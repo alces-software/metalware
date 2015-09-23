@@ -31,7 +31,7 @@ fetch_ruby() {
     if [ "$dep_source" == "fresh" ]; then
         fetch_source https://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.7.tar.gz ruby-source.tar.gz
     else
-        fetch_dist metalware-ruby
+        fetch_dist ruby
     fi
 }
 
@@ -58,6 +58,6 @@ install_ruby() {
         make install &> "${dep_logs}/ruby-install.log"
         say_done $?
     else
-        install_dist metalware-ruby
+        install_dist ruby
     fi
 }

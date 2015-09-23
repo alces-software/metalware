@@ -26,7 +26,7 @@ detect_components() {
 fetch_components() {
     if [ "$dep_source" == "dist" ]; then
         title "Fetching Ruby components"
-        fetch_dist 'metalware-components'
+        fetch_dist 'components'
     fi
 }
 
@@ -38,6 +38,6 @@ install_components() {
         "${alces_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
         say_done $?
     else
-        install_dist 'metalware-components'
+        install_dist 'components'
     fi
 }
