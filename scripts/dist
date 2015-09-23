@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cd /opt/metalware
+outdir=/tmp/metalware
+mkdir -p ${outdir}
+
+echo "genders"
+tar czf ${outdir}/genders.tar.gz opt/genders
+echo "libyaml"
+tar czf ${outdir}/libyaml.tar.gz opt/lib
+echo "pdsh"
+tar czf ${outdir}/pdsh.tar.gz opt/pdsh
+echo "ruby"
+tar czf ${outdir}/ruby.tar.gz opt/ruby
+echo "components"
+tar czf ${outdir}/components.tar.gz lib/ruby/.bundle lib/ruby/vendor/ruby
