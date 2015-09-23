@@ -1,0 +1,15 @@
+#NB Settings in /etc/sysconfig/network-scripts/ifcfg-bmc will override these
+DEVICE=bmc
+ONBOOT=no
+BOOTPROTO=none
+IPADDR_MASK=10.11.1.XXX
+IPADDR_COPY=eth0
+NETMASK=255.255.0.0
+GATEWAY=0.0.0.0
+DEVICETYPE=bmc
+USER_ID=2
+LAN_CHANNEL=1
+
+#By default the following settings are set in the ipmi.conf file, but they may be overridden here.
+#USERNAME=admin
+#PASSWORD=password

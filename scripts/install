@@ -1,0 +1,133 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+source=$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)
+target=/opt/metalware
+dist_url=https://clusterware.storage.googleapis.com
+source $source/scripts/lib/ui.functions.sh
+source $source/scripts/lib/fetch.functions.sh
+source $source/scripts/lib/install.functions.sh
+
+deps="libyaml ruby bundler genders pdsh components"
+
+if [ -z "$2" ]; then
+  echo "$0: invalid parameters"
+  cat <<EOF
+Usage: $0 <OS> <fresh|dist>
+
+OS must be one of the systems supported by metalware: 'el6', 'el7'
+
+Supply 'fresh' or 'dist' to select whether to build dependencies from
+source or to download prebuilt distributions of the dependencies.
+EOF
+  exit 1
+else
+  os="$1"
+  dep_source="$2"
+fi
+
+cat <<EOF
+[33m===============================================================================
+ STARTING INSTALLATION
+===============================================================================[0m
+EOF
+
+source "${source}/scripts/os/${os}.sh"
+
+mkdir -p ${source}/tmp/log ${source}/tmp/src ${source}/tmp/build
+dep_logs="${source}/tmp/log"
+dep_build="${source}/tmp/build"
+dep_src="${source}/tmp/src"
+
+# Install pre-requisites
+title "Installing prerequisites"
+doing 'Base'
+install_base_prerequisites &> "${dep_logs}/base-prereqs.log"
+say_done $?
+if [ "${dep_source}" == "fresh" ]; then
+    doing 'Build'
+    install_build_prerequisites &> "${dep_logs}/build-prereqs.log"
+    say_done $?
+fi
+doing 'Runtime'
+install_runtime_prerequisites &> "${dep_logs}/runtime-prereqs.log"
+say_done $?
+
+title "Creating initial directory structure"
+doing 'Create'
+[[ -d "${target}" ]] || mkdir -p "${target}"
+cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${target}"
+say_done $?
+
+for dep in ${deps}; do
+    source "${source}/scripts/dependencies/${dep}.sh"
+    if ! detect_${dep}; then
+        fetch_${dep}
+    fi
+done
+
+for dep in ${deps}; do
+    if ! detect_${dep}; then
+        install_${dep}
+    fi
+done
+
+title "Installing profile hooks"
+doing 'Install'
+cp "${source}/dist/profile"/* /etc/profile.d
+say_done $?
+
+if [ "$(type -t lsof)" ]; then
+    ppid=`ps -p $$ -o ppid=`
+    user_shell=`lsof -p $ppid | awk '(NR==2) {print $1}'`
+fi
+
+case $user_shell in
+    sh|bash|ksh|zsh)
+        rc_script_ext=sh
+        ;;
+    tcsh|csh)
+        rc_script_ext=csh
+        ;;
+    *)
+        rc_script_ext=sh
+        ;;
+esac
+
+cat <<EOF
+[33m
+===============================================================================
+ INSTALLATION COMPLETE
+===============================================================================
+[0m[1m
+Global profile scripts have been installed in:
+
+/etc/profile.d/alces-metalware.sh
+/etc/profile.d/alces-metalware.csh
+
+Please login again, or manually run the following:
+
+source /etc/profile.d/alces-metalware.${rc_script_ext}
+
+Afterwards, execute 'metal' for further information.
+[0m
+EOF

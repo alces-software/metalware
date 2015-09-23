@@ -1,0 +1,22 @@
+GEM
+  remote: http://rubygems.org/
+  remote: http://gems.alces-software.com/
+  specs:
+    alces-tools (0.13.0)
+    highline (1.6.13)
+    net-dhcp (1.1.1)
+    pcap (0.7.7)
+    ruby-ip (0.9.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  alces-tools (>= 0.13.0)
+  highline
+  net-dhcp
+  pcap (= 0.7.7)
+  ruby-ip
+
+BUNDLED WITH
+   1.10.5
