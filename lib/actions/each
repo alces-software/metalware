@@ -36,7 +36,7 @@ usage()
   echo "  parameters:"
   echo "    <gender> node name or gender name"
   echo "    <command> string containing the command"
-  echo "  Command Variables:"
+  echo "  command variables:"
   echo "    %node% is replaced with the specific node name"
   echo "    %index% is replaced with the index number of the loop"
   echo
@@ -51,6 +51,10 @@ while ! [ -z "${*}" ]; do
     '-c')
       CMD="${2}"
       shift 1
+      ;;
+    '-h'|'--help')
+      usage
+      exit 0
       ;;
   esac
   shift 1
@@ -72,3 +76,4 @@ nodeattr -n $NODEGROUP | while read node; do
   echo $CMD | sed "s/%node%/${node}/g" |\
   sed "s/%index%/${index}/g" | bash
 done
+exit 0
