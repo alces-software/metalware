@@ -1,0 +1,74 @@
+: '
+: NAME: each
+: SYNOPSIS: Iterator through the gender groups
+: VERSION: 1.0.0
+: '
+#==============================================================================
+# Copyright (C) 2007-2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+
+usage()
+{
+  echo "(c) 2008-2011 Alces Software Ltd & Stephen F Norledge"
+  echo "each command is used to iterate over the nodes within a gender groups"
+  echo "usage: metal each -g <gender> -c <command>"
+  echo "  options:"
+  echo "    -g specify gender nodes groups"
+  echo "    -c specify command to be used by the iterator"
+  echo "  parameters:"
+  echo "    <gender> node name or gender name"
+  echo "    <command> string containing the command"
+  echo "  Command Variables:"
+  echo "    %node% is replaced with the specific node name"
+  echo "    %index% is replaced with the index number of the loop"
+  echo
+}
+
+while ! [ -z "${*}" ]; do
+  case "${1}" in
+    '-g')
+      NODEGROUP="${2}"
+      shift 1
+      ;;
+    '-c')
+      CMD="${2}"
+      shift 1
+      ;;
+  esac
+  shift 1
+done
+
+if [ -z "$NODEGROUP" ]; then
+  echo "Gender group is required, -g <gender>" >&2
+  exit 1
+fi
+
+if [ -z "$CMD" ]; then
+  echo "Command is required, -c <command>" >&2
+  exit 1
+fi
+
+index=0
+nodeattr -n $NODEGROUP | while read node; do
+  ((index++))
+  echo $CMD | sed "s/%node%/${node}/g" |\
+  sed "s/%index%/${index}/g" | bash
+done
