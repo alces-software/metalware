@@ -37,7 +37,9 @@ module Alces
           @default_name_index_size=options[:name_sequence_length].to_i || 2
           @default_name=options[:name] || "node"
           @detected_macs=[]
-          @cobbler_interface=options[:cobbler_interface]
+          @filename = '/var/log/metalware/hunter.log'
+          @file = File.open(@filename, "a")
+          @file.sync = true
         end
 
         def listen!
@@ -101,8 +103,6 @@ module Alces
             STDERR.flush
             input = gets.chomp
             name = input.empty? ? default_name : input
-            STDERR.print "Updating stored information for host:#{name} (#{hwaddr}).."
-            STDERR.flush
 
             update(name, hwaddr)
           rescue Exception => e
@@ -115,18 +115,8 @@ module Alces
         end
 
         def update(name, hwaddr)
-          update_cobbler!(name, hwaddr)
-          STDERR.puts "OK"
-        end
-
-        def update_cobbler!(name, hwaddr)
-          ip=`gethostip -d #{name}`.chomp
-          raise "Unable to resolve IP for host:#{name}" if ip.to_s.empty?
-          run(['cobbler','system','edit','--name',name,"--interface=#{@cobbler_interface}",'--mac',hwaddr,]).tap do |r|
-            if r.fail?
-              raise "Unable to update cobbler database: #{(r.exc && r.exc.message) || r.stderr}"
-            end
-          end
+          @file.puts("#{name}-#{hwaddr}")
+          STDERR.puts "Logged in: #{@filename}"
         end
 
         def sequenced_name

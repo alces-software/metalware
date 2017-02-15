@@ -79,7 +79,6 @@ module Alces
                      name: hostname,
                      name_sequence_start: sequence_start,
                      name_sequence_length: sequence_length,
-                     cobbler_interface: cobbler_interface,
                      )
         end
       end
