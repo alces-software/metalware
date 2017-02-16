@@ -36,10 +36,12 @@ module Alces
           @detection_count=options[:name_sequence_start].to_i || 0
           @default_name_index_size=options[:name_sequence_length].to_i || 2
           @default_name=options[:name] || "node"
+          @update_dhcp_flag=options[:update_dhcp_flag]
+          @templateFilename=options[:template]
           @detected_macs=[]
-          @filename = '/var/log/metalware/hunter.log'
-          @file = File.open(@filename, "a")
-          @file.sync = true
+          @logFilename = '/var/log/metalware/hunter.log'
+          @logFile = File.open(@logFilename, "a")
+          @logFile.sync = true
         end
 
         def listen!
@@ -103,8 +105,9 @@ module Alces
             STDERR.flush
             input = gets.chomp
             name = input.empty? ? default_name : input
+            update_dhcp(name, hwaddr) if @update_dhcp_flag
+            log_address(name, hwaddr)
 
-            update(name, hwaddr)
           rescue Exception => e
             warn e
             STDERR.puts "FAIL: #{e.message}"; STDERR.flush
@@ -114,9 +117,67 @@ module Alces
           end
         end
 
-        def update(name, hwaddr)
-          @file.puts("#{name}-#{hwaddr}")
-          STDERR.puts "Logged in: #{@filename}"
+        def log_address(name, hwaddr)
+          @logFile.puts("#{name}-#{hwaddr}")
+          STDERR.puts "Logged in: #{@logFilename}"
+        end
+
+        def update_dhcp(name, hwaddr)
+          @DHCP_filename = "/etc/dhcp/dhcpd.hosts"
+          fixedip=`gethostip -d #{name}`.chomp
+          raise "Unable to resolve IP for host:#{name}" if fixedip.to_s.empty?
+          remove_dhcp_entry(hwaddr)
+          add_dhcp_entry(name, hwaddr, fixedip)
+        end
+
+        def add_dhcp_entry(name, hwaddr, fixedip)
+          #Finds the host machine ip address
+          hostip = `ifconfig | grep -A1 #{@interface_name} | grep inet | tr -ds "[:alpha:]" ' ' | cut -d' ' -f2`
+          hostip.gsub!("\n", "")
+
+          File.open(@templateFilename, 'r') do |templateF|
+            content = templateF.read
+            content.gsub!(/%NODENAME%/, name)
+            content.gsub!(/%HWADDR%/, hwaddr)
+            content.gsub!(/%HOSTIP%/, hostip)
+            content.gsub!(/%FIXEDADDR%/, fixedip)
+            File.open(@DHCP_filename, 'a') do |file|
+              file.puts content
+            end
+          end
+        end
+
+        def remove_dhcp_entry(hwaddr)
+          tempFilename = "/tmp/dhcpd.hosts." << Process.pid.to_s
+
+          # Checks if the mac address already exists in the list
+          start_line = -1
+          end_line = -1
+          found = false
+          File.open(@DHCP_filename) do |file|
+            file.each_line.with_index do |line, index|
+              start_line = index if line.include? "{"
+              found = true if line.include? "#{hwaddr}"
+              if line.include? "}" and found
+                end_line = index
+                break
+              end
+            end
+            return if !found or start_line < 0 or end_line < 0
+          end
+
+          # Creates the new file with the address removed
+          File.open(tempFilename, "w", 0644) do |tempFile|
+            File.open(@DHCP_filename) do |file|
+              file.each_line.with_index do |line, index|
+                tempFile.puts line if index < start_line or index > end_line
+              end
+            end
+          end
+
+          # Replaces the original file with the new one
+          `mv -f #{tempFilename} #{@DHCP_filename}`
+          `rm -f #{tempFilename}`
         end
 
         def sequenced_name
