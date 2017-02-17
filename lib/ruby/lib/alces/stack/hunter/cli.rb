@@ -58,12 +58,12 @@ module Alces
                required: true
 
         flag :update_dhcp,
-               'Adds/updates the entry in dhcp.hosts while hunting for mac addresses',
+               'Adds/updates the entry in dhcpd.hosts while hunting for mac addresses',
                '--update-dhcp',
                default: false
 
         option :template,
-                'Specify which template file for updating dhcp.hosts',
+                'Specify which template file for updating dhcpd.hosts',
                 '--template',
                 default: "#{ENV['alces_BASE']}/etc/templates/dhcp"
 
