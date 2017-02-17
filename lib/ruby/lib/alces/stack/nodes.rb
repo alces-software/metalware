@@ -1,4 +1,3 @@
-
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,16 +19,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/boot/cli'
-require 'alces/stack/boot/run'
-
 module Alces
   module Stack
-    module Boot
-      class << self
-        def run!(*args)
-          Run.new(*args).run!
-        end
+    class Nodes
+      def initialize(gender, &block)
+        @gender = gender
+        yield self
+      end
+      def each(&block)
+        `nodeattr -c #{@gender}`.split(',').each(&block)
       end
     end
   end

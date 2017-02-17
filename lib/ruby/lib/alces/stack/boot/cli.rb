@@ -43,20 +43,9 @@ module Alces
                 '--template', '-t',
                 default: "#{ENV['alces_BASE']}/etc/templates/pxelinux.cfg/login"
 
-        flag   :no_hang,
-               'Does not wait for ctrl-c before exiting',
-               '--no-hang',
-               default: false
-
-        flag   :child,
-               'Denotes a child node of a group',
-               '--child',
-               default: false
-
         def setup_signal_handler
           trap('INT') do
             STDERR.puts "\nExiting..." unless @exiting
-            Alces::Stack::Boot.delete_files
             @exiting = true
             Kernel.exit(0)
           end
@@ -70,9 +59,7 @@ module Alces
             name: name,
             group_flag: !(group == false),
             group: group,
-            no_hang_flag: no_hang,
-            template: template,
-            child_flag: child
+            template: template
             )
         end
       end

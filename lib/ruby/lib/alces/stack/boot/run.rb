@@ -21,6 +21,7 @@
 #==============================================================================
 require 'alces/tools/logging'
 require 'alces/tools/execution'
+require 'alces/stack/nodes'
 
 module Alces
 	module Stack
@@ -33,38 +34,43 @@ module Alces
           @node_name = options[:name]
           @group_flag = options[:group_flag]
           @gender = options[:group]
-          @no_hang_flag = options[:no_hang_flag]
           @template = options[:template]
-          @child_flag = options[:child]
+          @delete_node = ""
         end
 
         def run!
-          puts "(CTRL+C TO TERMINATE)" if !@no_hang_flag 
+          puts "(CTRL+C TO TERMINATE)"
           begin
             if @group_flag
               run_group
             else
-              run_single
+              run_single(false)
             end
-          rescue => e
-            Alces::Stack::Boot.delete_files
+          rescue Exception => e
+            @delete_node.split(',').each do |s|
+              `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
+            end
             raise e
           end
         end
 
-        def run_single
+        def run_single(no_hang)
           raise "No node name supplied" if !@node_name
           ip=`gethostip -x #{@node_name} 2>/dev/null`
           raise "Could not find IP address of #{@node_name}" if ip.length < 9
-          Alces::Stack::Boot.create_file(@template, ip)
-          sleep if !@no_hang_flag
-          Alces::Stack::Boot.delete_files if !@child_flag
+          `cp #{@template} /var/lib/tftpboot/pxelinux.cfg/#{ip}`
+          @delete_node << ",#{ip}"
+          sleep if !no_hang
         end
 
         def run_group
-          `metal each -g #{@gender} -c 'metal boot %node% -t #{@template} --no-hang --child'`
-          sleep if !@no_hang_flag
-          Alces::Stack::Boot.delete_files
+          Nodes.new(@gender) do |node_group|
+            node_group.each do |node|
+              @node_name = node
+              run_single(true)
+            end
+          end
+          sleep
         end
       end
     end
