@@ -57,14 +57,19 @@ module Alces
                default: 0,
                required: true
 
-        option :cobbler_interface,
-               'Specify cobbler interface',
-               '--cobblerinterface',
-               default: 'eth0',
-               required: true
+        flag :update_dhcp,
+               'Adds/updates the entry in dhcpd.hosts while hunting for mac addresses',
+               '--update-dhcp',
+               default: false
+
+        option :template,
+                'Specify which template file for updating dhcpd.hosts',
+                '--template',
+                default: "#{ENV['alces_BASE']}/etc/templates/dhcp"
 
         def setup_signal_handler
           trap('INT') do
+            `systemctl restart dhcpd` if update_dhcp
             STDERR.puts "Exiting..." unless @exiting
             @exiting = true
             Kernel.exit(0)
@@ -79,6 +84,8 @@ module Alces
                      name: hostname,
                      name_sequence_start: sequence_start,
                      name_sequence_length: sequence_length,
+                     update_dhcp_flag: update_dhcp,
+                     template: template
                      )
         end
       end

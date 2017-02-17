@@ -1,0 +1,7 @@
+  host %NODENAME% {
+    hardware ethernet %HWADDR%;
+    option host-name "%NODENAME%.prv.cluster.local";
+    option routers %HOSTIP%;
+    filename "/pxelinux.0";
+    fixed-address %FIXEDADDR%;
+  }
