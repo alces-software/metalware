@@ -38,20 +38,25 @@ module Alces
                '--group', '-g',
                default: false
 
+        option :template,
+                'Specify path to template for pxelinux.cfg',
+                '--template', '-t',
+                default: "#{ENV['alces_BASE']}/etc/templates/pxelinux.cfg/login"
+
         flag   :no_hang,
                'Does not wait for ctrl-c before exiting',
                '--no-hang',
                default: false
 
-        flag   :no_delete,
-               'Does not remove the pxelinux.cfg/XXXXXXX file',
-               '--node-delete',
+        flag   :child,
+               'Denotes a child node of a group',
+               '--child',
                default: false
 
         def setup_signal_handler
           trap('INT') do
-            Alces::Stack::Boot.delete_files if !no_delete
-            STDERR.puts "Exiting..." unless @exiting
+            STDERR.puts "\nExiting..." unless @exiting
+            Alces::Stack::Boot.delete_files
             @exiting = true
             Kernel.exit(0)
           end
@@ -66,7 +71,8 @@ module Alces
             group_flag: !(group == false),
             group: group,
             no_hang_flag: no_hang,
-            no_delete_flag: no_delete
+            template: template,
+            child_flag: child
             )
         end
       end

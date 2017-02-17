@@ -32,13 +32,18 @@ module Alces
           Run.new(*args).run!
         end
 
+        def create_file(template, ip)
+          File.open('/tmp/metalware.boot', 'a').puts(ip)
+          "cp #{template} /var/lib/tftpboot/pxelinux.cfg/#{ip}"
+        end
+
         def delete_files
-          exlude_files = "compute default infra login"
-          `ls /var/lib/tftpboot/pxelinux.cfg`.split(" ").each do |line|
-            if !exlude_files.include? line
+          if File.exist?('/tmp/metalware.boot')
+            File.open('/tmp/metalware.boot', 'r').each do |line|
               `rm -f /var/lib/tftpboot/pxelinux.cfg/#{line}`
             end
           end
+          `rm -f /tmp/metalware.boot`
         end
       end
     end

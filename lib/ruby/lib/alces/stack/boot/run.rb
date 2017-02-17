@@ -34,18 +34,20 @@ module Alces
           @group_flag = options[:group_flag]
           @gender = options[:group]
           @no_hang_flag = options[:no_hang_flag]
-          @no_delete_flag = options[:no_delete_flag]
+          @template = options[:template]
+          @child_flag = options[:child]
         end
 
         def run!
+          puts "(CTRL+C TO TERMINATE)" if !@no_hang_flag 
           begin
             if @group_flag
               run_group
             else
               run_single
             end
-          rescue Exception => e
-            Alces::Stack::Boot.delete_files if !@no_delete_flag
+          rescue => e
+            Alces::Stack::Boot.delete_files
             raise e
           end
         end
@@ -54,9 +56,15 @@ module Alces
           raise "No node name supplied" if !@node_name
           ip=`gethostip -x #{@node_name} 2>/dev/null`
           raise "Could not find IP address of #{@node_name}" if ip.length < 9
+          Alces::Stack::Boot.create_file(@template, ip)
+          sleep if !@no_hang_flag
+          Alces::Stack::Boot.delete_files if !@child_flag
         end
 
         def run_group
+          `metal each -g #{@gender} -c 'metal boot %node% -t #{@template} --no-hang --child'`
+          sleep if !@no_hang_flag
+          Alces::Stack::Boot.delete_files
         end
       end
     end
