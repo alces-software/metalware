@@ -69,6 +69,7 @@ module Alces
 
         def setup_signal_handler
           trap('INT') do
+            `systemctl restart dhcpd` if update_dhcp
             STDERR.puts "Exiting..." unless @exiting
             @exiting = true
             Kernel.exit(0)

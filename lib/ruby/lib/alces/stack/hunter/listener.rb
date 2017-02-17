@@ -155,15 +155,20 @@ module Alces
           end_line = -1
           found = false
           File.open(@DHCP_filename) do |file|
+            bracket_count = 0
             file.each_line.with_index do |line, index|
-              start_line = index if line.include? "{"
+              raise "Can not alter dhcpd.hosts if multiple \'{\' or \'}\' are on the same line" if line.scan(/\{|\}/).count > 1
+              start_line = index if !found and bracket_count == 0 and line.include? "{"
+              bracket_count+=1 if line.include? "{"
               found = true if line.include? "#{hwaddr}"
-              if line.include? "}" and found
+              bracket_count-=1 if line.include? "}"
+              if found and bracket_count == 0 and line.include? "}"
                 end_line = index
                 break
               end
             end
-            return if !found or start_line < 0 or end_line < 0
+            return if !found
+            raise "Could not remove mac address from dhcpd.hosts" if start_line < 0 or end_line < 0
           end
 
           # Creates the new file with the address removed
