@@ -22,6 +22,7 @@
 require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'alces/stack/nodes'
+require "alces/stack/templater"
 
 module Alces
 	module Stack
@@ -36,6 +37,7 @@ module Alces
           @gender = options[:group]
           @template = options[:template]
           @delete_node = ""
+          @kernal_append = options[:kernal_append]
         end
 
         def run!
@@ -58,8 +60,16 @@ module Alces
           raise "No node name supplied" if !@node_name
           ip=`gethostip -x #{@node_name} 2>/dev/null`
           raise "Could not find IP address of #{@node_name}" if ip.length < 9
-          `cp #{@template} /var/lib/tftpboot/pxelinux.cfg/#{ip}`
           @delete_node << ",#{ip}"
+          
+          save="/var/lib/tftpboot/pxelinux.cfg/#{ip}"
+          template_parameters = {
+            :HOSTNAME => `hostname -i`,
+            :NODE => @node_name
+          }
+          template_parameters[:KERNALAPPENDOPTIONS] = @kernal_append if @kernal_append
+          
+          Templater.save(@template, save, template_parameters)
           sleep if !no_hang
         end
 

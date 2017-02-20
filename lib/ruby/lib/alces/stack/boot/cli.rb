@@ -21,6 +21,7 @@
 #==============================================================================
 require 'alces/tools/cli'
 require 'alces/stack'
+require "alces/stack/templater"
 
 module Alces
   module Stack
@@ -33,15 +34,25 @@ module Alces
         description "Creates the boot files for the node(s)"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
 
-        option :group,
-               'Specify a gender group to run over',
-               '--group', '-g',
-               default: false
+        option  :group,
+                'Specify a gender group to run over',
+                '--group', '-g',
+                default: false
 
-        option :template,
+        option  :template,
                 'Specify path to template for pxelinux.cfg',
                 '--template', '-t',
-                default: "#{ENV['alces_BASE']}/etc/templates/pxelinux.cfg/login"
+                default: "#{ENV['alces_BASE']}/etc/templates/pxelinux.cfg/login.erb"
+
+        flag    :template_options,
+                'Show templating options',
+                '--template-options',
+                default: false
+
+        option  :kernal_append,
+                'Specify value for kernal append in template. Check --template-options',
+                '--kernelappendoptions',
+                default: false
 
         def setup_signal_handler
           trap('INT') do
@@ -51,15 +62,28 @@ module Alces
           end
         end
 
+        def show_template_options
+          options = {
+            :HOSTIP => "Head node IP address",
+            :NODE => "Compute node's name",
+            :KERNELAPPENDOPTIONS => "Value specified by --kernelappendoptions"
+          }
+          Alces::Stack::Templater.show_options(options)
+          exit 0
+        end
+
         def execute
           setup_signal_handler
+
+          show_template_options if template_options
 
           name = ARGV[0] if !group
           Alces::Stack::Boot.run!(
             name: name,
             group_flag: !(group == false),
             group: group,
-            template: template
+            template: template,
+            kernal_append: kernal_append
             )
         end
       end

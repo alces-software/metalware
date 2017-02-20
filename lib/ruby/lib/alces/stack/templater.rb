@@ -19,16 +19,40 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require "erb"
+require "ostruct"
+
 module Alces
   module Stack
-    class Nodes
-      def initialize(gender, &block)
-        @gender = gender
-        raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
-        yield self if !block.nil?
-      end
-      def each(&block)
-        `nodeattr -c #{@gender}`.split(',').each(&block)
+    module Templater
+      class << self
+        def file(filename, template_parameters={})
+          File.open(filename, 'r') do |file|
+            result = replace_hash(file.read, template_parameters)
+            oldTemplate = result.scan(/%[[:upper:]]+%/)
+            raise "Old template style found, replace with ERB format. Found: #{oldTemplate}" if !oldTemplate.empty?
+            return result
+          end
+        end
+
+        def save(template_file, save_file, template_parameters={})
+          results = file(template_file, template_parameters)
+          File.open(save_file.chomp, "w") do |f|
+            f.puts(results)
+          end
+        end
+
+        def replace_hash(template, template_parameters={})
+          return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+        end
+
+        def show_options(options={})
+          puts "The following parameters are replaced by ERB:"
+          options.each do |key, value|
+            puts "    <%= #{key} %> : #{value}"
+          end
+          puts
+        end
       end
     end
   end
