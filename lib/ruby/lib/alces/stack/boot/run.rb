@@ -64,10 +64,10 @@ module Alces
           
           save="/var/lib/tftpboot/pxelinux.cfg/#{ip}"
           template_parameters = {
-            :HOSTNAME => `hostname -i`,
-            :NODE => @node_name
+            :hostip => `hostname -i`.chomp,
+            :node => @node_name.chomp
           }
-          template_parameters[:KERNALAPPENDOPTIONS] = @kernal_append if @kernal_append
+          template_parameters[:kernalappendoptions] = @kernal_append.chomp if @kernal_append
           
           Templater.save(@template, save, template_parameters)
           sleep if !no_hang

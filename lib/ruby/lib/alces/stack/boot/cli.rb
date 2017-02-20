@@ -42,7 +42,7 @@ module Alces
         option  :template,
                 'Specify path to template for pxelinux.cfg',
                 '--template', '-t',
-                default: "#{ENV['alces_BASE']}/etc/templates/pxelinux.cfg/login.erb"
+                default: "#{ENV['alces_BASE']}/etc/templates/pxelinux.cfg/localboot.erb"
 
         flag    :template_options,
                 'Show templating options',
@@ -64,9 +64,9 @@ module Alces
 
         def show_template_options
           options = {
-            :HOSTIP => "Head node IP address",
-            :NODE => "Compute node's name",
-            :KERNELAPPENDOPTIONS => "Value specified by --kernelappendoptions"
+            :hostip => "Head node IP address",
+            :node => "Compute node's name",
+            :kernalappendoptions => "Value specified by --kernelappendoptions"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
