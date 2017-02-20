@@ -24,10 +24,11 @@ module Alces
     class Nodes
       def initialize(gender, &block)
         @gender = gender
-        yield self
+        raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
+        yield self if !block.nil?
       end
       def each(&block)
-        `nodeattr -c #{@gender}`.split(',').each(&block)
+        node_list = `nodeattr -c #{@gender}`.split(',').each(&block)
       end
     end
   end

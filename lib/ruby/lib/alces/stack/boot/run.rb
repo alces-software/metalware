@@ -64,11 +64,9 @@ module Alces
         end
 
         def run_group
-          Nodes.new(@gender) do |node_group|
-            node_group.each do |node|
-              @node_name = node
-              run_single(true)
-            end
+          Nodes.new(@gender).each do |node|
+            @node_name = node
+            run_single(true)
           end
           sleep
         end
