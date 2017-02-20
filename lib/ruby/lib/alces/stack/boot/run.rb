@@ -37,7 +37,7 @@ module Alces
           @gender = options[:group]
           @template = options[:template]
           @delete_node = ""
-          @kernal_append = options[:kernal_append]
+          @kernel_append = options[:kernel_append]
         end
 
         def run!
@@ -65,10 +65,10 @@ module Alces
           save="/var/lib/tftpboot/pxelinux.cfg/#{ip}"
           template_parameters = {
             :hostip => `hostname -i`.chomp,
-            :node => @node_name.chomp
+            :node => @node_name.chomp,
+            :kernelappendoptions=> @kernel_append.chomp
           }
-          template_parameters[:kernalappendoptions] = @kernal_append.chomp if @kernal_append
-          
+
           Templater.save(@template, save, template_parameters)
           sleep if !no_hang
         end

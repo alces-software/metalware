@@ -49,10 +49,10 @@ module Alces
                 '--template-options',
                 default: false
 
-        option  :kernal_append,
+        option  :kernel_append,
                 'Specify value for kernal append in template. Check --template-options',
                 '--kernelappendoptions',
-                default: false
+                default: ""
 
         def setup_signal_handler
           trap('INT') do
@@ -66,7 +66,7 @@ module Alces
           options = {
             :hostip => "Head node IP address",
             :node => "Compute node's name",
-            :kernalappendoptions => "Value specified by --kernelappendoptions"
+            :kernelappendoptions => "Value specified by --kernelappendoptions"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -83,7 +83,7 @@ module Alces
             group_flag: !(group == false),
             group: group,
             template: template,
-            kernal_append: kernal_append
+            kernel_append: kernel_append
             )
         end
       end
