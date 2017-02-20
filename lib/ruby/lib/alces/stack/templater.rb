@@ -27,11 +27,8 @@ module Alces
     module Templater
       class << self
         def file(filename, template_parameters={})
-          File.open(filename, 'r') do |file|
-            result = replace_hash(file.read, template_parameters)
-            oldTemplate = result.scan(/%[[:upper:]]+%/)
-            raise "Old template style found, replace with ERB format. Found: #{oldTemplate}" if !oldTemplate.empty?
-            return result
+          File.open(filename.chomp, 'r') do |file|
+            return replace_hash(file.read, template_parameters)
           end
         end
 
@@ -39,6 +36,13 @@ module Alces
           results = file(template_file, template_parameters)
           File.open(save_file.chomp, "w") do |f|
             f.puts(results)
+          end
+        end
+
+        def append(template_file, append_file, template_parameters={})
+          results = file(template_file, template_parameters)
+          File.open(append_file.chomp, 'a') do |f|
+            f.puts results
           end
         end
 

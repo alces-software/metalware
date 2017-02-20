@@ -23,6 +23,7 @@ require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'net/dhcp'
 require 'pcaplet'
+require 'alces/stack/templater'
 
 module Alces
   module Stack
@@ -133,18 +134,13 @@ module Alces
         def add_dhcp_entry(name, hwaddr, fixedip)
           #Finds the host machine ip address
           hostip = `ifconfig | grep -A1 #{@interface_name} | grep inet | tr -ds "[:alpha:]" ' ' | cut -d' ' -f2`
-          hostip.gsub!("\n", "")
-
-          File.open(@templateFilename, 'r') do |templateF|
-            content = templateF.read
-            content.gsub!(/%NODENAME%/, name)
-            content.gsub!(/%HWADDR%/, hwaddr)
-            content.gsub!(/%HOSTIP%/, hostip)
-            content.gsub!(/%FIXEDADDR%/, fixedip)
-            File.open(@DHCP_filename, 'a') do |file|
-              file.puts content
-            end
-          end
+          template_parameters = {
+            nodename: name.chomp,
+            hwaddr: hwaddr.chomp,
+            hostip: hostip.chomp,
+            fixedaddr: fixedip.chomp
+          }
+          Alces::Stack::Templater.append(@templateFilename, @DHCP_filename, template_parameters)
         end
 
         def remove_dhcp_entry(hwaddr)
