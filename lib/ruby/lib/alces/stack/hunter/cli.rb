@@ -21,6 +21,7 @@
 #==============================================================================
 require 'alces/stack'
 require 'alces/tools/cli'
+require 'alces/stack/templater'
 
 module Alces
   module Stack
@@ -65,7 +66,12 @@ module Alces
         option :template,
                 'Specify which template file for updating dhcpd.hosts',
                 '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/dhcp"
+                default: "#{ENV['alces_BASE']}/etc/templates/hunter/dhcp"
+
+        flag    :template_options,
+                'Display the templating parameters',
+                '--template-options',
+                default: false
 
         def setup_signal_handler
           trap('INT') do
@@ -76,8 +82,20 @@ module Alces
           end
         end
 
+        def show_template_options
+          options = {
+            :hostip=>"Head node IP address",
+            :nodename=>"Compute node name",
+            :fixedaddr=>"Compute node IP address",
+            :hwaddr=>"Compute node mac address"
+          }
+          Alces::Stack::Templater.show_options(options)
+          exit 0
+        end
+
         def execute
           setup_signal_handler
+          show_template_options if template_options
 
           Alces::Stack::Hunter.
             listen!( interface,
