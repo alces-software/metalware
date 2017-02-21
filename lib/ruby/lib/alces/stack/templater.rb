@@ -21,29 +21,60 @@
 #==============================================================================
 require "erb"
 require "ostruct"
+require "json"
 
 module Alces
   module Stack
     module Templater
       class << self
         def file(filename, template_parameters={})
-          File.open(filename.chomp, 'r') do |file|
-            return replace_hash(file.read, template_parameters)
+          File.open(filename.chomp, 'r') do |f|
+            return replace_hash(f.read, template_parameters)
           end
         end
 
         def save(template_file, save_file, template_parameters={})
-          results = file(template_file, template_parameters)
           File.open(save_file.chomp, "w") do |f|
-            f.puts(results)
+            f.puts file(template_file, template_parameters)
           end
         end
 
         def append(template_file, append_file, template_parameters={})
-          results = file(template_file, template_parameters)
           File.open(append_file.chomp, 'a') do |f|
-            f.puts results
+            f.puts file(template_file, template_parameters)
           end
+        end
+
+        def file_json(filename, json, template_parameters={})
+          file(filename, parse_json(json, template_parameters))
+        end
+
+        def save_json(filename, save_file, json, template_parameters={})
+          save(filename, save_file, parse_json(json, template_parameters))
+        end
+
+        def append_json(filename, append_file, json, template_parameters={})
+          append(filename, append_file, parse_json(json, template_parameters))
+        end
+
+        def parse_json(json, template_parameters={})
+          # Loads content if json is a file
+          if File.file?(json)
+            json = File.read(json)
+          elsif /\A(\/?\w)*(.\w*)?\Z/ =~ json
+            raise "Could not find file: " << json
+          end
+          #Extracts the JSON data
+          begin
+            JSON.load(json).each do |key, value|
+              template_parameters[key.to_sym] = value
+            end
+          rescue => e
+            STDERR.puts "ERROR: Could not pass JSON object, insure keys are also strings"
+            raise e
+          end
+          #Returns the hash
+          return template_parameters
         end
 
         def replace_hash(template, template_parameters={})
@@ -52,9 +83,15 @@ module Alces
 
         def show_options(options={})
           puts "The following parameters are replaced by ERB:"
+          print_json = false
           options.each do |key, value|
-            puts "    <%= #{key} %> : #{value}"
+            if key.to_s == 'JSON' and value.to_s == 'true'
+              print_json = true
+            else
+              puts "    <%= #{key} %> : #{value}"
+            end
           end
+          puts "Include additional parameters in the JSON object. In the case of conflicts, the JSON value is used" if print_json
           puts
         end
       end
