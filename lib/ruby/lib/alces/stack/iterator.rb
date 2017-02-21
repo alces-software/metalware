@@ -19,45 +19,20 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/logging'
-require 'alces/tools/execution'
-require 'alces/stack/nodes'
-require "alces/stack/templater"
-require 'alces/stack/iterator'
-
 module Alces
   module Stack
-    module Hosts
-      class Run
-        include Alces::Tools::Logging
-        include Alces::Tools::Execution
-
-        def initialize(template, options={})
-          @template = template
-          @nodegroup = options[:nodegroup]
-          @template_parameters = {
-            nodename: options[:nodename],
-            iptail: options[:iptail],
-            q3: options[:q3]
-          }
-          @json = options[:json]
-          @add_flag = options[:add_flag]
+    class Iterator
+      def initialize(gender, lambda, json)
+        if !gender
+          lambda.call(json)
+        else
+          run(gender, lambda, json)
         end
+      end
 
-        def run!
-          lambda = -> (json) {add(json)} if @add_flag
+      def run(gender, lambda, json)
+        json_hash = Alces::Stack::Templater::JSON_Templater.parse(json)
 
-          Alces::Stack::Iterator.new(@nodegroup, lambda, @json)
-        end
-
-        def add(json)
-          append_file = "/etc/hosts"
-          if !json
-            Alces::Stack::Templater.append(@template, append_file, @template_parameters)
-          else
-            Alces::Stack::Templater::JSON_Templater.append(@template, append_file, json, @template_parameters)
-          end
-        end
       end
     end
   end

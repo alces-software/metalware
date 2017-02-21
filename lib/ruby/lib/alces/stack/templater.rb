@@ -63,7 +63,7 @@ module Alces
           puts
         end
       end
-
+      
       class JSON_Templater
         class << self
           def file(filename, json, template_parameters={})

@@ -54,6 +54,11 @@ module Alces
                 '--nodename',
                 default: ""
 
+        option  :nodegroup,
+                'Node group to be modified, overrides --nodename',
+                '--nodegroup', '-g',
+                default: false
+
         option  :iptail,
                 'Fourth IP byte in template',
                 '--iptail',
@@ -95,6 +100,7 @@ module Alces
           Alces::Stack::Hosts.run!(template, 
               add_flag: add_flag,
               nodename: nodename,
+              nodegroup: nodegroup,
               iptail: iptail,
               q3: q3,
               json: json
