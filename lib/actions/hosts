@@ -1,5 +1,12 @@
+<<DOC
+: '
+: NAME: hosts
+: SYNOPSIS: Modifies the host file
+: VERSION: 1.0.0
+: '
+DOC
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,24 +26,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-install_runtime_prerequisites() {
-    # ruby: openssl readline zlib libffi
-    # hunter: libpcap
-    # console/ipmi/power: ipmitool
-    yum -e0 -y install openssl readline zlib libffi && \
-        yum -e0 -y install libpcap && \
-        yum -e0 -y install ipmitool && \
-        yum -e0 -y install gettext
-}
+# Execute as ruby script if we're evaluating under bash
+if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
 
-install_base_prerequisites() {
-    yum -e0 -y install lsof
-}
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
-install_build_prerequisites() {
-    # ruby: openssl readline zlib libffi
-    # hunter: libpcap
-    yum -e0 -y groupinstall "Development Tools" && \
-        yum -e0 -y install openssl-devel readline-devel zlib-devel libffi-devel && \
-        yum -e0 -y install libpcap-devel
-}
+require 'rubygems'
+require 'bundler/setup'
+
+require 'alces/stack/hosts'
+
+Alces::Stack::Hosts::CLI.execute if $0 == __FILE__

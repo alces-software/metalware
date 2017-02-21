@@ -25,7 +25,7 @@ require 'alces/stack/nodes'
 require "alces/stack/templater"
 
 module Alces
-	module Stack
+  module Stack
     module Boot
       class Run
         include Alces::Tools::Logging

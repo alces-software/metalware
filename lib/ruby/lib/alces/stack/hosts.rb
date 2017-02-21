@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,24 +19,17 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-install_runtime_prerequisites() {
-    # ruby: openssl readline zlib libffi
-    # hunter: libpcap
-    # console/ipmi/power: ipmitool
-    yum -e0 -y install openssl readline zlib libffi && \
-        yum -e0 -y install libpcap && \
-        yum -e0 -y install ipmitool && \
-        yum -e0 -y install gettext
-}
+require 'alces/stack/hosts/cli'
+require 'alces/stack/hosts/run'
 
-install_base_prerequisites() {
-    yum -e0 -y install lsof
-}
-
-install_build_prerequisites() {
-    # ruby: openssl readline zlib libffi
-    # hunter: libpcap
-    yum -e0 -y groupinstall "Development Tools" && \
-        yum -e0 -y install openssl-devel readline-devel zlib-devel libffi-devel && \
-        yum -e0 -y install libpcap-devel
-}
+module Alces
+  module Stack
+    module Hosts
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
+      end
+    end
+  end
+end
