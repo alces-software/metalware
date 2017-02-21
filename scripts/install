@@ -76,7 +76,7 @@ title "Creating initial directory structure"
 doing 'Create'
 mkdir -p /var/log/metalware
 [[ -d "${target}" ]] || mkdir -p "${target}"
-cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${target}"
+cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${source}/deployment" "${target}"
 say_done $?
 
 for dep in ${deps}; do
