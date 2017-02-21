@@ -45,38 +45,6 @@ module Alces
           end
         end
 
-        def file_json(filename, json, template_parameters={})
-          file(filename, parse_json(json, template_parameters))
-        end
-
-        def save_json(filename, save_file, json, template_parameters={})
-          save(filename, save_file, parse_json(json, template_parameters))
-        end
-
-        def append_json(filename, append_file, json, template_parameters={})
-          append(filename, append_file, parse_json(json, template_parameters))
-        end
-
-        def parse_json(json, template_parameters={})
-          # Loads content if json is a file
-          if File.file?(json)
-            json = File.read(json)
-          elsif /\A(\/?\w)*(.\w*)?\Z/ =~ json
-            raise "Could not find file: " << json
-          end
-          #Extracts the JSON data
-          begin
-            JSON.load(json).each do |key, value|
-              template_parameters[key.to_sym] = value
-            end
-          rescue => e
-            STDERR.puts "ERROR: Could not pass JSON object, insure keys are also strings"
-            raise e
-          end
-          #Returns the hash
-          return template_parameters
-        end
-
         def replace_hash(template, template_parameters={})
           return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
         end
@@ -93,6 +61,44 @@ module Alces
           end
           puts "Include additional parameters in the JSON object. In the case of conflicts, the JSON value is used" if print_json
           puts
+        end
+      end
+
+      class JSON_Templater
+        class << self
+          def file(filename, json, template_parameters={})
+            Alces::Stack::Templater.file(filename, parse(json, template_parameters))
+          end
+
+          def save(filename, save_file, json, template_parameters={})
+            Alces::Stack::Templater.save(filename, save_file, parse(json, template_parameters))
+          end
+
+          def append(filename, append_file, json, template_parameters={})
+            Alces::Stack::Templater.append(filename, append_file, parse(json, template_parameters))
+          end
+
+          def parse(json, template_parameters={})
+            # Skips if json is empty
+            return template_parameters if json.to_s.strip.empty? or !json
+            # Loads content if json is a file
+            if File.file?(json)
+              json = File.read(json)
+            elsif /\A(\/?\w)*(.\w*)?\Z/ =~ json
+              raise "Could not find file: " << json
+            end
+            #Extracts the JSON data
+            begin
+              JSON.load(json).each do |key, value|
+                template_parameters[key.to_sym] = value
+              end
+            rescue => e
+              STDERR.puts "ERROR: Could not pass JSON object, insure keys are also strings"
+              raise e
+            end
+            #Returns the hash
+            return template_parameters
+          end
         end
       end
     end

@@ -49,9 +49,9 @@ module Alces
         def add
           append_file = "/etc/hosts"
           if !@json
-            Alces::Stack::Templater.append_json(@template, append_file, @template_parameters)
+            Alces::Stack::Templater.append(@template, append_file, @template_parameters)
           else
-            Alces::Stack::Templater.append_json(@template, append_file, @json, @template_parameters)
+            Alces::Stack::Templater::JSON_Templater.append(@template, append_file, @json, @template_parameters)
           end
         end
       end
