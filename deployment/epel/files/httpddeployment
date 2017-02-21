@@ -1,4 +1,4 @@
-<Directory /opt/metalware/deployment/local/>
+<Directory /opt/metalware/deployment/>
     Options Indexes MultiViews FollowSymlinks
     AllowOverride None
     Require all granted

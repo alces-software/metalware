@@ -26,12 +26,12 @@ export _ALCES_BMC_PASSWORD=A1ce550ftware
 
 export _ALCES_RELAYHOST=smtp.alces-software.com
 
-export _ALCES_SSHKEY=tbc
+export _ALCES_SSHKEY="tbc"
 
 export _ALCES_YUMTEMPLATE=yum.upstream
 
 #GENERATE with openssl passwd -1 $PASSWD
-export _ALCES_ROOTPASSWORDCRYPT=$1$4GLswpYN$9wsXWH9M4rRwgjGSCfCMt0
+export _ALCES_ROOTPASSWORDCRYPT="$1$4GLswpYN$9wsXWH9M4rRwgjGSCfCMt0"
 
 #Get Kennel cmdline options
 params=`cat /proc/cmdline`
@@ -57,7 +57,7 @@ eval `compgen -v | grep ^ALCES | while read n; do echo _$n=\`eval "echo \\\\$$n"
 export _ALCES_KEYS=`compgen -v | grep _ALCES | while read n; do echo '$'$n; done | xargs`
 
 install_file() {
-  FILES_PATH=/opt/metalware/deployment/local/epel/files/
+  FILES_PATH=/opt/metalware/deployment/epel/files/
   FILES_URL=http://${_ALCES_BUILDSERVER}/deployment/epel/files/
   if [ -d $FILES_PATH ]; then
     cat $FILES_PATH/$1 | envsubst "$_ALCES_KEYS" > $2
@@ -67,7 +67,7 @@ install_file() {
 }
 
 run_script() {
-  SCRIPTS_PATH=/opt/metalware/deployment/local/epel/scripts/
+  SCRIPTS_PATH=/opt/metalware/deployment/epel/scripts/
   SCRIPTS_URL=http://${_ALCES_BUILDSERVER}/deployment/epel/scripts/
   if [ -d $SCRIPTS_PATH ]; then
     cat $SCRIPTS_PATH/$1 | bash -x
