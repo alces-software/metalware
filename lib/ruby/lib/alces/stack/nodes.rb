@@ -19,6 +19,8 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require 'templater'
+
 module Alces
   module Stack
     class Nodes
@@ -27,8 +29,32 @@ module Alces
         raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
         yield self if !block.nil?
       end
+
       def each(&block)
         `nodeattr -c #{@gender}`.split(',').each(&block)
+      end
+
+      def each_with_index(&block)
+        `nodeattr -c #{@gender}`.split(',').each_with_index(&block)
+      end
+    end
+
+    class Iterator
+      def initialize(gender, lambda, json)
+        if !gender
+          lambda.call(json)
+        else
+          iterate(gender, lambda, json)
+        end
+      end
+
+      def iterate(gender, lambda, json)
+        json_hash = Alces::Stack::Templater::JSON_Templater.parse(json)
+        Nodes.new(gender).each_with_index do |nodename, index|
+          json_hash[:nodename] = nodename
+          json_hash[:index] = index
+          lambda.call(json_hash.to_json)
+        end
       end
     end
   end

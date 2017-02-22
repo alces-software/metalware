@@ -21,7 +21,6 @@
 #==============================================================================
 require 'alces/tools/logging'
 require 'alces/tools/execution'
-require 'alces/stack/nodes'
 require "alces/stack/templater"
 require 'alces/stack/iterator'
 
