@@ -27,55 +27,44 @@ require 'alces/stack/iterator'
 
 module Alces
   module Stack
-    module Hosts
+    module Kickstart
       class Run
         include Alces::Tools::Logging
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @template = template
-          @template_parameters = {
-            nodename: options[:nodename]
-          }
-          @nodegroup = options[:nodegroup]
+          @template = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(template)
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
-          @add_flag = options[:add_flag]
+          @template_parameters = {
+            hostip: `hostname -i`.chomp
+          }
         end
 
         def run!
-          raise "Requires a node name or node group" if !@template_parameters[:nodename] and !@nodegroup
-
-          case
-          when @dry_run_flag
-            lambda = dry_run
-          when @add_flag
-            lambda = -> (json) {add(json)}
+          if @dry_run_flag
+            lambda = -> (json) { puts_template(json) }
           else
-            raise "Could not modify hosts, see 'metal hosts -h'"
+            lambda = -> (json) { save(json) }
           end
 
           Alces::Stack::Iterator.new(@nodegroup, lambda, @json) if !lambda.nil?
         end
 
-        def dry_run
-          case
-          when @add_flag
-            lambda = -> (json) {puts_template(json)}
-          else
-            raise "Could not modify hosts, see 'metal hosts -h'"
-          end
-          return lambda
+        def save(json)
+          save_file = get_file_name
+          Alces::Stack::Templater::JSON_Templater.save(@template, save_file, json, @template_parameters)
         end
 
-        def add(json)
-          append_file = "/etc/hosts"
-          json = "" if !json
-          Alces::Stack::Templater::JSON_Templater.append(@template, append_file, json, @template_parameters)
+        def get_file_name
+          name = @template.scan(/\.?\w+\.?\w*\Z/)
+          raise "Could not determine save file name from template: " << @template if name.size != 1
+          return "/var/www/html/deployment/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks"
         end
-
+    
         def puts_template(json)
-          json = "" if !json
+          save_file = get_file_name
+          puts "Would save to: " << save_file
           puts Alces::Stack::Templater::JSON_Templater.file(@template, json, @template_parameters)
         end
       end

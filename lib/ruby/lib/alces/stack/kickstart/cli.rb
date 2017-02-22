@@ -25,39 +25,24 @@ require "alces/stack/templater"
 
 module Alces
   module Stack
-    module Hosts
+    module Kickstart
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal hosts'
-        description "Modifies the hosts file, modifier flag (e.g. --add) is required"
+        name 'metal kickstart'
+        description "Renders kickstart templates"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
-
-        option  :nodename,
-                'Node name to be modified',
-                '-n', '--node-name',
-                default: false
-
-        option  :nodegroup,
-                'Node group to be modified, overrides --node-name',
-                '-g', '--node-group',
-                default: false
-
-        flag    :add_flag,
-                'Adds a new entry to /etc/hosts',
-                '-a', '--add',
-                default: false
 
         option  :json,
                 'JSON file or string containing additional templating parameters',
                 '-j', '--additional-parameters',
-                default: false
+                default: "{}"
 
         option  :template,
                 'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/hosts/compute.erb"
+                default: "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
 
         flag    :template_options,
                 'Show templating options',
@@ -81,7 +66,7 @@ module Alces
           options = {
             JSON: true,
             ITERATOR: true,
-            nodename: "Value specified by --node-name"
+            hostip: "IP address of host node"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -91,11 +76,8 @@ module Alces
           setup_signal_handler
           show_template_options if template_options
 
-          Alces::Stack::Hosts.run!(template, 
+          Alces::Stack::Kickstart.run!(template, 
               dry_run_flag: dry_run_flag,
-              add_flag: add_flag,
-              nodename: nodename,
-              nodegroup: nodegroup,
               json: json
             )
         end
