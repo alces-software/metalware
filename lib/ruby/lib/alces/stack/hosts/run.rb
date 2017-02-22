@@ -21,6 +21,7 @@
 #==============================================================================
 require 'alces/tools/logging'
 require 'alces/tools/execution'
+require 'alces/tools/cli'
 require "alces/stack/templater"
 require 'alces/stack/iterator'
 
@@ -43,11 +44,15 @@ module Alces
         end
 
         def run!
+          raise "Requires a node name or node group" if !@template_parameters[:nodename] and !@nodegroup
+
           case
           when @dry_run_flag
             lambda = dry_run
           when @add_flag
             lambda = -> (json) {add(json)}
+          else
+            raise "Could not modify hosts, see 'metal hosts -h'"
           end
 
           Alces::Stack::Iterator.new(@nodegroup, lambda, @json) if !lambda.nil?
@@ -57,6 +62,8 @@ module Alces
           case
           when @add_flag
             lambda = -> (json) {puts_template(json)}
+          else
+            raise "Could not modify hosts, see 'metal hosts -h'"
           end
           return lambda
         end

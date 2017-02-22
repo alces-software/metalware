@@ -31,17 +31,27 @@ module Alces
 
         root_only
         name 'metal hosts'
-        description "Modifies the hosts file"
+        description "Modifies the hosts file, modifier flag (e.g. --add) is required"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
-        flag    :dry_run_flag,
-                'Prints the template output without modifying files',
-                '-n', '--dry-run',
+        option  :nodename,
+                'Node name to be modified',
+                '-n', '--node-name',
+                default: false
+
+        option  :nodegroup,
+                'Node group to be modified, overrides --node-name',
+                '-g', '--node-group',
                 default: false
 
         flag    :add_flag,
                 'Adds a new entry to /etc/hosts',
                 '-a', '--add',
+                default: false
+
+        option  :json,
+                'JSON file or string containing additional templating parameters',
+                '-j', '--additional-parameters',
                 default: false
 
         option  :template,
@@ -54,19 +64,9 @@ module Alces
                 '--template-options',
                 default: false
 
-        option  :nodename,
-                'Node name to be modified',
-                '--nodename',
-                default: ""
-
-        option  :nodegroup,
-                'Node group to be modified, overrides --nodename',
-                '-g', '--nodegroup',
-                default: false
-
-        option  :json,
-                'JSON file or string containing additional templating parameters',
-                '-j', '--additional-parameters',
+        flag    :dry_run_flag,
+                'Prints the template output without modifying files',
+                '-x', '--dry-run',
                 default: false
 
         def setup_signal_handler
@@ -81,7 +81,7 @@ module Alces
           options = {
             JSON: true,
             ITERATOR: true,
-            nodename: "Value specified by --nodename"
+            nodename: "Value specified by --node-name"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0

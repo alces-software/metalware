@@ -29,7 +29,7 @@ module Alces
       class << self
         def file(filename, template_parameters={})
           File.open(filename.chomp, 'r') do |f|
-            return replace_hash(f.read, template_parameters)
+            return replace_hash(f.read, 0, template_parameters)
           end
         end
 
@@ -45,8 +45,14 @@ module Alces
           end
         end
 
-        def replace_hash(template, template_parameters={})
-          return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+        def replace_hash(template, count, template_parameters={})
+          raise "Templater loop count reached. Check parameters for infinite loops" if count > 100
+          tags = template.scan(/<%=[ \w]*%>/)
+          return template if tags.length == 0
+          tags.each do |t|
+            raise "Could not find value for " << t if !template_parameters.has_key?(t.gsub(/[ <>%=]/, "").to_sym)
+          end
+          return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), count + 1, template_parameters)
         end
 
         def show_options(options={})
