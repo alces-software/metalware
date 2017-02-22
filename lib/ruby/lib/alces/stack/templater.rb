@@ -50,20 +50,38 @@ module Alces
         end
 
         def show_options(options={})
-          puts "The following parameters are replaced by ERB:"
+          # Flags
+          none_flag = true
           print_json = false
+          print_iterator = false
+          puts
+          puts "The following command line parameters are replaced by ERB:"
           options.each do |key, value|
             if key.to_s == 'JSON' and value.to_s == 'true'
               print_json = true
+            elsif key.to_s == 'ITERATOR' and value.to_s == 'true'
+              print_iterator = true
             else
+              none_flag = false
               puts "    <%= #{key} %> : #{value}"
             end
           end
-          puts "Include additional parameters in the JSON object. In the case of conflicts, the JSON value is used" if print_json
+          puts "    (none)" if none_flag
           puts
+          if print_iterator
+            puts "When iterating over a node group, the following is replaced:"
+            puts "    <%= nodename %> : The node name from the group"
+            puts "    <%= index %> : The index in the group"
+            puts "See ERB documentation for template algebra to use on 'index'"
+            puts
+          end
+          if print_json
+            puts "Include additional parameters in the JSON object. In the case of conflicts the priority order is: iterator parameters (if applicable), json inputs, then command line inputs"
+            puts
+          end
         end
       end
-
+      
       class JSON_Templater
         class << self
           def file(filename, json, template_parameters={})

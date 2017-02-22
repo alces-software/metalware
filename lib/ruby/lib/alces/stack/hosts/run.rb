@@ -21,8 +21,8 @@
 #==============================================================================
 require 'alces/tools/logging'
 require 'alces/tools/execution'
-require 'alces/stack/nodes'
 require "alces/stack/templater"
+require 'alces/stack/iterator'
 
 module Alces
   module Stack
@@ -34,25 +34,42 @@ module Alces
         def initialize(template, options={})
           @template = template
           @template_parameters = {
-            nodename: options[:nodename],
-            iptail: options[:iptail],
-            q3: options[:q3]
+            nodename: options[:nodename]
           }
+          @nodegroup = options[:nodegroup]
           @json = options[:json]
+          @dry_run_flag = options[:dry_run_flag]
           @add_flag = options[:add_flag]
         end
 
         def run!
-          add() if @add_flag
+          case
+          when @dry_run_flag
+            lambda = dry_run
+          when @add_flag
+            lambda = -> (json) {add(json)}
+          end
+
+          Alces::Stack::Iterator.new(@nodegroup, lambda, @json) if !lambda.nil?
         end
 
-        def add
-          append_file = "/etc/hosts"
-          if !@json
-            Alces::Stack::Templater.append(@template, append_file, @template_parameters)
-          else
-            Alces::Stack::Templater::JSON_Templater.append(@template, append_file, @json, @template_parameters)
+        def dry_run
+          case
+          when @add_flag
+            lambda = -> (json) {puts_template(json)}
           end
+          return lambda
+        end
+
+        def add(json)
+          append_file = "/etc/hosts"
+          json = "" if !json
+          Alces::Stack::Templater::JSON_Templater.append(@template, append_file, json, @template_parameters)
+        end
+
+        def puts_template(json)
+          json = "" if !json
+          puts Alces::Stack::Templater::JSON_Templater.file(@template, json, @template_parameters)
         end
       end
     end

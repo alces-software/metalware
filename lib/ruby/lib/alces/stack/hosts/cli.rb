@@ -34,14 +34,19 @@ module Alces
         description "Modifies the hosts file"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
+        flag    :dry_run_flag,
+                'Prints the template output without modifying files',
+                '-n', '--dry-run',
+                default: false
+
         flag    :add_flag,
                 'Adds a new entry to /etc/hosts',
-                '--add', '-a',
+                '-a', '--add',
                 default: false
 
         option  :template,
                 'Template file to be used',
-                '--template', '-t',
+                '-t', '--template',
                 default: "#{ENV['alces_BASE']}/etc/templates/hosts/compute.erb"
 
         flag    :template_options,
@@ -54,19 +59,14 @@ module Alces
                 '--nodename',
                 default: ""
 
-        option  :iptail,
-                'Fourth IP byte in template',
-                '--iptail',
-                default: ""
-
-        option  :q3,
-                'Replaces q3 in template',
-                '--q3',
-                default: ""
+        option  :nodegroup,
+                'Node group to be modified, overrides --nodename',
+                '-g', '--nodegroup',
+                default: false
 
         option  :json,
                 'JSON file or string containing additional templating parameters',
-                '--additional-parameters', '-j',
+                '-j', '--additional-parameters',
                 default: false
 
         def setup_signal_handler
@@ -80,9 +80,8 @@ module Alces
         def show_template_options
           options = {
             JSON: true,
-            nodename: "Value specified by --nodename",
-            iptail: "Value specified by --iptail",
-            q3: "Value specified by --q3"
+            ITERATOR: true,
+            nodename: "Value specified by --nodename"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -93,10 +92,10 @@ module Alces
           show_template_options if template_options
 
           Alces::Stack::Hosts.run!(template, 
+              dry_run_flag: dry_run_flag,
               add_flag: add_flag,
               nodename: nodename,
-              iptail: iptail,
-              q3: q3,
+              nodegroup: nodegroup,
               json: json
             )
         end
