@@ -33,7 +33,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @template = template
+          @template = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/").find(template)
           @template_parameters = {
             nodename: options[:nodename]
           }

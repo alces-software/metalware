@@ -60,9 +60,14 @@ module Alces
                 default: false
 
         option  :kernel_append,
-                'Specify value for kernal append in template. Check --template-options',
+                'Specify value for kernel append in template. Check --template-options',
                 '--kernelappendoptions',
                 default: ""
+
+        option  :kickstart,
+                'Renders the kickstart template if include. Deletes the file at the end',
+                '--kickstart',
+                default: false
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
@@ -81,7 +86,10 @@ module Alces
           options = {
             :hostip => "Head node IP address",
             :nodename => "Value specified by --node-name",
-            :kernelappendoptions => "Value specified by --kernelappendoptions"
+            :kernelappendoptions => "Value specified by --kernelappendoptions",
+            :kickstart => "Determined from --kickstart (required) and nodename",
+            :JSON => true,
+            :ITERATOR => true
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -92,12 +100,13 @@ module Alces
 
           show_template_options if template_options
           Alces::Stack::Boot.run!(
-            nodename: nodename,
-            group: group,
-            template: template,
-            kernel_append: kernel_append,
-            dry_run_flag: dry_run_flag,
-            json: json
+              nodename: nodename,
+              group: group,
+              template: template,
+              kernel_append: kernel_append,
+              dry_run_flag: dry_run_flag,
+              json: json,
+              kickstart: kickstart
             )
         end
       end

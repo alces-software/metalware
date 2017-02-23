@@ -27,19 +27,21 @@ module Alces
     class Iterator
       def initialize(gender, lambda, json)
         if !gender
-          lambda.call(json)
+          return lambda.call(json)
         else
-          iterate(gender, lambda, json)
+          return iterate(gender, lambda, json)
         end
       end
 
       def iterate(gender, lambda, json)
         json_hash = Alces::Stack::Templater::JSON_Templater.parse(json)
+        output = Array.new
         Nodes.new(gender).each_with_index do |nodename, index|
           json_hash[:nodename] = nodename
           json_hash[:index] = index
-          lambda.call(json_hash.to_json)
+          output << lambda.call(json_hash.to_json)
         end
+        return output
       end
     end
   end

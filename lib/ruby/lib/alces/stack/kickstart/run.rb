@@ -34,11 +34,15 @@ module Alces
 
         def initialize(template, options={})
           @template = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(template)
+          @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
           @template_parameters = {
             hostip: `hostname -i`.chomp
           }
+          @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
+          @save_append = options[:save_append]
+          @ran_from_boot = options[:ran_from_boot]
         end
 
         def run!
@@ -50,7 +54,8 @@ module Alces
             lambda = -> (json) { save(json) }
           end
 
-          Alces::Stack::Iterator.new(@nodegroup, lambda, @json) if !lambda.nil?
+          Alces::Stack::Iterator.new(@group, lambda, @json) if !lambda.nil?
+          return get_file_name if @ran_from_boot
         end
 
         def save(json)
@@ -62,12 +67,13 @@ module Alces
         def get_file_name
           name = @template.scan(/\.?\w+\.?\w*\Z/)
           raise "Could not determine save file name from template: " << @template if name.size != 1
-          return "/var/www/html/deployment/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks"
+          return "/var/www/html/deployment/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks" << @save_append
         end
-    
+
         def puts_template(json)
           save_file = get_file_name
-          puts "Would save to: " << save_file
+          puts "KICKSTART TEMPLATE"
+          puts "Would save to: " << save_file << "\n\n"
           puts Alces::Stack::Templater::JSON_Templater.file(@template, json, @template_parameters)
         end
       end

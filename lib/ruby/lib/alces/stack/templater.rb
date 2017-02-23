@@ -56,6 +56,7 @@ module Alces
               if !template_parameters.has_key?(word.to_sym)
                 error_tag = true
                 error_message << "\n  " << t
+                break
               end
             end
           end

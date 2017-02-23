@@ -34,6 +34,16 @@ module Alces
         description "Renders kickstart templates"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
+        option  :nodename,
+                'Node name to be modified',
+                '-n', '--node-name',
+                default: false
+
+        option  :group,
+                'Specify a gender group to run over',
+                '-g', '--node-group',
+                default: false
+
         option  :json,
                 'JSON file or string containing additional templating parameters',
                 '-j', '--additional-parameters',
@@ -43,6 +53,11 @@ module Alces
                 'Template file to be used',
                 '-t', '--template',
                 default: "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
+
+        option  :save_append,
+                'String to append to end of save file',
+                '--save-append',
+                default: ""
 
         flag    :template_options,
                 'Show templating options',
@@ -77,8 +92,12 @@ module Alces
           show_template_options if template_options
 
           Alces::Stack::Kickstart.run!(template, 
+              nodename: nodename,
+              group: group,
               dry_run_flag: dry_run_flag,
-              json: json
+              json: json,
+              save_append: save_append,
+              ran_from_boot: false
             )
         end
       end
