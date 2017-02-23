@@ -46,8 +46,6 @@ module Alces
         end
 
         def run!
-          raise "Requires json input, if no input include: -j \"{}\"" if !@json
-
           if @dry_run_flag
             lambda = -> (json) { puts_template(json) }
           else
@@ -59,8 +57,10 @@ module Alces
         end
 
         def save(json)
+          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
           save_file = get_file_name
-          Alces::Stack::Templater::JSON_Templater.save(@template, save_file, json, @template_parameters)
+          save_file = save_file << "." << hash[:nodename] if @group
+          Alces::Stack::Templater.save(@template, save_file, hash)
           puts "Save file: " << save_file
         end
 
@@ -71,10 +71,12 @@ module Alces
         end
 
         def puts_template(json)
+          hash = Acles::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
           save_file = get_file_name
+          save_file = save_file << hash[:nodename] if @group
           puts "KICKSTART TEMPLATE"
-          puts "Would save to: " << save_file << "\n\n"
-          puts Alces::Stack::Templater::JSON_Templater.file(@template, json, @template_parameters)
+          puts "Would save to: " << "." << save_file << "\n\n"
+          puts Alces::Stack::Templater.file(@template, hash)
         end
       end
     end
