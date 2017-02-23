@@ -37,7 +37,7 @@ module Alces
         option  :json,
                 'JSON file or string containing additional templating parameters',
                 '-j', '--additional-parameters',
-                default: "{}"
+                default: false
 
         option  :template,
                 'Template file to be used',

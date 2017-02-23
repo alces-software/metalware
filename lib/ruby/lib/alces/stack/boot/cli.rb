@@ -30,18 +30,28 @@ module Alces
         include Alces::Tools::CLI
 
         root_only
-        name 'metal boot [NODE NAME]'
+        name 'metal boot'
         description "Creates the boot files for the node(s)"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
 
+        option  :nodename,
+                'Node name to be modified',
+                '-n', '--node-name',
+                default: false
+
         option  :group,
                 'Specify a gender group to run over',
-                '--group', '-g',
+                '-g', '--node-group',
+                default: false
+
+        option  :json,
+                'JSON file or string containing additional templating parameters',
+                '-j', '--additional-parameters',
                 default: false
 
         option  :template,
-                'Specify path to template for pxelinux.cfg',
-                '--template', '-t',
+                'Specify template',
+                '-t', '--template',
                 default: "#{ENV['alces_BASE']}/etc/templates/boot/localboot.erb"
 
         flag    :template_options,
@@ -54,6 +64,11 @@ module Alces
                 '--kernelappendoptions',
                 default: ""
 
+        flag    :dry_run_flag,
+                'Prints the template output without modifying files',
+                '-x', '--dry-run',
+                default: false
+
         def setup_signal_handler
           trap('INT') do
             STDERR.puts "\nExiting..." unless @exiting
@@ -65,7 +80,7 @@ module Alces
         def show_template_options
           options = {
             :hostip => "Head node IP address",
-            :nodename => "Compute node's name",
+            :nodename => "Value specified by --node-name",
             :kernelappendoptions => "Value specified by --kernelappendoptions"
           }
           Alces::Stack::Templater.show_options(options)
@@ -76,14 +91,13 @@ module Alces
           setup_signal_handler
 
           show_template_options if template_options
-
-          name = ARGV[0] if !group
           Alces::Stack::Boot.run!(
-            name: name,
-            group_flag: !(group == false),
+            nodename: nodename,
             group: group,
             template: template,
-            kernel_append: kernel_append
+            kernel_append: kernel_append,
+            dry_run_flag: dry_run_flag,
+            json: json
             )
         end
       end

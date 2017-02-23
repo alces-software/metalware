@@ -42,6 +42,8 @@ module Alces
         end
 
         def run!
+          raise "Requires json input, if no input include: -j \"{}\"" if !@json
+
           if @dry_run_flag
             lambda = -> (json) { puts_template(json) }
           else
@@ -54,6 +56,7 @@ module Alces
         def save(json)
           save_file = get_file_name
           Alces::Stack::Templater::JSON_Templater.save(@template, save_file, json, @template_parameters)
+          puts "Save file: " << save_file
         end
 
         def get_file_name

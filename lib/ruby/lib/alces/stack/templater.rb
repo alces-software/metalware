@@ -47,11 +47,17 @@ module Alces
 
         def replace_hash(template, count, template_parameters={})
           raise "Templater loop count reached. Check parameters for infinite loops" if count > 100
-          tags = template.scan(/<%=[ \w]*%>/)
+          tags = template.scan(/<%=[ \w_]*%>/)
           return template if tags.length == 0
+          error_tag = false
+          error_message  = "Could not find value(s) for:"
           tags.each do |t|
-            raise "Could not find value for " << t if !template_parameters.has_key?(t.gsub(/[ <>%=]/, "").to_sym)
+            if !template_parameters.has_key?(t.gsub(/[ <>%=]/, "").to_sym)
+              error_tag = true
+              error_message << "\n  " << t
+            end
           end
+          raise error_message if error_tag
           return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), count + 1, template_parameters)
         end
 
@@ -134,7 +140,7 @@ module Alces
         def get_default
           return @default_location
         end
-        
+
         def find(template)
           return template
         end

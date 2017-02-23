@@ -32,7 +32,7 @@ module Alces
         root_only
         name 'metal hosts'
         description "Modifies the hosts file, modifier flag (e.g. --add) is required"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
+        log_to File.join(Alces::Stack.config.log_root,'alces-node-hosts.log')
 
         option  :nodename,
                 'Node name to be modified',
