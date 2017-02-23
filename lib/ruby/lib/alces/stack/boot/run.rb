@@ -63,10 +63,12 @@ module Alces
             if @dry_run_flag
               puts "Would delete the following files:"
               @delete_node.split(',').each do |s|
+                next if s.empty?
                 puts "  /var/lib/tftpboot/pxelinux.cfg/#{s}"
               end
             else
               @delete_node.split(',').each do |s|
+                next if s.empty?
                 `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
               end
             end

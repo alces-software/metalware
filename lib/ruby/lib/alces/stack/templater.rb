@@ -47,14 +47,16 @@ module Alces
 
         def replace_hash(template, count, template_parameters={})
           raise "Templater loop count reached. Check parameters for infinite loops" if count > 100
-          tags = template.scan(/<%=[ \w_]*%>/)
+          tags = template.scan(/<%=[ \w\*\+\-\/\%\(\)\=\!]*%>/)
           return template if tags.length == 0
           error_tag = false
           error_message  = "Could not find value(s) for:"
           tags.each do |t|
-            if !template_parameters.has_key?(t.gsub(/[ <>%=]/, "").to_sym)
-              error_tag = true
-              error_message << "\n  " << t
+            t.scan(/_*[[:alpha:]][[:alnum:]_]*/) do |word|
+              if !template_parameters.has_key?(word.to_sym)
+                error_tag = true
+                error_message << "\n  " << t
+              end
             end
           end
           raise error_message if error_tag
