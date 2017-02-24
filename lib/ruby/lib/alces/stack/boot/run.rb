@@ -129,19 +129,16 @@ module Alces
         end
 
         def kickstart_teardown
-          @number_lines = (`cat /var/log/httpd/access_log | wc -l`.to_i + 1).to_s
           @found_nodes = Hash.new
           lambda = -> (options) {
-            grep = `tail /var/log/httpd/access_log -n +#{@number_lines} | grep 'GET /deployment/rendered/ks/#{@kickstart_name}.#{options[:nodename]}'`
-            if grep.length < 1
-              @kickstart_teardown_exit_flag = true
-              return
-            elsif !@found_nodes[options[:nodename]]
+            if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
               @found_nodes[options[:nodename]] = true
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
               `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
               `rm -f /var/lib/metalware/rendered/ks/#{@kickstart_name}.#{options[:nodename]} 2>/dev/null`
+            elsif !@found_nodes[options[:nodename]]
+              @kickstart_teardown_exit_flag = true
             end
           }
           @kickstart_teardown_exit_flag = true
@@ -157,20 +154,20 @@ module Alces
 
         def teardown(e)
           puts "Would delete the following files:" if @dry_run_flag
-            @delete_pxe.split(',').each do |s|
-              next if s.empty?
-              if @dry_run_flag then puts "  /var/lib/tftpboot/pxelinux.cfg/#{s}"
-              else `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
+          @delete_pxe.split(',').each do |s|
+            next if s.empty?
+            if @dry_run_flag then puts "  /var/lib/tftpboot/pxelinux.cfg/#{s}"
+            else `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
+            end
+          end
+          if @kickstart
+            @kickstart_files.each do |fname|
+              if @dry_run_flag then puts "  #{fname}"
+              else `rm -f #{fname} 2>/dev/null`
               end
             end
-            if @kickstart
-              @kickstart_files.each do |fname|
-                if @dry_run_flag then puts "  #{fname}"
-                else `rm -f #{fname} 2>/dev/null`
-                end
-              end
-            end
-            raise e
+          end
+          raise e
         end
       end
     end
