@@ -65,6 +65,7 @@ module Alces
         end
 
         def show_options(options={})
+          options[:hostip] = "IP address of host node"
           # Flags
           none_flag = true
           print_json = false
@@ -130,6 +131,12 @@ module Alces
               raise e
             end
             #Returns the hash
+            template_parameters = add_default_parameters(template_parameters)
+            return template_parameters
+          end
+
+          def add_default_parameters(template_parameters={})
+            template_parameters[:hostip] = `hostname -i`.chomp if !template_parameters.key?(:hostip)
             return template_parameters
           end
         end

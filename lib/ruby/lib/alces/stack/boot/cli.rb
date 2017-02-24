@@ -52,7 +52,7 @@ module Alces
         option  :template,
                 'Specify template',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/boot/localboot.erb"
+                default: "#{ENV['alces_BASE']}/etc/templates/boot/install.erb"
 
         flag    :template_options,
                 'Show templating options',
@@ -66,8 +66,13 @@ module Alces
 
         option  :kickstart,
                 'Renders the kickstart template if include. Deletes the file at the end',
-                '--kickstart',
-                default: false
+                '-k', '--kickstart',
+                default: ""
+
+        flag    :flag_default_kickstart,
+                "Runs default -k [#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb]",
+                '-s', '--kickstart-default',
+                default:false
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
@@ -84,7 +89,6 @@ module Alces
 
         def show_template_options
           options = {
-            :hostip => "Head node IP address",
             :nodename => "Value specified by --node-name",
             :kernelappendoptions => "Value specified by --kernelappendoptions",
             :kickstart => "Determined from --kickstart (required) and nodename",
@@ -97,7 +101,9 @@ module Alces
 
         def execute
           setup_signal_handler
-
+          if flag_default_kickstart
+            kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
+          end
           show_template_options if template_options
           Alces::Stack::Boot.run!(
               nodename: nodename,

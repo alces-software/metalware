@@ -37,9 +37,7 @@ module Alces
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
-          @template_parameters = {
-            hostip: `hostname -i`.chomp
-          }
+          @template_parameters = {}
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
           @save_append = options[:save_append]
           @ran_from_boot = options[:ran_from_boot]
@@ -61,7 +59,6 @@ module Alces
           save_file = get_file_name
           save_file = save_file << "." << hash[:nodename] if @group
           Alces::Stack::Templater.save(@template, save_file, hash)
-          puts "Save file: " << save_file
         end
 
         def get_file_name
@@ -71,7 +68,7 @@ module Alces
         end
 
         def puts_template(json)
-          hash = Acles::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
+          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
           save_file = get_file_name
           save_file = save_file << hash[:nodename] if @group
           puts "KICKSTART TEMPLATE"

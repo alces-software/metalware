@@ -38,7 +38,6 @@ module Alces
           @group = options[:group]
           @dry_run_flag = options[:dry_run_flag]
           @template_parameters = {
-            hostip: `hostname -i`.chomp,
             kernelappendoptions: options[:kernel_append].chomp
           }
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
@@ -49,10 +48,10 @@ module Alces
 
         def run!
           puts "(CTRL+C TO TERMINATE)"
-          raise "Requires a node name, node group, or json input" if !@node_name and !@group and !@json 
+          raise "Requires a node name, node group, or json input" if !@template_parameters.key?("nodename".to_sym) and !@group and !@json 
 
           #Generates kick start files if required
-          if @kickstart
+          if !@kickstart.to_s.empty?
             set_kickstart_template_parameter
 
             @kickstart_options = {
@@ -121,8 +120,10 @@ module Alces
           # Creates the json input for kickstart]
           json_new = {}
           json_new.merge!(@template_parameters)
-          json_old = JSON.parse(json)
-          json_new.merge!(json_old)
+          if json and !json.to_s.empty?
+            json_old = JSON.parse(json)
+            json_new.merge!(json_old)
+          end
           json_new = json_new.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
 
           # Sets dynamic variables in the kickstart options
@@ -130,7 +131,6 @@ module Alces
           raise "No node specified for appending kickstart file" if !@kickstart_options.key?("nodename".to_sym)
           @kickstart_options[:save_append] = "." << @kickstart_options[:nodename]
           @kickstart_options[:json] = json_new.to_json
-
           @kickstart_files << Alces::Stack::Kickstart.run!(@kickstart, @kickstart_options)
           puts "\n" if @dry_run_flag
         end
