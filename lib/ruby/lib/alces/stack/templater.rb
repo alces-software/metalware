@@ -47,15 +47,25 @@ module Alces
 
         def replace_hash(template, count, template_parameters={})
           raise "Templater loop count reached. Check parameters for infinite loops" if count > 100
-          tags = template.scan(/<%=[ \w]*%>/)
+          tags = template.scan(/<%=[ \w\*\+\-\/\%\(\)\=\!]*%>/)
           return template if tags.length == 0
+          error_tag = false
+          error_message  = "Could not find value(s) for:"
           tags.each do |t|
-            raise "Could not find value for " << t if !template_parameters.has_key?(t.gsub(/[ <>%=]/, "").to_sym)
+            t.scan(/_*[[:alpha:]][[:alnum:]_]*/) do |word|
+              if !template_parameters.has_key?(word.to_sym)
+                error_tag = true
+                error_message << "\n  " << t
+                break
+              end
+            end
           end
+          raise error_message if error_tag
           return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), count + 1, template_parameters)
         end
 
         def show_options(options={})
+          options[:hostip] = "IP address of host node"
           # Flags
           none_flag = true
           print_json = false
@@ -103,6 +113,7 @@ module Alces
           end
 
           def parse(json, template_parameters={})
+            template_parameters = add_default_parameters(template_parameters)
             # Skips if json is empty
             return template_parameters if json.to_s.strip.empty? or !json
             # Loads content if json is a file
@@ -123,6 +134,42 @@ module Alces
             #Returns the hash
             return template_parameters
           end
+
+          def add_default_parameters(template_parameters={})
+            template_parameters[:hostip] = `hostname -i`.chomp if !template_parameters.key?(:hostip)
+            return template_parameters
+          end
+        end
+      end
+
+      class Finder
+        def initialize(default_location)
+          @default_location = default_location
+        end
+
+        def get_default
+          return @default_location
+        end
+
+        def find(template)
+          copy = template
+          template = "/" << template if template[0] != '/'
+          template_erb = "#{template}.erb"
+          # Checks if it's a full path to the default folder
+          if template =~ /\A#{@default_location}.*\Z/
+            return template if File.file?(template)
+            return template_erb if File.file?(template_erb)
+          end
+          # Checks to see if the file is in the template folder
+          path_template = "#{@default_location}#{template}"
+          path_template.gsub!(/\/\//,"/")
+          path_template_erb = "#{path_template}.erb"
+          return path_template if File.file?(path_template)
+          return path_template_erb if File.file?(path_template_erb)
+          # Checks the file structure
+          return template if File.file?(template)
+          return template_erb if File.file?(template_erb)
+          raise "Could not find template file: " << copy
         end
       end
     end

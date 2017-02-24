@@ -1,3 +1,10 @@
+<<DOC
+: '
+: NAME: kickstart
+: SYNOPSIS: Renders kickstart templates
+: VERSION: 1.0.0
+: '
+DOC
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,30 +26,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/templater'
-require 'alces/stack/nodes'
+# Execute as ruby script if we're evaluating under bash
+if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
 
-module Alces
-  module Stack
-    class Iterator
-      def initialize(gender, lambda, json)
-        if !gender
-          return lambda.call(json)
-        else
-          return iterate(gender, lambda, json)
-        end
-      end
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
-      def iterate(gender, lambda, json)
-        json_hash = Alces::Stack::Templater::JSON_Templater.parse(json)
-        output = Array.new
-        Nodes.new(gender).each_with_index do |nodename, index|
-          json_hash[:nodename] = nodename
-          json_hash[:index] = index
-          output << lambda.call(json_hash.to_json)
-        end
-        return output
-      end
-    end
-  end
-end
+require 'rubygems'
+require 'bundler/setup'
+
+require 'alces/stack/kickstart'
+
+Alces::Stack::Kickstart::CLI.execute if $0 == __FILE__

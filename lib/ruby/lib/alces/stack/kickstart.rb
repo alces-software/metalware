@@ -19,29 +19,16 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/templater'
-require 'alces/stack/nodes'
+require 'alces/stack/kickstart/cli'
+require 'alces/stack/kickstart/run'
 
 module Alces
   module Stack
-    class Iterator
-      def initialize(gender, lambda, json)
-        if !gender
-          return lambda.call(json)
-        else
-          return iterate(gender, lambda, json)
+    module Kickstart
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
         end
-      end
-
-      def iterate(gender, lambda, json)
-        json_hash = Alces::Stack::Templater::JSON_Templater.parse(json)
-        output = Array.new
-        Nodes.new(gender).each_with_index do |nodename, index|
-          json_hash[:nodename] = nodename
-          json_hash[:index] = index
-          output << lambda.call(json_hash.to_json)
-        end
-        return output
       end
     end
   end
