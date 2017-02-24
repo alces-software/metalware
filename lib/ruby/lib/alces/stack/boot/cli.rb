@@ -66,13 +66,7 @@ module Alces
 
         option  :kickstart,
                 'Renders the kickstart template if include. Deletes the file at the end',
-                '-k', '--kickstart',
-                default: ""
-
-        flag    :flag_default_kickstart,
-                "Runs default -k [#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb]",
-                '-s', '--kickstart-default',
-                default:false
+                '-k', '--kickstart'
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
@@ -101,9 +95,6 @@ module Alces
 
         def execute
           setup_signal_handler
-          if flag_default_kickstart
-            kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
-          end
           show_template_options if template_options
           Alces::Stack::Boot.run!(
               nodename: nodename,

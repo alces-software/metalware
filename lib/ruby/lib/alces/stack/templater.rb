@@ -154,15 +154,21 @@ module Alces
         def find(template)
           copy = template
           template = "/" << template if template[0] != '/'
+          template_erb = "#{template}.erb"
           # Checks if it's a full path to the default folder
           if template =~ /\A#{@default_location}.*\Z/
             return template if File.file?(template)
+            return template_erb if File.file?(template_erb)
           end
           # Checks to see if the file is in the template folder
-          path_template = @default_location << template
+          path_template = "#{@default_location}#{template}"
+          path_template.gsub!(/\/\//,"/")
+          path_template_erb = "#{path_template}.erb"
           return path_template if File.file?(path_template)
+          return path_template_erb if File.file?(path_template_erb)
           # Checks the file structure
           return template if File.file?(template)
+          return template_erb if File.file?(template_erb)
           raise "Could not find template file: " << copy
         end
       end

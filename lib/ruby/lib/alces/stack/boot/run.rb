@@ -125,7 +125,7 @@ module Alces
             json_new.merge!(json_old)
           end
           json_new = json_new.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
-
+          
           # Sets dynamic variables in the kickstart options
           @kickstart_options[:nodename] = json_new[:nodename] if json_new.key?("nodename".to_sym)
           raise "No node specified for appending kickstart file" if !@kickstart_options.key?("nodename".to_sym)
