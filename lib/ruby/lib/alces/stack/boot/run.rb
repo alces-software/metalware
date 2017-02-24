@@ -129,6 +129,8 @@ module Alces
         end
 
         def kickstart_teardown
+          delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
+          Alces::Stack::Iterator.run(@group, delete_lambda, {})
           @found_nodes = Hash.new
           lambda = -> (options) {
             if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
