@@ -152,6 +152,7 @@ module Alces
         end
 
         def find(template)
+          copy = template
           template = "/" << template if template[0] != '/'
           # Checks if it's a full path to the default folder
           if template =~ /\A#{@default_location}.*\Z/
@@ -162,7 +163,7 @@ module Alces
           return path_template if File.file?(path_template)
           # Checks the file structure
           return template if File.file?(template)
-          raise "Could not find template file: " << template
+          raise "Could not find template file: " << copy
         end
       end
     end
