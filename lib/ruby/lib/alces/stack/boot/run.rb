@@ -51,19 +51,7 @@ module Alces
           raise "Requires a node name, node group, or json input" if !@template_parameters.key?("nodename".to_sym) and !@group and !@json 
 
           #Generates kick start files if required
-          if !@kickstart.to_s.empty?
-            set_kickstart_template_parameter
-
-            @kickstart_options = {
-              group: false,
-              dry_run_flag:  @dry_run_flag,
-              ran_from_boot: true
-            }
-            @kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
-            kickstart_lambda = -> (json) {run_kickstart(json)}
-            @kickstart_files = Array.new
-            Alces::Stack::Iterator.new(@group, kickstart_lambda, @json)
-          end
+          set_kickstart_template_parameter if !@kickstart.to_s.empty?
 
           case 
           when @dry_run_flag
@@ -74,23 +62,10 @@ module Alces
 
           begin
             Alces::Stack::Iterator.new(@group, lambda, @json)
+            kickstart_teardown if !@kickstart.to_s.empty?
             sleep
           rescue Exception => e
-            puts "Would delete the following files:" if @dry_run_flag
-            @delete_pxe.split(',').each do |s|
-              next if s.empty?
-              if @dry_run_flag then puts "  /var/lib/tftpboot/pxelinux.cfg/#{s}"
-              else `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
-              end
-            end
-            if @kickstart
-              @kickstart_files.each do |fname|
-                if @dry_run_flag then puts "  #{fname}"
-                else `rm -f #{fname} 2>/dev/null`
-                end
-              end
-            end
-            raise e
+            teardown(e)
           rescue Interrupt
           end
         end
@@ -137,9 +112,64 @@ module Alces
 
         def set_kickstart_template_parameter
           @kickstart = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(@kickstart)
-          name = @kickstart.scan(/\.?\w+\.?\w*\Z/)
-          raise "Could not determine kickstart file name: " << @kickstart if name.size != 1
-          @template_parameters[:kickstart] = name[0].scan(/\.?\w+/)[0] << ".ks.<%= nodename %>" 
+          @kickstart_name = @kickstart.scan(/\.?\w+\.?\w*\Z/)
+          raise "Could not determine kickstart file name: #{@kickstart}" if @kickstart_name.size != 1
+          @kickstart_name = @kickstart_name[0].scan(/\.?\w+/)[0] << ".ks"
+          @template_parameters[:kickstart] = "#{@kickstart_name}.<%= nodename %>" 
+        
+          @kickstart_options = {
+            group: false,
+            dry_run_flag:  @dry_run_flag,
+            ran_from_boot: true
+          }
+          @kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
+          kickstart_lambda = -> (json) {run_kickstart(json)}
+          @kickstart_files = Array.new
+          Alces::Stack::Iterator.new(@group, kickstart_lambda, @json)
+        end
+
+        def kickstart_teardown
+          delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
+          Alces::Stack::Iterator.run(@group, delete_lambda, {})
+          @found_nodes = Hash.new
+          lambda = -> (options) {
+            if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
+              @found_nodes[options[:nodename]] = true
+              puts "Found #{options[:nodename]}"
+              ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
+              `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
+              `rm -f /var/lib/metalware/rendered/ks/#{@kickstart_name}.#{options[:nodename]} 2>/dev/null`
+            elsif !@found_nodes[options[:nodename]]
+              @kickstart_teardown_exit_flag = true
+            end
+          }
+          @kickstart_teardown_exit_flag = true
+          puts "Looking for completed nodes"
+          while @kickstart_teardown_exit_flag
+            @kickstart_teardown_exit_flag = false
+            sleep 30
+            Alces::Stack::Iterator.run(@group, lambda, {})
+          end
+          puts "Found all nodes"
+          exit 0
+        end
+
+        def teardown(e)
+          puts "Would delete the following files:" if @dry_run_flag
+          @delete_pxe.split(',').each do |s|
+            next if s.empty?
+            if @dry_run_flag then puts "  /var/lib/tftpboot/pxelinux.cfg/#{s}"
+            else `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
+            end
+          end
+          if @kickstart
+            @kickstart_files.each do |fname|
+              if @dry_run_flag then puts "  #{fname}"
+              else `rm -f #{fname} 2>/dev/null`
+              end
+            end
+          end
+          raise e
         end
       end
     end

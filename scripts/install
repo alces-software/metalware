@@ -75,7 +75,9 @@ say_done $?
 title "Creating initial directory structure"
 doing 'Create'
 mkdir -p /var/log/metalware
-mkdir -p /var/www/html/deployment/ks
+mkdir -p /var/lib/metalware/rendered/ks
+mkdir -p /var/lib/metalware/cache/
+chmod a+rw /var/lib/metalware/cache
 [[ -d "${target}" ]] || mkdir -p "${target}"
 cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${source}/deployment" "${target}"
 say_done $?

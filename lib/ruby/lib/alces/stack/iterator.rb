@@ -43,6 +43,26 @@ module Alces
         end
         return output
       end
+
+      class << self
+        def run(gender, lambda, options={})
+          if !gender
+            return lambda.call(options)
+          else
+            return iterate(gender, lambda, options)
+          end
+        end
+
+        def iterate(gender, lambda, options={})
+          output = Array.new
+          Nodes.new(gender).each_with_index do |nodename, index|
+            options[:nodename] = nodename
+            options[:index] = index
+            output << lambda.call(options)
+          end
+          return output
+        end
+      end
     end
   end
 end
