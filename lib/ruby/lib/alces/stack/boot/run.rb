@@ -129,9 +129,10 @@ module Alces
         end
 
         def kickstart_teardown
+          @number_lines = (`cat /var/log/httpd/access_log | wc -l`.to_i + 1).to_s
           @found_nodes = Hash.new
           lambda = -> (options) {
-            grep = `cat /var/log/httpd/access_log | grep 'GET /cluster/ks/#{@kickstart_name}.#{options[:nodename]}'`
+            grep = `tail /var/log/httpd/access_log -n +#{@number_lines} | grep 'GET /deployment/rendered/ks/#{@kickstart_name}.#{options[:nodename]}'`
             if grep.length < 1
               @kickstart_teardown_exit_flag = true
               return
