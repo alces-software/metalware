@@ -7,7 +7,7 @@ source /root/.deployment
 
 KS_URL=http://${_ALCES_BUILDSERVER}/epel/ks/
 
-yum -y install dhcp fence-agents tftp xinetd tftp-server syslinux syslinux-tftpboot
+yum -y install dhcp fence-agents tftp xinetd tftp-server syslinux syslinux-tftpboot httpd php
 
 sed -ie "s/^.*disable.*$/\        disable                 = no/g" /etc/xinetd.d/tftp
 systemctl enable xinetd
@@ -38,3 +38,4 @@ systemctl restart dhcpd
 
 systemctl enable dnsmasq
 systemctl restart dnsmasq
+
