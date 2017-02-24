@@ -14,7 +14,8 @@ selinux --disabled
 
 #AUTH
 auth  --useshadow  --enablemd5
-rootpw --iscrypted "${_ALCES_ROOTPASSWORDCRYPT}" 
+#GENERATE with openssl passwd -1 $PASSWD
+rootpw --iscrypted <%= encrypted_root_password %>
 
 #LOCALIZATION
 keyboard uk
