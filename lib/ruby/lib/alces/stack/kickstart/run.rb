@@ -64,7 +64,7 @@ module Alces
         def get_file_name
           name = @template.scan(/\.?\w+\.?\w*\Z/)
           raise "Could not determine save file name from template: " << @template if name.size != 1
-          return "/var/www/html/deployment/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks" << @save_append
+          return "/var/lib/metalware/rendered/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks" << @save_append
         end
 
         def puts_template(json)

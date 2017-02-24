@@ -29,6 +29,11 @@ module Alces
         def run!(*args)
           Run.new(*args).run!
         end
+
+        def save_file_name(filename, nodename)
+          filename = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(filename)
+          
+        end
       end
     end
   end

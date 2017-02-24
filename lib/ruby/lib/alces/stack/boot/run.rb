@@ -140,7 +140,7 @@ module Alces
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
               `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
-              `rm -f /var/www/html/deployment/ks/#{@kickstart_name}.#{options[:nodename]} 2>/dev/null`
+              `rm -f /var/lib/metalware/rendered/ks/#{@kickstart_name}.#{options[:nodename]} 2>/dev/null`
             end
           }
           @kickstart_teardown_exit_flag = true
