@@ -1,7 +1,5 @@
 #!/bin/bash
 #(c)2017 Alces Software Ltd. HPC Consulting Build Suite
-#Job ID: <%= job %>
-#Cluster: <%= cluster %>
 
 #MISC
 text
@@ -89,9 +87,7 @@ ntpdate 0.centos.pool.ntp.org
 set -x -v
 exec 1>/root/ks-post.log 2>&1
 
-export MASTERIP=10.10.0.11
-
-curl http://${MASTERIP}/deployment/epel/conf/config > /root/.deployment
+curl http://<%= hostip %>/deployment/epel/conf/config > /root/.deployment
 export ALCES_PROFILE=compute
 source /root/.deployment
 run_profile
