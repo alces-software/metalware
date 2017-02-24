@@ -6,6 +6,7 @@
     Allow from $_ALCES_PRVNETWORK/$_ALCES_PRVNETMASK
 </Directory>
 <Directory /var/lib/metalware/rendered/>
+    Options Indexes MultiViews FollowSymlinks
     AllowOverride None
     Require all granted
     Order Allow,Deny
