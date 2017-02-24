@@ -113,6 +113,7 @@ module Alces
           end
 
           def parse(json, template_parameters={})
+            template_parameters = add_default_parameters(template_parameters)
             # Skips if json is empty
             return template_parameters if json.to_s.strip.empty? or !json
             # Loads content if json is a file
@@ -131,7 +132,6 @@ module Alces
               raise e
             end
             #Returns the hash
-            template_parameters = add_default_parameters(template_parameters)
             return template_parameters
           end
 
