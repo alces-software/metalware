@@ -1,5 +1,6 @@
+#!/usr/bin/env ruby
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,21 +20,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source 'http://rubygems.org'
-source 'http://gems.alces-software.com'
+require "test/unit"
+require "../alces/stack/templater"
+  
+class TC_Templater_Combiner < Test::Unit::TestCase
+  def setup
+  
+  end
 
-group :dhcp do
-  gem 'pcap', '0.7.7'
-  gem 'net-dhcp'
+  def test_no_input
+    echo "here"
+  end
 end
-
-group :booter do
-  gem 'ruby-ip'
-end
-
-group :test do
-  gem 'test-unit'
-end
-
-gem 'alces-tools', '>= 0.13.0'
-gem 'highline'

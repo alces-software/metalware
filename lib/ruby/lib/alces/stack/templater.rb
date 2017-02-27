@@ -45,23 +45,8 @@ module Alces
           end
         end
 
-        def replace_hash(template, count, template_parameters={})
-          raise "Templater loop count reached. Check parameters for infinite loops" if count > 100
-          tags = template.scan(/<%=[ \w\*\+\-\/\%\(\)\=\!]*%>/)
-          return template if tags.length == 0
-          error_tag = false
-          error_message  = "Could not find value(s) for:"
-          tags.each do |t|
-            t.scan(/_*[[:alpha:]][[:alnum:]_]*/) do |word|
-              if !template_parameters.has_key?(word.to_sym)
-                error_tag = true
-                error_message << "\n  " << t
-                break
-              end
-            end
-          end
-          raise error_message if error_tag
-          return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), count + 1, template_parameters)
+        def replace_hash(template, template_parameters={})
+          return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), template_parameters)
         end
 
         def show_options(options={})
@@ -95,6 +80,16 @@ module Alces
             puts "Include additional parameters in the JSON object. In the case of conflicts the priority order is: iterator parameters (if applicable), json inputs, then command line inputs"
             puts
           end
+        end
+      end
+
+      class Combiner 
+        def initialize(nodename, index, json, hash={})
+          return hash
+        end
+
+        def JOSN_to_hash(json)
+
         end
       end
       
