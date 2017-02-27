@@ -27,47 +27,62 @@ module Alces
   module Stack
     module Templater
       class Handler
-        class << self
-          def file(filename, template_parameters={})
-            File.open(filename.chomp, 'r') do |f|
-              return replace_hash(f.read, 0, template_parameters)
-            end
+        def file(filename, template_parameters={})
+          File.open(filename.chomp, 'r') do |f|
+            return replace_erb(f.read, 0, template_parameters)
           end
+        end
 
-          def save(template_file, save_file, template_parameters={})
-            File.open(save_file.chomp, "w") do |f|
-              f.puts file(template_file, template_parameters)
-            end
+        def save(template_file, save_file, template_parameters={})
+          File.open(save_file.chomp, "w") do |f|
+            f.puts file(template_file, template_parameters)
           end
+        end
 
-          def append(template_file, append_file, template_parameters={})
-            File.open(append_file.chomp, 'a') do |f|
-              f.puts file(template_file, template_parameters)
-            end
+        def append(template_file, append_file, template_parameters={})
+          File.open(append_file.chomp, 'a') do |f|
+            f.puts file(template_file, template_parameters)
           end
+        end
 
-          def replace_hash(template, template_parameters={})
-            return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), template_parameters)
-          end
+        def replace_erb(template, template_parameters={})
+          return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+        end
 
-          def JSON_string_to_hash(json)
-            return {} if !json or json.empty?
-            return JSON.parse(json,:symbolize_names => true)
-          end
+        def JSON_string_to_hash(json)
+          return {} if !json or json.empty?
+          return JSON.parse(json,:symbolize_names => true)
         end
       end
 
       class Combiner < Handler
         def initialize(nodename, index, json, hash={})
-          @combined_hash = Hash.new
+          @combined_hash = {hostip: `hostname -i`.chomp}
           @combined_hash.merge!(hash)
-          @combined_hash.merge!(Handler.JSON_string_to_hash(json))
+          @combined_hash.merge!(JSON_string_to_hash(json))
           @combined_hash[:nodename] = nodename if nodename and !nodename.to_s.empty?
           @combined_hash[:index] = index if index and !index.to_s.empty?
+          @parsed_hash = parse_combined_hash
+        end
+
+        def parse_combined_hash
+          current_hash = Hash.new.merge(@combined_hash)
+          current_str = current_hash.to_s
+          old_str = ""
+          while old_str != current_str
+            old_str = "#{current_str}"
+            current_str = replace_erb(current_str, current_hash)
+            current_hash = eval(current_str)
+          end
+          return current_hash
         end
 
         def get_combined_hash
           return @combined_hash
+        end
+
+        def get_parse_hash
+          return @parsed_hash
         end
       end
       
