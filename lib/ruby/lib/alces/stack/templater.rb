@@ -26,70 +26,48 @@ require "json"
 module Alces
   module Stack
     module Templater
-      class << self
-        def file(filename, template_parameters={})
-          File.open(filename.chomp, 'r') do |f|
-            return replace_hash(f.read, 0, template_parameters)
-          end
-        end
-
-        def save(template_file, save_file, template_parameters={})
-          File.open(save_file.chomp, "w") do |f|
-            f.puts file(template_file, template_parameters)
-          end
-        end
-
-        def append(template_file, append_file, template_parameters={})
-          File.open(append_file.chomp, 'a') do |f|
-            f.puts file(template_file, template_parameters)
-          end
-        end
-
-        def replace_hash(template, template_parameters={})
-          return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), template_parameters)
-        end
-
-        def show_options(options={})
-          options[:hostip] = "IP address of host node"
-          # Flags
-          none_flag = true
-          print_json = false
-          print_iterator = false
-          puts
-          puts "The following command line parameters are replaced by ERB:"
-          options.each do |key, value|
-            if key.to_s == 'JSON' and value.to_s == 'true'
-              print_json = true
-            elsif key.to_s == 'ITERATOR' and value.to_s == 'true'
-              print_iterator = true
-            else
-              none_flag = false
-              puts "    <%= #{key} %> : #{value}"
+      class Handler
+        class << self
+          def file(filename, template_parameters={})
+            File.open(filename.chomp, 'r') do |f|
+              return replace_hash(f.read, 0, template_parameters)
             end
           end
-          puts "    (none)" if none_flag
-          puts
-          if print_iterator
-            puts "When iterating over a node group, the following is replaced:"
-            puts "    <%= nodename %> : The node name from the group"
-            puts "    <%= index %> : The index in the group"
-            puts "See ERB documentation for template algebra to use on 'index'"
-            puts
+
+          def save(template_file, save_file, template_parameters={})
+            File.open(save_file.chomp, "w") do |f|
+              f.puts file(template_file, template_parameters)
+            end
           end
-          if print_json
-            puts "Include additional parameters in the JSON object. In the case of conflicts the priority order is: iterator parameters (if applicable), json inputs, then command line inputs"
-            puts
+
+          def append(template_file, append_file, template_parameters={})
+            File.open(append_file.chomp, 'a') do |f|
+              f.puts file(template_file, template_parameters)
+            end
+          end
+
+          def replace_hash(template, template_parameters={})
+            return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), template_parameters)
+          end
+
+          def JSON_string_to_hash(json)
+            return {} if !json or json.empty?
+            return JSON.parse(json,:symbolize_names => true)
           end
         end
       end
 
-      class Combiner 
+      class Combiner < Handler
         def initialize(nodename, index, json, hash={})
-          return hash
+          @combined_hash = Hash.new
+          @combined_hash.merge!(hash)
+          @combined_hash.merge!(Handler.JSON_string_to_hash(json))
+          @combined_hash[:nodename] = nodename if nodename and !nodename.to_s.empty?
+          @combined_hash[:index] = index if index and !index.to_s.empty?
         end
 
-        def JOSN_to_hash(json)
-
+        def get_combined_hash
+          return @combined_hash
         end
       end
       
@@ -165,6 +143,41 @@ module Alces
           return template if File.file?(template)
           return template_erb if File.file?(template_erb)
           raise "Could not find template file: " << copy
+        end
+      end
+
+      class Options
+        def show_options(options={})
+          options[:hostip] = "IP address of host node"
+          # Flags
+          none_flag = true
+          print_json = false
+          print_iterator = false
+          puts
+          puts "The following command line parameters are replaced by ERB:"
+          options.each do |key, value|
+            if key.to_s == 'JSON' and value.to_s == 'true'
+              print_json = true
+            elsif key.to_s == 'ITERATOR' and value.to_s == 'true'
+              print_iterator = true
+            else
+              none_flag = false
+              puts "    <%= #{key} %> : #{value}"
+            end
+          end
+          puts "    (none)" if none_flag
+          puts
+          if print_iterator
+            puts "When iterating over a node group, the following is replaced:"
+            puts "    <%= nodename %> : The node name from the group"
+            puts "    <%= index %> : The index in the group"
+            puts "See ERB documentation for template algebra to use on 'index'"
+            puts
+          end
+          if print_json
+            puts "Include additional parameters in the JSON object. In the case of conflicts the priority order is: iterator parameters (if applicable), json inputs, then command line inputs"
+            puts
+          end
         end
       end
     end
