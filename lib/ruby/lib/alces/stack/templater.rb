@@ -29,7 +29,7 @@ module Alces
       class Handler
         def file(filename, template_parameters={})
           File.open(filename.chomp, 'r') do |f|
-            return replace_erb(f.read, 0, template_parameters)
+            return replace_erb(f.read, template_parameters)
           end
         end
 
@@ -69,12 +69,32 @@ module Alces
           current_hash = Hash.new.merge(@combined_hash)
           current_str = current_hash.to_s
           old_str = ""
+          count = 0
           while old_str != current_str
+            count += 1
+            raise LoopErbError if count > 10
             old_str = "#{current_str}"
             current_str = replace_erb(current_str, current_hash)
             current_hash = eval(current_str)
           end
           return current_hash
+        end
+
+        class LoopErbError < StandardError 
+          def initialize(msg="Input hash may contains infinite recursive erb")
+            super
+          end
+        end
+
+        def file (filename, template={})
+          raise HashInputError if !template.empty?
+          super(filename, @parsed_hash)
+        end
+
+        class HashInputError < StandardError
+          def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
+            super
+          end
         end
 
         def get_combined_hash

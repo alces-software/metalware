@@ -109,6 +109,27 @@ class TC_Templater_Combiner < Test::Unit::TestCase
   end
 
   def test_parsed_hash
-    
+    # No erb
+    assert_equal(@basic_hash, Alces::Stack::Templater::Combiner.new("","","",@basic_hash).get_parse_hash, "Changed hash if no erb is present")
+    # Single erb replace
+    @basic_hash[:replace_with_hostip] = "<%= hostip %>"
+    correct_hash = Hash.new.merge(@basic_hash)
+    correct_hash[:replace_with_hostip] = correct_hash[:hostip]
+    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new("","","",@basic_hash).get_parse_hash, "Did not correctly replace a single erb")
+    # Chain erb replace
+    @basic_hash[:double_replace] = "<%= replace_with_hostip %>"
+    @basic_hash[:triple_replace] = "<%= double_replace %>"
+    correct_hash[:double_replace] = correct_hash[:hostip]
+    correct_hash[:triple_replace] = correct_hash[:hostip]
+    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new("","","",@basic_hash).get_parse_hash, "Did not correctly replace a single erb")
+    # Recursion error
+    @basic_hash[:recursion_error] = "<%= recursion_error %>a"
+    assert_raise Alces::Stack::Templater::Combiner::LoopErbError do Alces::Stack::Templater::Combiner.new("","","",@basic_hash) end
+  end
+
+  def test_file
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil,nil,nil).file("fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil,nil,nil).save("fake.txt", "fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil,nil,nil).append("fake.txt", "fake.txt", @basic_hash) end
   end
 end
