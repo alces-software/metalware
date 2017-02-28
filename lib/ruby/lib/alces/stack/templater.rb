@@ -56,14 +56,14 @@ module Alces
       end
 
       class Combiner < Handler
-        def initialize(nodename, index, json, hash={})
+        def initialize(json, hash={})
           @combined_hash = {hostip: `hostname -i`.chomp}
           @combined_hash.merge!(hash)
           @combined_hash.merge!(JSON_string_to_hash(json))
-          @combined_hash[:nodename] = nodename if nodename and !nodename.to_s.empty?
-          @combined_hash[:index] = index if index and !index.to_s.empty?
           @parsed_hash = parse_combined_hash
         end
+        attr_reader :combined_hash
+        attr_reader :parsed_hash
 
         def parse_combined_hash
           current_hash = Hash.new.merge(@combined_hash)
@@ -96,71 +96,31 @@ module Alces
             super
           end
         end
-
-        def get_combined_hash
-          return @combined_hash
-        end
-
-        def get_parse_hash
-          return @parsed_hash
-        end
-      end
-      
-      class JSON_Templater
-        class << self
-          def file(filename, json, template_parameters={})
-            Alces::Stack::Templater.file(filename, parse(json, template_parameters))
-          end
-
-          def save(filename, save_file, json, template_parameters={})
-            Alces::Stack::Templater.save(filename, save_file, parse(json, template_parameters))
-          end
-
-          def append(filename, append_file, json, template_parameters={})
-            Alces::Stack::Templater.append(filename, append_file, parse(json, template_parameters))
-          end
-
-          def parse(json, template_parameters={})
-            template_parameters = add_default_parameters(template_parameters)
-            # Skips if json is empty
-            return template_parameters if json.to_s.strip.empty? or !json
-            # Loads content if json is a file
-            if File.file?(json)
-              json = File.read(json)
-            elsif /\A(\/?\w)*(.\w*)?\Z/ =~ json
-              raise "Could not find file: " << json
-            end
-            #Extracts the JSON data
-            begin
-              JSON.load(json).each do |key, value|
-                template_parameters[key.to_sym] = value
-              end
-            rescue => e
-              STDERR.puts "ERROR: Could not pass JSON object, insure keys are also strings"
-              raise e
-            end
-            #Returns the hash
-            return template_parameters
-          end
-
-          def add_default_parameters(template_parameters={})
-            template_parameters[:hostip] = `hostname -i`.chomp if !template_parameters.key?(:hostip)
-            return template_parameters
-          end
-        end
       end
 
       class Finder
         def initialize(default_location)
           @default_location = default_location
         end
-
-        def get_default
-          return @default_location
+       
+        def template=(new_template)
+          @template = find_template(new_template)
+          @filename_ext = @template.scan(/\.?[\w\_\-]+\.?[\w\_\-]*\Z/)[0].chomp
+          @filename = @filename_ext.scan(/\.?[\w\_\-]+/)[0].chomp
         end
 
-        def find(template)
-          copy = template
+        attr_reader :template
+        attr_reader :filename
+        attr_reader :filename_ext
+
+        def filename_diff_ext(ext)
+          ext = ".#{ext}" if ext[0] != "."
+          return "#{@filename}#{ext}"
+        end
+
+        def find_template(template)
+          copy = "#{template}"
+          template.gsub!(/\/\//,"/")
           template = "/" << template if template[0] != '/'
           template_erb = "#{template}.erb"
           # Checks if it's a full path to the default folder
@@ -177,7 +137,14 @@ module Alces
           # Checks the file structure
           return template if File.file?(template)
           return template_erb if File.file?(template_erb)
-          raise "Could not find template file: " << copy
+          raise TemplateNotFound.new(copy)
+        end
+
+        class TemplateNotFound < StandardError
+          def intialize(template)
+            msg = "Could not find template file: " << template
+            super
+          end
         end
       end
 

@@ -33,7 +33,8 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @template = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(template)
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
+          @finder.template = template
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -54,6 +55,10 @@ module Alces
           return get_file_name if @ran_from_boot
         end
 
+        def save(options={})
+          handler = Alces::Stack::Templater::Combiner.new()
+        end
+
         def save(json)
           hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
           save_file = get_file_name
@@ -62,9 +67,7 @@ module Alces
         end
 
         def get_file_name
-          name = @template.scan(/\.?\w+\.?\w*\Z/)
-          raise "Could not determine save file name from template: " << @template if name.size != 1
-          return "/var/lib/metalware/rendered/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks" << @save_append
+          return "/var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks") << @save_append
         end
 
         def puts_template(json)
