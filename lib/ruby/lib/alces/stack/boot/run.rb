@@ -129,8 +129,10 @@ module Alces
         end
 
         def kickstart_teardown
+          # Deletes old signal files
           delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
-          Alces::Stack::Iterator.run(@group, delete_lambda, {})
+          Alces::Stack::Iterator.run(@group, delete_lambda, {nodename: @template_parameters[:nodename]})
+          # 
           @found_nodes = Hash.new
           lambda = -> (options) {
             if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
@@ -139,6 +141,7 @@ module Alces
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
               `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
               `rm -f /var/lib/metalware/rendered/ks/#{@kickstart_name}.#{options[:nodename]} 2>/dev/null`
+              `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
             elsif !@found_nodes[options[:nodename]]
               @kickstart_teardown_exit_flag = true
             end
@@ -148,7 +151,7 @@ module Alces
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
             sleep 30
-            Alces::Stack::Iterator.run(@group, lambda, {})
+            Alces::Stack::Iterator.run(@group, lambda, {nodename: @template_parameters[:nodename]})
           end
           puts "Found all nodes"
           exit 0
