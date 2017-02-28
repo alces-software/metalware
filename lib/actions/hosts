@@ -1,3 +1,10 @@
+<<DOC
+: '
+: NAME: hosts
+: SYNOPSIS: Modifies the host file
+: VERSION: 1.0.0
+: '
+DOC
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,23 +26,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+# Execute as ruby script if we're evaluating under bash
+if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
 
-module Alces
-  module Stack
-    class Nodes
-      def initialize(gender, &block)
-        @gender = gender
-        raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
-        yield self if !block.nil?
-      end
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
-      def each(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each(&block)
-      end
+require 'rubygems'
+require 'bundler/setup'
 
-      def each_with_index(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each_with_index(&block)
-      end
-    end
-  end
-end
+require 'alces/stack/hosts'
+
+Alces::Stack::Hosts::CLI.execute if $0 == __FILE__

@@ -25,14 +25,14 @@ require "alces/stack/templater"
 
 module Alces
   module Stack
-    module Boot
+    module Kickstart
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal boot'
-        description "Creates the boot files for the node(s)"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
+        name 'metal kickstart'
+        description "Renders kickstart templates"
+        log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
         option  :nodename,
                 'Node name to be modified',
@@ -50,23 +50,19 @@ module Alces
                 default: false
 
         option  :template,
-                'Specify template',
+                'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/boot/install.erb"
+                default: "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
+
+        option  :save_append,
+                'String to append to end of save file',
+                '--save-append',
+                default: ""
 
         flag    :template_options,
                 'Show templating options',
                 '--template-options',
                 default: false
-
-        option  :kernel_append,
-                'Specify value for kernel append in template. Check --template-options',
-                '--kernelappendoptions',
-                default: ""
-
-        option  :kickstart,
-                'Renders the kickstart template if include. Deletes the file at the end',
-                '-k', '--kickstart'
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
@@ -83,11 +79,9 @@ module Alces
 
         def show_template_options
           options = {
-            :nodename => "Value specified by --node-name",
-            :kernelappendoptions => "Value specified by --kernelappendoptions",
-            :kickstart => "Determined from --kickstart (required) and nodename",
-            :JSON => true,
-            :ITERATOR => true
+            JSON: true,
+            ITERATOR: true,
+            hostip: "IP address of host node"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -96,14 +90,14 @@ module Alces
         def execute
           setup_signal_handler
           show_template_options if template_options
-          Alces::Stack::Boot.run!(
+
+          Alces::Stack::Kickstart.run!(template, 
               nodename: nodename,
               group: group,
-              template: template,
-              kernel_append: kernel_append,
               dry_run_flag: dry_run_flag,
               json: json,
-              kickstart: kickstart
+              save_append: save_append,
+              ran_from_boot: false
             )
         end
       end

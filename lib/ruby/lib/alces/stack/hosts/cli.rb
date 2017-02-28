@@ -25,23 +25,28 @@ require "alces/stack/templater"
 
 module Alces
   module Stack
-    module Boot
+    module Hosts
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal boot'
-        description "Creates the boot files for the node(s)"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
+        name 'metal hosts'
+        description "Modifies the hosts file, modifier flag (e.g. --add) is required"
+        log_to File.join(Alces::Stack.config.log_root,'alces-node-hosts.log')
 
         option  :nodename,
                 'Node name to be modified',
                 '-n', '--node-name',
                 default: false
 
-        option  :group,
-                'Specify a gender group to run over',
+        option  :nodegroup,
+                'Node group to be modified, overrides --node-name',
                 '-g', '--node-group',
+                default: false
+
+        flag    :add_flag,
+                'Adds a new entry to /etc/hosts',
+                '-a', '--add',
                 default: false
 
         option  :json,
@@ -50,23 +55,14 @@ module Alces
                 default: false
 
         option  :template,
-                'Specify template',
+                'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/boot/install.erb"
+                default: "#{ENV['alces_BASE']}/etc/templates/hosts/compute.erb"
 
         flag    :template_options,
                 'Show templating options',
                 '--template-options',
                 default: false
-
-        option  :kernel_append,
-                'Specify value for kernel append in template. Check --template-options',
-                '--kernelappendoptions',
-                default: ""
-
-        option  :kickstart,
-                'Renders the kickstart template if include. Deletes the file at the end',
-                '-k', '--kickstart'
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
@@ -83,11 +79,9 @@ module Alces
 
         def show_template_options
           options = {
-            :nodename => "Value specified by --node-name",
-            :kernelappendoptions => "Value specified by --kernelappendoptions",
-            :kickstart => "Determined from --kickstart (required) and nodename",
-            :JSON => true,
-            :ITERATOR => true
+            JSON: true,
+            ITERATOR: true,
+            nodename: "Value specified by --node-name"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -96,14 +90,13 @@ module Alces
         def execute
           setup_signal_handler
           show_template_options if template_options
-          Alces::Stack::Boot.run!(
-              nodename: nodename,
-              group: group,
-              template: template,
-              kernel_append: kernel_append,
+
+          Alces::Stack::Hosts.run!(template, 
               dry_run_flag: dry_run_flag,
-              json: json,
-              kickstart: kickstart
+              add_flag: add_flag,
+              nodename: nodename,
+              nodegroup: nodegroup,
+              json: json
             )
         end
       end
