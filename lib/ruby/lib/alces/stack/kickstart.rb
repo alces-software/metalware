@@ -19,22 +19,21 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require 'alces/stack/kickstart/cli'
+require 'alces/stack/kickstart/run'
 
 module Alces
   module Stack
-    class Nodes
-      def initialize(gender, &block)
-        @gender = gender
-        raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
-        yield self if !block.nil?
-      end
+    module Kickstart
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
 
-      def each(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each(&block)
-      end
-
-      def each_with_index(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each_with_index(&block)
+        def save_file_name(filename, nodename)
+          filename = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(filename)
+          
+        end
       end
     end
   end

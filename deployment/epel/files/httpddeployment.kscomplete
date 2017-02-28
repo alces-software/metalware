@@ -1,0 +1,4 @@
+<?php
+$cmd="touch /var/lib/metalware/cache/metalwarebooter." . $_GET['name'];
+exec($cmd);
+?>
