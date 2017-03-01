@@ -51,23 +51,19 @@ module Alces
             lambda = -> (json) { save(json) }
           end
 
-          Alces::Stack::Iterator.new(@group, lambda, @json) if !lambda.nil?
+          Alces::Stack::Iterator.run(@group, lambda)
           return get_file_name if @ran_from_boot
-        end
-
-        def save(options={})
-          handler = Alces::Stack::Templater::Combiner.new()
-        end
-
-        def save(json)
-          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
-          save_file = get_file_name
-          save_file = save_file << "." << hash[:nodename] if @group
-          Alces::Stack::Templater.save(@template, save_file, hash)
         end
 
         def get_file_name
           return "/var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks") << @save_append
+        end
+
+        def puts_template(template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          puts "KICKSTART TEMPLATE"
+          puts "Hash:" << combiner.parsed_hash
+          puts
         end
 
         def puts_template(json)

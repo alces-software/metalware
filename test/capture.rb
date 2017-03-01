@@ -20,18 +20,17 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-`export alces_Base=../`
-f = File.open("/bin/nodeattr","w")
-f.write("#!/bin/bash
-if [ -z $2 ]
- then
-   exit 1
-elif [ $2 == \"nodes\" ]
- then
-  echo \"node1,node2,node3\"
-  exit 0
-fi
-exit 1
-")
-f.chmod(700)
-f.close
+raise "alces_BASE has not been set in ENV" if !ENV['alces_BASE']
+$LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
+
+require "test/unit"
+require "alces/stack/capture"
+
+class TC_Capture < Test::Unit::TestCase
+  def test_capture
+    capture = Alces::Stack::Capture.stdout do puts "Captured" end
+    puts "reset" 
+    assert(!capture.include?("reset"), "Capture has not reset standard out")
+    assert(capture.include?("Captured"), "Capture did not capture required text")
+  end
+end

@@ -51,17 +51,17 @@ module Alces
         end
 
         def each(&block)
-          run_nodeattr.gsub("\n","").split(',').each(&block)
+          run_nodeattr.each(&block)
         end
 
         def each_with_index(&block)
-          run_nodeattr.gsub("\n","").split(',').each_with_index(&block)
+          run_nodeattr.each_with_index(&block)
         end
 
         def run_nodeattr
           n = `nodeattr -c #{@gender}`
           raise GenderError if n.empty?
-          return n
+          return n.gsub("\n","").split(',')
         end
       end
 

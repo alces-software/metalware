@@ -24,4 +24,16 @@ raise "alces_BASE has not been set in ENV" if !ENV['alces_BASE']
 $LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
 
 require "test/unit"
-require "alces/stack/templater"
+require "alces/stack/kickstart"
+require "alces/stack/capture"
+
+class TC_Kickstart < Test::Unit::TestCase
+  def setup
+    @template = "/tmp/template." << Process.pid
+    File.write(@template, "Template\n<%= nodename %>\n<%= index %>")
+  end
+
+  def teardown
+    File.delete(@template) if File.exist?(@template)
+  end
+end

@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,20 +19,23 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source 'http://rubygems.org'
-
-group :dhcp do
-  gem 'pcap', '0.7.7', path: "../lib/ruby/vendor/cache"
-  gem 'net-dhcp', '1.1.1', path: "../lib/ruby/vendor/cache"
+require "stringio"
+module Alces
+  module Stack
+    module Capture
+      class << self
+        def stdout
+          begin
+            old_stdout = $stdout
+            new_stdout = StringIO.new('','w')
+            $stdout = new_stdout
+            yield
+          ensure
+            $stdout = old_stdout
+          end
+          return new_stdout.string
+        end
+      end
+    end
+  end
 end
-
-group :booter do
-  gem 'ruby-ip', '0.9.1', path: "../lib/ruby/vendor/cache"
-end
-
-group :test do
-  gem 'test-unit'
-end
-
-gem 'alces-tools', '0.13.0', path: "../lib/ruby/vendor/cache"
-gem 'highline', '1.16.13', path: "../lib/ruby/vendor/cache"
