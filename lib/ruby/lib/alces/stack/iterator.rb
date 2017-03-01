@@ -20,33 +20,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'alces/stack/templater'
-require 'alces/stack/nodes'
 
 module Alces
   module Stack
-    class Iterator
-      def initialize(gender, lambda, json)
-        if !gender
-          return lambda.call(json)
-        else
-          return iterate(gender, lambda, json)
-        end
-      end
-
-      def iterate(gender, lambda, json)
-        json_hash = Alces::Stack::Templater::JSON_Templater.parse(json)
-        output = Array.new
-        Nodes.new(gender).each_with_index do |nodename, index|
-          json_hash[:nodename] = nodename
-          json_hash[:index] = index
-          output << lambda.call(json_hash.to_json)
-        end
-        return output
-      end
-
+    module Iterator
       class << self
         def run(gender, lambda, options={})
-          if !gender
+          if !gender or gender.to_s.empty?
             return lambda.call(options)
           else
             return iterate(gender, lambda, options)
@@ -58,9 +38,36 @@ module Alces
           Nodes.new(gender).each_with_index do |nodename, index|
             options[:nodename] = nodename
             options[:index] = index
-            output << lambda.call(options)
+            output << Hash.new.merge(lambda.call(options))
           end
           return output
+        end
+      end
+
+      class Nodes
+        def initialize(gender, &block)
+          @gender = gender
+          yield self if !block.nil?
+        end
+
+        def each(&block)
+          run_nodeattr.gsub("\n","").split(',').each(&block)
+        end
+
+        def each_with_index(&block)
+          run_nodeattr.gsub("\n","").split(',').each_with_index(&block)
+        end
+
+        def run_nodeattr
+          n = `nodeattr -c #{@gender}`
+          raise GenderError if n.empty?
+          return n
+        end
+      end
+
+      class GenderError < StandardError
+        def initialize(msg="Could not find gender group")
+          super
         end
       end
     end

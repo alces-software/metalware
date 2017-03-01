@@ -21,6 +21,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 raise "alces_BASE has not been set in ENV" if !ENV['alces_BASE']
+$LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
 
 require "test/unit"
-require_relative "#{ENV['alces_BASE']}/lib/ruby/lib/alces/stack/templater"
+require "alces/stack/templater"

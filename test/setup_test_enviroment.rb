@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,23 +20,18 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-
-module Alces
-  module Stack
-    class Nodes
-      def initialize(gender, &block)
-        @gender = gender
-        raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
-        yield self if !block.nil?
-      end
-
-      def each(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each(&block)
-      end
-
-      def each_with_index(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each_with_index(&block)
-      end
-    end
-  end
-end
+`export alces_Base=../`
+f = File.open("/bin/nodeattr","w")
+f.write("#!/bin/bash
+if [ -z $2 ]
+ then
+   exit 1
+elif [ $2 == \"nodes\" ]
+ then
+  echo \"node1,node2,node3\"
+  exit 0
+fi
+exit 1
+")
+f.chmod(700)
+f.close
