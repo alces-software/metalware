@@ -38,7 +38,7 @@ module Alces
           Nodes.new(gender).each_with_index do |nodename, index|
             options[:nodename] = nodename
             options[:index] = index
-            output << Hash.new.merge(lambda.call(options))
+            output << Marshal.load(Marshal.dump(lambda.call(options)))
           end
           return output
         end

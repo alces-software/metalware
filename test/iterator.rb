@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #

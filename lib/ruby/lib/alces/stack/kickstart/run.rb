@@ -46,33 +46,34 @@ module Alces
 
         def run!
           if @dry_run_flag
-            lambda = -> (json) { puts_template(json) }
+            lambda = -> (template_parameters) { puts_template(template_parameters) }
           else
-            lambda = -> (json) { save(json) }
+            lambda = -> (template_parameters) { save_template(template_parameters) }
           end
 
           Alces::Stack::Iterator.run(@group, lambda)
-          return get_file_name if @ran_from_boot
+          return get_save_file if @ran_from_boot
         end
 
-        def get_file_name
-          return "/var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks") << @save_append
+        def get_save_file(nodename)
+          str = "/var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks")
+          str << "." << @save_append if !@save_append.to_s.empty? and @save_append
+          str << "." << nodename.to_s if !@group.to_s.empty? and @group
+          return str
+        end
+
+        def save_template(template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner.save(@finder.template, get_save_file(combiner.parsed_hash[:nodename]))
         end
 
         def puts_template(template_parameters)
           combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
           puts "KICKSTART TEMPLATE"
-          puts "Hash:" << combiner.parsed_hash
-          puts
-        end
-
-        def puts_template(json)
-          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
-          save_file = get_file_name
-          save_file = save_file << hash[:nodename] if @group
-          puts "KICKSTART TEMPLATE"
-          puts "Would save to: " << "." << save_file << "\n\n"
-          puts Alces::Stack::Templater.file(@template, hash)
+          puts "Hash:" << combiner.parsed_hash.to_s
+          puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])
+          puts "Template:"
+          puts combiner.file(@finder.template)
         end
       end
     end

@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,17 +19,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-raise "alces_BASE has not been set in ENV" if !ENV['alces_BASE']
-$LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/test"
+require 'rubygems'
+require 'bundler/setup'
+Bundler.setup(:default)
+require 'test/unit'
 
-require "test/unit"
-require "alces/stack/capture"
-
-class TC_Capture < Test::Unit::TestCase
-  def test_capture
-    capture = Alces::Stack::Capture.stdout do puts "Captured" end
-    puts "\nreset" 
-    assert(!capture.include?("\nreset"), "Capture has not reset standard out")
-    assert(capture.include?("Captured"), "Capture did not capture required text")
-  end
-end
+require 'capture'
+require 'iterator'
+require 'kickstart'
+require 'templater/combiner'
+require 'templater/finder'

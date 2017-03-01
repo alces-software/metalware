@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,7 +25,7 @@ $LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
 require "test/unit"
 require "alces/stack/templater"
 
-class TC_Templater_Combiner < Test::Unit::TestCase
+class TC_Templater_Finder < Test::Unit::TestCase
   def setup
     @default_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/".gsub!(/\/\//,"/")
     @default_boot = "#{ENV['alces_BASE']}/etc/templates/boot/".gsub!(/\/\//,"/")
