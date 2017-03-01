@@ -80,7 +80,7 @@ mkdir -p /var/lib/metalware/cache/
 chmod a+rw /var/lib/metalware/cache
 [[ -d "${target}" ]] || mkdir -p "${target}"
 cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${source}/deployment" "${target}"
-if [ $alces_TEST ]; then
+if $alces_TEST; then
     cp -R "${source}/test" "${target}"
 fi
 say_done $?
