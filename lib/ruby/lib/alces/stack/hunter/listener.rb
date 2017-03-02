@@ -133,7 +133,7 @@ module Alces
 
         def add_dhcp_entry(name, hwaddr, fixedip)
           #Finds the host machine ip address
-          hostip = `ifconfig | grep -A1 #{@interface_name} | grep inet | tr -ds "[:alpha:]" ' ' | cut -d' ' -f2`
+          hostip = `hostname -i`.chomp
           template_parameters = {
             nodename: name.chomp,
             hwaddr: hwaddr.chomp,
