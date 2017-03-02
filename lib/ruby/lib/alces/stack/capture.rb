@@ -27,13 +27,25 @@ module Alces
         def stdout
           begin
             old_stdout = $stdout
-            new_stdout = StringIO.new('','w')
+            new_stdout = StringIO.new
             $stdout = new_stdout
             yield
           ensure
             $stdout = old_stdout
           end
           return new_stdout.string
+        end
+
+        def stderr
+          begin
+            old_stderr = $stderr
+            new_stderr = StringIO.new
+            $stderr = new_stderr
+            yield
+          ensure
+            $stderr = old_stderr
+          end
+          return new_stderr.string
         end
       end
     end

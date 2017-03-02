@@ -20,15 +20,39 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/test"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
+
 require 'rubygems'
 require 'bundler/setup'
 Bundler.setup(:default)
 require 'test/unit'
 
-require 'capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'templater-test/combiner-test'
-require 'templater/finder-test'
+require 'alces/stack/capture'
+
+class TC_Hosts < Test::Unit::TestCase
+  def setup
+    `cp /etc/hosts /etc/hosts.copy.#{Process.pid}`
+    @base_hosts = File.read("/etc/hosts")
+    @bash = File.read("/etc/profile.d/alces-metalware.sh")
+    @template = "test.erb"
+    @template_str = "\nInsert into host <%= nodename %>"
+    File.write("#{ENV['alces_BASE']}/etc/templates/hosts/#{@template}", @template_str)
+
+  end
+
+  def test_error_inputs
+    output = Alces::Stack::Capture.stdout do puts `#{@bash} metal hosts 2>&1` end
+    assert_equal("ERROR: Requires a node name, node group, or json\n", output, "Error expect for no nodename or group")
+    output = Alces::Stack::Capture.stdout do puts `#{@bash} metal hosts -n nodes 2>&1` end
+    assert_equal("ERROR: Could not modify hosts! No command included (e.g. --add).\nSee 'metal hosts -h'\n", output, "Ran without specifying mode")
+  end
+
+  def test_dry_run
+
+  end
+
+  def teardown
+    `mv /etc/hosts.copy.#{Process.pid} /etc/hosts`
+    `rm #{ENV['alces_BASE']}/etc/templates/hosts/#{@template}`
+  end
+end

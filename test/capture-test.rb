@@ -27,10 +27,16 @@ require "test/unit"
 require "alces/stack/capture"
 
 class TC_Capture < Test::Unit::TestCase
-  def test_capture
+  def test_stdout
     capture = Alces::Stack::Capture.stdout do puts "Captured" end
     puts "\nreset" 
     assert(!capture.include?("\nreset"), "Capture has not reset standard out")
-    assert(capture.include?("Captured"), "Capture did not capture required text")
+    assert(capture.include?("Captured"), "Capture did not capture standard out text")
   end
-end
+  def test_stderr
+    capture = Alces::Stack::Capture.err do $stderr.puts "Captured" end
+    $stderr.puts "\nreset" 
+    assert(!capture.include?("\nreset"), "Capture has not reset standard error")
+    assert(capture.include?("Captured"), "Capture did not capture standard error text")
+  end
+end 
