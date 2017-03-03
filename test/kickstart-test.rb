@@ -19,10 +19,14 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-raise "alces_BASE has not been set in ENV" if !ENV['alces_BASE']
-$LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
-require "test/unit"
+require 'rubygems'
+require 'bundler/setup'
+Bundler.setup(:default)
+require 'test/unit'
+
 require "alces/stack/kickstart"
 require "alces/stack/templater"
 require "alces/stack/capture"

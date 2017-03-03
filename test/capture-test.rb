@@ -20,10 +20,14 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-raise "alces_BASE has not been set in ENV" if !ENV['alces_BASE']
-$LOAD_PATH << "#{ENV['alces_BASE']}/lib/ruby/lib/".gsub!("//","/")
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
-require "test/unit"
+require 'rubygems'
+require 'bundler/setup'
+Bundler.setup(:default)
+require 'test/unit'
+
 require "alces/stack/capture"
 
 class TC_Capture < Test::Unit::TestCase
@@ -34,7 +38,7 @@ class TC_Capture < Test::Unit::TestCase
     assert(capture.include?("Captured"), "Capture did not capture standard out text")
   end
   def test_stderr
-    capture = Alces::Stack::Capture.err do $stderr.puts "Captured" end
+    capture = Alces::Stack::Capture.stderr do $stderr.puts "Captured" end
     $stderr.puts "\nreset" 
     assert(!capture.include?("\nreset"), "Capture has not reset standard error")
     assert(capture.include?("Captured"), "Capture did not capture standard error text")
