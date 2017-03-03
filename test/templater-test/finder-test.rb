@@ -89,5 +89,7 @@ class TC_Templater_Finder < Test::Unit::TestCase
     assert_equal("local-boot", find.filename, "Did not find filename with -")
     find.template = "local_boot"
     assert_equal("local_boot", find.filename, "Did not find filename with _")
+    assert_raise Alces::Stack::Templater::Finder::TemplateNotFound do find.template = "" end
+    assert_raise Alces::Stack::Templater::Finder::TemplateNotFound do find.template = nil end
   end
 end

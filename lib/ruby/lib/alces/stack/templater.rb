@@ -119,7 +119,11 @@ module Alces
         end
 
         def find_template(template)
-          template = template.dup
+          begin
+            template = template.dup
+          rescue StandardError
+            raise TemplateNotFound.new(template)
+          end
           copy = "#{template}"
           template.gsub!(/\/\//,"/")
           template = "/" << template if template[0] != '/'

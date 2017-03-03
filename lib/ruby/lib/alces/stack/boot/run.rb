@@ -34,7 +34,8 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(options={})
-          @template = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/boot/").find(options[:template])
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/boot/")
+          @finder.template = options[:template]
           @group = options[:group]
           @dry_run_flag = options[:dry_run_flag]
           @template_parameters = {
@@ -43,7 +44,8 @@ module Alces
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
           @json = options[:json]
           @kickstart = options[:kickstart]
-          @delete_pxe = ""
+          @to_delete = Array.new
+          @to_delete_dry_run = Array.new
         end
 
         def run!
@@ -55,44 +57,45 @@ module Alces
 
           case 
           when @dry_run_flag
-            lambda = -> (json) {puts_template(json)}
+            lambda = -> (parameter) {puts_template(parameter)}
           else
-            lambda = -> (json) {save_template(json)}
+            lambda = -> (parameter) {save_template(parameter)}
           end
 
           begin
-            Alces::Stack::Iterator.new(@group, lambda, @json)
+            Alces::Stack::Iterator.new(@template_parameters, lambda)
             kickstart_teardown if !@kickstart.to_s.empty?
             sleep
           rescue Exception => e
             teardown(e)
-          rescue Interrupt
           end
         end
 
-        def save_template(json)
-          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
-          ip=`gethostip -x #{hash[:nodename]} 2>/dev/null`
-          raise "Could not find IP address of #{hash[:nodename]}" if ip.length < 9
-          @delete_pxe << ",#{ip}"
-          save="/var/lib/tftpboot/pxelinux.cfg/#{ip}"
-          Alces::Stack::Templater.save(@template, save, hash)
+        def get_save_file(combiner)
+          ip=`gethostip -x #{combiner.parsed_hash[:nodename]} 2>/dev/null`
+          raise "Could not find IP address of #{combiner.parsed_hash[:nodename]}" if ip.length < 9
+          return "/var/lib/tftpboot/pxelinux.cfg/#{ip}".chomp
         end
 
-        def puts_template(json)
-          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
-          ip=`gethostip -x #{hash[:nodename]} 2>/dev/null`
-          raise "Could not find IP address of #{hash[:nodename]}" if ip.length < 9
-          @delete_pxe << ",#{ip}"
-          save="/var/lib/tftpboot/pxelinux.cfg/#{ip}"
+        def save_template(parameters={})
+          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          save = get_save_file(combiner)
+          @to_delete << save
+          combiner.save(@finder.template, save)
+        end
+
+        def puts_template(parameters={})
+          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          save = get_save_file(combiner)
+          @to_delete_dry_run <<  save
           puts "BOOT TEMPLATE"
           puts "Would save file to: " << save << "\n"
-          puts Alces::Stack::Templater.file(@template, hash)
+          puts combiner.file(@finder.template)
           puts
         end
 
         def run_kickstart(json)
-          # Creates the json input for kickstart]
+          # Creates the json input for kickstart
           json_new = {}
           json_new.merge!(@template_parameters)
           if json and !json.to_s.empty?
@@ -154,25 +157,25 @@ module Alces
             Alces::Stack::Iterator.run(@group, lambda, {nodename: @template_parameters[:nodename]})
           end
           puts "Found all nodes"
-          exit 0
+          return
         end
 
         def teardown(e)
-          puts "Would delete the following files:" if @dry_run_flag
-          @delete_pxe.split(',').each do |s|
-            next if s.empty?
-            if @dry_run_flag then puts "  /var/lib/tftpboot/pxelinux.cfg/#{s}"
-            else `rm -f /var/lib/tftpboot/pxelinux.cfg/#{s} 2>/dev/null`
-            end
+          tear_down_flag_dry = false
+          tear_down_flag = false
+          tear_down_flag_dry = true if @dry_run_flag and !@to_delete.empty?
+          tear_down_flag = true if !@dry_run_flag and !@to_delete_dry_run.empty?
+          puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
+          @to_delete_dry_run.each do |file| puts "  #{file}" end
+          @to_delete_dry.each do |file| `rm -f #{file}` end
+          begin
+            raise e
+          rescue Interrupt
+            raise TearDownError.new("Files created during a dry run") if tear_down_flag_dry
+            raise TearDownError.new("Files should have been saved! This was not a dry run") if tear_down_flag
           end
-          if @kickstart
-            @kickstart_files.each do |fname|
-              if @dry_run_flag then puts "  #{fname}"
-              else `rm -f #{fname} 2>/dev/null`
-              end
-            end
-          end
-          raise e
+        end
+        class TearDownError < StandardError
         end
       end
     end
