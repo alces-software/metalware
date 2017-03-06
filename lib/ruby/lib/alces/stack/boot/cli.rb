@@ -85,11 +85,9 @@ module Alces
           options = {
             :nodename => "Value specified by --node-name",
             :kernelappendoptions => "Value specified by --kernelappendoptions",
-            :kickstart => "Determined from --kickstart (required) and nodename",
-            :JSON => true,
-            :ITERATOR => true
+            :kickstart => "Determined from --kickstart (required) and nodename"
           }
-          Alces::Stack::Templater.show_options(options)
+          Alces::Stack::Templater::Options.show(options)
           exit 0
         end
 

@@ -154,36 +154,49 @@ module Alces
       end
 
       class Options
-        def show_options(options={})
-          options[:hostip] = "IP address of host node"
-          # Flags
-          none_flag = true
-          print_json = false
-          print_iterator = false
-          puts
-          puts "The following command line parameters are replaced by ERB:"
-          options.each do |key, value|
-            if key.to_s == 'JSON' and value.to_s == 'true'
-              print_json = true
-            elsif key.to_s == 'ITERATOR' and value.to_s == 'true'
-              print_iterator = true
-            else
-              none_flag = false
-              puts "    <%= #{key} %> : #{value}"
+        class << self
+          def show(options={})
+            const = {
+              hostip: "#{`hostname -i`.chomp}"
+            }
+            puts "ERB can replace template parameters with variables from 5 sources:"
+            puts "  1) yaml config files stored in [INSERT LOCATION]"
+            puts "  2) JSON input from the command line using -j"
+            puts "  3) Iterator variables when looping over a group (when applicable)"
+            puts "  4) Other command line inputs"
+            puts "  5) Constants available to all templates"
+            puts
+            puts "In the event of a conflict between the sources, the priority order is as given above."
+            puts
+            puts "The following command line parameters are replaced by ERB:"
+            none_flag = true
+            if options.keys.max_by(&:length).nil? then option_length = 0
+            else option_length = options.keys.max_by(&:length).length end
+            const_length = const.keys.max_by(&:length).length
+            if option_length > const_length then align = option_length
+            else align = const_length end
+            options.each do |key, value|
+              none_flag = false;
+              spaces = align - key.length
+              print"    <%= #{key} %> "
+              while spaces > 0
+                spaces -= 1
+                print " "
+              end
+              puts ": #{value}"
             end
-          end
-          puts "    (none)" if none_flag
-          puts
-          if print_iterator
-            puts "When iterating over a node group, the following is replaced:"
-            puts "    <%= nodename %> : The node name from the group"
-            puts "    <%= index %> : The index in the group"
-            puts "See ERB documentation for template algebra to use on 'index'"
+            puts "    (none)" if none_flag
             puts
-          end
-          if print_json
-            puts "Include additional parameters in the JSON object. In the case of conflicts the priority order is: iterator parameters (if applicable), json inputs, then command line inputs"
-            puts
+            puts "The constant value replaced by erb:"
+            const.each do |key, value|
+              spaces = align - key.length
+              print"    <%= #{key} %> "
+              while spaces > 0
+                spaces -= 1
+                print " "
+              end
+              puts ": #{value}"
+            end
           end
         end
       end

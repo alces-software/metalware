@@ -89,12 +89,11 @@ module Alces
 
         def show_template_options
           options = {
-            :hostip=>"Head node IP address",
             :nodename=>"Compute node name",
             :fixedaddr=>"Compute node IP address",
             :hwaddr=>"Compute node mac address"
           }
-          Alces::Stack::Templater.show_options(options)
+          Alces::Stack::Templater::Options.show(options)
           exit 0
         end
 

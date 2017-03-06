@@ -79,11 +79,8 @@ module Alces
 
         def show_template_options
           options = {
-            JSON: true,
-            ITERATOR: true,
-            hostip: "IP address of host node"
           }
-          Alces::Stack::Templater.show_options(options)
+          Alces::Stack::Templater::Options.show(options)
           exit 0
         end
 
