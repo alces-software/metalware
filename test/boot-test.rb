@@ -178,7 +178,7 @@ class TC_Boot < Test::Unit::TestCase
       assert_empty(`ls /var/lib/metalware/cache/`.chomp, "Cache files still exist")
       assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp, "Kickstart files still exist")
     }
-    child_lambda = lambda { Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run! }
+    child_lambda = lambda { Alces::Stack::Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run! end }
     Alces::Stack::ForkProcess.new(parent_lambda, child_lambda).run
   end
 
@@ -198,7 +198,7 @@ class TC_Boot < Test::Unit::TestCase
       assert_empty(`ls /var/lib/metalware/cache/`.chomp, "Cache files still exist")
       assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp, "Kickstart files still exist")
     }
-    child_lambda = lambda { Alces::Stack::Boot::Run.new(@input_group_kickstart).run! }
+    child_lambda = lambda { Alces::Stack::Capture.stdout do Alces::Stack::Boot::Run.new(@input_group_kickstart).run! end }
     Alces::Stack::ForkProcess.new(parent_lambda, child_lambda).run
   end
 

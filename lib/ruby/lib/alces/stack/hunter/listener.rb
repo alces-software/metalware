@@ -43,6 +43,7 @@ module Alces
           @logFilename = '/var/log/metalware/hunter.log'
           @logFile = File.open(@logFilename, "a")
           @logFile.sync = true
+          @json = options[:json]
         end
 
         def listen!
@@ -133,14 +134,12 @@ module Alces
 
         def add_dhcp_entry(name, hwaddr, fixedip)
           #Finds the host machine ip address
-          hostip = `hostname -i`.chomp
           template_parameters = {
             nodename: name.chomp,
             hwaddr: hwaddr.chomp,
-            hostip: hostip.chomp,
             fixedaddr: fixedip.chomp
           }
-          Alces::Stack::Templater.append(@templateFilename, @DHCP_filename, template_parameters)
+          Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@templateFilename, @DHCP_filename)
         end
 
         def remove_dhcp_entry(hwaddr)
