@@ -64,12 +64,12 @@ module Alces
         end
 
         def save_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new("kickstart", @json, template_parameters)
           combiner.save(@finder.template, get_save_file(combiner.parsed_hash[:nodename]))
         end
 
         def puts_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new("kickstart", @json, template_parameters)
           puts "KICKSTART TEMPLATE"
           puts "Hash:" << combiner.parsed_hash.to_s
           puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])

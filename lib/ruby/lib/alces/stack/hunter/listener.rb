@@ -139,7 +139,7 @@ module Alces
             hwaddr: hwaddr.chomp,
             fixedaddr: fixedip.chomp
           }
-          Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@templateFilename, @DHCP_filename)
+          Alces::Stack::Templater::Combiner.new("hunter", @json, template_parameters).append(@templateFilename, @DHCP_filename)
         end
 
         def remove_dhcp_entry(hwaddr)

@@ -36,6 +36,9 @@ class TC_Boot < Test::Unit::TestCase
     @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
     @template = "test.erb"
     @template_str = "Boot template, <%= nodename %>, <%= kernelappendoptions %>"
+    @template_str_kickstart = "#{template_str} <%= kickstart %>"
+    @template_kickstart = "/tmp/template.kickstart." << Process.pid.to_s
+    File.write(@template_kickstart, @template_str_kickstart)
     File.write("#{@default_template_location}#{@template}", @template_str)
     File.write("#{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}", @template_str)
     @finder = Alces::Stack::Templater::Finder.new(@default_template_location)
@@ -53,7 +56,9 @@ class TC_Boot < Test::Unit::TestCase
     }
     @input_group.merge!(@input_base)
     @input_group_kickstart = Hash.new.merge(@input_group).merge({kickstart:"test"})
+    @input_group_kickstart[:template] = @template_kickstart
     @input_nodename_kickstart = Hash.new.merge(@input_nodename).merge({kickstart:"test"})
+    @input_nodename_kickstart[:template] = @template_kickstart
     `cp /etc/hosts /etc/hosts.copy`
     `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
     `mkdir -p /var/lib/tftpboot/pxelinux.cfg/`
@@ -82,7 +87,7 @@ class TC_Boot < Test::Unit::TestCase
   def test_get_save_file
     boot = Alces::Stack::Boot::Run.new(@input_nodename)
     json = @input_nodename[:json]; @input_nodename.delete(:json)
-    combiner = Alces::Stack::Templater::Combiner.new(json, @input_nodename)
+    combiner = Alces::Stack::Templater::Combiner.new("boot", json, @input_nodename)
     save = boot.get_save_file(combiner)
     assert_equal("/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}", save, "Incorrect save file name")
   end
@@ -145,6 +150,11 @@ class TC_Boot < Test::Unit::TestCase
     boot = Alces::Stack::Boot::Run.new(@input_nodename_kickstart)
     boot.run_kickstart
     assert_equal("/var/lib/metalware/rendered/ks/test.ks.#{@input_nodename_kickstart[:nodename]}",boot.instance_variable_get(:@to_delete)[0],"Incorrect save file")
+    content = File.read("/var/lib/metalware/rendered/ks/test.ks.#{@input_nodename_kickstart[:nodename]}")
+    json = @input_nodename_kickstart[:json]
+    @input_nodename_kickstart.delete(:json)
+    correct = Alces::Stack::Combiner.new("kickstart", json, @input_nodename_kickstart).file(@template_kickstart)
+    assert_equal(correct, content, "Did not pass kickstart template correctly")
   end
 
   def test_run_kickstart_group
@@ -163,7 +173,7 @@ class TC_Boot < Test::Unit::TestCase
     parent_lambda = -> (fork, pid) {
       assert_equal(false, fork.wait_child_terminated(0.5), "metal boot has exited early")
       @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
-      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], @input_nodename_kickstart)
+      combiner = Alces::Stack::Templater::Combiner.new("boot", @input_nodename_kickstart[:json], @input_nodename_kickstart)
       output_pxe = `cat #{save_pxe}`.chomp
       correct_pxe = combiner.replace_erb(@template_str, combiner.parsed_hash)
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")
@@ -205,6 +215,7 @@ class TC_Boot < Test::Unit::TestCase
   def teardown
     `rm #{@default_template_location}#{@template}`
     `rm #{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}`
+    `rm -f #{@template_kickstart}`
     `mv /etc/hosts.copy /etc/hosts`
   end
 end

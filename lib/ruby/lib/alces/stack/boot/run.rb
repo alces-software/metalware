@@ -44,6 +44,8 @@ module Alces
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
           @json = options[:json]
           @kickstart_template = options[:kickstart]
+          @ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
+          @ks_finder.template = @kickstart_template if @kickstart_template
           @to_delete = Array.new
           @to_delete_dry_run = Array.new
         end
@@ -79,20 +81,28 @@ module Alces
         end
 
         def save_template(parameters={})
-          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          add_kickstart(parameters) if @kickstart_template
+          combiner = Alces::Stack::Templater::Combiner.new("boot", @json, parameters)
           save = get_save_file(combiner)
           @to_delete << save
           combiner.save(@finder.template, save)
         end
 
         def puts_template(parameters={})
-          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          add_kickstart(parameters) if @kickstart_template
+          combiner = Alces::Stack::Templater::Combiner.new("boot", @json, parameters)
           save = get_save_file(combiner)
           @to_delete_dry_run <<  save
           puts "BOOT TEMPLATE"
           puts "Would save file to: " << save << "\n"
           puts combiner.file(@finder.template)
           puts
+        end
+
+        def add_kickstart(parameters={})
+          ks_file = @ks_finder.filename_diff_ext("ks")
+          ks_file << "." << parameters[:nodename]
+          parameters[:kickstart] = ks_file
         end
 
         def run_kickstart
@@ -104,7 +114,7 @@ module Alces
           }
           kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
           kickstart_lambda = -> (hash) {
-            hash[:save_append] =hash[:nodename]
+            hash[:save_append] = hash[:nodename]
             return Alces::Stack::Kickstart::Run.new(@kickstart_template, hash).run!
           }
           kickstart_files = Alces::Stack::Iterator.run(@group, kickstart_lambda, kickstart_options)

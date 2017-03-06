@@ -56,14 +56,24 @@ module Alces
       end
 
       class Combiner < Handler
-        def initialize(json, hash={})
+        def initialize(action, json, hash={})
           @combined_hash = {hostip: `hostname -i`.chomp}
           @combined_hash.merge!(hash)
           @combined_hash.merge!(JSON_string_to_hash(json))
+          set_config_path(action)
+          combine_yaml
           @parsed_hash = parse_combined_hash
         end
         attr_reader :combined_hash
         attr_reader :parsed_hash
+
+        def set_config_path(action)
+
+        end
+
+        def combine_yaml
+
+        end
 
         def parse_combined_hash
           current_hash = Hash.new.merge(@combined_hash)
@@ -167,6 +177,7 @@ module Alces
             puts "  5) Constants available to all templates"
             puts
             puts "In the event of a conflict between the sources, the priority order is as given above."
+            puts "DO NOT include \'nodename\'' or \'index\' in a yaml or json input, results are undetermined"
             puts
             puts "The following command line parameters are replaced by ERB:"
             none_flag = true

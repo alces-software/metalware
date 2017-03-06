@@ -69,12 +69,12 @@ module Alces
         def add(template_parameters)
           append_file = "/etc/hosts"
           @json = "" if !@json
-          Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@finder.template, append_file)
+          Alces::Stack::Templater::Combiner.new("hosts", @json, template_parameters).append(@finder.template, append_file)
         end
 
         def puts_template(template_parameters)
           @json = "" if !@json
-          puts Alces::Stack::Templater::Combiner.new(@json, template_parameters).file(@finder.template)
+          puts Alces::Stack::Templater::Combiner.new("hosts", @json, template_parameters).file(@finder.template)
         end
       end
     end
