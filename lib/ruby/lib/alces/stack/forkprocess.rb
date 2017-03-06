@@ -32,9 +32,20 @@ module Alces
           @parent_lambda.call(self, @pid)
           Process.detach(@pid)
         else
-          @child_lambda.call
-          Kernel.exit!
+          begin
+            @child_lambda.call
+          ensure
+            Kernel.exit!
+          end
         end
+      end
+
+      def wait_child_terminated(maxtime=0)
+        start = Time.now
+        while maxtime == 0 or maxtime > Time.now - start
+          return true if @pid == Process.waitpid(@pid, Process::WNOHANG)
+        end
+        return false
       end
 
       def interrupt_child
@@ -52,9 +63,9 @@ module Alces
         def test
           parent_lambda = -> (fork, pid) {
             puts "Parent going to sleep"
-            sleep 10
-            puts "Parent awake, time to interrupt child"
+            fork.wait_child_terminated(10)
             fork.interrupt_child
+            fork.wait_child_terminated
             puts "Parent Finished"
           }
           child_lambda = lambda{

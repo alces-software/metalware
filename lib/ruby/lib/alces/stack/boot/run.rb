@@ -43,7 +43,7 @@ module Alces
           }
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
           @json = options[:json]
-          @kickstart = options[:kickstart]
+          @kickstart_template = options[:kickstart]
           @to_delete = Array.new
           @to_delete_dry_run = Array.new
         end
@@ -53,7 +53,7 @@ module Alces
           raise "Requires a node name, node group, or json input" if !@template_parameters.key?("nodename".to_sym) and !@group and !@json 
 
           #Generates kick start files if required
-          set_kickstart_template_parameter if !@kickstart.to_s.empty?
+          run_kickstart if !@kickstart_template.to_s.empty?
 
           case 
           when @dry_run_flag
@@ -63,9 +63,10 @@ module Alces
           end
 
           begin
-            Alces::Stack::Iterator.new(@template_parameters, lambda)
-            kickstart_teardown if !@kickstart.to_s.empty?
-            sleep
+            Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
+            if !@kickstart_template.to_s.empty? then kickstart_teardown; raise Interrupt
+            else sleep
+            end
           rescue Exception => e
             teardown(e)
           end
@@ -94,48 +95,32 @@ module Alces
           puts
         end
 
-        def run_kickstart(json)
-          # Creates the json input for kickstart
-          json_new = {}
-          json_new.merge!(@template_parameters)
-          if json and !json.to_s.empty?
-            json_old = JSON.parse(json)
-            json_new.merge!(json_old)
-          end
-          json_new = json_new.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
-          
-          # Sets dynamic variables in the kickstart options
-          @kickstart_options[:nodename] = json_new[:nodename] if json_new.key?("nodename".to_sym)
-          raise "No node specified for appending kickstart file" if !@kickstart_options.key?("nodename".to_sym)
-          @kickstart_options[:save_append] = "." << @kickstart_options[:nodename]
-          @kickstart_options[:json] = json_new.to_json
-          @kickstart_files << Alces::Stack::Kickstart.run!(@kickstart, @kickstart_options)
-          puts "\n" if @dry_run_flag
-        end
-
-        def set_kickstart_template_parameter
-          @kickstart = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(@kickstart)
-          @kickstart_name = @kickstart.scan(/\.?\w+\.?\w*\Z/)
-          raise "Could not determine kickstart file name: #{@kickstart}" if @kickstart_name.size != 1
-          @kickstart_name = @kickstart_name[0].scan(/\.?\w+/)[0] << ".ks"
-          @template_parameters[:kickstart] = "#{@kickstart_name}.<%= nodename %>" 
-        
-          @kickstart_options = {
+        def run_kickstart
+          kickstart_options = {
             group: false,
-            dry_run_flag:  @dry_run_flag,
-            ran_from_boot: true
+            dry_run_flag: @dry_run_flag,
+            ran_from_boot: true,
+            json: @json
           }
-          @kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
-          kickstart_lambda = -> (json) {run_kickstart(json)}
-          @kickstart_files = Array.new
-          Alces::Stack::Iterator.new(@group, kickstart_lambda, @json)
+          kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
+          kickstart_lambda = -> (hash) {
+            hash[:save_append] =hash[:nodename]
+            return Alces::Stack::Kickstart::Run.new(@kickstart_template, hash).run!
+          }
+          kickstart_files = Alces::Stack::Iterator.run(@group, kickstart_lambda, kickstart_options)
+          @to_delete_dry_run.push(*kickstart_files) if @dry_run_flag
+          @to_delete.push(*kickstart_files) if !@dry_run_flag
         end
 
         def kickstart_teardown
           # Deletes old signal files
           delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
           Alces::Stack::Iterator.run(@group, delete_lambda, {nodename: @template_parameters[:nodename]})
-          # 
+
+          # Gets the kick start template filename
+          ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
+          ks_finder.template = @kickstart_template
+
           @found_nodes = Hash.new
           lambda = -> (options) {
             if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
@@ -143,7 +128,7 @@ module Alces
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
               `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
-              `rm -f /var/lib/metalware/rendered/ks/#{@kickstart_name}.#{options[:nodename]} 2>/dev/null`
+              `rm -f /var/lib/metalware/rendered/ks/#{ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
               `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
             elsif !@found_nodes[options[:nodename]]
               @kickstart_teardown_exit_flag = true
@@ -153,7 +138,7 @@ module Alces
           puts "Looking for completed nodes"
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
-            sleep 30
+            sleep 10
             Alces::Stack::Iterator.run(@group, lambda, {nodename: @template_parameters[:nodename]})
           end
           puts "Found all nodes"
@@ -167,7 +152,7 @@ module Alces
           tear_down_flag = true if !@dry_run_flag and !@to_delete_dry_run.empty?
           puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
           @to_delete_dry_run.each do |file| puts "  #{file}" end
-          @to_delete_dry.each do |file| `rm -f #{file}` end
+          @to_delete.each do |file| `rm -f #{file}` end
           begin
             raise e
           rescue Interrupt

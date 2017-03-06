@@ -45,14 +45,15 @@ module Alces
         end
 
         def run!
+          raise "Ran from boot can only run with a single node" if @ran_from_boot and @group
           if @dry_run_flag
             lambda = -> (template_parameters) { puts_template(template_parameters) }
           else
             lambda = -> (template_parameters) { save_template(template_parameters) }
           end
 
-          Alces::Stack::Iterator.run(@group, lambda)
-          return get_save_file if @ran_from_boot
+          Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
+          return get_save_file(@template_parameters[:nodename]) if @ran_from_boot
         end
 
         def get_save_file(nodename)
