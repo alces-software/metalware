@@ -50,9 +50,9 @@ module Alces
         start = Time.now
         while maxtime == 0 or maxtime > Time.now - start
           return true if @pid == Process.waitpid(@pid, Process::WNOHANG)
-          sleep waittime
+          sleep waittime if waittime > 0
         end
-        sleep waittime
+        sleep waittime if waittime > 0
         return true if @pid == Process.waitpid(@pid, Process::WNOHANG)
         return false
       end
