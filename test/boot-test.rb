@@ -98,7 +98,7 @@ class TC_Boot < Test::Unit::TestCase
   def test_get_save_file
     boot = Alces::Stack::Boot::Run.new(@input_nodename)
     json = @input_nodename[:json]; @input_nodename.delete(:json)
-    combiner = Alces::Stack::Templater::Combiner.new("boot", json, @input_nodename)
+    combiner = Alces::Stack::Templater::Combiner.new(json, @input_nodename)
     save = boot.get_save_file(combiner)
     assert_equal("/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}", save, "Incorrect save file name")
   end
@@ -165,7 +165,7 @@ class TC_Boot < Test::Unit::TestCase
     json = @input_nodename_kickstart[:json]
     @input_nodename_kickstart.delete(:json)
     @input_nodename_kickstart[:kickstart] = "" # The kickstart parameter is not available to kickstart atm
-    correct = Alces::Stack::Templater::Combiner.new("kickstart", json, @input_nodename_kickstart).file(@template_kickstart)
+    correct = Alces::Stack::Templater::Combiner.new(json, @input_nodename_kickstart).file(@template_kickstart)
     assert_equal(correct.strip, content.chomp, "Did not pass kickstart template correctly")
   end
 
@@ -188,7 +188,7 @@ class TC_Boot < Test::Unit::TestCase
       @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
       hash_temp = Hash.new.merge(@input_nodename_kickstart)
       hash_temp[:kickstart] = "test.ks.slave04"
-      combiner = Alces::Stack::Templater::Combiner.new("boot", @input_nodename_kickstart[:json], hash_temp)
+      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
       correct_pxe = combiner.replace_erb(@template_str_kickstart, combiner.parsed_hash)
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")

@@ -52,11 +52,11 @@ module Alces
       end
 
       class Combiner < Handler
-        def initialize(action, json, hash={})
+        def initialize(json, hash={})
           @combined_hash = {hostip: `hostname -i`.chomp}
           @combined_hash.merge!(hash)
           @combined_hash.merge!(load_json_hash(json))
-          @combined_hash.merge!(load_yaml_hash(action)) if action and !action.to_s.empty?
+          @combined_hash.merge!(load_yaml_hash)
           @parsed_hash = parse_combined_hash
         end
         attr_reader :combined_hash
@@ -69,14 +69,21 @@ module Alces
           return hash
         end
 
-        def load_yaml_hash(action)
+        def load_yaml_hash()
           hash = Hash.new
           get_yaml_file_list.each do |yaml|
-            begin
-              yaml_payload = YAML.load(File.read("#{ENV['alces_BASE']}/etc/config/#{action}/#{yaml}.yaml"))
-              raise "Expected yaml config to contain a hash" if yaml_payload.class != Hash 
-              hash.merge!(yaml_payload)
-            rescue Errno::ENOENT
+            begin 
+              yaml_payload = YAML.load(File.read("#{ENV['alces_BASE']}/etc/config/#{yaml}.yaml"))
+            rescue Errno::ENOENT # Skips missing files
+            rescue StandardError => e
+              $stderr.puts "Could not pass YAML file"
+              raise e
+            else
+              if yaml_payload.class != Hash
+                raise "Expected yaml config to contain a hash" 
+              else
+                hash.merge!(yaml_payload)
+              end
             end
           end
           hash = hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}

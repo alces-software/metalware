@@ -89,7 +89,7 @@ module Alces
 
         def save_template(parameters={})
           add_kickstart(parameters) if @kickstart_template
-          combiner = Alces::Stack::Templater::Combiner.new("boot", @json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
           save = get_save_file(combiner)
           @to_delete << save
           combiner.save(@finder.template, save)
@@ -97,7 +97,7 @@ module Alces
 
         def puts_template(parameters={})
           add_kickstart(parameters) if @kickstart_template
-          combiner = Alces::Stack::Templater::Combiner.new("boot", @json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
           save = get_save_file(combiner)
           @to_delete_dry_run <<  save
           puts "BOOT TEMPLATE"

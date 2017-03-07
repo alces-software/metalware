@@ -1,6 +1,4 @@
-{
-  "config" : "slave04",
-  "iptail" : 1,
-  "q3": 1,
-  "index": 7
-}
+config: slave04
+iptail: 1
+q3: 1
+index: 7

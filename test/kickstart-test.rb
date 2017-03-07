@@ -73,7 +73,7 @@ class TC_Kickstart < Test::Unit::TestCase
     # Manually determines correct file save location
     ks = Alces::Stack::Kickstart::Run.new(@finder.template, hash)
     template_parameters = ks.instance_variable_get(:@template_parameters)
-    combiner = Alces::Stack::Templater::Combiner.new("kickstart", ks.instance_variable_get(:@json), template_parameters)
+    combiner = Alces::Stack::Templater::Combiner.new(ks.instance_variable_get(:@json), template_parameters)
     
     expected_str = "KICKSTART TEMPLATE\nHash:" << combiner.parsed_hash.to_s
     expected_str << "\nSave: /var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks")
@@ -100,7 +100,7 @@ class TC_Kickstart < Test::Unit::TestCase
     template_parameters = ks.instance_variable_get(:@template_parameters)
     ks.save_template(template_parameters)
     assert_nothing_raised do @finder_save.template = ks.get_save_file(template_parameters[:nodename]) end
-    exp_parsed_temp = Alces::Stack::Templater::Combiner.new("kickstart", json, hash).file(@finder.template) << "\n"
+    exp_parsed_temp = Alces::Stack::Templater::Combiner.new(json, hash).file(@finder.template) << "\n"
     assert_equal(exp_parsed_temp, File.read(@finder_save.template))
   end
 

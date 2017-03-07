@@ -1,6 +1,4 @@
-{
-  "config" : "all",
-  "iptail" : 1,
-  "q3": 1,
-  "index": 5
-}
+config: all
+iptail: 1
+q3: 1
+index: 5
