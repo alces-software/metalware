@@ -22,15 +22,21 @@
 module Alces
   module Stack
     class ForkProcess
-      def initialize(parent_lambda, child_lambda)
+      def initialize(parent_lambda, child_lambda, kill_child_flag = true)
         @parent_lambda = parent_lambda
         @child_lambda = child_lambda
+        @kill_child_flag = kill_child_flag
       end
       def run
         @pid = Process.fork
         if @pid
-          @parent_lambda.call(self, @pid)
-          Process.detach(@pid)
+          begin
+            @parent_lambda.call(self, @pid)
+          ensure
+            if @kill_child_flag and !check_child.nil? then kill_child
+            else Process.detach(@pid)
+            end
+          end
         else
           begin
             @child_lambda.call
@@ -40,11 +46,14 @@ module Alces
         end
       end
 
-      def wait_child_terminated(maxtime=0)
+      def wait_child_terminated(maxtime=0, waittime=0.5)
         start = Time.now
         while maxtime == 0 or maxtime > Time.now - start
           return true if @pid == Process.waitpid(@pid, Process::WNOHANG)
+          sleep waittime
         end
+        sleep waittime
+        return true if @pid == Process.waitpid(@pid, Process::WNOHANG)
         return false
       end
 
@@ -56,8 +65,16 @@ module Alces
         signal_child(9)
       end
 
+      def check_child
+        begin
+          return signal_child(0)
+        rescue Errno::ESRCH
+          return nil
+        end
+      end
+
       def signal_child(sig)
-        Process.kill(sig, @pid)
+        return Process.kill(sig, @pid)
       end
       class << self
         def test

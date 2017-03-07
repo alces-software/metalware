@@ -73,14 +73,6 @@ module Alces
                 '-x', '--dry-run',
                 default: false
 
-        def setup_signal_handler
-          trap('INT') do
-            STDERR.puts "\nExiting..." unless @exiting
-            @exiting = true
-            Kernel.exit(0)
-          end
-        end
-
         def show_template_options
           options = {
             :nodename => "Value specified by --node-name",
@@ -92,7 +84,6 @@ module Alces
         end
 
         def execute
-          setup_signal_handler
           show_template_options if template_options
           Alces::Stack::Boot.run!(
               nodename: nodename,

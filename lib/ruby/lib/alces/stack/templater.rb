@@ -22,6 +22,7 @@
 require "erb"
 require "ostruct"
 require "json"
+require "yaml"
 
 module Alces
   module Stack
@@ -48,31 +49,46 @@ module Alces
         def replace_erb(template, template_parameters={})
           return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
         end
-
-        def JSON_string_to_hash(json)
-          return {} if !json or json.empty?
-          return JSON.parse(json,:symbolize_names => true)
-        end
       end
 
       class Combiner < Handler
         def initialize(action, json, hash={})
           @combined_hash = {hostip: `hostname -i`.chomp}
           @combined_hash.merge!(hash)
-          @combined_hash.merge!(JSON_string_to_hash(json))
-          set_config_path(action)
-          combine_yaml
+          @combined_hash.merge!(load_json_hash(json))
+          @combined_hash.merge!(load_yaml_hash(action)) if action and !action.to_s.empty?
           @parsed_hash = parse_combined_hash
         end
         attr_reader :combined_hash
         attr_reader :parsed_hash
 
-        def set_config_path(action)
-
+        def load_json_hash(json)
+          return {} if !json or json.empty?
+          hash = JSON.parse(json,:symbolize_names => true)
+          raise "JSON can not contain nodename" if hash.key?(:nodename)
+          return hash
         end
 
-        def combine_yaml
+        def load_yaml_hash(action)
+          hash = Hash.new
+          get_yaml_file_list.each do |yaml|
+            begin
+              yaml_payload = YAML.load(File.read("#{ENV['alces_BASE']}/etc/config/#{action}/#{yaml}.yaml"))
+              raise "Expected yaml config to contain a hash" if yaml_payload.class != Hash 
+              hash.merge!(yaml_payload)
+            rescue Errno::ENOENT
+            end
+          end
+          hash = hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+          return hash
+        end
 
+        def get_yaml_file_list
+          return Array.new if !@combined_hash.key?(:nodename)
+          list_str = `nodeattr -l #{@combined_hash[:nodename]} 2>/dev/null`.chomp
+          if list_str.empty? then return Array.new end
+          list = list_str.split(/\n/).reverse
+          return list << @combined_hash[:nodename]
         end
 
         def parse_combined_hash
@@ -177,7 +193,10 @@ module Alces
             puts "  5) Constants available to all templates"
             puts
             puts "In the event of a conflict between the sources, the priority order is as given above."
-            puts "DO NOT include \'nodename\'' or \'index\' in a yaml or json input, results are undetermined"
+            puts "DO NOT include \'nodename\'' in a yaml or json input, results are undetermined"
+            puts
+            puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config/<action>"
+            puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
             puts
             puts "The following command line parameters are replaced by ERB:"
             none_flag = true

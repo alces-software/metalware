@@ -40,16 +40,13 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       is_nil: nil,
       hostip: `hostname -i`.chomp
     }
-    @json_string = '{"nodename":"node_json_input", "index":2}'
+    @json_string = '{"index":2}'
     @nodename = "node_nodename_input"
     @index = 3
     @template_folder = "#{ENV['alces_BASE']}/etc/templates"
     @example_template = "#{@template_folder}/boot/install.erb"
-
-    `cp #{ENV['alces_BASE']}/etc/config/hosts/site.yaml #{ENV['alces_BASE']}/etc/config/hosts/site.yaml.copy 2>&1`
-    `cp #{ENV['alces_BASE']}/etc/config/hosts/cluster.yaml #{ENV['alces_BASE']}/etc/config/hosts/cluster.yaml.copy 2>&1`
-    `cp #{ENV['alces_BASE']}/etc/config/hosts/slave05.yaml #{ENV['alces_BASE']}/etc/config/hosts/slave05.yaml.copy 2>&1`
-    "{\n  \"nodename\" : \"node1\",\n  \"iptail\" : 1,\n  \"q3\": 1\n}"
+    `mv #{ENV['alces_BASE']}/etc/config/hosts #{ENV['alces_BASE']}/etc/config/hosts.copy 2>&1`
+    `cp -r #{ENV['alces_BASE']}/test/config-test #{ENV['alces_BASE']}/etc/config/hosts`
   end
 
   def test_no_input
@@ -73,7 +70,6 @@ class TC_Templater_Combiner < Test::Unit::TestCase
 
   def test_json_input
     json_hash = {
-      nodename: "node_json_input",
       index: 2,
       hostip: `hostname -i`.chomp
     }
@@ -90,10 +86,10 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     }
     hash_over_default = Alces::Stack::Templater::Combiner.new("","",over_default_hash).combined_hash
     assert_equal(over_default_hash, hash_over_default, "Hash did not override default values")
-    json_input = '{"nodename":"set_by_json", "index": 2}'
+    json_input = '{"index": 2, "hostip": "1.1.1.1"}'
     json_hash = {
-      hostip: "0.0.0.0",
-      nodename: "set_by_json",
+      hostip: "1.1.1.1",
+      nodename: "set_by_hash",
       index: 2
     }
     json_over_hash = Alces::Stack::Templater::Combiner.new("",json_input, over_default_hash).combined_hash
@@ -119,16 +115,58 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     assert_raise Alces::Stack::Templater::Combiner::LoopErbError do Alces::Stack::Templater::Combiner.new("","",@basic_hash) end
   end
 
-
   def test_file
     assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil,nil).file("fake.txt", @basic_hash) end
     assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil,nil).save("fake.txt", "fake.txt", @basic_hash) end
     assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil,nil).append("fake.txt", "fake.txt", @basic_hash) end
   end
 
+  def test_load_yaml_hash_no_nodename
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("hosts", "").parsed_hash, "Yaml hash not empty")
+  end
+
+  def test_yaml_all_cluster_config
+    hash = {
+      nodename: "slave01",
+      config: "cluster",
+      iptail: 1,
+      q3: 1,
+      index: 6
+    }
+    hash.merge!(@default_hash)
+    assert_equal(hash, Alces::Stack::Templater::Combiner.new("hosts", "",nodename:"slave01").parsed_hash, "Has not passed yaml")
+  end
+
+  def test_yaml_all_cluster_config_slave04
+    hash = {
+      nodename: "slave04",
+      config: "slave04",
+      iptail: 1,
+      q3: 1,
+      index: 7
+    }
+    hash.merge!(@default_hash)
+    assert_equal(hash, Alces::Stack::Templater::Combiner.new("hosts", "",nodename:"slave04").parsed_hash, "Yaml pass or load order error")
+  end
+
+  def test_yaml_overide_jsob
+    hash = {
+      nodename: "slave04",
+      config: "slave04",
+      iptail: 1,
+      q3: 1,
+      index: 7
+    }
+    hash.merge!(@default_hash)
+    json = '{
+      "config":"json",
+      "q3":0
+    }'
+    assert_equal(hash, Alces::Stack::Templater::Combiner.new("hosts", json,nodename:"slave04").parsed_hash, "Yaml has not overridden JSON")
+  end
+
   def teardown
-    `mv #{ENV['alces_BASE']}/etc/config/hosts/site.yaml.copy #{ENV['alces_BASE']}/etc/config/hosts/site.yaml 2>&1`
-    `mv #{ENV['alces_BASE']}/etc/config/hosts/cluster.yaml.copy #{ENV['alces_BASE']}/etc/config/hosts/cluster.yaml 2>&1`
-    `mv #{ENV['alces_BASE']}/etc/config/hosts/slave05.yaml.copy #{ENV['alces_BASE']}/etc/config/hosts/slave05.yaml 2>&1`
+    `rm -rf #{ENV['alces_BASE']}/etc/config/hosts 2>&1`
+    `mv #{ENV['alces_BASE']}/etc/config/hosts.copy #{ENV['alces_BASE']}/etc/config/hosts 2>&1`
   end
 end

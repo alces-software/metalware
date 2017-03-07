@@ -64,14 +64,21 @@ module Alces
             lambda = -> (parameter) {save_template(parameter)}
           end
 
-          begin
-            Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
-            if !@kickstart_template.to_s.empty? then kickstart_teardown; raise Interrupt
-            else sleep
-            end
-          rescue Exception => e
-            teardown(e)
+          @e = Interrupt
+          Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
+          if !@kickstart_template.to_s.empty?
+            kickstart_teardown
+            raise Interrupt
+          else sleep
           end
+        rescue Exception => @e
+        ensure
+          print "Exiting...."
+          $stdout.flush
+          teardown(@e)
+          puts "Done"
+          $stdout.flush
+          Kernel.exit(0)
         end
 
         def get_save_file(combiner)
@@ -151,7 +158,10 @@ module Alces
             sleep 10
             Alces::Stack::Iterator.run(@group, lambda, {nodename: @template_parameters[:nodename]})
           end
+          $stdout.flush
+          sleep 1
           puts "Found all nodes"
+          $stdout.flush
           return
         end
 
@@ -162,13 +172,11 @@ module Alces
           tear_down_flag = true if !@dry_run_flag and !@to_delete_dry_run.empty?
           puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
           @to_delete_dry_run.each do |file| puts "  #{file}" end
-          @to_delete.each do |file| `rm -f #{file}` end
-          begin
-            raise e
-          rescue Interrupt
-            raise TearDownError.new("Files created during a dry run") if tear_down_flag_dry
-            raise TearDownError.new("Files should have been saved! This was not a dry run") if tear_down_flag
-          end
+          @to_delete.each do |file| `rm -f #{file} 2>/dev/null` end
+          raise e
+        rescue Interrupt
+          raise TearDownError.new("Files created during a dry run") if tear_down_flag_dry
+          raise TearDownError.new("Files should have been saved! This was not a dry run") if tear_down_flag
         end
         class TearDownError < StandardError
         end
