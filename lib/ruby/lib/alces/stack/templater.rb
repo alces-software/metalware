@@ -27,6 +27,56 @@ require "yaml"
 module Alces
   module Stack
     module Templater
+      class << self
+        def show_options(options={})
+          const = {
+            hostip: "#{`hostname -i`.chomp}",
+            index: "0"
+          }
+          puts "ERB can replace template parameters with variables from 5 sources:"
+          puts "  1) JSON input from the command line using -j"
+          puts "  2) YAML config files stored in: #{ENV['alces_BASE']}/etc/config"
+          puts "  3) Command line inputs and index from the iterator (if applicable)"
+          puts "  4) Constants available to all templates"
+          puts
+          puts "In the event of a conflict between the sources, the priority order is as given above."
+          puts "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
+          puts
+          puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config"
+          puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
+          puts
+          puts "The following command line parameters are replaced by ERB:"
+          none_flag = true
+          if options.keys.max_by(&:length).nil? then option_length = 0
+          else option_length = options.keys.max_by(&:length).length end
+          const_length = const.keys.max_by(&:length).length
+          if option_length > const_length then align = option_length
+          else align = const_length end
+          options.each do |key, value|
+            none_flag = false;
+            spaces = align - key.length
+            print"    <%= #{key} %> "
+            while spaces > 0
+              spaces -= 1
+              print " "
+            end
+            puts ": #{value}"
+          end
+          puts "    (none)" if none_flag
+          puts
+          puts "The constant value replaced by erb:"
+          const.each do |key, value|
+            spaces = align - key.length
+            print"    <%= #{key} %> "
+            while spaces > 0
+              spaces -= 1
+              print " "
+            end
+            puts ": #{value}"
+          end
+        end
+      end
+
       class Handler
         def file(filename, template_parameters={})
           File.open(filename.chomp, 'r') do |f|
@@ -57,25 +107,23 @@ module Alces
       end
 
       class Combiner < Handler
-        def initialize(json, hash={})
-          @combined_hash = {
+        DEFAULT_HASH = {
             hostip: `hostname -i`.chomp,
             index: 0
           }
-          @combined_hash.merge!(hash)
+        def initialize(json, hash={})
+          @combined_hash = DEFAULT_HASH.merge(hash)
           fixed_nodename = combined_hash[:nodename]
-          fixed_index = combined_hash[:index]
           @combined_hash.merge!(load_yaml_hash)
           @combined_hash.merge!(load_json_hash(json))
           @parsed_hash = parse_combined_hash
-          if parsed_hash[:nodename] != fixed_nodename or parsed_hash[:index] != fixed_index
-            raise HashOverrideError.new(fixed_nodename, fixed_index, @parsed_hash)
+          if parsed_hash[:nodename] != fixed_nodename
+            raise HashOverrideError.new(fixed_nodename, @parsed_hash)
           end
         end
         class HashOverrideError < StandardError
           def initialize(nodename, index, parsed_hash={})
             msg = "Original nodename: " << nodename.to_s << "\n"
-            msg << "Original index: " << index.to_s << "\n"
             msg << parsed_hash.to_s << "\n"
             msg << "YAML, JSON and ERB can not alter the values of nodename and index"
             super(msg)
@@ -86,8 +134,7 @@ module Alces
         attr_reader :parsed_hash
 
         def load_json_hash(json)
-          return {} if !json or json.empty?
-          return JSON.parse(json,:symbolize_names => true)
+          (json || "").empty? ? {} : JSON.parse(json,symbolize_names: true)
         end
 
         def load_yaml_hash()
@@ -100,15 +147,14 @@ module Alces
               $stderr.puts "Could not pass YAML file"
               raise e
             else
-              if yaml_payload.class != Hash
+              if !yaml_payload.is_a? Hash
                 raise "Expected yaml config to contain a hash" 
               else
                 hash.merge!(yaml_payload)
               end
             end
           end
-          hash = hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
-          return hash
+          hash.inject({}) do |memo,(k,v)| memo[k.to_sym] = v; memo end
         end
 
         def get_yaml_file_list
@@ -153,12 +199,9 @@ module Alces
       end
 
       class Finder
-        def initialize(default_location)
+        def initialize(default_location, template)
           @default_location = default_location
-        end
-       
-        def template=(new_template)
-          @template = find_template(new_template)
+          @template = find_template(template)
           @filename_ext = @template.scan(/\.?[\w\_\-]+\.?[\w\_\-]*\Z/)[0].chomp
           @filename = @filename_ext.scan(/\.?[\w\_\-]+/)[0].chomp
         end
@@ -203,58 +246,6 @@ module Alces
           def intialize(template)
             msg = "Could not find template file: " << template
             super
-          end
-        end
-      end
-
-      class Options
-        class << self
-          def show(options={})
-            const = {
-              hostip: "#{`hostname -i`.chomp}"
-            }
-            puts "ERB can replace template parameters with variables from 5 sources:"
-            puts "  1) yaml config files stored in [INSERT LOCATION]"
-            puts "  2) JSON input from the command line using -j"
-            puts "  3) Iterator variables when looping over a group (when applicable)"
-            puts "  4) Other command line inputs"
-            puts "  5) Constants available to all templates"
-            puts
-            puts "In the event of a conflict between the sources, the priority order is as given above."
-            puts "DO NOT include \'nodename\'' in a yaml or json input, results are undetermined"
-            puts
-            puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config/<action>"
-            puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
-            puts
-            puts "The following command line parameters are replaced by ERB:"
-            none_flag = true
-            if options.keys.max_by(&:length).nil? then option_length = 0
-            else option_length = options.keys.max_by(&:length).length end
-            const_length = const.keys.max_by(&:length).length
-            if option_length > const_length then align = option_length
-            else align = const_length end
-            options.each do |key, value|
-              none_flag = false;
-              spaces = align - key.length
-              print"    <%= #{key} %> "
-              while spaces > 0
-                spaces -= 1
-                print " "
-              end
-              puts ": #{value}"
-            end
-            puts "    (none)" if none_flag
-            puts
-            puts "The constant value replaced by erb:"
-            const.each do |key, value|
-              spaces = align - key.length
-              print"    <%= #{key} %> "
-              while spaces > 0
-                spaces -= 1
-                print " "
-              end
-              puts ": #{value}"
-            end
           end
         end
       end

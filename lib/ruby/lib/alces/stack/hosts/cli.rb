@@ -50,7 +50,7 @@ module Alces
                 default: false
 
         option  :json,
-                'JSON file or string containing additional templating parameters',
+                'JSON string containing additional templating parameters',
                 '-j', '--additional-parameters',
                 default: false
 
@@ -81,7 +81,7 @@ module Alces
           options = {
             nodename: "Value specified by --node-name"
           }
-          Alces::Stack::Templater::Options.show(options)
+          Alces::Stack::Templater.show_options(options)
           exit 0
         end
 

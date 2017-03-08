@@ -19,19 +19,13 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-Bundler.setup(:default)
-require 'test/unit'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require "alces/stack/iterator"
 
 class TC_Iterator < Test::Unit::TestCase
   def setup
-    @lambda = ->(options) {
+    @lambda_proc = ->(options) {
       return options
     }
     @hash = {
@@ -46,18 +40,18 @@ class TC_Iterator < Test::Unit::TestCase
 
   def test_invalid_inputs
     assert_raise ArgumentError do Alces::Stack::Iterator.run() end
-    assert_raise Alces::Stack::Iterator::GenderError do Alces::Stack::Iterator.run("NotFound", @lambda) end
+    assert_raise Alces::Stack::Iterator::GenderError do Alces::Stack::Iterator.run("NotFound", @lambda_proc) end
   end
 
   def test_single_node_input
-    assert_equal(Hash.new, Alces::Stack::Iterator.run("", @lambda), "Incorrect output for empty hash input on single node")
-    assert_equal(Hash.new, Alces::Stack::Iterator.run(false, @lambda), "Incorrect output for empty hash input on single node")
-    assert_equal(Hash.new, Alces::Stack::Iterator.run(nil, @lambda), "Incorrect output for empty hash input on single node")
-    assert_equal(@hash, Alces::Stack::Iterator.run("", @lambda, @hash), "Incorrect output for hash input on single node")
+    assert_equal(Hash.new, Alces::Stack::Iterator.run("", @lambda_proc), "Incorrect output for empty hash input on single node")
+    assert_equal(Hash.new, Alces::Stack::Iterator.run(false, @lambda_proc), "Incorrect output for empty hash input on single node")
+    assert_equal(Hash.new, Alces::Stack::Iterator.run(nil, @lambda_proc), "Incorrect output for empty hash input on single node")
+    assert_equal(@hash, Alces::Stack::Iterator.run("", @lambda_proc, @hash), "Incorrect output for hash input on single node")
   end
 
   def test_group_node_input
-    result = Alces::Stack::Iterator.run(@group, @lambda)
+    result = Alces::Stack::Iterator.run(@group, @lambda_proc)
     @group_array.each_with_index do |nodename, index|
       test_hash = {
         nodename: nodename,
@@ -65,7 +59,7 @@ class TC_Iterator < Test::Unit::TestCase
       }
       assert_equal(test_hash, result[index], "Incorrect returned hash for group with no hash input")
     end
-    result = Alces::Stack::Iterator.run(@group, @lambda, @hash)
+    result = Alces::Stack::Iterator.run(@group, @lambda_proc, @hash)
     @group_array.each_with_index do |nodename, index|
       @hash[:nodename] = nodename
       @hash[:index] = index

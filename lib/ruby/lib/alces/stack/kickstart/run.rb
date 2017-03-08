@@ -33,8 +33,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
-          @finder.template = template
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", template)
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -47,12 +46,12 @@ module Alces
         def run!
           raise "Ran from boot can only run with a single node" if @ran_from_boot and @group
           if @dry_run_flag
-            lambda = -> (template_parameters) { puts_template(template_parameters) }
+            lambda_proc = -> (template_parameters) { puts_template(template_parameters) }
           else
-            lambda = -> (template_parameters) { save_template(template_parameters) }
+            lambda_proc = -> (template_parameters) { save_template(template_parameters) }
           end
 
-          Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
+          Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
           return get_save_file(@template_parameters[:nodename]) if @ran_from_boot
         end
 

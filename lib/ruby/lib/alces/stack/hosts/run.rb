@@ -33,8 +33,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/")
-          @finder.template = template
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/", template)
           @template_parameters = {
             nodename: options[:nodename]
           }
@@ -49,31 +48,31 @@ module Alces
 
           case
           when @dry_run_flag
-            lambda = dry_run
+            lambda_proc = dry_run
           when @add_flag
-            lambda = -> (template_parameters) {add(template_parameters)} 
+            lambda_proc = -> (template_parameters) {add(template_parameters)} 
           end
 
-          Alces::Stack::Iterator.run(@nodegroup, lambda, @template_parameters) if !lambda.nil?
-          raise "Could not modify hosts! No command included (e.g. --add).\nSee 'metal hosts -h'" if lambda.nil?
+          Alces::Stack::Iterator.run(@nodegroup, lambda_proc, @template_parameters) if !lambda_proc.nil?
+          raise "Could not modify hosts! No command included (e.g. --add).\nSee 'metal hosts -h'" if lambda_proc.nil?
         end
 
         def dry_run
           case
           when @add_flag
-            lambda = -> (template_parameters) {puts_template(template_parameters)}
+            lambda_proc = -> (template_parameters) {puts_template(template_parameters)}
           end
-          return lambda
+          return lambda_proc
         end
 
         def add(template_parameters)
           append_file = "/etc/hosts"
-          @json = "" if !@json
+          @json ||= ""
           Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@finder.template, append_file)
         end
 
         def puts_template(template_parameters)
-          @json = "" if !@json
+          @json ||= ""
           puts Alces::Stack::Templater::Combiner.new(@json, template_parameters).file(@finder.template)
         end
       end

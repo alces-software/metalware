@@ -34,8 +34,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/boot/")
-          @finder.template = options[:template]
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/boot/", options[:template])
           @group = options[:group]
           @dry_run_flag = options[:dry_run_flag]
           @template_parameters = {
@@ -44,10 +43,9 @@ module Alces
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
           @json = options[:json]
           @kickstart_template = options[:kickstart]
-          @ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
-          @ks_finder.template = @kickstart_template if @kickstart_template
-          @to_delete = Array.new
-          @to_delete_dry_run = Array.new
+          @ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @kickstart_template) if @kickstart_template
+          @to_delete = []
+          @to_delete_dry_run = []
         end
 
         def run!
@@ -59,13 +57,12 @@ module Alces
 
           case 
           when @dry_run_flag
-            lambda = -> (parameter) {puts_template(parameter)}
+            lambda_proc = -> (parameter) {puts_template(parameter)}
           else
-            lambda = -> (parameter) {save_template(parameter)}
+            lambda_proc = -> (parameter) {save_template(parameter)}
           end
 
-          @e = Interrupt
-          Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
+          Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
           if !@kickstart_template.to_s.empty?
             kickstart_teardown
             raise Interrupt
@@ -134,18 +131,14 @@ module Alces
           delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
           Alces::Stack::Iterator.run(@group, delete_lambda, {nodename: @template_parameters[:nodename]})
 
-          # Gets the kick start template filename
-          ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
-          ks_finder.template = @kickstart_template
-
           @found_nodes = Hash.new
-          lambda = -> (options) {
+          lambda_proc = -> (options) {
             if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
               @found_nodes[options[:nodename]] = true
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
               `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
-              `rm -f /var/lib/metalware/rendered/ks/#{ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
+              `rm -f /var/lib/metalware/rendered/ks/#{@ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
               `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
             elsif !@found_nodes[options[:nodename]]
               @kickstart_teardown_exit_flag = true
@@ -156,7 +149,7 @@ module Alces
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
             sleep 10
-            Alces::Stack::Iterator.run(@group, lambda, {nodename: @template_parameters[:nodename]})
+            Alces::Stack::Iterator.run(@group, lambda_proc, {nodename: @template_parameters[:nodename]})
           end
           $stdout.flush
           sleep 1

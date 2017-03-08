@@ -45,7 +45,7 @@ module Alces
                 default: false
 
         option  :json,
-                'JSON file or string containing additional templating parameters',
+                'JSON string containing additional templating parameters',
                 '-j', '--additional-parameters',
                 default: false
 
@@ -79,7 +79,7 @@ module Alces
             :kernelappendoptions => "Value specified by --kernelappendoptions",
             :kickstart => "Determined from --kickstart (required) and nodename"
           }
-          Alces::Stack::Templater::Options.show(options)
+          Alces::Stack::Templater.show_options(options)
           exit 0
         end
 

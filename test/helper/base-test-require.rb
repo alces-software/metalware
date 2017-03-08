@@ -19,35 +19,11 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require "stringio"
-module Alces
-  module Stack
-    module Capture
-      class << self
-        def stdout
-          begin
-            old_stdout = $stdout
-            new_stdout = StringIO.new
-            $stdout = new_stdout
-            yield
-          ensure
-            $stdout = old_stdout
-          end
-          return new_stdout.string
-        end
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
+$: << "#{ENV['alces_BASE']}/test/helper"
 
-        def stderr
-          begin
-            old_stderr = $stderr
-            new_stderr = StringIO.new
-            $stderr = new_stderr
-            yield
-          ensure
-            $stderr = old_stderr
-          end
-          return new_stderr.string
-        end
-      end
-    end
-  end
-end
+require 'rubygems'
+require 'bundler/setup'
+Bundler.setup(:default)
+require 'test/unit'

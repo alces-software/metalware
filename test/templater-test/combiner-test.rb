@@ -19,17 +19,10 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-Bundler.setup(:default)
-require 'test/unit'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require "json"
 require "alces/stack/templater"
-require "alces/stack/capture"
 
 class TC_Templater_Combiner < Test::Unit::TestCase
   def setup
@@ -50,7 +43,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     @template_folder = "#{ENV['alces_BASE']}/etc/templates"
     @example_template = "#{@template_folder}/boot/install.erb"
     `mv #{ENV['alces_BASE']}/etc/config #{ENV['alces_BASE']}/etc/config.copy 2>&1`
-    `cp -r #{ENV['alces_BASE']}/test/config-test #{ENV['alces_BASE']}/etc/config`
+    `cp -r #{ENV['alces_BASE']}/test/config-test/ #{ENV['alces_BASE']}/etc/config`
   end
 
   def test_no_input
@@ -166,13 +159,11 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       "config":"json",
       "q3":0
     }'
-    assert_equal(hash, Alces::Stack::Templater::Combiner.new(json,nodename:"slave04").parsed_hash, "Yaml has not overridden JSON")
+    assert_equal(hash, Alces::Stack::Templater::Combiner.new(json,nodename:"slave04").parsed_hash, "JSON has not correctly overridden YAML")
   end
 
-  def test_override_nodename_index_error
+  def test_override_nodename_error
     json = '{"nodename":1}'
-    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do Alces::Stack::Templater::Combiner.new(json) end
-    json = '{"index":1}'
     assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do Alces::Stack::Templater::Combiner.new(json) end
   end
 

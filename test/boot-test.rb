@@ -19,17 +19,11 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-Bundler.setup(:default)
-require 'test/unit'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require 'alces/stack/boot'
-require 'alces/stack/capture'
-require 'alces/stack/forkprocess'
+require 'capture'
+require 'forkprocess'
 
 class TC_Boot < Test::Unit::TestCase
   def setup
@@ -41,10 +35,8 @@ class TC_Boot < Test::Unit::TestCase
     File.write(@template_kickstart, @template_str_kickstart)
     File.write("#{@default_template_location}#{@template}", @template_str)
     File.write("#{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}", @template_str)
-    @finder = Alces::Stack::Templater::Finder.new(@default_template_location)
-    @ks_finder = Alces::Stack::Templater::Finder.new(@default_template_location)
-    @ks_finder.template = @template_kickstart
-    @finder.template = @template
+    @finder = Alces::Stack::Templater::Finder.new(@default_template_location, @template)
+    @ks_finder = Alces::Stack::Templater::Finder.new(@default_template_location, @template_kickstart)
     @input_base = {
       template: @template,
       kernel_append: "KERNAL_APPEND",
@@ -106,7 +98,7 @@ class TC_Boot < Test::Unit::TestCase
   def test_puts_template
     boot = Alces::Stack::Boot::Run.new(@input_nodename)
     @input_nodename[:kernelappendoptions] = "KERNAL_APPEND"
-    output = Alces::Stack::Capture.stdout do boot.puts_template(@input_nodename) end
+    output = Capture.stdout do boot.puts_template(@input_nodename) end
     save = "/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}"
     string = "BOOT TEMPLATE\nWould save file to: #{save}\n"
     string << Alces::Stack::Templater::Handler.new.replace_erb(@template_str, @input_nodename)
@@ -136,8 +128,8 @@ class TC_Boot < Test::Unit::TestCase
       assert_equal(true, fork.wait_child_terminated(2), "metal boot has not finished")
       assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp, "Pxe file have not been deleted")
     }
-    child_lambda = lambda { Alces::Stack::Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename).run! end }
-    Alces::Stack::ForkProcess.new(parent_lambda, child_lambda).run
+    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename).run! end }
+    ForkProcess.new(parent_lambda, child_lambda).run
   end
 
   def test_run_group
@@ -153,8 +145,8 @@ class TC_Boot < Test::Unit::TestCase
       assert_equal(true, fork.wait_child_terminated(2), "metal boot has not finished")
       assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp, "Pxe file have not been deleted")
     }
-    child_lambda = lambda { Alces::Stack::Capture.stdout do Alces::Stack::Boot::Run.new(@input_group).run! end }
-    Alces::Stack::ForkProcess.new(parent_lambda, child_lambda).run
+    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_group).run! end }
+    ForkProcess.new(parent_lambda, child_lambda).run
   end
 
   def test_run_kickstart_single
@@ -205,8 +197,8 @@ class TC_Boot < Test::Unit::TestCase
       assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp, "Kickstart files still exist")
       assert_equal(true, exited, "metal boot -k cleaned up files correctly but didn't exit")
     }
-    child_lambda = lambda { Alces::Stack::Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run! end }
-    Alces::Stack::ForkProcess.new(parent_lambda, child_lambda).run
+    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run! end }
+    ForkProcess.new(parent_lambda, child_lambda).run
   end
 
   def test_group_kickstart_command
@@ -228,8 +220,8 @@ class TC_Boot < Test::Unit::TestCase
       assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp, "Kickstart files still exist")
       assert_equal(true, exited, "metal boot -k cleaned up files correctly but didn't exit")
     }
-    child_lambda = lambda { Alces::Stack::Capture.stdout do Alces::Stack::Boot::Run.new(@input_group_kickstart).run! end }
-    Alces::Stack::ForkProcess.new(parent_lambda, child_lambda).run
+    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_group_kickstart).run! end }
+    ForkProcess.new(parent_lambda, child_lambda).run
   end
 
   def teardown
