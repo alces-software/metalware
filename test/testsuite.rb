@@ -20,8 +20,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+$: << "#{ENV['alces_BASE']}/test"
 
-require 'helper/capture-test'
+require 'capture-test'
 require 'iterator-test'
 require 'kickstart-test'
 require 'hosts-test'

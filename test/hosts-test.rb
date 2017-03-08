@@ -21,7 +21,7 @@
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
-require 'alces/stack/capture'
+require 'capture'
 require "alces/stack/hosts"
 require "alces/stack/templater"
 
