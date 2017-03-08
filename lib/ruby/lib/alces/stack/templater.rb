@@ -64,18 +64,16 @@ module Alces
           }
           @combined_hash.merge!(hash)
           fixed_nodename = combined_hash[:nodename]
-          fixed_index = combined_hash[:index]
           @combined_hash.merge!(load_yaml_hash)
           @combined_hash.merge!(load_json_hash(json))
           @parsed_hash = parse_combined_hash
-          if parsed_hash[:nodename] != fixed_nodename or parsed_hash[:index] != fixed_index
-            raise HashOverrideError.new(fixed_nodename, fixed_index, @parsed_hash)
+          if parsed_hash[:nodename] != fixed_nodename
+            raise HashOverrideError.new(fixed_nodename, @parsed_hash)
           end
         end
         class HashOverrideError < StandardError
           def initialize(nodename, index, parsed_hash={})
             msg = "Original nodename: " << nodename.to_s << "\n"
-            msg << "Original index: " << index.to_s << "\n"
             msg << parsed_hash.to_s << "\n"
             msg << "YAML, JSON and ERB can not alter the values of nodename and index"
             super(msg)
@@ -211,17 +209,17 @@ module Alces
         class << self
           def show(options={})
             const = {
-              hostip: "#{`hostname -i`.chomp}"
+              hostip: "#{`hostname -i`.chomp}",
+              index: "0"
             }
             puts "ERB can replace template parameters with variables from 5 sources:"
-            puts "  1) yaml config files stored in [INSERT LOCATION]"
-            puts "  2) JSON input from the command line using -j"
-            puts "  3) Iterator variables when looping over a group (when applicable)"
-            puts "  4) Other command line inputs"
-            puts "  5) Constants available to all templates"
+            puts "  1) JSON input from the command line using -j"
+            puts "  2) YAML config files stored in: #{ENV['alces_BASE']}/etc/config"
+            puts "  3) Command line inputs and index from the iterator (if applicable)"
+            puts "  4) Constants available to all templates"
             puts
             puts "In the event of a conflict between the sources, the priority order is as given above."
-            puts "DO NOT include \'nodename\'' in a yaml or json input, results are undetermined"
+            puts "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
             puts
             puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config/<action>"
             puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
