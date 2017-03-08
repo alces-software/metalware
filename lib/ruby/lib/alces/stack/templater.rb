@@ -48,25 +48,46 @@ module Alces
 
         def replace_erb(template, template_parameters={})
           return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+        rescue StandardError => e
+          $stderr.puts "Could not parse ERB"
+          $stderr.puts template.to_s
+          $stderr.puts template_parameters.to_s
+          raise e
         end
       end
 
       class Combiner < Handler
         def initialize(json, hash={})
-          @combined_hash = {hostip: `hostname -i`.chomp}
+          @combined_hash = {
+            hostip: `hostname -i`.chomp,
+            index: 0
+          }
           @combined_hash.merge!(hash)
-          @combined_hash.merge!(load_json_hash(json))
+          fixed_nodename = combined_hash[:nodename]
+          fixed_index = combined_hash[:index]
           @combined_hash.merge!(load_yaml_hash)
+          @combined_hash.merge!(load_json_hash(json))
           @parsed_hash = parse_combined_hash
+          if parsed_hash[:nodename] != fixed_nodename or parsed_hash[:index] != fixed_index
+            raise HashOverrideError.new(fixed_nodename, fixed_index, @parsed_hash)
+          end
         end
+        class HashOverrideError < StandardError
+          def initialize(nodename, index, parsed_hash={})
+            msg = "Original nodename: " << nodename.to_s << "\n"
+            msg << "Original index: " << index.to_s << "\n"
+            msg << parsed_hash.to_s << "\n"
+            msg << "YAML, JSON and ERB can not alter the values of nodename and index"
+            super(msg)
+          end
+        end
+
         attr_reader :combined_hash
         attr_reader :parsed_hash
 
         def load_json_hash(json)
           return {} if !json or json.empty?
-          hash = JSON.parse(json,:symbolize_names => true)
-          raise "JSON can not contain nodename" if hash.key?(:nodename)
-          return hash
+          return JSON.parse(json,:symbolize_names => true)
         end
 
         def load_yaml_hash()

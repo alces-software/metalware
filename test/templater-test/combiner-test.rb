@@ -29,10 +29,14 @@ require 'test/unit'
 
 require "json"
 require "alces/stack/templater"
+require "alces/stack/capture"
 
 class TC_Templater_Combiner < Test::Unit::TestCase
   def setup
-    @default_hash = {hostip: `hostname -i`.chomp}
+    @default_hash = {
+      hostip: `hostname -i`.chomp,
+      index: 0
+    }
     @basic_hash = {
       nodename: "node_hash_input",
       index: 1,
@@ -40,7 +44,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       is_nil: nil,
       hostip: `hostname -i`.chomp
     }
-    @json_string = '{"index":2}'
+    @json_string = '{"hostip":"0.0.0.0"}'
     @nodename = "node_nodename_input"
     @index = 3
     @template_folder = "#{ENV['alces_BASE']}/etc/templates"
@@ -70,8 +74,8 @@ class TC_Templater_Combiner < Test::Unit::TestCase
 
   def test_json_input
     json_hash = {
-      index: 2,
-      hostip: `hostname -i`.chomp
+      hostip: "0.0.0.0",
+      index: 0
     }
     assert_equal(json_hash, Alces::Stack::Templater::Combiner.new(@json_string).combined_hash, "Did not add json to combined hash")
     assert_raise TypeError do Alces::Stack::Templater::Combiner.new(json_hash).combined_hash end
@@ -82,15 +86,15 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     over_default_hash = {
       hostip: "0.0.0.0",
       nodename: "set_by_hash",
-      index: 1
+      index: 0
     }
     hash_over_default = Alces::Stack::Templater::Combiner.new("",over_default_hash).combined_hash
     assert_equal(over_default_hash, hash_over_default, "Hash did not override default values")
-    json_input = '{"index": 2, "hostip": "1.1.1.1"}'
+    json_input = '{"hostip": "1.1.1.1"}'
     json_hash = {
       hostip: "1.1.1.1",
       nodename: "set_by_hash",
-      index: 2
+      index: 0
     }
     json_over_hash = Alces::Stack::Templater::Combiner.new(json_input, over_default_hash).combined_hash
     assert_equal(json_hash, json_over_hash, "JSON did not override hash inputs")
@@ -130,8 +134,8 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       nodename: "slave01",
       config: "cluster",
       iptail: 1,
-      q3: 1,
-      index: 6
+      q3: 6,
+      index: 0
     }
     hash.merge!(@default_hash)
     assert_equal(hash, Alces::Stack::Templater::Combiner.new("",nodename:"slave01").parsed_hash, "Has not passed yaml")
@@ -142,20 +146,20 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       nodename: "slave04",
       config: "slave04",
       iptail: 1,
-      q3: 1,
-      index: 7
+      q3: 7,
+      index: 0
     }
     hash.merge!(@default_hash)
     assert_equal(hash, Alces::Stack::Templater::Combiner.new("",nodename:"slave04").parsed_hash, "Yaml pass or load order error")
   end
 
-  def test_yaml_overide_jsob
+  def test_json_overide_yaml
     hash = {
       nodename: "slave04",
-      config: "slave04",
+      config: "json",
       iptail: 1,
-      q3: 1,
-      index: 7
+      q3: 0,
+      index: 0
     }
     hash.merge!(@default_hash)
     json = '{
@@ -163,6 +167,13 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       "q3":0
     }'
     assert_equal(hash, Alces::Stack::Templater::Combiner.new(json,nodename:"slave04").parsed_hash, "Yaml has not overridden JSON")
+  end
+
+  def test_override_nodename_index_error
+    json = '{"nodename":1}'
+    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do Alces::Stack::Templater::Combiner.new(json) end
+    json = '{"index":1}'
+    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do Alces::Stack::Templater::Combiner.new(json) end
   end
 
   def teardown
