@@ -7,6 +7,7 @@ source /root/.deployment
 export ALCES_PROFILE="COMPUTE"
 
 run_script install/base.sh
+run_script install/networking.sh
 run_script install/mlx5.sh
 run_script install/nisclient.sh
 run_script install/nfsclient.sh
