@@ -25,20 +25,20 @@ module Alces
   module Stack
     module Iterator
       class << self
-        def run(gender, lambda, options={})
+        def run(gender, lambda_proc, options={})
           if !gender or gender.to_s.empty?
-            return lambda.call(options)
+            return lambda_proc.call(options)
           else
-            return iterate(gender, lambda, options)
+            return iterate(gender, lambda_proc, options)
           end
         end
 
-        def iterate(gender, lambda, options={})
+        def iterate(gender, lambda_proc, options={})
           output = Array.new
           Nodes.new(gender).each_with_index do |nodename, index|
             options[:nodename] = nodename
             options[:index] = index
-            output << Marshal.load(Marshal.dump(lambda.call(options)))
+            output << Marshal.load(Marshal.dump(lambda_proc.call(options)))
           end
           return output
         end

@@ -19,12 +19,31 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require "stringio"
+module Capture
+  class << self
+    def stdout
+      begin
+        old_stdout = $stdout
+        new_stdout = StringIO.new
+        $stdout = new_stdout
+        yield
+      ensure
+        $stdout = old_stdout
+      end
+      return new_stdout.string
+    end
 
-require 'helper/capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'boot-test'
-require 'templater-test/combiner-test'
-require 'templater-test/finder-test'
+    def stderr
+      begin
+        old_stderr = $stderr
+        new_stderr = StringIO.new
+        $stderr = new_stderr
+        yield
+      ensure
+        $stderr = old_stderr
+      end
+      return new_stderr.string
+    end
+  end
+end

@@ -19,18 +19,12 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-Bundler.setup(:default)
-require 'test/unit'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require "alces/stack/kickstart"
 require "alces/stack/templater"
-require "alces/stack/capture"
 require "alces/stack/iterator"
+require "capture"
 
 `rm /var/lib/metalware/rendered/ks/* -rf`
 class TC_Kickstart < Test::Unit::TestCase
@@ -46,14 +40,12 @@ class TC_Kickstart < Test::Unit::TestCase
       ran_from_boot: false,
       save_append: "append"
     }
-    @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
-    @finder_save = Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/")
-    @finder.template = @template
+    @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @template)
   end
 
   def options_checker(ks_o, template, hash={})
-    @finder.template = template
-    assert_equal(@finder.template, ks_o.instance_variable_get(:@finder).template, "Did not set template")
+    finder= Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", template)
+    assert_equal(finder.template, ks_o.instance_variable_get(:@finder).template, "Did not set template")
     assert_equal(hash[:group], ks_o.instance_variable_get(:@group), "Incorrect group")
     assert_equal(hash[:json], ks_o.instance_variable_get(:@json), "Incorrect json")
     assert_equal(hash[:save_append], ks_o.instance_variable_get(:@save_append), "Incorrect save_append")
@@ -81,7 +73,7 @@ class TC_Kickstart < Test::Unit::TestCase
     if !hash[:group].to_s.empty? then expected_str << "." << hash[:nodename].to_s end
     expected_str << "\nTemplate:\n" << combiner.file(@finder.template) << "\n"
     
-    stdout = Alces::Stack::Capture.stdout do ks.puts_template(template_parameters) end
+    stdout = Capture.stdout do ks.puts_template(template_parameters) end
     assert_equal(expected_str, stdout, "Puts template did not print the correct text")
   end
 
@@ -99,9 +91,10 @@ class TC_Kickstart < Test::Unit::TestCase
     hash.delete(:json)
     template_parameters = ks.instance_variable_get(:@template_parameters)
     ks.save_template(template_parameters)
-    assert_nothing_raised do @finder_save.template = ks.get_save_file(template_parameters[:nodename]) end
+    finder_save = nil
+    assert_nothing_raised do finder_save = Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", ks.get_save_file(template_parameters[:nodename])) end
     exp_parsed_temp = Alces::Stack::Templater::Combiner.new(json, hash).file(@finder.template) << "\n"
-    assert_equal(exp_parsed_temp, File.read(@finder_save.template))
+    assert_equal(exp_parsed_temp, File.read(finder_save.template))
   end
 
   def test_save_template
@@ -112,14 +105,14 @@ class TC_Kickstart < Test::Unit::TestCase
   def test_complete_run
     bash = File.read("/etc/profile.d/alces-metalware.sh")
     `#{bash}\n metal kickstart`
-    assert_nothing_raised do @finder_save.template = "compute.ks" end
+    assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", "compute.ks") end
     `#{bash}\n metal kickstart -n random`
-    assert_nothing_raised do @finder_save.template = "compute.ks" end
+    assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", "compute.ks") end
     `#{bash}\n metal kickstart -n random --save-append appended`
-    assert_nothing_raised do @finder_save.template = "compute.ks.appended" end
+    assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", "compute.ks.appended") end
     `#{bash}\n metal kickstart -g slave --save-append appended`
-    lambda = -> (hash) {assert_nothing_raised do @finder_save.template = "compute.ks.appended.#{hash[:nodename]}" end}
-    Alces::Stack::Iterator.run("slave", lambda)
+    lambda_proc = -> (hash) {assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/" ,"compute.ks.appended.#{hash[:nodename]}") end}
+    Alces::Stack::Iterator.run("slave", lambda_proc)
   end
 
   def teardown

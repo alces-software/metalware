@@ -19,13 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-Bundler.setup(:default)
-require 'test/unit'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require 'alces/stack/capture'
 require "alces/stack/hosts"
@@ -43,15 +37,15 @@ class TC_Hosts < Test::Unit::TestCase
   end
 
   def test_error_inputs
-    output = Alces::Stack::Capture.stdout do puts `#{@bash} metal hosts 2>&1` end
+    output = Capture.stdout do puts `#{@bash} metal hosts 2>&1` end
     assert_equal("ERROR: Requires a node name, node group, or json\n", output, "Error expect for no nodename or group")
-    output = Alces::Stack::Capture.stdout do puts `#{@bash} metal hosts -n nodes 2>&1` end
+    output = Capture.stdout do puts `#{@bash} metal hosts -n nodes 2>&1` end
     assert_equal("ERROR: Could not modify hosts! No command included (e.g. --add).\nSee 'metal hosts -h'\n", output, "Ran without specifying mode")
   end
 
   def test_add_host_dry_run
     nodename = "node"
-    output = Alces::Stack::Capture.stdout do puts `#{@bash} metal hosts -ax -n #{nodename} -t #{@template} 2>&1` end
+    output = Capture.stdout do puts `#{@bash} metal hosts -ax -n #{nodename} -t #{@template} 2>&1` end
     correct_output = Alces::Stack::Templater::Handler.new.replace_erb(@template_str, {nodename: nodename})
     assert_equal(correct_output, output.chomp, "Did not replace_erb correctly")
   end

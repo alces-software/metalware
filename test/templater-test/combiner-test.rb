@@ -19,17 +19,10 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-Bundler.setup(:default)
-require 'test/unit'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require "json"
 require "alces/stack/templater"
-require "alces/stack/capture"
 
 class TC_Templater_Combiner < Test::Unit::TestCase
   def setup
