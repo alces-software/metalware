@@ -37,7 +37,9 @@ module Alces
           @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/boot/", options[:template])
           @group = options[:group]
           @dry_run_flag = options[:dry_run_flag]
+          @permanent_boot_flag = options[:permanent_boot_flag]
           @template_parameters = {
+            firstboot: true,
             kernelappendoptions: options[:kernel_append].chomp
           }
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
