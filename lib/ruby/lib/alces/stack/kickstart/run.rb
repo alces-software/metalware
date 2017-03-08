@@ -33,7 +33,8 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @template = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/").find(template)
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/")
+          @finder.template = template
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -44,36 +45,36 @@ module Alces
         end
 
         def run!
+          raise "Ran from boot can only run with a single node" if @ran_from_boot and @group
           if @dry_run_flag
-            lambda = -> (json) { puts_template(json) }
+            lambda = -> (template_parameters) { puts_template(template_parameters) }
           else
-            lambda = -> (json) { save(json) }
+            lambda = -> (template_parameters) { save_template(template_parameters) }
           end
 
-          Alces::Stack::Iterator.new(@group, lambda, @json) if !lambda.nil?
-          return get_file_name if @ran_from_boot
+          Alces::Stack::Iterator.run(@group, lambda, @template_parameters)
+          return get_save_file(@template_parameters[:nodename]) if @ran_from_boot
         end
 
-        def save(json)
-          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
-          save_file = get_file_name
-          save_file = save_file << "." << hash[:nodename] if @group
-          Alces::Stack::Templater.save(@template, save_file, hash)
+        def get_save_file(nodename)
+          str = "/var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks")
+          str << "." << @save_append if !@save_append.to_s.empty? and @save_append
+          str << "." << nodename.to_s if !@group.to_s.empty? and @group
+          return str
         end
 
-        def get_file_name
-          name = @template.scan(/\.?\w+\.?\w*\Z/)
-          raise "Could not determine save file name from template: " << @template if name.size != 1
-          return "/var/lib/metalware/rendered/ks/" << name[0].scan(/\.?\w+/)[0] << ".ks" << @save_append
+        def save_template(template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner.save(@finder.template, get_save_file(combiner.parsed_hash[:nodename]))
         end
 
-        def puts_template(json)
-          hash = Alces::Stack::Templater::JSON_Templater.parse(json, @template_parameters)
-          save_file = get_file_name
-          save_file = save_file << hash[:nodename] if @group
+        def puts_template(template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
           puts "KICKSTART TEMPLATE"
-          puts "Would save to: " << "." << save_file << "\n\n"
-          puts Alces::Stack::Templater.file(@template, hash)
+          puts "Hash:" << combiner.parsed_hash.to_s
+          puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])
+          puts "Template:"
+          puts combiner.file(@finder.template)
         end
       end
     end

@@ -63,6 +63,11 @@ module Alces
                '--update-dhcp',
                default: false
 
+        option  :json,
+                'JSON file or string containing additional templating parameters',
+                '-j', '--additional-parameters',
+                default: false
+
         option :template,
                 'Specify which template file for updating dhcpd.hosts',
                 '--template',
@@ -84,12 +89,11 @@ module Alces
 
         def show_template_options
           options = {
-            :hostip=>"Head node IP address",
             :nodename=>"Compute node name",
             :fixedaddr=>"Compute node IP address",
             :hwaddr=>"Compute node mac address"
           }
-          Alces::Stack::Templater.show_options(options)
+          Alces::Stack::Templater::Options.show(options)
           exit 0
         end
 
@@ -103,7 +107,8 @@ module Alces
                      name_sequence_start: sequence_start,
                      name_sequence_length: sequence_length,
                      update_dhcp_flag: update_dhcp,
-                     template: template
+                     template: template,
+                     json: json
                      )
         end
       end
