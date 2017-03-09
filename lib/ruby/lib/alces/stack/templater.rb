@@ -31,7 +31,8 @@ module Alces
         def show_options(options={})
           const = {
             hostip: "#{`hostname -i`.chomp}",
-            index: "0"
+            index: "0 (integer)",
+            permanentboot: "false (boolean)"
           }
           puts "ERB can replace template parameters with variables from 5 sources:"
           puts "  1) JSON input from the command line using -j"
@@ -64,7 +65,7 @@ module Alces
           end
           puts "    (none)" if none_flag
           puts
-          puts "The constant value replaced by erb:"
+          puts "The constant values replaced by erb:"
           const.each do |key, value|
             spaces = align - key.length
             print"    <%= #{key} %> "
@@ -109,7 +110,8 @@ module Alces
       class Combiner < Handler
         DEFAULT_HASH = {
             hostip: `hostname -i`.chomp,
-            index: 0
+            index: 0,
+            permanentboot: false
           }
         def initialize(json, hash={})
           @combined_hash = DEFAULT_HASH.merge(hash)

@@ -30,9 +30,9 @@ class TC_Boot < Test::Unit::TestCase
     @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
     @template = "test.erb"
     @template_str = "Boot template, <%= nodename %>, <%= kernelappendoptions %>"
-    @template_str_kickstart = "#{@template_str} <%= kickstart %> <%= permanentboot %>"
-    @template_kickstart = "/tmp/test.erb"
-    @template_pxe_firstboot_str = "#{@template_str_kickstart} " << "<%= firstboot %>"
+    @template_str_kickstart = "Kickstart template, <%= nodename %>, <%= kernelappendoptions %> <%= kickstart %> <% if !permanentboot %>false<% end %>"
+    @template_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb"
+    @template_pxe_firstboot_str = "PXE template, <%= nodename %>, <%= kernelappendoptions %> <%= kickstart %> <% if !permanentboot %>false<% end %> <%= firstboot %>"
     @template_pxe_firstboot = "firstboot.erb"
     File.write("#{@default_template_location}#{@template_pxe_firstboot}", @template_pxe_firstboot_str)
     File.write(@template_kickstart, @template_str_kickstart)
@@ -54,9 +54,9 @@ class TC_Boot < Test::Unit::TestCase
       permanent_boot_flag: false
     }
     @input_group.merge!(@input_base)
-    @input_group_kickstart = Hash.new.merge(@input_group).merge({kickstart:"test"})
+    @input_group_kickstart = Hash.new.merge(@input_group).merge({kickstart:@template_kickstart})
     @input_group_kickstart[:template] = @template_kickstart
-    @input_nodename_kickstart = Hash.new.merge(@input_nodename).merge({kickstart:"test"})
+    @input_nodename_kickstart = Hash.new.merge(@input_nodename).merge({kickstart:@template_kickstart})
     @input_nodename_kickstart[:template] = @template_kickstart
     `cp /etc/hosts /etc/hosts.copy`
     `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
@@ -185,9 +185,9 @@ class TC_Boot < Test::Unit::TestCase
       @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
       hash_temp = Hash.new.merge(@input_nodename_kickstart)
       hash_temp[:kickstart] = "test.ks.slave04"
-      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
-      correct_pxe = combiner.replace_erb(@template_str_kickstart, combiner.parsed_hash)
+      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
+      correct_pxe = combiner.file("#{@default_template_location}#{@template}")
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")
       output_kick = `cat #{save_kick}`.chomp
       correct_kick = combiner.file("#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb")

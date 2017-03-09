@@ -50,7 +50,6 @@ module Alces
           @to_delete = []
           @to_delete_dry_run = []
           @save_loc_kickstart = @permanent_boot_flag ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
-          `mkdir -p #{@save_loc_kickstart} 2>/dev/null`
         end
 
         def run!
@@ -72,11 +71,12 @@ module Alces
             raise Interrupt
           else sleep
           end
-        rescue Exception => e
-          print "Exiting...."
-          STDOUT.flush
-          teardown(e)
-          puts "Done"
+        rescue StandardError => @e
+        ensure
+          @e ||= Interrupt
+          STDERR.print "Exiting...."
+          teardown(@e)
+          STDERR.puts "Done"
           $stdout.flush
           Kernel.exit(0)
         end
@@ -170,14 +170,10 @@ module Alces
           puts "Looking for completed nodes"
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
-            sleep 1
-            puts "Working"
+            sleep 10
             Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
           end
-          $stdout.flush
-          sleep 10
           puts "Found all nodes"
-          $stdout.flush
           return
         end
 
@@ -187,9 +183,8 @@ module Alces
           tear_down_flag_dry = true if @dry_run_flag and !@to_delete.empty?
           tear_down_flag = true if !@dry_run_flag and !@to_delete_dry_run.empty?
           if !@permanent_boot_flag
-            puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
-            @to_delete_dry_run.each do |file| puts "  #{file}" end
-            puts @to_delete
+            STDERR.puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
+            @to_delete_dry_run.each do |file| STDERR.puts "  #{file}" end
             @to_delete.each do |file| `rm -f #{file} 2>/dev/null` end
           end
           raise e
