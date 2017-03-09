@@ -19,17 +19,14 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/kickstart/cli'
-require 'alces/stack/kickstart/run'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
-module Alces
-  module Stack
-    module Kickstart
-      class << self
-        def run!(*args)
-          Run.new(*args).run!
-        end
-      end
-    end
+require "alces/stack/kickstart"
+require "alces/stack/templater"
+require "alces/stack/iterator"
+require "capture"
+
+class TC_Script < Test::Unit::TestCase
+  def setup
   end
 end

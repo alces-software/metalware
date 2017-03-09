@@ -19,12 +19,12 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/kickstart/cli'
-require 'alces/stack/kickstart/run'
+require 'alces/stack/script/cli'
+require 'alces/stack/script/run'
 
 module Alces
   module Stack
-    module Kickstart
+    module Script
       class << self
         def run!(*args)
           Run.new(*args).run!

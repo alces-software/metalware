@@ -1,3 +1,10 @@
+<<DOC
+: '
+: NAME: script
+: SYNOPSIS: Renders script templates
+: VERSION: 1.0.0
+: '
+DOC
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,17 +26,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/kickstart/cli'
-require 'alces/stack/kickstart/run'
+# Execute as ruby script if we're evaluating under bash
+if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
 
-module Alces
-  module Stack
-    module Kickstart
-      class << self
-        def run!(*args)
-          Run.new(*args).run!
-        end
-      end
-    end
-  end
-end
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
+
+require 'rubygems'
+require 'bundler/setup'
+
+require 'alces/stack/script'
+
+Alces::Stack::Script::CLI.execute if $0 == __FILE__
