@@ -60,6 +60,7 @@ class TC_Boot < Test::Unit::TestCase
     `cp /etc/hosts /etc/hosts.copy`
     `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
     `mkdir -p /var/lib/tftpboot/pxelinux.cfg/`
+    `mkdir -p /var/www/html/ks`
     `rm -rf /var/lib/tftpboot/pxelinux.cfg/*`
     `rm -rf /var/lib/metalware/rendered/ks/*`
     `rm -rf /var/lib/metalware/cache/*`
@@ -230,14 +231,14 @@ class TC_Boot < Test::Unit::TestCase
     @input_nodename_kickstart[:permanent_boot_flag] = true
     @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
     @input_nodename_kickstart[:template] = @template_pxe_firstboot
-    puts Alces::Stack::Templater::Finder.new("/opt/metalware/etc/templates/boot", "firstboot").templater
     save_pxe = "/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
     save_kick = "/var/www/html/ks/test.ks.#{@input_nodename_kickstart[:nodename]}"
     end_kick = "/var/lib/metalware/cache/metalwarebooter.#{@input_nodename_kickstart[:nodename]}"
     parent_lambda = -> (fork, pid) {
       assert_equal(false, fork.wait_child_terminated(0.5), "metal boot has exited early")
-      hash_temp = Hash.new.merge(@input_nodename_kickstart)
+      hash_temp = {}.merge(@input_nodename_kickstart)
       hash_temp[:kickstart] = "test.ks.#{@input_nodename_kickstart[:nodename]}"
+      hash_temp[:firstboot] = true
       combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
       correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str, combiner.parsed_hash)

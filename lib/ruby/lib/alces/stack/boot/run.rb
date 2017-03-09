@@ -58,8 +58,7 @@ module Alces
           #Generates kick start files if required
           run_kickstart if !@kickstart_template.to_s.empty?
 
-          case 
-          when @dry_run_flag
+          if @dry_run_flag
             lambda_proc = -> (parameter) {puts_template(parameter)}
           else
             lambda_proc = -> (parameter) {save_template(parameter)}
@@ -153,7 +152,11 @@ module Alces
                 `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
                 `rm -f #{@save_loc_kickstart}/#{@ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
               else
-                
+                if @dry_run_flag
+                  puts_template(options)
+                else
+                  save_template(options)
+                end
               end
             elsif !@found_nodes[options[:nodename]]
               @kickstart_teardown_exit_flag = true
@@ -163,11 +166,11 @@ module Alces
           puts "Looking for completed nodes"
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
-            sleep 10
-            Alces::Stack::Iterator.run(@group, lambda_proc, {nodename: @template_parameters[:nodename]})
+            sleep 1
+            Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
           end
           $stdout.flush
-          sleep 1
+          sleep 10
           puts "Found all nodes"
           $stdout.flush
           return
