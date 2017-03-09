@@ -83,6 +83,8 @@ chmod a+rw /var/lib/metalware/cache
 cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${source}/deployment" "${target}"
 if [[ -n "$alces_TEST" ]]; then
     cp -R "${source}/test" "${target}"
+else
+    rm -f "${target}/bin/test"
 fi
 say_done $?
 

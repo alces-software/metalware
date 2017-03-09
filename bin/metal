@@ -90,17 +90,9 @@ EOF
     #printf "    %-20s %s" "command" "XXX Command synopsis."
     echo ""
 }
-export -f display_help
 
-export alces_BINNAME="metal"
-export alces_BASE="/opt/metalware"
-export alces_CMDDIR="$alces_BASE/lib/actions"
-### RUBY
-export alces_RUBY="$alces_BASE/opt/ruby/bin/ruby"
-export alces_RUBYHOME="$alces_BASE/opt/ruby"
-export LD_LIBRARY_PATH="${alces_RUBYHOME}/lib:$LD_LIBRARY_PATH"
-export GEM_HOME="${alces_RUBYHOME}/lib/ruby/gems/2.1.0"
-export GEM_PATH="${alces_RUBYHOME}/lib/ruby/gems/2.1.0"
+export -f display_help
+$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/exportCmd
 
 cmd=$1
 
