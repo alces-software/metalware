@@ -3,9 +3,17 @@ PROMPT 0
 MENU TITLE PXE Menu
 TIMEOUT 5
 TOTALTIMEOUT 5
+<% if firstboot %>
 ONTIMEOUT INSTALL
+<% else %>
+ONTIMEOUT LOCAL
+<% end %>
 
 LABEL INSTALL
      KERNEL boot/centos7-kernel
-        APPEND initrd=boot/centos7-initrd.img ks=http://<%= hostip %>/metalware/ks/<%= kickstart %> network ks.sendmac _ALCES_BASE_HOSTNAME=<%= nodename %> <%= kernelappendoptions %>
+        APPEND initrd=boot/centos7-initrd.img ks=http://<%= hostip %><% if !permanentboot %>/metalware<% end %>/ks/<%= kickstart %> network ks.sendmac _ALCES_BASE_HOSTNAME=<%= nodename %> <%= kernelappendoptions %>
         IPAPPEND 2
+
+LABEL local
+     MENU LABEL (local)
+     MENU DEFAULT

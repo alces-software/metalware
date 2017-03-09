@@ -40,6 +40,7 @@ module Alces
           @permanent_boot_flag = options[:permanent_boot_flag]
           @template_parameters = {
             firstboot: true,
+            permanentboot: @permanent_boot_flag,
             kernelappendoptions: options[:kernel_append].chomp
           }
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
@@ -49,6 +50,7 @@ module Alces
           @to_delete = []
           @to_delete_dry_run = []
           @save_loc_kickstart = @permanent_boot_flag ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+          `mkdir -p #{@save_loc_kickstart} 2>/dev/null`
         end
 
         def run!
@@ -70,11 +72,12 @@ module Alces
             raise Interrupt
           else sleep
           end
-        rescue Exception => @e
-        ensure
+        rescue Exception => e
           print "Exiting...."
-          teardown(@e)
+          STDOUT.flush
+          teardown(e)
           puts "Done"
+          $stdout.flush
           Kernel.exit(0)
         end
 
@@ -127,6 +130,7 @@ module Alces
             return Alces::Stack::Kickstart::Run.new(@kickstart_template, hash).run!
           }
           kickstart_files = Alces::Stack::Iterator.run(@group, kickstart_lambda, kickstart_options)
+          kickstart_files
           if !@permanent_boot_flag
             @to_delete_dry_run.push(*kickstart_files) if @dry_run_flag
             @to_delete.push(*kickstart_files) if !@dry_run_flag
@@ -167,6 +171,7 @@ module Alces
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
             sleep 1
+            puts "Working"
             Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
           end
           $stdout.flush
@@ -184,6 +189,7 @@ module Alces
           if !@permanent_boot_flag
             puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
             @to_delete_dry_run.each do |file| puts "  #{file}" end
+            puts @to_delete
             @to_delete.each do |file| `rm -f #{file} 2>/dev/null` end
           end
           raise e

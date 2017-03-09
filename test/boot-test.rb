@@ -30,7 +30,7 @@ class TC_Boot < Test::Unit::TestCase
     @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
     @template = "test.erb"
     @template_str = "Boot template, <%= nodename %>, <%= kernelappendoptions %>"
-    @template_str_kickstart = "#{@template_str} <%= kickstart %>"
+    @template_str_kickstart = "#{@template_str} <%= kickstart %> <%= permanentboot %>"
     @template_kickstart = "/tmp/test.erb"
     @template_pxe_firstboot_str = "#{@template_str_kickstart} " << "<%= firstboot %>"
     @template_pxe_firstboot = "firstboot.erb"
@@ -41,6 +41,7 @@ class TC_Boot < Test::Unit::TestCase
     @finder = Alces::Stack::Templater::Finder.new(@default_template_location, @template)
     @ks_finder = Alces::Stack::Templater::Finder.new(@default_template_location, @template_kickstart)
     @input_base = {
+      permanentboot: false,
       template: @template,
       kernel_append: "KERNAL_APPEND",
       json: '{"json":"included","kernelappendoptions":"KERNAL_APPEND"}'
@@ -231,6 +232,7 @@ class TC_Boot < Test::Unit::TestCase
     @input_nodename_kickstart[:permanent_boot_flag] = true
     @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
     @input_nodename_kickstart[:template] = @template_pxe_firstboot
+    @input_nodename_kickstart[:permanentboot] = true
     save_pxe = "/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
     save_kick = "/var/www/html/ks/test.ks.#{@input_nodename_kickstart[:nodename]}"
     end_kick = "/var/lib/metalware/cache/metalwarebooter.#{@input_nodename_kickstart[:nodename]}"

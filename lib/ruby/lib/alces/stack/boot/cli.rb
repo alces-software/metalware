@@ -61,7 +61,8 @@ module Alces
 
         flag    :permanent_boot_flag,
                 'Causes the pxe and kickstart files remain after completion',
-                '-p', '--permanent'
+                '-p', '--permanent',
+                default: false
 
         flag    :template_options,
                 'Show templating options',
