@@ -48,6 +48,7 @@ module Alces
           @ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @kickstart_template) if @kickstart_template
           @to_delete = []
           @to_delete_dry_run = []
+          @save_loc_kickstart = @permanent_boot_flag ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
         end
 
         def run!
@@ -73,10 +74,8 @@ module Alces
         rescue Exception => @e
         ensure
           print "Exiting...."
-          $stdout.flush
           teardown(@e)
           puts "Done"
-          $stdout.flush
           Kernel.exit(0)
         end
 
@@ -90,7 +89,9 @@ module Alces
           add_kickstart(parameters) if @kickstart_template
           combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
           save = get_save_file(combiner)
-          @to_delete << save
+          if !@permanent_boot_flag
+            @to_delete << save
+          end
           combiner.save(@finder.template, save)
         end
 
@@ -100,7 +101,9 @@ module Alces
           save = get_save_file(combiner)
           @to_delete_dry_run <<  save
           puts "BOOT TEMPLATE"
-          puts "Would save file to: " << save << "\n"
+          if !@permanent_boot_flag
+            puts "Would save file to: " << save << "\n"
+          end
           puts combiner.file(@finder.template)
           puts
         end
@@ -116,7 +119,8 @@ module Alces
             group: false,
             dry_run_flag: @dry_run_flag,
             ran_from_boot: true,
-            json: @json
+            json: @json,
+            save_location: @save_loc_kickstart
           }
           kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
           kickstart_lambda = -> (hash) {
@@ -124,8 +128,10 @@ module Alces
             return Alces::Stack::Kickstart::Run.new(@kickstart_template, hash).run!
           }
           kickstart_files = Alces::Stack::Iterator.run(@group, kickstart_lambda, kickstart_options)
-          @to_delete_dry_run.push(*kickstart_files) if @dry_run_flag
-          @to_delete.push(*kickstart_files) if !@dry_run_flag
+          if !@permanent_boot_flag
+            @to_delete_dry_run.push(*kickstart_files) if @dry_run_flag
+            @to_delete.push(*kickstart_files) if !@dry_run_flag
+          end
         end
 
         def kickstart_teardown
@@ -133,15 +139,22 @@ module Alces
           delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
           Alces::Stack::Iterator.run(@group, delete_lambda, {nodename: @template_parameters[:nodename]})
 
+          # Switches to permanent boot
+          @template_parameters[:firstboot] = false
+
           @found_nodes = Hash.new
           lambda_proc = -> (options) {
             if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
               @found_nodes[options[:nodename]] = true
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
-              `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
-              `rm -f /var/lib/metalware/rendered/ks/#{@ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
               `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
+              if !@permanent_boot_flag
+                `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
+                `rm -f #{@save_loc_kickstart}/#{@ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
+              else
+                
+              end
             elsif !@found_nodes[options[:nodename]]
               @kickstart_teardown_exit_flag = true
             end
@@ -165,9 +178,11 @@ module Alces
           tear_down_flag = false
           tear_down_flag_dry = true if @dry_run_flag and !@to_delete.empty?
           tear_down_flag = true if !@dry_run_flag and !@to_delete_dry_run.empty?
-          puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
-          @to_delete_dry_run.each do |file| puts "  #{file}" end
-          @to_delete.each do |file| `rm -f #{file} 2>/dev/null` end
+          if !@permanent_boot_flag
+            puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
+            @to_delete_dry_run.each do |file| puts "  #{file}" end
+            @to_delete.each do |file| `rm -f #{file} 2>/dev/null` end
+          end
           raise e
         rescue Interrupt
           raise TearDownError.new("Files created during a dry run") if tear_down_flag_dry

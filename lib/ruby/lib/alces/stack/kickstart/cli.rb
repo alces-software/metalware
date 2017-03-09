@@ -59,6 +59,11 @@ module Alces
                 '--save-append',
                 default: ""
 
+        option  :save_location,
+                'File to save the rendered template in',
+                '--save-location',
+                default: "/var/lib/metalware/rendered/ks/"
+
         flag    :template_options,
                 'Show templating options',
                 '--template-options',
@@ -69,23 +74,15 @@ module Alces
                 '-x', '--dry-run',
                 default: false
 
-        def setup_signal_handler
-          trap('INT') do
-            STDERR.puts "\nExiting..." unless @exiting
-            @exiting = true
-            Kernel.exit(0)
-          end
-        end
-
         def show_template_options
           options = {
+            nodename: "The name of the node specified with -n"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
         end
 
         def execute
-          setup_signal_handler
           show_template_options if template_options
 
           Alces::Stack::Kickstart.run!(template, 
@@ -94,6 +91,7 @@ module Alces
               dry_run_flag: dry_run_flag,
               json: json,
               save_append: save_append,
+              save_location: save_location,
               ran_from_boot: false
             )
         end

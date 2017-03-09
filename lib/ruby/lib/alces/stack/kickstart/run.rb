@@ -41,6 +41,8 @@ module Alces
           @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
           @save_append = options[:save_append]
           @ran_from_boot = options[:ran_from_boot]
+          @save_location = "#{options[:save_location]}"
+          @save_location << "/" if @save_location[-1] != "/"
         end
 
         def run!
@@ -52,11 +54,12 @@ module Alces
           end
 
           Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
-          return get_save_file(@template_parameters[:nodename]) if @ran_from_boot
+          return if !@ran_from_boot
+          get_save_file(@template_parameters[:nodename])
         end
 
         def get_save_file(nodename)
-          str = "/var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks")
+          str = "#{@save_location}" << @finder.filename_diff_ext("ks")
           str << "." << @save_append if !@save_append.to_s.empty? and @save_append
           str << "." << nodename.to_s if !@group.to_s.empty? and @group
           return str

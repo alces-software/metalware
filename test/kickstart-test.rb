@@ -29,6 +29,7 @@ require "capture"
 `rm /var/lib/metalware/rendered/ks/* -rf`
 class TC_Kickstart < Test::Unit::TestCase
   def setup
+    @bash = File.read("/etc/profile.d/alces-metalware.sh")
     @template = "/tmp/template." << Process.pid.to_s
     @template_str = "<%= nodename %> <%= index %>"
     File.write(@template, @template_str)
@@ -38,9 +39,12 @@ class TC_Kickstart < Test::Unit::TestCase
       json: '{"json":"included", "index":0}',
       dry_run_flag: true,
       ran_from_boot: false,
-      save_append: "append"
+      save_append: "append",
+      save_location: "/var/lib/metalware/rendered/ks/"
     }
     @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @template)
+    @diff_loc = "/tmp/different_kicks_start"   
+    `mkdir #{@diff_loc} 2>/dev/null`
   end
 
   def options_checker(ks_o, template, hash={})
@@ -55,7 +59,7 @@ class TC_Kickstart < Test::Unit::TestCase
   end
 
   def test_input_parsing
-    ks = Alces::Stack::Kickstart::Run.new(@template)
+    ks = Alces::Stack::Kickstart::Run.new(@template, save_location: "/var/lib/metalware/rendered/ks/")
     options_checker(ks, @template)
     ks = Alces::Stack::Kickstart::Run.new(@template, @hash)
     options_checker(ks, @template, @hash)
@@ -78,7 +82,7 @@ class TC_Kickstart < Test::Unit::TestCase
   end
 
   def test_put_template
-    check_put_template({})
+    check_put_template({save_location: "/var/lib/metalware/rendered/ks/"})
     check_put_template(@hash)
     @hash[:group] = ""
     check_put_template(@hash)
@@ -98,25 +102,30 @@ class TC_Kickstart < Test::Unit::TestCase
   end
 
   def test_save_template
-    check_save_template({})
+    check_save_template({save_location: "/var/lib/metalware/rendered/ks/"})
     check_save_template(@hash)
   end
 
   def test_complete_run
-    bash = File.read("/etc/profile.d/alces-metalware.sh")
-    `#{bash}\n metal kickstart`
+    `#{@bash} metal kickstart`
     assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", "compute.ks") end
-    `#{bash}\n metal kickstart -n random`
+    `#{@bash} metal kickstart -n random`
     assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", "compute.ks") end
-    `#{bash}\n metal kickstart -n random --save-append appended`
+    `#{@bash} metal kickstart -n random --save-append appended`
     assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/", "compute.ks.appended") end
-    `#{bash}\n metal kickstart -g slave --save-append appended`
+    `#{@bash} metal kickstart -g slave --save-append appended`
     lambda_proc = -> (hash) {assert_nothing_raised do Alces::Stack::Templater::Finder.new("/var/lib/metalware/rendered/ks/" ,"compute.ks.appended.#{hash[:nodename]}") end}
     Alces::Stack::Iterator.run("slave", lambda_proc)
+  end
+
+  def test_different_save_location
+    `#{@bash} metal kickstart --save-location #{@diff_loc}`
+    assert(File.file?("#{@diff_loc}/compute.ks"), "Did not save file in the non-default location")
   end
 
   def teardown
     File.delete(@template) if File.exist?(@template)
     `rm /var/lib/metalware/rendered/ks/* -rf`
+    `rm -rf #{@diff_loc}`
   end
 end
