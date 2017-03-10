@@ -33,40 +33,90 @@ module Alces
         include Alces::Tools::Logging
         include Alces::Tools::Execution
 
-        def initialize(options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/boot/", options[:template])
-          @group = options[:group]
-          @dry_run_flag = options[:dry_run_flag]
-          @permanent_boot_flag = options[:permanent_boot_flag]
-          @template_parameters = {
-            firstboot: true,
-            permanentboot: @permanent_boot_flag,
-            kernelappendoptions: options[:kernel_append].chomp
-          }
-          @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
-          @json = options[:json]
-          @kickstart_template = options[:kickstart]
-          @ks_finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @kickstart_template) if @kickstart_template
+        def initialize(options = {})
+          @opt = Options.new(options)
           @to_delete = []
           @to_delete_dry_run = []
-          @save_loc_kickstart = @permanent_boot_flag ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+        end
+
+        class Options
+          def initialize(options = {})
+            @options = options
+          end
+
+          def finder
+            @finder ||= Alces::Stack::Templater::Finder.new(
+              "#{ENV['alces_BASE']}/etc/templates/boot/",
+              @options[:template])
+          end
+
+          def ks_finder
+            @ks_finder ||= @options[:kickstart] ?
+              Alces::Stack::Templater::Finder.new(
+                "#{ENV['alces_BASE']}/etc/templates/kickstart/",
+                @options[:kickstart])
+              : nil
+          end
+
+          def template_parameters
+            @template_parameters ||= {
+              firstboot: true,
+              permanentboot: permanent_boot?,
+              kernelappendoptions: kernel_append.chomp
+            }.tap do |h|
+              h[:nodename] =
+                @options[:nodename].chomp if @options[:nodename]
+            end
+          end
+
+          def group
+            @options[:group]
+          end
+
+          def save_loc_kickstart
+            permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+          end
+
+          def dry_run?
+            !!@options[:dry_run_flag]
+          end
+
+          def permanent_boot?
+            !!@options[:permanent_boot_flag]
+          end
+
+          def kickstart?
+            !!@options[:kickstart]
+          end
+
+          def method_missing(s, *a, &b)
+            if @options.key?(s)
+              @options[s]
+            else
+              super
+            end
+          end       
         end
 
         def run!
           puts "(CTRL+C TO TERMINATE)"
-          raise "Requires a node name, node group, or json input" if !@template_parameters.key?("nodename".to_sym) and !@group and !@json 
-
-          #Generates kick start files if required
-          run_kickstart if !@kickstart_template.to_s.empty?
-
-          if @dry_run_flag
-            lambda_proc = -> (parameter) {puts_template(parameter)}
-          else
-            lambda_proc = -> (parameter) {save_template(parameter)}
+          if !@opt.template_parameters.key?("nodename".to_sym) and !@opt.group and !@opt.json 
+            raise "Requires a node name, node group, or json input" 
           end
 
-          Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
-          if !@kickstart_template.to_s.empty?
+          #Generates kick start files if required
+          run_kickstart if @opt.kickstart?
+
+          if @opt.dry_run?
+            lambda_proc = -> (parameter) { puts_template(parameter) }
+          else
+            lambda_proc = -> (parameter) { save_template(parameter) }
+          end
+          Alces::Stack::Iterator.run(@opt.group,
+                                     lambda_proc,
+                                     @opt.template_parameters)
+
+          if @opt.kickstart?
             kickstart_teardown
             raise Interrupt
           else sleep
@@ -88,30 +138,30 @@ module Alces
         end
 
         def save_template(parameters={})
-          add_kickstart(parameters) if @kickstart_template
+          add_kickstart(parameters) if @opt.kickstart?
           combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
           save = get_save_file(combiner)
-          if !@permanent_boot_flag
+          unless @opt.permanent_boot?
             @to_delete << save
           end
-          combiner.save(@finder.template, save)
+          combiner.save(@opt.finder.template, save)
         end
 
         def puts_template(parameters={})
-          add_kickstart(parameters) if @kickstart_template
-          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          add_kickstart(parameters) if @opt.kickstart?
+          combiner = Alces::Stack::Templater::Combiner.new(@opt.json, parameters)
           save = get_save_file(combiner)
           @to_delete_dry_run <<  save
           puts "BOOT TEMPLATE"
-          if !@permanent_boot_flag
+          unless @opt.permanent_boot?
             puts "Would save file to: " << save << "\n"
           end
-          puts combiner.file(@finder.template)
+          puts combiner.file(@opt.finder.template)
           puts
         end
 
         def add_kickstart(parameters={})
-          ks_file = @ks_finder.filename_diff_ext("ks")
+          ks_file = @opt.ks_finder.filename_diff_ext("ks")
           ks_file << "." << parameters[:nodename]
           parameters[:kickstart] = ks_file
         end
@@ -119,44 +169,57 @@ module Alces
         def run_kickstart
           kickstart_options = {
             group: false,
-            dry_run_flag: @dry_run_flag,
+            dry_run_flag: @opt.dry_run?,
             ran_from_boot: true,
-            json: @json,
-            save_location: @save_loc_kickstart
+            json: @opt.json,
+            save_location: @opt.save_loc_kickstart
           }
-          kickstart_options[:nodename] = @template_parameters[:nodename] if @template_parameters.key?("nodename".to_sym)
+          kickstart_options[:nodename] =
+            @opt.template_parameters[:nodename] if @opt.template_parameters.key?(:nodename)
           kickstart_lambda = -> (hash) {
             hash[:save_append] = hash[:nodename]
-            return Alces::Stack::Kickstart::Run.new(@kickstart_template, hash).run!
+            return Alces::Stack::Kickstart::Run.new(@opt.kickstart, hash).run!
           }
-          kickstart_files = Alces::Stack::Iterator.run(@group, kickstart_lambda, kickstart_options)
-          kickstart_files
-          if !@permanent_boot_flag
-            @to_delete_dry_run.push(*kickstart_files) if @dry_run_flag
-            @to_delete.push(*kickstart_files) if !@dry_run_flag
+          kickstart_files = Alces::Stack::Iterator.run(@opt.group,
+                                                       kickstart_lambda,
+                                                       kickstart_options)
+          kickstart_files = [kickstart_files] unless kickstart_files.is_a? Array
+          unless @opt.permanent_boot?
+            @to_delete_dry_run.concat(kickstart_files) if @opt.dry_run?
+            @to_delete.concat(kickstart_files) unless @opt.dry_run?
           end
         end
 
         def kickstart_teardown
           # Deletes old signal files
-          delete_lambda = -> (options) { `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}` }
-          Alces::Stack::Iterator.run(@group, delete_lambda, {nodename: @template_parameters[:nodename]})
+          delete_lambda = -> (options) {
+            `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
+          }
+          Alces::Stack::Iterator.run(@opt.group,
+                                     delete_lambda,
+                                     @opt.template_parameters)
 
           # Switches to permanent boot
-          @template_parameters[:firstboot] = false
+          @opt.template_parameters[:firstboot] = false
+          @found_nodes = {}
 
-          @found_nodes = Hash.new
           lambda_proc = -> (options) {
-            if !@found_nodes[options[:nodename]] and File.file?("/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}")
+            if !@found_nodes[options[:nodename]] and
+               File.file?("/var/lib/metalware/cache/metalwarebooter." \
+                            "#{options[:nodename]}")
               @found_nodes[options[:nodename]] = true
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
+              puts options[:nodename]
               `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
-              if !@permanent_boot_flag
+              unless @opt.permanent_boot? 
                 `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
-                `rm -f #{@save_loc_kickstart}/#{@ks_finder.filename_diff_ext("ks")}.#{options[:nodename]} 2>/dev/null`
+                run_str = "rm -f #{@save_loc_kickstart}/" \
+                          "#{@opt.ks_finder.filename_diff_ext("ks")}." \
+                          "#{options[:nodename]} 2>/dev/nul"
+                `#{run_str}`
               else
-                if @dry_run_flag
+                if @opt.dry_run?
                   puts_template(options)
                 else
                   save_template(options)
@@ -166,12 +229,15 @@ module Alces
               @kickstart_teardown_exit_flag = true
             end
           }
+
           @kickstart_teardown_exit_flag = true
           puts "Looking for completed nodes"
           while @kickstart_teardown_exit_flag
             @kickstart_teardown_exit_flag = false
             sleep 10
-            Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
+            Alces::Stack::Iterator.run(@opt.group,
+                                       lambda_proc,
+                                       @opt.template_parameters)
           end
           puts "Found all nodes"
           return
@@ -180,17 +246,19 @@ module Alces
         def teardown(e)
           tear_down_flag_dry = false
           tear_down_flag = false
-          tear_down_flag_dry = true if @dry_run_flag and !@to_delete.empty?
-          tear_down_flag = true if !@dry_run_flag and !@to_delete_dry_run.empty?
-          if !@permanent_boot_flag
-            STDERR.puts "DRY RUN: Files that would be deleted:" if !@to_delete_dry_run.empty?
-            @to_delete_dry_run.each do |file| STDERR.puts "  #{file}" end
-            @to_delete.each do |file| `rm -f #{file} 2>/dev/null` end
+          tear_down_flag_dry = true if @opt.dry_run? and !@to_delete.empty?
+          tear_down_flag = true if !@opt.dry_run? and !@to_delete_dry_run.empty?
+          unless @opt.permanent_boot?
+            STDERR.puts "DRY RUN: Files that would be deleted:" unless @to_delete_dry_run.empty?
+            @to_delete_dry_run.each { |file| STDERR.puts "  #{file}" }
+            @to_delete.each { |file| `rm -f #{file} 2>/dev/null` }
           end
           raise e
         rescue Interrupt
-          raise TearDownError.new("Files created during a dry run") if tear_down_flag_dry
-          raise TearDownError.new("Files should have been saved! This was not a dry run") if tear_down_flag
+          raise TearDownError.new(
+            "Files created during a dry run") if tear_down_flag_dry
+          raise TearDownError.new(
+            "Files should have been saved! This was not a dry run") if tear_down_flag
         end
         class TearDownError < StandardError
         end

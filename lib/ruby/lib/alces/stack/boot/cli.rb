@@ -57,7 +57,7 @@ module Alces
         option  :template,
                 'Specify template',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/boot/install.erb"
+                default: "install.erb"
 
         flag    :permanent_boot_flag,
                 'Causes the pxe and kickstart files remain after completion',
