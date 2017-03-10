@@ -92,7 +92,7 @@ EOF
 }
 
 export -f display_help
-$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/exportCmd
+source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )../etc/metal.rc
 
 cmd=$1
 
