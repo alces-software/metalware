@@ -58,8 +58,9 @@ module Alces
         end
 
         def get_save_file(nodename)
-          str = "#{@save_location}".gsub("<nodename>", nodename)
-          str << @finder.filename_diff_ext("ks")
+          str = "#{@save_location}".gsub("<%= nodename %>", nodename)
+          str << @finder.filename_ext
+          `mkdir -p #{File.dirname(str)}`
           return str
         end
 
@@ -71,7 +72,7 @@ module Alces
         def puts_template(template_parameters)
           combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
           puts "SCRIPT TEMPLATE"
-          puts "Hash:" << combiner.parsed_hash.to_s
+          puts "Hash: " << combiner.parsed_hash.to_s
           puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])
           puts "Template:"
           puts combiner.file(@finder.template)

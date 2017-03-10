@@ -52,12 +52,13 @@ module Alces
         option  :template,
                 'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/script/basic.erb"
+                default: "empty.erb"
 
         option  :save_location,
-                'File to save the rendered template in',
+                'File to save the rendered template in.' \
+                  " NOTE: only replaces <%= nodename %>\n   ",
                 '--save-location',
-                default: "/var/lib/metalware/rendered/scripts/<nodename>"
+                default: "/var/lib/metalware/rendered/scripts/<%= nodename %>"
 
         flag    :template_options,
                 'Show templating options',
@@ -80,7 +81,7 @@ module Alces
         def execute
           show_template_options if template_options
 
-          Alces::Stack::Kickstart.run!(template, 
+          Alces::Stack::Script.run!(template, 
               nodename: nodename,
               group: group,
               dry_run_flag: dry_run_flag,

@@ -210,7 +210,6 @@ module Alces
               @found_nodes[options[:nodename]] = true
               puts "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
-              puts options[:nodename]
               `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
               unless @opt.permanent_boot? 
                 `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`

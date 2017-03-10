@@ -203,14 +203,16 @@ module Alces
       class Finder
         def initialize(default_location, template)
           @default_location = default_location
-          @template = find_template(template)
-          @filename_ext = @template.scan(/\.?[\w\_\-]+\.?[\w\_\-]*\Z/)[0].chomp
-          @filename = @filename_ext.scan(/\.?[\w\_\-]+/)[0].chomp
+          @template = find_template(template).chomp
+          @filename_ext = File.basename(@template)
+          @filename = File.basename(@template, ".*")
+          @path = File.dirname(@template)
         end
 
         attr_reader :template
         attr_reader :filename
         attr_reader :filename_ext
+        attr_reader :path
 
         def filename_diff_ext(ext)
           ext = ".#{ext}" if ext[0] != "."

@@ -69,6 +69,12 @@ class TC_Templater_Finder < Test::Unit::TestCase
     assert_equal(fullpath, find.template, "Could not find boot template")
   end
 
+  def test_path
+    fullpath = "#{@default_boot}install.erb"
+    find = Alces::Stack::Templater::Finder.new(@default_boot, "install")
+    assert_equal(@default_boot, find.path << "/", "Did not return correct path to template")
+  end
+
   def test_filename
     find = Alces::Stack::Templater::Finder.new(@default_kickstart, "compute")
     assert_equal("compute", find.filename, "Did not return correct filename or ext")

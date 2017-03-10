@@ -45,7 +45,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     @template_folder = "#{ENV['alces_BASE']}/etc/templates"
     @example_template = "#{@template_folder}/boot/install.erb"
     `mv #{ENV['alces_BASE']}/etc/config #{ENV['alces_BASE']}/etc/config.copy 2>&1`
-    `cp -r #{ENV['alces_BASE']}/test/config-test/ #{ENV['alces_BASE']}/etc/config`
+    `cp -r #{ENV['alces_BASE']}/test/helper/config #{ENV['alces_BASE']}/etc/config`
   end
 
   def test_no_input
