@@ -30,23 +30,31 @@ class TC_Boot_Long < Test::Unit::TestCase
     @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
     @template = "test.erb"
     @template_str = "Boot template, <%= nodename %>, <%= kernelappendoptions %>"
-    @template_str_kickstart = "Kickstart template, <%= nodename %>, <%= kernelappendoptions %> <%= kickstart %> <% if !permanentboot %>false<% end %>"
+    @template_str_kickstart =
+      "Kickstart template, <%= nodename %>, <%= kernelappendoptions %>" \
+      " <%= kickstart %> <% if !permanentboot %>false<% end %>"
     @template_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb"
-    @template_pxe_firstboot_str = "PXE template, <%= nodename %>, <%= kernelappendoptions %> <%= kickstart %> <% if !permanentboot %>false<% end %> <%= firstboot %>"
+    @template_pxe_firstboot_str =
+      "PXE template, <%= nodename %>, <%= kernelappendoptions %> " \
+      "<%= kickstart %> <% if !permanentboot %>false<% end %> <%= firstboot %>"
     @template_pxe_firstboot = "firstboot.erb"
-    File.write("#{@default_template_location}#{@template_pxe_firstboot}", @template_pxe_firstboot_str)
+    File.write("#{@default_template_location}#{@template_pxe_firstboot}",
+               @template_pxe_firstboot_str)
     File.write(@template_kickstart, @template_str_kickstart)
     File.write("#{@default_template_location}#{@template}", @template_str)
-    File.write("#{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}", @template_str)
-    @finder = Alces::Stack::Templater::Finder.new(@default_template_location, @template)
-    @ks_finder = Alces::Stack::Templater::Finder.new(@default_template_location, @template_kickstart)
+    File.write("#{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}",
+               @template_str)
+    @finder = Alces::Stack::Templater::Finder
+                .new(@default_template_location, @template)
+    @ks_finder = Alces::Stack::Templater::Finder
+                .new(@default_template_location, @template_kickstart)
     @input_base = {
       permanentboot: false,
       template: @template,
       kernel_append: "KERNAL_APPEND",
       json: '{"json":"included","kernelappendoptions":"KERNAL_APPEND"}'
     }
-    @input_nodename = Hash.new.merge(@input_base)
+    @input_nodename = {}.merge(@input_base)
     @input_nodename[:nodename] = "slave04"
     @input_group = {
       nodename: "SHOULD_BE_OVERRIDDEN",
@@ -54,9 +62,11 @@ class TC_Boot_Long < Test::Unit::TestCase
       permanent_boot_flag: false
     }
     @input_group.merge!(@input_base)
-    @input_group_kickstart = Hash.new.merge(@input_group).merge({kickstart:@template_kickstart})
+    @input_group_kickstart = {}.merge(@input_group)
+                               .merge({ kickstart: @template_kickstart })
     @input_group_kickstart[:template] = @template_kickstart
-    @input_nodename_kickstart = Hash.new.merge(@input_nodename).merge({kickstart:@template_kickstart})
+    @input_nodename_kickstart = {}.merge(@input_nodename)
+                                  .merge({ kickstart: @template_kickstart })
     @input_nodename_kickstart[:template] = @template_kickstart
     `cp /etc/hosts /etc/hosts.copy`
     `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
@@ -68,32 +78,53 @@ class TC_Boot_Long < Test::Unit::TestCase
   end
 
   def test_single_kickstart_command
-    save_pxe = "/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
-    save_kick = "/var/lib/metalware/rendered/ks/test.ks.#{@input_nodename_kickstart[:nodename]}"
-    end_kick = "/var/lib/metalware/cache/metalwarebooter.#{@input_nodename_kickstart[:nodename]}"
+    save_pxe = "/var/lib/tftpboot/pxelinux.cfg/" \
+               "#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
+    save_kick = "/var/lib/metalware/rendered/ks/test.ks." \
+                "#{@input_nodename_kickstart[:nodename]}"
+    end_kick = "/var/lib/metalware/cache/metalwarebooter." \
+               "#{@input_nodename_kickstart[:nodename]}"
+    
     parent_lambda = -> (fork, pid) {
-      assert_equal(false, fork.wait_child_terminated(0.5), "metal boot has exited early")
+      assert_equal(false,
+                   fork.wait_child_terminated(0.5),
+                   "metal boot has exited early")
       @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
       hash_temp = Hash.new.merge(@input_nodename_kickstart)
       hash_temp[:kickstart] = "test.ks.slave04"
       output_pxe = `cat #{save_pxe}`.chomp
-      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
+      combiner = Alces::Stack::Templater::Combiner
+                   .new(@input_nodename_kickstart[:json], hash_temp)
       correct_pxe = combiner.file("#{@default_template_location}#{@template}")
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")
       output_kick = `cat #{save_kick}`.chomp
-      correct_kick = combiner.file("#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb")
-      assert_equal(correct_kick, output_kick, "Did not create correct kickstart file")
+      correct_kick =
+        combiner.file("#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb")
+      assert_equal(correct_kick,
+                   output_kick, 
+                   "Did not create correct kickstart file")
       puts
       puts "Tester: This may take 30s"
       sleep 5
       File.write(end_kick, "")
       exited = fork.wait_child_terminated(20)
-      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp, "Pxe file have not been deleted")
-      assert_empty(`ls /var/lib/metalware/cache/`.chomp, "Cache files still exist")
-      assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp, "Kickstart files still exist")
-      assert_equal(true, exited, "metal boot -k cleaned up files correctly but didn't exit")
+      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp,
+                   "Pxe file have not been deleted")
+      assert_empty(`ls /var/lib/metalware/cache/`.chomp,
+                   "Cache files still exist")
+      assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp,
+                   "Kickstart files still exist")
+      assert_equal(true,
+                   exited,
+                   "metal boot -k cleaned up files correctly but didn't exit")
     }
-    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run! end }
+
+    child_lambda = lambda {
+      Capture.stdout {
+        Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run!
+      }
+    }
+
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
@@ -101,21 +132,40 @@ class TC_Boot_Long < Test::Unit::TestCase
     parent_lambda = -> (fork, pid) {
       lambda = -> (hash) {return 1}
       nodes = Alces::Stack::Iterator.run(@input_group_kickstart[:group], lambda)
-      assert_equal(false, fork.wait_child_terminated(2), "metal boot has exited early")
-      assert_equal(nodes.length, `ls /var/lib/tftpboot/pxelinux.cfg/`.lines.count, "Did not print all pxe files")
-      assert_equal(nodes.length, `ls /var/lib/metalware/rendered/ks/`.lines.count, "Did not print all render files")
+      assert_equal(false,
+                   fork.wait_child_terminated(2),
+                   "metal boot has exited early")
+      assert_equal(nodes.length,
+                   `ls /var/lib/tftpboot/pxelinux.cfg/`.lines.count,
+                   "Did not print all pxe files")
+      assert_equal(nodes.length,
+                   `ls /var/lib/metalware/rendered/ks/`.lines.count,
+                   "Did not print all render files")
       puts
       puts "Tester: This may take 30s"
       sleep 5
-      end_lambda = -> (hash) { File.write("/var/lib/metalware/cache/metalwarebooter.#{hash[:nodename]}", "") }
+      end_lambda = -> (hash) {
+        File.write("/var/lib/metalware/cache/metalwarebooter.#{hash[:nodename]}", "") 
+      }
       Alces::Stack::Iterator.run(@input_group_kickstart[:group], end_lambda)
       exited = fork.wait_child_terminated(20)
-      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp, "Pxe file have not been deleted")
-      assert_empty(`ls /var/lib/metalware/cache/`.chomp, "Cache files still exist")
-      assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp, "Kickstart files still exist")
-      assert_equal(true, exited, "metal boot -k cleaned up files correctly but didn't exit")
+      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp,
+                   "Pxe file have not been deleted")
+      assert_empty(`ls /var/lib/metalware/cache/`.chomp,
+                   "Cache files still exist")
+      assert_empty(`ls /var/lib/metalware/rendered/ks/`.chomp,
+                   "Kickstart files still exist")
+      assert_equal(true,
+                   exited,
+                   "metal boot -k cleaned up files correctly but didn't exit")
     }
-    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_group_kickstart).run! end }
+
+    child_lambda = lambda {
+      Capture.stdout {
+        Alces::Stack::Boot::Run.new(@input_group_kickstart).run!
+      }
+    }
+    
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
@@ -124,51 +174,85 @@ class TC_Boot_Long < Test::Unit::TestCase
     @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
     @input_nodename_kickstart[:template] = @template_pxe_firstboot
     @input_nodename_kickstart[:permanentboot] = true
-    save_pxe = "/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
+    save_pxe = "/var/lib/tftpboot/pxelinux.cfg/" \
+               "#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
     save_kick = "/var/www/html/ks/test.ks.#{@input_nodename_kickstart[:nodename]}"
-    end_kick = "/var/lib/metalware/cache/metalwarebooter.#{@input_nodename_kickstart[:nodename]}"
+    end_kick = "/var/lib/metalware/cache/metalwarebooter." \
+               "#{@input_nodename_kickstart[:nodename]}"
     parent_lambda = -> (fork, pid) {
-      assert_equal(false, fork.wait_child_terminated(0.5), "metal boot has exited early")
+      assert_equal(false, 
+                   fork.wait_child_terminated(0.5),
+                   "metal boot has exited early")
       hash_temp = {}.merge(@input_nodename_kickstart)
       hash_temp[:kickstart] = "test.ks.#{@input_nodename_kickstart[:nodename]}"
       hash_temp[:firstboot] = true
-      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
+      combiner = Alces::Stack::Templater::Combiner
+                   .new(@input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
-      correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str, combiner.parsed_hash)
-      assert_equal(correct_pxe, output_pxe, "Firstboot pxe file has not been rendered correctly")
+      correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str,
+                                         combiner.parsed_hash)
+      assert_equal(correct_pxe,
+                   output_pxe,
+                   "Firstboot pxe file has not been rendered correctly")
       puts
       puts "Tester: This may take 30s"
       sleep 5
       File.write(end_kick, "")
       exited = fork.wait_child_terminated(20)
-      assert_empty(`ls /var/lib/metalware/cache/`.chomp, "Cache files still exist")
+      assert_empty(`ls /var/lib/metalware/cache/`.chomp,
+                   "Cache files still exist")
       assert(File.file?(save_pxe), "Pxe file has been deleted")
       assert(File.file?(save_kick), "Kickstart file has been deleted")
       hash_temp[:firstboot] = false
-      combiner = Alces::Stack::Templater::Combiner.new(@input_nodename_kickstart[:json], hash_temp)
+      combiner = Alces::Stack::Templater::Combiner
+                   .new(@input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
-      correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str, combiner.parsed_hash)
-      assert_equal(correct_pxe, output_pxe, "Secondboot pxe file has not been rendered correctly")
-      assert_equal(true, exited, "metal boot -k cleaned up files correctly but didn't exit")
+      correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str,
+                                         combiner.parsed_hash)
+      assert_equal(correct_pxe,
+                   output_pxe,
+                   "Secondboot pxe file has not been rendered correctly")
+      assert_equal(true,
+                   exited,
+                   "metal boot -k cleaned up files correctly but didn't exit")
     }
-    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run! end }
+
+    child_lambda = lambda {
+      Capture.stdout { 
+        Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run!
+      }
+    }
+
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
   def test_run_single
-    save = "/var/lib/tftpboot/pxelinux.cfg/#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}"
+    save = "/var/lib/tftpboot/pxelinux.cfg/" \
+           "#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}"
     puts "\nTester: This may take 5s"
     parent_lambda = -> (fork, pid) {
-      assert_equal(false, fork.wait_child_terminated(1), "metal boot has exited early")
+      assert_equal(false,
+                   fork.wait_child_terminated(1),
+                   "metal boot has exited early")
       output = `cat #{save}`
       @input_nodename[:kernelappendoptions] = "KERNAL_APPEND"
-      correct = Alces::Stack::Templater::Handler.new.replace_erb(@template_str, @input_nodename)
+      correct = Alces::Stack::Templater::Handler
+                  .new.replace_erb(@template_str, @input_nodename)
       assert_equal(correct, output.chomp, "Did not replace template correctly")
       fork.interrupt_child
-      assert_equal(true, fork.wait_child_terminated(4), "metal boot has not finished")
-      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp, "Pxe file have not been deleted")
+      assert_equal(true,
+                   fork.wait_child_terminated(4),
+                   "metal boot has not finished")
+      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp,
+                   "Pxe file have not been deleted")
     }
-    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_nodename).run! end }
+
+    child_lambda = lambda {
+      Capture.stdout {
+        Alces::Stack::Boot::Run.new(@input_nodename).run! 
+        } 
+      }
+    
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
@@ -176,17 +260,30 @@ class TC_Boot_Long < Test::Unit::TestCase
     save = "/var/lib/tftpboot/pxelinux.cfg/"
     puts "\nTester: This may take 5s"
     parent_lambda = -> (fork, pid) {
-      assert_equal(false, fork.wait_child_terminated(1), "metal boot has exited early")
+      assert_equal(false,
+                   fork.wait_child_terminated(1),
+                   "metal boot has exited early")
       check_lambda = -> (hash) {
         ip = `gethostip -x #{hash[:nodename]}`.chomp
-        assert_equal(ip, `ls #{save} | grep #{ip}`.chomp, "Could not find pxe file")
+        assert_equal(ip,
+                     `ls #{save} | grep #{ip}`.chomp,
+                     "Could not find pxe file")
       }
       Alces::Stack::Iterator.run(@input_group[:group], check_lambda)
       fork.interrupt_child
-      assert_equal(true, fork.wait_child_terminated(4), "metal boot has not finished")
-      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp, "Pxe file have not been deleted")
+      assert_equal(true,
+                   fork.wait_child_terminated(4),
+                   "metal boot has not finished")
+      assert_empty(`ls /var/lib/tftpboot/pxelinux.cfg/`.chomp,
+                   "Pxe file have not been deleted")
     }
-    child_lambda = lambda { Capture.stdout do Alces::Stack::Boot::Run.new(@input_group).run! end }
+
+    child_lambda = lambda { 
+      Capture.stdout {
+        Alces::Stack::Boot::Run.new(@input_group).run! 
+        }
+      }
+    
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
