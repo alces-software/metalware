@@ -49,20 +49,25 @@ module Alces
                 '-j', '--additional-parameters',
                 default: false
 
+        option  :kernel_append,
+                'Specify value for kernel append in template. Check --template-options',
+                '--kernelappendoptions',
+                default: ""
+
         option  :template,
                 'Specify template',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/boot/install.erb"
+                default: "install.erb"
+
+        flag    :permanent_boot_flag,
+                'Causes the pxe and kickstart files remain after completion',
+                '-p', '--permanent',
+                default: false
 
         flag    :template_options,
                 'Show templating options',
                 '--template-options',
                 default: false
-
-        option  :kernel_append,
-                'Specify value for kernel append in template. Check --template-options',
-                '--kernelappendoptions',
-                default: ""
 
         option  :kickstart,
                 'Renders the kickstart template if include. Deletes the file at the end',
@@ -75,9 +80,10 @@ module Alces
 
         def show_template_options
           options = {
-            :nodename => "Value specified by --node-name",
-            :kernelappendoptions => "Value specified by --kernelappendoptions",
-            :kickstart => "Determined from --kickstart (required) and nodename"
+            nodename: "Value specified by --node-name",
+            kernelappendoptions: "Value specified by --kernelappendoptions",
+            kickstart: "Determined from --kickstart (required) and nodename",
+            firstboot: "True by default, switches to false on second render if --permanent is specified"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -92,7 +98,8 @@ module Alces
               kernel_append: kernel_append,
               dry_run_flag: dry_run_flag,
               json: json,
-              kickstart: kickstart
+              kickstart: kickstart,
+              permanent_boot_flag: permanent_boot_flag
             )
         end
       end
