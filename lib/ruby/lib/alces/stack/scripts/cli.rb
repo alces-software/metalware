@@ -25,12 +25,12 @@ require "alces/stack/templater"
 
 module Alces
   module Stack
-    module Script
+    module Scripts
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal script'
+        name 'metal scripts'
         description "Renders script templates"
         log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
@@ -49,16 +49,16 @@ module Alces
                 '-j', '--additional-parameters',
                 default: false
 
-        option  :template,
-                'Template file to be used',
-                '-t', '--template',
-                default: "empty.erb"
-
         option  :save_location,
                 'File to save the rendered template in.' \
                   " NOTE: only replaces <%= nodename %>\n   ",
                 '--save-location',
                 default: "/var/lib/metalware/rendered/scripts/<%= nodename %>"
+
+        option  :template,
+                'Template file to be used',
+                '-t', '--template',
+                default: "empty.erb"
 
         flag    :template_options,
                 'Show templating options',

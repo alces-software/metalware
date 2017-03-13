@@ -27,7 +27,7 @@ require "alces/stack/iterator"
 class TC_Script < Test::Unit::TestCase
   def setup
     @bash = File.read("/etc/profile.d/alces-metalware.sh")
-    @base_temp_loc = "#{ENV['alces_BASE']}/etc/templates/script"
+    @base_temp_loc = "#{ENV['alces_BASE']}/etc/templates/scripts"
     @template = "test.sh"
     @template_str = "<%= nodename %> <%= json %>"
     File.write("#{@base_temp_loc}/#{@template}.erb", @template_str)
@@ -42,7 +42,7 @@ class TC_Script < Test::Unit::TestCase
 
   def test_single_dry
     output = 
-      `#{@bash} metal script -x -n #{@single_node} -j '#{@json}' -t #{@template}`
+      `#{@bash} metal scripts -x -n #{@single_node} -j '#{@json}' -t #{@template}`
     combiner = Alces::Stack::Templater::Combiner.new(@json, @single_input_hash)
     correct = "SCRIPT TEMPLATE\nHash: " << combiner.parsed_hash.to_s
     correct << "\nSave: " << @save_location.gsub("<%= nodename %>", @single_node)
@@ -52,7 +52,7 @@ class TC_Script < Test::Unit::TestCase
 
   def test_single
     new_save_loc = "#{@save_location_base}/<%= nodename %>/add/here"
-    run_str = "#{@bash} metal script -n #{@single_node} -j '#{@json}' -t " \
+    run_str = "#{@bash} metal scripts -n #{@single_node} -j '#{@json}' -t " \
               "#{@template} -v --save-location \"#{new_save_loc}\""
     `#{run_str}`
     new_save_loc << "/#{@finder.filename_ext}"
@@ -63,7 +63,7 @@ class TC_Script < Test::Unit::TestCase
   end
 
   def test_group
-    `#{@bash} metal script -g slave -j '#{@json}' -t #{@template}`
+    `#{@bash} metal scripts -g slave -j '#{@json}' -t #{@template}`
     folders = `ls #{@save_location_base}`.split("\n")
     num_nodes = 
       Alces::Stack::Iterator.run("slave", lambda { |a| return a }, {}).count

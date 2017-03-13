@@ -42,8 +42,6 @@ module Alces
         class Options
           def initialize(options = {})
             @options = options
-            @script_finder = Alces::Stack::Templater::Finder
-              .new("#{ENV['alces_BASE']}/etc/templates/scripts")
           end
 
           def finder
@@ -91,15 +89,16 @@ module Alces
             !!@options[:kickstart]
           end
 
-          class scripts
-            class << self
-              def included?
-                !!@options[:script]
-              end
-
-              def scripts
-
-              end
+          SCRIPT_TEMP_LOC = "#{ENV['alces_BASE']}/etc/templates/scripts"
+          def scripts?
+            !!@options[:script]
+          end
+          
+          def each_script(&block)
+            script = @options[:scripts].is_a? Array ? 
+                       @options[:scripts] : [@options[:scripts]]
+            script.each do |s|
+              yield Alces::Stack::Templater::Finder.new(SCRIPT_TEMP_LOC, s)
             end
           end
 
@@ -118,8 +117,8 @@ module Alces
             raise "Requires a node name, node group, or json input" 
           end
 
-          #Generates kick start files if required
-          run_kickstart if @opt.kickstart?
+          render_kickstart if @opt.kickstart?
+          render_scripts if @opt.scripts.included?
 
           if @opt.dry_run?
             lambda_proc = -> (parameter) { puts_template(parameter) }
@@ -170,13 +169,25 @@ module Alces
           puts
         end
 
+        def add_files_to_delete(array)
+          array = [array] unless array.is_a? Array
+          unless @opt.permanent_boot?
+            @to_delete_dry_run.concat(array) if @opt.dry_run?
+            @to_delete.concat(array) unless @opt.dry_run?
+          end
+        end
+
+        def render_scripts
+          puts 
+        end
+
         def add_kickstart(parameters={})
           ks_file = @opt.ks_finder.filename_diff_ext("ks")
           ks_file << "." << parameters[:nodename]
           parameters[:kickstart] = ks_file
         end
 
-        def run_kickstart
+        def render_kickstart
           kickstart_options = {
             group: false,
             dry_run_flag: @opt.dry_run?,
@@ -186,18 +197,16 @@ module Alces
           }
           kickstart_options[:nodename] =
             @opt.template_parameters[:nodename] if @opt.template_parameters.key?(:nodename)
+          
           kickstart_lambda = -> (hash) {
             hash[:save_append] = hash[:nodename]
             return Alces::Stack::Kickstart::Run.new(@opt.kickstart, hash).run!
           }
+          
           kickstart_files = Alces::Stack::Iterator.run(@opt.group,
                                                        kickstart_lambda,
                                                        kickstart_options)
-          kickstart_files = [kickstart_files] unless kickstart_files.is_a? Array
-          unless @opt.permanent_boot?
-            @to_delete_dry_run.concat(kickstart_files) if @opt.dry_run?
-            @to_delete.concat(kickstart_files) unless @opt.dry_run?
-          end
+          add_files_to_delete(kickstart_files)
         end
 
         def kickstart_teardown

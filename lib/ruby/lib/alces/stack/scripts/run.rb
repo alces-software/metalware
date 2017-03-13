@@ -27,13 +27,13 @@ require 'alces/stack/iterator'
 
 module Alces
   module Stack
-    module Script
+    module Scripts
       class Run
         include Alces::Tools::Logging
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/script/", template)
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/Scripts/", template)
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
