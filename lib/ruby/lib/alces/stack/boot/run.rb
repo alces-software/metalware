@@ -42,6 +42,8 @@ module Alces
         class Options
           def initialize(options = {})
             @options = options
+            @script_finder = Alces::Stack::Templater::Finder
+              .new("#{ENV['alces_BASE']}/etc/templates/scripts")
           end
 
           def finder
@@ -89,6 +91,18 @@ module Alces
             !!@options[:kickstart]
           end
 
+          class scripts
+            class << self
+              def included?
+                !!@options[:script]
+              end
+
+              def scripts
+
+              end
+            end
+          end
+
           def method_missing(s, *a, &b)
             if @options.key?(s)
               @options[s]
@@ -100,7 +114,7 @@ module Alces
 
         def run!
           puts "(CTRL+C TO TERMINATE)"
-          if !@opt.template_parameters.key?("nodename".to_sym) and !@opt.group and !@opt.json 
+          if !@opt.template_parameters.key?(:nodename) and !@opt.group and !@opt.json 
             raise "Requires a node name, node group, or json input" 
           end
 
@@ -116,11 +130,7 @@ module Alces
                                      lambda_proc,
                                      @opt.template_parameters)
 
-          if @opt.kickstart?
-            kickstart_teardown
-            raise Interrupt
-          else sleep
-          end
+          @opt.kickstart? ? kickstart_teardown : sleep
         rescue StandardError => @e
         ensure
           @e ||= Interrupt

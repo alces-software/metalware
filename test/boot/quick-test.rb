@@ -188,6 +188,10 @@ class TC_Boot_Quick < Test::Unit::TestCase
     Alces::Stack::Iterator.run(@input_group_kickstart[:group], check_lambda)
   end
 
+  def test_script_input
+    
+  end
+
   def teardown
     `rm #{@default_template_location}#{@template}`
     `rm #{@default_template_location}#{@template_pxe_firstboot}`

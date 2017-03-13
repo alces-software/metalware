@@ -73,6 +73,9 @@ module Alces
                 'Renders the kickstart template if include. Deletes the file at the end',
                 '-k', '--kickstart'
 
+        option  :script,
+                'edhhgdsh',
+
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
                 '-x', '--dry-run',
