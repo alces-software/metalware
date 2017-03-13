@@ -64,11 +64,11 @@ class TC_Boot_Quick < Test::Unit::TestCase
   end
 
   def test_input_passing_group_kickstart
-    check_passing(@ks_finder, @input_group_kickstart)
+    check_passing(@finder, @input_group_kickstart)
   end
 
   def test_input_passing_nodename_kickstart
-    check_passing(@ks_finder, @input_nodename_kickstart)
+    check_passing(@finder, @input_nodename_kickstart)
   end
 
   def test_get_save_file
@@ -111,9 +111,9 @@ class TC_Boot_Quick < Test::Unit::TestCase
     `rm -f #{save}`
   end
 
-  def test_run_kickstart_single
+  def test_render_kickstart_single
     boot = Alces::Stack::Boot::Run.new(@input_nodename_kickstart)
-    boot.run_kickstart
+    boot.render_kickstart
     assert_equal("/var/lib/metalware/rendered/ks/test.ks." \
                    "#{@input_nodename_kickstart[:nodename]}",
                  boot.instance_variable_get(:@to_delete)[0],
@@ -130,9 +130,9 @@ class TC_Boot_Quick < Test::Unit::TestCase
                  "Did not pass kickstart template correctly")
   end
 
-  def test_run_kickstart_group
+  def test_render_kickstart_group
     boot = Alces::Stack::Boot::Run.new(@input_group_kickstart)
-    boot.run_kickstart
+    boot.render_kickstart
     check_lambda = -> (hash) { 
       assert_equal("/var/lib/metalware/rendered/ks/test.ks.#{hash[:nodename]}",
                    boot.instance_variable_get(:@to_delete)[hash[:index]],
@@ -142,6 +142,13 @@ class TC_Boot_Quick < Test::Unit::TestCase
   end
 
   def test_render_script_nodename
+    @input_nodename_script[:permanent_boot] = true
     boot = Alces::Stack::Boot::Run.new(@input_nodename_script)
+    boot.render_scripts
+  end
+
+  def test_render_script_group
+    boot = Alces::Stack::Boot::Run.new(@input_group_script)
+    boot.render_scripts
   end
 end

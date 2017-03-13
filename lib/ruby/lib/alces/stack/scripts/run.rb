@@ -33,7 +33,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/Scripts/", template)
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/scripts/", template)
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -45,7 +45,8 @@ module Alces
         end
 
         def run!
-          raise "Ran from boot can only run with a single node" if @ran_from_boot and @group
+          raise "Requires a nodename or group" if !@group and !@template_parameters[:nodename]
+          
           if @dry_run_flag
             lambda_proc = -> (template_parameters) { puts_template(template_parameters) }
           else
@@ -53,20 +54,20 @@ module Alces
           end
 
           Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
-          return if !@ran_from_boot
-          get_save_file(@template_parameters[:nodename])
         end
 
         def get_save_file(nodename)
           str = "#{@save_location}".gsub("<%= nodename %>", nodename)
-          str << @finder.filename_ext
+          str << @finder.filename_ext_trim_erb
           `mkdir -p #{File.dirname(str)}`
           return str
         end
 
         def save_template(template_parameters)
           combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
-          combiner.save(@finder.template, get_save_file(combiner.parsed_hash[:nodename]))
+          save = get_save_file(combiner.parsed_hash[:nodename])
+          combiner.save(@finder.template, save)
+          return save
         end
 
         def puts_template(template_parameters)

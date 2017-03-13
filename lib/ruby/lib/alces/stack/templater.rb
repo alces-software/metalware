@@ -32,7 +32,7 @@ module Alces
           const = {
             hostip: "#{`hostname -i`.chomp}",
             index: "0 (integer)",
-            permanentboot: "false (boolean)"
+            permanent_boot: "false (boolean)"
           }
           puts "ERB can replace template parameters with variables from 5 sources:"
           puts "  1) JSON input from the command line using -j"
@@ -111,7 +111,7 @@ module Alces
         DEFAULT_HASH = {
             hostip: `hostname -i`.chomp,
             index: 0,
-            permanentboot: false
+            permanent_boot: false
           }
         def initialize(json, hash={})
           @combined_hash = DEFAULT_HASH.merge(hash)
@@ -205,6 +205,7 @@ module Alces
           @default_location = default_location
           @template = find_template(template).chomp
           @filename_ext = File.basename(@template)
+          @filename_ext_trim_erb = @filename_ext.gsub(".erb", "")
           @filename = File.basename(@template, ".*")
           @path = File.dirname(@template)
         end
@@ -212,6 +213,7 @@ module Alces
         attr_reader :template
         attr_reader :filename
         attr_reader :filename_ext
+        attr_reader :filename_ext_trim_erb
         attr_reader :path
 
         def filename_diff_ext(ext)

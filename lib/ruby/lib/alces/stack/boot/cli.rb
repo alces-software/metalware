@@ -74,7 +74,7 @@ module Alces
                 '-k', '--kickstart'
 
         option  :scripts,
-                'Takes a list of scripts ',
+                'Renders script templates, saved in default location. Format: comma separated string',
                 '-s', '--scripts'
 
         flag    :dry_run_flag,
@@ -100,10 +100,11 @@ module Alces
               group: group,
               template: template,
               kernel_append: kernel_append,
-              dry_run_flag: dry_run_flag,
+              dry_run: dry_run_flag,
               json: json,
               kickstart: kickstart,
-              permanent_boot_flag: permanent_boot_flag
+              permanent_boot: permanent_boot_flag,
+              scripts: scripts
             )
         end
       end

@@ -81,7 +81,7 @@ module Alces
         def execute
           show_template_options if template_options
 
-          Alces::Stack::Script.run!(template, 
+          Alces::Stack::Scripts.run!(template, 
               nodename: nodename,
               group: group,
               dry_run_flag: dry_run_flag,

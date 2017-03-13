@@ -24,6 +24,7 @@ require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require "alces/stack/templater"
 require 'alces/stack/kickstart'
+require 'alces/stack/scripts'
 require 'json'
 
 module Alces
@@ -61,7 +62,7 @@ module Alces
           def template_parameters
             @template_parameters ||= {
               firstboot: true,
-              permanentboot: permanent_boot?,
+              permanent_boot: self.permanent_boot?,
               kernelappendoptions: kernel_append.chomp
             }.tap do |h|
               h[:nodename] =
@@ -74,37 +75,26 @@ module Alces
           end
 
           def save_loc_kickstart
-            permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+            self.permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
           end
 
-          def dry_run?
-            !!@options[:dry_run_flag]
-          end
-
-          def permanent_boot?
-            !!@options[:permanent_boot_flag]
-          end
-
-          def kickstart?
-            !!@options[:kickstart]
-          end
-
-          SCRIPT_TEMP_LOC = "#{ENV['alces_BASE']}/etc/templates/scripts"
-          def scripts?
-            !!@options[:script]
+          def save_loc_script
+            self.permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
           end
           
           def each_script(&block)
-            script = @options[:scripts].is_a? Array ? 
-                       @options[:scripts] : [@options[:scripts]]
-            script.each do |s|
-              yield Alces::Stack::Templater::Finder.new(SCRIPT_TEMP_LOC, s)
+            scripts = "#{@options[:scripts]}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
+                                             .split(/\s*,\s*/)
+            scripts.each do |s|
+              yield s
             end
           end
 
           def method_missing(s, *a, &b)
             if @options.key?(s)
               @options[s]
+            elsif s[-1] == "?"
+              !!@options[s[0...-1].to_sym]
             else
               super
             end
@@ -118,13 +108,14 @@ module Alces
           end
 
           render_kickstart if @opt.kickstart?
-          render_scripts if @opt.scripts.included?
+          render_scripts if @opt.scripts?
 
           if @opt.dry_run?
             lambda_proc = -> (parameter) { puts_template(parameter) }
           else
             lambda_proc = -> (parameter) { save_template(parameter) }
           end
+
           Alces::Stack::Iterator.run(@opt.group,
                                      lambda_proc,
                                      @opt.template_parameters)
@@ -170,6 +161,7 @@ module Alces
         end
 
         def add_files_to_delete(array)
+          return if !array or array.empty?
           array = [array] unless array.is_a? Array
           unless @opt.permanent_boot?
             @to_delete_dry_run.concat(array) if @opt.dry_run?
@@ -178,7 +170,17 @@ module Alces
         end
 
         def render_scripts
-          puts 
+          @opt.each_script do |s| 
+            parameters = {}.merge(@opt.template_parameters)
+                           .merge({
+                              ran_from_boot: true,
+                              dry_run_flag: @opt.dry_run?,
+                              group: @opt.group
+                            })
+            save_files = Alces::Stack::Scripts::Run.new(s, parameters).run!
+            puts save_files
+            add_files_to_delete(save_files)
+          end
         end
 
         def add_kickstart(parameters={})
@@ -188,16 +190,16 @@ module Alces
         end
 
         def render_kickstart
-          kickstart_options = {
-            group: false,
-            dry_run_flag: @opt.dry_run?,
-            ran_from_boot: true,
-            json: @opt.json,
-            save_location: @opt.save_loc_kickstart
-          }
-          kickstart_options[:nodename] =
-            @opt.template_parameters[:nodename] if @opt.template_parameters.key?(:nodename)
-          
+          kickstart_options = {}.merge(@opt.template_parameters)
+                                .merge({
+                                  group: false,
+                                  dry_run_flag: @opt.dry_run?,
+                                  ran_from_boot: true,
+                                  json: @opt.json,
+                                  save_location: @opt.save_loc_kickstart,
+                                  kickstart: @opt.kickstart
+                                })
+
           kickstart_lambda = -> (hash) {
             hash[:save_append] = hash[:nodename]
             return Alces::Stack::Kickstart::Run.new(@opt.kickstart, hash).run!

@@ -20,63 +20,16 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+$: << "#{ENV['alces_BASE']}/test/boot"
 
 require 'alces/stack/boot'
 require 'capture'
 require 'forkprocess'
+require 'boot-setup'
 
 class TC_Boot_Long < Test::Unit::TestCase
-  def setup
-    @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
-    @template = "test.erb"
-    @template_str = "Boot template, <%= nodename %>, <%= kernelappendoptions %>"
-    @template_str_kickstart =
-      "Kickstart template, <%= nodename %>, <%= kernelappendoptions %>" \
-      " <%= kickstart %> <% if !permanentboot %>false<% end %>"
-    @template_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb"
-    @template_pxe_firstboot_str =
-      "PXE template, <%= nodename %>, <%= kernelappendoptions %> " \
-      "<%= kickstart %> <% if !permanentboot %>false<% end %> <%= firstboot %>"
-    @template_pxe_firstboot = "firstboot.erb"
-    File.write("#{@default_template_location}#{@template_pxe_firstboot}",
-               @template_pxe_firstboot_str)
-    File.write(@template_kickstart, @template_str_kickstart)
-    File.write("#{@default_template_location}#{@template}", @template_str)
-    File.write("#{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}",
-               @template_str)
-    @finder = Alces::Stack::Templater::Finder
-                .new(@default_template_location, @template)
-    @ks_finder = Alces::Stack::Templater::Finder
-                .new(@default_template_location, @template_kickstart)
-    @input_base = {
-      permanentboot: false,
-      template: @template,
-      kernel_append: "KERNAL_APPEND",
-      json: '{"json":"included","kernelappendoptions":"KERNAL_APPEND"}'
-    }
-    @input_nodename = {}.merge(@input_base)
-    @input_nodename[:nodename] = "slave04"
-    @input_group = {
-      nodename: "SHOULD_BE_OVERRIDDEN",
-      group: "slave",
-      permanent_boot_flag: false
-    }
-    @input_group.merge!(@input_base)
-    @input_group_kickstart = {}.merge(@input_group)
-                               .merge({ kickstart: @template_kickstart })
-    @input_group_kickstart[:template] = @template_kickstart
-    @input_nodename_kickstart = {}.merge(@input_nodename)
-                                  .merge({ kickstart: @template_kickstart })
-    @input_nodename_kickstart[:template] = @template_kickstart
-    `cp /etc/hosts /etc/hosts.copy`
-    `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
-    `mkdir -p /var/lib/tftpboot/pxelinux.cfg/`
-    `mkdir -p /var/www/html/ks`
-    `rm -rf /var/lib/tftpboot/pxelinux.cfg/*`
-    `rm -rf /var/lib/metalware/rendered/ks/*`
-    `rm -rf /var/lib/metalware/cache/*`
-  end
-
+  include BootTestSetup
+  
   def test_single_kickstart_command
     save_pxe = "/var/lib/tftpboot/pxelinux.cfg/" \
                "#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
@@ -170,15 +123,15 @@ class TC_Boot_Long < Test::Unit::TestCase
   end
 
   def test_permanent_boot
-    @input_nodename_kickstart[:permanent_boot_flag] = true
     @input_nodename_kickstart[:kernelappendoptions] = "KERNAL_APPEND"
     @input_nodename_kickstart[:template] = @template_pxe_firstboot
-    @input_nodename_kickstart[:permanentboot] = true
+    @input_nodename_kickstart[:permanent_boot] = true
     save_pxe = "/var/lib/tftpboot/pxelinux.cfg/" \
                "#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
     save_kick = "/var/www/html/ks/test.ks.#{@input_nodename_kickstart[:nodename]}"
     end_kick = "/var/lib/metalware/cache/metalwarebooter." \
                "#{@input_nodename_kickstart[:nodename]}"
+    
     parent_lambda = -> (fork, pid) {
       assert_equal(false, 
                    fork.wait_child_terminated(0.5),
@@ -218,9 +171,9 @@ class TC_Boot_Long < Test::Unit::TestCase
     }
 
     child_lambda = lambda {
-      Capture.stdout { 
+      Capture.stdout do
         Alces::Stack::Boot::Run.new(@input_nodename_kickstart).run!
-      }
+      end
     }
 
     ForkProcess.new(parent_lambda, child_lambda).run
@@ -285,13 +238,5 @@ class TC_Boot_Long < Test::Unit::TestCase
       }
     
     ForkProcess.new(parent_lambda, child_lambda).run
-  end
-
-  def teardown
-    `rm #{@default_template_location}#{@template}`
-    `rm #{@default_template_location}#{@template_pxe_firstboot}`
-    `rm #{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}`
-    `rm -f #{@template_kickstart}`
-    `mv /etc/hosts.copy /etc/hosts`
   end
 end
