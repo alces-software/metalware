@@ -162,7 +162,6 @@ module Alces
                 break
               end
             end
-            return if !found
             raise "Could not remove mac address from dhcpd.hosts" if start_line < 0 or end_line < 0
           end
 
