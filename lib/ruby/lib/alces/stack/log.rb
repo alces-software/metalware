@@ -19,17 +19,36 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source 'http://rubygems.org'
-source 'http://gems.alces-software.com'
+require 'logger'
 
-group :dhcp do
-  gem 'pcap', '0.7.7'
-  gem 'net-dhcp'
+module Alces
+  module Stack
+    class Log
+      class << self
+        def stderr
+          @log_stderr ||= Logger.new($stderr)
+        end
+
+        def logger
+          @log ||= new_log
+        end
+
+        def new_log
+          f = File.open('/var/log/metalware/metal.log', "a")
+          f.sync = true
+          Logger.new(f)
+        end
+
+        def create_log(file)
+          f = File.open(file, "a")
+          f.sync = true
+          Logger.new(f)
+        end
+
+        def method_missing(s, *a)
+          logger.respond_to?(s) ? logger.public_send(s, *a) : super
+        end
+      end
+    end
+  end
 end
-
-group :booter do
-  gem 'ruby-ip'
-end
-
-gem 'alces-tools', '>= 0.13.0'
-gem 'highline'
