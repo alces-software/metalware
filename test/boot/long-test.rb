@@ -234,8 +234,8 @@ class TC_Boot_Long < Test::Unit::TestCase
     child_lambda = lambda { 
       Capture.stdout {
         Alces::Stack::Boot::Run.new(@input_group).run! 
-        }
       }
+    }
     
     ForkProcess.new(parent_lambda, child_lambda).run
   end

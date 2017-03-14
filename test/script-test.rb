@@ -36,7 +36,7 @@ class TC_Script < Test::Unit::TestCase
     @single_input_hash = { nodename: @single_node }
     @save_location_base = "/var/lib/metalware/rendered/scripts"
     @save_location =
-      "#{@save_location_base}/<%= nodename %>" << "/#{@finder.filename_ext}"
+      "#{@save_location_base}/<%= nodename %>" << "/#{@finder.filename_ext_trim_erb}"
     @json = '{"json" : "json included" }'
   end
 
@@ -55,7 +55,7 @@ class TC_Script < Test::Unit::TestCase
     run_str = "#{@bash} metal scripts -n #{@single_node} -j '#{@json}' -t " \
               "#{@template} -v --save-location \"#{new_save_loc}\""
     `#{run_str}`
-    new_save_loc << "/#{@finder.filename_ext}"
+    new_save_loc << "/#{@finder.filename_ext_trim_erb}"
     output = File.read(new_save_loc.gsub("<%= nodename %>", @single_node))
     correct = Alces::Stack::Templater::Combiner.new(@json, @single_input_hash)
                                                .file(@finder.template)

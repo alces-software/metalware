@@ -92,6 +92,8 @@ module BootTestSetup
     `rm -rf /var/lib/tftpboot/pxelinux.cfg/*`
     `rm -rf /var/lib/metalware/rendered/ks/*`
     `rm -rf /var/lib/metalware/cache/*`
+    `rm -rf /var/www/html/scripts/*`
+    `rm -rf /var/lib/metalware/rendered/scripts/*`
   end
 
   def teardown
@@ -102,6 +104,5 @@ module BootTestSetup
     `rm #{@default_template_location}#{@template_pxe_firstboot}`
     `rm -f #{@template_kickstart}`
     `mv /etc/hosts.copy /etc/hosts`
-    ``
   end
 end

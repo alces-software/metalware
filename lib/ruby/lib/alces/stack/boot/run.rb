@@ -79,7 +79,8 @@ module Alces
           end
 
           def save_loc_script
-            self.permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+            self.permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
+              "/var/lib/metalware/rendered/scripts/<%= nodename %>"
           end
           
           def each_script(&block)
@@ -141,9 +142,7 @@ module Alces
           add_kickstart(parameters) if @opt.kickstart?
           combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
           save = get_save_file(combiner)
-          unless @opt.permanent_boot?
-            @to_delete << save
-          end
+          add_files_to_delete(save)
           combiner.save(@opt.finder.template, save)
         end
 
@@ -151,7 +150,7 @@ module Alces
           add_kickstart(parameters) if @opt.kickstart?
           combiner = Alces::Stack::Templater::Combiner.new(@opt.json, parameters)
           save = get_save_file(combiner)
-          @to_delete_dry_run <<  save
+          add_files_to_delete(save)
           puts "BOOT TEMPLATE"
           unless @opt.permanent_boot?
             puts "Would save file to: " << save << "\n"
@@ -175,10 +174,10 @@ module Alces
                            .merge({
                               ran_from_boot: true,
                               dry_run_flag: @opt.dry_run?,
-                              group: @opt.group
+                              group: @opt.group,
+                              save_location: @opt.save_loc_script
                             })
             save_files = Alces::Stack::Scripts::Run.new(s, parameters).run!
-            puts save_files
             add_files_to_delete(save_files)
           end
         end

@@ -145,10 +145,31 @@ class TC_Boot_Quick < Test::Unit::TestCase
     @input_nodename_script[:permanent_boot] = true
     boot = Alces::Stack::Boot::Run.new(@input_nodename_script)
     boot.render_scripts
+    assert_equal("1",
+                 `find /var/www/html/scripts -type f | wc -l`.chomp,
+                 "To many (or few) script files")
+    assert(File.file?("/var/www/html/scripts/slave04/empty"),
+           "Script was not placed correctly")
+    assert_equal("0",
+                 `find /var/lib/metalware/rendered/scripts -type f | wc -l`.chomp,
+                 "Rouge scripts in wrong location")
   end
 
   def test_render_script_group
     boot = Alces::Stack::Boot::Run.new(@input_group_script)
     boot.render_scripts
+    num_nodes = Alces::Stack::Iterator.run(@input_group_script[:group],
+                                           lambda { |hash| hash[:index] },
+                                           {})
+                                      .length
+    assert_equal((num_nodes * 4).to_s,
+                 `find /var/lib/metalware/rendered/scripts -type f | wc -l`.chomp,
+                 "To many (or few) script files")
+    assert_equal(num_nodes.to_s,
+                 `find /var/lib/metalware/rendered/scripts/* -type d | wc -l`.chomp,
+                 "To many (or few) script directories")
+    assert_equal("0",
+                 `find /var/www/html/scripts -type f | wc -l`.chomp,
+                 "Rouge scripts in wrong location")
   end
 end

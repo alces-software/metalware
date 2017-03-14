@@ -29,7 +29,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     @default_hash = {
       hostip: `hostname -i`.chomp,
       index: 0,
-      permanentboot: false
+      permanent_boot: false
     }
     @basic_hash = {
       nodename: "node_hash_input",
@@ -37,7 +37,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       bool: true,
       is_nil: nil,
       hostip: `hostname -i`.chomp,
-      permanentboot: false
+      permanent_boot: false
     }
     @json_string = '{"hostip":"0.0.0.0"}'
     @nodename = "node_nodename_input"
@@ -71,7 +71,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     json_hash = {
       hostip: "0.0.0.0",
       index: 0,
-      permanentboot: false
+      permanent_boot: false
     }
     assert_equal(json_hash, Alces::Stack::Templater::Combiner.new(@json_string).combined_hash, "Did not add json to combined hash")
     assert_raise TypeError do Alces::Stack::Templater::Combiner.new(json_hash).combined_hash end
@@ -83,7 +83,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       hostip: "0.0.0.0",
       nodename: "set_by_hash",
       index: 0,
-      permanentboot: false
+      permanent_boot: false
     }
     hash_over_default = Alces::Stack::Templater::Combiner.new("",over_default_hash).combined_hash
     assert_equal(over_default_hash, hash_over_default, "Hash did not override default values")
@@ -92,7 +92,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       hostip: "1.1.1.1",
       nodename: "set_by_hash",
       index: 0,
-      permanentboot: false
+      permanent_boot: false
     }
     json_over_hash = Alces::Stack::Templater::Combiner.new(json_input, over_default_hash).combined_hash
     assert_equal(json_hash, json_over_hash, "JSON did not override hash inputs")
@@ -146,7 +146,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       iptail: 1,
       q3: 7,
       index: 0,
-      permanentboot: false
+      permanent_boot: false
     }
     hash.merge!(@default_hash)
     assert_equal(hash, Alces::Stack::Templater::Combiner.new("",nodename:"slave04").parsed_hash, "Yaml pass or load order error")
@@ -159,7 +159,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       iptail: 1,
       q3: 0,
       index: 0,
-      permanentboot: false
+      permanent_boot: false
     }
     hash.merge!(@default_hash)
     json = '{
