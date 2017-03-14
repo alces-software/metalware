@@ -205,7 +205,7 @@ module Alces
           @default_location = default_location
           @template = find_template(template).chomp
           @filename_ext = File.basename(@template)
-          @filename_ext_trim_erb = @filename_ext.gsub(".erb", "")
+          @filename_ext_trim_erb = File.basename(@template, ".erb")
           @filename = File.basename(@template, ".*")
           @path = File.dirname(@template)
         end
