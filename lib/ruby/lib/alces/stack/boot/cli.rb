@@ -22,6 +22,7 @@
 require 'alces/tools/cli'
 require 'alces/stack'
 require "alces/stack/templater"
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -94,6 +95,7 @@ module Alces
         end
 
         def execute
+          alces::stack::log.progname = "boot"
           show_template_options if template_options
           Alces::Stack::Boot.run!(
               nodename: nodename,

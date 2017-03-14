@@ -22,6 +22,7 @@
 require 'alces/stack'
 require 'alces/tools/cli'
 require 'alces/stack/templater'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -100,6 +101,8 @@ module Alces
         def execute
           setup_signal_handler
           show_template_options if template_options
+          Alces::Stack::Log.progname = "hunter"
+          Alces::Stack::Log.info ARGV.length
 
           Alces::Stack::Hunter.
             listen!( interface,

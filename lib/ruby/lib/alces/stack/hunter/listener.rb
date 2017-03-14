@@ -40,7 +40,6 @@ module Alces
           @templateFilename=options[:template]
           @detected_macs=[]
           @json = options[:json]
-          Alces::Stack::Log.progname = "hunter"
           @hunter_logger = Alces::Stack::Log.create_log("/var/log/metalware/hunter.log")
         end
 
@@ -107,6 +106,8 @@ module Alces
             name = input.empty? ? default_name : input
             update_dhcp(name, hwaddr) if @update_dhcp_flag
             Alces::Stack::Log.info("#{name}-#{hwaddr}")
+            @hunter_logger.info("#{name}-#{hwaddr}")
+            STDERR.puts "Logged node"
 
           rescue Exception => e
             warn e
@@ -132,7 +133,8 @@ module Alces
             hwaddr: hwaddr.chomp,
             fixedaddr: fixedip.chomp
           }
-          Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@templateFilename, @DHCP_filename)
+          Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+                                           .append(@templateFilename, @DHCP_filename)
         end
 
         def remove_dhcp_entry(hwaddr)
@@ -155,10 +157,11 @@ module Alces
                 break
               end
             end
-            return if !found
+            return unless found
             raise "Could not remove mac address from dhcpd.hosts" if start_line < 0 or end_line < 0
           end
 
+          Alces::Stack::Log.info "Removing old DHCP entry for: #{hwaddr}"
           # Creates the new file with the address removed
           File.open(tempFilename, "w", 0644) do |tempFile|
             File.open(@DHCP_filename) do |file|
