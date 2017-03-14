@@ -62,7 +62,7 @@ module Alces
           def template_parameters
             @template_parameters ||= {
               firstboot: true,
-              permanent_boot: self.permanent_boot?,
+              permanent_boot: permanent_boot?,
               kernelappendoptions: kernel_append.chomp
             }.tap do |h|
               h[:nodename] =
@@ -75,11 +75,11 @@ module Alces
           end
 
           def save_loc_kickstart
-            self.permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+            permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
           end
 
           def save_loc_script
-            self.permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
+            permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
               "/var/lib/metalware/rendered/scripts/<%= nodename %>"
           end
           
@@ -104,7 +104,7 @@ module Alces
 
         def run!
           puts "(CTRL+C TO TERMINATE)"
-          if !@opt.template_parameters.key?(:nodename) and !@opt.group and !@opt.json 
+          if !@opt.template_parameters.key?(:nodename) && !@opt.group && !@opt.json 
             raise "Requires a node name, node group, or json input" 
           end
 
@@ -160,7 +160,7 @@ module Alces
         end
 
         def add_files_to_delete(array)
-          return if !array or array.empty?
+          return if !array || array.empty?
           array = [array] unless array.is_a? Array
           unless @opt.permanent_boot?
             @to_delete_dry_run.concat(array) if @opt.dry_run?
@@ -224,7 +224,7 @@ module Alces
           @found_nodes = {}
 
           lambda_proc = -> (options) {
-            if !@found_nodes[options[:nodename]] and
+            if !@found_nodes[options[:nodename]] &&
                File.file?("/var/lib/metalware/cache/metalwarebooter." \
                             "#{options[:nodename]}")
               @found_nodes[options[:nodename]] = true
@@ -265,8 +265,8 @@ module Alces
         def teardown(e)
           tear_down_flag_dry = false
           tear_down_flag = false
-          tear_down_flag_dry = true if @opt.dry_run? and !@to_delete.empty?
-          tear_down_flag = true if !@opt.dry_run? and !@to_delete_dry_run.empty?
+          tear_down_flag_dry = true if @opt.dry_run? && !@to_delete.empty?
+          tear_down_flag = true if !@opt.dry_run? && !@to_delete_dry_run.empty?
           unless @opt.permanent_boot?
             STDERR.puts "DRY RUN: Files that would be deleted:" unless @to_delete_dry_run.empty?
             @to_delete_dry_run.each { |file| STDERR.puts "  #{file}" }
