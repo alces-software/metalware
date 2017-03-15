@@ -4,34 +4,71 @@
 #Cluster: <CLUSTER>
 
 export _ALCES_BASE_HOSTNAME=headnode1
-export _ALCES_DOMAIN=cluster.local
 
 #infra,comppute
 export _ALCES_PROFILE=MASTER
 export _ALCES_BUILDSERVER=10.10.0.11
 export _ALCES_BUILDSERVEREXTERNALDNS=mycluster.mydomain.com #Used when configuring external facing http services (This must be live in your site DNS)
 
-export _ALCES_EXTERNALDNS=10.101.0.1
-
-export _ALCES_PRVINTERFACE=em1
-export _ALCES_PRVNETMASK=255.255.0.0
-export _ALCES_PRVNETWORK=10.10.0.0
-
-export _ALCES_MGTINTERFACE=em2
-export _ALCES_IBINTERFACE=ib0
-
 export _ALCES_CLUSTER=cluster
-
-export _ALCES_BMC_PASSWORD=A1ce550ftware
 
 export _ALCES_RELAYHOST=smtp.alces-software.com
 
-export _ALCES_SSHKEY="tbc"
+export _ALCES_SSHKEY="XXXX root@localhost.localdomain"
 
-export _ALCES_YUMTEMPLATE=yum.upstream
+export _ALCES_YUMTEMPLATE=yum.local
 
 #GENERATE with openssl passwd -1 $PASSWD
 export _ALCES_ROOTPASSWORDCRYPT="$1$4GLswpYN$9wsXWH9M4rRwgjGSCfCMt0"
+
+#GENERIC NETWORKING
+export _ALCES_DOMAIN=cluster.local
+export _ALCES_NETWORKS="PRV MGT IB"
+export _ALCES_SEARCHDOMAINS="prv.${_ALCES_DOMAIN} mgt.${_ALCES_DOMAIN} ib.${_ALCES_DOMAIN} ${_ALCES_DOMAIN}"
+export _ALCES_EXTERNALDNS=10.101.0.1
+export _ALCES_INTERNALDNS=${_ALCES_BUILDSERVER}
+
+
+#SPECIFIC NETWORKING
+export _ALCES_PRVINTERFACE="bond0"
+export _ALCES_PRVIP=
+export _ALCES_PRVNETMASK=255.255.0.0
+export _ALCES_PRVNETWORK=10.10.0.0
+export _ALCES_PRVGATEWAY=10.10.0.11
+export _ALCES_PRVDOMAIN="prv.${_ALCES_DOMAIN}"
+export _ALCES_PRVTYPE="Bond"
+
+export _ALCES_MGTINTERFACE="mgt"
+export _ALCES_MGTIP=
+export _ALCES_MGTNETMASK=255.255.0.0
+export _ALCES_MGTNETWORK=10.11.0.0
+export _ALCES_MGTGATEWAY=
+export _ALCES_MGTDOMAIN="mgt.${_ALCES_DOMAIN}"
+export _ALCES_MGTTYPE="Bridge"
+
+export _ALCES_IBINTERFACE="ib0"
+export _ALCES_IBIP=
+export _ALCES_IBNETMASK=255.255.0.0
+export _ALCES_IBNETWORK=10.12.0.0
+export _ALCES_IBGATEWAY=
+export _ALCES_IBDOMAIN="ib.${_ALCES_DOMAIN}"
+export _ALCES_IBTYPE=
+
+export _ALCES_BOND0_OPTIONS="mode=1 primary=p3p2 miimon=80"
+export _ALCES_BOND0_INTERFACES="em1 em2 p3p2"
+
+export _ALCES_MGT_INTERFACES="em3"
+
+#IPMI (BMC) NETWORKING
+export _ALCES_BMCDOMAIN="bmc.${_ALCES_DOMAIN}"
+export _ALCES_BMCPASSWORD="A1ce550ftware"
+export _ALCES_BMCIP=
+export _ALCES_BMCNETMASK=$_ALCES_MGTNETMASK
+export _ALCES_BMCNETWORK=$_ALCES_MGTNETWORK
+export _ALCES_BMCGATEWAY=$_ALCES_MGTGATEWAY
+export _ALCES_BMCCHANNEL=1
+export _ALCES_BMCUSER=2
+
 
 #Get Kennel cmdline options
 params=`cat /proc/cmdline`
@@ -70,13 +107,18 @@ run_script() {
   SCRIPTS_PATH=/opt/metalware/deployment/epel/scripts/
   SCRIPTS_URL=http://${_ALCES_BUILDSERVER}/deployment/epel/scripts/
   if [ -d $SCRIPTS_PATH ]; then
-    cat $SCRIPTS_PATH/$1 | bash -x
+    cat $SCRIPTS_PATH/$1 | bash
   else
-    curl $SCRIPTS_URL/$1 | bash -x
+    curl $SCRIPTS_URL/$1 | bash
   fi
 
 }
 
 run_profile() {
   run_script profile/`echo $_ALCES_PROFILE | tr '[:upper:]' '[:lower:]'`.sh
+}
+
+get_value() {
+  STR=`echo $1 | awk '{print toupper($0)}'`
+  echo `eval "echo \\\$${STR}"`
 }

@@ -23,6 +23,7 @@ require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
 require 'alces/stack/iterator'
+require 'fileutils'
 
 module Alces
   module Stack
@@ -35,15 +36,14 @@ module Alces
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
-          @template_parameters = {}
-          @template_parameters[:nodename] = options[:nodename].chomp if options[:nodename]
+          @template_parameters =
+            options[:nodename] ? { nodename: options[:nodename] } : {}
           @ran_from_boot = options[:ran_from_boot]
-          @save_location = "#{options[:save_location]}"
-          @save_location << "/" if @save_location[-1] != "/"
+          @save_location = "#{options[:save_location]}".chomp('/') << '/'
         end
 
         def run!
-          raise "Requires a nodename or group" if !@group and !@template_parameters[:nodename]
+          raise "Requires a nodename or group" if !@group && !@template_parameters[:nodename]
           
           if @dry_run_flag
             lambda_proc = -> (template_parameters) { puts_template(template_parameters) }
@@ -55,15 +55,14 @@ module Alces
         end
 
         def get_save_file(nodename)
-          str = "#{@save_location}".gsub("<%= nodename %>", nodename)
-          str << @finder.filename_ext_trim_erb
-          `mkdir -p #{File.dirname(str)}`
-          return str
+          str = "#{@save_location.gsub("<%= nodename %>", nodename)}" \
+                "#{@finder.filename_ext_trim_erb}"
         end
 
         def save_template(template_parameters)
           combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
           save = get_save_file(combiner.parsed_hash[:nodename])
+          FileUtils.mkdir_p(File.dirname(save))
           combiner.save(@finder.template, save)
           return save
         end
