@@ -4,6 +4,7 @@
     Require all granted
     Order Allow,Deny
     Allow from $_ALCES_PRVNETWORK/$_ALCES_PRVNETMASK
+    Allow from 127.0.0.1/8
 </Directory>
 <Directory /var/lib/metalware/rendered/>
     Options Indexes MultiViews FollowSymlinks
@@ -11,6 +12,7 @@
     Require all granted
     Order Allow,Deny
     Allow from $_ALCES_PRVNETWORK/$_ALCES_PRVNETMASK
+    Allow from 127.0.0.1/8
 </Directory>
 Alias /deployment /opt/metalware/deployment/
 Alias /metalware /var/lib/metalware/rendered/
