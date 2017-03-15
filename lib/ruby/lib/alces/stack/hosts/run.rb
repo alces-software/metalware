@@ -45,7 +45,7 @@ module Alces
         def run!
           raise "Requires a node name, node group, or json" if !@template_parameters[:nodename] &&
                                                                !@nodegroup &&
-                                                               !@json
+                                                               @json.empty?
 
           case
           when @dry_run_flag

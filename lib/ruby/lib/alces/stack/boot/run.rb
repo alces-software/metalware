@@ -61,7 +61,7 @@ module Alces
           def template_parameters
             @template_parameters ||= {
               firstboot: true,
-              permanent_boot: self.permanent_boot?,
+              permanent_boot: permanent_boot?,
               kernelappendoptions: kernel_append.chomp
             }.tap do |h|
               h[:nodename] =
@@ -74,11 +74,11 @@ module Alces
           end
 
           def save_loc_kickstart
-            self.permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
+            permanent_boot? ? "/var/www/html/ks" : "/var/lib/metalware/rendered/ks"
           end
 
           def save_loc_script
-            self.permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
+            permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
               "/var/lib/metalware/rendered/scripts/<%= nodename %>"
           end
           
