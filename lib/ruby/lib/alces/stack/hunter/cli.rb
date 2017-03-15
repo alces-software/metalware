@@ -98,11 +98,15 @@ module Alces
           exit 0
         end
 
+        def assert_preconditions!
+          Alces::Stack::Log.progname = "hunter"
+          Alces::Stack::Log.info "metal hunter #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          self.class.assert_preconditions!
+        end
+
         def execute
           setup_signal_handler
           show_template_options if template_options
-          Alces::Stack::Log.progname = "hunter"
-          Alces::Stack::Log.info ARGV.length
 
           Alces::Stack::Hunter.
             listen!( interface,
@@ -113,6 +117,9 @@ module Alces
                      template: template,
                      json: json
                      )
+        rescue => e
+          Alces::Stack::Log.fatal e.inspect
+          raise e
         end
       end
     end

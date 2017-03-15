@@ -94,8 +94,13 @@ module Alces
           exit 0
         end
 
+        def assert_preconditions!
+          Alces::Stack::Log.progname = "boot"
+          Alces::Stack::Log.info "metal boot #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          self.class.assert_preconditions!
+        end
+
         def execute
-          alces::stack::log.progname = "boot"
           show_template_options if template_options
           Alces::Stack::Boot.run!(
               nodename: nodename,
@@ -108,6 +113,9 @@ module Alces
               permanent_boot: permanent_boot_flag,
               scripts: scripts
             )
+        rescue => e
+          Alces::Stack::Log.fatal e.inspect
+          raise e
         end
       end
     end

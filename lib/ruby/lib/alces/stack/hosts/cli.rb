@@ -21,7 +21,8 @@
 #==============================================================================
 require 'alces/tools/cli'
 require 'alces/stack'
-require "alces/stack/templater"
+require 'alces/stack/templater'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -85,6 +86,12 @@ module Alces
           exit 0
         end
 
+        def assert_preconditions!
+          Alces::Stack::Log.progname = "hosts"
+          Alces::Stack::Log.info "metal hosts #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          self.class.assert_preconditions!
+        end
+
         def execute
           setup_signal_handler
           show_template_options if template_options
@@ -96,6 +103,9 @@ module Alces
               nodegroup: nodegroup,
               json: json
             )
+        rescue => e
+          Alces::Stack::Log.fatal e.inspect
+          raise e
         end
       end
     end

@@ -61,6 +61,9 @@ module Alces
               filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
               network.add_filter(filter)
             end
+            network_set = true
+          ensure
+            Alces::Stack::Log.fatal "Failed to connect to network, check interface" unless network_set
           end
         end
 
