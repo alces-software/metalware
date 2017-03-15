@@ -19,15 +19,17 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
-$: << "#{ENV['alces_BASE']}/test"
+require 'alces/stack/scripts/cli'
+require 'alces/stack/scripts/run'
 
-require 'capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'script-test'
-require 'boot/quick-test'
-require 'boot/long-test'
-require 'templater/combiner-test'
-require 'templater/finder-test'
+module Alces
+  module Stack
+    module Scripts
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
+      end
+    end
+  end
+end

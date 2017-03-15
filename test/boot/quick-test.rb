@@ -20,62 +20,15 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+$: << "#{ENV['alces_BASE']}/test/boot"
 
 require 'alces/stack/boot'
 require 'capture'
 require 'forkprocess'
+require 'boot-setup'
 
 class TC_Boot_Quick < Test::Unit::TestCase
-  def setup
-    @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
-    @template = "test.erb"
-    @template_str = "Boot template, <%= nodename %>, <%= kernelappendoptions %>"
-    @template_str_kickstart =
-      "Kickstart template, <%= nodename %>, <%= kernelappendoptions %>" \
-      " <%= kickstart %> <% if !permanentboot %>false<% end %>"
-    @template_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb"
-    @template_pxe_firstboot_str =
-      "PXE template, <%= nodename %>, <%= kernelappendoptions %> " \
-      "<%= kickstart %> <% if !permanentboot %>false<% end %> <%= firstboot %>"
-    @template_pxe_firstboot = "firstboot.erb"
-    File.write("#{@default_template_location}#{@template_pxe_firstboot}",
-               @template_pxe_firstboot_str)
-    File.write(@template_kickstart, @template_str_kickstart)
-    File.write("#{@default_template_location}#{@template}", @template_str)
-    File.write("#{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}",
-               @template_str)
-    @finder = Alces::Stack::Templater::Finder
-                .new(@default_template_location, @template)
-    @ks_finder = Alces::Stack::Templater::Finder
-                .new(@default_template_location, @template_kickstart)
-    @input_base = {
-      permanentboot: false,
-      template: @template,
-      kernel_append: "KERNAL_APPEND",
-      json: '{"json":"included","kernelappendoptions":"KERNAL_APPEND"}'
-    }
-    @input_nodename = {}.merge(@input_base)
-    @input_nodename[:nodename] = "slave04"
-    @input_group = {
-      nodename: "SHOULD_BE_OVERRIDDEN",
-      group: "slave",
-      permanent_boot_flag: false
-    }
-    @input_group.merge!(@input_base)
-    @input_group_kickstart = {}.merge(@input_group)
-                               .merge({ kickstart: @template_kickstart })
-    @input_group_kickstart[:template] = @template_kickstart
-    @input_nodename_kickstart = {}.merge(@input_nodename)
-                                  .merge({ kickstart: @template_kickstart })
-    @input_nodename_kickstart[:template] = @template_kickstart
-    `cp /etc/hosts /etc/hosts.copy`
-    `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
-    `mkdir -p /var/lib/tftpboot/pxelinux.cfg/`
-    `mkdir -p /var/www/html/ks`
-    `rm -rf /var/lib/tftpboot/pxelinux.cfg/*`
-    `rm -rf /var/lib/metalware/rendered/ks/*`
-    `rm -rf /var/lib/metalware/cache/*`
-  end
+  include BootTestSetup
 
   def check_passing(finder, hash={})
     boot = Alces::Stack::Boot::Run.new(hash)
@@ -111,11 +64,11 @@ class TC_Boot_Quick < Test::Unit::TestCase
   end
 
   def test_input_passing_group_kickstart
-    check_passing(@ks_finder, @input_group_kickstart)
+    check_passing(@finder, @input_group_kickstart)
   end
 
   def test_input_passing_nodename_kickstart
-    check_passing(@ks_finder, @input_nodename_kickstart)
+    check_passing(@finder, @input_nodename_kickstart)
   end
 
   def test_get_save_file
@@ -158,9 +111,9 @@ class TC_Boot_Quick < Test::Unit::TestCase
     `rm -f #{save}`
   end
 
-  def test_run_kickstart_single
+  def test_render_kickstart_single
     boot = Alces::Stack::Boot::Run.new(@input_nodename_kickstart)
-    boot.run_kickstart
+    boot.render_kickstart
     assert_equal("/var/lib/metalware/rendered/ks/test.ks." \
                    "#{@input_nodename_kickstart[:nodename]}",
                  boot.instance_variable_get(:@to_delete)[0],
@@ -177,9 +130,9 @@ class TC_Boot_Quick < Test::Unit::TestCase
                  "Did not pass kickstart template correctly")
   end
 
-  def test_run_kickstart_group
+  def test_render_kickstart_group
     boot = Alces::Stack::Boot::Run.new(@input_group_kickstart)
-    boot.run_kickstart
+    boot.render_kickstart
     check_lambda = -> (hash) { 
       assert_equal("/var/lib/metalware/rendered/ks/test.ks.#{hash[:nodename]}",
                    boot.instance_variable_get(:@to_delete)[hash[:index]],
@@ -188,11 +141,35 @@ class TC_Boot_Quick < Test::Unit::TestCase
     Alces::Stack::Iterator.run(@input_group_kickstart[:group], check_lambda)
   end
 
-  def teardown
-    `rm #{@default_template_location}#{@template}`
-    `rm #{@default_template_location}#{@template_pxe_firstboot}`
-    `rm #{ENV['alces_BASE']}/etc/templates/kickstart/#{@template}`
-    `rm -f #{@template_kickstart}`
-    `mv /etc/hosts.copy /etc/hosts`
+  def test_render_script_nodename
+    @input_nodename_script[:permanent_boot] = true
+    boot = Alces::Stack::Boot::Run.new(@input_nodename_script)
+    boot.render_scripts
+    assert_equal("1",
+                 `find /var/www/html/scripts -type f | wc -l`.chomp,
+                 "To many (or few) script files")
+    assert(File.file?("/var/www/html/scripts/slave04/empty"),
+           "Script was not placed correctly")
+    assert_equal("0",
+                 `find /var/lib/metalware/rendered/scripts -type f | wc -l`.chomp,
+                 "Rouge scripts in wrong location")
+  end
+
+  def test_render_script_group
+    boot = Alces::Stack::Boot::Run.new(@input_group_script)
+    boot.render_scripts
+    num_nodes = Alces::Stack::Iterator.run(@input_group_script[:group],
+                                           lambda { |hash| hash[:index] },
+                                           {})
+                                      .length
+    assert_equal((num_nodes * 4).to_s,
+                 `find /var/lib/metalware/rendered/scripts -type f | wc -l`.chomp,
+                 "To many (or few) script files")
+    assert_equal(num_nodes.to_s,
+                 `find /var/lib/metalware/rendered/scripts/* -type d | wc -l`.chomp,
+                 "To many (or few) script directories")
+    assert_equal("0",
+                 `find /var/www/html/scripts -type f | wc -l`.chomp,
+                 "Rouge scripts in wrong location")
   end
 end

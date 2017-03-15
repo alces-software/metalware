@@ -25,14 +25,14 @@ require "alces/stack/templater"
 
 module Alces
   module Stack
-    module Boot
+    module Scripts
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal boot'
-        description "Creates the boot files for the node(s)"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
+        name 'metal scripts'
+        description "Renders script templates"
+        log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
         option  :nodename,
                 'Node name to be modified',
@@ -49,33 +49,21 @@ module Alces
                 '-j', '--additional-parameters',
                 default: false
 
-        option  :kernel_append,
-                'Specify value for kernel append in template. Check --template-options',
-                '--kernelappendoptions',
-                default: ""
+        option  :save_location,
+                'File to save the rendered template in.' \
+                  " NOTE: only replaces <%= nodename %>\n   ",
+                '--save-location',
+                default: "/var/lib/metalware/rendered/scripts/<%= nodename %>"
 
         option  :template,
-                'Specify template',
+                'Template file to be used',
                 '-t', '--template',
-                default: "install.erb"
-
-        flag    :permanent_boot_flag,
-                'Causes the pxe and kickstart files remain after completion',
-                '-p', '--permanent',
-                default: false
+                default: "empty.erb"
 
         flag    :template_options,
                 'Show templating options',
                 '--template-options',
                 default: false
-
-        option  :kickstart,
-                'Renders the kickstart template if include. Deletes the file at the end',
-                '-k', '--kickstart'
-
-        option  :scripts,
-                'Renders script templates, saved in default location. Format: comma separated string',
-                '-s', '--scripts'
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
@@ -84,10 +72,7 @@ module Alces
 
         def show_template_options
           options = {
-            nodename: "Value specified by --node-name",
-            kernelappendoptions: "Value specified by --kernelappendoptions",
-            kickstart: "Determined from --kickstart (required) and nodename",
-            firstboot: "True by default, switches to false on second render if --permanent is specified"
+            nodename: "The name of the node specified with -n"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
@@ -95,16 +80,14 @@ module Alces
 
         def execute
           show_template_options if template_options
-          Alces::Stack::Boot.run!(
+
+          Alces::Stack::Scripts.run!(template, 
               nodename: nodename,
               group: group,
-              template: template,
-              kernel_append: kernel_append,
-              dry_run: dry_run_flag,
+              dry_run_flag: dry_run_flag,
               json: json,
-              kickstart: kickstart,
-              permanent_boot: permanent_boot_flag,
-              scripts: scripts
+              save_location: save_location,
+              ran_from_boot: false
             )
         end
       end

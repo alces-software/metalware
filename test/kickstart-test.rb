@@ -26,7 +26,6 @@ require "alces/stack/templater"
 require "alces/stack/iterator"
 require "capture"
 
-`rm /var/lib/metalware/rendered/ks/* -rf`
 class TC_Kickstart < Test::Unit::TestCase
   def setup
     @bash = File.read("/etc/profile.d/alces-metalware.sh")
@@ -45,6 +44,7 @@ class TC_Kickstart < Test::Unit::TestCase
     @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @template)
     @diff_loc = "/tmp/different_kicks_start"   
     `mkdir #{@diff_loc} 2>/dev/null`
+    `rm /var/lib/metalware/rendered/ks/* -rf`
   end
 
   def options_checker(ks_o, template, hash={})
