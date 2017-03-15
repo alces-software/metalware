@@ -140,7 +140,7 @@ module Alces
 
         def save_template(parameters={})
           add_kickstart(parameters) if @opt.kickstart?
-          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@opt.json, parameters)
           save = get_save_file(combiner)
           add_files_to_delete(save)
           combiner.save(@opt.finder.template, save)
