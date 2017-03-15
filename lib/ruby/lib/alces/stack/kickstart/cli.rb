@@ -53,7 +53,7 @@ module Alces
         option  :template,
                 'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
+                default: "#{ENV['alces_REPO']}/templates/kickstart/compute.erb"
 
         option  :save_append,
                 'String to append to end of save file',

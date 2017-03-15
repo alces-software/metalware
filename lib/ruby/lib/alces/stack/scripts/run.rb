@@ -31,7 +31,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/scripts/", template)
+          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_REPO']}/templates/scripts/", template)
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]

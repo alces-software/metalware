@@ -32,7 +32,7 @@ module Alces
 
         def initialize(template, options={})
           @finder = 
-            Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/", template)
+            Alces::Stack::Templater::Finder.new("#{ENV['alces_REPO']}/templates/hosts/", template)
           @template_parameters = {
             nodename: options[:nodename]
           }

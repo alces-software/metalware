@@ -46,14 +46,14 @@ module Alces
 
           def finder
             @finder ||= Alces::Stack::Templater::Finder.new(
-              "#{ENV['alces_BASE']}/etc/templates/boot/",
+              "#{ENV['alces_REPO']}/templates/boot/",
               @options[:template])
           end
 
           def ks_finder
             @ks_finder ||= @options[:kickstart] ?
               Alces::Stack::Templater::Finder.new(
-                "#{ENV['alces_BASE']}/etc/templates/kickstart/",
+                "#{ENV['alces_REPO']}/templates/kickstart/",
                 @options[:kickstart])
               : nil
           end

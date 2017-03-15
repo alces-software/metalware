@@ -37,14 +37,14 @@ module Alces
           }
           puts "ERB can replace template parameters with variables from 5 sources:"
           puts "  1) JSON input from the command line using -j"
-          puts "  2) YAML config files stored in: #{ENV['alces_BASE']}/etc/config"
+          puts "  2) YAML config files stored in: #{ENV['alces_REPO']}/config"
           puts "  3) Command line inputs and index from the iterator (if applicable)"
           puts "  4) Constants available to all templates"
           puts
           puts "In the event of a conflict between the sources, the priority order is as given above."
           puts "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
           puts
-          puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config"
+          puts "The yaml config files are stored in #{ENV['alces_REPO']}/config"
           puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
           puts
           puts "The following command line parameters are replaced by ERB:"
@@ -146,7 +146,7 @@ module Alces
           hash = Hash.new
           get_yaml_file_list.each do |yaml|
             begin 
-              yaml_payload = YAML.load(File.read("#{ENV['alces_BASE']}/etc/config/#{yaml}.yaml"))
+              yaml_payload = YAML.load(File.read("#{ENV['alces_REPO']}/config/#{yaml}.yaml"))
             rescue Errno::ENOENT # Skips missing files
             rescue StandardError => e
               $stderr.puts "Could not pass YAML file"

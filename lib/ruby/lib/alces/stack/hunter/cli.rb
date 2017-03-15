@@ -72,7 +72,7 @@ module Alces
         option :template,
                 'Specify which template file for updating dhcpd.hosts',
                 '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/hunter/dhcp.erb"
+                default: "#{ENV['alces_REPO']}/templates/hunter/dhcp.erb"
 
         flag    :template_options,
                 'Display the templating parameters',
