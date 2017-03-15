@@ -41,14 +41,14 @@ class TC_Kickstart < Test::Unit::TestCase
       save_append: "append",
       save_location: "/var/lib/metalware/rendered/ks/"
     }
-    @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", @template)
+    @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_REPO']}/templates/kickstart/", @template)
     @diff_loc = "/tmp/different_kicks_start"   
     `mkdir #{@diff_loc} 2>/dev/null`
     `rm /var/lib/metalware/rendered/ks/* -rf`
   end
 
   def options_checker(ks_o, template, hash={})
-    finder= Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/kickstart/", template)
+    finder= Alces::Stack::Templater::Finder.new("#{ENV['alces_REPO']}/templates/kickstart/", template)
     assert_equal(finder.template, ks_o.instance_variable_get(:@finder).template, "Did not set template")
     assert_equal(hash[:group], ks_o.instance_variable_get(:@group), "Incorrect group")
     assert_equal(hash[:json], ks_o.instance_variable_get(:@json), "Incorrect json")

@@ -25,8 +25,8 @@ require "alces/stack/templater"
 
 class TC_Templater_Finder < Test::Unit::TestCase
   def setup
-    @default_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/".gsub("//","/")
-    @default_boot = "#{ENV['alces_BASE']}/etc/templates/boot/".gsub("//","/")
+    @default_kickstart = "#{ENV['alces_REPO']}/templates/kickstart/".gsub("//","/")
+    @default_boot = "#{ENV['alces_REPO']}/templates/boot/".gsub("//","/")
     @tmp_folder = "#{@default_kickstart}tempfolderthatshouldnotexist/"
     @tmp_file = "#{@tmp_folder}local.erb"
     @tmp_file2 = "#{@default_kickstart}local-boot.erb"

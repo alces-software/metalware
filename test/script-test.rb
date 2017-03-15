@@ -27,7 +27,7 @@ require "alces/stack/iterator"
 class TC_Script < Test::Unit::TestCase
   def setup
     @bash = File.read("/etc/profile.d/alces-metalware.sh")
-    @base_temp_loc = "#{ENV['alces_BASE']}/etc/templates/scripts"
+    @base_temp_loc = "#{ENV['alces_REPO']}/templates/scripts"
     @template = "test.sh"
     @template_str = "<%= nodename %> <%= json %>"
     File.write("#{@base_temp_loc}/#{@template}.erb", @template_str)

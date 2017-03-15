@@ -42,10 +42,10 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     @json_string = '{"hostip":"0.0.0.0"}'
     @nodename = "node_nodename_input"
     @index = 3
-    @template_folder = "#{ENV['alces_BASE']}/etc/templates"
+    @template_folder = "#{ENV['alces_REPO']}/templates"
     @example_template = "#{@template_folder}/boot/install.erb"
-    `mv #{ENV['alces_BASE']}/etc/config #{ENV['alces_BASE']}/etc/config.copy 2>&1`
-    `cp -r #{ENV['alces_BASE']}/test/helper/config #{ENV['alces_BASE']}/etc/config`
+    `mv #{ENV['alces_REPO']}/config #{ENV['alces_REPO']}/config.copy 2>&1`
+    `cp -r #{ENV['alces_BASE']}/test/helper/config #{ENV['alces_REPO']}/config`
   end
 
   def test_no_input
@@ -175,7 +175,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
   end
 
   def teardown
-    `rm -rf #{ENV['alces_BASE']}/etc/config 2>&1`
-    `mv #{ENV['alces_BASE']}/etc/config.copy #{ENV['alces_BASE']}/etc/config 2>&1`
+    `rm -rf #{ENV['alces_REPO']}/config 2>&1`
+    `mv #{ENV['alces_REPO']}/config.copy #{ENV['alces_REPO']}/config 2>&1`
   end
 end

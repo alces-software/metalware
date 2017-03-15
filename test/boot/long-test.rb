@@ -52,7 +52,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")
       output_kick = `cat #{save_kick}`.chomp
       correct_kick =
-        combiner.file("#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb")
+        combiner.file("#{ENV['alces_REPO']}/templates/kickstart/test.erb")
       assert_equal(correct_kick,
                    output_kick, 
                    "Did not create correct kickstart file")
