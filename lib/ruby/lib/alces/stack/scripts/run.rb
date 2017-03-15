@@ -24,6 +24,7 @@ require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
 require 'alces/stack/iterator'
+require 'fileutils'
 
 module Alces
   module Stack
