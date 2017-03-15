@@ -19,7 +19,6 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
@@ -29,7 +28,6 @@ module Alces
   module Stack
     module Scripts
       class Run
-        include Alces::Tools::Logging
         include Alces::Tools::Execution
 
         def initialize(template, options={})

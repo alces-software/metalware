@@ -21,7 +21,8 @@
 #==============================================================================
 require 'alces/tools/cli'
 require 'alces/stack'
-require "alces/stack/templater"
+require 'alces/stack/templater'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -84,7 +85,7 @@ module Alces
 
         def assert_preconditions!
           Alces::Stack::Log.progname = "kickstart"
-          Alces::Stack::Log.info "metal hosts #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          Alces::Stack::Log.info "metal kickstart #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
           self.class.assert_preconditions!
         end
 
