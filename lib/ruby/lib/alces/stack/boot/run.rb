@@ -47,14 +47,14 @@ module Alces
 
           def finder
             @finder ||= Alces::Stack::Finder.new(
-              "#{ENV['alces_REPO']}/templates/boot/",
+              "#{ENV['alces_REPO']}", "/templates/boot/",
               @options[:template])
           end
 
           def ks_finder
             @ks_finder ||= @options[:kickstart] ?
               Alces::Stack::Finder.new(
-                "#{ENV['alces_REPO']}/templates/kickstart/",
+                "#{ENV['alces_REPO']}", "/templates/kickstart/",
                 @options[:kickstart])
               : nil
           end

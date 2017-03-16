@@ -28,11 +28,13 @@ require "alces/stack/iterator"
 class TC_Script < Test::Unit::TestCase
   def setup
     @bash = File.read("/etc/profile.d/alces-metalware.sh")
-    @base_temp_loc = "#{ENV['alces_REPO']}/templates/scripts"
+    base_temp_loc_repo = "#{ENV['alces_REPO']}"
+    base_temp_loc_path = "templates/scripts"
+    @base_temp_loc = "#{base_temp_loc_repo}/#{base_temp_loc_path}"
     @template = "test.sh"
     @template_str = "<%= nodename %> <%= json %>"
     File.write("#{@base_temp_loc}/#{@template}.erb", @template_str)
-    @finder = Alces::Stack::Finder.new(@base_temp_loc, "#{@template}")
+    @finder = Alces::Stack::Finder.new(base_temp_loc_repo, base_temp_loc_path, "#{@template}")
     @single_node = "slave04"
     @single_input_hash = { nodename: @single_node }
     @save_location_base = "/var/lib/metalware/rendered/scripts"
@@ -71,7 +73,8 @@ class TC_Script < Test::Unit::TestCase
     assert_equal(num_nodes, folders.count, "Incorrect number of script folders created")
     folders.each do |f|
       num_files = `ls #{@save_location_base}/#{f}`.split("\n").count
-      assert_equal(1, num_files,"Incorrect number of files created")
+      assert_equal(1, num_files, "Incorrect number of files created\n" \
+                                 "#{`tree #{@save_location_base}/#{f}`}")
       output = `cat #{@save_location_base}/#{f}/*`
       correct = Alces::Stack::Templater::Combiner.new(@json, { nodename: f })
                                                .file(@finder.template)
@@ -80,7 +83,7 @@ class TC_Script < Test::Unit::TestCase
   end
 
   def teardown
-    `rm -f #{@base_temp_loc}/@template`
+    `rm -f #{@base_temp_loc}/#{@template}`
     `rm -rf #{@save_location_base}/*`
   end
 end

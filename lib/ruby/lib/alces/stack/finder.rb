@@ -76,24 +76,24 @@ module Alces
       end
 
       def match_full_path_in_default(def_loc, template = {})
-        return nil unless template.t == /\A#{def_loc}.*\Z/
-        return template.t if File.file?(template.t)
-        return template.e if File.file?(template.e)
+        return nil unless template[:t] == /\A#{def_loc}.*\Z/
+        return template[:t] if File.file?(template[:t])
+        return template[:e] if File.file?(template[:e])
         return nil
       end
 
       def match_sub_path_in_default(def_loc, template = {})
         copy = {}
-        copy.t = "#{def_loc}/#{template.t}".gsub(/\/\/+/, "/")
-        copy.e = "#{def_loc}/#{template.e}".gsub(/\/\/+/, "/")
-        return copy.t if File.file?(copy.t)
-        return copy.e if File.file?(copy.e)
+        copy[:t] = "#{def_loc}/#{template[:t]}".gsub(/\/\/+/, "/")
+        copy[:e] = "#{def_loc}/#{template[:e]}".gsub(/\/\/+/, "/")
+        return copy[:t] if File.file?(copy[:t])
+        return copy[:e] if File.file?(copy[:e])
         return nil
       end
 
       def match_full_path(def_loc, template = {})
-        return template.t if File.file?(template.t)
-        return template.e if File.file?(template.e)
+        return template[:t] if File.file?(template[:t])
+        return template[:e] if File.file?(template[:e])
         return nil
       end
 

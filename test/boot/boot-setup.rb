@@ -30,7 +30,9 @@ module BootTestSetup
   end
 
   def set_up_templates
-    @default_template_location = "#{ENV['alces_REPO']}/templates/boot/"
+    @default_template_location_repo = "#{ENV['alces_REPO']}"
+    @default_template_location_path = "templates/boot/"
+    @default_template_location = "#{@default_template_location_repo}/#{@default_template_location_path}"
 
     @template = "test.erb"
     @template_str = "Boot template, <%= nodename %>, " \
@@ -52,10 +54,12 @@ module BootTestSetup
   end
 
   def set_finders
-    @finder = Alces::Stack::Finder
-                .new(@default_template_location, @template)
-    @ks_finder = Alces::Stack::Finder
-                .new(@default_template_location, @template_kickstart)
+    @finder = Alces::Stack::Finder.new(@default_template_location_repo,
+                                       @default_template_location_path,
+                                       @template)
+    @ks_finder = Alces::Stack::Finder.new(@default_template_location_repo,
+                                          @default_template_location_path,
+                                          @template_kickstart)
   end
 
   def set_inputs

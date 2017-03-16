@@ -25,12 +25,16 @@ require "alces/stack/finder"
 
 class TC_Templater_Finder < Test::Unit::TestCase
   def setup
-    @default_kickstart = "#{ENV['alces_REPO']}/templates/kickstart/".gsub("//","/")
-    @default_boot = "#{ENV['alces_REPO']}/templates/boot/".gsub("//","/")
-    @tmp_folder = "#{@default_kickstart}tempfolderthatshouldnotexist/"
-    @tmp_file = "#{@tmp_folder}local.erb"
-    @tmp_file2 = "#{@default_kickstart}local-boot.erb"
-    @tmp_file3 = "#{@default_kickstart}local_boot.erb"
+    @default_kickstart_repo = "#{ENV['alces_REPO']}"
+    @default_kickstart_path = "/templates/kickstart"
+    @default_kickstart = "#{@default_kickstart_repo}/#{@default_kickstart_path}".gsub(/\/\/+/, "/")
+    @default_boot_repo = "#{ENV['alces_REPO']}"
+    @default_boot_path = "/templates/boot"
+    @default_boot = "#{@default_boot_repo}/#{@default_boot_path}".gsub(/\/\/+/, "/")
+    @tmp_folder = "#{@default_kickstart}/tempfolderthatshouldnotexist"
+    @tmp_file = "#{@tmp_folder}/local.erb"
+    @tmp_file2 = "#{@default_kickstart}/local-boot.erb"
+    @tmp_file3 = "#{@default_kickstart}/local_boot.erb"
     `mkdir #{@tmp_folder}`
     `echo "A whole bunch of nothing" > #{@tmp_file}`
     `echo "A whole bunch of nothing" > #{@tmp_file2}`
@@ -44,49 +48,49 @@ class TC_Templater_Finder < Test::Unit::TestCase
   end
 
   def test_find_kickstart
-    fullpath  = "#{@default_kickstart}compute.erb"
-    tmp_fullpath  = "#{@default_kickstart}local.erb"
-    find = Alces::Stack::Finder.new(@default_kickstart, "#{@default_kickstart}/compute.erb")
+    fullpath  = "#{@default_kickstart}/compute.erb"
+    tmp_fullpath  = "#{@default_kickstart}/local.erb"
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "#{@default_kickstart}/compute.erb")
     assert_equal(fullpath, find.template, "Could not find file from full path")
-    find = Alces::Stack::Finder.new(@default_kickstart, "#{@default_kickstart}/compute")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "#{@default_kickstart}/compute")
     assert_equal(fullpath, find.template, "Could not find file from full path with no .ext")
-    find = Alces::Stack::Finder.new(@default_kickstart, "/compute.erb")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "/compute.erb")
     assert_equal(fullpath, find.template, "Could not find file from name")
-    find = Alces::Stack::Finder.new(@default_kickstart, "compute")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "compute")
     assert_equal(fullpath, find.template, "Could not find file from name no .ext")
-    find = Alces::Stack::Finder.new(@default_kickstart, "tempfolderthatshouldnotexist/local.erb")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "tempfolderthatshouldnotexist/local.erb")
     assert_equal(@tmp_file, find.template, "Found nested template")
-    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart, template = "local") end
-    find = Alces::Stack::Finder.new(@default_kickstart, "local-boot")
+    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, template = "local") end
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "local-boot")
     assert_equal(@tmp_file2, find.template, "Could not find file with a -")
-    find = Alces::Stack::Finder.new(@default_kickstart, "local_boot")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "local_boot")
     assert_equal(@tmp_file3, find.template, "Could not find file with a _")
   end
 
   def test_find_boot
-    fullpath = "#{@default_boot}install.erb"
-    find = Alces::Stack::Finder.new(@default_boot, "install")
+    fullpath = "#{@default_boot}/install.erb"
+    find = Alces::Stack::Finder.new(@default_boot_repo, @default_boot_path, "install")
     assert_equal(fullpath, find.template, "Could not find boot template")
   end
 
   def test_path
-    fullpath = "#{@default_boot}install.erb"
-    find = Alces::Stack::Finder.new(@default_boot, "install")
-    assert_equal(@default_boot, find.path << "/", "Did not return correct path to template")
+    fullpath = "#{@default_boot}/install.erb"
+    find = Alces::Stack::Finder.new(@default_boot_repo, @default_boot_path, "install")
+    assert_equal(@default_boot, find.path, "Did not return correct path to template")
   end
 
   def test_filename
-    find = Alces::Stack::Finder.new(@default_kickstart, "compute")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "compute")
     assert_equal("compute", find.filename, "Did not return correct filename or ext")
     assert_equal("compute.erb", find.filename_ext, "Did not return correct filename or ext")
     assert_equal("compute.ks", find.filename_diff_ext("ks"), "Did not return correct filename or ext")
     assert_equal("compute.ks", find.filename_diff_ext(".ks"), "Did not return correct filename or ext")
     assert_equal("compute.ks", find.filename_diff_ext(".ks"), "Did not return correct filename or ext")
-    find = Alces::Stack::Finder.new(@default_kickstart, "local-boot")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "local-boot")
     assert_equal("local-boot", find.filename, "Did not find filename with -")
-    find = Alces::Stack::Finder.new(@default_kickstart, "local_boot")
+    find = Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "local_boot")
     assert_equal("local_boot", find.filename, "Did not find filename with _")
-    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart, "") end
-    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart, nil) end
+    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, "") end
+    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart_repo, @default_kickstart_path, nil) end
   end
 end

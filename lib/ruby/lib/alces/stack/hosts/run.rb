@@ -33,7 +33,7 @@ module Alces
 
         def initialize(template, options={})
           @finder = 
-            Alces::Stack::Finder.new("#{ENV['alces_REPO']}/templates/hosts/", template)
+            Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/templates/hosts/", template)
           @template_parameters = {
             nodename: options[:nodename]
           }

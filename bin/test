@@ -22,8 +22,17 @@
 #==============================================================================
 source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../etc/metal.rc
 yum list installed syslinux >/dev/null
+reset=false
 if [ $? -ne 0 ]; then
   yum -y install syslinux
+  reset=true
+fi
+yum list installed tree >/dev/null
+if [ $? -ne 0 ]; then
+  yum -y install tree
+  reset=true
+fi
+if $reset; then
   reset
 fi
 alias rby=$alces_RUBY
