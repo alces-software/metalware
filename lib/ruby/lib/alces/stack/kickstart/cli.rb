@@ -21,7 +21,8 @@
 #==============================================================================
 require 'alces/tools/cli'
 require 'alces/stack'
-require "alces/stack/templater"
+require 'alces/stack/templater'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -82,6 +83,12 @@ module Alces
           exit 0
         end
 
+        def assert_preconditions!
+          Alces::Stack::Log.progname = "kickstart"
+          Alces::Stack::Log.info "metal kickstart #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          self.class.assert_preconditions!
+        end
+
         def execute
           show_template_options if template_options
 
@@ -94,6 +101,9 @@ module Alces
               save_location: save_location,
               ran_from_boot: false
             )
+        rescue => e
+          Alces::Stack::Log.fatal e.inspect
+          raise e
         end
       end
     end

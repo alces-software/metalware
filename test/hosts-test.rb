@@ -37,7 +37,7 @@ class TC_Hosts < Test::Unit::TestCase
   end
 
   def test_error_inputs
-    output = Capture.stdout do puts `#{@bash} metal hosts 2>&1` end
+    output = Capture.stdout do puts `#{@bash} metal hosts -a 2>&1` end
     assert_equal("ERROR: Requires a node name, node group, or json\n", output, "Error expect for no nodename or group")
     output = Capture.stdout do puts `#{@bash} metal hosts -n nodes 2>&1` end
     assert_equal("ERROR: Could not modify hosts! No command included (e.g. --add).\nSee 'metal hosts -h'\n", output, "Ran without specifying mode")

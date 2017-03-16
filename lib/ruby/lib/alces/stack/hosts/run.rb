@@ -19,7 +19,6 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/logging'
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
@@ -29,22 +28,24 @@ module Alces
   module Stack
     module Hosts
       class Run
-        include Alces::Tools::Logging
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/", template)
+          @finder = 
+            Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/", template)
           @template_parameters = {
             nodename: options[:nodename]
           }
           @nodegroup = options[:nodegroup]
-          @json = options[:json]
+          @json = options[:json] ? options[:json] : ""
           @dry_run_flag = options[:dry_run_flag]
           @add_flag = options[:add_flag]
         end
 
         def run!
-          raise "Requires a node name, node group, or json" if !@template_parameters[:nodename] and !@nodegroup and !@json
+          raise "Requires a node name, node group, or json" if !@template_parameters[:nodename] &&
+                                                               !@nodegroup &&
+                                                               @json.empty?
 
           case
           when @dry_run_flag
@@ -67,12 +68,10 @@ module Alces
 
         def add(template_parameters)
           append_file = "/etc/hosts"
-          @json ||= ""
           Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@finder.template, append_file)
         end
 
         def puts_template(template_parameters)
-          @json ||= ""
           puts Alces::Stack::Templater::Combiner.new(@json, template_parameters).file(@finder.template)
         end
       end

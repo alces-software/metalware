@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/logging'
+require 'alces/stack/log'
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require "alces/stack/templater"
@@ -31,7 +31,6 @@ module Alces
   module Stack
     module Boot
       class Run
-        include Alces::Tools::Logging
         include Alces::Tools::Execution
 
         def initialize(options = {})
@@ -126,9 +125,11 @@ module Alces
         ensure
           @e ||= Interrupt
           STDERR.print "Exiting...."
-          teardown(@e)
+          e = teardown(@e)
           STDERR.puts "Done"
           $stdout.flush
+          raise e unless e == Interrupt
+          Alces::Stack::Log.info "clean exit"
           Kernel.exit(0)
         end
 
@@ -165,6 +166,13 @@ module Alces
           unless @opt.permanent_boot?
             @to_delete_dry_run.concat(array) if @opt.dry_run?
             @to_delete.concat(array) unless @opt.dry_run?
+          end
+        end
+
+        def delete_file_log(file, msg_prefix = "Deleted:")
+          if File.file? file
+            `rm -f #{file}`
+            Alces::Stack::Log.info "#{msg_prefix} #{file}"
           end
         end
 
@@ -213,7 +221,9 @@ module Alces
         def kickstart_teardown
           # Deletes old signal files
           delete_lambda = -> (options) {
-            `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
+            delete_file = 
+              "/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}"
+            delete_file_log(delete_file, "Deleting (Old Cache):")
           }
           Alces::Stack::Iterator.run(@opt.group,
                                      delete_lambda,
@@ -225,18 +235,18 @@ module Alces
 
           lambda_proc = -> (options) {
             if !@found_nodes[options[:nodename]] &&
-               File.file?("/var/lib/metalware/cache/metalwarebooter." \
+                 File.file?("/var/lib/metalware/cache/metalwarebooter." \
                             "#{options[:nodename]}")
               @found_nodes[options[:nodename]] = true
               puts "Found #{options[:nodename]}"
+              Alces::Stack::Log.info "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
-              `rm -f /var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}`
+              delete_file_log "/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}"
               unless @opt.permanent_boot? 
-                `rm -f /var/lib/tftpboot/pxelinux.cfg/#{ip} 2>/dev/null`
-                run_str = "rm -f #{@save_loc_kickstart}/" \
-                          "#{@opt.ks_finder.filename_diff_ext("ks")}." \
-                          "#{options[:nodename]} 2>/dev/nul"
-                `#{run_str}`
+                delete_file_log "/var/lib/tftpboot/pxelinux.cfg/#{ip}"
+                delete_file_log "#{@save_loc_kickstart}/" \
+                                "#{@opt.ks_finder.filename_diff_ext("ks")}." \
+                                "#{options[:nodename]}"
               else
                 if @opt.dry_run?
                   puts_template(options)
@@ -270,17 +280,16 @@ module Alces
           unless @opt.permanent_boot?
             STDERR.puts "DRY RUN: Files that would be deleted:" unless @to_delete_dry_run.empty?
             @to_delete_dry_run.each { |file| STDERR.puts "  #{file}" }
-            @to_delete.each { |file| `rm -f #{file} 2>/dev/null` }
+            @to_delete.each { |file| delete_file_log file }
           end
-          raise e
-        rescue Interrupt
-          raise TearDownError.new(
+
+          e = TearDownError.new(
             "Files created during a dry run") if tear_down_flag_dry
-          raise TearDownError.new(
+          e = TearDownError.new(
             "Files should have been saved! This was not a dry run") if tear_down_flag
+          return e
         end
-        class TearDownError < StandardError
-        end
+        class TearDownError < StandardError; end
       end
     end
   end
