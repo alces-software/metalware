@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/iterator'
 
 module Alces
@@ -31,7 +32,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_REPO']}/templates/kickstart/", template)
+          @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}/templates/kickstart/", template)
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]

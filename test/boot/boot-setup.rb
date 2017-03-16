@@ -19,6 +19,8 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require "alces/stack/finder"
+
 module BootTestSetup
   def setup
     set_up_templates
@@ -50,9 +52,9 @@ module BootTestSetup
   end
 
   def set_finders
-    @finder = Alces::Stack::Templater::Finder
+    @finder = Alces::Stack::Finder
                 .new(@default_template_location, @template)
-    @ks_finder = Alces::Stack::Templater::Finder
+    @ks_finder = Alces::Stack::Finder
                 .new(@default_template_location, @template_kickstart)
   end
 

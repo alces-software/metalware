@@ -21,7 +21,7 @@
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
-require "alces/stack/templater"
+require "alces/stack/finder"
 
 class TC_Templater_Finder < Test::Unit::TestCase
   def setup
@@ -46,47 +46,47 @@ class TC_Templater_Finder < Test::Unit::TestCase
   def test_find_kickstart
     fullpath  = "#{@default_kickstart}compute.erb"
     tmp_fullpath  = "#{@default_kickstart}local.erb"
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "#{@default_kickstart}/compute.erb")
+    find = Alces::Stack::Finder.new(@default_kickstart, "#{@default_kickstart}/compute.erb")
     assert_equal(fullpath, find.template, "Could not find file from full path")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "#{@default_kickstart}/compute")
+    find = Alces::Stack::Finder.new(@default_kickstart, "#{@default_kickstart}/compute")
     assert_equal(fullpath, find.template, "Could not find file from full path with no .ext")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "/compute.erb")
+    find = Alces::Stack::Finder.new(@default_kickstart, "/compute.erb")
     assert_equal(fullpath, find.template, "Could not find file from name")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "compute")
+    find = Alces::Stack::Finder.new(@default_kickstart, "compute")
     assert_equal(fullpath, find.template, "Could not find file from name no .ext")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "tempfolderthatshouldnotexist/local.erb")
+    find = Alces::Stack::Finder.new(@default_kickstart, "tempfolderthatshouldnotexist/local.erb")
     assert_equal(@tmp_file, find.template, "Found nested template")
-    assert_raise Alces::Stack::Templater::Finder::TemplateNotFound do Alces::Stack::Templater::Finder.new(@default_kickstart, template = "local") end
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "local-boot")
+    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart, template = "local") end
+    find = Alces::Stack::Finder.new(@default_kickstart, "local-boot")
     assert_equal(@tmp_file2, find.template, "Could not find file with a -")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "local_boot")
+    find = Alces::Stack::Finder.new(@default_kickstart, "local_boot")
     assert_equal(@tmp_file3, find.template, "Could not find file with a _")
   end
 
   def test_find_boot
     fullpath = "#{@default_boot}install.erb"
-    find = Alces::Stack::Templater::Finder.new(@default_boot, "install")
+    find = Alces::Stack::Finder.new(@default_boot, "install")
     assert_equal(fullpath, find.template, "Could not find boot template")
   end
 
   def test_path
     fullpath = "#{@default_boot}install.erb"
-    find = Alces::Stack::Templater::Finder.new(@default_boot, "install")
+    find = Alces::Stack::Finder.new(@default_boot, "install")
     assert_equal(@default_boot, find.path << "/", "Did not return correct path to template")
   end
 
   def test_filename
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "compute")
+    find = Alces::Stack::Finder.new(@default_kickstart, "compute")
     assert_equal("compute", find.filename, "Did not return correct filename or ext")
     assert_equal("compute.erb", find.filename_ext, "Did not return correct filename or ext")
     assert_equal("compute.ks", find.filename_diff_ext("ks"), "Did not return correct filename or ext")
     assert_equal("compute.ks", find.filename_diff_ext(".ks"), "Did not return correct filename or ext")
     assert_equal("compute.ks", find.filename_diff_ext(".ks"), "Did not return correct filename or ext")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "local-boot")
+    find = Alces::Stack::Finder.new(@default_kickstart, "local-boot")
     assert_equal("local-boot", find.filename, "Did not find filename with -")
-    find = Alces::Stack::Templater::Finder.new(@default_kickstart, "local_boot")
+    find = Alces::Stack::Finder.new(@default_kickstart, "local_boot")
     assert_equal("local_boot", find.filename, "Did not find filename with _")
-    assert_raise Alces::Stack::Templater::Finder::TemplateNotFound do Alces::Stack::Templater::Finder.new(@default_kickstart, "") end
-    assert_raise Alces::Stack::Templater::Finder::TemplateNotFound do Alces::Stack::Templater::Finder.new(@default_kickstart, nil) end
+    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart, "") end
+    assert_raise Alces::Stack::Finder::TemplateNotFound do Alces::Stack::Finder.new(@default_kickstart, nil) end
   end
 end

@@ -22,6 +22,7 @@
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
 require "alces/stack/templater"
+require "alces/stack/finder"
 require "alces/stack/iterator"
 
 class TC_Script < Test::Unit::TestCase
@@ -31,7 +32,7 @@ class TC_Script < Test::Unit::TestCase
     @template = "test.sh"
     @template_str = "<%= nodename %> <%= json %>"
     File.write("#{@base_temp_loc}/#{@template}.erb", @template_str)
-    @finder = Alces::Stack::Templater::Finder.new(@base_temp_loc, "#{@template}")
+    @finder = Alces::Stack::Finder.new(@base_temp_loc, "#{@template}")
     @single_node = "slave04"
     @single_input_hash = { nodename: @single_node }
     @save_location_base = "/var/lib/metalware/rendered/scripts"

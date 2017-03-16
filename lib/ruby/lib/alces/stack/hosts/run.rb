@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/iterator'
 
 module Alces
@@ -32,7 +33,7 @@ module Alces
 
         def initialize(template, options={})
           @finder = 
-            Alces::Stack::Templater::Finder.new("#{ENV['alces_REPO']}/templates/hosts/", template)
+            Alces::Stack::Finder.new("#{ENV['alces_REPO']}/templates/hosts/", template)
           @template_parameters = {
             nodename: options[:nodename]
           }

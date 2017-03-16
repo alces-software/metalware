@@ -202,62 +202,6 @@ module Alces
           end
         end
       end
-
-      class Finder
-        def initialize(default_location, template)
-          @default_location = default_location
-          @template = find_template(template).chomp
-          @filename_ext = File.basename(@template)
-          @filename_ext_trim_erb = File.basename(@template, ".erb")
-          @filename = File.basename(@template, ".*")
-          @path = File.dirname(@template)
-        end
-
-        attr_reader :template
-        attr_reader :filename
-        attr_reader :filename_ext
-        attr_reader :filename_ext_trim_erb
-        attr_reader :path
-
-        def filename_diff_ext(ext)
-          ext = ".#{ext}" if ext[0] != "."
-          return "#{@filename}#{ext}"
-        end
-
-        def find_template(template)
-          begin
-            template = template.dup
-          rescue StandardError
-            raise TemplateNotFound.new(template)
-          end
-          copy = "#{template}"
-          template.gsub!(/\/\//,"/")
-          template = "/" << template if template[0] != '/'
-          template_erb = "#{template}.erb"
-          # Checks if it's a full path to the default folder
-          if template =~ /\A#{@default_location}.*\Z/
-            return template if File.file?(template)
-            return template_erb if File.file?(template_erb)
-          end
-          # Checks to see if the file is in the template folder
-          path_template = "#{@default_location}#{template}"
-          path_template.gsub!(/\/\//,"/")
-          path_template_erb = "#{path_template}.erb"
-          return path_template if File.file?(path_template)
-          return path_template_erb if File.file?(path_template_erb)
-          # Checks the file structure
-          return template if File.file?(template)
-          return template_erb if File.file?(template_erb)
-          raise TemplateNotFound.new(copy)
-        end
-
-        class TemplateNotFound < StandardError
-          def intialize(template)
-            msg = "Could not find template file: " << template
-            super
-          end
-        end
-      end
     end
   end
 end

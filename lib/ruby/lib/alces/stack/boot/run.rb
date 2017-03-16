@@ -23,6 +23,7 @@ require 'alces/stack/log'
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/kickstart'
 require 'alces/stack/scripts'
 require 'json'
@@ -45,14 +46,14 @@ module Alces
           end
 
           def finder
-            @finder ||= Alces::Stack::Templater::Finder.new(
+            @finder ||= Alces::Stack::Finder.new(
               "#{ENV['alces_REPO']}/templates/boot/",
               @options[:template])
           end
 
           def ks_finder
             @ks_finder ||= @options[:kickstart] ?
-              Alces::Stack::Templater::Finder.new(
+              Alces::Stack::Finder.new(
                 "#{ENV['alces_REPO']}/templates/kickstart/",
                 @options[:kickstart])
               : nil
