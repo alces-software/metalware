@@ -23,6 +23,7 @@ require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 
 require "json"
 require "alces/stack/templater"
+require "alces/stack/finder"
 
 class TC_Templater_Combiner < Test::Unit::TestCase
   def setup
@@ -46,6 +47,10 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     @example_template = "#{@template_folder}/boot/install.erb"
     `mv #{ENV['alces_REPO']}/config #{ENV['alces_REPO']}/config.copy 2>&1`
     `cp -r #{ENV['alces_BASE']}/test/helper/config #{ENV['alces_REPO']}/config`
+    `mkdir -p /var/lib/metalware/repos/new/template/boot`
+    `mkdir -p /var/lib/metalware/repos/new/config`
+    `echo '<%= diff_repo %>' > /var/lib/metalware/repos/new/template/boot/template`
+    `echo 'diff_repo: diff_repo' > /var/lib/metalware/repos/new/config/all.yaml`
   end
 
   def test_no_input
@@ -184,7 +189,16 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     end
   end
 
+  def test_diff_repo_yaml
+    finder = Alces::Stack::Finder
+               .new("#{ENV['alces_REPO']}", "/template/boot", "new::template")
+    rendered = Alces::Stack::Templater::Combiner
+                 .new(finder.repo, "", {nodename: "slave04"}).file(finder.template)
+    assert_equal("diff_repo", rendered.chomp, "Did not switch yaml repo")
+  end
+
   def teardown
+    `rm -rf /var/lib/metalware/repos/new`
     `rm -rf #{ENV['alces_REPO']}/config 2>&1`
     `mv #{ENV['alces_REPO']}/config.copy #{ENV['alces_REPO']}/config 2>&1`
   end

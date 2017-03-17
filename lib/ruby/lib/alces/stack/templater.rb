@@ -117,9 +117,10 @@ module Alces
             permanent_boot: false
           }
         def initialize(repo, json, hash={})
+          repo = set_repo(repo)
           @combined_hash = DEFAULT_HASH.merge(hash)
           fixed_nodename = combined_hash[:nodename]
-          @combined_hash.merge!(load_yaml_hash)
+          @combined_hash.merge!(load_yaml_hash(repo))
           @combined_hash.merge!(load_json_hash(json))
           @parsed_hash = parse_combined_hash
           if parsed_hash[:nodename] != fixed_nodename
@@ -138,15 +139,23 @@ module Alces
         attr_reader :combined_hash
         attr_reader :parsed_hash
 
+        def set_repo(repo)
+          repo = nil if repo.to_s.empty?
+          repo ||= lambda {
+            Alces::Stack::Log.warn "Alces::Stack::Templater::Combiner Implicitly using default repo"
+            "#{ENV['alces_REPO']}"
+          }.call
+        end
+
         def load_json_hash(json)
           (json || "").empty? ? {} : JSON.parse(json,symbolize_names: true)
         end
 
-        def load_yaml_hash()
+        def load_yaml_hash(repo)
           hash = Hash.new
           get_yaml_file_list.each do |yaml|
             begin 
-              yaml_payload = YAML.load(File.read("#{ENV['alces_REPO']}/config/#{yaml}.yaml"))
+              yaml_payload = YAML.load(File.read("#{repo}/config/#{yaml}.yaml"))
             rescue Errno::ENOENT # Skips missing files
             rescue StandardError => e
               $stderr.puts "Could not pass YAML file"
