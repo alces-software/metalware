@@ -58,7 +58,7 @@ module Alces
         option  :template,
                 'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_REPO']}/templates/hosts/compute.erb"
+                default: "compute.erb"
 
         flag    :template_options,
                 'Show templating options',

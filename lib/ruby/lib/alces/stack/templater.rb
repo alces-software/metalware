@@ -29,52 +29,74 @@ module Alces
   module Stack
     module Templater
       class << self
-        def show_options(options={})
-          const = {
-            hostip: "#{`hostname -i`.chomp}",
-            index: "0 (integer)",
-            permanent_boot: "false (boolean)"
+        DEFAULT_HASH = {
+            hostip: `hostname -i`.chomp,
+            index: 0,
+            permanent_boot: false
           }
-          puts "ERB can replace template parameters with variables from 5 sources:"
-          puts "  1) JSON input from the command line using -j"
-          puts "  2) YAML config files stored in: #{ENV['alces_REPO']}/config"
-          puts "  3) Command line inputs and index from the iterator (if applicable)"
-          puts "  4) Constants available to all templates"
+
+        def wrap(s, width)
+          s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
+        end
+
+        def putw(s)
+          puts wrap(s, `tput cols`.to_i)
+        end
+
+        def show_options(options={})
+          putw "Templates can be specifying by the full path to the file directly. " \
+               "Alternatively, the template name can be specified and the default " \
+               "path (see below) will be used instead. You do not need to include " \
+               "the '.erb' file extension. Other extensions are accepted however " \
+               "must be specified. A different repo can be specified by <repo>::" \
+               "<filename>. In this case the repo path (see below) is used."
           puts
-          puts "In the event of a conflict between the sources, the priority order is as given above."
-          puts "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
+          putw "Default path : #{ENV['alces_REPO']}/templates/<action>/<filename>"
+          putw "Repo path    : /var/lib/metalware/repos/<repo>/template/<action>/<filename>"
           puts
-          puts "The yaml config files are stored in #{ENV['alces_REPO']}/config"
-          puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
+          putw "ERB can replace template parameters with variables from 5 sources:"
+          putw "  1) JSON input from the command line using -j"
+          putw "  2) YAML config files stored in: #{ENV['alces_REPO']}/config"
+          putw "  3) Command line inputs and index from the iterator (if applicable)"
+          putw "  4) Constants available to all templates"
           puts
-          puts "The following command line parameters are replaced by ERB:"
+          putw "In the event of a conflict between the sources, the priority order is as given above."
+          putw "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
+          puts
+          putw "The templater by default uses the YAML file in the default location" \
+               "However templater switches "
+          putw "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
+          puts
+          putw "The following command line parameters are replaced by ERB:"
           none_flag = true
           if options.keys.max_by(&:length).nil? then option_length = 0
           else option_length = options.keys.max_by(&:length).length end
-          const_length = const.keys.max_by(&:length).length
+          const_length = DEFAULT_HASH.keys.max_by(&:length).length
           if option_length > const_length then align = option_length
           else align = const_length end
           options.each do |key, value|
             none_flag = false;
             spaces = align - key.length
-            print"    <%= #{key} %> "
+            str = "    <%= #{key} %> "
             while spaces > 0
               spaces -= 1
-              print " "
+              str << " "
             end
-            puts ": #{value}"
+            str << ": #{value}"
+            putw str
           end
-          puts "    (none)" if none_flag
+          putw "    (none)" if none_flag
           puts
-          puts "The constant values replaced by erb:"
-          const.each do |key, value|
+          putw "The constant values replaced by erb:"
+          DEFAULT_HASH.each do |key, value|
             spaces = align - key.length
-            print"    <%= #{key} %> "
+            str = "    <%= #{key} %> "
             while spaces > 0
               spaces -= 1
-              print " "
+              str << " "
             end
-            puts ": #{value}"
+            str << ": #{value} (#{value.class})"
+            putw str
           end
         end
       end
@@ -111,11 +133,6 @@ module Alces
       end
 
       class Combiner < Handler
-        DEFAULT_HASH = {
-            hostip: `hostname -i`.chomp,
-            index: 0,
-            permanent_boot: false
-          }
         def initialize(repo, json, hash={})
           repo = set_repo(repo)
           @combined_hash = DEFAULT_HASH.merge(hash)

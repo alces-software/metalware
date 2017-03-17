@@ -55,6 +55,10 @@ module Alces
                 '--kernelappendoptions',
                 default: ""
 
+        option  :repo,
+                'Specifies a repo to use for all templates. Is overridden by <repo>:: flag',
+                '-r', '--repo'
+
         option  :template,
                 'Specify template',
                 '-t', '--template',
