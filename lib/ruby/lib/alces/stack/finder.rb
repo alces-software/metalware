@@ -63,16 +63,34 @@ module Alces
       end
 
       def process_template(template)
-        copy = "#{template}"
-        copy.gsub!(/\/\/+/, "/")
+        copy = "#{template}".gsub(/\A.*::/, "").gsub(/\/\/+/, "/")
         h = {
           t: "#{copy}",
           e: "#{copy}.erb"
         }
       end
 
-      def set_default_location(template)
-        def_loc = "#{@default_repo}/#{@default_path_repo}"
+      def set_default_location(template_input)
+        template = template_input.to_s
+        raise ErrorRepoNotFound.new "empty repo" unless template.scan(/\A::/).empty?
+        repo_arr = template.scan(/\A.*::/)
+        if repo_arr.length > 1
+          raise ErrorRepoNotFound
+        elsif repo_arr.length == 1
+          repo = "/var/lib/metalware/repos/#{repo_arr[0].gsub("::", "")}"
+        else
+          repo = @default_repo
+        end
+        def_loc = "#{repo}/#{@default_path_repo}".gsub(/\/\/+/, "/")
+        raise ErrorRepoNotFound.new def_loc unless File.directory?(def_loc)
+        return def_loc
+      end
+
+      class ErrorRepoNotFound < StandardError
+        def initialize (repo)
+          msg = "Could not find template folder or repo: #{repo}"
+          super
+        end
       end
 
       def match_full_path_in_default(def_loc, template = {})

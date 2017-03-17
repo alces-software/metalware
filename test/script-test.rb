@@ -24,6 +24,7 @@ require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 require "alces/stack/templater"
 require "alces/stack/finder"
 require "alces/stack/iterator"
+require "fileutils"
 
 class TC_Script < Test::Unit::TestCase
   def setup
@@ -83,7 +84,7 @@ class TC_Script < Test::Unit::TestCase
   end
 
   def teardown
-    `rm -f #{@base_temp_loc}/#{@template}`
-    `rm -rf #{@save_location_base}/*`
+    File.delete("#{@base_temp_loc}/#{@template}.erb")
+    Dir.glob("#{@save_location_base}/*").each { |d| FileUtils.rm_r(d) }
   end
 end
