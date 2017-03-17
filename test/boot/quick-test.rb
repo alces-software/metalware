@@ -74,7 +74,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
   def test_get_save_file
     boot = Alces::Stack::Boot::Run.new(@input_nodename)
     json = @input_nodename[:json]; @input_nodename.delete(:json)
-    combiner = Alces::Stack::Templater::Combiner.new(json, @input_nodename)
+    combiner = Alces::Stack::Templater::Combiner.new(nil, json, @input_nodename)
     save = boot.get_save_file(combiner)
     assert_equal("/var/lib/tftpboot/pxelinux.cfg/" \
                    "#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}",
@@ -124,7 +124,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
     @input_nodename_kickstart.delete(:json)
     @input_nodename_kickstart[:kickstart] = ""
     correct = Alces::Stack::Templater::Combiner
-                .new(json, @input_nodename_kickstart).file(@template_kickstart)
+                .new(nil, json, @input_nodename_kickstart).file(@template_kickstart)
     assert_equal(correct.strip,
                  content.chomp,
                  "Did not pass kickstart template correctly")

@@ -25,6 +25,7 @@ module Alces
       def initialize(default_repo, default_path_repo, template)
         @default_repo = default_repo.chomp("/")
         @default_path_repo = default_path_repo.chomp("/")
+        @repo = get_repo(template)
         @template = find_template(template).chomp
         @filename_ext = File.basename(@template)
         @filename_ext_trim_erb = File.basename(@template, ".erb")
@@ -32,6 +33,7 @@ module Alces
         @path = File.dirname(@template)
       end
 
+      attr_reader :repo
       attr_reader :template
       attr_reader :filename
       attr_reader :filename_ext
@@ -43,10 +45,34 @@ module Alces
         return "#{@filename}#{ext}"
       end
 
+      def get_repo(template_input)
+        template = template_input.to_s
+        raise ErrorRepoNotFound.new "empty repo" unless template.scan(/\A::/).empty?
+        repo_arr = template.scan(/\A.*::/)
+        if repo_arr.length > 1
+          raise ErrorRepoNotFound
+        elsif repo_arr.length == 1
+          repo = "/var/lib/metalware/repos/#{repo_arr[0].gsub("::", "")}"
+        elsif @default_repo.empty? || !@default_repo
+          repo = "/"
+        else
+          repo = @default_repo
+        end
+        raise ErrorRepoNotFound.new repo unless File.directory?(repo)
+        return repo.chomp("/")
+      end
+
+      class ErrorRepoNotFound < StandardError
+        def initialize (repo)
+          msg = "Could not find repo: #{repo}"
+          super
+        end
+      end
+
       def find_template(template)
         # Preprocessing
         t_hash = process_template(template)
-        default_location = set_default_location(template)
+        location = "#{@repo}/#{@default_path_repo}".gsub(/\/\/+/, "/")
 
         # Match tests
         match_arr = [method(:match_full_path_in_default),
@@ -55,7 +81,7 @@ module Alces
 
         # Checks for a match
         match_arr.each do |match_test|
-          result = match_test.call(default_location, t_hash)
+          result = match_test.call(location, t_hash)
           return result if result
         end
 
@@ -70,46 +96,23 @@ module Alces
         }
       end
 
-      def set_default_location(template_input)
-        template = template_input.to_s
-        raise ErrorRepoNotFound.new "empty repo" unless template.scan(/\A::/).empty?
-        repo_arr = template.scan(/\A.*::/)
-        if repo_arr.length > 1
-          raise ErrorRepoNotFound
-        elsif repo_arr.length == 1
-          repo = "/var/lib/metalware/repos/#{repo_arr[0].gsub("::", "")}"
-        else
-          repo = @default_repo
-        end
-        def_loc = "#{repo}/#{@default_path_repo}".gsub(/\/\/+/, "/")
-        raise ErrorRepoNotFound.new def_loc unless File.directory?(def_loc)
-        return def_loc
-      end
-
-      class ErrorRepoNotFound < StandardError
-        def initialize (repo)
-          msg = "Could not find template folder or repo: #{repo}"
-          super
-        end
-      end
-
-      def match_full_path_in_default(def_loc, template = {})
-        return nil unless template[:t] == /\A#{def_loc}.*\Z/
+      def match_full_path_in_default(location, template = {})
+        return nil unless template[:t] == /\A#{location}.*\Z/
         return template[:t] if File.file?(template[:t])
         return template[:e] if File.file?(template[:e])
         return nil
       end
 
-      def match_sub_path_in_default(def_loc, template = {})
+      def match_sub_path_in_default(location, template = {})
         copy = {}
-        copy[:t] = "#{def_loc}/#{template[:t]}".gsub(/\/\/+/, "/")
-        copy[:e] = "#{def_loc}/#{template[:e]}".gsub(/\/\/+/, "/")
+        copy[:t] = "#{location}/#{template[:t]}".gsub(/\/\/+/, "/")
+        copy[:e] = "#{location}/#{template[:e]}".gsub(/\/\/+/, "/")
         return copy[:t] if File.file?(copy[:t])
         return copy[:e] if File.file?(copy[:e])
         return nil
       end
 
-      def match_full_path(def_loc, template = {})
+      def match_full_path(location, template = {})
         return template[:t] if File.file?(template[:t])
         return template[:e] if File.file?(template[:e])
         return nil

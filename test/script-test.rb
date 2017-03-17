@@ -47,7 +47,7 @@ class TC_Script < Test::Unit::TestCase
   def test_single_dry
     output = 
       `#{@bash} metal scripts -x -n #{@single_node} -j '#{@json}' -t #{@template}`
-    combiner = Alces::Stack::Templater::Combiner.new(@json, @single_input_hash)
+    combiner = Alces::Stack::Templater::Combiner.new(nil, @json, @single_input_hash)
     correct = "SCRIPT TEMPLATE\nHash: " << combiner.parsed_hash.to_s
     correct << "\nSave: " << @save_location.gsub("<%= nodename %>", @single_node)
     correct << "\nTemplate:\n" << combiner.file(@finder.template)
@@ -61,7 +61,7 @@ class TC_Script < Test::Unit::TestCase
     `#{run_str}`
     new_save_loc << "/#{@finder.filename_ext_trim_erb}"
     output = File.read(new_save_loc.gsub("<%= nodename %>", @single_node))
-    correct = Alces::Stack::Templater::Combiner.new(@json, @single_input_hash)
+    correct = Alces::Stack::Templater::Combiner.new(nil, @json, @single_input_hash)
                                                .file(@finder.template)
     assert_equal(correct, output.chomp, "Did not save rendered template correctly")
   end
@@ -77,7 +77,7 @@ class TC_Script < Test::Unit::TestCase
       assert_equal(1, num_files, "Incorrect number of files created\n" \
                                  "#{`tree #{@save_location_base}/#{f}`}")
       output = `cat #{@save_location_base}/#{f}/*`
-      correct = Alces::Stack::Templater::Combiner.new(@json, { nodename: f })
+      correct = Alces::Stack::Templater::Combiner.new(nil, @json, { nodename: f })
                                                .file(@finder.template)
       assert_equal(correct, output.chomp, "Contents of files incorrect")
     end

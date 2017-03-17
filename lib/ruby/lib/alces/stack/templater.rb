@@ -116,7 +116,7 @@ module Alces
             index: 0,
             permanent_boot: false
           }
-        def initialize(json, hash={})
+        def initialize(repo, json, hash={})
           @combined_hash = DEFAULT_HASH.merge(hash)
           fixed_nodename = combined_hash[:nodename]
           @combined_hash.merge!(load_yaml_hash)

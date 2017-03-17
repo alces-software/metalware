@@ -51,6 +51,10 @@ module Alces
               @options[:template])
           end
 
+          def repo
+            finder.repo
+          end
+
           def ks_finder
             @ks_finder ||= @options[:kickstart] ?
               Alces::Stack::Finder.new(
@@ -142,7 +146,7 @@ module Alces
 
         def save_template(parameters={})
           add_kickstart(parameters) if @opt.kickstart?
-          combiner = Alces::Stack::Templater::Combiner.new(@json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@opt.repo, @json, parameters)
           save = get_save_file(combiner)
           add_files_to_delete(save)
           combiner.save(@opt.finder.template, save)
@@ -150,7 +154,7 @@ module Alces
 
         def puts_template(parameters={})
           add_kickstart(parameters) if @opt.kickstart?
-          combiner = Alces::Stack::Templater::Combiner.new(@opt.json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@opt.repo, @opt.json, parameters)
           save = get_save_file(combiner)
           add_files_to_delete(save)
           puts "BOOT TEMPLATE"

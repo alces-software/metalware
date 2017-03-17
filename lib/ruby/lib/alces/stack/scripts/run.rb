@@ -61,7 +61,7 @@ module Alces
         end
 
         def save_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@finder.repo, @json, template_parameters)
           save = get_save_file(combiner.parsed_hash[:nodename])
           FileUtils.mkdir_p(File.dirname(save))
           combiner.save(@finder.template, save)
@@ -69,7 +69,7 @@ module Alces
         end
 
         def puts_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@finder.repo, @json, template_parameters)
           puts "SCRIPT TEMPLATE"
           puts "Hash: " << combiner.parsed_hash.to_s
           puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])

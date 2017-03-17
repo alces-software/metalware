@@ -47,7 +47,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       hash_temp[:kickstart] = "test.ks.slave04"
       output_pxe = `cat #{save_pxe}`.chomp
       combiner = Alces::Stack::Templater::Combiner
-                   .new(@input_nodename_kickstart[:json], hash_temp)
+                   .new("", @input_nodename_kickstart[:json], hash_temp)
       correct_pxe = combiner.file("#{@default_template_location}#{@template}")
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")
       output_kick = `cat #{save_kick}`.chomp
@@ -140,7 +140,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       hash_temp[:kickstart] = "test.ks.#{@input_nodename_kickstart[:nodename]}"
       hash_temp[:firstboot] = true
       combiner = Alces::Stack::Templater::Combiner
-                   .new(@input_nodename_kickstart[:json], hash_temp)
+                   .new("", @input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
       correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str,
                                          combiner.parsed_hash)
@@ -158,7 +158,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       assert(File.file?(save_kick), "Kickstart file has been deleted")
       hash_temp[:firstboot] = false
       combiner = Alces::Stack::Templater::Combiner
-                   .new(@input_nodename_kickstart[:json], hash_temp)
+                   .new("", @input_nodename_kickstart[:json], hash_temp)
       output_pxe = `cat #{save_pxe}`.chomp
       correct_pxe = combiner.replace_erb(@template_pxe_firstboot_str,
                                          combiner.parsed_hash)

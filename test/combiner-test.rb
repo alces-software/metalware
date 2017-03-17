@@ -49,9 +49,9 @@ class TC_Templater_Combiner < Test::Unit::TestCase
   end
 
   def test_no_input
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("").combined_hash, "Combined array is not empty")
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(nil,{}).combined_hash, "Combined array is not empty")
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(false,Hash.new).combined_hash, "Combined array is not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("", "").combined_hash, "Combined array is not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(nil, nil,{}).combined_hash, "Combined array is not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(false, false,Hash.new).combined_hash, "Combined array is not empty")
   end
 
   def test_hash_input
@@ -61,7 +61,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       bool: true,
       is_nil: nil
     }
-    new_hash = Alces::Stack::Templater::Combiner.new("", no_hostip).combined_hash
+    new_hash = Alces::Stack::Templater::Combiner.new(nil, "", no_hostip).combined_hash
     assert_equal(new_hash, @basic_hash, "Did not add hash to combined hash")
     new_hash[:newfeild] = true
     assert_not_equal(new_hash, @basic_hash, "Can not change hash input and combined hash independently")
@@ -73,9 +73,9 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       index: 0,
       permanent_boot: false
     }
-    assert_equal(json_hash, Alces::Stack::Templater::Combiner.new(@json_string).combined_hash, "Did not add json to combined hash")
-    assert_raise TypeError do Alces::Stack::Templater::Combiner.new(json_hash).combined_hash end
-    assert_raise JSON::ParserError do Alces::Stack::Templater::Combiner.new(@example_template).combined_hash end
+    assert_equal(json_hash, Alces::Stack::Templater::Combiner.new(false, @json_string).combined_hash, "Did not add json to combined hash")
+    assert_raise TypeError do Alces::Stack::Templater::Combiner.new(nil, json_hash).combined_hash end
+    assert_raise JSON::ParserError do Alces::Stack::Templater::Combiner.new("", @example_template).combined_hash end
   end
 
   def test_priority_order
@@ -85,7 +85,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       index: 0,
       permanent_boot: false
     }
-    hash_over_default = Alces::Stack::Templater::Combiner.new("",over_default_hash).combined_hash
+    hash_over_default = Alces::Stack::Templater::Combiner.new(false, "",over_default_hash).combined_hash
     assert_equal(over_default_hash, hash_over_default, "Hash did not override default values")
     json_input = '{"hostip": "1.1.1.1"}'
     json_hash = {
@@ -94,37 +94,37 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       index: 0,
       permanent_boot: false
     }
-    json_over_hash = Alces::Stack::Templater::Combiner.new(json_input, over_default_hash).combined_hash
+    json_over_hash = Alces::Stack::Templater::Combiner.new(nil, json_input, over_default_hash).combined_hash
     assert_equal(json_hash, json_over_hash, "JSON did not override hash inputs")
   end
 
   def test_parsed_hash
     # No erb
-    assert_equal(@basic_hash, Alces::Stack::Templater::Combiner.new("",@basic_hash).parsed_hash, "Changed hash if no erb is present")
+    assert_equal(@basic_hash, Alces::Stack::Templater::Combiner.new("", "",@basic_hash).parsed_hash, "Changed hash if no erb is present")
     # Single erb replace
     @basic_hash[:replace_with_hostip] = "<%= hostip %>"
     correct_hash = Hash.new.merge(@basic_hash)
     correct_hash[:replace_with_hostip] = correct_hash[:hostip]
-    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new("",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
+    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new(false, "",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
     # Chain erb replace
     @basic_hash[:double_replace] = "<%= replace_with_hostip %>"
     @basic_hash[:triple_replace] = "<%= double_replace %>"
     correct_hash[:double_replace] = correct_hash[:hostip]
     correct_hash[:triple_replace] = correct_hash[:hostip]
-    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new("",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
+    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new(nil, "",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
     # Recursion error
     @basic_hash[:recursion_error] = "<%= recursion_error %>a"
-    assert_raise Alces::Stack::Templater::Combiner::LoopErbError do Alces::Stack::Templater::Combiner.new("",@basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::LoopErbError do Alces::Stack::Templater::Combiner.new("", "",@basic_hash) end
   end
 
   def test_file
-    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil).file("fake.txt", @basic_hash) end
-    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil).save("fake.txt", "fake.txt", @basic_hash) end
-    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil).append("fake.txt", "fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(false, nil).file("fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil, nil).save("fake.txt", "fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new("", nil).append("fake.txt", "fake.txt", @basic_hash) end
   end
 
   def test_load_yaml_hash_no_nodename
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("").parsed_hash, "Yaml hash not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("", "").parsed_hash, "Yaml hash not empty")
   end
 
   def test_yaml_all_cluster_config
@@ -136,7 +136,11 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       index: 0
     }
     hash.merge!(@default_hash)
-    assert_equal(hash, Alces::Stack::Templater::Combiner.new("",nodename:"slave01").parsed_hash, "Has not passed yaml")
+    assert_equal(
+      hash,
+      Alces::Stack::Templater::Combiner.new("", "", nodename:"slave01").parsed_hash,
+      "Has not passed yaml"
+    )
   end
 
   def test_yaml_all_cluster_config_slave04
@@ -149,7 +153,11 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       permanent_boot: false
     }
     hash.merge!(@default_hash)
-    assert_equal(hash, Alces::Stack::Templater::Combiner.new("",nodename:"slave04").parsed_hash, "Yaml pass or load order error")
+    assert_equal(
+      hash,
+      Alces::Stack::Templater::Combiner.new("", "", nodename:"slave04").parsed_hash,
+      "Yaml pass or load order error"
+    )
   end
 
   def test_json_overide_yaml
@@ -166,12 +174,14 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       "config":"json",
       "q3":0
     }'
-    assert_equal(hash, Alces::Stack::Templater::Combiner.new(json,nodename:"slave04").parsed_hash, "JSON has not correctly overridden YAML")
+    assert_equal(hash, Alces::Stack::Templater::Combiner.new("", json,nodename:"slave04").parsed_hash, "JSON has not correctly overridden YAML")
   end
 
   def test_override_nodename_error
     json = '{"nodename":1}'
-    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do Alces::Stack::Templater::Combiner.new(json) end
+    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do 
+      Alces::Stack::Templater::Combiner.new(nil, json)
+    end
   end
 
   def teardown

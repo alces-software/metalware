@@ -23,6 +23,7 @@ require 'alces/tools/execution'
 require 'net/dhcp'
 require 'pcaplet'
 require 'alces/stack/templater'
+require 'alces/stack/finder'
 require 'alces/stack/log'
 
 module Alces
@@ -37,7 +38,9 @@ module Alces
           @default_name_index_size=options[:name_sequence_length].to_i || 2
           @default_name=options[:name] || "node"
           @update_dhcp_flag=options[:update_dhcp_flag]
-          @templateFilename=options[:template]
+          finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/templates/hunter", options[:template])
+          @templateFilename = finder.template
+          @repo = finder.repo
           @detected_macs=[]
           @json = options[:json]
           @hunter_logger = Alces::Stack::Log.create_log("/var/log/metalware/hunter.log")
@@ -136,7 +139,7 @@ module Alces
             hwaddr: hwaddr.chomp,
             fixedaddr: fixedip.chomp
           }
-          Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          Alces::Stack::Templater::Combiner.new(@repo, @json, template_parameters)
                                            .append(@templateFilename, @DHCP_filename)
         end
 
