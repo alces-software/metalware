@@ -34,8 +34,8 @@ $: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
 require 'rubygems'
 require 'bundler/setup'
-Bundler.setup(:default, :dhcp)
+Bundler.setup(:default)
 
-require 'alces/stack/hunter'
+require 'alces/stack/repo'
 
-Alces::Stack::Hunter::CLI.execute if $0 == __FILE__
+Alces::Stack::Repo::CLI.execute if $0 == __FILE__

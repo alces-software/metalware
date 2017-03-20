@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,21 +19,45 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source 'http://rubygems.org'
-source 'http://gems.alces-software.com'
+require 'alces/stack/log'
+require 'alces/tools/execution'
+require 'git'
 
-group :dhcp do
-  gem 'pcap', '0.7.7'
-  gem 'net-dhcp'
+module Alces
+  module Stack
+    module Repo
+      class Run
+        include Alces::Tools::Execution
+
+        def initialize(options = {})
+          @opt = Options.new(options)
+        end
+
+        class Options
+          def initialize(options = {})
+            @options = options
+          end
+
+          def method_missing(s, *a, &b)
+            if @options.key?(s)
+              @options[s]
+            elsif s[-1] == "?"
+              !!@options[s[0...-1].to_sym]
+            else
+              super
+            end
+          end       
+        end
+
+        def run!
+
+          if @opt.dry_run?
+            lambda_proc = -> (parameter) { puts_template(parameter) }
+          else
+            lambda_proc = -> (parameter) { save_template(parameter) }
+          end
+        end
+      end
+    end
+  end
 end
-
-group :booter do
-  gem 'ruby-ip'
-end
-
-group :git do
-  gem 'git'
-end
-
-gem 'alces-tools', '>= 0.13.0'
-gem 'highline'

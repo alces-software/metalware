@@ -33,7 +33,6 @@ module Alces
         root_only
         name 'metal boot'
         description "Creates the boot files for the node(s)"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
 
         option  :nodename,
                 'Node name to be modified',

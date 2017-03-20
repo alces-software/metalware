@@ -19,21 +19,17 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source 'http://rubygems.org'
-source 'http://gems.alces-software.com'
+require 'alces/stack/repo/cli'
+require 'alces/stack/repo/run'
 
-group :dhcp do
-  gem 'pcap', '0.7.7'
-  gem 'net-dhcp'
+module Alces
+  module Stack
+    module Repo
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
+      end
+    end
+  end
 end
-
-group :booter do
-  gem 'ruby-ip'
-end
-
-group :git do
-  gem 'git'
-end
-
-gem 'alces-tools', '>= 0.13.0'
-gem 'highline'

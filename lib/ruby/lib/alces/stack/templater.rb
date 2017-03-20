@@ -56,14 +56,16 @@ module Alces
           putw "  3) Command line inputs and index from the iterator (if applicable)"
           putw "  4) Constants available to all templates"
           puts
-          putw "In the event of a conflict between the sources, the priority order is as given above."
+          putw "In the event of a conflict between the sources, the priority order" \
+               " is as given above."
           putw "NOTE: nodename can not be overridden by JSON, YAML or ERB. This " \
                "is to because loading the YAML files is dependent on the nodename."
           puts
           putw "The templater uses the YAML files contained in the config directory " \
-               "inside the repo (default or specified). The config files are loaded " \
-               "according to the reverse order defined in the genders folder, followed " \
-               "by <nodename>.yaml which is loaded last."
+               "inside the repo (default or specified). The all.yaml config file " \
+               "is loaded first followed by remaining config files according to " \
+               "the reverse order defined in the genders file. Then " \
+               "<nodename>.yaml is loaded last."
           puts
           putw "The following command line parameters are replaced by ERB:"
           none_flag = true
