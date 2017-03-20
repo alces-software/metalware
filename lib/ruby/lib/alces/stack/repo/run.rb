@@ -21,7 +21,7 @@
 #==============================================================================
 require 'alces/stack/log'
 require 'alces/tools/execution'
-require 'git'
+require 'rugged'
 
 module Alces
   module Stack

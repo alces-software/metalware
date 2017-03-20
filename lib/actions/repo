@@ -34,7 +34,7 @@ $: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
 require 'rubygems'
 require 'bundler/setup'
-Bundler.setup(:default)
+Bundler.setup(:default, :git)
 
 require 'alces/stack/repo'
 

@@ -32,7 +32,7 @@ group :booter do
 end
 
 group :git do
-  gem 'git'
+  gem 'rugged'
 end
 
 gem 'alces-tools', '>= 0.13.0'
