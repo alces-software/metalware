@@ -47,7 +47,7 @@ module Alces
 
       def get_repo(template_input)
         template = template_input.to_s
-        raise ErrorRepoNotFound.new "empty repo" unless template.scan(/\A::/).empty?
+        raise ErrorRepoNotFound.new "(undefined)" unless template.scan(/\A::/).empty?
         repo_arr = template.scan(/\A.*::/)
         if repo_arr.length > 1
           raise ErrorRepoNotFound
@@ -65,7 +65,7 @@ module Alces
       class ErrorRepoNotFound < StandardError
         def initialize (repo)
           msg = "Could not find repo: #{repo}"
-          super
+          super msg
         end
       end
 
