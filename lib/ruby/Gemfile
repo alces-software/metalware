@@ -31,9 +31,11 @@ group :booter do
   gem 'ruby-ip'
 end
 
+=begin
 group :git do
   gem 'rugged'
 end
+=end
 
 gem 'alces-tools', '>= 0.13.0'
 gem 'highline'
