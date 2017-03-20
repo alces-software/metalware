@@ -27,14 +27,8 @@ require "alces/stack/log"
 
 module Alces
   module Stack
-    module Templater
+    module Templater    
       class << self
-        DEFAULT_HASH = {
-            hostip: `hostname -i`.chomp,
-            index: 0,
-            permanent_boot: false
-          }
-
         def wrap(s, width)
           s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
         end
@@ -44,16 +38,18 @@ module Alces
         end
 
         def show_options(options={})
+          putw "Template input:"
           putw "Templates can be specifying by the full path to the file directly. " \
                "Alternatively, the template name can be specified and the default " \
                "path (see below) will be used instead. You do not need to include " \
                "the '.erb' file extension. Other extensions are accepted however " \
                "must be specified. A different repo can be specified by <repo>::" \
-               "<filename>. In this case the repo path (see below) is used."
+               "<filename> flag. In this case the repo path (see below) is used."
           puts
           putw "Default path : #{ENV['alces_REPO']}/templates/<action>/<filename>"
           putw "Repo path    : /var/lib/metalware/repos/<repo>/template/<action>/<filename>"
           puts
+          putw "ERB Priority Order:"
           putw "ERB can replace template parameters with variables from 5 sources:"
           putw "  1) JSON input from the command line using -j"
           putw "  2) YAML config files stored in: #{ENV['alces_REPO']}/config"
@@ -61,17 +57,20 @@ module Alces
           putw "  4) Constants available to all templates"
           puts
           putw "In the event of a conflict between the sources, the priority order is as given above."
-          putw "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
+          putw "NOTE: nodename can not be overridden by JSON, YAML or ERB. This " \
+               "is to because loading the YAML files is dependent on the nodename."
           puts
-          putw "The templater by default uses the YAML file in the default location" \
-               "However templater switches "
-          putw "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
+          putw "The templater uses the YAML files contained in the config directory " \
+               "inside the repo (default or specified). The config files are loaded " \
+               "according to the reverse order defined in the genders folder, followed " \
+               "by <nodename>.yaml which is loaded last."
           puts
           putw "The following command line parameters are replaced by ERB:"
           none_flag = true
           if options.keys.max_by(&:length).nil? then option_length = 0
           else option_length = options.keys.max_by(&:length).length end
-          const_length = DEFAULT_HASH.keys.max_by(&:length).length
+          const_length = Alces::Stack::Templater::Combiner::DEFAULT_HASH
+                           .keys.max_by(&:length).length
           if option_length > const_length then align = option_length
           else align = const_length end
           options.each do |key, value|
@@ -88,7 +87,7 @@ module Alces
           putw "    (none)" if none_flag
           puts
           putw "The constant values replaced by erb:"
-          DEFAULT_HASH.each do |key, value|
+          Alces::Stack::Templater::Combiner::DEFAULT_HASH.each do |key, value|
             spaces = align - key.length
             str = "    <%= #{key} %> "
             while spaces > 0
@@ -133,6 +132,12 @@ module Alces
       end
 
       class Combiner < Handler
+        DEFAULT_HASH = {
+            hostip: `hostname -i`.chomp,
+            index: 0,
+            permanent_boot: false
+          }
+
         def initialize(repo, json, hash={})
           repo = set_repo(repo)
           @combined_hash = DEFAULT_HASH.merge(hash)

@@ -115,7 +115,8 @@ module Alces
               json: json,
               kickstart: kickstart,
               permanent_boot: permanent_boot_flag,
-              scripts: scripts
+              scripts: scripts,
+              repo: repo
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect
