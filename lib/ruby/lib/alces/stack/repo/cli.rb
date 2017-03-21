@@ -39,18 +39,23 @@ module Alces
                 default: false
 
         option  :import,
-                "URL to clone a git repository from",
+                "Name of repository to import. Requires a URL",
                 "-i", "--import",
                 default: false
 
-        flag    :list,
+        option  :url,
+                "URL to remote repository",
+                "-u", "--url",
+                default: false
+
+        option  :list,
                 "TBA",
                 "-l", "--list",
                 default: false
 
-        flag    :update,
+        option  :update,
                 "TBA",
-                "-u", "--update",
+                "-p", "--update",
                 default: false
 
         flag    :force,
@@ -64,12 +69,13 @@ module Alces
         end
 
         def execute
-          Alces::Stack::Boot.run!(
+          Alces::Stack::Repo.run!(
               repo_name: repo_name,
               import: import,
               list: list,
               update: update,
-              force: force
+              force: force,
+              url: url
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect

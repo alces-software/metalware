@@ -19,6 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require 'alces/stack/repo'
 require 'alces/stack/log'
 require 'alces/tools/execution'
 require 'rugged'
@@ -38,6 +39,36 @@ module Alces
             @options = options
           end
 
+          def get_repo_path(cmd)
+            file = send(cmd)
+            path = "/var/lib/metalware/repos/#{file}".chomp.gsub(/\/\/+/,"/")
+          end
+
+          def get_command
+            cmds = [:import, :list, :update]
+            cmd = nil
+            cmds.each do |c|
+              cmd_bool = send("#{c}?".to_sym)
+              if cmd_bool && !!cmd
+                raise ErrorMultipleCommands.new(cmd, c)
+              elsif cmd_bool
+                cmd = c
+              end
+            end
+            if cmd.nil?
+              Alces::Stack::Repo::CLI.usage
+              Kernel.exit
+            end
+            cmd
+          end
+
+          class ErrorMultipleCommands < StandardError
+            def initialize(arg1, arg2)
+              msg = "Can not run command with: --#{arg1} and --#{arg2}"
+              super msg
+            end
+          end
+
           def method_missing(s, *a, &b)
             if @options.key?(s)
               @options[s]
@@ -50,11 +81,20 @@ module Alces
         end
 
         def run!
+          send(@opt.get_command)
+        rescue NoMethodError => e
+          raise $!, "'metal repo --#{@opt.get_command}' not found"
+        end
 
-          if @opt.dry_run?
-            lambda_proc = -> (parameter) { puts_template(parameter) }
-          else
-            lambda_proc = -> (parameter) { save_template(parameter) }
+        def import
+          raise ErrorURLNotFound.new unless @opt.url?
+          puts @opt.url
+          Rugged::Repository.clone_at(@opt.url, @opt.get_repo_path(:import))
+        end
+
+        class ErrorURLNotFound < StandardError
+          def initialize(msg = "Remote repository URL not specified")
+            super
           end
         end
       end
