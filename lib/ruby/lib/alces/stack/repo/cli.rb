@@ -33,33 +33,33 @@ module Alces
         name 'metal repo'
         description "Manage repositories from git"
         
-        option  :repo_name,
-                "Name of the repo directory: /var/lib/metalware/repos/<name>",
+        option  :name_input,
+                "Name of the repository in file structure",
                 "-n", "--name",
                 default: false
-
-        option  :import,
-                "Name of repository to import. Requires a URL",
-                "-i", "--import",
-                default: false
-
+        
         option  :url,
                 "URL to remote repository",
-                "-u", "--url",
+                "-r", "--url",
                 default: false
 
-        option  :list,
+        flag    :clone_repo,
+                "Name of repository to clone. Requires a URL",
+                "-c", "--clone",
+                default: false
+
+        flag    :list,
                 "TBA",
                 "-l", "--list",
                 default: false
 
-        option  :update,
-                "TBA",
-                "-p", "--update",
+        flag    :update,
+                "Updates the local repository to match remote",
+                "-u", "--update",
                 default: false
 
         flag    :force,
-                "Force the command to take place",
+                "Force the command to take place. May delete existing directories",
                 "-f", "--force"
 
         def assert_preconditions!
@@ -70,8 +70,8 @@ module Alces
 
         def execute
           Alces::Stack::Repo.run!(
-              repo_name: repo_name,
-              import: import,
+              name_input: name_input,
+              clone_repo: clone_repo,
               list: list,
               update: update,
               force: force,

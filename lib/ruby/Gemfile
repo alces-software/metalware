@@ -33,7 +33,6 @@ end
 
 group :git do
   gem 'rugged', '~> 0.22.2'
-#  gem 'rugged', git: 'git://github.com/libgit2/rugged.git', submodules: true
 end
 
 gem 'alces-tools', '>= 0.13.0'
