@@ -196,11 +196,13 @@ module Alces
         end
 
         def get_yaml_file_list
-          return Array.new if !@combined_hash.key?(:nodename)
+          list = [ "all" ]
+          return list if !@combined_hash.key?(:nodename)
           list_str = `nodeattr -l #{@combined_hash[:nodename]} 2>/dev/null`.chomp
-          if list_str.empty? then return Array.new end
-          list = list_str.split(/\n/).reverse
-          return list << @combined_hash[:nodename]
+          if list_str.empty? then return list end
+          list.concat(list_str.split(/\n/).reverse)
+          list.push(@combined_hash[:nodename])
+          list.uniq
         end
 
         def parse_combined_hash

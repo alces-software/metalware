@@ -87,6 +87,7 @@ if [[ -n "$alces_TEST" ]]; then
 else
     rm -f "${target}/bin/test"
 fi
+cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
 for dep in ${deps}; do
