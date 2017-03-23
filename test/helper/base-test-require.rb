@@ -19,23 +19,11 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
+$: << "#{ENV['alces_BASE']}/test/helper"
 
-module Alces
-  module Stack
-    class Nodes
-      def initialize(gender, &block)
-        @gender = gender
-        raise "Could not find gender group" if `nodeattr -c #{@gender}`.empty?
-        yield self if !block.nil?
-      end
-
-      def each(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each(&block)
-      end
-
-      def each_with_index(&block)
-        `nodeattr -c #{@gender}`.gsub("\n","").split(',').each_with_index(&block)
-      end
-    end
-  end
-end
+require 'rubygems'
+require 'bundler/setup'
+Bundler.setup(:default)
+require 'test/unit'

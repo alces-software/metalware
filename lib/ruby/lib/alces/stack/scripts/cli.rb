@@ -26,28 +26,23 @@ require 'alces/stack/log'
 
 module Alces
   module Stack
-    module Hosts
+    module Scripts
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal hosts'
-        description "Modifies the hosts file, modifier flag (e.g. --add) is required"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-hosts.log')
+        name 'metal scripts'
+        description "Renders script templates"
+        log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
 
         option  :nodename,
                 'Node name to be modified',
                 '-n', '--node-name',
                 default: false
 
-        option  :nodegroup,
-                'Node group to be modified, overrides --node-name',
+        option  :group,
+                'Specify a gender group to run over',
                 '-g', '--node-group',
-                default: false
-
-        flag    :add_flag,
-                'Adds a new entry to /etc/hosts',
-                '-a', '--add',
                 default: false
 
         option  :json,
@@ -55,10 +50,16 @@ module Alces
                 '-j', '--additional-parameters',
                 default: false
 
+        option  :save_location,
+                'File to save the rendered template in.' \
+                  " NOTE: only replaces <%= nodename %>\n   ",
+                '--save-location',
+                default: "/var/lib/metalware/rendered/scripts/<%= nodename %>"
+
         option  :template,
                 'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/hosts/compute.erb"
+                default: "empty.erb"
 
         flag    :template_options,
                 'Show templating options',
@@ -70,38 +71,30 @@ module Alces
                 '-x', '--dry-run',
                 default: false
 
-        def setup_signal_handler
-          trap('INT') do
-            STDERR.puts "\nExiting..." unless @exiting
-            @exiting = true
-            Kernel.exit(0)
-          end
-        end
-
         def show_template_options
           options = {
-            nodename: "Value specified by --node-name"
+            nodename: "The name of the node specified with -n"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
         end
 
         def assert_preconditions!
-          Alces::Stack::Log.progname = "hosts"
-          Alces::Stack::Log.info "metal hosts #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          Alces::Stack::Log.progname = "scripts"
+          Alces::Stack::Log.info "metal scripts #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
           self.class.assert_preconditions!
         end
 
         def execute
-          setup_signal_handler
           show_template_options if template_options
 
-          Alces::Stack::Hosts.run!(template, 
-              dry_run_flag: dry_run_flag,
-              add_flag: add_flag,
+          Alces::Stack::Scripts.run!(template, 
               nodename: nodename,
-              nodegroup: nodegroup,
-              json: json
+              group: group,
+              dry_run_flag: dry_run_flag,
+              json: json,
+              save_location: save_location,
+              ran_from_boot: false
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect

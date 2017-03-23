@@ -1,5 +1,6 @@
+#!/bin/bash
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,17 +20,12 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/kickstart/cli'
-require 'alces/stack/kickstart/run'
-
-module Alces
-  module Stack
-    module Kickstart
-      class << self
-        def run!(*args)
-          Run.new(*args).run!
-        end
-      end
-    end
-  end
-end
+export alces_BINNAME="metal"
+export alces_BASE="/opt/metalware"
+export alces_CMDDIR="$alces_BASE/lib/actions"
+### RUBY
+export alces_RUBY="$alces_BASE/opt/ruby/bin/ruby"
+export alces_RUBYHOME="$alces_BASE/opt/ruby"
+export LD_LIBRARY_PATH="${alces_RUBYHOME}/lib:$LD_LIBRARY_PATH"
+export GEM_HOME="${alces_RUBYHOME}/lib/ruby/gems/2.1.0"
+export GEM_PATH="${alces_RUBYHOME}/lib/ruby/gems/2.1.0"

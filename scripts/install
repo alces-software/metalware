@@ -77,9 +77,16 @@ doing 'Create'
 mkdir -p /var/log/metalware
 mkdir -p /var/lib/metalware/rendered/ks
 mkdir -p /var/lib/metalware/cache/
+mkdir -p /var/www/html/ks
 chmod a+rw /var/lib/metalware/cache
 [[ -d "${target}" ]] || mkdir -p "${target}"
 cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${source}/deployment" "${target}"
+if [[ -n "$alces_TEST" ]]; then
+    cp -R "${source}/test" "${target}"
+else
+    rm -f "${target}/bin/test"
+fi
+cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
 for dep in ${deps}; do

@@ -19,17 +19,21 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/kickstart/cli'
-require 'alces/stack/kickstart/run'
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
-module Alces
-  module Stack
-    module Kickstart
-      class << self
-        def run!(*args)
-          Run.new(*args).run!
-        end
-      end
-    end
+require "capture"
+
+class TC_Capture < Test::Unit::TestCase
+  def test_stdout
+    capture = Capture.stdout do puts "Captured" end
+    puts "\nreset" 
+    assert(!capture.include?("\nreset"), "Capture has not reset standard out")
+    assert(capture.include?("Captured"), "Capture did not capture standard out text")
   end
-end
+  def test_stderr
+    capture = Capture.stderr do $stderr.puts "Captured" end
+    $stderr.puts "\nreset" 
+    assert(!capture.include?("\nreset"), "Capture has not reset standard error")
+    assert(capture.include?("Captured"), "Capture did not capture standard error text")
+  end
+end 

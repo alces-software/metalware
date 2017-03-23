@@ -22,14 +22,67 @@
 require "erb"
 require "ostruct"
 require "json"
+require "yaml"
+require "alces/stack/log"
 
 module Alces
   module Stack
     module Templater
       class << self
+        def show_options(options={})
+          const = {
+            hostip: "#{`hostname -i`.chomp}",
+            index: "0 (integer)",
+            permanent_boot: "false (boolean)"
+          }
+          puts "ERB can replace template parameters with variables from 5 sources:"
+          puts "  1) JSON input from the command line using -j"
+          puts "  2) YAML config files stored in: #{ENV['alces_BASE']}/etc/config"
+          puts "  3) Command line inputs and index from the iterator (if applicable)"
+          puts "  4) Constants available to all templates"
+          puts
+          puts "In the event of a conflict between the sources, the priority order is as given above."
+          puts "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
+          puts
+          puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config"
+          puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
+          puts
+          puts "The following command line parameters are replaced by ERB:"
+          none_flag = true
+          if options.keys.max_by(&:length).nil? then option_length = 0
+          else option_length = options.keys.max_by(&:length).length end
+          const_length = const.keys.max_by(&:length).length
+          if option_length > const_length then align = option_length
+          else align = const_length end
+          options.each do |key, value|
+            none_flag = false;
+            spaces = align - key.length
+            print"    <%= #{key} %> "
+            while spaces > 0
+              spaces -= 1
+              print " "
+            end
+            puts ": #{value}"
+          end
+          puts "    (none)" if none_flag
+          puts
+          puts "The constant values replaced by erb:"
+          const.each do |key, value|
+            spaces = align - key.length
+            print"    <%= #{key} %> "
+            while spaces > 0
+              spaces -= 1
+              print " "
+            end
+            puts ": #{value}"
+          end
+        end
+      end
+
+      class Handler
         def file(filename, template_parameters={})
           File.open(filename.chomp, 'r') do |f|
-            return replace_hash(f.read, 0, template_parameters)
+            return replace_erb(f.read, template_parameters)
           end
         end
 
@@ -37,122 +90,150 @@ module Alces
           File.open(save_file.chomp, "w") do |f|
             f.puts file(template_file, template_parameters)
           end
+          Alces::Stack::Log.info "Template Saved: #{save_file}"
         end
 
         def append(template_file, append_file, template_parameters={})
           File.open(append_file.chomp, 'a') do |f|
             f.puts file(template_file, template_parameters)
           end
+          Alces::Stack::Log.info "Template Appended: #{append_file}"
         end
 
-        def replace_hash(template, count, template_parameters={})
-          raise "Templater loop count reached. Check parameters for infinite loops" if count > 100
-          tags = template.scan(/<%=[ \w\*\+\-\/\%\(\)\=\!]*%>/)
-          return template if tags.length == 0
-          error_tag = false
-          error_message  = "Could not find value(s) for:"
-          tags.each do |t|
-            t.scan(/_*[[:alpha:]][[:alnum:]_]*/) do |word|
-              if !template_parameters.has_key?(word.to_sym)
-                error_tag = true
-                error_message << "\n  " << t
-                break
-              end
-            end
-          end
-          raise error_message if error_tag
-          return replace_hash(ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding}), count + 1, template_parameters)
-        end
-
-        def show_options(options={})
-          options[:hostip] = "IP address of host node"
-          # Flags
-          none_flag = true
-          print_json = false
-          print_iterator = false
-          puts
-          puts "The following command line parameters are replaced by ERB:"
-          options.each do |key, value|
-            if key.to_s == 'JSON' and value.to_s == 'true'
-              print_json = true
-            elsif key.to_s == 'ITERATOR' and value.to_s == 'true'
-              print_iterator = true
-            else
-              none_flag = false
-              puts "    <%= #{key} %> : #{value}"
-            end
-          end
-          puts "    (none)" if none_flag
-          puts
-          if print_iterator
-            puts "When iterating over a node group, the following is replaced:"
-            puts "    <%= nodename %> : The node name from the group"
-            puts "    <%= index %> : The index in the group"
-            puts "See ERB documentation for template algebra to use on 'index'"
-            puts
-          end
-          if print_json
-            puts "Include additional parameters in the JSON object. In the case of conflicts the priority order is: iterator parameters (if applicable), json inputs, then command line inputs"
-            puts
-          end
+        def replace_erb(template, template_parameters={})
+          return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+        rescue StandardError => e
+          $stderr.puts "Could not parse ERB"
+          $stderr.puts template.to_s
+          $stderr.puts template_parameters.to_s
+          raise e
         end
       end
-      
-      class JSON_Templater
-        class << self
-          def file(filename, json, template_parameters={})
-            Alces::Stack::Templater.file(filename, parse(json, template_parameters))
-          end
 
-          def save(filename, save_file, json, template_parameters={})
-            Alces::Stack::Templater.save(filename, save_file, parse(json, template_parameters))
+      class Combiner < Handler
+        DEFAULT_HASH = {
+            hostip: `hostname -i`.chomp,
+            index: 0,
+            permanent_boot: false
+          }
+        def initialize(json, hash={})
+          @combined_hash = DEFAULT_HASH.merge(hash)
+          fixed_nodename = combined_hash[:nodename]
+          @combined_hash.merge!(load_yaml_hash)
+          @combined_hash.merge!(load_json_hash(json))
+          @parsed_hash = parse_combined_hash
+          if parsed_hash[:nodename] != fixed_nodename
+            raise HashOverrideError.new(fixed_nodename, @parsed_hash)
           end
-
-          def append(filename, append_file, json, template_parameters={})
-            Alces::Stack::Templater.append(filename, append_file, parse(json, template_parameters))
+        end
+        class HashOverrideError < StandardError
+          def initialize(nodename, index, parsed_hash={})
+            msg = "Original nodename: " << nodename.to_s << "\n"
+            msg << parsed_hash.to_s << "\n"
+            msg << "YAML, JSON and ERB can not alter the values of nodename and index"
+            super(msg)
           end
+        end
 
-          def parse(json, template_parameters={})
-            template_parameters = add_default_parameters(template_parameters)
-            # Skips if json is empty
-            return template_parameters if json.to_s.strip.empty? or !json
-            # Loads content if json is a file
-            if File.file?(json)
-              json = File.read(json)
-            elsif /\A(\/?\w)*(.\w*)?\Z/ =~ json
-              raise "Could not find file: " << json
-            end
-            #Extracts the JSON data
-            begin
-              JSON.load(json).each do |key, value|
-                template_parameters[key.to_sym] = value
-              end
-            rescue => e
-              STDERR.puts "ERROR: Could not pass JSON object, insure keys are also strings"
+        attr_reader :combined_hash
+        attr_reader :parsed_hash
+
+        def load_json_hash(json)
+          (json || "").empty? ? {} : JSON.parse(json,symbolize_names: true)
+        end
+
+        def load_yaml_hash()
+          hash = Hash.new
+          get_yaml_file_list.each do |yaml|
+            begin 
+              yaml_payload = YAML.load(File.read("#{ENV['alces_BASE']}/etc/config/#{yaml}.yaml"))
+            rescue Errno::ENOENT # Skips missing files
+            rescue StandardError => e
+              $stderr.puts "Could not pass YAML file"
               raise e
+            else
+              if !yaml_payload.is_a? Hash
+                raise "Expected yaml config to contain a hash" 
+              else
+                hash.merge!(yaml_payload)
+              end
             end
-            #Returns the hash
-            return template_parameters
           end
+          hash.inject({}) do |memo,(k,v)| memo[k.to_sym] = v; memo end
+        end
 
-          def add_default_parameters(template_parameters={})
-            template_parameters[:hostip] = `hostname -i`.chomp if !template_parameters.key?(:hostip)
-            return template_parameters
+        def get_yaml_file_list
+          list = [ "all" ]
+          return list if !@combined_hash.key?(:nodename)
+          list_str = `nodeattr -l #{@combined_hash[:nodename]} 2>/dev/null`.chomp
+          if list_str.empty? then return list end
+          list.concat(list_str.split(/\n/).reverse)
+          list.push(@combined_hash[:nodename])
+          list.uniq
+        end
+
+        def parse_combined_hash
+          current_hash = Hash.new.merge(@combined_hash)
+          current_str = current_hash.to_s
+          old_str = ""
+          count = 0
+          while old_str != current_str
+            count += 1
+            raise LoopErbError if count > 10
+            old_str = "#{current_str}"
+            current_str = replace_erb(current_str, current_hash)
+            current_hash = eval(current_str)
+          end
+          return current_hash
+        end
+
+        class LoopErbError < StandardError 
+          def initialize(msg="Input hash may contains infinite recursive erb")
+            super
+          end
+        end
+
+        def file (filename, template={})
+          raise HashInputError if !template.empty?
+          super(filename, @parsed_hash)
+        end
+
+        class HashInputError < StandardError
+          def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
+            super
           end
         end
       end
 
       class Finder
-        def initialize(default_location)
+        def initialize(default_location, template)
           @default_location = default_location
+          @template = find_template(template).chomp
+          @filename_ext = File.basename(@template)
+          @filename_ext_trim_erb = File.basename(@template, ".erb")
+          @filename = File.basename(@template, ".*")
+          @path = File.dirname(@template)
         end
 
-        def get_default
-          return @default_location
+        attr_reader :template
+        attr_reader :filename
+        attr_reader :filename_ext
+        attr_reader :filename_ext_trim_erb
+        attr_reader :path
+
+        def filename_diff_ext(ext)
+          ext = ".#{ext}" if ext[0] != "."
+          return "#{@filename}#{ext}"
         end
 
-        def find(template)
-          copy = template
+        def find_template(template)
+          begin
+            template = template.dup
+          rescue StandardError
+            raise TemplateNotFound.new(template)
+          end
+          copy = "#{template}"
+          template.gsub!(/\/\//,"/")
           template = "/" << template if template[0] != '/'
           template_erb = "#{template}.erb"
           # Checks if it's a full path to the default folder
@@ -169,7 +250,14 @@ module Alces
           # Checks the file structure
           return template if File.file?(template)
           return template_erb if File.file?(template_erb)
-          raise "Could not find template file: " << copy
+          raise TemplateNotFound.new(copy)
+        end
+
+        class TemplateNotFound < StandardError
+          def intialize(template)
+            msg = "Could not find template file: " << template
+            super
+          end
         end
       end
     end

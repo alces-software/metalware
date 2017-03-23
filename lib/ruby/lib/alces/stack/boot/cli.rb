@@ -22,6 +22,7 @@
 require 'alces/tools/cli'
 require 'alces/stack'
 require "alces/stack/templater"
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -45,18 +46,8 @@ module Alces
                 default: false
 
         option  :json,
-                'JSON file or string containing additional templating parameters',
+                'JSON string containing additional templating parameters',
                 '-j', '--additional-parameters',
-                default: false
-
-        option  :template,
-                'Specify template',
-                '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/boot/install.erb"
-
-        flag    :template_options,
-                'Show templating options',
-                '--template-options',
                 default: false
 
         option  :kernel_append,
@@ -64,47 +55,67 @@ module Alces
                 '--kernelappendoptions',
                 default: ""
 
+        option  :template,
+                'Specify template',
+                '-t', '--template',
+                default: "install.erb"
+
+        flag    :permanent_boot_flag,
+                'Causes the pxe and kickstart files remain after completion',
+                '-p', '--permanent',
+                default: false
+
+        flag    :template_options,
+                'Show templating options',
+                '--template-options',
+                default: false
+
         option  :kickstart,
                 'Renders the kickstart template if include. Deletes the file at the end',
                 '-k', '--kickstart'
+
+        option  :scripts,
+                'Renders script templates, saved in default location. Format: comma separated string',
+                '-s', '--scripts'
 
         flag    :dry_run_flag,
                 'Prints the template output without modifying files',
                 '-x', '--dry-run',
                 default: false
 
-        def setup_signal_handler
-          trap('INT') do
-            STDERR.puts "\nExiting..." unless @exiting
-            @exiting = true
-            Kernel.exit(0)
-          end
-        end
-
         def show_template_options
           options = {
-            :nodename => "Value specified by --node-name",
-            :kernelappendoptions => "Value specified by --kernelappendoptions",
-            :kickstart => "Determined from --kickstart (required) and nodename",
-            :JSON => true,
-            :ITERATOR => true
+            nodename: "Value specified by --node-name",
+            kernelappendoptions: "Value specified by --kernelappendoptions",
+            kickstart: "Determined from --kickstart (required) and nodename",
+            firstboot: "True by default, switches to false on second render if --permanent is specified"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
         end
 
+        def assert_preconditions!
+          Alces::Stack::Log.progname = "boot"
+          Alces::Stack::Log.info "metal boot #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          self.class.assert_preconditions!
+        end
+
         def execute
-          setup_signal_handler
           show_template_options if template_options
           Alces::Stack::Boot.run!(
               nodename: nodename,
               group: group,
               template: template,
               kernel_append: kernel_append,
-              dry_run_flag: dry_run_flag,
+              dry_run: dry_run_flag,
               json: json,
-              kickstart: kickstart
+              kickstart: kickstart,
+              permanent_boot: permanent_boot_flag,
+              scripts: scripts
             )
+        rescue => e
+          Alces::Stack::Log.fatal e.inspect
+          raise e
         end
       end
     end

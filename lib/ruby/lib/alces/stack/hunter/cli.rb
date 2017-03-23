@@ -22,6 +22,7 @@
 require 'alces/stack'
 require 'alces/tools/cli'
 require 'alces/stack/templater'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -63,6 +64,11 @@ module Alces
                '--update-dhcp',
                default: false
 
+        option  :json,
+                'JSON string containing additional templating parameters',
+                '-j', '--additional-parameters',
+                default: false
+
         option :template,
                 'Specify which template file for updating dhcpd.hosts',
                 '--template',
@@ -84,13 +90,18 @@ module Alces
 
         def show_template_options
           options = {
-            :hostip=>"Head node IP address",
             :nodename=>"Compute node name",
             :fixedaddr=>"Compute node IP address",
             :hwaddr=>"Compute node mac address"
           }
           Alces::Stack::Templater.show_options(options)
           exit 0
+        end
+
+        def assert_preconditions!
+          Alces::Stack::Log.progname = "hunter"
+          Alces::Stack::Log.info "metal hunter #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          self.class.assert_preconditions!
         end
 
         def execute
@@ -103,8 +114,12 @@ module Alces
                      name_sequence_start: sequence_start,
                      name_sequence_length: sequence_length,
                      update_dhcp_flag: update_dhcp,
-                     template: template
+                     template: template,
+                     json: json
                      )
+        rescue => e
+          Alces::Stack::Log.fatal e.inspect
+          raise e
         end
       end
     end
