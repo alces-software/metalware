@@ -127,6 +127,7 @@ esac
 
 title "Installing default repository"
 doing 'Repo'
+source /etc/profile.d/alces-metalware.${rc_script_ext}
 metal repo -cn default -r https://github.com/alces-software/metalware-profile-hpc
 say_done $?
 
