@@ -46,8 +46,12 @@ module Alces
         def listen!
           STDERR.puts "WAITING FOR NEW NODES TO APPEAR ON THE NETWORK, PLEASE NETWORK BOOT THEM NOW... (CTRL+C TO TERMINATE)"
           Thread.new do
-            network.each do |p|
-              process_packet(p.udp_data) if p.udp?
+            begin
+              network.each do |p|
+                process_packet(p.udp_data) if p.udp?
+              end
+            rescue
+              Alces::Stack::Log.fatal "Fatal error in network processing thread: #{$!.class.name} #{$!.message}"
             end
           end
           sleep
@@ -56,15 +60,12 @@ module Alces
         private
 
         def network
-          @network ||= begin
-            Pcaplet.new("-s 600 -n -i #{@interface_name}").tap do |network|
-              filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
-              network.add_filter(filter)
-            end
-            network_set = true
-          ensure
-            Alces::Stack::Log.fatal "Failed to connect to network, check interface" unless network_set
+          @network ||= Pcaplet.new("-s 600 -n -i #{@interface_name}").tap do |network|
+            filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
+            network.add_filter(filter)
           end
+        rescue
+          Alces::Stack::Log.fatal "Failed to connect to network, check interface"
         end
 
         def process_packet(data)
