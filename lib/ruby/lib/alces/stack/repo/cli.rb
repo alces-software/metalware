@@ -44,12 +44,12 @@ module Alces
                 default: false
 
         flag    :clone_repo,
-                "Name of repository to clone. Requires a URL",
+                "Clones the repo form the URL",
                 "-c", "--clone",
                 default: false
 
         flag    :list,
-                "TBA",
+                "Lists the repositories",
                 "-l", "--list",
                 default: false
 

@@ -53,10 +53,6 @@ module Alces
             @options[:name_input]
           end
 
-          class NoNameGiven < StandardError
-            def initialize(msg = "--name is required"); super; end
-          end
-
           def get_command
             cmd = nil
             CMDS.each do |key, value|
@@ -76,13 +72,6 @@ module Alces
 
           def get_command_cli; CMDS[get_command]; end
 
-          class ErrorMultipleCommands < StandardError
-            def initialize(arg1, arg2)
-              msg = "Can not run command with: --#{arg1} and --#{arg2}"
-              super msg
-            end
-          end
-
           def method_missing(s, *a, &b)
             if @options.key?(s)
               @options[s]
@@ -91,7 +80,18 @@ module Alces
             else
               super
             end
-          end       
+          end
+
+          class NoNameGiven < StandardError
+            def initialize(msg = "--name is required"); super; end
+          end
+
+          class ErrorMultipleCommands < StandardError
+            def initialize(arg1, arg2)
+              msg = "Can not run command with: --#{arg1} and --#{arg2}"
+              super msg
+            end
+          end
         end
 
         def run!
@@ -135,25 +135,35 @@ module Alces
             end
           end
 
+          hash_descriptions = {
+            list_good_repos: "Repos:",
+            list_check_repos: "Could not 'git fetch' from repos. Check URL and " \
+                              "internet connection",
+            list_bad_repos: "An error occurred in the following repos:"
+          }
+
+          @max_repo_length = 0
+          hash_descriptions.each do |hash, notUsed|
+            instance_variable_get("@#{hash}").each do |key, notUsed| 
+              @max_repo_length = key.length if @max_repo_length < key.length
+            end
+          end
+
           puts_results = lambda { |hash_name, msg|
             repo_hash = instance_variable_get("@#{hash_name}")
             unless repo_hash.empty?
               puts if @puts_space_list
               puts msg
-              repo_hash.each { |key, value| puts "#{key}: #{value}" }
+              repo_hash.each do |key, value|
+                padding = " " * (@max_repo_length - key.length) 
+                puts "#{key}#{padding} : #{value}"
+              end
               @puts_space_list = true
             end
           }
-          hash_of_hashes = {
-            list_good_repos: "Repo(s):",
-            list_check_repos: "Could not 'git fetch' from repo(s). Check URL(s) and internet",
-            list_bad_repos: "An error occurred in the following repo(s):"
-          }
           @puts_space_list = false
-          hash_of_hashes.each { |key, value| puts_results.call(key, value) }
+          hash_descriptions.each { |key, value| puts_results.call(key, value) }
         end
-        class NoRemote < StandardError; end
-        class ErrorFetch < StandardError; end
 
         def clone_repo
           raise ErrorURLNotFound.new unless @opt.url?
@@ -168,6 +178,7 @@ module Alces
         end
 
         def update
+          raise RepoNotFound.new(@opt.name_input) unless File.directory?(@opt.get_repo_path)
           repo = Rugged::Repository.init_at(@opt.get_repo_path)
           repo.fetch("origin")
 
@@ -177,8 +188,10 @@ module Alces
           uncommited = local_commit.diff_workdir.size
 
           if @opt.force?
-            Alces::Stack::Log.warn "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
-            Alces::Stack::Log.warn "Deleted #{uncommited} local change(s)" if uncommited > 0
+            Alces::Stack::Log.warn
+              "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
+            Alces::Stack::Log.warn 
+              "Deleted #{uncommited} local change(s)" if uncommited > 0
           else
             raise LocalAheadOfRemote.new(ahead_behind[0]) if ahead_behind[0] > 0
             raise UncommitedChanges.new(uncommited) if uncommited > 0
@@ -198,12 +211,24 @@ module Alces
             puts str
             Alces::Stack::Log.info str
           else
-            Alces::Stack::Log.fatal "Update stopped. Condition should not be reachable"
+            Alces::Stack::Log.fatal "Internal error. An impossible condition has " \
+                                    "been reached!"
+            raise "Internal error. Check metal log"
+          end
+        end
+
+        class NoRemote < StandardError; end
+        class ErrorFetch < StandardError; end
+
+        class RepoNotFound < StandardError
+          def initialize(repo)
+            msg = "Could not find repo matching: #{repo}"
+            super msg
           end
         end
 
         class LocalAheadOfRemote < StandardError
-          def initialize(num); 
+          def initialize(num)
             msg = "The local repo is #{num} commits ahead of remote. -f will " \
                   "override local commits"
             super msg; 
@@ -211,7 +236,7 @@ module Alces
         end
 
         class UncommitedChanges < StandardError
-          def initialize(num); 
+          def initialize(num) 
             msg = "The local repo has #{num} uncommitted changes. -f will " \
                   "delete these changes. (untracked unaffected)"
             super msg; 
