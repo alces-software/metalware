@@ -125,10 +125,10 @@ case $user_shell in
         ;;
 esac
 
-title "Installing default repository"
+title "Downloading default repository"
 doing 'Repo'
 source /etc/profile.d/alces-metalware.${rc_script_ext}
-metal repo -cn default -r https://github.com/alces-software/metalware-profile-hpc
+metal repo -cn default -r https://github.com/alces-software/metalware-default
 say_done $?
 
 cat <<EOF
