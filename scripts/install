@@ -125,6 +125,11 @@ case $user_shell in
         ;;
 esac
 
+title "Installing default repository"
+doing 'Repo'
+metal repo -cn default -r https://github.com/alces-software/metalware-profile-hpc
+say_done $?
+
 cat <<EOF
 [33m
 ===============================================================================
