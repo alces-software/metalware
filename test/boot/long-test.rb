@@ -48,7 +48,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       output_pxe = `cat #{save_pxe}`.chomp
       combiner = Alces::Stack::Templater::Combiner
                    .new("", @input_nodename_kickstart[:json], hash_temp)
-      correct_pxe = combiner.file("#{@default_template_location}#{@template}")
+      correct_pxe = combiner.file("#{@default_template_location}/#{@template}")
       assert_equal(correct_pxe, output_pxe, "Did not replace template correctly")
       output_kick = `cat #{save_kick}`.chomp
       correct_kick =

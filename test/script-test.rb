@@ -30,7 +30,7 @@ class TC_Script < Test::Unit::TestCase
   def setup
     @bash = File.read("/etc/profile.d/alces-metalware.sh")
     base_temp_loc_repo = "#{ENV['alces_REPO']}"
-    base_temp_loc_path = "templates/scripts"
+    base_temp_loc_path = "/scripts"
     @base_temp_loc = "#{base_temp_loc_repo}/#{base_temp_loc_path}"
     @template = "test.sh"
     @template_str = "<%= nodename %> <%= json %>"
