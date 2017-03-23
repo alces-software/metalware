@@ -21,8 +21,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../etc/metal.rc
-yum list installed syslinux &>/dev/null
 reset=false
+yum list installed syslinux &>/dev/null
 if [ $? -ne 0 ]; then
   yum -y install syslinux
   reset=true
