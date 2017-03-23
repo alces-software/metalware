@@ -40,14 +40,23 @@ module Alces
             options[:nodename] ? { nodename: options[:nodename] } : {}
           @ran_from_boot = options[:ran_from_boot]
           @save_location = "#{options[:save_location]}".chomp('/') << '/'
+          @repo = options[:repo]
         end
 
         def each_script(&block)
-            scripts = "#{@scripts}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
-                                   .split(/\s*,\s*/)
-            scripts.each do |s|
-              yield s
-            end
+          scripts = "#{@scripts}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
+                                 .split(/\s*,\s*/)
+          scripts.each do |s|
+            yield set_repo_helper s
+          end
+        end
+
+        def set_repo_helper(filename)
+          if @repo && filename.scan("::").empty?
+            raise "SWITCHING REPOS NOT CURRENTLY SUPPORTED"
+            return "#{@options[:repo]}::#{filename}"  
+          else
+            return filename
           end
         end
 

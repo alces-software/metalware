@@ -81,14 +81,6 @@ module Alces
             permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
               "/var/lib/metalware/rendered/scripts/<%= nodename %>"
           end
-          
-          def each_script(&block)
-            scripts = "#{@options[:scripts]}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
-                                             .split(/\s*,\s*/)
-            scripts.each do |s|
-              yield s
-            end
-          end
 
           def method_missing(s, *a, &b)
             if @options.key?(s)
@@ -177,17 +169,16 @@ module Alces
         end
 
         def render_scripts
-          @opt.each_script do |s| 
-            parameters = {}.merge(@opt.template_parameters)
-                           .merge({
-                              ran_from_boot: true,
-                              dry_run_flag: @opt.dry_run?,
-                              group: @opt.group,
-                              save_location: @opt.save_loc_script
-                            })
-            save_files = Alces::Stack::Scripts::Run.new(s, parameters).run!
-            add_files_to_delete(save_files)
-          end
+          parameters = {}.merge(@opt.template_parameters)
+                         .merge({
+                            ran_from_boot: true,
+                            dry_run_flag: @opt.dry_run?,
+                            group: @opt.group,
+                            json: @opt.json,
+                            save_location: @opt.save_loc_script
+                          })
+          save_files = Alces::Stack::Scripts::Run.new(@opt.scripts, parameters).run!
+          add_files_to_delete(save_files)
         end
 
         def add_kickstart(parameters={})
