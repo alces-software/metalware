@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2017-03-20
+
+### Changed
+- Defined hierarchy for template inputs
+
+### Added
+- Template engine (ERb) supports config files
+- Support for script file manipulation using ERb templates
+- Support permanent templating/ boot
+- Logging file manipulations and error events
+
 ## [1.0.0] - 2017-02-28
 
 ### Changed
