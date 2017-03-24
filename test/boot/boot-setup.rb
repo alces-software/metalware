@@ -37,7 +37,7 @@ module BootTestSetup
 
   def set_up_templates
     @default_template_location_repo = "#{ENV['alces_REPO']}"
-    @default_template_location_path = "templates/boot"
+    @default_template_location_path = "boot"
     @default_template_location = "#{@default_template_location_repo}/#{@default_template_location_path}"
 
     @template = "test.erb"
@@ -45,7 +45,7 @@ module BootTestSetup
                     "<%= kernelappendoptions %>, <%= kickstart %>"
     File.write("#{@default_template_location}/#{@template}", @template_str)
 
-    @template_kickstart = "#{ENV['alces_REPO']}/templates/kickstart/test.erb"
+    @template_kickstart = "#{ENV['alces_REPO']}/kickstart/test.erb"
     @template_str_kickstart =
       "Kickstart template, <%= nodename %>, <%= kernelappendoptions %>" \
       " <% if !permanent_boot %>false<% end %>"

@@ -28,7 +28,7 @@ class TC_Repo < Test::Unit::TestCase
   end
 
   def test_clone
-    `#{@bash} metal repo -cn new_repo -u https://github.com/alces-software/metalware-profile-hpc.git`
+    `#{@bash} metal repo -cn new_repo -r https://github.com/alces-software/metalware-default.git`
     assert(Dir["/var/lib/metalware/repos/new_repo/*"].count > 0,
            "Repo was not cloned correctly")
   end
@@ -37,14 +37,18 @@ class TC_Repo < Test::Unit::TestCase
     repo = "/var/lib/metalware/repos/name"
     FileUtils::mkdir_p "#{repo}/file"
 
-    `#{@bash} metal repo -cn name -u https://github.com/alces-software/metalware-profile-hpc.git 2>/dev/null`
+    `#{@bash} metal repo -cn name -r https://github.com/alces-software/metalware-default.git 2>/dev/null`
     assert(Dir["#{repo}/*"].count == 1, "Clone override existing repo without -f")
 
-    `#{@bash} metal repo -fcn name -u https://github.com/alces-software/metalware-profile-hpc.git`
+    `#{@bash} metal repo -fcn name -r https://github.com/alces-software/metalware-default.git`
     assert(Dir["#{repo}/*"].count > 1, "Clone did not override existing repo with -f")
   end
 
   def teardown
-    `rm -rf /var/lib/metalware/repos/*`
+    Dir.entries("/var/lib/metalware/repos").each do |repo|
+      unless [".", "..", "default"].include? repo
+        FileUtils.rm_rf("/var/lib/metalware/repos/#{repo}")
+      end
+    end
   end
 end

@@ -26,11 +26,11 @@ require "alces/stack/finder"
 class TC_Templater_Finder < Test::Unit::TestCase
   def setup
     @default_kickstart_repo = "#{ENV['alces_REPO']}"
-    @default_kickstart_path = "/templates/kickstart"
+    @default_kickstart_path = "/kickstart"
     @default_kickstart = "#{@default_kickstart_repo}/#{@default_kickstart_path}".gsub(/\/\/+/, "/")
     @default_boot_repo = "#{ENV['alces_REPO']}"
     @diff_repo = "/var/lib/metalware/repos/new-repo"
-    @default_boot_path = "/templates/boot"
+    @default_boot_path = "/boot"
     @default_boot = "#{@default_boot_repo}/#{@default_boot_path}".gsub(/\/\/+/, "/")
     @tmp_folder = "#{@default_kickstart}/tempfolderthatshouldnotexist"
     @tmp_folder2 = "#{@diff_repo}#{@default_boot_path}"
