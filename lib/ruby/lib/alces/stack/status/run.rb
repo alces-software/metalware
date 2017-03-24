@@ -57,9 +57,11 @@ module Alces
 
         def run!
           set_pipes
-          lead = fork_processes
-          kill_children(lead) unless monitor_children(lead)
-          Process.waitpid(lead)
+          teacher = fork_processes
+          unless monitor_children(teacher)
+            kill_children
+            Process.waitpid(teacher)
+          end
           display_results
         end
 
@@ -69,27 +71,26 @@ module Alces
         end
 
         def fork_processes
-          fork {
+          fork do
             pids = fork_cmd(:power)
             pids.concat fork_cmd(:ping)
             @write_pids.puts pids
             @write_pids.close
             @write_data.close
             Process.waitall
-          }
+          end
         end
 
-        def monitor_children(lead)
+        def monitor_children(teacher)
           start_time = Time.now
           result = nil
           while Time.now - start_time < @opt.wait && result.nil?
-            sleep 1
-            result = Process.waitpid(lead, Process::WNOHANG)
+            result = Process.waitpid(teacher, Process::WNOHANG)
           end
           !!result
         end
 
-        def kill_children(lead)
+        def kill_children
           puts "Process timed out before all nodes responded. Check log for details"
           Alces::Stack::Log.warn "Process timed. Node may return before receiving SIGINT"
           @write_pids.close
@@ -99,8 +100,8 @@ module Alces
         end
 
         def fork_cmd(cmd)
-          lambda_proc = lambda { |options|
-            Process.fork {
+          lambda_proc = lambda do |options|
+            Process.fork do
               begin
                 @write_pids.close
                 nodename = options[:nodename]
@@ -111,8 +112,8 @@ module Alces
               ensure
                 @write_data.close
               end
-            }
-          }
+            end
+          end
           Alces::Stack::Iterator.run(@opt.group, lambda_proc, nodename: @opt.nodename)
         end
 
