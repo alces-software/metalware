@@ -89,8 +89,12 @@ module Alces
         end
 
         def monitor_jobs
+          c = 0
           while result = @jobs.finished
             @jobs.start if @jobs.start?
+            c += 1
+            print c.to_s + " : "
+            puts result
           end
         end
       end

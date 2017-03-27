@@ -23,6 +23,7 @@ require 'alces/tools/execution'
 require 'alces/tools/cli'
 require 'alces/stack/iterator'
 require 'alces/stack/status/monitor'
+require 'alces/stack/status/task'
 
 module Alces
   module Stack
@@ -59,8 +60,10 @@ module Alces
         def run!
           nodes = ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8"]
           cmds = [:power, :ping, :power, :ping, :power, :ping, :power]
-          monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50, 10).fork!
+          Alces::Stack::Status::Task.set_timeout(30)
+          monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50).fork!
           monitor.wait
+
         end
 
         def set_pipes

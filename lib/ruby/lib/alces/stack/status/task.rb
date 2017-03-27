@@ -41,6 +41,8 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(node, job)
+          @node = node
+          @job = job
         end
 
         def fork!
@@ -70,22 +72,46 @@ module Alces
         end
 
         def start
-          timeout(time)
+          Timeout::timeout(self.class.get_timeout) {
+            @cmd_pid = false
+            @data = send(@job, @node)
+          }
+        rescue Timeout::Error
+          @data = "timeout"
         rescue StandardError => e
           Alces::Stack::Log.error e.inspect
           raise e
+        ensure
+          write @data
+          @write.close
         end
 
         def job_power_status(nodename)
-          result = `#{ENV['alces_BASE']}/bin/metal power #{nodename} status 2>&1`
-                     .scan(/Chassis Power is .*\Z/)[0].to_s
-                     .scan(Regexp.union(/on/, /off/))[0]
+          metal = "#{ENV['alces_BASE']}/bin/metal"
+          cmd = "#{metal} power #{nodename} status 2>&1"
+          result = run_bash(cmd)
+                    .scan(/Chassis Power is .*\Z/)[0].to_s
+                    .scan(Regexp.union(/on/, /off/))[0]
           result.nil? ? "error" : result
         end
 
         def job_ping_node(nodename)
-          result = `ping -c 1 #{nodename} > /dev/null; echo $?`
+          cmd = "ping -c 1 #{nodename} > /dev/null; echo $?"
+          result = run_bash(cmd)
           result.chomp == "0" ? "ok" : "error"
+        end
+
+        def run_bash(cmd)
+          read, write = IO.pipe
+          file = "/proc/#{Process.pid}/fd/#{write.fileno}"
+          @bash_pid = fork {
+            read.close
+            cmd = "#{cmd} | cat > #{file}"
+            Process.exec(cmd)
+          }
+          Process.waitpid(@bash_pid)
+          write.close
+          read.read
         end
       end
     end
