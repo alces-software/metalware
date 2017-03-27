@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require 'alces/stack/iterator'
+require 'alces/stack/status/monitor'
 
 module Alces
   module Stack
@@ -56,77 +57,15 @@ module Alces
         end
 
         def run!
-          set_pipes
-          teacher = fork_processes
-          unless monitor_children(teacher)
-            kill_children
-            Process.waitpid(teacher)
-          end
-          display_results
+          nodes = ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8"]
+          cmds = [:power, :ping, :power, :ping, :power, :ping, :power]
+          monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50, 10).fork!
+          monitor.wait
         end
 
         def set_pipes
           @read_data, @write_data = IO.pipe
           @read_pids, @write_pids = IO.pipe
-        end
-
-        def fork_processes
-          fork do
-            pids = fork_cmd(:power)
-            pids.concat fork_cmd(:ping)
-            @write_pids.puts pids
-            @write_pids.close
-            @write_data.close
-            Process.waitall
-          end
-        end
-
-        def monitor_children(teacher)
-          start_time = Time.now
-          result = nil
-          while Time.now - start_time < @opt.wait && result.nil?
-            result = Process.waitpid(teacher, Process::WNOHANG)
-          end
-          !!result
-        end
-
-        def kill_children
-          puts "Process timed out before all nodes responded. Check log for details"
-          Alces::Stack::Log.warn "Process timed. Node may return before receiving SIGINT"
-          @write_pids.close
-          @read_pids.read.split("\n").each do |pid|
-            begin Process.kill(2, pid.to_i); rescue Errno::ESRCH; end
-          end
-        end
-
-        def fork_cmd(cmd)
-          lambda_proc = lambda do |options|
-            Process.fork do
-              begin
-                @write_pids.close
-                nodename = options[:nodename]
-                result = send(cmd, nodename)
-                @write_data.puts "#{cmd} : #{nodename} : #{result}"
-              rescue Interrupt
-                Alces::Stack::Log.error "Could not determine '#{cmd}' for node '#{nodename}'"
-              ensure
-                @write_data.close
-              end
-            end
-          end
-          Alces::Stack::Iterator.run(@opt.group, lambda_proc, nodename: @opt.nodename)
-        end
-
-        def power(nodename)
-          result = `#{ENV['alces_BASE']}/bin/metal power #{nodename} status 2>&1`
-                     .scan(/Chassis Power is .*\Z/)[0].to_s
-                     .scan(Regexp.union(/on/, /off/))[0]
-          result.nil? ? "error" : result
-        end
-
-        def ping(nodename)
-          result = `ping -c 1 #{nodename} > /dev/null; echo $?`
-          result.chomp == "0" ? "ok" : "error"
         end
 
         def display_results
