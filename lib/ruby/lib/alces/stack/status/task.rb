@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require 'timeout'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -33,43 +34,38 @@ module Alces
             @time ||= 10
           end
 
-          def set_timeout(time)
-            @time = time
-          end
+          def set_timeout(time); @time = time; end
         end
 
         include Alces::Tools::Execution
 
         def initialize(node, job)
+          @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
+          @status_log.progname = "status"
           @node = node
           @job = job
         end
 
         def fork!
           @read, @write = IO.pipe
-          @pid = fork do 
+          @pid = fork do
+            Signal.trap("INT") { teardown }
+            @status_log.info "Task, #{Process.pid}, #{@node}, #{@job}"
             @read.close
             start
+            Kernel.exit
           end
           @write.close
           return self
         end
 
-        def wait
-          Process.waitpid(@pid)
-        end
-
-        def read
-          @read.read
-        end
-
+        def wait; Process.waitpid(@pid); end
+        def read; @read.read end
         def pid; @pid; end
 
         # ----- FORKED METHODS BELOW THIS LINE ------
         
-        def write(msg)
-          @write.puts msg
-        end
+        def write(msg); @write.puts msg; end
 
         def start
           Timeout::timeout(self.class.get_timeout) {
@@ -82,8 +78,7 @@ module Alces
           Alces::Stack::Log.error e.inspect
           raise e
         ensure
-          write @data
-          @write.close
+          teardown
         end
 
         def job_power_status(nodename)
@@ -106,12 +101,21 @@ module Alces
           file = "/proc/#{Process.pid}/fd/#{write.fileno}"
           @bash_pid = fork {
             read.close
-            cmd = "#{cmd} | cat > #{file}"
-            Process.exec(cmd)
+            Process.exec("#{cmd} | cat > #{file} 2>/dev/null")
           }
           Process.waitpid(@bash_pid)
           write.close
           read.read
+        end
+
+        def teardown
+          begin 
+            write @data
+            @write.close
+            Process.kill(2, @bash_pid) unless @bash_pid.nil?
+          rescue 
+          end
+          Kernel.exit
         end
       end
     end

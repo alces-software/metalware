@@ -58,22 +58,15 @@ module Alces
         end
 
         def run!
+          Signal.trap("INT", "IGNORE")
           nodes = ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8"]
           cmds = [:power, :ping, :power, :ping, :power, :ping, :power]
-          Alces::Stack::Status::Task.set_timeout(30)
+          Alces::Stack::Status::Task.set_timeout(10)
           monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50).fork!
-          monitor.wait
-
-        end
-
-        def set_pipes
-          @read_data, @write_data = IO.pipe
-          @read_pids, @write_pids = IO.pipe
-        end
-
-        def display_results
-          @write_data.close
-          puts @read_data.read
+          while monitor.wait_wnohang.nil?
+            result = monitor.read
+            puts "result: #{result}" unless result.empty?
+          end
         end
       end
     end

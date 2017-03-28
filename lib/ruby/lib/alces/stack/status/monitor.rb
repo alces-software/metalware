@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require 'alces/stack/status/jobs'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -30,6 +31,8 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(nodes, cmds, limit)
+          @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
+          @status_log.progname = "status"
           @limit = limit
           @nodes = nodes
           @cmds = cmds
@@ -38,6 +41,7 @@ module Alces
         def fork!
           @read, @write = IO.pipe
           @pid = fork do
+            @status_log.info "Monitor #{Process.pid}"
             @read.close
             start
           end
@@ -45,31 +49,36 @@ module Alces
           return self
         end
 
-        def wait
-          Process.waitpid(@pid)
-        end
-
-        def read
-          @read.read
-        end
+        def wait; Process.waitpid(@pid); end
+        def wait_wnohang; Process.waitpid(@pid, Process::WNOHANG); end
+        def read; @read.read; end
 
         def pid; @pid; end
+
+        def kill
+          puts "KILL"
+          if @kill_sig_received
+            Process.kill(9, @pid) unless @pid.nil?
+            Alces::Stack::Log.warn "Force shutdown of monitor process"
+          else
+            Process.kill(9, @pid) unless @pid.nil?
+            @kill_sig_received = true
+            Alces::Stack::Log.infor "Interrupt received, starting monitor teardown"
+          end
+        rescue
+        end
 
         # ----- FORKED METHODS BELOW THIS LINE ------
         
         def write(msg)
+          #puts @write.sync;
           @write.puts msg
         end
 
         def start
+          Signal.trap("INT") { teardown_jobs }
           create_jobs
           monitor_jobs
-        rescue Interrupt
-          print "Exiting...."
-          @jobs.reset_queue
-          #@jobs.interrupt
-          monitor_jobs
-          puts "Done"
         rescue StandardError => e
           Alces::Stack::Log.fatal e.inspect
           raise e
@@ -89,13 +98,20 @@ module Alces
         end
 
         def monitor_jobs
-          c = 0
-          while result = @jobs.finished
+          @result_hash
+          while node = @jobs.finished
             @jobs.start if @jobs.start?
-            c += 1
-            print c.to_s + " : "
-            puts result
+            payload = @jobs.get_node_results(node, @cmds)
+            write payload unless payload.nil?
           end
+        end
+
+        def teardown_jobs
+          $stderr.print "Exiting...."
+          @jobs.reset_queue
+          monitor_jobs
+          $stderr.puts "Done #{Process.pid}"
+          Kernel.exit
         end
       end
     end

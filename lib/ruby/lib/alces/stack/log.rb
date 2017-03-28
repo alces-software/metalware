@@ -34,9 +34,7 @@ module Alces
         end
 
         def new_log
-          f = File.open('/var/log/metalware/metal.log', "a")
-          f.sync = true
-          Logger.new(f)
+          create_log('/var/log/metalware/metal.log')
         end
 
         def create_log(file)
