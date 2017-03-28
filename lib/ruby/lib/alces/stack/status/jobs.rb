@@ -108,7 +108,7 @@ module Alces
         def finished
           pid = Process.waitpid
           task_hash = @running[pid]
-          data = task_hash[:task].read
+          data = task_hash[:task].read.gsub("\n", "")
           add_result(task_hash[:node], task_hash[:cmd], data)
           @running.delete(pid)
           return task_hash[:node].to_sym

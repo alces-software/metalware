@@ -99,7 +99,7 @@ module Alces
         def run_bash(cmd)
           read, write = IO.pipe
           file = "/proc/#{Process.pid}/fd/#{write.fileno}"
-          @bash_pid = fork {
+          puts @bash_pid = fork {
             read.close
             Process.exec("#{cmd} | cat > #{file} 2>/dev/null")
           }
@@ -112,6 +112,9 @@ module Alces
           begin 
             write @data
             @write.close
+          rescue 
+          end
+          begin
             Process.kill(2, @bash_pid) unless @bash_pid.nil?
           rescue 
           end

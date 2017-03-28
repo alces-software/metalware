@@ -71,7 +71,6 @@ module Alces
         # ----- FORKED METHODS BELOW THIS LINE ------
         
         def write(msg)
-          #puts @write.sync;
           @write.puts msg
         end
 
@@ -98,7 +97,6 @@ module Alces
         end
 
         def monitor_jobs
-          @result_hash
           while node = @jobs.finished
             @jobs.start if @jobs.start?
             payload = @jobs.get_node_results(node, @cmds)

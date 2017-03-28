@@ -67,6 +67,7 @@ module Alces
             result = monitor.read
             puts "result: #{result}" unless result.empty?
           end
+          puts "EXIT RUN"
         end
       end
     end
