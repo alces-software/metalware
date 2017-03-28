@@ -3,3 +3,4 @@
 *.bak
 lib/ruby/vendor/ruby
 tmp
+.vagrant
