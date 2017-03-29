@@ -73,16 +73,15 @@ module Alces
 
         def set_signal
           Signal.trap("INT") {
-            if @int_once
-              Kernel.exit
-            else
+            unless @int_once
               @int_once = true
               begin
                 @monitor.wait
               rescue Errno::ECHILD
               end
-              Kernel.exit
             end
+            File.delete(@report_file) if File.exist?(@report_file.to_s)
+            Kernel.exit
           }
         end
 
@@ -94,7 +93,7 @@ module Alces
         end
 
         def set_reporting
-          Alces::Stack::Status::Task.time = 10
+          Alces::Stack::Status::Task.time = (@opt.wait < 5 ? 5 : @opt.wait)
           @report_file = "/tmp/metalware-status.#{Process.pid}"
           FileUtils.touch(@report_file)
           File.delete(@report_file) if File.exist?(@report_file)

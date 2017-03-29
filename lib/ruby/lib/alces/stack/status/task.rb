@@ -65,7 +65,8 @@ module Alces
         # ----- FORKED METHODS BELOW THIS LINE ------
         
         def write(msg)
-          sleep 1 if Time.now - @start_time < 1
+          timer = 2 - (Time.now - @start_time)
+          sleep timer if timer > 0
           msg = "#{msg.chomp("\n")}\n"
           File.open(self.class.report_file, "a") do |f|
             f.flock(File::LOCK_EX)
