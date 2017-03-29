@@ -38,7 +38,7 @@ module Alces
           @default_name_index_size=options[:name_sequence_length].to_i || 2
           @default_name=options[:name] || "node"
           @update_dhcp_flag=options[:update_dhcp_flag]
-          finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/templates/hunter", options[:template])
+          finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/hunter", options[:template])
           @templateFilename = finder.template
           @repo = finder.repo
           @detected_macs=[]
