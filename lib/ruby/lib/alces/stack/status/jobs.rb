@@ -41,11 +41,6 @@ module Alces
           }
         end
 
-        CLI_LIBRARY = {
-          :power => :job_power_status,
-          :ping => :job_ping_node
-        }
-
         def generate_key
           key = :head
           while @queue.key? key do 
@@ -59,7 +54,6 @@ module Alces
           @queue[key] = {
             node: node,
             cmd: cmd,
-            job: CLI_LIBRARY[cmd],
             next: false
           }
           @queue[:head] = key unless @queue[:head]
@@ -87,7 +81,7 @@ module Alces
 
           next_job = @queue[@queue[:head]]
           task = Alces::Stack::Status::Task
-                   .new(next_job[:node], next_job[:job])
+                   .new(next_job[:node], next_job[:cmd])
           @running[task.fork!.pid] = {
             node: next_job[:node],
             cmd: next_job[:cmd],
@@ -106,11 +100,10 @@ module Alces
 
         def finished
           pid = Process.waitpid
-          task_hash = @running[pid]
           @running.delete(pid)
-          return task_hash[:node].to_sym
+          return true
         rescue Errno::ECHILD
-          return nil
+          return false
         end
 
         def print_queue

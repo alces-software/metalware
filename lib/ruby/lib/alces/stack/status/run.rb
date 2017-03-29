@@ -49,6 +49,17 @@ module Alces
           end
           class InputError < StandardError; end
 
+          def nodes
+            lambda_proc = lambda { |options| options[:nodename] }
+            @nodes ||= Alces::Stack::Iterator
+                         .run(group, lambda_proc, nodename: nodename)
+                         .tap{ |a| a = [a] unless a.is_a? Array }
+          end
+
+          def cmds
+            [:power, :ping]
+          end
+
           def method_missing(s, *a, &b)
             if @options.key?(s)
               @options[s]
@@ -77,39 +88,59 @@ module Alces
           Alces::Stack::Status::Task.log = status_log
         end
 
-        def node_list
-          lambda_proc = lambda { |options| options[:nodename] }
-          nodes = Alces::Stack::Iterator.run(@opt.group, lambda_proc, nodename: @opt.nodename)
-          nodes = [nodes] unless nodes.is_a? Array
-          nodes
-        end
-
-        def setup_reporting
+        def set_reporting
           Alces::Stack::Status::Task.time = 10
           @report_file = "/tmp/metalware-status.#{Process.pid}"
           FileUtils.touch(@report_file)
           File.delete(@report_file) if File.exist?(@report_file)
           Alces::Stack::Status::Task.report_file = @report_file
+          @results = {}
         end
 
         def run!
           set_logging
-          setup_reporting
-          nodes = node_list
-          cmds = [:power, :ping]
-          monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50).fork!
+          set_reporting
+          monitor = Alces::Stack::Status::Monitor.new(@opt.nodes, @opt.cmds, 50).fork!
           set_signal
-          while monitor.wait_wnohang.nil?
+          next_loop, wait = true, true
+          while next_loop
             File.open(@report_file, "a+") do |f|
               f.flock(File::LOCK_EX)
-              data = f.read
-              puts data
+              process_data(f.read)
               f.truncate(0)
             end
-            sleep 1
+            check_findished_node
+            next_loop = false unless wait
+            wait = monitor.wait_wnohang.nil? if wait
+            sleep 1 if next_loop
           end
         ensure
           File.delete(@report_file) if File.exist?(@report_file.to_s)
+        end
+
+        def process_data(data)
+          data.split("\n").each do |entry|
+            h = eval(entry.gsub(/\\n/, "\n"))
+            (@results[h[:nodename].to_sym] ||= {})[h[:cmd]] = h[:data]
+          end
+        end
+
+        def check_findished_node
+          return if (@cur_index ||= 0) >= @opt.nodes.length
+          h = (@results[@opt.nodes[@cur_index].to_sym] ||= {})
+          complete = true
+          @opt.cmds.each { |c| complete = false unless h.key? c }
+          return unless complete
+          display_result(h)
+          @results.delete @opt.nodes[@cur_index].to_sym
+          @cur_index += 1
+          check_findished_node
+        end
+
+        def display_result(h = {})
+          str = "#{@opt.nodes[@cur_index]} : "
+          @opt.cmds.each { |c| str << "#{c} #{h[c]}, " }
+          puts str
         end
       end
     end

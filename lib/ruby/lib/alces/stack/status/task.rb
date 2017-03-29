@@ -29,13 +29,13 @@ module Alces
     module Status
       class Task
         class << self
-          def get_timeout
+          def time
             Alces::Stack::Log.warn "Timeout not specified, using default" if @time.nil?
             @time ||= 10
           end
 
+          attr_writer :time
           attr_accessor :log
-          attr_accessor :time
           attr_accessor :report_file
         end
 
@@ -48,12 +48,13 @@ module Alces
 
         def fork!
           @pid = fork do
-            Signal.trap("INT") { puts "teardown"; teardown }
+            Signal.trap("INT", "SIG_DFL")
             self.class.log.info "Task, #{Process.pid}, #{@node}, #{@job}"
             start
             Kernel.exit
           end
           return self
+        rescue Interrupt
         rescue => e
           self.class.log.fatal e.inspect
           raise e
@@ -71,12 +72,17 @@ module Alces
             f.write(msg)
           end
         end
+        
+        CLI_LIBRARY = {
+          :power => :job_power_status,
+          :ping => :job_ping_node
+        }
 
         def start
           Timeout::timeout(self.class.time) {
-            @cmd_pid = false
-            @data = send(@job, @node)
+            @data = send(CLI_LIBRARY[@job], @node)
           }
+        rescue Interrupt
         rescue Timeout::Error
           @data = "timeout"
         ensure
@@ -111,9 +117,19 @@ module Alces
         end
 
         def teardown
+          data_hash = 
           tasks = [
-            lambda { write @data },
-            lambda { Process.kill(2, @bash_pid) unless @bash_pid.nil? }
+            lambda { 
+              h = {
+                nodename: @node,
+                cmd: @job,
+                data: @data
+              }
+              write h.to_s
+            },
+            lambda {
+              Process.kill(2, @bash_pid) unless @bash_pid.nil?
+            }
           ]
           tasks.each do |t|
             begin

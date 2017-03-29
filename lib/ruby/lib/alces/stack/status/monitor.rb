@@ -48,8 +48,6 @@ module Alces
           end
           @write.close
           return self
-        rescue => e
-          self.class.log.fatal e.inspect
         end
 
         def wait; Process.waitpid(@pid); end
@@ -83,6 +81,8 @@ module Alces
           monitor_jobs
         rescue StandardError => e
           Alces::Stack::Log.fatal e.inspect
+          self.class.log.fatal e.inspect
+          teardown_jobs
           raise e
         end
 
@@ -100,7 +100,7 @@ module Alces
         end
 
         def monitor_jobs
-          while node = @jobs.finished
+          while @jobs.finished
             @jobs.start if @jobs.start?
           end
         end
@@ -108,8 +108,11 @@ module Alces
         def teardown_jobs
           $stderr.print "Exiting...."
           @jobs.reset_queue
+          @running.keys.each { |k| 
+            begin; Process.kill(2, k); rescue => e; end
+          } unless @running.nil?
           monitor_jobs
-          $stderr.puts "Done #{Process.pid}"
+          $stderr.puts "Done"
           Kernel.exit
         end
       end
