@@ -39,20 +39,15 @@ module Alces
         end
 
         def fork!
-          @read, @write = IO.pipe
-          @read.sync = true
           @pid = fork do
             self.class.log.info "Monitor #{Process.pid}"
-            @read.close
             start
           end
-          @write.close
           return self
         end
 
         def wait; Process.waitpid(@pid); end
         def wait_wnohang; Process.waitpid(@pid, Process::WNOHANG); end
-        def read; @read.read; end
 
         def pid; @pid; end
 
@@ -70,20 +65,19 @@ module Alces
         end
 
         # ----- FORKED METHODS BELOW THIS LINE ------
-        
-        def write(msg)
-          @write.puts msg
-        end
-
         def start
           create_jobs
-          Signal.trap("INT") { teardown_jobs }
           monitor_jobs
         rescue StandardError => e
           Alces::Stack::Log.fatal e.inspect
           self.class.log.fatal e.inspect
+          @error = true
           teardown_jobs
           raise e
+        rescue Interrupt
+          @error = true
+        ensure
+          teardown_jobs
         end
 
         def create_jobs
@@ -106,13 +100,15 @@ module Alces
         end
 
         def teardown_jobs
-          $stderr.print "Exiting...."
+          $stdout.flush
+          $stderr.flush
+          $stderr.print "Exiting...." if @error
           @jobs.reset_queue
           @running.keys.each { |k| 
             begin; Process.kill(2, k); rescue => e; end
           } unless @running.nil?
           monitor_jobs
-          $stderr.puts "Done"
+          $stderr.puts "Done" if @error
           Kernel.exit
         end
       end

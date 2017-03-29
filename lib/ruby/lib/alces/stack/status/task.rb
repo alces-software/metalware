@@ -48,7 +48,6 @@ module Alces
 
         def fork!
           @pid = fork do
-            Signal.trap("INT", "SIG_DFL")
             self.class.log.info "Task, #{Process.pid}, #{@node}, #{@job}"
             start
             Kernel.exit
@@ -66,11 +65,13 @@ module Alces
         # ----- FORKED METHODS BELOW THIS LINE ------
         
         def write(msg)
+          sleep 1 if Time.now - @start_time < 1
           msg = "#{msg.chomp("\n")}\n"
           File.open(self.class.report_file, "a") do |f|
             f.flock(File::LOCK_EX)
             f.write(msg)
           end
+        rescue Interrupt
         end
         
         CLI_LIBRARY = {
@@ -79,6 +80,7 @@ module Alces
         }
 
         def start
+          @start_time = Time.now
           Timeout::timeout(self.class.time) {
             @data = send(CLI_LIBRARY[@job], @node)
           }
@@ -99,7 +101,7 @@ module Alces
         end
 
         def job_ping_node(nodename)
-          cmd = "ping -c 1 #{nodename} > /dev/null; echo $?"
+          cmd = "ping -c 1 #{nodename} >/dev/null 2>&1; echo $?"
           result = run_bash(cmd)
           result.chomp == "0" ? "ok" : "error"
         end
@@ -109,7 +111,7 @@ module Alces
           file = "/proc/#{Process.pid}/fd/#{write_bash.fileno}"
           @bash_pid = fork {
             read_bash.close
-            Process.exec("#{cmd} | cat > #{file} 2>/dev/null")
+            Process.exec("#{cmd} | cat > #{file}")
           }
           Process.waitpid(@bash_pid)
           write_bash.close

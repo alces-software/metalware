@@ -77,6 +77,11 @@ module Alces
               Kernel.exit
             else
               @int_once = true
+              begin
+                @monitor.wait
+              rescue Errno::ECHILD
+              end
+              Kernel.exit
             end
           }
         end
@@ -100,7 +105,7 @@ module Alces
         def run!
           set_logging
           set_reporting
-          monitor = Alces::Stack::Status::Monitor.new(@opt.nodes, @opt.cmds, 50).fork!
+          @monitor = Alces::Stack::Status::Monitor.new(@opt.nodes, @opt.cmds, 50).fork!
           set_signal
           next_loop, wait = true, true
           while next_loop
@@ -111,7 +116,7 @@ module Alces
             end
             check_findished_node
             next_loop = false unless wait
-            wait = monitor.wait_wnohang.nil? if wait
+            wait = @monitor.wait_wnohang.nil? if wait
             sleep 1 if next_loop
           end
         ensure
@@ -141,6 +146,7 @@ module Alces
           str = "#{@opt.nodes[@cur_index]} : "
           @opt.cmds.each { |c| str << "#{c} #{h[c]}, " }
           puts str
+          $stdout.flush
         end
       end
     end
