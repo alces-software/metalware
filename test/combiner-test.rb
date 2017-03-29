@@ -23,6 +23,7 @@ require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 
 require "json"
 require "alces/stack/templater"
+require "alces/stack/finder"
 
 class TC_Templater_Combiner < Test::Unit::TestCase
   def setup
@@ -48,16 +49,20 @@ class TC_Templater_Combiner < Test::Unit::TestCase
     @json_string = '{"hostip":"0.0.0.0"}'
     @nodename = "node_nodename_input"
     @index = 3
-    @template_folder = "#{ENV['alces_BASE']}/etc/templates"
+    @template_folder = "#{ENV['alces_REPO']}/templates"
     @example_template = "#{@template_folder}/boot/install.erb"
-    `mv #{ENV['alces_BASE']}/etc/config #{ENV['alces_BASE']}/etc/config.copy 2>&1`
-    `cp -r #{ENV['alces_BASE']}/test/helper/config #{ENV['alces_BASE']}/etc/config`
+    `mv #{ENV['alces_REPO']}/config #{ENV['alces_REPO']}/config.copy 2>&1`
+    `cp -r #{ENV['alces_BASE']}/test/helper/config #{ENV['alces_REPO']}/config`
+    `mkdir -p /var/lib/metalware/repos/new/template/boot`
+    `mkdir -p /var/lib/metalware/repos/new/config`
+    `echo '<%= diff_repo %>' > /var/lib/metalware/repos/new/template/boot/template`
+    `echo 'diff_repo: diff_repo' > /var/lib/metalware/repos/new/config/all.yaml`
   end
 
   def test_no_input
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("").combined_hash, "Combined array is not empty")
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(nil,{}).combined_hash, "Combined array is not empty")
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(false,Hash.new).combined_hash, "Combined array is not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("", "").combined_hash, "Combined array is not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(nil, nil,{}).combined_hash, "Combined array is not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new(false, false,Hash.new).combined_hash, "Combined array is not empty")
   end
 
   def test_hash_input
@@ -67,7 +72,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       bool: true,
       is_nil: nil
     }
-    new_hash = Alces::Stack::Templater::Combiner.new("", no_hostip).combined_hash
+    new_hash = Alces::Stack::Templater::Combiner.new(nil, "", no_hostip).combined_hash
     assert_equal(new_hash, @basic_hash, "Did not add hash to combined hash")
     new_hash[:newfeild] = true
     assert_not_equal(new_hash, @basic_hash, "Can not change hash input and combined hash independently")
@@ -82,9 +87,9 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       iptail: 1,
       q3: 5
     }
-    assert_equal(json_hash, Alces::Stack::Templater::Combiner.new(@json_string).combined_hash, "Did not add json to combined hash")
-    assert_raise TypeError do Alces::Stack::Templater::Combiner.new(json_hash).combined_hash end
-    assert_raise JSON::ParserError do Alces::Stack::Templater::Combiner.new(@example_template).combined_hash end
+    assert_equal(json_hash, Alces::Stack::Templater::Combiner.new(false, @json_string).combined_hash, "Did not add json to combined hash")
+    assert_raise TypeError do Alces::Stack::Templater::Combiner.new(nil, json_hash).combined_hash end
+    assert_raise JSON::ParserError do Alces::Stack::Templater::Combiner.new("", @example_template).combined_hash end
   end
 
   def test_priority_order
@@ -97,7 +102,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       iptail: 1,
       q3: 5
     }
-    hash_over_default = Alces::Stack::Templater::Combiner.new("",over_default_hash).combined_hash
+    hash_over_default = Alces::Stack::Templater::Combiner.new(false, "",over_default_hash).combined_hash
     assert_equal(over_default_hash, hash_over_default, "Hash did not override default values")
     json_input = '{"hostip": "1.1.1.1"}'
     json_hash = {
@@ -109,37 +114,37 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       iptail: 1,
       q3: 5
     }
-    json_over_hash = Alces::Stack::Templater::Combiner.new(json_input, over_default_hash).combined_hash
+    json_over_hash = Alces::Stack::Templater::Combiner.new(nil, json_input, over_default_hash).combined_hash
     assert_equal(json_hash, json_over_hash, "JSON did not override hash inputs")
   end
 
   def test_parsed_hash
     # No erb
-    assert_equal(@basic_hash, Alces::Stack::Templater::Combiner.new("",@basic_hash).parsed_hash, "Changed hash if no erb is present")
+    assert_equal(@basic_hash, Alces::Stack::Templater::Combiner.new("", "",@basic_hash).parsed_hash, "Changed hash if no erb is present")
     # Single erb replace
     @basic_hash[:replace_with_hostip] = "<%= hostip %>"
     correct_hash = Hash.new.merge(@basic_hash)
     correct_hash[:replace_with_hostip] = correct_hash[:hostip]
-    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new("",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
+    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new(false, "",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
     # Chain erb replace
     @basic_hash[:double_replace] = "<%= replace_with_hostip %>"
     @basic_hash[:triple_replace] = "<%= double_replace %>"
     correct_hash[:double_replace] = correct_hash[:hostip]
     correct_hash[:triple_replace] = correct_hash[:hostip]
-    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new("",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
+    assert_equal(correct_hash, Alces::Stack::Templater::Combiner.new(nil, "",@basic_hash).parsed_hash, "Did not correctly replace a single erb")
     # Recursion error
     @basic_hash[:recursion_error] = "<%= recursion_error %>a"
-    assert_raise Alces::Stack::Templater::Combiner::LoopErbError do Alces::Stack::Templater::Combiner.new("",@basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::LoopErbError do Alces::Stack::Templater::Combiner.new("", "",@basic_hash) end
   end
 
   def test_file
-    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil).file("fake.txt", @basic_hash) end
-    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil).save("fake.txt", "fake.txt", @basic_hash) end
-    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil).append("fake.txt", "fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(false, nil).file("fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new(nil, nil).save("fake.txt", "fake.txt", @basic_hash) end
+    assert_raise Alces::Stack::Templater::Combiner::HashInputError do Alces::Stack::Templater::Combiner.new("", nil).append("fake.txt", "fake.txt", @basic_hash) end
   end
 
   def test_load_yaml_hash_no_nodename
-    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("").parsed_hash, "Yaml hash not empty")
+    assert_equal(@default_hash, Alces::Stack::Templater::Combiner.new("", "").parsed_hash, "Yaml hash not empty")
   end
 
   def test_yaml_all_cluster_config
@@ -151,7 +156,12 @@ class TC_Templater_Combiner < Test::Unit::TestCase
                   q3: 6,
                   index: 0
                 })
-    assert_equal(correct, Alces::Stack::Templater::Combiner.new("",nodename:"slave01").parsed_hash, "Has not passed yaml")
+
+    assert_equal(
+      correct,
+      Alces::Stack::Templater::Combiner.new("", "", nodename:"slave01").parsed_hash,
+      "Has not passed yaml"
+    )
   end
 
   def test_yaml_all_cluster_config_slave04
@@ -164,7 +174,11 @@ class TC_Templater_Combiner < Test::Unit::TestCase
                   index: 0,
                   permanent_boot: false
                 })
-    assert_equal(correct, Alces::Stack::Templater::Combiner.new("",nodename:"slave04").parsed_hash, "Yaml pass or load order error")
+    assert_equal(
+      correct,
+      Alces::Stack::Templater::Combiner.new("", "", nodename:"slave04").parsed_hash,
+      "Yaml pass or load order error"
+    ) 
   end
 
   def test_json_overide_yaml
@@ -181,16 +195,31 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       "config":"json",
       "q3":0
     }'
-    assert_equal(correct, Alces::Stack::Templater::Combiner.new(json,nodename:"slave04").parsed_hash, "JSON has not correctly overridden YAML")
+    assert_equal(
+      correct,
+      Alces::Stack::Templater::Combiner.new("", json,nodename:"slave04").parsed_hash,
+      "JSON has not correctly overridden YAML"
+    )
   end
 
   def test_override_nodename_error
     json = '{"nodename":1}'
-    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do Alces::Stack::Templater::Combiner.new(json) end
+    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do 
+      Alces::Stack::Templater::Combiner.new(nil, json)
+    end
+  end
+
+  def test_diff_repo_yaml
+    finder = Alces::Stack::Finder
+               .new("#{ENV['alces_REPO']}", "/template/boot", "new::template")
+    rendered = Alces::Stack::Templater::Combiner
+                 .new(finder.repo, "", {nodename: "slave04"}).file(finder.template)
+    assert_equal("diff_repo", rendered.chomp, "Did not switch yaml repo")
   end
 
   def teardown
-    `rm -rf #{ENV['alces_BASE']}/etc/config 2>&1`
-    `mv #{ENV['alces_BASE']}/etc/config.copy #{ENV['alces_BASE']}/etc/config 2>&1`
+    `rm -rf /var/lib/metalware/repos/new`
+    `rm -rf #{ENV['alces_REPO']}/config 2>&1`
+    `mv #{ENV['alces_REPO']}/config.copy #{ENV['alces_REPO']}/config 2>&1`
   end
 end

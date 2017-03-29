@@ -1,4 +1,3 @@
-#!/bin/bash
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,19 +19,32 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../etc/metal.rc
-yum list installed syslinux &>/dev/null
-reset=false
-if [ $? -ne 0 ]; then
-  yum -y install syslinux
-  reset=true
-fi
-yum list installed tree &>/dev/null
-if [ $? -ne 0 ]; then
-  yum -y install tree
-  reset=true
-fi
-if $reset; then
-  reset
-fi
-alias rby=$alces_RUBY
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require "fileutils"
+
+class TC_Repo < Test::Unit::TestCase
+  def setup
+    @bash = File.read("/etc/profile.d/alces-metalware.sh")
+  end
+
+  def test_clone
+    `#{@bash} metal repo -cn new_repo -u https://github.com/alces-software/metalware-profile-hpc.git`
+    assert(Dir["/var/lib/metalware/repos/new_repo/*"].count > 0,
+           "Repo was not cloned correctly")
+  end
+
+  def test_repo_already_exists
+    repo = "/var/lib/metalware/repos/name"
+    FileUtils::mkdir_p "#{repo}/file"
+
+    `#{@bash} metal repo -cn name -u https://github.com/alces-software/metalware-profile-hpc.git 2>/dev/null`
+    assert(Dir["#{repo}/*"].count == 1, "Clone override existing repo without -f")
+
+    `#{@bash} metal repo -fcn name -u https://github.com/alces-software/metalware-profile-hpc.git`
+    assert(Dir["#{repo}/*"].count > 1, "Clone did not override existing repo with -f")
+  end
+
+  def teardown
+    `rm -rf /var/lib/metalware/repos/*`
+  end
+end

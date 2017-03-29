@@ -1,6 +1,5 @@
-#!/bin/bash
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -20,19 +19,17 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-source $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../etc/metal.rc
-yum list installed syslinux &>/dev/null
-reset=false
-if [ $? -ne 0 ]; then
-  yum -y install syslinux
-  reset=true
-fi
-yum list installed tree &>/dev/null
-if [ $? -ne 0 ]; then
-  yum -y install tree
-  reset=true
-fi
-if $reset; then
-  reset
-fi
-alias rby=$alces_RUBY
+require 'alces/stack/repo/cli'
+require 'alces/stack/repo/run'
+
+module Alces
+  module Stack
+    module Repo
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
+      end
+    end
+  end
+end

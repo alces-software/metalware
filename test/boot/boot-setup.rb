@@ -19,6 +19,8 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require "alces/stack/finder"
+
 module BootTestSetup
   def setup
     set_up_templates
@@ -28,14 +30,16 @@ module BootTestSetup
   end
 
   def set_up_templates
-    @default_template_location = "#{ENV['alces_BASE']}/etc/templates/boot/"
+    @default_template_location_repo = "#{ENV['alces_REPO']}"
+    @default_template_location_path = "templates/boot/"
+    @default_template_location = "#{@default_template_location_repo}/#{@default_template_location_path}"
 
     @template = "test.erb"
     @template_str = "Boot template, <%= nodename %>, " \
                     "<%= kernelappendoptions %>, <%= kickstart %>"
     File.write("#{@default_template_location}#{@template}", @template_str)
 
-    @template_kickstart = "#{ENV['alces_BASE']}/etc/templates/kickstart/test.erb"
+    @template_kickstart = "#{ENV['alces_REPO']}/templates/kickstart/test.erb"
     @template_str_kickstart =
       "Kickstart template, <%= nodename %>, <%= kernelappendoptions %>" \
       " <% if !permanent_boot %>false<% end %>"
@@ -50,10 +54,12 @@ module BootTestSetup
   end
 
   def set_finders
-    @finder = Alces::Stack::Templater::Finder
-                .new(@default_template_location, @template)
-    @ks_finder = Alces::Stack::Templater::Finder
-                .new(@default_template_location, @template_kickstart)
+    @finder = Alces::Stack::Finder.new(@default_template_location_repo,
+                                       @default_template_location_path,
+                                       @template)
+    @ks_finder = Alces::Stack::Finder.new(@default_template_location_repo,
+                                          @default_template_location_path,
+                                          @template_kickstart)
   end
 
   def set_inputs
@@ -86,9 +92,9 @@ module BootTestSetup
     `metal hosts -a -g #{@input_group[:group]} -j '{"iptail":"<%= index + 100 %>"}'`
     `mkdir -p /var/lib/tftpboot/pxelinux.cfg/`
     `mkdir -p /var/www/html/ks`
-    `echo "" > #{ENV['alces_BASE']}/etc/templates/scripts/empty2.sh`
-    `echo "" > #{ENV['alces_BASE']}/etc/templates/scripts/empty3.csh`
-    `echo "" > #{ENV['alces_BASE']}/etc/templates/scripts/empty4.sh.erb`
+    `echo "" > #{ENV['alces_REPO']}/templates/scripts/empty2.sh`
+    `echo "" > #{ENV['alces_REPO']}/templates/scripts/empty3.csh`
+    `echo "" > #{ENV['alces_REPO']}/templates/scripts/empty4.sh.erb`
     `rm -rf /var/lib/tftpboot/pxelinux.cfg/*`
     `rm -rf /var/lib/metalware/rendered/ks/*`
     `rm -rf /var/lib/metalware/cache/*`
@@ -97,9 +103,9 @@ module BootTestSetup
   end
 
   def teardown
-    `rm -f #{ENV['alces_BASE']}/etc/templates/scripts/empty2.sh`
-    `rm -f #{ENV['alces_BASE']}/etc/templates/scripts/empty3.csh`
-    `rm -f #{ENV['alces_BASE']}/etc/templates/scripts/empty4.sh.erb`
+    `rm -f #{ENV['alces_REPO']}/templates/scripts/empty2.sh`
+    `rm -f #{ENV['alces_REPO']}/templates/scripts/empty3.csh`
+    `rm -f #{ENV['alces_REPO']}/templates/scripts/empty4.sh.erb`
     `rm #{@default_template_location}#{@template}`
     `rm #{@default_template_location}#{@template_pxe_firstboot}`
     `rm -f #{@template_kickstart}`

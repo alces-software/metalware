@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/iterator'
 require 'fileutils'
 
@@ -32,7 +33,7 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/scripts/", template)
+          @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/templates/scripts/", template)
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -60,7 +61,7 @@ module Alces
         end
 
         def save_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@finder.repo, @json, template_parameters)
           save = get_save_file(combiner.parsed_hash[:nodename])
           FileUtils.mkdir_p(File.dirname(save))
           combiner.save(@finder.template, save)
@@ -68,7 +69,7 @@ module Alces
         end
 
         def puts_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@finder.repo, @json, template_parameters)
           puts "SCRIPT TEMPLATE"
           puts "Hash: " << combiner.parsed_hash.to_s
           puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])
