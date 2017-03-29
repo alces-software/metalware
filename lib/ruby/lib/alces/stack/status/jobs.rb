@@ -31,7 +31,6 @@ module Alces
 
         def initialize()
           @running = {}
-          @results = {}
           reset_queue
         end
 
@@ -108,27 +107,10 @@ module Alces
         def finished
           pid = Process.waitpid
           task_hash = @running[pid]
-          data = task_hash[:task].read.gsub("\n", "")
-          add_result(task_hash[:node], task_hash[:cmd], data)
           @running.delete(pid)
           return task_hash[:node].to_sym
         rescue Errno::ECHILD
           return nil
-        end
-
-        def add_result(nodename, cmd, data)
-          @results[nodename.to_sym] ||= {}
-          @results[nodename.to_sym][cmd] = data
-        end
-
-        # Only returns results when all the data for the node is available
-        def get_node_results(nodename, cmds)
-          results = {}.merge(@results[nodename])
-          cmds.each do |cmd|
-            return nil unless results.key? cmd
-          end
-          @results.delete nodename
-          return results.to_s
         end
 
         def print_queue

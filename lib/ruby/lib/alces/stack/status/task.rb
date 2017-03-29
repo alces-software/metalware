@@ -34,41 +34,41 @@ module Alces
             @time ||= 10
           end
 
-          def set_timeout(time); @time = time; end
+          attr_accessor :log
+          attr_accessor :time
+          attr_accessor :report_pid
+          attr_accessor :report_fd
         end
 
         include Alces::Tools::Execution
 
         def initialize(node, job)
-          @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
-          @status_log.progname = "status"
           @node = node
           @job = job
         end
 
         def fork!
-          @read, @write = IO.pipe
           @pid = fork do
             Signal.trap("INT") { teardown }
-            @status_log.info "Task, #{Process.pid}, #{@node}, #{@job}"
-            @read.close
+            self.class.log.info "Task, #{Process.pid}, #{@node}, #{@job}"
             start
             Kernel.exit
           end
-          @write.close
           return self
         end
 
         def wait; Process.waitpid(@pid); end
-        def read; @read.read end
         def pid; @pid; end
 
         # ----- FORKED METHODS BELOW THIS LINE ------
         
-        def write(msg); @write.puts msg; end
+        def write(msg);
+          file = "/proc/#{self.class.report_pid}/fd/#{self.class.report_fd}"
+          File.write(file, "#{msg.chomp("\n")}\n")
+        end
 
         def start
-          Timeout::timeout(self.class.get_timeout) {
+          Timeout::timeout(self.class.time) {
             @cmd_pid = false
             @data = send(@job, @node)
           }
@@ -97,28 +97,26 @@ module Alces
         end
 
         def run_bash(cmd)
-          read, write = IO.pipe
-          file = "/proc/#{Process.pid}/fd/#{write.fileno}"
-          puts @bash_pid = fork {
-            read.close
+          read_bash, write_bash = IO.pipe
+          file = "/proc/#{Process.pid}/fd/#{write_bash.fileno}"
+          @bash_pid = fork {
+            read_bash.close
             Process.exec("#{cmd} | cat > #{file} 2>/dev/null")
           }
           Process.waitpid(@bash_pid)
-          write.close
-          read.read
+          write_bash.close
+          read_bash.read
         end
 
         def teardown
           begin 
             write @data
-            @write.close
           rescue 
           end
           begin
             Process.kill(2, @bash_pid) unless @bash_pid.nil?
           rescue 
           end
-          Kernel.exit
         end
       end
     end

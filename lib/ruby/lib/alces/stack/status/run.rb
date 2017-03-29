@@ -24,6 +24,8 @@ require 'alces/tools/cli'
 require 'alces/stack/iterator'
 require 'alces/stack/status/monitor'
 require 'alces/stack/status/task'
+require 'alces/stack/iterator'
+require 'alces/stack/log'
 
 module Alces
   module Stack
@@ -57,17 +59,45 @@ module Alces
           end
         end
 
+        def set_signal
+          Signal.trap("INT") {
+            if @int_once
+              Kernel.exit
+            else
+              @int_once = true
+            end
+          }
+        end
+
+        def node_list
+          lambda_proc = lambda { |options| options[:nodename] }
+          nodes = Alces::Stack::Iterator.run(@opt.group, lambda_proc, nodename: @opt.nodename)
+          nodes = [nodes] unless nodes.is_a? Array
+          nodes
+        end
+
+        def set_reporting
+          status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
+          status_log.progname = "status"
+          Alces::Stack::Status::Monitor.log = status_log
+          Alces::Stack::Status::Task.log = status_log
+
+          report_read, report_write = IO.pipe
+          Alces::Stack::Status::Task.time = 10
+          Alces::Stack::Status::Task.report_pid = Process.pid
+          Alces::Stack::Status::Task.report_fd = report_write.fileno
+          [report_read, report_write]
+        end
+
         def run!
-          Signal.trap("INT", "IGNORE")
-          nodes = ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8"]
-          cmds = [:power, :ping, :power, :ping, :power, :ping, :power]
-          Alces::Stack::Status::Task.set_timeout(10)
+          set_signal
+          nodes = node_list
+          cmds = [:power, :ping]
+          report_read, report_write = set_reporting
           monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50).fork!
-          while monitor.wait_wnohang.nil?
-            result = monitor.read
-            puts "result: #{result}" unless result.empty?
-          end
-          puts "EXIT RUN"
+          monitor.wait
+          report_write.close
+          puts report_read.read
         end
       end
     end

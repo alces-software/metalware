@@ -22,17 +22,17 @@
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require 'alces/stack/status/jobs'
-require 'alces/stack/log'
 
 module Alces
   module Stack
     module Status
       class Monitor
+        class << self
+          attr_accessor :log
+        end
         include Alces::Tools::Execution
 
         def initialize(nodes, cmds, limit)
-          @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
-          @status_log.progname = "status"
           @limit = limit
           @nodes = nodes
           @cmds = cmds
@@ -40,8 +40,9 @@ module Alces
 
         def fork!
           @read, @write = IO.pipe
+          @read.sync = true
           @pid = fork do
-            @status_log.info "Monitor #{Process.pid}"
+            self.class.log.info "Monitor #{Process.pid}"
             @read.close
             start
           end
@@ -99,8 +100,6 @@ module Alces
         def monitor_jobs
           while node = @jobs.finished
             @jobs.start if @jobs.start?
-            payload = @jobs.get_node_results(node, @cmds)
-            write payload unless payload.nil?
           end
         end
 
