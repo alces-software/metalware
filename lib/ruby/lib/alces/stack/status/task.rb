@@ -36,8 +36,7 @@ module Alces
 
           attr_accessor :log
           attr_accessor :time
-          attr_accessor :report_pid
-          attr_accessor :report_fd
+          attr_accessor :report_file
         end
 
         include Alces::Tools::Execution
@@ -49,12 +48,15 @@ module Alces
 
         def fork!
           @pid = fork do
-            Signal.trap("INT") { teardown }
+            Signal.trap("INT") { puts "teardown"; teardown }
             self.class.log.info "Task, #{Process.pid}, #{@node}, #{@job}"
             start
             Kernel.exit
           end
           return self
+        rescue => e
+          self.class.log.fatal e.inspect
+          raise e
         end
 
         def wait; Process.waitpid(@pid); end
@@ -62,9 +64,12 @@ module Alces
 
         # ----- FORKED METHODS BELOW THIS LINE ------
         
-        def write(msg);
-          file = "/proc/#{self.class.report_pid}/fd/#{self.class.report_fd}"
-          File.write(file, "#{msg.chomp("\n")}\n")
+        def write(msg)
+          msg = "#{msg.chomp("\n")}\n"
+          File.open(self.class.report_file, "a") do |f|
+            f.flock(File::LOCK_EX)
+            f.write(msg)
+          end
         end
 
         def start
@@ -74,9 +79,6 @@ module Alces
           }
         rescue Timeout::Error
           @data = "timeout"
-        rescue StandardError => e
-          Alces::Stack::Log.error e.inspect
-          raise e
         ensure
           teardown
         end
@@ -109,13 +111,16 @@ module Alces
         end
 
         def teardown
-          begin 
-            write @data
-          rescue 
-          end
-          begin
-            Process.kill(2, @bash_pid) unless @bash_pid.nil?
-          rescue 
+          tasks = [
+            lambda { write @data },
+            lambda { Process.kill(2, @bash_pid) unless @bash_pid.nil? }
+          ]
+          tasks.each do |t|
+            begin
+              t.call
+            rescue => e
+              self.class.log.error e.inspect unless e.is_a? Errno::ESRCH
+            end
           end
         end
       end

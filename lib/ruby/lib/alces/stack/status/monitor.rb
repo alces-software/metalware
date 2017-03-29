@@ -48,6 +48,8 @@ module Alces
           end
           @write.close
           return self
+        rescue => e
+          self.class.log.fatal e.inspect
         end
 
         def wait; Process.waitpid(@pid); end
@@ -76,8 +78,8 @@ module Alces
         end
 
         def start
-          Signal.trap("INT") { teardown_jobs }
           create_jobs
+          Signal.trap("INT") { teardown_jobs }
           monitor_jobs
         rescue StandardError => e
           Alces::Stack::Log.fatal e.inspect

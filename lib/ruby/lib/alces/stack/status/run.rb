@@ -26,6 +26,7 @@ require 'alces/stack/status/monitor'
 require 'alces/stack/status/task'
 require 'alces/stack/iterator'
 require 'alces/stack/log'
+require 'fileutils'
 
 module Alces
   module Stack
@@ -69,6 +70,13 @@ module Alces
           }
         end
 
+        def set_logging
+          status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
+          status_log.progname = "status"
+          Alces::Stack::Status::Monitor.log = status_log
+          Alces::Stack::Status::Task.log = status_log
+        end
+
         def node_list
           lambda_proc = lambda { |options| options[:nodename] }
           nodes = Alces::Stack::Iterator.run(@opt.group, lambda_proc, nodename: @opt.nodename)
@@ -76,28 +84,32 @@ module Alces
           nodes
         end
 
-        def set_reporting
-          status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
-          status_log.progname = "status"
-          Alces::Stack::Status::Monitor.log = status_log
-          Alces::Stack::Status::Task.log = status_log
-
-          report_read, report_write = IO.pipe
+        def setup_reporting
           Alces::Stack::Status::Task.time = 10
-          Alces::Stack::Status::Task.report_pid = Process.pid
-          Alces::Stack::Status::Task.report_fd = report_write.fileno
-          [report_read, report_write]
+          @report_file = "/tmp/metalware-status.#{Process.pid}"
+          FileUtils.touch(@report_file)
+          File.delete(@report_file) if File.exist?(@report_file)
+          Alces::Stack::Status::Task.report_file = @report_file
         end
 
         def run!
-          set_signal
+          set_logging
+          setup_reporting
           nodes = node_list
           cmds = [:power, :ping]
-          report_read, report_write = set_reporting
           monitor = Alces::Stack::Status::Monitor.new(nodes, cmds, 50).fork!
-          monitor.wait
-          report_write.close
-          puts report_read.read
+          set_signal
+          while monitor.wait_wnohang.nil?
+            File.open(@report_file, "a+") do |f|
+              f.flock(File::LOCK_EX)
+              data = f.read
+              puts data
+              f.truncate(0)
+            end
+            sleep 1
+          end
+        ensure
+          File.delete(@report_file) if File.exist?(@report_file.to_s)
         end
       end
     end
