@@ -56,10 +56,6 @@ module Alces
           if @kill_sig_received
             Process.kill(9, @pid) unless @pid.nil?
             Alces::Stack::Log.warn "Force shutdown of monitor process"
-          else
-            Process.kill(9, @pid) unless @pid.nil?
-            @kill_sig_received = true
-            Alces::Stack::Log.infor "Interrupt received, starting monitor teardown"
           end
         rescue
         end
@@ -105,11 +101,16 @@ module Alces
           $stderr.print "Exiting...." if @error
           @jobs.reset_queue
           @running.keys.each { |k| 
-            begin; Process.kill(2, k); rescue => e; end
+            begin; Process.kill(2, k); rescue; end
           } unless @running.nil?
           monitor_jobs
           $stderr.puts "Done" if @error
           Kernel.exit
+        rescue Interrupt
+          @running.keys.each { |k| 
+            begin; Process.kill(9, k); rescue; end
+          } unless @running.nil?
+          $stderr.puts "FORCED EXIT"
         end
       end
     end

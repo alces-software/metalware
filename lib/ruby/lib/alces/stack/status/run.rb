@@ -73,11 +73,13 @@ module Alces
 
         def set_signal
           Signal.trap("INT") {
-            unless @int_once
+            if @int_once
+              @monitor.kill
+            else
               @int_once = true
               begin
                 @monitor.wait
-              rescue Errno::ECHILD
+              rescue
               end
             end
             File.delete(@report_file) if File.exist?(@report_file.to_s)

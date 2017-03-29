@@ -112,7 +112,7 @@ module Alces
           file = "/proc/#{Process.pid}/fd/#{write_bash.fileno}"
           @bash_pid = fork {
             read_bash.close
-            Process.exec("#{cmd} | cat > #{file}")
+            Process.exec("#{cmd} | cat > #{file} 2>/dev/null")
           }
           Process.waitpid(@bash_pid)
           write_bash.close
