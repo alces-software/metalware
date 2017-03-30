@@ -71,7 +71,7 @@ module Alces
           end
 
           each_script do |template|
-            @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/scripts/", template)
+            @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/scripts", template)
             Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
           end
         end
