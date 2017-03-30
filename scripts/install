@@ -76,7 +76,8 @@ title "Creating initial directory structure"
 doing 'Create'
 mkdir -p /var/log/metalware
 mkdir -p /var/lib/metalware/rendered/ks
-mkdir -p /var/lib/metalware/cache/
+mkdir -p /var/lib/metalware/cache
+mkdir -p /var/lib/metalware/repos
 mkdir -p /var/www/html/ks
 chmod a+rw /var/lib/metalware/cache
 [[ -d "${target}" ]] || mkdir -p "${target}"
@@ -123,6 +124,12 @@ case $user_shell in
         rc_script_ext=sh
         ;;
 esac
+
+title "Downloading default repository"
+doing 'Repo'
+source /etc/profile.d/alces-metalware.${rc_script_ext}
+metal repo -cn default -r https://github.com/alces-software/metalware-default
+say_done $?
 
 cat <<EOF
 [33m

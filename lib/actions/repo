@@ -1,5 +1,12 @@
+<<DOC
+: '
+: NAME: repo
+: SYNOPSIS: Manage repositories from Git
+: VERSION: 1.0.0
+: '
+DOC
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,16 +26,16 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
-$: << "#{ENV['alces_BASE']}/test"
+# Execute as ruby script if we're evaluating under bash
+if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
 
-require 'capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'script-test'
-require 'boot/quick-test'
-require 'boot/long-test'
-require 'combiner-test'
-require 'finder-test'
-require 'repo-test'
+ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
+$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
+
+require 'rubygems'
+require 'bundler/setup'
+Bundler.setup(:default, :git)
+
+require 'alces/stack/repo'
+
+Alces::Stack::Repo::CLI.execute if $0 == __FILE__

@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,16 +19,17 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
-$: << "#{ENV['alces_BASE']}/test"
+require 'alces/stack/repo/cli'
+require 'alces/stack/repo/run'
 
-require 'capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'script-test'
-require 'boot/quick-test'
-require 'boot/long-test'
-require 'combiner-test'
-require 'finder-test'
-require 'repo-test'
+module Alces
+  module Stack
+    module Repo
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
+      end
+    end
+  end
+end

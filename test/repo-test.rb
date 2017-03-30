@@ -20,15 +20,35 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
-$: << "#{ENV['alces_BASE']}/test"
+require "fileutils"
 
-require 'capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'script-test'
-require 'boot/quick-test'
-require 'boot/long-test'
-require 'combiner-test'
-require 'finder-test'
-require 'repo-test'
+class TC_Repo < Test::Unit::TestCase
+  def setup
+    @bash = File.read("/etc/profile.d/alces-metalware.sh")
+  end
+
+  def test_clone
+    `#{@bash} metal repo -cn new_repo -r https://github.com/alces-software/metalware-default.git`
+    assert(Dir["/var/lib/metalware/repos/new_repo/*"].count > 0,
+           "Repo was not cloned correctly")
+  end
+
+  def test_repo_already_exists
+    repo = "/var/lib/metalware/repos/name"
+    FileUtils::mkdir_p "#{repo}/file"
+
+    `#{@bash} metal repo -cn name -r https://github.com/alces-software/metalware-default.git 2>/dev/null`
+    assert(Dir["#{repo}/*"].count == 1, "Clone override existing repo without -f")
+
+    `#{@bash} metal repo -fcn name -r https://github.com/alces-software/metalware-default.git`
+    assert(Dir["#{repo}/*"].count > 1, "Clone did not override existing repo with -f")
+  end
+
+  def teardown
+    Dir.entries("/var/lib/metalware/repos").each do |repo|
+      unless [".", "..", "default"].include? repo
+        FileUtils.rm_rf("/var/lib/metalware/repos/#{repo}")
+      end
+    end
+  end
+end

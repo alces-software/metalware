@@ -23,6 +23,7 @@ require 'alces/stack/log'
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/kickstart'
 require 'alces/stack/scripts'
 require 'json'
@@ -42,20 +43,43 @@ module Alces
         class Options
           def initialize(options = {})
             @options = options
+            set_repo
+          end
+
+          def set_repo
+            return unless @options[:repo]
+            @options[:template] = set_repo_helper @options[:template]
+            ks = @options[:kickstart]
+            @options[:kickstart] = set_repo_helper ks if ks
+          end
+
+          def set_repo_helper(filename)
+            if @options[:repo] && filename.scan("::").empty?
+              return "#{@options[:repo]}::#{filename}"  
+            else
+              return filename
+            end
           end
 
           def finder
-            @finder ||= Alces::Stack::Templater::Finder.new(
-              "#{ENV['alces_BASE']}/etc/templates/boot/",
-              @options[:template])
+            @finder ||= Alces::Stack::Finder.new("#{ENV['alces_REPO']}",
+                                                 "/boot/",
+                                                 @options[:template])
+          end
+
+          def repo
+            finder.repo
           end
 
           def ks_finder
-            @ks_finder ||= @options[:kickstart] ?
-              Alces::Stack::Templater::Finder.new(
-                "#{ENV['alces_BASE']}/etc/templates/kickstart/",
-                @options[:kickstart])
-              : nil
+            @ks_finder ||=
+              if @options[:kickstart]
+                Alces::Stack::Finder.new("#{ENV['alces_REPO']}", 
+                                         "/kickstart/",
+                                         @options[:kickstart])
+              else 
+                nil
+              end
           end
 
           def template_parameters
@@ -64,8 +88,7 @@ module Alces
               permanent_boot: permanent_boot?,
               kernelappendoptions: kernel_append.chomp
             }.tap do |h|
-              h[:nodename] =
-                @options[:nodename].chomp if @options[:nodename]
+              h[:nodename] = @options[:nodename].chomp if @options[:nodename]
             end
           end
 
@@ -78,8 +101,11 @@ module Alces
           end
 
           def save_loc_script
-            permanent_boot? ? "/var/www/html/scripts/<%= nodename %>" :
+            if permanent_boot?
+              "/var/www/html/scripts/<%= nodename %>"
+            else
               "/var/lib/metalware/rendered/scripts/<%= nodename %>"
+            end
           end
 
           def method_missing(s, *a, &b)
@@ -111,7 +137,6 @@ module Alces
           Alces::Stack::Iterator.run(@opt.group,
                                      lambda_proc,
                                      @opt.template_parameters)
-
           @opt.kickstart? ? kickstart_teardown : sleep
         rescue StandardError => @e
         ensure
@@ -119,7 +144,6 @@ module Alces
           STDERR.print "Exiting...."
           e = teardown(@e)
           STDERR.puts "Done"
-          $stdout.flush
           raise e unless e == Interrupt
           Alces::Stack::Log.info "clean exit"
           Kernel.exit(0)
@@ -127,13 +151,19 @@ module Alces
 
         def get_save_file(combiner)
           ip=`gethostip -x #{combiner.parsed_hash[:nodename]} 2>/dev/null`
-          raise "Could not find IP address of #{combiner.parsed_hash[:nodename]}" if ip.length < 9
+          raise ErrorResolveIP.new(combiner.parsed_hash[:nodename]) if ip.length < 9
           return "/var/lib/tftpboot/pxelinux.cfg/#{ip}".chomp
+        end
+        class ErrorResolveIP < StandardError
+          def initialize(nodename)
+            msg = "Could not find IP address of #{nodename}"
+            super 
+          end
         end
 
         def save_template(parameters={})
           add_kickstart(parameters) if @opt.kickstart?
-          combiner = Alces::Stack::Templater::Combiner.new(@opt.json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@opt.repo, @opt.json, parameters)
           save = get_save_file(combiner)
           add_files_to_delete(save)
           combiner.save(@opt.finder.template, save)
@@ -141,7 +171,7 @@ module Alces
 
         def puts_template(parameters={})
           add_kickstart(parameters) if @opt.kickstart?
-          combiner = Alces::Stack::Templater::Combiner.new(@opt.json, parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@opt.repo, @opt.json, parameters)
           save = get_save_file(combiner)
           add_files_to_delete(save)
           puts "BOOT TEMPLATE"

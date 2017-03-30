@@ -43,7 +43,7 @@ module Alces
           STDIN.gets
           true
         rescue Interrupt
-          puts "Request cancelled by user."
+          puts "Request canceled by user."
           false
         end
       end
