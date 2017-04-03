@@ -51,9 +51,12 @@ module Alces
 
           def nodes
             lambda_proc = lambda { |options| options[:nodename] }
-            @nodes ||= Alces::Stack::Iterator
-                         .run(group, lambda_proc, nodename: nodename)
-                         .tap{ |a| a = [a] unless a.is_a? Array }
+            @nodes ||= lambda {
+                a = Alces::Stack::Iterator
+                      .run(group, lambda_proc, nodename: nodename)
+                a = [a] unless a.is_a? Array 
+                a
+              }.call
           end
 
           def cmds

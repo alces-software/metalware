@@ -100,16 +100,22 @@ module Alces
           $stderr.flush
           $stderr.print "Exiting...." if @error
           @jobs.reset_queue
-          @running.keys.each { |k| 
-            begin; Process.kill(2, k); rescue; end
-          } unless @running.nil?
+          running = @jobs.running
+          unless running.nil?
+            running.keys.each { |k| 
+              begin; Process.kill(2, k); rescue; end
+            }
+          end 
           monitor_jobs
           $stderr.puts "Done" if @error
           Kernel.exit
         rescue Interrupt
-          @running.keys.each { |k| 
-            begin; Process.kill(9, k); rescue; end
-          } unless @running.nil?
+          running = @jobs.running
+          unless running.nil?
+            running.keys.each { |k| 
+              begin; Process.kill(2, k); rescue; end
+            }
+          end
           $stderr.puts "FORCED EXIT"
         end
       end

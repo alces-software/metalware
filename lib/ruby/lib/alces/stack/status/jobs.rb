@@ -34,6 +34,8 @@ module Alces
           reset_queue
         end
 
+        attr_reader :running
+
         def reset_queue
           @queue = {
             head: false,
