@@ -32,8 +32,8 @@ module Alces
       class Run
         include Alces::Tools::Execution
 
-        def initialize(template, options={})
-          @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/scripts", template)
+        def initialize(scripts, options={})
+          @scripts = scripts
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -41,6 +41,24 @@ module Alces
             options[:nodename] ? { nodename: options[:nodename] } : {}
           @ran_from_boot = options[:ran_from_boot]
           @save_location = "#{options[:save_location]}".chomp('/') << '/'
+          @repo = options[:repo]
+        end
+
+        def each_script(&block)
+          scripts = "#{@scripts}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
+                                 .split(/\s*,\s*/)
+          scripts.each do |s|
+            yield set_repo_helper s
+          end
+        end
+
+        def set_repo_helper(filename)
+          if @repo && filename.scan("::").empty?
+            raise "SWITCHING REPOS NOT CURRENTLY SUPPORTED"
+            return "#{@options[:repo]}::#{filename}"  
+          else
+            return filename
+          end
         end
 
         def run!
@@ -52,7 +70,10 @@ module Alces
             lambda_proc = -> (template_parameters) { save_template(template_parameters) }
           end
 
-          Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
+          each_script do |template|
+            @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/scripts", template)
+            Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
+          end
         end
 
         def get_save_file(nodename)

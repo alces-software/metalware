@@ -108,20 +108,6 @@ module Alces
             end
           end
 
-          def scripts
-            raise ErrorAccessScripts "Do not directly access scripts inputs. " \
-                                     "Use ::each_script"
-          end
-          class ErrorAccessScripts < StandardError; end
-
-          def each_script(&block)
-            scripts = "#{@options[:scripts]}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
-                                             .split(/\s*,\s*/)
-            scripts.each do |s| 
-              yield set_repo_helper s
-            end
-          end
-
           def method_missing(s, *a, &b)
             if @options.key?(s)
               @options[s]
@@ -151,7 +137,6 @@ module Alces
           Alces::Stack::Iterator.run(@opt.group,
                                      lambda_proc,
                                      @opt.template_parameters)
-
           @opt.kickstart? ? kickstart_teardown : sleep
         rescue StandardError => @e
         ensure
@@ -214,17 +199,16 @@ module Alces
         end
 
         def render_scripts
-          @opt.each_script do |s| 
-            parameters = {}.merge(@opt.template_parameters)
-                           .merge({
-                              ran_from_boot: true,
-                              dry_run_flag: @opt.dry_run?,
-                              group: @opt.group,
-                              save_location: @opt.save_loc_script
-                            })
-            save_files = Alces::Stack::Scripts::Run.new(s, parameters).run!
-            add_files_to_delete(save_files)
-          end
+          parameters = {}.merge(@opt.template_parameters)
+                         .merge({
+                            ran_from_boot: true,
+                            dry_run_flag: @opt.dry_run?,
+                            group: @opt.group,
+                            json: @opt.json,
+                            save_location: @opt.save_loc_script
+                          })
+          save_files = Alces::Stack::Scripts::Run.new(@opt.scripts, parameters).run!
+          add_files_to_delete(save_files)
         end
 
         def add_kickstart(parameters={})

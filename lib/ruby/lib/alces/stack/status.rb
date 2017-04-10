@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,32 +19,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'logger'
+require 'alces/stack/status/cli'
+require 'alces/stack/status/run'
 
 module Alces
   module Stack
-    class Log
+    module Status
       class << self
-        def stderr
-          @log_stderr ||= Logger.new($stderr)
-        end
-
-        def logger
-          @log ||= new_log
-        end
-
-        def new_log
-          create_log('/var/log/metalware/metal.log')
-        end
-
-        def create_log(file)
-          f = File.open(file, "a")
-          f.sync = true
-          Logger.new(f)
-        end
-
-        def method_missing(s, *a)
-          logger.respond_to?(s) ? logger.public_send(s, *a) : super
+        def run!(*args)
+          Run.new(*args).run!
         end
       end
     end
