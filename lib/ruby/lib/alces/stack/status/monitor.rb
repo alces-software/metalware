@@ -22,46 +22,36 @@
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require 'alces/stack/status/jobs'
+require 'alces/stack/options'
 
 module Alces
   module Stack
     module Status
       class Monitor
-        class << self
-          attr_accessor :log
-        end
         include Alces::Tools::Execution
 
-        def initialize(nodes, cmds, limit)
-          @limit = limit
-          @nodes = nodes
-          @cmds = cmds
+        def initialize(options = {})
+          @opt = Alces::Stack::Options.new(options)
+          @queue = Queue.new
+          @running = {}
         end
 
-        def fork!
-          @pid = fork do
-            self.class.log.info "Monitor #{Process.pid}"
-            start
-          end
-          return self
-        end
-
-        def wait; Process.waitpid(@pid); end
-        def wait_wnohang; Process.waitpid(@pid, Process::WNOHANG); end
-
-        def pid; @pid; end
-
-        def kill
-          puts "KILL"
-          if @kill_sig_received
-            Process.kill(9, @pid) unless @pid.nil?
-            Alces::Stack::Log.warn "Force shutdown of monitor process"
-          end
-        rescue
-        end
-
-        # ----- FORKED METHODS BELOW THIS LINE ------
         def start
+          @thread = Thread.new {
+            @status_log.info "Monitor Thread: #{Thread.current}"
+
+          }
+          self
+        end
+
+        attr_reader :thread
+
+        # ----- THREAD METHODS BELOW THIS LINE ------
+        def add_job_queue(nodename, cmd)
+          @queue.push({ nodename: nodename, cmd: cmd })
+        end
+
+        def run
           create_jobs
           monitor_jobs
         rescue StandardError => e

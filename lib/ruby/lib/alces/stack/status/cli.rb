@@ -53,10 +53,10 @@ module Alces
         def assert_preconditions!
           msg = "metal status #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
           @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
-          Alces::Stack::Log.progname = "status"
           @status_log.progname = "status"
+          Alces::Stack::Log.progname = "status"
           Alces::Stack::Log.info msg
-          @status_log.info "#{msg} , #{Process.pid}"
+          @status_log.info "#{msg} , #{Thread.current}"
           self.class.assert_preconditions!
         end
 
@@ -64,7 +64,8 @@ module Alces
           Alces::Stack::Status.run!(
               nodename: nodename,
               group: group,
-              wait: wait.to_i < 5 ? 5 : wait.to_i
+              wait: wait.to_i < 5 ? 5 : wait.to_i,
+              status_log: @status_log
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect
