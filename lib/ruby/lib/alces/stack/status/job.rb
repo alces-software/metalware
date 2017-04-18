@@ -19,7 +19,6 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/execution'
 require 'alces/stack/log'
 require 'timeout'
 
@@ -29,14 +28,13 @@ module Alces
       class Job
         class << self
           def report_data(nodename, cmd, data)
+            @results ||= {}
             @results[nodename] ||= {}
             @results[nodename][cmd] = data
           end
 
-          attr_accessor :results
+          attr_reader :results
         end
-
-        include Alces::Tools::Execution
 
         def initialize(nodename, cmd, time_limit = 10)
           @nodename = nodename
@@ -65,10 +63,10 @@ module Alces
             @data = send(CMD_LIBRARY[@cmd] ? CMD_LIBRARY[@cmd] : @cmd)
           }
         rescue Timeout::Error
-          @data = ""
+          @data = "timeout"
         ensure
           kill_bash_process if @bash_pid
-          report_data(@nodename, @cmd, @data)
+          self.class.report_data(@nodename, @cmd, @data)
         end
 
         def kill_bash_process
@@ -78,15 +76,15 @@ module Alces
         rescue Errno::ESRCH
         end
 
+        def _send_signal_and_wait(signum)
+          Process.kill signum, @bash_pid
+          Process.wait(@bash_pid)
+        end
+
         def run_bash(cmd)
           pipe = IO.popen(cmd)
           @bash_pid = pipe.pid
           pipe.read
-        end
-
-        def _send_signal_and_wait(signum)
-          Process.kill signum, @bash_pid
-          Process.wait(@bash_pid)
         end
 
         def job_power_status(nodename)

@@ -19,7 +19,6 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/execution'
 require 'alces/stack/iterator'
 require 'alces/stack/log'
 require 'alces/stack/options'
@@ -29,18 +28,18 @@ module Alces
   module Stack
     module Status
       class Monitor
-        include Alces::Tools::Execution
-
         def initialize(options = {})
           @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
           @opt = Alces::Stack::Options.new(options)
           @queue = Queue.new
+          @running = []
         end
 
         def start
           @thread = Thread.new {
             @status_log.info "Monitor Thread: #{Thread.current}"
-
+            create_jobs
+            monitor_jobs
           }
           self
         end
@@ -52,27 +51,38 @@ module Alces
           @queue.push({ nodename: nodename, cmd: cmd })
         end
 
-        def start_next_job(nodename, cmd)
+        def start_next_job(idx)
           job = @queue.pop
-          
+          @running[idx] = Alces::Stack::Status::Job
+            .new(job[:nodename], job[:cmd], @opt.limit).start
         end
 
         def create_jobs
-          @jobs = Alces::Stack::Status::Jobs.new()
-          @nodes.each do |node|
-            @cmds.each do |cmd|
-              @jobs.add(node, cmd)
-              if @limit > 0
-                @jobs.start
-                @limit -= 1
+          idx = 0
+          @opt.nodes.each do |node|
+            @opt.cmds.each do |cmd|
+              add_job_queue(node, cmd)
+              if idx < @opt.limit
+                start_next_job(idx)
+                idx += 1
               end
             end 
           end
         end
 
         def monitor_jobs
-          while @jobs.finished
-            @jobs.start if @jobs.start?
+          while @running.length > 0
+            @running.each_with_index do |job, idx|
+              unless job.thread.alive?
+                job.thread.join
+                if @queue.length > 0
+                  start_next_job(idx)
+                else
+                  @running.delete_at(idx)
+                end
+              end
+            end
+            sleep 1
           end
         end
       end

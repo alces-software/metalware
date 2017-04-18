@@ -23,6 +23,22 @@ require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 
 require "alces/stack/status/monitor"
 
+module Alces
+  module Stack
+    module Status
+      class Job
+        def pause
+          sleep 1
+        end
+
+        def bash_pause
+          run_bash("sleep 1")
+        end
+      end
+    end
+  end
+end
+
 class TC_Status_Monitor < Test::Unit::TestCase
   def setup
     @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
@@ -34,7 +50,7 @@ class TC_Status_Monitor < Test::Unit::TestCase
     @options = {
       limit: 10,
       nodes: @nodes,
-      cmds: [:cmd1, :cmd2],
+      cmds: [:bash_pause, :pause],
       status_log: @status_log
     }
     @monitor = Alces::Stack::Status::Monitor.new(@options)
@@ -60,7 +76,41 @@ class TC_Status_Monitor < Test::Unit::TestCase
   end
 
   def test_start_next_job
+    (0...10).each do |i|
+      @monitor.add_job_queue("random_node#{i}", :sleep)
+    end
+    queue = @monitor.instance_variable_get :@queue
+    old_queue_length = queue.length
+    old_number_threads = Thread.list.length
+    @monitor.start_next_job(0)
+    assert_equal(old_queue_length, queue.length + 1, "Did not pop job off queue")
+    assert_equal(old_number_threads + 1, Thread.list.length,
+                 "Did not start next job")
   end
 
+  def test_create_jobs
+    num_jobs = @options[:cmds].length * @options[:nodes].length - @options[:limit]
+    @monitor.create_jobs
+    assert_equal(num_jobs,
+                 @monitor.instance_variable_get(:@queue).length,
+                 "Did not start the correct number of processes")
+    assert_equal(@options[:limit],
+                 @monitor.instance_variable_get(:@running).length,
+                 "Did not record all the running threads")
+  end
 
+  def test_monitor_jobs
+    @monitor.create_jobs
+    puts "\nTest monitor jobs, may take 10s"
+    @monitor.monitor_jobs
+    assert_equal(1, Thread.list.length, "Job threads have not been terminated")
+    queue = @monitor.instance_variable_get :@queue
+    assert_equal(0, queue.length, "Queue is not empty")
+    running = @monitor.instance_variable_get :@running
+    assert_equal(0, running.length, "Running jobs still exists")
+  end
+
+  def teardown
+    Thread.list.each { |t| t.exit unless t == Thread.current }
+  end
 end

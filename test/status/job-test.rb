@@ -40,11 +40,6 @@ module Alces
 end
 
 class TC_Status_Job < Test::Unit::TestCase
-  def setup
-    Alces::Stack::Status::Job.results = {}
-    assert(Alces::Stack::Status::Job.results.empty?, "Results hash not empty")
-  end
-
   def test_initialize
     nodename = "new_node"
     cmd = :new_cmd
@@ -94,5 +89,9 @@ class TC_Status_Job < Test::Unit::TestCase
     assert(results.key?(nodename), "#{nodename} data not found, #{results}")
     assert_equal(100, results[nodename][cmd1], "Didn't report regular data")
     assert_equal("timeout", results[nodename][cmd2], "Didn't report timeout data")
+  end
+
+  def teardown
+    Thread.list.each { |t| t.exit unless t == Thread.current }
   end
 end
