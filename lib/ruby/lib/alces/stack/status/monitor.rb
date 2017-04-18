@@ -21,8 +21,9 @@
 #==============================================================================
 require 'alces/tools/execution'
 require 'alces/stack/iterator'
-require 'alces/stack/status/jobs'
+require 'alces/stack/log'
 require 'alces/stack/options'
+require 'alces/stack/status/job'
 
 module Alces
   module Stack
@@ -31,9 +32,9 @@ module Alces
         include Alces::Tools::Execution
 
         def initialize(options = {})
+          @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
           @opt = Alces::Stack::Options.new(options)
           @queue = Queue.new
-          @running = {}
         end
 
         def start
@@ -51,19 +52,9 @@ module Alces
           @queue.push({ nodename: nodename, cmd: cmd })
         end
 
-        def run
-          create_jobs
-          monitor_jobs
-        rescue StandardError => e
-          Alces::Stack::Log.fatal e.inspect
-          self.class.log.fatal e.inspect
-          @error = true
-          teardown_jobs
-          raise e
-        rescue Interrupt
-          @error = true
-        ensure
-          teardown_jobs
+        def start_next_job(nodename, cmd)
+          job = @queue.pop
+          
         end
 
         def create_jobs
@@ -83,30 +74,6 @@ module Alces
           while @jobs.finished
             @jobs.start if @jobs.start?
           end
-        end
-
-        def teardown_jobs
-          $stdout.flush
-          $stderr.flush
-          $stderr.print "Exiting...." if @error
-          @jobs.reset_queue
-          running = @jobs.running
-          unless running.nil?
-            running.keys.each { |k| 
-              begin; Process.kill(2, k); rescue; end
-            }
-          end 
-          monitor_jobs
-          $stderr.puts "Done" if @error
-          Kernel.exit
-        rescue Interrupt
-          running = @jobs.running
-          unless running.nil?
-            running.keys.each { |k| 
-              begin; Process.kill(2, k); rescue; end
-            }
-          end
-          $stderr.puts "FORCED EXIT"
         end
       end
     end

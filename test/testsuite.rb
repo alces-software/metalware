@@ -22,13 +22,15 @@
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 $: << "#{ENV['alces_BASE']}/test"
 
-require 'capture-test'
-require 'iterator-test'
-require 'kickstart-test'
-require 'hosts-test'
-require 'script-test'
-require 'boot/quick-test'
 require 'boot/long-test'
+require 'boot/quick-test'
+require 'capture-test'
 require 'combiner-test'
 require 'finder-test'
+require 'hosts-test'
+require 'iterator-test'
+require 'kickstart-test'
 require 'repo-test'
+require 'script-test'
+require 'status/job-test'
+require 'status/monitor-test'

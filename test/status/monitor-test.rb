@@ -23,7 +23,7 @@ require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 
 require "alces/stack/status/monitor"
 
-class TC_Status < Test::Unit::TestCase
+class TC_Status_Monitor < Test::Unit::TestCase
   def setup
     @status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
     @status_log.progname = "status"
@@ -49,12 +49,18 @@ class TC_Status < Test::Unit::TestCase
   end
 
   def test_add_job_queue
-    (0...9).each do |i|
+    (0...10).each do |i|
       @monitor.add_job_queue("random_node#{i}", "random_cmd#{i}".to_sym)
     end
     queue = @monitor.instance_variable_get :@queue
     assert_equal(10, queue.length, "10 jobs where not added to the queue")
-    assert_equal("random_node5", queue[5][:nodename], "Nodename not correct")
-    assert_equal("random_cmd5".to_sym, queue[5][:cmd], "Cmd not correct")
+    value = queue.pop
+    assert_equal("random_node0", value[:nodename], "Nodename not correct")
+    assert_equal("random_cmd0".to_sym, value[:cmd], "Cmd not correct")
   end
+
+  def test_start_next_job
+  end
+
+
 end

@@ -1,0 +1,108 @@
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+require 'alces/tools/execution'
+require 'alces/stack/log'
+require 'timeout'
+
+module Alces
+  module Stack
+    module Status
+      class Job
+        class << self
+          def report_data(nodename, cmd, data)
+            @results[nodename] ||= {}
+            @results[nodename][cmd] = data
+          end
+
+          attr_accessor :results
+        end
+
+        include Alces::Tools::Execution
+
+        def initialize(nodename, cmd, time_limit = 10)
+          @nodename = nodename
+          @cmd = cmd
+          @time_limit = time_limit
+          @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
+          @metal = "#{ENV['alces_BASE']}/bin/metal"
+        end
+
+        attr_reader :thread
+
+        def start
+          @thread = Thread.new { run_command }
+          self
+        end
+
+        # ----- THREAD METHODS BELOW THIS LINE ------
+        CMD_LIBRARY = {
+          :power => :job_power_status,
+          :ping => :job_ping_node
+        }
+
+        def run_command
+          Timeout::timeout(@time_limit) {
+            @status_log.info "Job Thread: #{Thread.current}"
+            @data = send(CMD_LIBRARY[@cmd] ? CMD_LIBRARY[@cmd] : @cmd)
+          }
+        rescue Timeout::Error
+          @data = ""
+        ensure
+          kill_bash_process if @bash_pid
+          report_data(@nodename, @cmd, @data)
+        end
+
+        def kill_bash_process
+          Timeout::timeout(10) { _send_signal_and_wait(2) }
+        rescue Timeout::Error
+          _send_signal_and_wait(9)
+        rescue Errno::ESRCH
+        end
+
+        def run_bash(cmd)
+          pipe = IO.popen(cmd)
+          @bash_pid = pipe.pid
+          pipe.read
+        end
+
+        def _send_signal_and_wait(signum)
+          Process.kill signum, @bash_pid
+          Process.wait(@bash_pid)
+        end
+
+        def job_power_status(nodename)
+          cmd = "#{@metal} power #{nodename} status 2>&1"
+          result = run_bash(cmd)
+                    .scan(/Chassis Power is .*\Z/)[0].to_s
+                    .scan(Regexp.union(/on/, /off/))[0]
+          result.nil? ? "error" : result
+        end
+
+        def job_ping_node(nodename)
+          cmd = "ping -c 1 #{nodename} >/dev/null 2>&1; echo $?"
+          result = run_bash(cmd)
+          result.chomp == "0" ? "ok" : "error"
+        end
+      end
+    end
+  end
+end
