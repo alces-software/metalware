@@ -1,0 +1,33 @@
+#!/bin/bash
+set -eo pipefail
+IFS=$'\n\t'
+
+# Script to determine the host's IP on the interface we want to use for
+# Metalware templating (the `prv` interface). Relies on Clusterware being
+# installed and this being a Controller appliance.
+
+setup() {
+    local a xdg_config
+    IFS=: read -a xdg_config <<< "${XDG_CONFIG_HOME:-$HOME/.config}:${XDG_CONFIG_DIRS:-/etc/xdg}"
+    for a in "${xdg_config[@]}"; do
+        if [ -e "${a}"/clusterware/config.rc ]; then
+            source "${a}"/clusterware/config.rc
+            break
+        fi
+    done
+    if [ -z "${cw_ROOT}" ]; then
+        echo "$0: unable to locate clusterware configuration"
+        exit 1
+    fi
+    kernel_load
+}
+
+main() {
+    source /opt/controller/etc/controller.rc
+    network_get_iface_address "$controller_NETWORK_prvintf"
+}
+
+setup
+require network
+
+main

@@ -134,8 +134,24 @@ module Alces
       end
 
       class Combiner < Handler
+        def self.hostip
+          determine_hostip_script = '/opt/metalware/libexec/determine-hostip'
+
+          hostip = `#{determine_hostip_script}`.chomp
+          if $?.success?
+            hostip
+          else
+            # If script failed for any reason fall back to using `hostname -i`,
+            # which may or may not give the IP on the interface we actually
+            # want to use (note: the dance with pipes is so we only get the
+            # last word in the output, as I've had the IPv6 IP included first
+            # before, which breaks all the things).
+            `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
+          end
+        end
+
         DEFAULT_HASH = {
-          hostip: `hostname -i`.chomp,
+          hostip: self.hostip,
           index: 0,
           permanent_boot: false
         }
