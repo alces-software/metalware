@@ -135,10 +135,10 @@ module Alces
 
       class Combiner < Handler
         DEFAULT_HASH = {
-            hostip: `hostname -i`.chomp,
-            index: 0,
-            permanent_boot: false
-          }
+          hostip: `hostname -i`.chomp,
+          index: 0,
+          permanent_boot: false
+        }
 
         def initialize(repo, json, hash={})
           repo = set_repo(repo)
