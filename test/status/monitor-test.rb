@@ -48,7 +48,7 @@ class TC_Status_Monitor < Test::Unit::TestCase
       else; "slave#{i + 1}"; end
     end
     @options = {
-      limit: 10,
+      thread_limit: 10,
       nodes: @nodes,
       cmds: [:bash_pause, :pause],
       status_log: @status_log
@@ -58,7 +58,7 @@ class TC_Status_Monitor < Test::Unit::TestCase
 
   def test_option_parsing
     opt = @monitor.instance_variable_get :@opt
-    assert_equal(@options[:limit], opt.limit, "Did not pass the limit correctly")
+    assert_equal(@options[:thread_limit], opt.thread_limit, "Did not pass the limit correctly")
     assert_equal(@options[:nodes], opt.nodes, "Did not pass the nodes correctly")
     assert_equal(@options[:cmds], opt.cmds, "Did not pass the cmds list correctly")
     assert_equal(@options[:status_log], opt.status_log, "Did not pass status log correctly")
@@ -89,20 +89,20 @@ class TC_Status_Monitor < Test::Unit::TestCase
   end
 
   def test_create_jobs
-    num_jobs = @options[:cmds].length * @options[:nodes].length - @options[:limit]
+    num_jobs = @options[:cmds].length * @options[:nodes].length - @options[:thread_limit]
     @monitor.create_jobs
     assert_equal(num_jobs,
                  @monitor.instance_variable_get(:@queue).length,
                  "Did not start the correct number of processes")
-    assert_equal(@options[:limit],
+    assert_equal(@options[:thread_limit],
                  @monitor.instance_variable_get(:@running).length,
                  "Did not record all the running threads")
   end
 
-  def test_monitor_jobs
-    @monitor.create_jobs
-    puts "\nTest monitor jobs, may take 10s"
-    @monitor.monitor_jobs
+  def test_start
+    puts "\nTest start monitor, may take 10s"
+    @monitor.start
+    @monitor.thread.join
     assert_equal(1, Thread.list.length, "Job threads have not been terminated")
     queue = @monitor.instance_variable_get :@queue
     assert_equal(0, queue.length, "Queue is not empty")

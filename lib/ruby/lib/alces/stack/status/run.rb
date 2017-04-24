@@ -19,71 +19,77 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/execution'
 require 'alces/tools/cli'
 require 'alces/stack/iterator'
-require 'alces/stack/status/monitor'
-require 'alces/stack/status/task'
-require 'alces/stack/iterator'
 require 'alces/stack/log'
+require 'alces/stack/options'
+require 'alces/stack/status/monitor'
+require 'alces/stack/status/job'
 require 'fileutils'
 
 module Alces
   module Stack
+    class Options
+      def cmds
+        [:power, :ping]
+      end
+
+      def nodes
+        @nodes ||= _set_nodes
+      end
+
+      def _set_nodes
+        lambda_proc = lambda { |lambda_hash| lambda_hash[:nodename] }
+        a = Alces::Stack::Iterator.run(group, lambda_proc, nodename: nodename)
+        a.is_a?(Array) ? a : [a]
+      end
+    end
+
     module Status
       class Run
-        include Alces::Tools::Execution
-
         def initialize(options={})
-          @opt = Options.new(options)
-        end
-
-        class Options
-          def initialize(options)
-            @options = options
-            assert_preconditions
-          end
-
-          def assert_preconditions
-            raise InputError.new "Requires: -n xor -g" if group? == nodename?
-          end
-          class InputError < StandardError; end
-
-          def nodes
-            @nodes ||= _set_nodes
-          end
-
-          def _set_nodes
-            lambda_proc = lambda { |options| options[:nodename] }
-            a = Alces::Stack::Iterator.run(group, lambda_proc, nodename: nodename)
-            a = [a] unless a.is_a? Array 
-            a
-          end
-
-          def cmds
-            [:power, :ping]
-          end
-
-          def method_missing(s, *a, &b)
-            if @options.key?(s)
-              @options[s]
-            elsif s[-1] == "?"
-              !!@options[s[0...-1].to_sym]
-            else
-              super
-            end
-          end
+          @opt = Alces::Stack::Options.new(options)
         end
 
         def run!
-          @monitor = Alces::Stack::Status::Monitor.new(@opt.nodes,
-                                                       @opt.cmds,
-                                                       50,
-                                                       @opt.status_log)
-          @monitor.start
-          sleep 1
+          start_monitor
+          display_data
+          @monitor.thread.join
         end
         
+        def start_monitor
+          @monitor = Alces::Stack::Status::Monitor.new({
+              nodes: @opt.nodes,
+              cmds: @opt.cmds,
+              thread_limit: @opt.thread_limit
+            })
+          @monitor.start
+        end
+
+        def display_data
+          while !(data = get_finished_data).class.is_a? (Finished)
+            raise "Monitor thread has died" if @monitor.thread.stop? && !data
+            puts data if data
+          end
+        end
+
+        def get_finished_data
+          @finished_node_index ||= 0
+          return Finished.new unless @finished_node_index < @opt.nodes.length
+
+          nodename = @opt.nodes[@finished_node_index]
+          current_results = nil
+          Alces::Stack::Status::Job.results.tap do |r|
+            return false if r.nil?
+            current_results = r[nodename]
+            return false if current_results.nil?
+          end
+          
+          @opt.cmds.each { |cmd| return false unless current_results.key? cmd }
+          @finished_node_index += 1
+          current_results
+        end
+        class Finished; end
       end
     end
   end

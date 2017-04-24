@@ -54,7 +54,7 @@ module Alces
         def start_next_job(idx)
           job = @queue.pop
           @running[idx] = Alces::Stack::Status::Job
-            .new(job[:nodename], job[:cmd], @opt.limit).start
+            .new(job[:nodename], job[:cmd], @opt.time_limit).start
         end
 
         def create_jobs
@@ -62,7 +62,7 @@ module Alces
           @opt.nodes.each do |node|
             @opt.cmds.each do |cmd|
               add_job_queue(node, cmd)
-              if idx < @opt.limit
+              if idx < @opt.thread_limit
                 start_next_job(idx)
                 idx += 1
               end
