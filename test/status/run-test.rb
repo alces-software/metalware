@@ -25,7 +25,7 @@ require "alces/stack/status/run"
 
 class TC_Status_Run < Test::Unit::TestCase
   def test_get_finished_data
-    run = Alces::Stack::Status::Run.new(group: "slave", thread_limit: 10, nodename: "")
+    run = Alces::Stack::Status::Run.new(group: "slave", thread_limit: 10, nodename: false)
     run_opt = run.instance_variable_get :@opt
     correct = {}
     ["slave01", "slave02"].each do |node|
@@ -33,16 +33,15 @@ class TC_Status_Run < Test::Unit::TestCase
         Alces::Stack::Status::Job.report_data(node, cmd, "test")
         correct[cmd] = "test"
       end
-      Alces::Stack::Status::Job.report_data(node, :node_lable, node) #Testing purpose only
     end
     Alces::Stack::Status::Job.report_data("slave3", :ping, "not-complete")
-    assert_equal(correct.merge({node_lable: "slave01"}),
+    assert_equal(correct.merge({nodename: "slave01"}),
                  run.get_finished_data,
                  "Did not return correct finished node")
-    assert_equal(correct.merge({node_lable: "slave02"}),
+    assert_equal(correct.merge({nodename: "slave02"}),
                  run.get_finished_data,
                  "Did not return correct finished node")
-    assert_equal(false, run.get_finished_data, "Returned an unfinished node")
+    assert_equal({}, run.get_finished_data, "Returned an unfinished node")
     
     # Asserts finishes correctly
     run_opt.nodes.each do |node| 
@@ -51,9 +50,9 @@ class TC_Status_Run < Test::Unit::TestCase
       end
       run.get_finished_data
     end
-    assert_equal(Alces::Stack::Status::Run::Finished,
-                 run.get_finished_data.class,
-                 "Not returning nil when no nodes finished")
+    assert_equal({"FINISHED" => true},
+                 run.get_finished_data,
+                 "Did not return FINISHED")
   end
 
   def teardown

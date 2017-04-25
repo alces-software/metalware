@@ -113,5 +113,6 @@ class TC_Status_Monitor < Test::Unit::TestCase
 
   def teardown
     Thread.list.each { |t| t.exit unless t == Thread.current }
+    Alces::Stack::Status::Job.instance_variable_set(:@results, nil)
   end
 end

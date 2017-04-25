@@ -49,6 +49,7 @@ module Alces
       class Run
         def initialize(options={})
           @opt = RunOptions.new(options)
+          raise "Can not specify both -g and -n" if @opt.nodename? == @opt.group?
         end
 
         def run!

@@ -66,7 +66,6 @@ module Alces
 
         def run_command
           Timeout::timeout(@time_limit) {
-            @status_log.info "Job Thread: #{Thread.current}"
             @data = send(CMD_LIBRARY[@cmd] ? CMD_LIBRARY[@cmd] : @cmd)
           }
         rescue Timeout::Error
@@ -94,16 +93,16 @@ module Alces
           pipe.read
         end
 
-        def job_power_status(nodename)
-          cmd = "#{@metal} power #{nodename} status 2>&1"
+        def job_power_status
+          cmd = "#{@metal} power #{@nodename} status 2>&1"
           result = run_bash(cmd)
                     .scan(/Chassis Power is .*\Z/)[0].to_s
                     .scan(Regexp.union(/on/, /off/))[0]
           result.nil? ? "error" : result
         end
 
-        def job_ping_node(nodename)
-          cmd = "ping -c 1 #{nodename} >/dev/null 2>&1; echo $?"
+        def job_ping_node
+          cmd = "ping -c 1 #{@nodename} >/dev/null 2>&1; echo $?"
           result = run_bash(cmd)
           result.chomp == "0" ? "ok" : "error"
         end
