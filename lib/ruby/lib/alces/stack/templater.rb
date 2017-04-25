@@ -27,7 +27,7 @@ require "alces/stack/log"
 
 module Alces
   module Stack
-    module Templater    
+    module Templater
       class << self
         def wrap(s, width)
           s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
@@ -178,7 +178,7 @@ module Alces
         def load_yaml_hash(repo)
           hash = Hash.new
           get_yaml_file_list.each do |yaml|
-            begin 
+            begin
               yaml_payload = YAML.load(File.read("#{repo}/config/#{yaml}.yaml"))
             rescue Errno::ENOENT # Skips missing files
             rescue StandardError => e
@@ -186,7 +186,7 @@ module Alces
               raise e
             else
               if !yaml_payload.is_a? Hash
-                raise "Expected yaml config to contain a hash" 
+                raise "Expected yaml config to contain a hash"
               else
                 hash.merge!(yaml_payload)
               end
@@ -220,7 +220,7 @@ module Alces
           return current_hash
         end
 
-        class LoopErbError < StandardError 
+        class LoopErbError < StandardError
           def initialize(msg="Input hash may contains infinite recursive erb")
             super
           end

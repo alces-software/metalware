@@ -50,7 +50,7 @@ module BootTestSetup
       "Kickstart template, <%= nodename %>, <%= kernelappendoptions %>" \
       " <% if !permanent_boot %>false<% end %>"
     File.write(@template_kickstart, @template_kickstart)
-    
+
     @template_pxe_firstboot = "firstboot.erb"
     @template_pxe_firstboot_str =
       'PXE template, <%= nodename %>, <%= permanent_boot ? "permanent" : "" %>' \
@@ -75,22 +75,22 @@ module BootTestSetup
       kernel_append: "KERNAL_APPEND",
       json: '{"json":"included","kernelappendoptions":"KERNAL_APPEND"}'
     }
-    
+
     @input_nodename = {}.merge(@input_base).merge({ nodename: "slave04" })
     @input_group = {}.merge(@input_base).merge({
         nodename: "SHOULD_BE_OVERRIDDEN",
         group: "slave"
       })
-    
+
     @input_nodename_kickstart = {}.merge(@input_nodename)
                                   .merge({ kickstart: @template_kickstart })
     @input_group_kickstart = {}.merge(@input_group)
                                .merge({ kickstart: @template_kickstart })
-    
+
     @input_nodename_script = {}.merge(@input_nodename)
                                .merge({ scripts: "empty.erb" })
     @input_group_script = {}.merge(@input_group)
-                            .merge({ scripts: "empty.erb ,empty2.sh,empty3.csh , empty4.sh" }) 
+                            .merge({ scripts: "empty.erb ,empty2.sh,empty3.csh , empty4.sh" })
   end
 
   def run_bash_cmd

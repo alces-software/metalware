@@ -112,7 +112,7 @@ set_cmd()
 usage()
 {
   echo "(c) 2008-2011 Alces Software Ltd & Stephen F Norledge"
-  echo "Power command, perform ipmi remote power commands on single or multiple machines" 
+  echo "Power command, perform ipmi remote power commands on single or multiple machines"
   echo "usage: alces power [-g] <name> <command>"
   echo "  options:"
   echo "    -g specify genders node group"

@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 $: << "#{ENV['alces_BASE']}/test"
 
 require 'capture-test'

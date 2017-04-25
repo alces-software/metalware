@@ -63,7 +63,7 @@ module Alces
 
         def run!
           raise "Requires a nodename or group" if !@group && !@template_parameters[:nodename]
-          
+
           if @dry_run_flag
             lambda_proc = -> (template_parameters) { puts_template(template_parameters) }
           else

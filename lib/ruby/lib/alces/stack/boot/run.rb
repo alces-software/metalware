@@ -55,7 +55,7 @@ module Alces
 
           def set_repo_helper(filename)
             if @options[:repo] && filename.scan("::").empty?
-              return "#{@options[:repo]}::#{filename}"  
+              return "#{@options[:repo]}::#{filename}"
             else
               return filename
             end
@@ -74,10 +74,10 @@ module Alces
           def ks_finder
             @ks_finder ||=
               if @options[:kickstart]
-                Alces::Stack::Finder.new("#{ENV['alces_REPO']}", 
+                Alces::Stack::Finder.new("#{ENV['alces_REPO']}",
                                          "/kickstart/",
                                          @options[:kickstart])
-              else 
+              else
                 nil
               end
           end
@@ -116,13 +116,13 @@ module Alces
             else
               super
             end
-          end       
+          end
         end
 
         def run!
           puts "(CTRL+C TO TERMINATE)"
-          if !@opt.template_parameters.key?(:nodename) && !@opt.group && !@opt.json 
-            raise "Requires a node name, node group, or json input" 
+          if !@opt.template_parameters.key?(:nodename) && !@opt.group && !@opt.json
+            raise "Requires a node name, node group, or json input"
           end
 
           render_kickstart if @opt.kickstart?
@@ -157,7 +157,7 @@ module Alces
         class ErrorResolveIP < StandardError
           def initialize(nodename)
             msg = "Could not find IP address of #{nodename}"
-            super 
+            super
           end
         end
 
@@ -232,7 +232,7 @@ module Alces
             hash[:save_append] = hash[:nodename]
             return Alces::Stack::Kickstart::Run.new(@opt.kickstart, hash).run!
           }
-          
+
           kickstart_files = Alces::Stack::Iterator.run(@opt.group,
                                                        kickstart_lambda,
                                                        kickstart_options)
@@ -242,7 +242,7 @@ module Alces
         def kickstart_teardown
           # Deletes old signal files
           delete_lambda = -> (options) {
-            delete_file = 
+            delete_file =
               "/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}"
             delete_file_log(delete_file, "Deleting (Old Cache):")
           }
@@ -263,7 +263,7 @@ module Alces
               Alces::Stack::Log.info "Found #{options[:nodename]}"
               ip = `gethostip -x #{options[:nodename]} 2>/dev/null`.chomp
               delete_file_log "/var/lib/metalware/cache/metalwarebooter.#{options[:nodename]}"
-              unless @opt.permanent_boot? 
+              unless @opt.permanent_boot?
                 delete_file_log "/var/lib/tftpboot/pxelinux.cfg/#{ip}"
                 delete_file_log "#{@save_loc_kickstart}/" \
                                 "#{@opt.ks_finder.filename_diff_ext("ks")}." \

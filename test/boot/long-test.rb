@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 $: << "#{ENV['alces_BASE']}/test/boot"
 
 require 'alces/stack/boot'
@@ -29,7 +29,7 @@ require 'boot-setup'
 
 class TC_Boot_Long < Test::Unit::TestCase
   include BootTestSetup
-  
+
   def test_single_kickstart_command
     save_pxe = "/var/lib/tftpboot/pxelinux.cfg/" \
                "#{`gethostip -x #{@input_nodename_kickstart[:nodename]}`.chomp}"
@@ -37,7 +37,7 @@ class TC_Boot_Long < Test::Unit::TestCase
                 "#{@input_nodename_kickstart[:nodename]}"
     end_kick = "/var/lib/metalware/cache/metalwarebooter." \
                "#{@input_nodename_kickstart[:nodename]}"
-    
+
     parent_lambda = -> (fork, pid) {
       assert_equal(false,
                    fork.wait_child_terminated(0.5),
@@ -54,7 +54,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       correct_kick =
         combiner.file("#{ENV['alces_REPO']}/kickstart/test.erb")
       assert_equal(correct_kick,
-                   output_kick, 
+                   output_kick,
                    "Did not create correct kickstart file")
       puts
       puts "Tester: This may take 30s"
@@ -98,7 +98,7 @@ class TC_Boot_Long < Test::Unit::TestCase
       puts "Tester: This may take 30s"
       sleep 5
       end_lambda = -> (hash) {
-        File.write("/var/lib/metalware/cache/metalwarebooter.#{hash[:nodename]}", "") 
+        File.write("/var/lib/metalware/cache/metalwarebooter.#{hash[:nodename]}", "")
       }
       Alces::Stack::Iterator.run(@input_group_kickstart[:group], end_lambda)
       exited = fork.wait_child_terminated(20)
@@ -118,7 +118,7 @@ class TC_Boot_Long < Test::Unit::TestCase
         Alces::Stack::Boot::Run.new(@input_group_kickstart).run!
       }
     }
-    
+
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
@@ -131,9 +131,9 @@ class TC_Boot_Long < Test::Unit::TestCase
     save_kick = "/var/www/html/ks/test.ks.#{@input_nodename_kickstart[:nodename]}"
     end_kick = "/var/lib/metalware/cache/metalwarebooter." \
                "#{@input_nodename_kickstart[:nodename]}"
-    
+
     parent_lambda = -> (fork, pid) {
-      assert_equal(false, 
+      assert_equal(false,
                    fork.wait_child_terminated(0.5),
                    "metal boot has exited early")
       hash_temp = {}.merge(@input_nodename_kickstart)
@@ -202,10 +202,10 @@ class TC_Boot_Long < Test::Unit::TestCase
 
     child_lambda = lambda {
       Capture.stdout {
-        Alces::Stack::Boot::Run.new(@input_nodename).run! 
-        } 
+        Alces::Stack::Boot::Run.new(@input_nodename).run!
+        }
       }
-    
+
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 
@@ -231,12 +231,12 @@ class TC_Boot_Long < Test::Unit::TestCase
                    "Pxe file have not been deleted")
     }
 
-    child_lambda = lambda { 
+    child_lambda = lambda {
       Capture.stdout {
-        Alces::Stack::Boot::Run.new(@input_group).run! 
+        Alces::Stack::Boot::Run.new(@input_group).run!
       }
     }
-    
+
     ForkProcess.new(parent_lambda, child_lambda).run
   end
 end

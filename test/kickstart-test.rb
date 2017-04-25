@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 
 require "alces/stack/kickstart"
 require "alces/stack/templater"
@@ -43,7 +43,7 @@ class TC_Kickstart < Test::Unit::TestCase
       save_location: "/var/lib/metalware/rendered/ks/"
     }
     @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/templates/kickstart/", @template)
-    @diff_loc = "/tmp/different_kicks_start"   
+    @diff_loc = "/tmp/different_kicks_start"
     `mkdir #{@diff_loc} 2>/dev/null`
     `rm /var/lib/metalware/rendered/ks/* -rf`
   end
@@ -71,13 +71,13 @@ class TC_Kickstart < Test::Unit::TestCase
     ks = Alces::Stack::Kickstart::Run.new(@finder.template, hash)
     template_parameters = ks.instance_variable_get(:@template_parameters)
     combiner = Alces::Stack::Templater::Combiner.new(nil, ks.instance_variable_get(:@json), template_parameters)
-    
+
     expected_str = "KICKSTART TEMPLATE\nHash:" << combiner.parsed_hash.to_s
     expected_str << "\nSave: /var/lib/metalware/rendered/ks/" << @finder.filename_diff_ext("ks")
     if !hash[:save_append].to_s.empty? then expected_str << "." << hash[:save_append].to_s end
     if !hash[:group].to_s.empty? then expected_str << "." << hash[:nodename].to_s end
     expected_str << "\nTemplate:\n" << combiner.file(@finder.template) << "\n"
-    
+
     stdout = Capture.stdout do ks.puts_template(template_parameters) end
     assert_equal(expected_str, stdout, "Puts template did not print the correct text")
   end

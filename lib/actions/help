@@ -64,6 +64,6 @@ Report $alces_BINNAME bugs to support@alces-software.com
 Alces Software home page: <http://alces-software.com/>
 EOF
 #General help using this software: <http://alces-software.com/we/support/>
-#For complete documentation, run: 
+#For complete documentation, run:
 	;;
 esac
