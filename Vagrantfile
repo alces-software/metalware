@@ -21,11 +21,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_check_update = false
   config.vm.network "private_network", ip: "192.168.50.101"
 
-  config.ssh.username = "vagrant"
-  config.ssh.private_key_path = ["~/.ssh/id_rsa/vagrant.pvt", "~/.vagrant.d/insecure_private_key"]
-  config.ssh.insert_key = false
-  config.vm.provision "file", source: "~/.ssh/id_rsa/vagrant.pub", destination: "~/.ssh/authorized_keys"
-
   config.vm.provision "shell",
     inline: $script,
     env: {
@@ -34,8 +29,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       alces_TEST: true
     }
 
-  config.vm.synced_folder "../git/", "/opt/metalware/", type: "rsync",
-    rsync__args: ["-pva"],
-    rsync__exclude: [".vagrant", ".git*"],
-    rsync__auto: false
+  config.vm.synced_folder ".", "/opt/metalware/"
 end
