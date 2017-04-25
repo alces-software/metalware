@@ -56,11 +56,6 @@ class TC_Status_Run < Test::Unit::TestCase
                  "Not returning nil when no nodes finished")
   end
 
-  def test_display_data
-    run = Alces::Stack::Status::Run.new(group: "slave", thread_limit: 10, nodename: "")
-    run.display_data
-  end  
-
   def teardown
     Alces::Stack::Status::Job.instance_variable_set(:@results, nil)
   end

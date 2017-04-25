@@ -37,11 +37,20 @@ module Alces
 
         def start
           @thread = Thread.new {
-            @status_log.info "Monitor Thread: #{Thread.current}"
-            create_jobs
-            monitor_jobs
+            begin
+              @status_log.info "Monitor Thread: #{Thread.current}"
+              create_jobs
+              monitor_jobs
+              #@status_log.info "Monitor Finished"
+            rescue => e
+              @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
+              @status_log.fatal e.backtrace
+            end
           }
           self
+        rescue => e
+          @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
+          @status_log.fatal e.backtrace
         end
 
         attr_reader :thread
@@ -82,7 +91,6 @@ module Alces
                 end
               end
             end
-            sleep 1
           end
         end
       end

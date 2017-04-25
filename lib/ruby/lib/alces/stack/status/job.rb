@@ -47,7 +47,14 @@ module Alces
         attr_reader :thread
 
         def start
-          @thread = Thread.new { run_command }
+          @thread = Thread.new {
+            begin
+              @status_log.info "Job Thread: #{Thread.current}"
+              run_command
+            rescue => e
+              @status_log.fatal "JOB #{Thread.current}: #{e.inspect}"
+            end
+          }
           self
         end
 

@@ -29,7 +29,7 @@ require 'fileutils'
 
 module Alces
   module Stack
-    class Options
+    class RunOptions < Alces::Stack::Options 
       def cmds
         [:power, :ping]
       end
@@ -48,12 +48,12 @@ module Alces
     module Status
       class Run
         def initialize(options={})
-          @opt = Alces::Stack::Options.new(options)
+          @opt = RunOptions.new(options)
         end
 
         def run!
           start_monitor
-          display_data
+          collect_data
           @monitor.thread.join
         end
         
@@ -61,35 +61,74 @@ module Alces
           @monitor = Alces::Stack::Status::Monitor.new({
               nodes: @opt.nodes,
               cmds: @opt.cmds,
-              thread_limit: @opt.thread_limit
+              thread_limit: @opt.thread_limit,
+              time_limit: @opt.time_limit
             })
           @monitor.start
         end
 
-        def display_data
-          while !(data = get_finished_data).class.is_a? (Finished)
-            raise "Monitor thread has died" if @monitor.thread.stop? && !data
-            puts data if data
+        def collect_data
+          data = {}
+          empty_count = 0
+          while data["FINISHED"] != true
+            data = get_finished_data
+            if data.empty?
+              empty_count += 1
+              raise DataIncomplete if empty_count > 100 && @monitor.thread.stop?
+            elsif data["FINISHED"] != true
+              display_data data
+              empty_count = 0
+            end
+            sleep 0.1
           end
+        end
+
+        class DataIncomplete < StandardError
+          def initialize(msg = "Failed to receive data for all nodes")
+            super
+          end
+        end
+
+        def display_data(data = {})
+          print_header unless @header_been_printed
+          
+          format_str = "%-10s"
+          printf format_str, data[:nodename]
+          @opt.cmds.each { |cmd| printf " | #{format_str}", data[cmd] }
+          puts
+        end
+
+        def print_header
+          @header_been_printed = true
+          header_data = {}
+          underline_h = {}
+          underline_s = "----------"
+          header_data[:nodename] = "Node"
+          underline_h[:nodename] = underline_s
+          @opt.cmds.each do |c|
+            header_data[c] = c.to_s.capitalize
+            underline_h[c] = underline_s
+          end
+          display_data header_data
+          display_data underline_h
         end
 
         def get_finished_data
           @finished_node_index ||= 0
-          return Finished.new unless @finished_node_index < @opt.nodes.length
-
+          return {"FINISHED" => true} unless @finished_node_index < @opt.nodes.length
           nodename = @opt.nodes[@finished_node_index]
-          current_results = nil
-          Alces::Stack::Status::Job.results.tap do |r|
-            return false if r.nil?
-            current_results = r[nodename]
-            return false if current_results.nil?
+
+          current_results = Alces::Stack::Status::Job.results.tap do |r|
+            return {} if r.nil?
+            return {} unless r.key? nodename
+            r = r[nodename]
+            @opt.cmds.each { |cmd| return {} unless r.key? cmd }
+            r[:nodename] = nodename
           end
           
-          @opt.cmds.each { |cmd| return false unless current_results.key? cmd }
           @finished_node_index += 1
-          current_results
+          current_results[nodename]
         end
-        class Finished; end
       end
     end
   end

@@ -49,6 +49,7 @@ class TC_Status_Monitor < Test::Unit::TestCase
     end
     @options = {
       thread_limit: 10,
+      time_limit: 10,
       nodes: @nodes,
       cmds: [:bash_pause, :pause],
       status_log: @status_log
