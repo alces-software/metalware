@@ -24,6 +24,8 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+# vim: set filetype=sh :
+
 ALCES_ROOT=/opt/metalware
 ALCES_ETC=$ALCES_ROOT/etc
 LOCAL_BMC_CONFIG=/etc/sysconfig/network-scripts/ifcfg-bmc
@@ -75,7 +77,7 @@ export IPMI_PASSWORD="${PASSWORD}"
 usage()
 {
   echo "(c) 2008-2011 Alces Software Ltd & Stephen F Norledge"
-  echo "alces-ipmi command, perform ipmi commands on single or multiple machines" 
+  echo "alces-ipmi command, perform ipmi commands on single or multiple machines"
   echo "usage: alces ipmi [-g] <name> -c <command>"
   echo "  options:"
   echo "    -g specify genders node group"

@@ -23,5 +23,5 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Support for host file manipulation based on ERb templates
 - Support for kickstart file manipulation
 - Support for PXE boot file manipulation
-- Built in genders based node itteration
+- Built in genders based node iteration
 - Basic installation master and client deployment scripts

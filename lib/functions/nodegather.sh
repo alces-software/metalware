@@ -27,7 +27,7 @@ nodegather() {
   if ((nodeattr -c $1) > /dev/null 2>&1); then
     nodeattr -c $1 | sed 's/,/\n/g'
   else
-    echo "Please pass vaild genders compatible node string as first parameter" >&2
+    echo "Please pass valid genders compatible node string as first parameter" >&2
     exit 1
   fi
 }

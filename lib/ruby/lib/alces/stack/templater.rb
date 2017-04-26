@@ -27,7 +27,7 @@ require "alces/stack/log"
 
 module Alces
   module Stack
-    module Templater    
+    module Templater
       class << self
         def wrap(s, width)
           s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
@@ -134,11 +134,27 @@ module Alces
       end
 
       class Combiner < Handler
+        def self.hostip
+          determine_hostip_script = '/opt/metalware/libexec/determine-hostip'
+
+          hostip = `#{determine_hostip_script}`.chomp
+          if $?.success?
+            hostip
+          else
+            # If script failed for any reason fall back to using `hostname -i`,
+            # which may or may not give the IP on the interface we actually
+            # want to use (note: the dance with pipes is so we only get the
+            # last word in the output, as I've had the IPv6 IP included first
+            # before, which breaks all the things).
+            `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
+          end
+        end
+
         DEFAULT_HASH = {
-            hostip: `hostname -i`.chomp,
-            index: 0,
-            permanent_boot: false
-          }
+          hostip: self.hostip,
+          index: 0,
+          permanent_boot: false
+        }
 
         def initialize(repo, json, hash={})
           repo = set_repo(repo)
@@ -178,7 +194,7 @@ module Alces
         def load_yaml_hash(repo)
           hash = Hash.new
           get_yaml_file_list.each do |yaml|
-            begin 
+            begin
               yaml_payload = YAML.load(File.read("#{repo}/config/#{yaml}.yaml"))
             rescue Errno::ENOENT # Skips missing files
             rescue StandardError => e
@@ -186,7 +202,7 @@ module Alces
               raise e
             else
               if !yaml_payload.is_a? Hash
-                raise "Expected yaml config to contain a hash" 
+                raise "Expected yaml config to contain a hash"
               else
                 hash.merge!(yaml_payload)
               end
@@ -220,7 +236,7 @@ module Alces
           return current_hash
         end
 
-        class LoopErbError < StandardError 
+        class LoopErbError < StandardError
           def initialize(msg="Input hash may contains infinite recursive erb")
             super
           end

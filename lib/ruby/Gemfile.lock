@@ -7,6 +7,7 @@ GEM
     net-dhcp (1.1.1)
     pcap (0.7.7)
     ruby-ip (0.9.1)
+    rugged (0.22.2)
 
 PLATFORMS
   ruby
@@ -17,6 +18,7 @@ DEPENDENCIES
   net-dhcp
   pcap (= 0.7.7)
   ruby-ip
+  rugged (~> 0.22.2)
 
 BUNDLED WITH
-   1.10.5
+   1.10.6
