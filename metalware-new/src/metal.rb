@@ -1,85 +1,76 @@
-#!/usr/bin/env ruby
+
+# See http://stackoverflow.com/questions/837123/adding-a-directory-to-load-path-ruby.
+$:.unshift File.dirname(__FILE__)
 
 require 'rubygems'
 require 'commander'
 
-class MyApplication
-  include Commander::Methods
-  # include whatever modules you need
+require 'commands'
 
-  def run
-    program :name, 'metal'
-    program :version, '0.0.1'
-    program :description, 'Alces tools for the management and configuration of bare metal machines'
+module Metalware
+  class Cli
+    include Commander::Methods
 
-    command :repo do |c|
-      c.syntax = 'metal repo [options]'
-      c.summary = ''
-      c.description = ''
-      c.example 'description', 'command example'
-      c.option '--some-switch', 'Some switch that does something'
-      c.action do |args, options|
-        # Do something or c.when_called Metal::Commands::Repo
+    def run
+      program :name, 'metal'
+      program :version, '2.0.0'
+      program :description, 'Alces tools for the management and configuration of bare metal machines'
+
+      command :repo do |c|
+        c.syntax = 'metal repo [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.option '--some-switch', 'Some switch that does something'
+        c.action Commands::Repo
       end
-    end
 
-    command :render do |c|
-      c.syntax = 'metal render [options]'
-      c.summary = ''
-      c.description = ''
-      c.example 'description', 'command example'
-      c.option '--some-switch', 'Some switch that does something'
-      c.action do |args, options|
-        # Do something or c.when_called Metal::Commands::Render
+      command :render do |c|
+        c.syntax = 'metal render [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.option '--some-switch', 'Some switch that does something'
+        c.action Commands::Render
       end
-    end
 
-    command :hosts do |c|
-      c.syntax = 'metal hosts [options]'
-      c.summary = ''
-      c.description = ''
-      c.example 'description', 'command example'
-      c.option '--some-switch', 'Some switch that does something'
-      c.action do |args, options|
-        # Do something or c.when_called Metal::Commands::Hosts
+      command :hosts do |c|
+        c.syntax = 'metal hosts [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.option '--some-switch', 'Some switch that does something'
+        c.action Commands::Hosts
       end
-    end
 
-    command :hunter do |c|
-      c.syntax = 'metal hunter [options]'
-      c.summary = ''
-      c.description = ''
-      c.example 'description', 'command example'
-      c.option '--some-switch', 'Some switch that does something'
-      c.action do |args, options|
-        # Do something or c.when_called Metal::Commands::Hunter
+      command :hunter do |c|
+        c.syntax = 'metal hunter [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.option '--some-switch', 'Some switch that does something'
+        c.action Commands::Hunter
       end
-    end
 
-    command :dhcp do |c|
-      c.syntax = 'metal dhcp [options]'
-      c.summary = ''
-      c.description = ''
-      c.example 'description', 'command example'
-      c.option '--some-switch', 'Some switch that does something'
-      c.action do |args, options|
-        # Do something or c.when_called Metal::Commands::Dhcp
+      command :dhcp do |c|
+        c.syntax = 'metal dhcp [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.option '--some-switch', 'Some switch that does something'
+        c.action Commands::Dhcp
       end
-    end
 
-    command :build do |c|
-      c.syntax = 'metal build [options]'
-      c.summary = ''
-      c.description = ''
-      c.example 'description', 'command example'
-      c.option '--some-switch', 'Some switch that does something'
-      c.action do |args, options|
-        # Do something or c.when_called Metal::Commands::Build
+      command :build do |c|
+        c.syntax = 'metal build [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.option '--some-switch', 'Some switch that does something'
+        c.action Commands::Build
       end
-    end
 
-    run!
+      run!
+    end
   end
 end
-
-MyApplication.new.run if $0 == __FILE__
