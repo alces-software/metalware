@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 
 require "json"
 require "alces/stack/templater"
@@ -179,7 +179,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       correct,
       Alces::Stack::Templater::Combiner.new("", "", nodename:"slave04").parsed_hash,
       "Yaml pass or load order error"
-    ) 
+    )
   end
 
   def test_json_overide_yaml
@@ -205,7 +205,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
 
   def test_override_nodename_error
     json = '{"nodename":1}'
-    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do 
+    assert_raise(Alces::Stack::Templater::Combiner::HashOverrideError) do
       Alces::Stack::Templater::Combiner.new(nil, json)
     end
   end
