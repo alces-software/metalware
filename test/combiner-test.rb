@@ -27,8 +27,9 @@ require "alces/stack/finder"
 
 class TC_Templater_Combiner < Test::Unit::TestCase
   def setup
+    hostip = Alces::Stack::Templater::Combiner::DEFAULT_HASH[:hostip]
     @default_hash = {
-      hostip: `hostname -i`.chomp,
+      hostip: hostip,
       index: 0,
       permanent_boot: false,
       config: "all",
@@ -40,7 +41,7 @@ class TC_Templater_Combiner < Test::Unit::TestCase
       index: 1,
       bool: true,
       is_nil: nil,
-      hostip: `hostname -i`.chomp,
+      hostip: hostip,
       permanent_boot: false,
       config: "all",
       iptail: 1,
