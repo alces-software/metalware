@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.2.0]
+
+### Changed
+
+- Refactored Metalware content to separate Metalware content repos
+- Improved determination of `hostip` when templating
+
+### Added
+
+- Created repo system for Metalware content and new `metal repo` command to
+  manage these
 - Added `metal status` tool to display the `ping` and `power` state of the
   nodes
 
