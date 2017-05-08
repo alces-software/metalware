@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Install RVM.
+gpg2 --keyserver hkp://pgp.mit.edu --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+curl -sSL https://get.rvm.io | bash -s stable
+rvm rvmrc warning ignore allGemfiles
+
+# Install Ruby and gems.
+rvm install ruby-2.4.1
+cd .. && cd -  # Let RVM automatically use correct Ruby for dir.
+gem install bundler
+bundle install
