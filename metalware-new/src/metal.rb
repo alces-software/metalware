@@ -5,11 +5,13 @@ $:.unshift File.dirname(__FILE__)
 require 'rubygems'
 require 'commander'
 
+require 'commander_extensions'
 require 'commands'
 
 module Metalware
   class Cli
     include Commander::Methods
+    include CommanderExtensions::Delegates
 
     def run
       program :name, 'metal'
