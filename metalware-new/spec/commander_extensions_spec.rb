@@ -22,6 +22,16 @@ def create_test_command
   @command = command :test
 end
 
+def create_multi_word_test_command
+  command :'test do' do |c|
+    c.syntax = 'metal test do ARG1 ARG2 [options]'
+    c.when_called do |args, _options|
+      format('test do %s', args.join(' '))
+    end
+  end
+  @command = command :'test do'
+end
+
 
 describe CommanderExtensions do
   include CommanderExtensions::Delegates
@@ -69,6 +79,22 @@ describe CommanderExtensions do
           command(:test).call
         }.to raise_error(CommanderExtensions::CommandDefinitionError)
       end
+
+      describe 'when multi-word command' do
+        it 'raises if corresponding syntax words do not form command name' do
+          command :'test do' do |c|
+            c.syntax = 'metal test not_do [options]'
+          end
+
+          expect {
+            command(:'test do').call
+          }.to raise_error(
+            CommanderExtensions::CommandDefinitionError
+          ).with_message(
+            "After CLI name in syntax should come command name(s) ('test do'), got 'test not_do'"
+          )
+        end
+      end
     end
 
     describe 'validating passed arguments against syntax' do
@@ -88,6 +114,24 @@ describe CommanderExtensions do
         expect(
           command(:test).call(['one', 'two', 'three'])
         ).to eql('test one two three')
+      end
+
+      describe 'when multi-word command' do
+        before :each do
+          create_multi_word_test_command
+        end
+
+        it 'raises if too few arguments given' do
+          expect {
+            command(:'test do').call
+          }.to raise_error(CommanderExtensions::ArgumentsError)
+        end
+
+        it 'proceeds as normal if valid number of arguments given' do
+          expect(
+            command(:'test do').call(['one', 'two'])
+          ).to eql('test do one two')
+        end
       end
     end
 

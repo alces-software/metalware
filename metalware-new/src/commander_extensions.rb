@@ -40,20 +40,17 @@ module CommanderExtensions
 
     def validate_syntax!
       cli_name = 'metal'
+      command_syntax = command_syntax_parts.join(' ')
 
-      first_word = syntax_parts.first
-      second_word = syntax_parts[1]
-      last_word = syntax_parts.last
-
-      if first_word != cli_name
+      if syntax_parts.first != cli_name
         fail CommandDefinitionError,
-          "First word in 'syntax' should be CLI name ('#{cli_name}'), got '#{first_word}'"
-      elsif second_word != name
+          "First word in 'syntax' should be CLI name ('#{cli_name}'), got '#{syntax_parts.first}'"
+      elsif command_syntax != name
         fail CommandDefinitionError,
-          "Second word in 'syntax' should be command name ('#{name}'), got '#{second_word}'"
-      elsif last_word != '[options]'
+          "After CLI name in syntax should come command name(s) ('#{name}'), got '#{command_syntax}'"
+      elsif syntax_parts.last != '[options]'
         fail CommandDefinitionError,
-          "Last word in 'syntax' should be '[options]', got '#{last_word}'"
+          "Last word in 'syntax' should be '[options]', got '#{syntax_parts.last}'"
       end
     end
 
@@ -69,8 +66,15 @@ module CommanderExtensions
       syntax.split
     end
 
+    def command_syntax_parts
+      number_command_words = name.split.length
+      syntax_parts[1, number_command_words]
+    end
+
     def arguments_syntax_parts
-      syntax_parts[2...(syntax_parts.length - 1)]
+      args_start_index = 1 + command_syntax_parts.length
+      args_end_index = syntax_parts.length - 1
+      syntax_parts[args_start_index...args_end_index]
     end
 
     def total_arguments
