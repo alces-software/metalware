@@ -101,13 +101,13 @@ describe CommanderExtensions do
       it 'raises if too many arguments given' do
         expect {
           command(:test).call(['one', 'two', 'three', 'four'])
-        }.to raise_error(CommanderExtensions::ArgumentsError)
+        }.to raise_error(CommanderExtensions::CommandUsageError)
       end
 
       it 'raises if too few arguments given' do
         expect {
           command(:test).call(['one'])
-        }.to raise_error(CommanderExtensions::ArgumentsError)
+        }.to raise_error(CommanderExtensions::CommandUsageError)
       end
 
       it 'proceeds as normal if valid number of arguments given' do
@@ -124,7 +124,7 @@ describe CommanderExtensions do
         it 'raises if too few arguments given' do
           expect {
             command(:'test do').call
-          }.to raise_error(CommanderExtensions::ArgumentsError)
+          }.to raise_error(CommanderExtensions::CommandUsageError)
         end
 
         it 'proceeds as normal if valid number of arguments given' do

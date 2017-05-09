@@ -3,8 +3,14 @@ require 'commander'
 
 
 module CommanderExtensions
-  class ArgumentsError < StandardError; end
+
+  # An error in the definition of a command, which we cannot recover from and
+  # should be fixed in the code.
   class CommandDefinitionError < StandardError; end
+
+  # An error in the usage of a command; will happen in practise and error
+  # message should be shown along with command usage info.
+  class CommandUsageError < StandardError; end
 
 
   module Delegates
@@ -22,8 +28,10 @@ module CommanderExtensions
   class Command < Commander::Command
     def run(*args)
       super(*args)
-    rescue ArgumentsError => error
-      abort "#{error}. Usage: #{syntax}"
+      # TODO could be useful to catch and log all exceptions while running
+      # commands here; can then re-raise.
+    rescue CommandUsageError => error
+      abort "error: #{error}. Usage: #{syntax}"
     end
 
     def call(args = [])
@@ -56,9 +64,9 @@ module CommanderExtensions
 
     def validate_correct_number_of_args!(args)
       if too_many_args?(args)
-        fail ArgumentsError, "Too many arguments given"
+        fail CommandUsageError, "Too many arguments given"
       elsif too_few_args?(args)
-        fail ArgumentsError, "Too few arguments given"
+        fail CommandUsageError, "Too few arguments given"
       end
     end
 
