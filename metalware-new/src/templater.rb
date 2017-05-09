@@ -23,11 +23,13 @@ require "erb"
 require "ostruct"
 require "json"
 require "yaml"
-require "alces/stack/log"
+# require "alces/stack/log"
 
 module Metalware
   module Templater
     class Handler
+      # XXX need `template_parameters` param? Child class, which is only one
+      # used (outside of tests), forbids this.
       def file(filename, template_parameters={})
         File.open(filename.chomp, 'r') do |f|
           return replace_erb(f.read, template_parameters)
@@ -81,12 +83,11 @@ module Metalware
         permanent_boot: false
       }
 
-      def initialize(repo, json, hash={})
-        repo = set_repo(repo)
+      def initialize(hash={})
+        repo = '/var/lib/metalware/repo'
         @combined_hash = DEFAULT_HASH.merge(hash)
         fixed_nodename = combined_hash[:nodename]
         @combined_hash.merge!(load_yaml_hash(repo))
-        @combined_hash.merge!(load_json_hash(json))
         @parsed_hash = parse_combined_hash
         if parsed_hash[:nodename] != fixed_nodename
           raise HashOverrideError.new(fixed_nodename, @parsed_hash)
@@ -103,18 +104,6 @@ module Metalware
 
       attr_reader :combined_hash
       attr_reader :parsed_hash
-
-      def set_repo(repo)
-        repo = nil if repo.to_s.empty?
-        repo ||= lambda {
-          Alces::Stack::Log.warn "Alces::Stack::Templater::Combiner Implicitly using default repo"
-          "#{ENV['alces_REPO']}"
-        }.call
-      end
-
-      def load_json_hash(json)
-        (json || "").empty? ? {} : JSON.parse(json,symbolize_names: true)
-      end
 
       def load_yaml_hash(repo)
         hash = Hash.new
@@ -167,7 +156,7 @@ module Metalware
         end
       end
 
-      def file (filename, template={})
+      def file(filename, template={})
         raise HashInputError if !template.empty?
         super(filename, @parsed_hash)
       end
