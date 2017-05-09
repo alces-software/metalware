@@ -97,7 +97,7 @@ module Metalware
         def initialize(nodename, index, parsed_hash={})
           msg = "Original nodename: " << nodename.to_s << "\n"
           msg << parsed_hash.to_s << "\n"
-          msg << "YAML, JSON and ERB can not alter the values of nodename and index"
+          msg << "YAML and ERB cannot alter the values of nodename and index"
           super(msg)
         end
       end
@@ -112,11 +112,11 @@ module Metalware
             yaml_payload = YAML.load(File.read("#{repo}/config/#{yaml}.yaml"))
           rescue Errno::ENOENT # Skips missing files
           rescue StandardError => e
-            $stderr.puts "Could not pass YAML file"
+            $stderr.puts "Could not parse YAML file"
             raise e
           else
             if !yaml_payload.is_a? Hash
-              raise "Expected yaml config to contain a hash"
+              raise "Expected YAML config to contain a hash"
             else
               hash.merge!(yaml_payload)
             end
@@ -151,7 +151,7 @@ module Metalware
       end
 
       class LoopErbError < StandardError
-        def initialize(msg="Input hash may contains infinite recursive erb")
+        def initialize(msg="Input hash may contain infinitely recursive ERB")
           super
         end
       end
