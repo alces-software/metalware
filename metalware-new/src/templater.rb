@@ -42,14 +42,14 @@ module Metalware
         File.open(save_file.chomp, "w") do |f|
           f.puts file(template_file, template_parameters)
         end
-        Alces::Stack::Log.info "Template Saved: #{save_file}"
+        # Alces::Stack::Log.info "Template Saved: #{save_file}"
       end
 
       def append(template_file, append_file, template_parameters={})
         File.open(append_file.chomp, 'a') do |f|
           f.puts file(template_file, template_parameters)
         end
-        Alces::Stack::Log.info "Template Appended: #{append_file}"
+        # Alces::Stack::Log.info "Template Appended: #{append_file}"
       end
 
       def replace_erb(template, template_parameters={})
