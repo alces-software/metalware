@@ -19,56 +19,55 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/templater'
 
-module Alces
-  module Stack
-    module Iterator
-      class << self
-        def run(gender, lambda_proc, options={})
-          if !gender or gender.to_s.empty?
-            return lambda_proc.call(options)
-          else
-            return iterate(gender, lambda_proc, options)
-          end
-        end
+require 'templater'
 
-        def iterate(gender, lambda_proc, options={})
-          output = Array.new
-          Nodes.new(gender).each_with_index do |nodename, index|
-            options[:nodename] = nodename
-            options[:index] = index
-            output << Marshal.load(Marshal.dump(lambda_proc.call(options)))
-          end
-          return output
+module Metalware
+  module Iterator
+    class << self
+      def run(gender, lambda_proc, options={})
+        if !gender or gender.to_s.empty?
+          return lambda_proc.call(options)
+        else
+          return iterate(gender, lambda_proc, options)
         end
       end
 
-      class Nodes
-        def initialize(gender, &block)
-          @gender = gender
-          yield self if !block.nil?
+      def iterate(gender, lambda_proc, options={})
+        output = Array.new
+        Nodes.new(gender).each_with_index do |nodename, index|
+          options[:nodename] = nodename
+          options[:index] = index
+          output << Marshal.load(Marshal.dump(lambda_proc.call(options)))
         end
+        return output
+      end
+    end
 
-        def each(&block)
-          run_nodeattr.each(&block)
-        end
-
-        def each_with_index(&block)
-          run_nodeattr.each_with_index(&block)
-        end
-
-        def run_nodeattr
-          n = `nodeattr -c #{@gender}`
-          raise GenderError if n.empty?
-          return n.gsub("\n","").split(',')
-        end
+    class Nodes
+      def initialize(gender, &block)
+        @gender = gender
+        yield self if !block.nil?
       end
 
-      class GenderError < StandardError
-        def initialize(msg="Could not find gender group")
-          super
-        end
+      def each(&block)
+        run_nodeattr.each(&block)
+      end
+
+      def each_with_index(&block)
+        run_nodeattr.each_with_index(&block)
+      end
+
+      def run_nodeattr
+        n = `nodeattr -c #{@gender}`
+        raise GenderError if n.empty?
+        return n.gsub("\n","").split(',')
+      end
+    end
+
+    class GenderError < StandardError
+      def initialize(msg="Could not find gender group")
+        super
       end
     end
   end
