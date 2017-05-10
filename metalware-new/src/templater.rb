@@ -93,10 +93,17 @@ module Metalware
       }
 
       def initialize(hash={})
+        passed_magic_parameters = hash.select do |k,v|
+          [:index, :nodename].include?(k) && !v.nil?
+        end
+        magic_namespace = MagicNamespace.new(passed_magic_parameters)
+
         @combined_hash = DEFAULT_HASH.merge(hash)
         fixed_nodename = combined_hash[:nodename]
         @combined_hash.merge!(load_yaml_hash)
-        @parsed_hash = parse_combined_hash
+        @parsed_hash = parse_combined_hash.merge!(
+          alces: magic_namespace,
+        )
         if parsed_hash[:nodename] != fixed_nodename
           raise HashOverrideError.new(fixed_nodename, @parsed_hash)
         end
@@ -174,6 +181,12 @@ module Metalware
         def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
           super
         end
+      end
+    end
+
+    MagicNamespace = Struct.new(:index, :nodename) do
+      def initialize(index: 0, nodename: nil)
+        super(index, nodename)
       end
     end
   end

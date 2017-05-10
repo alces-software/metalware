@@ -24,7 +24,7 @@ describe Metalware::Templater::Combiner do
         This is a test template
         some_passed_value:
         some_repo_value:
-        index: 0
+        alces.index: 0
         EOF
 
         expect_renders(templater, expected)
@@ -40,7 +40,7 @@ describe Metalware::Templater::Combiner do
         This is a test template
         some_passed_value: my_value
         some_repo_value:
-        index: 0
+        alces.index: 0
         EOF
 
         expect_renders(templater, expected)
@@ -58,10 +58,35 @@ describe Metalware::Templater::Combiner do
         This is a test template
         some_passed_value:
         some_repo_value: repo_value
-        index: 0
+        alces.index: 0
         EOF
 
         expect_renders(templater, expected)
+      end
+    end
+  end
+
+  describe 'magic alces namespace' do
+    context 'without passed parameters' do
+      it 'is created with default values' do
+        templater = Metalware::Templater::Combiner.new
+        magic_namespace = templater.parsed_hash[:alces]
+
+        expect(magic_namespace.index).to eq(0)
+        expect(magic_namespace.nodename).to eq(nil)
+      end
+    end
+
+    context 'with passed parameters' do
+      it 'overrides defaults with parameter values, where applicable' do
+        templater = Metalware::Templater::Combiner.new({
+          nodename: 'testnode04',
+          index: 3
+        })
+        magic_namespace = templater.parsed_hash[:alces]
+
+        expect(magic_namespace.index).to eq(3)
+        expect(magic_namespace.nodename).to eq('testnode04')
       end
     end
   end
