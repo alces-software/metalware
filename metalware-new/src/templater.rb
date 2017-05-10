@@ -67,27 +67,7 @@ module Metalware
     end
 
     class Combiner < Handler
-      def self.hostip
-        determine_hostip_script = File.join(
-          Constants::METALWARE_INSTALL_PATH,
-          'libexec/determine-hostip'
-        )
-
-        hostip = `#{determine_hostip_script}`.chomp
-        if $?.success?
-          hostip
-        else
-          # If script failed for any reason fall back to using `hostname -i`,
-          # which may or may not give the IP on the interface we actually
-          # want to use (note: the dance with pipes is so we only get the
-          # last word in the output, as I've had the IPv6 IP included first
-          # before, which breaks all the things).
-          `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
-        end
-      end
-
       DEFAULT_HASH = {
-        hostip: self.hostip,
         index: 0,
         permanent_boot: false
       }
@@ -187,6 +167,29 @@ module Metalware
     MagicNamespace = Struct.new(:index, :nodename) do
       def initialize(index: 0, nodename: nil)
         super(index, nodename)
+      end
+
+      def hostip
+        hostip = `#{determine_hostip_script}`.chomp
+        if $?.success?
+          hostip
+        else
+          # If script failed for any reason fall back to using `hostname -i`,
+          # which may or may not give the IP on the interface we actually want
+          # to use (note: the dance with pipes is so we only get the last word
+          # in the output, as I've had the IPv6 IP included first before, which
+          # breaks all the things).
+          `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
+        end
+      end
+
+      private
+
+      def determine_hostip_script
+        File.join(
+          Constants::METALWARE_INSTALL_PATH,
+          'libexec/determine-hostip'
+        )
       end
     end
   end

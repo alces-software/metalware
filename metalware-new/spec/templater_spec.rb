@@ -67,6 +67,11 @@ describe Metalware::Templater::Combiner do
   end
 
   describe 'magic alces namespace' do
+    before do
+      # Stub this so mock `determine-hostip` script used.
+      stub_const('Metalware::Constants::METALWARE_INSTALL_PATH', FIXTURES_PATH)
+    end
+
     context 'without passed parameters' do
       it 'is created with default values' do
         templater = Metalware::Templater::Combiner.new
@@ -74,6 +79,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
+        expect(magic_namespace.hostip).to eq('1.2.3.4')
       end
     end
 
@@ -87,6 +93,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode04')
+        expect(magic_namespace.hostip).to eq('1.2.3.4')
       end
     end
   end
