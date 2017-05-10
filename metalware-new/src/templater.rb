@@ -68,7 +68,10 @@ module Metalware
 
     class Combiner < Handler
       def self.hostip
-        determine_hostip_script = '/opt/metalware/libexec/determine-hostip'
+        determine_hostip_script = File.join(
+          Constants::METALWARE_INSTALL_PATH,
+          'libexec/determine-hostip'
+        )
 
         hostip = `#{determine_hostip_script}`.chomp
         if $?.success?
