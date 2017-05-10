@@ -30,6 +30,10 @@ require "constants"
 module Metalware
   module Templater
     class Handler
+      # XXX Make this use the Combiner rather than be a superclass of it, to
+      # better separate these.
+      # XXX Have method to print template here, and do not expose access to
+      # `file` method directly, so can cleanly stub this for testing.
       # XXX need `template_parameters` param? Child class, which is only one
       # used (outside of tests), forbids this.
       def file(filename, template_parameters={})
