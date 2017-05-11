@@ -24,6 +24,7 @@ describe Metalware::Templater::Combiner do
         This is a test template
         some_passed_value:
         some_repo_value:
+        erb_repo_value:
         alces.index: 0
         EOF
 
@@ -40,6 +41,7 @@ describe Metalware::Templater::Combiner do
         This is a test template
         some_passed_value: my_value
         some_repo_value:
+        erb_repo_value:
         alces.index: 0
         EOF
 
@@ -58,6 +60,7 @@ describe Metalware::Templater::Combiner do
         This is a test template
         some_passed_value:
         some_repo_value: repo_value
+        erb_repo_value: 1
         alces.index: 0
         EOF
 
@@ -77,9 +80,9 @@ describe Metalware::Templater::Combiner do
         templater = Metalware::Templater::Combiner.new
         magic_namespace = templater.parsed_hash[:alces]
 
-        expect(magic_namespace.index).to eq(0)
-        expect(magic_namespace.nodename).to eq(nil)
-        expect(magic_namespace.hostip).to eq('1.2.3.4')
+        expect(magic_namespace[:index]).to eq(0)
+        expect(magic_namespace[:nodename]).to eq(nil)
+        expect(magic_namespace[:hostip]).to eq('1.2.3.4')
       end
     end
 
@@ -91,9 +94,9 @@ describe Metalware::Templater::Combiner do
         })
         magic_namespace = templater.parsed_hash[:alces]
 
-        expect(magic_namespace.index).to eq(3)
-        expect(magic_namespace.nodename).to eq('testnode04')
-        expect(magic_namespace.hostip).to eq('1.2.3.4')
+        expect(magic_namespace[:index]).to eq(3)
+        expect(magic_namespace[:nodename]).to eq('testnode04')
+        expect(magic_namespace[:hostip]).to eq('1.2.3.4')
       end
     end
   end

@@ -76,17 +76,12 @@ module Metalware
         passed_magic_parameters = hash.select do |k,v|
           [:index, :nodename].include?(k) && !v.nil?
         end
-        magic_namespace = MagicNamespace.new(passed_magic_parameters)
+        @magic_namespace = MagicNamespace.new(passed_magic_parameters)
 
-        @combined_hash = DEFAULT_HASH.merge(hash)
-        fixed_nodename = combined_hash[:nodename]
-        @combined_hash.merge!(load_yaml_hash)
-        @parsed_hash = parse_combined_hash.merge!(
-          alces: magic_namespace,
+        @combined_hash = hash.merge(load_yaml_hash).merge(
+          alces: @magic_namespace.to_h,
         )
-        if parsed_hash[:nodename] != fixed_nodename
-          raise HashOverrideError.new(fixed_nodename, @parsed_hash)
-        end
+        @parsed_hash = parse_combined_hash
       end
       class HashOverrideError < StandardError
         def initialize(nodename, index, parsed_hash={})
@@ -99,6 +94,10 @@ module Metalware
 
       attr_reader :combined_hash
       attr_reader :parsed_hash
+
+      def nodename
+        @magic_namespace.nodename
+      end
 
       def load_yaml_hash
         hash = Hash.new
@@ -123,11 +122,11 @@ module Metalware
 
       def get_yaml_file_list
         list = [ "all" ]
-        return list if !@combined_hash.key?(:nodename)
-        list_str = `nodeattr -l #{@combined_hash[:nodename]} 2>/dev/null`.chomp
+        return list if !nodename
+        list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
         if list_str.empty? then return list end
         list.concat(list_str.split(/\n/).reverse)
-        list.push(@combined_hash[:nodename])
+        list.push(nodename)
         list.uniq
       end
 
@@ -164,12 +163,14 @@ module Metalware
       end
     end
 
-    MagicNamespace = Struct.new(:index, :nodename) do
+    MagicNamespace = Struct.new(:index, :nodename, :hostip) do
       def initialize(index: 0, nodename: nil)
-        super(index, nodename)
+        super(index, nodename, MagicNamespace.hostip)
       end
 
-      def hostip
+      private
+
+      def self.hostip
         hostip = `#{determine_hostip_script}`.chomp
         if $?.success?
           hostip
@@ -183,9 +184,7 @@ module Metalware
         end
       end
 
-      private
-
-      def determine_hostip_script
+      def self.determine_hostip_script
         File.join(
           Constants::METALWARE_INSTALL_PATH,
           'libexec/determine-hostip'
