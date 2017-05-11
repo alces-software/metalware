@@ -117,6 +117,8 @@ module Metalware
             end
           end
         end
+        # XXX only symbolizes top-level keys, but not those in nested hashes =>
+        # confusing.
         hash.inject({}) do |memo,(k,v)| memo[k.to_sym] = v; memo end
       end
 

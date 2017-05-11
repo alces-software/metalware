@@ -26,6 +26,7 @@ describe Metalware::Templater::Combiner do
         some_repo_value:
         erb_repo_value:
         very_recursive_erb_repo_value:
+        nested.repo_value:
         alces.index: 0
         EOF
 
@@ -44,6 +45,7 @@ describe Metalware::Templater::Combiner do
         some_repo_value:
         erb_repo_value:
         very_recursive_erb_repo_value:
+        nested.repo_value:
         alces.index: 0
         EOF
 
@@ -64,6 +66,7 @@ describe Metalware::Templater::Combiner do
         some_repo_value: repo_value
         erb_repo_value: 1
         very_recursive_erb_repo_value: repo_value
+        nested.repo_value: nested_repo_value
         alces.index: 0
         EOF
 
