@@ -193,9 +193,9 @@ module Metalware
       end
     end
 
-    MagicNamespace = Struct.new(:index, :nodename, :hostip) do
+    MagicNamespace = Struct.new(:index, :nodename) do
       def initialize(index: 0, nodename: nil)
-        super(index, nodename, MagicNamespace.hostip)
+        super(index, nodename)
       end
 
       def hunter
@@ -207,9 +207,7 @@ module Metalware
         []
       end
 
-      private
-
-      def self.hostip
+      def hostip
         hostip = `#{determine_hostip_script}`.chomp
         if $?.success?
           hostip
@@ -223,7 +221,9 @@ module Metalware
         end
       end
 
-      def self.determine_hostip_script
+      private
+
+      def determine_hostip_script
         File.join(
           Constants::METALWARE_INSTALL_PATH,
           'libexec/determine-hostip'
