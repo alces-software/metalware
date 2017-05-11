@@ -6,6 +6,7 @@ require 'templater'
 FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
+TEST_CACHE_PATH = File.join(FIXTURES_PATH, 'cache')
 
 def expect_renders(templater, expected)
   # Strip trailing spaces from rendered output to make comparisons less
@@ -87,6 +88,9 @@ describe Metalware::Templater::Combiner do
     before do
       # Stub this so mock `determine-hostip` script used.
       stub_const('Metalware::Constants::METALWARE_INSTALL_PATH', FIXTURES_PATH)
+
+      # Stub this so mock hunter config used.
+      stub_const('Metalware::Constants::CACHE_PATH', TEST_CACHE_PATH)
     end
 
     context 'without passed parameters' do
@@ -97,6 +101,10 @@ describe Metalware::Templater::Combiner do
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
         expect(magic_namespace.hostip).to eq('1.2.3.4')
+
+        hunter_config = magic_namespace.hunter
+        expect(hunter_config.first.nodename).to eq('testnode01')
+        expect(hunter_config.first.mac_address).to eq('testnode01-mac')
       end
     end
 
@@ -111,6 +119,10 @@ describe Metalware::Templater::Combiner do
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode04')
         expect(magic_namespace.hostip).to eq('1.2.3.4')
+
+        hunter_config = magic_namespace.hunter
+        expect(hunter_config.first.nodename).to eq('testnode01')
+        expect(hunter_config.first.mac_address).to eq('testnode01-mac')
       end
     end
   end
