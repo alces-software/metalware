@@ -92,11 +92,11 @@ describe Metalware::Templater::Combiner do
     context 'without passed parameters' do
       it 'is created with default values' do
         templater = Metalware::Templater::Combiner.new
-        magic_namespace = templater.config[:alces]
+        magic_namespace = templater.config.alces
 
-        expect(magic_namespace[:index]).to eq(0)
-        expect(magic_namespace[:nodename]).to eq(nil)
-        expect(magic_namespace[:hostip]).to eq('1.2.3.4')
+        expect(magic_namespace.index).to eq(0)
+        expect(magic_namespace.nodename).to eq(nil)
+        expect(magic_namespace.hostip).to eq('1.2.3.4')
       end
     end
 
@@ -106,11 +106,11 @@ describe Metalware::Templater::Combiner do
           nodename: 'testnode04',
           index: 3
         })
-        magic_namespace = templater.config[:alces]
+        magic_namespace = templater.config.alces
 
-        expect(magic_namespace[:index]).to eq(3)
-        expect(magic_namespace[:nodename]).to eq('testnode04')
-        expect(magic_namespace[:hostip]).to eq('1.2.3.4')
+        expect(magic_namespace.index).to eq(3)
+        expect(magic_namespace.nodename).to eq('testnode04')
+        expect(magic_namespace.hostip).to eq('1.2.3.4')
       end
     end
   end

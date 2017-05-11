@@ -23,6 +23,7 @@ require "erb"
 require "ostruct"
 require "json"
 require "yaml"
+require 'recursive-open-struct'
 
 require "constants"
 require 'active_support/core_ext/hash/keys'
@@ -58,8 +59,8 @@ module Metalware
         # Alces::Stack::Log.info "Template Appended: #{append_file}"
       end
 
-      def replace_erb(template, template_parameters={})
-        parameters_binding = OpenStruct.new(template_parameters).instance_eval {binding}
+      def replace_erb(template, template_parameters)
+        parameters_binding = template_parameters.instance_eval {binding}
         ERB.new(template).result(parameters_binding)
       rescue StandardError => e
         $stderr.puts "Could not parse ERB"
@@ -116,7 +117,7 @@ module Metalware
       def base_config
         @base_config ||= raw_config
           .merge(@passed_hash)
-          .merge(alces: @magic_namespace.to_h)
+          .merge(alces: @magic_namespace)
       end
 
       def raw_config
@@ -170,7 +171,7 @@ module Metalware
           current_config_string = current_parsed_config.to_s
         end
 
-        current_parsed_config
+        RecursiveOpenStruct.new(current_parsed_config)
       end
 
       def perform_config_parsing_pass(current_parsed_config)
@@ -182,7 +183,7 @@ module Metalware
       def parse_config_value(value, current_parsed_config)
         case value
         when String
-          replace_erb(value, current_parsed_config)
+          replace_erb(value, RecursiveOpenStruct.new(current_parsed_config))
         when Hash
           value.map do |k,v|
             [k, parse_config_value(v, current_parsed_config)]
