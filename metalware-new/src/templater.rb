@@ -124,7 +124,7 @@ module Metalware
         ordered_node_config_files.each do |config_name|
           begin
             config_path = "#{Constants::REPO_PATH}/config/#{config_name}.yaml"
-            config = YAML.load(File.read(config_path))
+            config = YAML.load_file(config_path)
           rescue Errno::ENOENT # Skips missing files
           rescue StandardError => e
             $stderr.puts "Could not parse YAML config file"
@@ -200,7 +200,7 @@ module Metalware
 
       def hunter
         hunter_config_path = File.join(Constants::CACHE_PATH, 'hunter.yaml')
-        YAML.load(File.read(hunter_config_path)).map do |node_config|
+        YAML.load_file(hunter_config_path).map do |node_config|
           OpenStruct.new(node_config)
         end
       rescue Errno::ENOENT
