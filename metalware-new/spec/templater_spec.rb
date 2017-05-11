@@ -25,6 +25,7 @@ describe Metalware::Templater::Combiner do
         some_passed_value:
         some_repo_value:
         erb_repo_value:
+        very_recursive_erb_repo_value:
         alces.index: 0
         EOF
 
@@ -42,6 +43,7 @@ describe Metalware::Templater::Combiner do
         some_passed_value: my_value
         some_repo_value:
         erb_repo_value:
+        very_recursive_erb_repo_value:
         alces.index: 0
         EOF
 
@@ -61,6 +63,7 @@ describe Metalware::Templater::Combiner do
         some_passed_value:
         some_repo_value: repo_value
         erb_repo_value: 1
+        very_recursive_erb_repo_value: repo_value
         alces.index: 0
         EOF
 
