@@ -1,11 +1,11 @@
 
 require 'nodeattr_interface'
+require 'spec_utils'
 
-GENDERS_FILE = File.join(FIXTURES_PATH, 'genders')
 
 describe Metalware::NodeattrInterface do
   before do
-    stub_const("Metalware::Constants::NODEATTR_COMMAND", "nodeattr -f #{GENDERS_FILE}")
+    SpecUtils.use_mock_genders(self)
   end
 
   describe '#nodes_in_group' do

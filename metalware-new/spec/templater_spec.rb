@@ -2,6 +2,7 @@
 require 'active_support/core_ext/string/strip'
 
 require 'templater'
+require 'spec_utils'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
@@ -106,7 +107,7 @@ describe Metalware::Templater::Combiner do
       # Stub this so mock hunter config used.
       stub_const('Metalware::Constants::CACHE_PATH', TEST_CACHE_PATH)
 
-      stub_const("Metalware::Constants::NODEATTR_COMMAND", "nodeattr -f #{GENDERS_FILE}")
+      SpecUtils.use_mock_genders(self)
     end
 
     context 'without passed parameters' do
