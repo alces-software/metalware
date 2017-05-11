@@ -119,6 +119,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
+        expect(magic_namespace.build_complete_url).to eq(nil)
         expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
@@ -133,6 +134,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode04')
+        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode04')
         expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
