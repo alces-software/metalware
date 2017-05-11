@@ -69,6 +69,14 @@ describe Metalware::Templater::Combiner do
 
         expect_renders(templater, expected)
       end
+
+      it 'raises if maximum recursive config depth exceeded' do
+        stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
+
+        expect{
+          Metalware::Templater::Combiner.new
+        }.to raise_error(Metalware::Templater::Combiner::LoopErbError)
+      end
     end
   end
 

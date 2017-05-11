@@ -137,7 +137,7 @@ module Metalware
         count = 0
         while old_str != current_str
           count += 1
-          raise LoopErbError if count > 10
+          raise LoopErbError if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
           old_str = "#{current_str}"
           current_str = replace_erb(current_str, current_hash)
           current_hash = eval(current_str)
