@@ -10,6 +10,9 @@ rvm rvmrc warning ignore allGemfiles
 # Required for rugged gem.
 yum install cmake
 
+# Required for `nodeattr`.
+yum install genders
+
 # Install Ruby and gems.
 rvm install ruby-2.4.1
 cd .. && cd -  # Let RVM automatically use correct Ruby for dir.

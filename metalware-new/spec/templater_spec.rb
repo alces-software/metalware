@@ -3,7 +3,6 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 
-FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
 TEST_CACHE_PATH = File.join(FIXTURES_PATH, 'cache')
