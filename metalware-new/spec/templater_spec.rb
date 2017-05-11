@@ -85,6 +85,14 @@ describe Metalware::Templater::Combiner do
   end
 
   describe 'magic alces namespace' do
+    def expect_environment_dependent_parameters_present(magic_namespace)
+      expect(magic_namespace.hostip).to eq('1.2.3.4')
+
+      hunter_config = magic_namespace.hunter
+      expect(hunter_config.first.nodename).to eq('testnode01')
+      expect(hunter_config.first.mac_address).to eq('testnode01-mac')
+    end
+
     before do
       # Stub this so mock `determine-hostip` script used.
       stub_const('Metalware::Constants::METALWARE_INSTALL_PATH', FIXTURES_PATH)
@@ -100,11 +108,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
-        expect(magic_namespace.hostip).to eq('1.2.3.4')
-
-        hunter_config = magic_namespace.hunter
-        expect(hunter_config.first.nodename).to eq('testnode01')
-        expect(hunter_config.first.mac_address).to eq('testnode01-mac')
+        expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
 
@@ -118,11 +122,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode04')
-        expect(magic_namespace.hostip).to eq('1.2.3.4')
-
-        hunter_config = magic_namespace.hunter
-        expect(hunter_config.first.nodename).to eq('testnode01')
-        expect(hunter_config.first.mac_address).to eq('testnode01-mac')
+        expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
   end
