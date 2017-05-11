@@ -125,5 +125,17 @@ describe Metalware::Templater::Combiner do
         expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
+
+    context 'when no hunter config file present' do
+      before do
+        stub_const('Metalware::Constants::CACHE_PATH', '/non-existent')
+      end
+
+      it 'loads the hunter parameter as an empty array' do
+        templater = Metalware::Templater::Combiner.new
+        magic_namespace = templater.config.alces
+        expect(magic_namespace.hunter).to eq([])
+      end
+    end
   end
 end

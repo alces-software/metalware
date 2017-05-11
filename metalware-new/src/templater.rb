@@ -200,11 +200,12 @@ module Metalware
       end
 
       def hunter
-        # XXX handle if hunter config has not yet been written.
         hunter_config_path = File.join(Constants::CACHE_PATH, 'hunter.yaml')
         YAML.load(File.read(hunter_config_path)).map do |node_config|
           OpenStruct.new(node_config)
         end
+      rescue Errno::ENOENT
+        []
       end
 
       private
