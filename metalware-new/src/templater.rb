@@ -25,6 +25,7 @@ require "json"
 require "yaml"
 
 require "constants"
+require 'active_support/core_ext/hash/keys'
 # require "alces/stack/log"
 
 module Metalware
@@ -36,9 +37,10 @@ module Metalware
       # `file` method directly, so can cleanly stub this for testing.
       # XXX need `template_parameters` param? Child class, which is only one
       # used (outside of tests), forbids this.
+      # XXX rename to `render`; rename other methods here appropriately too.
       def file(filename, template_parameters={})
         File.open(filename.chomp, 'r') do |f|
-          return replace_erb(f.read, template_parameters)
+          replace_erb(f.read, template_parameters)
         end
       end
 
@@ -57,7 +59,8 @@ module Metalware
       end
 
       def replace_erb(template, template_parameters={})
-        return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+        parameters_binding = OpenStruct.new(template_parameters).instance_eval {binding}
+        ERB.new(template).result(parameters_binding)
       rescue StandardError => e
         $stderr.puts "Could not parse ERB"
         $stderr.puts template.to_s
@@ -67,62 +70,79 @@ module Metalware
     end
 
     class Combiner < Handler
-      DEFAULT_HASH = {
-        index: 0,
-        permanent_boot: false
-      }
+      attr_reader :config
 
+      # XXX Have this just take allowed keyword parameters:
+      # - nodename
+      # - index
+      # - what else?
       def initialize(hash={})
         passed_magic_parameters = hash.select do |k,v|
           [:index, :nodename].include?(k) && !v.nil?
         end
         @magic_namespace = MagicNamespace.new(passed_magic_parameters)
-
-        @combined_hash = hash.merge(load_yaml_hash).merge(
-          alces: @magic_namespace.to_h,
-        )
-        @parsed_hash = parse_combined_hash
+        @passed_hash = hash
+        @config = parse_config
       end
-      class HashOverrideError < StandardError
-        def initialize(nodename, index, parsed_hash={})
-          msg = "Original nodename: " << nodename.to_s << "\n"
-          msg << parsed_hash.to_s << "\n"
-          msg << "YAML and ERB cannot alter the values of nodename and index"
-          super(msg)
+
+      def file(filename, template={})
+        raise HashInputError if !template.empty?
+        super(filename, @config)
+      end
+
+      # XXX Make these not nested classes, also possibly should use common
+      # error class or superclass for these.
+      class HashInputError < StandardError
+        def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
+          super
         end
       end
 
-      attr_reader :combined_hash
-      attr_reader :parsed_hash
+      class LoopErbError < StandardError
+        def initialize(msg="Input hash may contain infinitely recursive ERB")
+          super
+        end
+      end
+
+      private
 
       def nodename
         @magic_namespace.nodename
       end
 
-      def load_yaml_hash
-        hash = Hash.new
-        get_yaml_file_list.each do |yaml|
+      # The merging of the raw combined config files, any additional passed
+      # values, and the magic `alces` namespace; this is the config prior to
+      # parsing any nested ERB values.
+      def base_config
+        @base_config ||= raw_config
+          .merge(@passed_hash)
+          .merge(alces: @magic_namespace.to_h)
+      end
+
+      def raw_config
+        combined_configs = {}
+        ordered_node_config_files.each do |config_name|
           begin
-            yaml_path = "#{Constants::REPO_PATH}/config/#{yaml}.yaml"
-            yaml_payload = YAML.load(File.read(yaml_path))
+            config_path = "#{Constants::REPO_PATH}/config/#{config_name}.yaml"
+            config = YAML.load(File.read(config_path))
           rescue Errno::ENOENT # Skips missing files
           rescue StandardError => e
-            $stderr.puts "Could not parse YAML file"
+            $stderr.puts "Could not parse YAML config file"
             raise e
           else
-            if !yaml_payload.is_a? Hash
-              raise "Expected YAML config to contain a hash"
+            if !config.is_a? Hash
+              raise "Expected YAML config file to contain a hash"
             else
-              hash.merge!(yaml_payload)
+              combined_configs.merge!(config)
             end
           end
         end
         # XXX only symbolizes top-level keys, but not those in nested hashes =>
         # confusing.
-        hash.inject({}) do |memo,(k,v)| memo[k.to_sym] = v; memo end
+        combined_configs.symbolize_keys
       end
 
-      def get_yaml_file_list
+      def ordered_node_config_files
         list = [ "all" ]
         return list if !nodename
         list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
@@ -132,36 +152,19 @@ module Metalware
         list.uniq
       end
 
-      def parse_combined_hash
-        current_hash = Hash.new.merge(@combined_hash)
-        current_str = current_hash.to_s
+      def parse_config
+        current_parsed_config = base_config
+        current_str = current_parsed_config.to_s
         old_str = ""
         count = 0
         while old_str != current_str
           count += 1
           raise LoopErbError if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
-          old_str = "#{current_str}"
-          current_str = replace_erb(current_str, current_hash)
-          current_hash = eval(current_str)
+          old_str = current_str
+          current_str = replace_erb(current_str, current_parsed_config)
+          current_parsed_config = eval(current_str)
         end
-        return current_hash
-      end
-
-      class LoopErbError < StandardError
-        def initialize(msg="Input hash may contain infinitely recursive ERB")
-          super
-        end
-      end
-
-      def file(filename, template={})
-        raise HashInputError if !template.empty?
-        super(filename, @parsed_hash)
-      end
-
-      class HashInputError < StandardError
-        def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
-          super
-        end
+        current_parsed_config
       end
     end
 
