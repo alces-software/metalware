@@ -21,7 +21,6 @@
 #==============================================================================
 require "erb"
 require "ostruct"
-require "json"
 require "yaml"
 require 'recursive-open-struct'
 
