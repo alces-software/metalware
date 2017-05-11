@@ -23,9 +23,10 @@ require "erb"
 require "ostruct"
 require "yaml"
 require 'recursive-open-struct'
+require 'active_support/core_ext/hash/keys'
 
 require "constants"
-require 'active_support/core_ext/hash/keys'
+require 'nodeattr_interface'
 # require "alces/stack/log"
 
 module Metalware
@@ -193,9 +194,21 @@ module Metalware
       end
     end
 
+    module GenderGroupProxy
+      class << self
+        def method_missing(group_symbol)
+          NodeattrInterface.nodes_in_group(group_symbol)
+        end
+      end
+    end
+
     MagicNamespace = Struct.new(:index, :nodename) do
       def initialize(index: 0, nodename: nil)
         super(index, nodename)
+      end
+
+      def genders
+        GenderGroupProxy
       end
 
       def hunter

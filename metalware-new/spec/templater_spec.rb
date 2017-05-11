@@ -87,9 +87,16 @@ describe Metalware::Templater::Combiner do
     def expect_environment_dependent_parameters_present(magic_namespace)
       expect(magic_namespace.hostip).to eq('1.2.3.4')
 
+      # Check hunter config.
       hunter_config = magic_namespace.hunter
       expect(hunter_config.first.nodename).to eq('testnode01')
       expect(hunter_config.first.mac_address).to eq('testnode01-mac')
+
+      # Check genders config.
+      genders_config = magic_namespace.genders
+      expect(genders_config.masters).to eq(['login1'])
+      expect(genders_config.all).to eq(['login1', 'node01', 'node02', 'node03'])
+      expect(genders_config.non_existent).to eq([])
     end
 
     before do
@@ -98,6 +105,8 @@ describe Metalware::Templater::Combiner do
 
       # Stub this so mock hunter config used.
       stub_const('Metalware::Constants::CACHE_PATH', TEST_CACHE_PATH)
+
+      stub_const("Metalware::Constants::NODEATTR_COMMAND", "nodeattr -f #{GENDERS_FILE}")
     end
 
     context 'without passed parameters' do
