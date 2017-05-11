@@ -220,6 +220,14 @@ module Metalware
         []
       end
 
+      def hosts_url
+        system_file_url 'hosts'
+      end
+
+      def genders_url
+        system_file_url 'genders'
+      end
+
       def hostip
         hostip = `#{determine_hostip_script}`.chomp
         if $?.success?
@@ -235,6 +243,10 @@ module Metalware
       end
 
       private
+
+      def system_file_url(system_file)
+        "http://#{hostip}/system/#{system_file}"
+      end
 
       def determine_hostip_script
         File.join(

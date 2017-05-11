@@ -87,6 +87,8 @@ describe Metalware::Templater::Combiner do
   describe 'magic alces namespace' do
     def expect_environment_dependent_parameters_present(magic_namespace)
       expect(magic_namespace.hostip).to eq('1.2.3.4')
+      expect(magic_namespace.hosts_url).to eq 'http://1.2.3.4/system/hosts'
+      expect(magic_namespace.genders_url).to eq 'http://1.2.3.4/system/genders'
 
       # Check hunter config.
       hunter_config = magic_namespace.hunter
