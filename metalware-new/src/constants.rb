@@ -7,6 +7,7 @@ module Metalware
     REPO_PATH = File.join(METALWARE_DATA_PATH, 'repo')
     # XXX Ensure created on Metalware install.
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
+    RENDERED_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 
