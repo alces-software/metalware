@@ -10,6 +10,7 @@ module Metalware
     RENDERED_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
+    BUILD_POLL_SLEEP = 10
 
     NODEATTR_COMMAND = 'nodeattr'
   end

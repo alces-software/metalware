@@ -32,6 +32,21 @@ module Metalware
         }
 
         Iterator.run(maybe_group, lambda_proc, template_parameters)
+
+        built_nodes = []
+        nodes_built_lambda_proc = -> (iterator_options) do
+          built_nodes << Node.new(iterator_options[:nodename]).built?
+        end
+
+        all_nodes_built = false
+        iterator_options = {nodename: maybe_node}
+        while !all_nodes_built
+          built_nodes = []
+          Iterator.run(maybe_group, nodes_built_lambda_proc, iterator_options).all?
+          all_nodes_built = built_nodes.all?
+
+          sleep Constants::BUILD_POLL_SLEEP
+        end
       end
 
       private
