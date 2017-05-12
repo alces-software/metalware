@@ -8,15 +8,16 @@ TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
 TEST_CACHE_PATH = File.join(FIXTURES_PATH, 'cache')
 
-def expect_renders(templater, expected)
-  # Strip trailing spaces from rendered output to make comparisons less
-  # brittle.
-  rendered = templater.file(TEST_TEMPLATE_PATH).gsub(/\s+\n/, "\n")
-
-  expect(rendered).to eq(expected.strip_heredoc)
-end
 
 describe Metalware::Templater::Combiner do
+  def expect_renders(templater, expected)
+    # Strip trailing spaces from rendered output to make comparisons less
+    # brittle.
+    rendered = templater.file(TEST_TEMPLATE_PATH).gsub(/\s+\n/, "\n")
+
+    expect(rendered).to eq(expected.strip_heredoc)
+  end
+
   describe '#file' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
