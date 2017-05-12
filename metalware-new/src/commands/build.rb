@@ -2,6 +2,7 @@
 require 'templater'
 require 'constants'
 require 'node'
+require 'iterator'
 
 module Metalware
   module Commands
@@ -15,21 +16,27 @@ module Metalware
         @args = args
         @options = options
 
-        render_kickstart
-        render_pxelinux
+        node_identifier = args.first
+        maybe_node = options.group ? nil : node_identifier
+        maybe_group = options.group ? node_identifier : nil
+
+        lambda_proc = -> (template_parameters) do
+          node = Node.new(template_parameters[:nodename])
+          templater = Templater::Combiner.new(template_parameters)
+          render_kickstart(templater, node)
+          render_pxelinux(templater, node)
+        end
+
+        template_parameters = {
+          nodename: maybe_node
+        }
+
+        Iterator.run(maybe_group, lambda_proc, template_parameters)
       end
 
       private
 
-      def node
-        @node ||= Node.new(args.first)
-      end
-
-      def templater
-        @templater ||= Templater::Combiner.new({nodename: node.name})
-      end
-
-      def render_kickstart
+      def render_kickstart(templater, node)
         kickstart_template_path = template_path :kickstart
         # XXX Ensure this path has been created
         kickstart_save_path = File.join(
@@ -38,7 +45,7 @@ module Metalware
         templater.save(kickstart_template_path, kickstart_save_path)
       end
 
-      def render_pxelinux
+      def render_pxelinux(templater, node)
         # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
         # file yet - best place to do this may be when creating `Node` objects?
         pxelinux_template_path = template_path :pxelinux
