@@ -4,6 +4,7 @@ require 'templater'
 require 'constants'
 require 'node'
 require 'iterator'
+require 'output'
 
 # XXX Need to handle interrupts
 
@@ -19,6 +20,9 @@ module Metalware
         @args = args
         @options = options
         @config = Config.new(options.config)
+
+        Output.stderr 'Waiting for nodes to report as built...',
+          '(Ctrl-C to terminate)'
 
         node_identifier = args.first
         maybe_node = options.group ? nil : node_identifier
@@ -64,8 +68,10 @@ module Metalware
         end
 
       rescue Interrupt
+        Output.stderr 'Exiting...'
       ensure
         clear_up_built_node_marker_files
+        Output.stderr 'Done.'
       end
 
       private
