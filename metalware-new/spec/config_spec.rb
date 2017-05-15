@@ -11,7 +11,7 @@ describe Metalware::Config do
   it 'can have default values retrieved' do
     config_file = SpecUtils.fixtures_config('empty.yaml')
     config = Metalware::Config.new(config_file)
-    expect(config.built_nodes_storage_path).to eq('/var/lib/metalware/cache')
+    expect(config.built_nodes_storage_path).to eq('/var/lib/metalware/cache/built-nodes')
     expect(config.rendered_files_path).to eq('/var/lib/metalware/rendered')
     expect(config.build_poll_sleep).to eq(10)
   end
