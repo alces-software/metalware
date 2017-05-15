@@ -4,6 +4,9 @@ require 'constants'
 require 'node'
 require 'iterator'
 
+# XXX Need to handle interrupts
+# XXX Need to remove marker files after building
+
 module Metalware
   module Commands
     class Build
@@ -28,14 +31,25 @@ module Metalware
         end
 
         template_parameters = {
-          nodename: maybe_node
+          nodename: maybe_node,
+          firstboot: true,
         }
 
         Iterator.run(maybe_group, lambda_proc, template_parameters)
 
         built_nodes = []
         nodes_built_lambda_proc = -> (iterator_options) do
-          built_nodes << Node.new(iterator_options[:nodename]).built?
+          node = Node.new(iterator_options[:nodename])
+
+          if node.built?
+            templater = Templater::Combiner.new({
+              nodename: node.name,
+              firstboot: false
+            })
+            render_pxelinux(templater, node)
+          end
+
+          built_nodes << node.built?
         end
 
         all_nodes_built = false

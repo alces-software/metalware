@@ -45,24 +45,28 @@ module SpecUtils
       example_group.instance_exec do
         expect(
           Metalware::Templater::Combiner
-        ).to receive(:new).with({
-          nodename: 'testnode01',
-          index: 0
-        }).ordered
+        ).to receive(:new).with(
+          hash_including(
+            nodename: 'testnode01',
+            index: 0
+          )
+        ).ordered
         expect(
           Metalware::Templater::Combiner
-        ).to receive(:new).with({
-          nodename: 'testnode02',
-          index: 1
-        }).ordered
+        ).to receive(:new).with(
+          hash_including(
+            nodename: 'testnode02',
+            index: 1
+          )
+        ).ordered
       end
     end
 
     def expect_it_templates_for_single_node(example_group)
       example_group.instance_exec do
-        expect(Metalware::Templater::Combiner).to receive(:new).with({
-          nodename: 'testnode01'
-        })
+        expect(Metalware::Templater::Combiner).to receive(:new).with(
+          hash_including(nodename: 'testnode01')
+        )
       end
     end
 

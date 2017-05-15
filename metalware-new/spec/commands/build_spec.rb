@@ -59,6 +59,7 @@ describe Metalware::Commands::Build do
 
   before :each do
     SpecUtils.use_mock_templater(self)
+    allow(@templater).to receive(:save)
     use_mock_nodes
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0)
   end
@@ -97,7 +98,6 @@ describe Metalware::Commands::Build do
     end
 
     it 'waits for the node to report as built before exiting' do
-      allow(@templater).to receive(:save)
       use_short_build_poll_time
       time_to_wait = TEST_BUILD_POLL_SLEEP * 2
 
@@ -106,6 +106,51 @@ describe Metalware::Commands::Build do
 
       use_mock_nodes
       expect_runs_within(time_to_wait) { run_build('testnode01') }
+    end
+
+    it 'renders pxelinux once with firstboot true if node does not build' do
+      time_to_wait = TEST_BUILD_POLL_SLEEP * 2
+      use_mock_nodes(not_built_nodes: 'testnode01')
+
+      expect(
+        Metalware::Templater::Combiner
+      ).to receive(:new).once.ordered.with(
+        hash_including(firstboot: true)
+      ).and_return(@templater)
+      expect(@templater).to receive(:save).with(
+        '/var/lib/metalware/repo/pxelinux/default',
+        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
+      ).once.ordered
+      expect(
+        Metalware::Templater::Combiner
+      ).not_to receive(:new).ordered.with(
+        hash_including(firstboot: false)
+      )
+
+      expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
+    end
+
+    it 'renders pxelinux twice with firstboot switched if node builds' do
+      expect(
+        Metalware::Templater::Combiner
+      ).to receive(:new).once.ordered.with(
+        hash_including(firstboot: true)
+      ).and_return(@templater)
+      expect(@templater).to receive(:save).with(
+        '/var/lib/metalware/repo/pxelinux/default',
+        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
+      ).once.ordered
+      expect(
+        Metalware::Templater::Combiner
+      ).to receive(:new).once.ordered.with(
+        hash_including(firstboot: false)
+      ).and_return(@templater)
+      expect(@templater).to receive(:save).with(
+        '/var/lib/metalware/repo/pxelinux/default',
+        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
+      ).once.ordered
+
+       run_build('testnode01')
     end
 
   end
@@ -143,7 +188,6 @@ describe Metalware::Commands::Build do
     end
 
     it 'waits for all nodes to report as built before exiting' do
-      allow(@templater).to receive(:save)
       use_short_build_poll_time
       time_to_wait = TEST_BUILD_POLL_SLEEP * 2
 
