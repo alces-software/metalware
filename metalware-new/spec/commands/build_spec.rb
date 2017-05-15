@@ -7,16 +7,8 @@ require 'spec_utils'
 
 # XXX Need to mock nodeattr in this and `hosts` tests? Could just use `genders`
 # from fixtures?
-# TODO Make tests for build timing actually depend on files appearing as
-# command is running? Currently just run command multiple times. Best way to do
-# this I think would be to have integration tests which run the `metal build`
-# and wait for things to happen + create the build files. To have this work
-# when running locally need to have config file where location to store marker
-# files, time to sleep when polling etc come from.
 
 describe Metalware::Commands::Build do
-  TEST_BUILD_POLL_SLEEP = 0.1 # XXX no longer actually used
-
   def run_build(node_identifier, **options_hash)
     SpecUtils.run_command(
       Metalware::Commands::Build, node_identifier, **options_hash
@@ -97,18 +89,8 @@ describe Metalware::Commands::Build do
       )
     end
 
-    it 'waits for the node to report as built before exiting' do
-      time_to_wait = TEST_BUILD_POLL_SLEEP * 2
-
-      use_mock_nodes(not_built_nodes: 'testnode01')
-      expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
-
-      use_mock_nodes
-      expect_runs_within(time_to_wait) { run_build('testnode01') }
-    end
-
     it 'renders pxelinux once with firstboot true if node does not build' do
-      time_to_wait = TEST_BUILD_POLL_SLEEP * 2
+      time_to_wait = 0.2
       use_mock_nodes(not_built_nodes: 'testnode01')
 
       expect(
@@ -184,25 +166,6 @@ describe Metalware::Commands::Build do
         kickstart: 'my_kickstart',
         pxelinux: 'my_pxelinux'
       )
-    end
-
-    it 'waits for all nodes to report as built before exiting' do
-      time_to_wait = TEST_BUILD_POLL_SLEEP * 2
-
-      use_mock_nodes(not_built_nodes: ['testnode01', 'testnode02'])
-      expect_runs_longer_than(time_to_wait) {
-        run_build('testnodes', group: true)
-      }
-
-      use_mock_nodes(not_built_nodes: ['testnode02'])
-      expect_runs_longer_than(time_to_wait) {
-        run_build('testnodes', group: true)
-      }
-
-      use_mock_nodes
-      expect_runs_within(time_to_wait) {
-        run_build('testnodes', group: true)
-      }
     end
   end
 

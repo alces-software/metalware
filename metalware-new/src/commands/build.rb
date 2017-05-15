@@ -81,14 +81,14 @@ module Metalware
         # file yet - best place to do this may be when creating `Node` objects?
         pxelinux_template_path = template_path :pxelinux
         pxelinux_save_path = File.join(
-          '/var/lib/tftpboot/pxelinux.cfg', node.hexadecimal_ip
+          @config.pxelinux_cfg_path, node.hexadecimal_ip
         )
         templater.save(pxelinux_template_path, pxelinux_save_path)
       end
 
       def template_path(template_type)
         File.join(
-          Constants::REPO_PATH,
+          @config.repo_path,
           template_type.to_s,
           options.__send__(template_type)
         )

@@ -12,6 +12,8 @@ module Metalware
       build_poll_sleep: 10,
       built_nodes_storage_path: '/var/lib/metalware/cache',
       rendered_files_path: '/var/lib/metalware/rendered',
+      pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
+      repo_path: '/var/lib/metalware/repo',
     }
 
     def initialize(file)
