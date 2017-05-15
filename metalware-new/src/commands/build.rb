@@ -63,6 +63,8 @@ module Metalware
           sleep @config.build_poll_sleep
         end
 
+      rescue Interrupt
+      ensure
         clear_up_built_node_marker_files
       end
 
