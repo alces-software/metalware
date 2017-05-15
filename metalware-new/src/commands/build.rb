@@ -6,7 +6,6 @@ require 'node'
 require 'iterator'
 
 # XXX Need to handle interrupts
-# XXX Need to remove marker files after building
 
 module Metalware
   module Commands
@@ -63,6 +62,8 @@ module Metalware
 
           sleep @config.build_poll_sleep
         end
+
+        clear_up_built_node_marker_files
       end
 
       private
@@ -92,6 +93,12 @@ module Metalware
           template_type.to_s,
           options.__send__(template_type)
         )
+      end
+
+      def clear_up_built_node_marker_files
+        glob = File.join(@config.built_nodes_storage_path, '*')
+        files = Dir.glob(glob)
+        FileUtils.rm_rf(files)
       end
     end
   end

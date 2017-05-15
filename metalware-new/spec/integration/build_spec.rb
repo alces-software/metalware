@@ -42,6 +42,10 @@ describe '`metal build`' do
     pid
   end
 
+  def expect_clears_up_built_node_marker_files
+    expect(Dir.empty?(TEST_BUILT_NODES_DIR)).to be true
+  end
+
   before :each do
     kill_any_metal_processes
 
@@ -72,6 +76,8 @@ describe '`metal build`' do
       FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node01')
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be false
+
+      expect_clears_up_built_node_marker_files
     end
   end
 
@@ -90,6 +96,8 @@ describe '`metal build`' do
       FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node03')
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be false
+
+      expect_clears_up_built_node_marker_files
     end
   end
 end
