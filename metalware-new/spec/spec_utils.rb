@@ -81,5 +81,9 @@ module SpecUtils
 
       command_class.new(args, options)
     end
+
+    def fixtures_config(config_file)
+      File.join(FIXTURES_PATH, 'configs', config_file)
+    end
   end
 end
