@@ -15,7 +15,7 @@ require 'spec_utils'
 # files, time to sleep when polling etc come from.
 
 describe Metalware::Commands::Build do
-  TEST_BUILD_POLL_SLEEP = 0.1
+  TEST_BUILD_POLL_SLEEP = 0.1 # XXX no longer actually used
 
   def run_build(node_identifier, **options_hash)
     SpecUtils.run_command(
@@ -28,8 +28,8 @@ describe Metalware::Commands::Build do
   def use_mock_nodes(not_built_nodes: [])
     allow(
       Metalware::Node
-    ).to receive(:new).and_wrap_original do |original_new, name|
-      original_new.call(name).tap do |node|
+    ).to receive(:new).and_wrap_original do |original_new, config, name|
+      original_new.call(config, name).tap do |node|
         # Stub this as depends on `gethostip` and `/etc/hosts`
         allow(node).to receive(:hexadecimal_ip).and_return(node.name + '_HEX_IP')
 
@@ -39,10 +39,6 @@ describe Metalware::Commands::Build do
         allow(node).to receive(:built?).and_return(node_built)
       end
     end
-  end
-
-  def use_short_build_poll_time
-    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', TEST_BUILD_POLL_SLEEP)
   end
 
   def expect_runs_longer_than(seconds, &block)
@@ -62,6 +58,10 @@ describe Metalware::Commands::Build do
     allow(@templater).to receive(:save)
     use_mock_nodes
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0)
+    stub_const(
+      'Metalware::Constants::DEFAULT_CONFIG_PATH',
+      SpecUtils.fixtures_config('unit-test.yaml')
+    )
   end
 
   context 'when called without group argument' do
@@ -98,7 +98,6 @@ describe Metalware::Commands::Build do
     end
 
     it 'waits for the node to report as built before exiting' do
-      use_short_build_poll_time
       time_to_wait = TEST_BUILD_POLL_SLEEP * 2
 
       use_mock_nodes(not_built_nodes: 'testnode01')
@@ -188,7 +187,6 @@ describe Metalware::Commands::Build do
     end
 
     it 'waits for all nodes to report as built before exiting' do
-      use_short_build_poll_time
       time_to_wait = TEST_BUILD_POLL_SLEEP * 2
 
       use_mock_nodes(not_built_nodes: ['testnode01', 'testnode02'])

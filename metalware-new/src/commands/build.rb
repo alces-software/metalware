@@ -1,4 +1,5 @@
 
+require 'config'
 require 'templater'
 require 'constants'
 require 'node'
@@ -18,13 +19,14 @@ module Metalware
           pxelinux: 'default'
         @args = args
         @options = options
+        @config = Config.new(options.config)
 
         node_identifier = args.first
         maybe_node = options.group ? nil : node_identifier
         maybe_group = options.group ? node_identifier : nil
 
         lambda_proc = -> (template_parameters) do
-          node = Node.new(template_parameters[:nodename])
+          node = Node.new(@config, template_parameters[:nodename])
           templater = Templater::Combiner.new(template_parameters)
           render_kickstart(templater, node)
           render_pxelinux(templater, node)
@@ -39,7 +41,7 @@ module Metalware
 
         built_nodes = []
         nodes_built_lambda_proc = -> (iterator_options) do
-          node = Node.new(iterator_options[:nodename])
+          node = Node.new(@config, iterator_options[:nodename])
 
           if node.built?
             templater = Templater::Combiner.new({
@@ -59,7 +61,7 @@ module Metalware
           Iterator.run(maybe_group, nodes_built_lambda_proc, iterator_options).all?
           all_nodes_built = built_nodes.all?
 
-          sleep Constants::BUILD_POLL_SLEEP
+          sleep @config.build_poll_sleep
         end
       end
 
@@ -69,7 +71,7 @@ module Metalware
         kickstart_template_path = template_path :kickstart
         # XXX Ensure this path has been created
         kickstart_save_path = File.join(
-          Constants::RENDERED_PATH, 'kickstart', node.name
+          @config.rendered_files_path, 'kickstart', node.name
         )
         templater.save(kickstart_template_path, kickstart_save_path)
       end

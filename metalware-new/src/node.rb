@@ -5,7 +5,8 @@ module Metalware
   class Node
     attr_reader :name
 
-    def initialize(name)
+    def initialize(config, name)
+      @config = config
       @name = name
     end
 
@@ -20,7 +21,7 @@ module Metalware
     private
 
     def build_complete_marker_file
-      File.join(Constants::CACHE_PATH, "metalwarebooter.#{name}")
+      File.join(@config.built_nodes_storage_path, "metalwarebooter.#{name}")
     end
   end
 end
