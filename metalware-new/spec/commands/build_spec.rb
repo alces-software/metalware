@@ -47,7 +47,6 @@ describe Metalware::Commands::Build do
     SpecUtils.use_mock_templater(self)
     allow(@templater).to receive(:save)
     use_mock_nodes
-    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0)
     SpecUtils.use_unit_test_config(self)
   end
 
