@@ -1,4 +1,6 @@
 
+require 'active_support/core_ext/string/strip'
+
 require 'config'
 require 'templater'
 require 'constants'
@@ -18,8 +20,7 @@ module Metalware
         wait_for_nodes_to_build
         teardown
       rescue Interrupt
-        Output.stderr 'Exiting...'
-        teardown
+        handle_interrupt
       end
 
       private
@@ -89,11 +90,9 @@ module Metalware
         end
       end
 
-      def render_permanent_pxelinux_configs
+      def render_all_permanent_pxelinux_configs
         @nodes.template_each firstboot: false do |templater, node|
-          if node.built?
-            render_pxelinux(templater, node)
-          end
+          render_pxelinux(templater, node)
         end
       end
 
@@ -106,6 +105,26 @@ module Metalware
         glob = File.join(@config.built_nodes_storage_path, '*')
         files = Dir.glob(glob)
         FileUtils.rm_rf(files)
+      end
+
+      def handle_interrupt
+        Output.stderr 'Exiting...'
+        ask_if_should_rerender_pxelinux_configs
+        teardown
+      rescue Interrupt
+        Output.stderr 'Re-rendering all permanent PXELINUX templates anyway...'
+        render_all_permanent_pxelinux_configs
+        teardown
+      end
+
+      def ask_if_should_rerender_pxelinux_configs
+        should_rerender = <<-EOF.strip_heredoc
+          Re-render permanent PXELINUX templates for all nodes as if build succeeded?
+          [yes/no]
+        EOF
+        if agree(should_rerender)
+          render_all_permanent_pxelinux_configs
+        end
       end
     end
   end
