@@ -15,10 +15,10 @@ describe Metalware::NodeattrInterface do
       ).to eq(['login1'])
       expect(
         Metalware::NodeattrInterface.nodes_in_group('nodes')
-      ).to eq(['node01', 'node02', 'node03'])
+      ).to eq(['testnode01', 'testnode02', 'testnode03'])
       expect(
         Metalware::NodeattrInterface.nodes_in_group('all')
-      ).to eq(['login1', 'node01', 'node02', 'node03'])
+      ).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
     end
   end
 end

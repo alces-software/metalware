@@ -25,6 +25,7 @@ module SpecUtils
       end
     end
 
+    # XXX remove post-refactoring
     def mock_iterator_run_nodeattr(example_group)
       example_group.instance_exec do
         # TODO break all running of `nodeattr` in Metalware out so can cleanly
