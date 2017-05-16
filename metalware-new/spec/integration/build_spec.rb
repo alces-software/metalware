@@ -36,7 +36,7 @@ describe '`metal build`' do
 
   def fork_command(command)
     pid = fork do
-      `#{command}`
+      exec command
     end
     Process.detach(pid)
     pid
@@ -97,6 +97,22 @@ describe '`metal build`' do
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be false
 
+      expect_clears_up_built_node_marker_files
+    end
+
+    it 'handles interrupt' do
+      metal_pid = fork_command "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+
+      wait_longer_than_build_poll
+      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node01')
+      wait_longer_than_build_poll
+
+      expect(process_exists?(metal_pid)).to be true
+
+      Process.kill("INT", metal_pid)
+      wait_longer_than_build_poll
+
+      expect(process_exists?(metal_pid)).to be false
       expect_clears_up_built_node_marker_files
     end
   end
