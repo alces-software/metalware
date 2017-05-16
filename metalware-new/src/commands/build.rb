@@ -32,7 +32,7 @@ module Metalware
         @options = options
         @config = Config.new(options.config)
         node_identifier = args.first
-        @nodes = Nodes.new(@config, node_identifier, options.group)
+        @nodes = Nodes.create(@config, node_identifier, options.group)
       end
 
       def render_build_templates

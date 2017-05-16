@@ -9,16 +9,21 @@ module Metalware
   class Nodes
     include Enumerable
 
+    # Private as can only get `Nodes` instance via other methods in this class.
+    private_class_method :new
+
     delegate :length, to: :@nodes
 
-    def initialize(config, node_identifier, is_group)
+    # Create instance of `Nodes` from a single node or gender group.
+    def self.create(config, node_identifier, is_group)
       if is_group
-        @nodes =
-          NodeattrInterface.nodes_in_group(node_identifier)
+        nodes = NodeattrInterface.nodes_in_group(node_identifier)
           .map {|name| Node.new(config, name)}
       else
-        @nodes = [Node.new(config, node_identifier)]
+        nodes = [Node.new(config, node_identifier)]
       end
+
+      new(nodes)
     end
 
     def each(&block)
@@ -35,6 +40,12 @@ module Metalware
 
         block.call(templater, node)
       end
+    end
+
+    private
+
+    def initialize(nodes)
+      @nodes = nodes
     end
   end
 end
