@@ -107,22 +107,19 @@ describe '`metal build`' do
       # Initial interrupt does not exit CLI; gives prompt for whether to
       # re-render all Pxelinux configs as if nodes all built.
 
-      it 'exits on second interrupt' do
-        metal_pid = fork_command "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+      def expect_interrupt_does_not_kill(pid)
+        Process.kill('INT', pid)
         wait_longer_than_build_poll
-        expect(process_exists?(metal_pid)).to be true
+        expect(process_exists?(pid)).to be true
+      end
 
-        Process.kill('INT', metal_pid)
+      def expect_interrupt_kills(pid)
+        Process.kill('INT', pid)
         wait_longer_than_build_poll
-        expect(process_exists?(metal_pid)).to be true
+        expect(process_exists?(pid)).to be false
+      end
 
-        Process.kill('INT', metal_pid)
-        wait_longer_than_build_poll
-        expect(process_exists?(metal_pid)).to be false
-        expect_clears_up_built_node_marker_files
-
+      def expect_permanent_pxelinux_rendered_for_testnode01
         testnode01_pxelinux =  File.read(
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
@@ -131,15 +128,43 @@ describe '`metal build`' do
             nodename: 'testnode01', index: 0, firstboot: false
           }).file(PXELINUX_TEMPLATE)
         )
+      end
 
-        testnode02_pxelinux =  File.read(
+      def expect_permanent_pxelinux_rendered_for_testnode02
+        testnode01_pxelinux =  File.read(
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
-        expect(testnode02_pxelinux).to eq(
+        expect(testnode01_pxelinux).to eq(
           Metalware::Templater::Combiner.new({
             nodename: 'testnode02', index: 1, firstboot: false
           }).file(PXELINUX_TEMPLATE)
         )
+      end
+
+      def expect_firstboot_pxelinux_rendered_for_testnode02
+        testnode01_pxelinux =  File.read(
+          File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
+        )
+        expect(testnode01_pxelinux).to eq(
+          Metalware::Templater::Combiner.new({
+            nodename: 'testnode02', index: 1, firstboot: true
+          }).file(PXELINUX_TEMPLATE)
+        )
+      end
+
+      it 'exits on second interrupt' do
+        metal_pid = fork_command "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+
+        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+        wait_longer_than_build_poll
+        expect(process_exists?(metal_pid)).to be true
+
+        expect_interrupt_does_not_kill(metal_pid)
+        expect_interrupt_kills(metal_pid)
+        expect_clears_up_built_node_marker_files
+
+        expect_permanent_pxelinux_rendered_for_testnode01
+        expect_permanent_pxelinux_rendered_for_testnode02
       end
 
       it 'handles "yes" to interrupt prompt' do
@@ -151,32 +176,15 @@ describe '`metal build`' do
           wait_longer_than_build_poll
           expect(process_exists?(metal_pid)).to be true
 
-          Process.kill('INT', metal_pid)
-          wait_longer_than_build_poll
-          expect(process_exists?(metal_pid)).to be true
+          expect_interrupt_does_not_kill(metal_pid)
 
           stdin.puts('yes')
           wait_longer_than_build_poll
           expect(process_exists?(metal_pid)).to be false
           expect_clears_up_built_node_marker_files
 
-          testnode01_pxelinux =  File.read(
-            File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
-          )
-          expect(testnode01_pxelinux).to eq(
-            Metalware::Templater::Combiner.new({
-              nodename: 'testnode01', index: 0, firstboot: false
-            }).file(PXELINUX_TEMPLATE)
-          )
-
-          testnode02_pxelinux =  File.read(
-            File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
-          )
-          expect(testnode02_pxelinux).to eq(
-            Metalware::Templater::Combiner.new({
-              nodename: 'testnode02', index: 1, firstboot: false
-            }).file(PXELINUX_TEMPLATE)
-          )
+          expect_permanent_pxelinux_rendered_for_testnode01
+          expect_permanent_pxelinux_rendered_for_testnode02
         end
       end
 
@@ -189,32 +197,15 @@ describe '`metal build`' do
           wait_longer_than_build_poll
           expect(process_exists?(metal_pid)).to be true
 
-          Process.kill('INT', metal_pid)
-          wait_longer_than_build_poll
-          expect(process_exists?(metal_pid)).to be true
+          expect_interrupt_does_not_kill(metal_pid)
 
           stdin.puts('no')
           wait_longer_than_build_poll
           expect(process_exists?(metal_pid)).to be false
           expect_clears_up_built_node_marker_files
 
-          testnode01_pxelinux =  File.read(
-            File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
-          )
-          expect(testnode01_pxelinux).to eq(
-            Metalware::Templater::Combiner.new({
-              nodename: 'testnode01', index: 0, firstboot: false
-            }).file(PXELINUX_TEMPLATE)
-          )
-
-          testnode02_pxelinux =  File.read(
-            File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
-          )
-          expect(testnode02_pxelinux).to eq(
-            Metalware::Templater::Combiner.new({
-              nodename: 'testnode02', index: 1, firstboot: true
-            }).file(PXELINUX_TEMPLATE)
-          )
+          expect_permanent_pxelinux_rendered_for_testnode01
+          expect_firstboot_pxelinux_rendered_for_testnode02
         end
       end
     end
