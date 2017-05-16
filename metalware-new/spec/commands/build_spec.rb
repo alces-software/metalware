@@ -41,12 +41,6 @@ describe Metalware::Commands::Build do
     end.to raise_error TimeoutError
   end
 
-  def expect_runs_within(seconds, &block)
-    expect do
-      Timeout::timeout(seconds, &block)
-    end.not_to raise_error TimeoutError
-  end
-
   before :each do
     SpecUtils.use_mock_templater(self)
     allow(@templater).to receive(:save)
