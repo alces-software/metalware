@@ -94,11 +94,6 @@ describe Metalware::Commands::Build do
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once.ordered
-      expect(
-        Metalware::Templater::Combiner
-      ).not_to receive(:new).ordered.with(
-        hash_including(firstboot: false)
-      )
 
       expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
     end

@@ -16,7 +16,6 @@ module Metalware
         setup(args, options)
         render_build_templates
         wait_for_nodes_to_build
-        render_permanent_pxelinux_configs
         teardown
       rescue Interrupt
         Output.stderr 'Exiting...'
@@ -72,13 +71,22 @@ module Metalware
       def wait_for_nodes_to_build
         Output.stderr 'Waiting for nodes to report as built...',
           '(Ctrl-C to terminate)'
-        while !all_nodes_built?
+
+        rerendered_nodes = []
+        loop do
+          # XXX Refactor with below?
+          @nodes.template_each firstboot: false do |templater, node|
+            if !rerendered_nodes.include?(node) && node.built?
+              render_pxelinux(templater, node)
+              rerendered_nodes << node
+            end
+          end
+
+          all_nodes_reported_built = rerendered_nodes.length == @nodes.length
+          break if all_nodes_reported_built
+
           sleep @config.build_poll_sleep
         end
-      end
-
-      def all_nodes_built?
-        @nodes.all? { |node| node.built? }
       end
 
       def render_permanent_pxelinux_configs

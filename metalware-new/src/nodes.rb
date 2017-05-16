@@ -1,4 +1,6 @@
 
+require 'active_support/core_ext/module/delegation'
+
 require 'nodeattr_interface'
 require 'node'
 
@@ -6,6 +8,8 @@ require 'node'
 module Metalware
   class Nodes
     include Enumerable
+
+    delegate :length, to: :@nodes
 
     def initialize(config, node_identifier, is_group)
       if is_group
