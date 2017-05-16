@@ -17,6 +17,8 @@ describe Metalware::Commands::Hosts do
 
   before :each do
     SpecUtils.use_mock_templater(self)
+    SpecUtils.use_mock_genders(self)
+    SpecUtils.use_unit_test_config(self)
   end
 
   context 'when called without group argument' do
@@ -53,14 +55,10 @@ describe Metalware::Commands::Hosts do
   end
 
   context 'when called for group' do
-    before :each do
-      SpecUtils.mock_iterator_run_nodeattr(self)
-    end
-
     it 'appends to hosts file by default' do
       SpecUtils.expect_it_templates_for_each_node(self)
 
-      expect(@templater).to receive(:append).twice.with(
+      expect(@templater).to receive(:append).thrice.with(
         '/var/lib/metalware/repo/hosts/default',
         '/etc/hosts'
       )
@@ -72,7 +70,7 @@ describe Metalware::Commands::Hosts do
       it 'outputs what would be appended' do
         SpecUtils.expect_it_templates_for_each_node(self)
 
-        expect(@templater).to receive(:file).twice.with(
+        expect(@templater).to receive(:file).thrice.with(
           '/var/lib/metalware/repo/hosts/default'
         )
 

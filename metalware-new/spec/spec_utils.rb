@@ -25,17 +25,11 @@ module SpecUtils
       end
     end
 
-    # XXX remove post-refactoring
-    def mock_iterator_run_nodeattr(example_group)
+    def use_unit_test_config(example_group)
       example_group.instance_exec do
-        # TODO break all running of `nodeattr` in Metalware out so can cleanly
-        # mock results.
-        allow_any_instance_of(
-          Metalware::Iterator::Nodes
-        ).to receive(
-          :run_nodeattr
-        ).and_return(
-          ['testnode01', 'testnode02']
+        stub_const(
+          'Metalware::Constants::DEFAULT_CONFIG_PATH',
+          SpecUtils.fixtures_config('unit-test.yaml')
         )
       end
     end

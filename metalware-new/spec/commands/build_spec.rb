@@ -48,10 +48,7 @@ describe Metalware::Commands::Build do
     allow(@templater).to receive(:save)
     use_mock_nodes
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0)
-    stub_const(
-      'Metalware::Constants::DEFAULT_CONFIG_PATH',
-      SpecUtils.fixtures_config('unit-test.yaml')
-    )
+    SpecUtils.use_unit_test_config(self)
   end
 
   context 'when called without group argument' do
