@@ -30,6 +30,13 @@ module Metalware
       @nodes.each(&block)
     end
 
+    def select(&block)
+      nodes = @nodes.select(&block)
+
+      # Return result as `Nodes` instance rather than array of `Node`s.
+      self.class.send(:new, nodes)
+    end
+
     def template_each(**additional_template_parameters, &block)
       @nodes.each_with_index do |node, index|
         template_parameters = {

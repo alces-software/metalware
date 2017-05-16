@@ -75,12 +75,12 @@ module Metalware
 
         rerendered_nodes = []
         loop do
-          # XXX Refactor with below?
-          @nodes.template_each firstboot: false do |templater, node|
-            if !rerendered_nodes.include?(node) && node.built?
-              render_pxelinux(templater, node)
-              rerendered_nodes << node
-            end
+          @nodes.select do |node|
+            !rerendered_nodes.include?(node) && node.built?
+          end.
+          tap do |nodes|
+            render_permanent_pxelinux_configs(nodes)
+            rerendered_nodes.push(*nodes)
           end
 
           all_nodes_reported_built = rerendered_nodes.length == @nodes.length
@@ -91,7 +91,11 @@ module Metalware
       end
 
       def render_all_permanent_pxelinux_configs
-        @nodes.template_each firstboot: false do |templater, node|
+        render_permanent_pxelinux_configs(@nodes)
+      end
+
+      def render_permanent_pxelinux_configs(nodes)
+        nodes.template_each firstboot: false do |templater, node|
           render_pxelinux(templater, node)
         end
       end
