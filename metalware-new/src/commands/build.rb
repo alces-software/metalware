@@ -17,11 +17,10 @@ module Metalware
         render_build_templates
         wait_for_nodes_to_build
         render_permanent_pxelinux_configs
+        teardown
       rescue Interrupt
         Output.stderr 'Exiting...'
-      ensure
-        clear_up_built_node_marker_files
-        Output.stderr 'Done.'
+        teardown
       end
 
       private
@@ -88,6 +87,11 @@ module Metalware
             render_pxelinux(templater, node)
           end
         end
+      end
+
+      def teardown
+        clear_up_built_node_marker_files
+        Output.stderr 'Done.'
       end
 
       def clear_up_built_node_marker_files
