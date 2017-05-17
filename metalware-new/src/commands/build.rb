@@ -9,7 +9,6 @@ require 'nodes'
 require 'iterator'
 require 'output'
 
-# XXX Need to handle interrupts
 
 module Metalware
   module Commands
