@@ -43,8 +43,8 @@ module Metalware
           'Waiting for new nodes to appear on the network, please network boot them now...',
           '(Ctrl-C to terminate)'
 
-        @network.each do |p|
-          process_packet(p.udp_data) if p.udp?
+        @network.each_packet do |packet|
+          process_packet(packet.udp_data) if packet.udp?
         end
       end
 
