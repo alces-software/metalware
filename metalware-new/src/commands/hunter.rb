@@ -102,7 +102,7 @@ module Metalware
           # @hunter_logger.info("#{name}-#{hwaddr}")
           Output.stderr 'Logged node'
 
-        rescue Exception => e
+        rescue => e
           warn e # XXX Needed?
           Output.stderr "FAIL: #{e.message}"
           retry if agree('Retry? [yes/no]:')
