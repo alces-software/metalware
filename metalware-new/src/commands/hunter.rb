@@ -22,7 +22,6 @@ module Metalware
       def setup(options)
         # XXX Always default interface to Metalware build interface (where
         # possible)?
-        # XXX setup Pcaplet here so fails fast if this fails
         options.default \
           interface: 'eth0',
           prefix: 'node',
@@ -35,6 +34,8 @@ module Metalware
         @templateFilename = File.join(Constants::REPO_PATH, 'dhcp', 'default') # XXX Also to remove
         @detected_macs = []
         # @hunter_logger = Alces::Stack::Log.create_log("/var/log/metalware/hunter.log")
+
+        setup_network_connection
       end
 
       def listen!
@@ -42,12 +43,12 @@ module Metalware
           'Waiting for new nodes to appear on the network, please network boot them now...',
           '(Ctrl-C to terminate)'
 
-        network.each do |p|
+        @network.each do |p|
           process_packet(p.udp_data) if p.udp?
         end
       end
 
-      def network
+      def setup_network_connection
         @network ||= Pcaplet.new("-s 600 -n -i #{@options.interface}").tap do |network|
           filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
           network.add_filter(filter)
