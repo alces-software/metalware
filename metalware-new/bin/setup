@@ -10,6 +10,9 @@ rvm rvmrc warning ignore allGemfiles
 # Required for rugged gem.
 yum install cmake
 
+# Required for pcap gem.
+yum install libpcap libpcap-devel
+
 # Required for `nodeattr`.
 yum install genders
 

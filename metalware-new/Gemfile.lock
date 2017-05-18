@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/alces-software/ruby-pcap.git
+  revision: 42728a34e955ad00a5d033f4ef999a75a15f6f67
+  specs:
+    pcap (0.7.7)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -15,6 +21,7 @@ GEM
     i18n (0.8.1)
     json (2.1.0)
     minitest (5.10.2)
+    net-dhcp (1.3.3)
     recursive-open-struct (1.0.4)
     rspec (3.6.0)
       rspec-core (~> 3.6.0)
@@ -45,6 +52,8 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   commander
+  net-dhcp
+  pcap!
   recursive-open-struct
   rspec
   rugged
