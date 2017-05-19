@@ -147,6 +147,7 @@ module Metalware
       def ordered_node_config_files
         list = [ "all" ]
         return list if !nodename
+        # XXX Move this to `NodeattrInterface` and use `SystemCommand.run`.
         list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
         if list_str.empty? then return list end
         list.concat(list_str.split(/\n/).reverse)
@@ -243,18 +244,17 @@ module Metalware
       end
 
       def hostip
-        hostip = `#{determine_hostip_script}`.chomp
-        if $?.success?
-          hostip
-        else
-          # If script failed for any reason fall back to using `hostname -i`,
-          # which may or may not give the IP on the interface we actually want
-          # to use (note: the dance with pipes is so we only get the last word
-          # in the output, as I've had the IPv6 IP included first before, which
-          # breaks all the things).
-          # XXX Warn about falling back to this?
-          `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
-        end
+        SystemCommand.run(determine_hostip_script).chomp
+      rescue SystemCommandError
+        # If script failed for any reason fall back to using `hostname -i`,
+        # which may or may not give the IP on the interface we actually want
+        # to use (note: the dance with pipes is so we only get the last word
+        # in the output, as I've had the IPv6 IP included first before, which
+        # breaks all the things).
+        # XXX Warn about falling back to this?
+        SystemCommand.run(
+          "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
+        ).chomp
       end
 
       private

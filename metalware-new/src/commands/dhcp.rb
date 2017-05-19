@@ -2,6 +2,7 @@
 require 'constants'
 require 'output'
 require 'templater'
+require 'system_command'
 
 
 module Metalware
@@ -49,7 +50,7 @@ module Metalware
 
       def install_rendered_template
         FileUtils.copy(RENDERED_DHCPD_HOSTS_STAGING_FILE, DHCPD_HOSTS_FILE)
-        `systemctl restart dhcpd` # XXX refactor this to be more robust
+        SystemCommand.run 'systemctl restart dhcpd'
       end
     end
   end

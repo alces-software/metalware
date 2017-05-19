@@ -7,7 +7,7 @@ module Metalware
     # XXX Move all other interactions with `nodeattr` to this module.
     class << self
       def nodes_in_group(group)
-        stdout = `#{Constants::NODEATTR_COMMAND} -c #{group}`
+        stdout = SystemCommand.run "#{Constants::NODEATTR_COMMAND} -c #{group}"
         if stdout.empty?
           raise NoGenderGroupError, "Could not find gender group: #{group}"
         end
