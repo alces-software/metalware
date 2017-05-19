@@ -24,6 +24,7 @@ require "ostruct"
 require "yaml"
 require 'recursive-open-struct'
 require 'active_support/core_ext/hash/keys'
+require 'hashie'
 
 require "constants"
 require 'nodeattr_interface'
@@ -212,16 +213,19 @@ module Metalware
       end
 
       def genders
+        # XXX Do we want to make genders available as a `Hashie::Mash` too?
+        # Depends if we want to be able to iterate through genders or just get
+        # list of nodes in a specified gender
         GenderGroupProxy
       end
 
       def hunter
-        YAML.load_file(Constants::HUNTER_PATH).map do |node_config|
-          OpenStruct.new(node_config)
+        if File.exists? Constants::HUNTER_PATH
+          Hashie::Mash.load(Constants::HUNTER_PATH)
+        else
+          # XXX Should warn/log that resorting to this?
+          Hashie::Mash.new
         end
-      rescue Errno::ENOENT
-        # XXX Should warn/log that resorting to this?
-        []
       end
 
       def hosts_url
