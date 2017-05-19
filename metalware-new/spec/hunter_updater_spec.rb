@@ -34,7 +34,7 @@ describe Metalware::HunterUpdater do
 
       it 'outputs info if replacing node name' do
         # Replaces existing entry with node name.
-        expect(Output).to receive(:stderr).with(
+        expect(Metalware::Output).to receive(:stderr).with(
           /Replacing.*somenode01.*some_mac_address/
         )
         updater.add('somenode01', 'another_mac_address')
@@ -43,13 +43,13 @@ describe Metalware::HunterUpdater do
         })
 
         # Does not replace when new node name.
-        expect(Output).not_to receive(:stderr)
+        expect(Metalware::Output).not_to receive(:stderr)
         updater.add('somenode02', 'some_mac_address')
       end
 
       it 'outputs info if replacing MAC address' do
         # Replaces existing entry with MAC address.
-        expect(Output).to receive(:stderr).with(
+        expect(Metalware::Output).to receive(:stderr).with(
           /Replacing.*some_mac_address.*somenode01/
         )
         updater.add('somenode02', 'some_mac_address')
@@ -58,7 +58,7 @@ describe Metalware::HunterUpdater do
         })
 
         # Does not replace when new MAC address.
-        expect(Output).not_to receive(:stderr)
+        expect(Metalware::Output).not_to receive(:stderr)
         updater.add('somenode01', 'another_mac_address')
       end
     end
