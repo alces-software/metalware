@@ -214,8 +214,7 @@ module Metalware
       end
 
       def hunter
-        hunter_config_path = File.join(Constants::CACHE_PATH, 'hunter.yaml')
-        YAML.load_file(hunter_config_path).map do |node_config|
+        YAML.load_file(Constants::HUNTER_PATH).map do |node_config|
           OpenStruct.new(node_config)
         end
       rescue Errno::ENOENT

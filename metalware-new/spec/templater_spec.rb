@@ -6,7 +6,7 @@ require 'spec_utils'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
-TEST_CACHE_PATH = File.join(FIXTURES_PATH, 'cache')
+TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
 describe Metalware::Templater::Combiner do
@@ -108,7 +108,7 @@ describe Metalware::Templater::Combiner do
       stub_const('Metalware::Constants::METALWARE_INSTALL_PATH', FIXTURES_PATH)
 
       # Stub this so mock hunter config used.
-      stub_const('Metalware::Constants::CACHE_PATH', TEST_CACHE_PATH)
+      stub_const('Metalware::Constants::HUNTER_PATH', TEST_HUNTER_PATH)
 
       SpecUtils.use_mock_genders(self)
     end
@@ -145,7 +145,7 @@ describe Metalware::Templater::Combiner do
 
     context 'when no hunter config file present' do
       before do
-        stub_const('Metalware::Constants::CACHE_PATH', '/non-existent')
+        stub_const('Metalware::Constants::HUNTER_PATH', '/non-existent')
       end
 
       it 'loads the hunter parameter as an empty array' do
