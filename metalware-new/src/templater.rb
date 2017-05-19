@@ -199,6 +199,8 @@ module Metalware
         def method_missing(group_symbol)
           NodeattrInterface.nodes_in_group(group_symbol)
         rescue NoGenderGroupError
+          # XXX Should warn/log that resorting to this? Here or in
+          # `MagicNamespace`?
           []
         end
       end
@@ -218,6 +220,7 @@ module Metalware
           OpenStruct.new(node_config)
         end
       rescue Errno::ENOENT
+        # XXX Should warn/log that resorting to this?
         []
       end
 
@@ -245,6 +248,7 @@ module Metalware
           # to use (note: the dance with pipes is so we only get the last word
           # in the output, as I've had the IPv6 IP included first before, which
           # breaks all the things).
+          # XXX Warn about falling back to this?
           `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
         end
       end
