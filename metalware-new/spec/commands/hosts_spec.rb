@@ -1,6 +1,4 @@
 
-require 'commander'
-
 require 'commands/hosts'
 require 'templater'
 require 'iterator'
