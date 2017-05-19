@@ -9,6 +9,10 @@ module Metalware
           STDERR.puts(*lines)
         end
       end
+
+      def stderr_indented_error_message(text)
+        stderr text.gsub(/^/, '>>> ')
+      end
     end
   end
 end
