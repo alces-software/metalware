@@ -19,104 +19,79 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/execution'
 require 'alces/stack/iterator'
-require 'alces/stack/status/jobs'
+require 'alces/stack/log'
+require 'alces/stack/options'
+require 'alces/stack/status/job'
 
 module Alces
   module Stack
     module Status
       class Monitor
-        class << self
-          attr_accessor :log
-        end
-        include Alces::Tools::Execution
-
-        def initialize(nodes, cmds, limit)
-          @limit = limit
-          @nodes = nodes
-          @cmds = cmds
+        def initialize(options = {})
+          @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
+          @opt = Alces::Stack::Options.new(options)
+          @queue = Queue.new
+          @running = []
         end
 
-        def fork!
-          @pid = fork do
-            self.class.log.info "Monitor #{Process.pid}"
-            start
-          end
-          return self
-        end
-
-        def wait; Process.waitpid(@pid); end
-        def wait_wnohang; Process.waitpid(@pid, Process::WNOHANG); end
-
-        def pid; @pid; end
-
-        def kill
-          puts "KILL"
-          if @kill_sig_received
-            Process.kill(9, @pid) unless @pid.nil?
-            Alces::Stack::Log.warn "Force shutdown of monitor process"
-          end
-        rescue
-        end
-
-        # ----- FORKED METHODS BELOW THIS LINE ------
         def start
-          create_jobs
-          monitor_jobs
-        rescue StandardError => e
-          Alces::Stack::Log.fatal e.inspect
-          self.class.log.fatal e.inspect
-          @error = true
-          teardown_jobs
-          raise e
-        rescue Interrupt
-          @error = true
-        ensure
-          teardown_jobs
+          @thread = Thread.new {
+            begin
+              @status_log.info "Monitor Thread: #{Thread.current}"
+              create_jobs
+              monitor_jobs
+              #@status_log.info "Monitor Finished"
+            rescue => e
+              @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
+              @status_log.fatal e.backtrace
+            end
+          }
+          self
+        rescue => e
+          @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
+          @status_log.fatal e.backtrace
+        end
+
+        attr_reader :thread
+
+        # ----- THREAD METHODS BELOW THIS LINE ------
+        def add_job_queue(nodename, cmd)
+          @queue.push({ nodename: nodename, cmd: cmd })
+        end
+
+        def start_next_job(idx)
+          job = @queue.pop
+          @running[idx] = Alces::Stack::Status::Job
+            .new(job[:nodename], job[:cmd], @opt.time_limit).start
         end
 
         def create_jobs
-          @jobs = Alces::Stack::Status::Jobs.new()
-          @nodes.each do |node|
-            @cmds.each do |cmd|
-              @jobs.add(node, cmd)
-              if @limit > 0
-                @jobs.start
-                @limit -= 1
+          idx = 0
+          @opt.nodes.each do |node|
+            @opt.cmds.each do |cmd|
+              add_job_queue(node, cmd)
+              if idx < @opt.thread_limit
+                start_next_job(idx)
+                idx += 1
               end
             end 
           end
         end
 
         def monitor_jobs
-          while @jobs.finished
-            @jobs.start if @jobs.start?
+          while @running.length > 0
+            @running.each_with_index do |job, idx|
+              unless job.thread.alive?
+                job.thread.join
+                if @queue.length > 0
+                  start_next_job(idx)
+                else
+                  @running.delete_at(idx)
+                end
+              end
+            end
           end
-        end
-
-        def teardown_jobs
-          $stdout.flush
-          $stderr.flush
-          $stderr.print "Exiting...." if @error
-          @jobs.reset_queue
-          running = @jobs.running
-          unless running.nil?
-            running.keys.each { |k| 
-              begin; Process.kill(2, k); rescue; end
-            }
-          end 
-          monitor_jobs
-          $stderr.puts "Done" if @error
-          Kernel.exit
-        rescue Interrupt
-          running = @jobs.running
-          unless running.nil?
-            running.keys.each { |k| 
-              begin; Process.kill(2, k); rescue; end
-            }
-          end
-          $stderr.puts "FORCED EXIT"
         end
       end
     end
