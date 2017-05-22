@@ -126,7 +126,7 @@ describe '`metal build`' do
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater::Combiner.new({
+          Metalware::Templater.new({
             nodename: 'testnode01', index: 0, firstboot: false
           }).file(PXELINUX_TEMPLATE)
         )
@@ -137,7 +137,7 @@ describe '`metal build`' do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater::Combiner.new({
+          Metalware::Templater.new({
             nodename: 'testnode02', index: 1, firstboot: false
           }).file(PXELINUX_TEMPLATE)
         )
@@ -148,7 +148,7 @@ describe '`metal build`' do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater::Combiner.new({
+          Metalware::Templater.new({
             nodename: 'testnode02', index: 1, firstboot: true
           }).file(PXELINUX_TEMPLATE)
         )

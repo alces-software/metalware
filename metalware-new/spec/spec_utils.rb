@@ -16,9 +16,9 @@ module SpecUtils
 
     def use_mock_templater(example_group)
       example_group.instance_exec do
-        @templater = object_double(Metalware::Templater::Combiner.new)
+        @templater = object_double(Metalware::Templater.new)
         allow(
-          Metalware::Templater::Combiner
+          Metalware::Templater
         ).to receive(:new).and_return(
           @templater
         )
@@ -39,7 +39,7 @@ module SpecUtils
     def expect_it_templates_for_each_node(example_group)
       example_group.instance_exec do
         expect(
-          Metalware::Templater::Combiner
+          Metalware::Templater
         ).to receive(:new).with(
           hash_including(
             nodename: 'testnode01',
@@ -47,7 +47,7 @@ module SpecUtils
           )
         ).ordered
         expect(
-          Metalware::Templater::Combiner
+          Metalware::Templater
         ).to receive(:new).with(
           hash_including(
             nodename: 'testnode02',
@@ -59,7 +59,7 @@ module SpecUtils
 
     def expect_it_templates_for_single_node(example_group)
       example_group.instance_exec do
-        expect(Metalware::Templater::Combiner).to receive(:new).with(
+        expect(Metalware::Templater).to receive(:new).with(
           hash_including(nodename: 'testnode01')
         )
       end

@@ -86,7 +86,7 @@ describe Metalware::Commands::Build do
       use_mock_nodes(not_built_nodes: 'testnode01')
 
       expect(
-        Metalware::Templater::Combiner
+        Metalware::Templater
       ).to receive(:new).once.ordered.with(
         hash_including(firstboot: true)
       ).and_return(@templater)
@@ -100,7 +100,7 @@ describe Metalware::Commands::Build do
 
     it 'renders pxelinux twice with firstboot switched if node builds' do
       expect(
-        Metalware::Templater::Combiner
+        Metalware::Templater
       ).to receive(:new).once.ordered.with(
         hash_including(firstboot: true)
       ).and_return(@templater)
@@ -109,7 +109,7 @@ describe Metalware::Commands::Build do
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once.ordered
       expect(
-        Metalware::Templater::Combiner
+        Metalware::Templater
       ).to receive(:new).once.ordered.with(
         hash_including(firstboot: false)
       ).and_return(@templater)

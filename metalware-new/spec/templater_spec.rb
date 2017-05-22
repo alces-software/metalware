@@ -9,7 +9,7 @@ TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
-describe Metalware::Templater::Combiner do
+describe Metalware::Templater do
   def expect_renders(templater, expected)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.
@@ -21,7 +21,7 @@ describe Metalware::Templater::Combiner do
   describe '#file' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
-        templater = Metalware::Templater::Combiner.new
+        templater = Metalware::Templater.new
         expected = <<-EOF
         This is a test template
         some_passed_value:
@@ -38,7 +38,7 @@ describe Metalware::Templater::Combiner do
 
     context 'when templater passed parameters' do
       it 'renders template with extra passed parameters' do
-        templater = Metalware::Templater::Combiner.new({
+        templater = Metalware::Templater.new({
           some_passed_value: 'my_value'
         })
         expected = <<-EOF
@@ -61,7 +61,7 @@ describe Metalware::Templater::Combiner do
       end
 
       it 'renders template with repo parameters' do
-        templater = Metalware::Templater::Combiner.new
+        templater = Metalware::Templater.new
         expected = <<-EOF
         This is a test template
         some_passed_value:
@@ -79,8 +79,8 @@ describe Metalware::Templater::Combiner do
         stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
 
         expect{
-          Metalware::Templater::Combiner.new
-        }.to raise_error(Metalware::Templater::Combiner::LoopErbError)
+          Metalware::Templater.new
+        }.to raise_error(Metalware::Templater::LoopErbError)
       end
     end
   end
@@ -115,7 +115,7 @@ describe Metalware::Templater::Combiner do
 
     context 'without passed parameters' do
       it 'is created with default values' do
-        templater = Metalware::Templater::Combiner.new
+        templater = Metalware::Templater.new
         magic_namespace = templater.config.alces
 
         expect(magic_namespace.index).to eq(0)
@@ -128,7 +128,7 @@ describe Metalware::Templater::Combiner do
 
     context 'with passed parameters' do
       it 'overrides defaults with parameter values, where applicable' do
-        templater = Metalware::Templater::Combiner.new({
+        templater = Metalware::Templater.new({
           nodename: 'testnode04',
           index: 3,
           firstboot: true,
@@ -149,7 +149,7 @@ describe Metalware::Templater::Combiner do
       end
 
       it 'loads the hunter parameter as an empty array' do
-        templater = Metalware::Templater::Combiner.new
+        templater = Metalware::Templater.new
         magic_namespace = templater.config.alces
         expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
       end

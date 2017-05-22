@@ -39,7 +39,7 @@ module Metalware
           nodename: node.name,
           index: index,
         }.merge(additional_template_parameters)
-        templater = Templater::Combiner.new(template_parameters)
+        templater = Templater.new(template_parameters)
 
         block.call(templater, node)
       end
