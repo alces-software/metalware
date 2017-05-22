@@ -41,7 +41,6 @@ module Alces
               @status_log.info "Monitor Thread: #{Thread.current}"
               create_jobs
               monitor_jobs
-              #@status_log.info "Monitor Finished"
             rescue => e
               @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
               @status_log.fatal e.backtrace

@@ -35,10 +35,11 @@ module Alces
       end
 
       def nodes
-        @nodes ||= _set_nodes
+        @nodes ||= set_nodes
       end
 
-      def _set_nodes
+      private
+      def set_nodes
         lambda_proc = lambda { |lambda_hash| lambda_hash[:nodename] }
         a = Alces::Stack::Iterator.run(group, lambda_proc, nodename: nodename)
         a.is_a?(Array) ? a : [a]
@@ -49,7 +50,7 @@ module Alces
       class Run
         def initialize(options={})
           @opt = RunOptions.new(options)
-          raise "Can not specify both -g and -n" if @opt.nodename? == @opt.group?
+          raise "Requires either a nodename (-n) OR group (-g) input" if @opt.nodename? == @opt.group?
         end
 
         def run!
@@ -80,7 +81,7 @@ module Alces
               display_data data
               empty_count = 0
             end
-            sleep 0.1
+            sleep 1 # Only looks for updated data every second
           end
         end
 
@@ -102,16 +103,16 @@ module Alces
         def print_header
           @header_been_printed = true
           header_data = {}
-          underline_h = {}
-          underline_s = "----------"
+          header_underline_hash = {}
+          header_underline_string = "----------"
           header_data[:nodename] = "Node"
-          underline_h[:nodename] = underline_s
+          header_underline_hash[:nodename] = header_underline_string
           @opt.cmds.each do |c|
             header_data[c] = c.to_s.capitalize
-            underline_h[c] = underline_s
+            header_underline_hash[c] = header_underline_string
           end
           display_data header_data
-          display_data underline_h
+          display_data header_underline_hash
         end
 
         def get_finished_data
