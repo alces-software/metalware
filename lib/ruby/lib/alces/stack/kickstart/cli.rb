@@ -33,8 +33,7 @@ module Alces
         root_only
         name 'metal kickstart'
         description "Renders kickstart templates"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
-
+        
         option  :nodename,
                 'Node name to be modified',
                 '-n', '--node-name',
