@@ -8,9 +8,13 @@ require 'spec_utils'
 
 describe Metalware::Commands::Build do
   def run_build(node_identifier, **options_hash)
-    SpecUtils.run_command(
-      Metalware::Commands::Build, node_identifier, **options_hash
-    )
+    # Run command in timeout as `build` will wait indefinitely, but want to
+    # abort tests if it looks like this is happening.
+    Timeout::timeout 0.5 do
+      SpecUtils.run_command(
+        Metalware::Commands::Build, node_identifier, **options_hash
+      )
+    end
   end
 
   # Makes `Node.new` return real `Node`s, but with certain methods stubbed to
@@ -35,12 +39,6 @@ describe Metalware::Commands::Build do
     expect do
       Timeout::timeout(seconds, &block)
     end.to raise_error TimeoutError
-  end
-
-  def expect_runs_within(seconds, &block)
-    expect do
-      Timeout::timeout(seconds, &block)
-    end.not_to raise_error TimeoutError
   end
 
   before :each do
@@ -96,11 +94,6 @@ describe Metalware::Commands::Build do
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once.ordered
-      expect(
-        Metalware::Templater::Combiner
-      ).not_to receive(:new).ordered.with(
-        hash_including(firstboot: false)
-      )
 
       expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
     end

@@ -1,4 +1,6 @@
 
+require 'active_support/core_ext/string/strip'
+
 require 'config'
 require 'templater'
 require 'constants'
@@ -16,12 +18,9 @@ module Metalware
         setup(args, options)
         render_build_templates
         wait_for_nodes_to_build
-        render_permanent_pxelinux_configs
+        teardown
       rescue Interrupt
-        Output.stderr 'Exiting...'
-      ensure
-        clear_up_built_node_marker_files
-        Output.stderr 'Done.'
+        handle_interrupt
       end
 
       private
@@ -33,7 +32,7 @@ module Metalware
         @options = options
         @config = Config.new(options.config)
         node_identifier = args.first
-        @nodes = Nodes.new(@config, node_identifier, options.group)
+        @nodes = Nodes.create(@config, node_identifier, options.group)
       end
 
       def render_build_templates
@@ -73,27 +72,63 @@ module Metalware
       def wait_for_nodes_to_build
         Output.stderr 'Waiting for nodes to report as built...',
           '(Ctrl-C to terminate)'
-        while !all_nodes_built?
+
+        rerendered_nodes = []
+        loop do
+          @nodes.select do |node|
+            !rerendered_nodes.include?(node) && node.built?
+          end.
+          tap do |nodes|
+            render_permanent_pxelinux_configs(nodes)
+            rerendered_nodes.push(*nodes)
+          end
+
+          all_nodes_reported_built = rerendered_nodes.length == @nodes.length
+          break if all_nodes_reported_built
+
           sleep @config.build_poll_sleep
         end
       end
 
-      def all_nodes_built?
-        @nodes.all? { |node| node.built? }
+      def render_all_permanent_pxelinux_configs
+        render_permanent_pxelinux_configs(@nodes)
       end
 
-      def render_permanent_pxelinux_configs
-        @nodes.template_each firstboot: false do |templater, node|
-          if node.built?
-            render_pxelinux(templater, node)
-          end
+      def render_permanent_pxelinux_configs(nodes)
+        nodes.template_each firstboot: false do |templater, node|
+          render_pxelinux(templater, node)
         end
+      end
+
+      def teardown
+        clear_up_built_node_marker_files
+        Output.stderr 'Done.'
       end
 
       def clear_up_built_node_marker_files
         glob = File.join(@config.built_nodes_storage_path, '*')
         files = Dir.glob(glob)
         FileUtils.rm_rf(files)
+      end
+
+      def handle_interrupt
+        Output.stderr 'Exiting...'
+        ask_if_should_rerender_pxelinux_configs
+        teardown
+      rescue Interrupt
+        Output.stderr 'Re-rendering all permanent PXELINUX templates anyway...'
+        render_all_permanent_pxelinux_configs
+        teardown
+      end
+
+      def ask_if_should_rerender_pxelinux_configs
+        should_rerender = <<-EOF.strip_heredoc
+          Re-render permanent PXELINUX templates for all nodes as if build succeeded?
+          [yes/no]
+        EOF
+        if agree(should_rerender)
+          render_all_permanent_pxelinux_configs
+        end
       end
     end
   end

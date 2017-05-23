@@ -22,7 +22,7 @@ module Metalware
 
         config = Config.new(options.config)
         node_identifier = args.first
-        @nodes = Nodes.new(config, node_identifier, options.group)
+        @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def add_nodes_to_hosts

@@ -19,7 +19,7 @@ module Metalware
       command = "gethostip -x #{name}"
       stdout, stderr, status = Open3.capture3(command)
       if status.exitstatus != 0
-        raise MetalwareError, "'#{command}' produced error '#{stderr}'"
+        raise MetalwareError, "'#{command}' produced error '#{stderr.strip}'"
       else
         stdout
       end

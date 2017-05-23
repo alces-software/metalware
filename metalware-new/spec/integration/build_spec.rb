@@ -16,6 +16,9 @@ describe '`metal build`' do
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
   TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
 
+  TEST_REPO = 'tmp/repo'
+  PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
+
   def kill_any_metal_processes
     `pkill bin/metal --full`
   end
@@ -36,7 +39,7 @@ describe '`metal build`' do
 
   def fork_command(command)
     pid = fork do
-      `#{command}`
+      exec command
     end
     Process.detach(pid)
     pid
@@ -56,7 +59,7 @@ describe '`metal build`' do
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
 
-    if !File.exists? 'tmp/repo'
+    if !File.exists? TEST_REPO
       `git clone https://github.com/alces-software/metalware-default.git tmp/repo`
       `cd tmp/repo && git checkout feature/adaptations-for-new-metalware`
     end
@@ -98,6 +101,113 @@ describe '`metal build`' do
       expect(process_exists?(metal_pid)).to be false
 
       expect_clears_up_built_node_marker_files
+    end
+
+    describe 'interrupt handling' do
+      # Initial interrupt does not exit CLI; gives prompt for whether to
+      # re-render all Pxelinux configs as if nodes all built.
+
+      def expect_interrupt_does_not_kill(pid)
+        Process.kill('INT', pid)
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be true
+      end
+
+      def expect_interrupt_kills(pid)
+        Process.kill('INT', pid)
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be false
+      end
+
+      def expect_permanent_pxelinux_rendered_for_testnode01
+        testnode01_pxelinux =  File.read(
+          File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
+        )
+        expect(testnode01_pxelinux).to eq(
+          Metalware::Templater::Combiner.new({
+            nodename: 'testnode01', index: 0, firstboot: false
+          }).file(PXELINUX_TEMPLATE)
+        )
+      end
+
+      def expect_permanent_pxelinux_rendered_for_testnode02
+        testnode01_pxelinux =  File.read(
+          File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
+        )
+        expect(testnode01_pxelinux).to eq(
+          Metalware::Templater::Combiner.new({
+            nodename: 'testnode02', index: 1, firstboot: false
+          }).file(PXELINUX_TEMPLATE)
+        )
+      end
+
+      def expect_firstboot_pxelinux_rendered_for_testnode02
+        testnode01_pxelinux =  File.read(
+          File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
+        )
+        expect(testnode01_pxelinux).to eq(
+          Metalware::Templater::Combiner.new({
+            nodename: 'testnode02', index: 1, firstboot: true
+          }).file(PXELINUX_TEMPLATE)
+        )
+      end
+
+      it 'exits on second interrupt' do
+        metal_pid = fork_command "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+
+        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+        wait_longer_than_build_poll
+        expect(process_exists?(metal_pid)).to be true
+
+        expect_interrupt_does_not_kill(metal_pid)
+        expect_interrupt_kills(metal_pid)
+        expect_clears_up_built_node_marker_files
+
+        expect_permanent_pxelinux_rendered_for_testnode01
+        expect_permanent_pxelinux_rendered_for_testnode02
+      end
+
+      it 'handles "yes" to interrupt prompt' do
+        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+        Open3.popen3 command do |stdin, stdout, stderr, thread|
+          metal_pid = thread.pid
+
+          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+          wait_longer_than_build_poll
+          expect(process_exists?(metal_pid)).to be true
+
+          expect_interrupt_does_not_kill(metal_pid)
+
+          stdin.puts('yes')
+          wait_longer_than_build_poll
+          expect(process_exists?(metal_pid)).to be false
+          expect_clears_up_built_node_marker_files
+
+          expect_permanent_pxelinux_rendered_for_testnode01
+          expect_permanent_pxelinux_rendered_for_testnode02
+        end
+      end
+
+      it 'handles "no" to interrupt prompt' do
+        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+        Open3.popen3 command do |stdin, stdout, stderr, thread|
+          metal_pid = thread.pid
+
+          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+          wait_longer_than_build_poll
+          expect(process_exists?(metal_pid)).to be true
+
+          expect_interrupt_does_not_kill(metal_pid)
+
+          stdin.puts('no')
+          wait_longer_than_build_poll
+          expect(process_exists?(metal_pid)).to be false
+          expect_clears_up_built_node_marker_files
+
+          expect_permanent_pxelinux_rendered_for_testnode01
+          expect_firstboot_pxelinux_rendered_for_testnode02
+        end
+      end
     end
   end
 end
