@@ -19,40 +19,34 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-
-require 'metal_log'
+require 'logger'
 
 module Metalware
-  module Commands
-    class BaseCommand
-      def initialize(args, options)
-        MetalLog.info "metal #{ARGV.join(" ")}"
-        setup(args, options)
-        run
-      rescue Interrupt => e
-        handle_interrupt(e)
-      rescue Exception => e
-        handle_fatal_exception(e)
+  class MetalLog < Logger
+    class << self
+      def method_missing(s, *a, &b)
+        metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
       end
 
-      private
+      private 
 
-      def setup(args, options)
-        raise NotImplementedError
-      end
-
-      def run
-        raise NotImplementedError
-      end
-
-      def handle_interrupt(e)
-        raise e
-      end
-
-      def handle_fatal_exception(e)
-        MetalLog.fatal e.inspect
-        raise e
+      def metal_log
+        @metal_log ||= MetalLog.new("metal")
       end
     end
+
+    def initialize(log_name)
+      path = "/var/log/metalware/#{log_name}.log"
+      f = File.open(path, "a")
+      f.sync = true
+      super(f)
+    end
+
+# POSSIBLE USE TO IMPLEMENT --strict
+=begin
+      def warn(*args, &block)
+        super(*args, &block)
+      end
+=end
   end
 end
