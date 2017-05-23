@@ -28,7 +28,7 @@ module Metalware
       def add_nodes_to_hosts
         @nodes.template_each do |parameters|
           if @options.dry_run
-            puts Templater.render(template_path, parameters)
+            Templater.render_to_stdout(template_path, parameters)
           else
             Templater.render_and_append_to_file(template_path, HOSTS_FILE, parameters)
           end

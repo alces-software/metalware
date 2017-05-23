@@ -33,12 +33,14 @@ require 'nodeattr_interface'
 module Metalware
   class Templater
     class << self
-      # XXX Have method to print template here, and do not expose access to
-      # `file` method directly, so can cleanly stub this for testing.
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
       def render(template, template_parameters={})
         Templater.new(template_parameters).render(template)
+      end
+
+      def render_to_stdout(template, template_parameters={})
+          puts render(template, template_parameters)
       end
 
       def render_to_file(template, save_file, template_parameters={})

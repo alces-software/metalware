@@ -41,7 +41,7 @@ describe Metalware::Commands::Hosts do
 
     context 'when dry-run' do
       it 'outputs what would be appended' do
-        expect(Metalware::Templater).to receive(:render).with(
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode01')
         )
@@ -76,15 +76,15 @@ describe Metalware::Commands::Hosts do
     context 'when dry-run' do
       it 'outputs what would be appended' do
         # XXX Dedupe these too
-        expect(Metalware::Templater).to receive(:render).with(
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode01', index: 0)
         )
-        expect(Metalware::Templater).to receive(:render).with(
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode02', index: 1)
         )
-        expect(Metalware::Templater).to receive(:render).with(
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode03', index: 2)
         )

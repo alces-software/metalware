@@ -11,8 +11,7 @@ module Metalware
           nodename: maybe_node,
         }.reject { |param, value| value.nil? }
 
-        rendered = Templater.render(template_path, template_parameters)
-        puts rendered
+        Templater.render_to_stdout(template_path, template_parameters)
       end
     end
   end
