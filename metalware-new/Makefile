@@ -6,6 +6,10 @@ REMOTE_DIR='/tmp/metalware'
 test:
 	bundle exec rspec
 
+.PHONY: view-test-coverage
+view-test-coverage:
+	xdg-open coverage/index.html
+
 .PHONY: rsync
 rsync:
 	rsync -r --copy-links --perms . dev@${CONTROLLER_IP}:${REMOTE_DIR}
