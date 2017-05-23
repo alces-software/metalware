@@ -8,15 +8,16 @@ TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
 TEST_CACHE_PATH = File.join(FIXTURES_PATH, 'cache')
 
-def expect_renders(templater, expected)
-  # Strip trailing spaces from rendered output to make comparisons less
-  # brittle.
-  rendered = templater.file(TEST_TEMPLATE_PATH).gsub(/\s+\n/, "\n")
-
-  expect(rendered).to eq(expected.strip_heredoc)
-end
 
 describe Metalware::Templater::Combiner do
+  def expect_renders(templater, expected)
+    # Strip trailing spaces from rendered output to make comparisons less
+    # brittle.
+    rendered = templater.file(TEST_TEMPLATE_PATH).gsub(/\s+\n/, "\n")
+
+    expect(rendered).to eq(expected.strip_heredoc)
+  end
+
   describe '#file' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
@@ -119,6 +120,7 @@ describe Metalware::Templater::Combiner do
 
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
+        expect(magic_namespace.firstboot).to eq(nil)
         expect(magic_namespace.build_complete_url).to eq(nil)
         expect_environment_dependent_parameters_present(magic_namespace)
       end
@@ -128,12 +130,14 @@ describe Metalware::Templater::Combiner do
       it 'overrides defaults with parameter values, where applicable' do
         templater = Metalware::Templater::Combiner.new({
           nodename: 'testnode04',
-          index: 3
+          index: 3,
+          firstboot: true,
         })
         magic_namespace = templater.config.alces
 
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode04')
+        expect(magic_namespace.firstboot).to eq(true)
         expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode04')
         expect_environment_dependent_parameters_present(magic_namespace)
       end

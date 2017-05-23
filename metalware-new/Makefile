@@ -2,6 +2,10 @@
 CONTROLLER_IP=10.101.0.75
 REMOTE_DIR='/tmp/metalware'
 
+.PHONY: unit-test
+unit-test:
+	bundle exec rspec --exclude-pattern 'spec/integration/**/*'
+
 .PHONY: test
 test:
 	bundle exec rspec

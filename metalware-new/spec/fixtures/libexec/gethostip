@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [[ $1 != '-x' ]]; then
+  echo 'Mock `gethostip` only supports `-x` option'
+  exit 1
+fi
+if [[ -z $2 ]]; then
+  echo 'Mock `gethostip` requires node name'
+  exit 1
+fi
+
+touch /tmp/foo
+
+echo "$2_HEX_IP"

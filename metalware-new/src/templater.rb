@@ -79,7 +79,7 @@ module Metalware
       # - what else?
       def initialize(hash={})
         passed_magic_parameters = hash.select do |k,v|
-          [:index, :nodename].include?(k) && !v.nil?
+          [:index, :nodename, :firstboot].include?(k) && !v.nil?
         end
         @magic_namespace = MagicNamespace.new(passed_magic_parameters)
         @passed_hash = hash
@@ -202,9 +202,9 @@ module Metalware
       end
     end
 
-    MagicNamespace = Struct.new(:index, :nodename) do
-      def initialize(index: 0, nodename: nil)
-        super(index, nodename)
+    MagicNamespace = Struct.new(:index, :nodename, :firstboot) do
+      def initialize(index: 0, nodename: nil, firstboot: nil)
+        super(index, nodename, firstboot)
       end
 
       def genders

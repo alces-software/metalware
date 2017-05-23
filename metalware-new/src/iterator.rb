@@ -22,6 +22,8 @@
 
 require 'templater'
 
+# XXX Refactor this to use better API.
+
 module Metalware
   module Iterator
     class << self

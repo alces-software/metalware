@@ -3,38 +3,38 @@ require 'commander_extensions'
 
 # These specs inspired by those in Commander gem in `spec/runner_spec.rb`.
 
-def mock_terminal
-  @input = StringIO.new
-  @output = StringIO.new
-  $terminal = HighLine.new @input, @output
-end
-
-def create_test_command
-  command :test do |c|
-    c.syntax = 'metal test ARG1 ARG2 [OPTIONAL_ARG3] [options]'
-    c.description = 'test description'
-    c.example 'description', 'command'
-    c.option '-o', '--some-option', 'Some option that does things'
-    c.when_called do |args, _options|
-      format('test %s', args.join(' '))
-    end
-  end
-  @command = command :test
-end
-
-def create_multi_word_test_command
-  command :'test do' do |c|
-    c.syntax = 'metal test do ARG1 ARG2 [options]'
-    c.when_called do |args, _options|
-      format('test do %s', args.join(' '))
-    end
-  end
-  @command = command :'test do'
-end
-
 
 describe CommanderExtensions do
   include CommanderExtensions::Delegates
+
+  def mock_terminal
+    @input = StringIO.new
+    @output = StringIO.new
+    $terminal = HighLine.new @input, @output
+  end
+
+  def create_test_command
+    command :test do |c|
+      c.syntax = 'metal test ARG1 ARG2 [OPTIONAL_ARG3] [options]'
+      c.description = 'test description'
+      c.example 'description', 'command'
+      c.option '-o', '--some-option', 'Some option that does things'
+      c.when_called do |args, _options|
+        format('test %s', args.join(' '))
+      end
+    end
+    @command = command :test
+  end
+
+  def create_multi_word_test_command
+    command :'test do' do |c|
+      c.syntax = 'metal test do ARG1 ARG2 [options]'
+      c.when_called do |args, _options|
+        format('test do %s', args.join(' '))
+      end
+    end
+    @command = command :'test do'
+  end
 
   before :each do
     $stderr = StringIO.new
