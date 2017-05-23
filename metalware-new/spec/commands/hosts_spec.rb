@@ -14,27 +14,26 @@ describe Metalware::Commands::Hosts do
   end
 
   before :each do
-    SpecUtils.use_mock_templater(self)
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
   end
 
   context 'when called without group argument' do
     it 'appends to hosts file by default' do
-      SpecUtils.expect_it_templates_for_single_node(self)
-      expect(@templater).to receive(:append).with(
+      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
         '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts'
+        '/etc/hosts',
+        hash_including(nodename: 'testnode01', index: 0)
       )
 
       run_hosts('testnode01')
     end
 
     it 'uses a different template if template option passed' do
-      SpecUtils.expect_it_templates_for_single_node(self)
-      expect(@templater).to receive(:append).with(
+      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
         '/var/lib/metalware/repo/hosts/my_template',
-        '/etc/hosts'
+        '/etc/hosts',
+        hash_including(nodename: 'testnode01', index: 0)
       )
 
       run_hosts('testnode01', template: 'my_template')
@@ -42,9 +41,9 @@ describe Metalware::Commands::Hosts do
 
     context 'when dry-run' do
       it 'outputs what would be appended' do
-        SpecUtils.expect_it_templates_for_single_node(self)
-        expect(@templater).to receive(:file).with(
-          '/var/lib/metalware/repo/hosts/default'
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          '/var/lib/metalware/repo/hosts/default',
+          hash_including(nodename: 'testnode01')
         )
 
         run_hosts('testnode01', dry_run: true)
@@ -54,11 +53,21 @@ describe Metalware::Commands::Hosts do
 
   context 'when called for group' do
     it 'appends to hosts file by default' do
-      SpecUtils.expect_it_templates_for_each_node(self)
-
-      expect(@templater).to receive(:append).thrice.with(
+      # XXX Dedupe these very similar assertions
+      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
         '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts'
+        '/etc/hosts',
+        hash_including(nodename: 'testnode01', index: 0)
+      )
+      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        '/var/lib/metalware/repo/hosts/default',
+        '/etc/hosts',
+        hash_including(nodename: 'testnode02', index: 1)
+      )
+      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        '/var/lib/metalware/repo/hosts/default',
+        '/etc/hosts',
+        hash_including(nodename: 'testnode03', index: 2)
       )
 
       run_hosts('testnodes', group: true)
@@ -66,10 +75,18 @@ describe Metalware::Commands::Hosts do
 
     context 'when dry-run' do
       it 'outputs what would be appended' do
-        SpecUtils.expect_it_templates_for_each_node(self)
-
-        expect(@templater).to receive(:file).thrice.with(
-          '/var/lib/metalware/repo/hosts/default'
+        # XXX Dedupe these too
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          '/var/lib/metalware/repo/hosts/default',
+          hash_including(nodename: 'testnode01', index: 0)
+        )
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          '/var/lib/metalware/repo/hosts/default',
+          hash_including(nodename: 'testnode02', index: 1)
+        )
+        expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          '/var/lib/metalware/repo/hosts/default',
+          hash_including(nodename: 'testnode03', index: 2)
         )
 
         run_hosts('testnodes', group: true, dry_run: true)
