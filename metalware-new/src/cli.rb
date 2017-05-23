@@ -30,7 +30,7 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '--force', '-f',
+        c.option '-f', '--force',
           'Force use of a new repo even if local changes have been made to the current repo'
         c.action Commands::Repo::Use
       end
@@ -40,7 +40,7 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '--force', '-f',
+        c.option '-f', '--force',
           'Force update even if local changes have been made to the repo'
         c.action Commands::Repo::Update
       end
@@ -58,10 +58,10 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '--node STRING', '-n', String, 'Node name'
-        c.option '--group STRING', '-g', String, 'Gender group'
-        c.option '--template STRING', '-t', String, 'Specify hosts template to use'
-        c.option '--dry-run', '-x',
+        c.option '-n NODE_NAME', '--node NODE_NAME', String, 'Node name'
+        c.option '-g GENDER_GROUP', '--group GENDER_GROUP', String, 'Gender group'
+        c.option '-t TEMPLATE', '--template TEMPLATE', String, 'Specify hosts template to use'
+        c.option '-x', '--dry-run',
           'Do not modify hosts file, just output additions that would be made'
         c.action Commands::Hosts
       end
@@ -71,13 +71,13 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '--interface STRING', '-i', String,
+        c.option '-i INTERFACE', '--interface INTERFACE', String,
           'Local interface to hunt on'
-        c.option '--prefix STRING', '-p', String,
+        c.option '-p PREFIX', '--prefix PREFIX', String,
           'Root to suggest for detected node names'
-        c.option '--length INTEGER', '-l', Integer,
+        c.option '-l LENGTH', '--length LENGTH', Integer,
           'Numeric sequence length to use for suggested detected node names'
-        c.option '--start INTEGER', '-s', Integer,
+        c.option '-s START_NUMBER', '--start  START_NUMBER', Integer,
           'Start integer to use for suggested detected node names'
         c.action Commands::Hunter
       end
@@ -87,7 +87,7 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '--template STRING', '-t', String, 'Specify dhcp template to use'
+        c.option '-t TEMPLATE', '--template TEMPLATE', String, 'Specify dhcp template to use'
         c.action Commands::Dhcp
       end
 
@@ -96,10 +96,12 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '--node STRING', '-n', String, 'Node name'
-        c.option '--group STRING', '-g', String, 'Gender group'
-        c.option '--kickstart STRING', '-k', String, 'Specify kickstart template to use'
-        c.option '--pxelinux STRING', '-p', String, 'Specify pxelinux template to use'
+        c.option '-n NODE_NAME', '--node NODE_NAME', String, 'Node name'
+        c.option '-g GENDER_GROUP', '--group GENDER_GROUP', String, 'Gender group'
+        c.option '-k KICKSTART_TEMPLATE', '--kickstart KICKSTART_TEMPLATE',
+          String, 'Specify kickstart template to use'
+        c.option '-p PXELINUX_TEMPLATE', '--pxelinux  PXELINUX_TEMPLATE',
+          String, 'Specify pxelinux template to use'
         c.action Commands::Build
       end
 

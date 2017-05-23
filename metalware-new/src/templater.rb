@@ -23,6 +23,8 @@ require "erb"
 require "ostruct"
 require "json"
 require "yaml"
+
+require "constants"
 # require "alces/stack/log"
 
 module Metalware
@@ -84,10 +86,9 @@ module Metalware
       }
 
       def initialize(hash={})
-        repo = '/var/lib/metalware/repo'
         @combined_hash = DEFAULT_HASH.merge(hash)
         fixed_nodename = combined_hash[:nodename]
-        @combined_hash.merge!(load_yaml_hash(repo))
+        @combined_hash.merge!(load_yaml_hash)
         @parsed_hash = parse_combined_hash
         if parsed_hash[:nodename] != fixed_nodename
           raise HashOverrideError.new(fixed_nodename, @parsed_hash)
@@ -105,11 +106,12 @@ module Metalware
       attr_reader :combined_hash
       attr_reader :parsed_hash
 
-      def load_yaml_hash(repo)
+      def load_yaml_hash
         hash = Hash.new
         get_yaml_file_list.each do |yaml|
           begin
-            yaml_payload = YAML.load(File.read("#{repo}/config/#{yaml}.yaml"))
+            yaml_path = "#{Constants::REPO_PATH}/config/#{yaml}.yaml"
+            yaml_payload = YAML.load(File.read(yaml_path))
           rescue Errno::ENOENT # Skips missing files
           rescue StandardError => e
             $stderr.puts "Could not parse YAML file"
