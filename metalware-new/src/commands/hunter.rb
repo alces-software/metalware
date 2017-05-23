@@ -4,7 +4,9 @@ require 'pcap'
 
 require 'templater'
 require 'output'
+require 'constants'
 # require 'alces/stack/log'
+require 'hunter_updater'
 
 
 module Metalware
@@ -97,7 +99,7 @@ module Metalware
           name = ask(name_node_question) do |answer|
             answer.default = default_name
           end
-          update_dhcp(name, hwaddr) if @update_dhcp_flag
+          record_hunted_pair(name, hwaddr)
           # Alces::Stack::Log.info("#{name}-#{hwaddr}")
           # @hunter_logger.info("#{name}-#{hwaddr}")
           Output.stderr 'Logged node'
@@ -109,62 +111,12 @@ module Metalware
         end
       end
 
-      def update_dhcp(name, hwaddr)
-        @DHCP_filename = "/etc/dhcp/dhcpd.hosts"
-        fixedip = `gethostip -d #{name}`.chomp
-        raise "Unable to resolve IP for host: #{name}" if fixedip.to_s.empty?
-        remove_dhcp_entry(hwaddr)
-        add_dhcp_entry(name, hwaddr, fixedip)
+      def record_hunted_pair(node_name, mac_address)
+        hunter_updater.add(node_name, mac_address)
       end
 
-      def add_dhcp_entry(name, hwaddr, fixedip)
-        #Finds the host machine ip address
-        template_parameters = {
-          nodename: name.chomp,
-          hwaddr: hwaddr.chomp,
-          fixedaddr: fixedip.chomp
-        }
-        Templater::Combiner.new(template_parameters)
-          .append(@templateFilename, @DHCP_filename)
-      end
-
-      def remove_dhcp_entry(hwaddr)
-        tempFilename = "/tmp/dhcpd.hosts." << Process.pid.to_s
-
-        # Checks if the mac address already exists in the list
-        start_line = -1
-        end_line = -1
-        found = false
-        File.open(@DHCP_filename) do |file|
-          bracket_count = 0
-          file.each_line.with_index do |line, index|
-            raise "Can not alter dhcpd.hosts if multiple \'{\' or \'}\' are on the same line" if line.scan(/\{|\}/).count > 1
-            start_line = index if !found and bracket_count == 0 and line.include? "{"
-            bracket_count += 1 if line.include? "{"
-            found = true if line.include? "#{hwaddr}"
-            bracket_count -= 1 if line.include? "}"
-            if found and bracket_count == 0 and line.include? "}"
-              end_line = index
-              break
-            end
-          end
-          return unless found
-          raise "Could not remove mac address from dhcpd.hosts" if start_line < 0 or end_line < 0
-        end
-
-        # Alces::Stack::Log.info "Removing old DHCP entry for: #{hwaddr}"
-        # Creates the new file with the address removed
-        File.open(tempFilename, "w", 0644) do |tempFile|
-          File.open(@DHCP_filename) do |file|
-            file.each_line.with_index do |line, index|
-              tempFile.puts line if index < start_line or index > end_line
-            end
-          end
-        end
-
-        # Replaces the original file with the new one
-        `mv -f #{tempFilename} #{@DHCP_filename}`
-        `rm -f #{tempFilename}`
+      def hunter_updater
+        @hunter_updater ||= HunterUpdater.new(Constants::HUNTER_PATH)
       end
 
       def sequenced_name
