@@ -10,9 +10,8 @@ module Metalware
         template_parameters = {
           nodename: maybe_node,
         }.reject { |param, value| value.nil? }
-        templater = Templater.new(template_parameters)
 
-        rendered = templater.file(template_path)
+        rendered = Templater.file(template_path, template_parameters)
         puts rendered
       end
     end

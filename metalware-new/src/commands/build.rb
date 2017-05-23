@@ -35,29 +35,29 @@ module Metalware
       end
 
       def render_build_templates
-        @nodes.template_each firstboot: true do |templater, node|
-          render_kickstart(templater, node)
-          render_pxelinux(templater, node)
+        @nodes.template_each firstboot: true do |parameters, node|
+          render_kickstart(parameters, node)
+          render_pxelinux(parameters, node)
         end
       end
 
-      def render_kickstart(templater, node)
+      def render_kickstart(parameters, node)
         kickstart_template_path = template_path :kickstart
         # XXX Ensure this path has been created
         kickstart_save_path = File.join(
           @config.rendered_files_path, 'kickstart', node.name
         )
-        templater.save(kickstart_template_path, kickstart_save_path)
+        Templater.save(kickstart_template_path, kickstart_save_path, parameters)
       end
 
-      def render_pxelinux(templater, node)
+      def render_pxelinux(parameters, node)
         # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
         # file yet - best place to do this may be when creating `Node` objects?
         pxelinux_template_path = template_path :pxelinux
         pxelinux_save_path = File.join(
           @config.pxelinux_cfg_path, node.hexadecimal_ip
         )
-        templater.save(pxelinux_template_path, pxelinux_save_path)
+        Templater.save(pxelinux_template_path, pxelinux_save_path, parameters)
       end
 
       def template_path(template_type)
@@ -97,8 +97,8 @@ module Metalware
       end
 
       def render_permanent_pxelinux_configs(nodes)
-        nodes.template_each firstboot: false do |templater, node|
-          render_pxelinux(templater, node)
+        nodes.template_each firstboot: false do |parameters, node|
+          render_pxelinux(parameters, node)
         end
       end
 

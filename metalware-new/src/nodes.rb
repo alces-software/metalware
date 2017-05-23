@@ -33,15 +33,15 @@ module Metalware
       self.class.send(:new, nodes)
     end
 
+    # XXX Is this method still worthwhile with new Templater?
     def template_each(**additional_template_parameters, &block)
       @nodes.each_with_index do |node, index|
         template_parameters = {
           nodename: node.name,
           index: index,
         }.merge(additional_template_parameters)
-        templater = Templater.new(template_parameters)
 
-        block.call(templater, node)
+        block.call(template_parameters, node)
       end
     end
 

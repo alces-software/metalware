@@ -32,6 +32,31 @@ require 'nodeattr_interface'
 
 module Metalware
   class Templater
+    class << self
+      # XXX Have method to print template here, and do not expose access to
+      # `file` method directly, so can cleanly stub this for testing.
+      # XXX rename to `render`; rename other methods here appropriately too.
+      # XXX rename args in these methods - use `**parameters` for passing
+      # template parameters?
+      def file(filename, template_parameters={})
+        Templater.new(template_parameters).file(filename)
+      end
+
+      def save(template_file, save_file, template_parameters={})
+        File.open(save_file.chomp, "w") do |f|
+          f.puts file(template_file, template_parameters)
+        end
+        # Alces::Stack::Log.info "Template Saved: #{save_file}"
+      end
+
+      def append(template_file, append_file, template_parameters={})
+        File.open(append_file.chomp, 'a') do |f|
+          f.puts file(template_file, template_parameters)
+        end
+        # Alces::Stack::Log.info "Template Appended: #{append_file}"
+      end
+    end
+
     attr_reader :config
 
     # XXX Have this just take allowed keyword parameters:
@@ -47,30 +72,11 @@ module Metalware
       @config = parse_config
     end
 
-    # XXX Have method to print template here, and do not expose access to
-    # `file` method directly, so can cleanly stub this for testing.
-    # XXX need `template_parameters` param? Child class, which is only one
-    # used (outside of tests), forbids this.
     # XXX rename to `render`; rename other methods here appropriately too.
-    # XXX `template_parameters` now unused here
     def file(filename, template_parameters={})
       File.open(filename.chomp, 'r') do |f|
         replace_erb(f.read, @config)
       end
-    end
-
-    def save(template_file, save_file, template_parameters={})
-      File.open(save_file.chomp, "w") do |f|
-        f.puts file(template_file, template_parameters)
-      end
-      # Alces::Stack::Log.info "Template Saved: #{save_file}"
-    end
-
-    def append(template_file, append_file, template_parameters={})
-      File.open(append_file.chomp, 'a') do |f|
-        f.puts file(template_file, template_parameters)
-      end
-      # Alces::Stack::Log.info "Template Appended: #{append_file}"
     end
 
     # XXX Make this not a nested class, also possibly should use common error

@@ -10,10 +10,12 @@ TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
 describe Metalware::Templater do
-  def expect_renders(templater, expected)
+  def expect_renders(template_parameters, expected)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.
-    rendered = templater.file(TEST_TEMPLATE_PATH).gsub(/\s+\n/, "\n")
+    rendered = Metalware::Templater.file(
+      TEST_TEMPLATE_PATH, template_parameters
+    ).gsub(/\s+\n/, "\n")
 
     expect(rendered).to eq(expected.strip_heredoc)
   end
@@ -21,7 +23,6 @@ describe Metalware::Templater do
   describe '#file' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
-        templater = Metalware::Templater.new
         expected = <<-EOF
         This is a test template
         some_passed_value:
@@ -32,13 +33,13 @@ describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders(templater, expected)
+        expect_renders({}, expected)
       end
     end
 
     context 'when templater passed parameters' do
       it 'renders template with extra passed parameters' do
-        templater = Metalware::Templater.new({
+        template_parameters = ({
           some_passed_value: 'my_value'
         })
         expected = <<-EOF
@@ -51,7 +52,7 @@ describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders(templater, expected)
+        expect_renders(template_parameters, expected)
       end
     end
 
@@ -61,7 +62,6 @@ describe Metalware::Templater do
       end
 
       it 'renders template with repo parameters' do
-        templater = Metalware::Templater.new
         expected = <<-EOF
         This is a test template
         some_passed_value:
@@ -72,7 +72,7 @@ describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders(templater, expected)
+        expect_renders({}, expected)
       end
 
       it 'raises if maximum recursive config depth exceeded' do
