@@ -22,7 +22,7 @@
 
 require 'templater'
 
-# XXX Refactor this to use better API.
+# XXX Remove if unneeded once initial new Metalware release ready.
 
 module Metalware
   module Iterator

@@ -3,6 +3,7 @@ require 'config'
 require 'templater'
 require 'constants'
 require 'node'
+require 'nodes'
 require 'iterator'
 require 'output'
 
@@ -11,62 +12,11 @@ require 'output'
 module Metalware
   module Commands
     class Build
-      attr_reader :args, :options
-
       def initialize(args, options)
-        options.default \
-          kickstart: 'default',
-          pxelinux: 'default'
-        @args = args
-        @options = options
-        @config = Config.new(options.config)
-
-        Output.stderr 'Waiting for nodes to report as built...',
-          '(Ctrl-C to terminate)'
-
-        node_identifier = args.first
-        maybe_node = options.group ? nil : node_identifier
-        maybe_group = options.group ? node_identifier : nil
-
-        lambda_proc = -> (template_parameters) do
-          node = Node.new(@config, template_parameters[:nodename])
-          templater = Templater::Combiner.new(template_parameters)
-          render_kickstart(templater, node)
-          render_pxelinux(templater, node)
-        end
-
-        template_parameters = {
-          nodename: maybe_node,
-          firstboot: true,
-        }
-
-        Iterator.run(maybe_group, lambda_proc, template_parameters)
-
-        built_nodes = []
-        nodes_built_lambda_proc = -> (iterator_options) do
-          node = Node.new(@config, iterator_options[:nodename])
-
-          if node.built?
-            templater = Templater::Combiner.new({
-              nodename: node.name,
-              firstboot: false
-            })
-            render_pxelinux(templater, node)
-          end
-
-          built_nodes << node.built?
-        end
-
-        all_nodes_built = false
-        iterator_options = {nodename: maybe_node}
-        while !all_nodes_built
-          built_nodes = []
-          Iterator.run(maybe_group, nodes_built_lambda_proc, iterator_options).all?
-          all_nodes_built = built_nodes.all?
-
-          sleep @config.build_poll_sleep
-        end
-
+        setup(args, options)
+        render_build_templates
+        wait_for_nodes_to_build
+        render_permanent_pxelinux_configs
       rescue Interrupt
         Output.stderr 'Exiting...'
       ensure
@@ -75,6 +25,23 @@ module Metalware
       end
 
       private
+
+      def setup(args, options)
+        options.default \
+          kickstart: 'default',
+          pxelinux: 'default'
+        @options = options
+        @config = Config.new(options.config)
+        node_identifier = args.first
+        @nodes = Nodes.new(@config, node_identifier, options.group)
+      end
+
+      def render_build_templates
+        @nodes.template_each firstboot: true do |templater, node|
+          render_kickstart(templater, node)
+          render_pxelinux(templater, node)
+        end
+      end
 
       def render_kickstart(templater, node)
         kickstart_template_path = template_path :kickstart
@@ -99,8 +66,28 @@ module Metalware
         File.join(
           @config.repo_path,
           template_type.to_s,
-          options.__send__(template_type)
+          @options.__send__(template_type)
         )
+      end
+
+      def wait_for_nodes_to_build
+        Output.stderr 'Waiting for nodes to report as built...',
+          '(Ctrl-C to terminate)'
+        while !all_nodes_built?
+          sleep @config.build_poll_sleep
+        end
+      end
+
+      def all_nodes_built?
+        @nodes.all? { |node| node.built? }
+      end
+
+      def render_permanent_pxelinux_configs
+        @nodes.template_each firstboot: false do |templater, node|
+          if node.built?
+            render_pxelinux(templater, node)
+          end
+        end
       end
 
       def clear_up_built_node_marker_files

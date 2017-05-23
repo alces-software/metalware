@@ -2,40 +2,37 @@
 require 'iterator'
 require 'templater'
 require 'constants'
+require 'nodes'
 
 module Metalware
   module Commands
     class Hosts
+      HOSTS_FILE = '/etc/hosts'
+
       def initialize(args, options)
-        options.default template: 'default'
-        @options = options
-
-        node_identifier = args.first
-        maybe_node = options.group ? nil : node_identifier
-        maybe_group = options.group ? node_identifier : nil
-
-        if options.dry_run
-          lambda_proc = -> (template_parameters) {puts_template(template_parameters)}
-        else
-          lambda_proc = -> (template_parameters) {add(template_parameters)}
-        end
-
-        template_parameters = {
-          nodename: maybe_node
-        }
-
-        Iterator.run(maybe_group, lambda_proc, template_parameters)
+        setup(args, options)
+        add_nodes_to_hosts
       end
 
       private
 
-      def add(template_parameters)
-        append_file = '/etc/hosts'
-        Templater::Combiner.new(template_parameters).append(template_path, append_file)
+      def setup(args, options)
+        options.default template: 'default'
+        @options = options
+
+        config = Config.new(options.config)
+        node_identifier = args.first
+        @nodes = Nodes.new(config, node_identifier, options.group)
       end
 
-      def puts_template(template_parameters)
-        puts Templater::Combiner.new(template_parameters).file(template_path)
+      def add_nodes_to_hosts
+        @nodes.template_each do |templater|
+          if @options.dry_run
+            templater.file(template_path)
+          else
+            templater.append(template_path, HOSTS_FILE)
+          end
+        end
       end
 
       def template_path

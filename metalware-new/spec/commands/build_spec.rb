@@ -5,8 +5,6 @@ require 'commands/build'
 require 'node'
 require 'spec_utils'
 
-# XXX Need to mock nodeattr in this and `hosts` tests? Could just use `genders`
-# from fixtures?
 
 describe Metalware::Commands::Build do
   def run_build(node_identifier, **options_hash)
@@ -49,11 +47,7 @@ describe Metalware::Commands::Build do
     SpecUtils.use_mock_templater(self)
     allow(@templater).to receive(:save)
     use_mock_nodes
-    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0)
-    stub_const(
-      'Metalware::Constants::DEFAULT_CONFIG_PATH',
-      SpecUtils.fixtures_config('unit-test.yaml')
-    )
+    SpecUtils.use_unit_test_config(self)
   end
 
   context 'when called without group argument' do
@@ -138,7 +132,7 @@ describe Metalware::Commands::Build do
 
   context 'when called for group' do
     before :each do
-      SpecUtils.mock_iterator_run_nodeattr(self)
+      SpecUtils.use_mock_genders(self)
     end
 
     it 'renders templates for each node' do

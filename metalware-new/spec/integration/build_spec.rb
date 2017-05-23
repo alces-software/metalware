@@ -88,12 +88,12 @@ describe '`metal build`' do
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be true
 
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node01')
+      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be true
 
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node02')
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node03')
+      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode02')
+      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode03')
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be false
 

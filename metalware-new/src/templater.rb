@@ -198,6 +198,8 @@ module Metalware
       class << self
         def method_missing(group_symbol)
           NodeattrInterface.nodes_in_group(group_symbol)
+        rescue NoGenderGroupError
+          []
         end
       end
     end
