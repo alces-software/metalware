@@ -3,6 +3,7 @@
 $:.unshift File.dirname(__FILE__)
 
 require 'rubygems'
+require 'bundler/setup'
 require 'commander'
 
 require 'commander_extensions'

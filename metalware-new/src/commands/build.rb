@@ -9,7 +9,6 @@ require 'nodes'
 require 'iterator'
 require 'output'
 
-# XXX Need to handle interrupts
 
 module Metalware
   module Commands
@@ -81,6 +80,9 @@ module Metalware
           tap do |nodes|
             render_permanent_pxelinux_configs(nodes)
             rerendered_nodes.push(*nodes)
+          end.
+          each do |node|
+            Output.stderr "Node #{node.name} built."
           end
 
           all_nodes_reported_built = rerendered_nodes.length == @nodes.length

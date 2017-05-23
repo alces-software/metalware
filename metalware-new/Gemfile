@@ -6,6 +6,8 @@ gem 'commander'
 gem 'rugged'
 gem 'activesupport'
 gem 'recursive-open-struct'
+gem 'pcap', git: 'https://github.com/alces-software/ruby-pcap.git'
+gem 'net-dhcp'
 
 group :test do
   gem 'rspec'
