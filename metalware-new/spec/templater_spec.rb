@@ -93,8 +93,8 @@ describe Metalware::Templater::Combiner do
 
       # Check hunter config.
       hunter_config = magic_namespace.hunter
-      expect(hunter_config.first.nodename).to eq('testnode01')
-      expect(hunter_config.first.mac_address).to eq('testnode01-mac')
+      expect(hunter_config.testnode01).to eq('testnode01-mac')
+      expect(hunter_config.testnode02).to eq('testnode02-mac')
 
       # Check genders config.
       genders_config = magic_namespace.genders
@@ -151,7 +151,7 @@ describe Metalware::Templater::Combiner do
       it 'loads the hunter parameter as an empty array' do
         templater = Metalware::Templater::Combiner.new
         magic_namespace = templater.config.alces
-        expect(magic_namespace.hunter).to eq([])
+        expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
       end
     end
   end

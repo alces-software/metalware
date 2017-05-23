@@ -60,8 +60,10 @@ describe '`metal build`' do
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
 
     if !File.exists? TEST_REPO
-      `git clone https://github.com/alces-software/metalware-default.git tmp/repo`
-      `cd tmp/repo && git checkout feature/adaptations-for-new-metalware`
+      SystemCommand.run \
+        'git clone https://github.com/alces-software/metalware-default.git tmp/repo'
+      SystemCommand.run \
+        'cd tmp/repo && git checkout feature/adaptations-for-new-metalware'
     end
   end
 

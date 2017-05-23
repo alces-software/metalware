@@ -1,5 +1,3 @@
-
-[
-        { nodename: testnode01, mac_address: testnode01-mac},
-        { nodename: testnode02, mac_address: testnode02-mac},
-]
+---
+:testnode01: testnode01-mac
+:testnode02: testnode02-mac

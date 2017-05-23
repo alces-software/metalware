@@ -24,6 +24,7 @@ require "ostruct"
 require "yaml"
 require 'recursive-open-struct'
 require 'active_support/core_ext/hash/keys'
+require 'hashie'
 
 require "constants"
 require 'nodeattr_interface'
@@ -146,6 +147,7 @@ module Metalware
       def ordered_node_config_files
         list = [ "all" ]
         return list if !nodename
+        # XXX Move this to `NodeattrInterface` and use `SystemCommand.run`.
         list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
         if list_str.empty? then return list end
         list.concat(list_str.split(/\n/).reverse)
@@ -212,16 +214,19 @@ module Metalware
       end
 
       def genders
+        # XXX Do we want to make genders available as a `Hashie::Mash` too?
+        # Depends if we want to be able to iterate through genders or just get
+        # list of nodes in a specified gender
         GenderGroupProxy
       end
 
       def hunter
-        YAML.load_file(Constants::HUNTER_PATH).map do |node_config|
-          OpenStruct.new(node_config)
+        if File.exists? Constants::HUNTER_PATH
+          Hashie::Mash.load(Constants::HUNTER_PATH)
+        else
+          # XXX Should warn/log that resorting to this?
+          Hashie::Mash.new
         end
-      rescue Errno::ENOENT
-        # XXX Should warn/log that resorting to this?
-        []
       end
 
       def hosts_url
@@ -239,18 +244,17 @@ module Metalware
       end
 
       def hostip
-        hostip = `#{determine_hostip_script}`.chomp
-        if $?.success?
-          hostip
-        else
-          # If script failed for any reason fall back to using `hostname -i`,
-          # which may or may not give the IP on the interface we actually want
-          # to use (note: the dance with pipes is so we only get the last word
-          # in the output, as I've had the IPv6 IP included first before, which
-          # breaks all the things).
-          # XXX Warn about falling back to this?
-          `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
-        end
+        SystemCommand.run(determine_hostip_script).chomp
+      rescue SystemCommandError
+        # If script failed for any reason fall back to using `hostname -i`,
+        # which may or may not give the IP on the interface we actually want
+        # to use (note: the dance with pipes is so we only get the last word
+        # in the output, as I've had the IPv6 IP included first before, which
+        # breaks all the things).
+        # XXX Warn about falling back to this?
+        SystemCommand.run(
+          "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
+        ).chomp
       end
 
       private

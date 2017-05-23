@@ -5,4 +5,7 @@ module Metalware
 
   class NoGenderGroupError < MetalwareError
   end
+
+  class SystemCommandError < MetalwareError
+  end
 end
