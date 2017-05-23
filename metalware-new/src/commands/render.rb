@@ -1,11 +1,16 @@
 
+require 'commands/base_command'
 require 'templater'
 
 module Metalware
   module Commands
-    class Render
-      def initialize(args, _options)
-        template_path, maybe_node = args
+    class Render < BaseCommand
+      def setup(args, options)
+        @args = args
+      end
+
+      def run
+        template_path, maybe_node = @args
 
         template_parameters = {
           nodename: maybe_node,

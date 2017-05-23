@@ -1,18 +1,14 @@
 
-require 'iterator'
-require 'templater'
+require 'commands/base_command'
 require 'constants'
+require 'iterator'
 require 'nodes'
+require 'templater'
 
 module Metalware
   module Commands
-    class Hosts
+    class Hosts < BaseCommand
       HOSTS_FILE = '/etc/hosts'
-
-      def initialize(args, options)
-        setup(args, options)
-        add_nodes_to_hosts
-      end
 
       private
 
@@ -23,6 +19,10 @@ module Metalware
         config = Config.new(options.config)
         node_identifier = args.first
         @nodes = Nodes.create(config, node_identifier, options.group)
+      end
+
+      def run
+        add_nodes_to_hosts
       end
 
       def add_nodes_to_hosts

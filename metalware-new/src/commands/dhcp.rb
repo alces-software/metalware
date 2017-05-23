@@ -1,4 +1,5 @@
 
+require 'commands/base_command'
 require 'constants'
 require 'output'
 require 'templater'
@@ -7,25 +8,24 @@ require 'system_command'
 
 module Metalware
   module Commands
-    class Dhcp
+    class Dhcp < BaseCommand
       DHCPD_HOSTS_FILE = '/etc/dhcp/dhcpd.hosts'
       RENDERED_DHCPD_HOSTS_STAGING_FILE = File.join(
         Constants::CACHE_PATH, 'last-rendered.dhcpd.hosts'
       )
       VALIDATE_DHCPD_CONFIG = "dhcpd -t -cf #{RENDERED_DHCPD_HOSTS_STAGING_FILE}"
 
-      def initialize(_args, options)
-        setup(options)
+      private
+
+      def setup(args, options)
+        options.default template: 'default'
+        @options = options
+      end
+
+      def run
         render_template
         validate_rendered_template!
         install_rendered_template
-      end
-
-      private
-
-      def setup(options)
-        options.default template: 'default'
-        @options = options
       end
 
       def render_template
