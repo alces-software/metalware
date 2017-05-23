@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require_relative '../src/cli.rb'
+
+Metalware::Cli.new.run if $0 == __FILE__
