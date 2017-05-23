@@ -47,7 +47,7 @@ describe Metalware::Commands::Build do
   end
 
   context 'when called without group argument' do
-    it 'renders default templates for given node' do
+    it 'renders default standard templates for given node' do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/kickstart/default',
         '/var/lib/metalware/rendered/kickstart/testnode01',
@@ -62,7 +62,7 @@ describe Metalware::Commands::Build do
       run_build('testnode01')
     end
 
-    it 'uses different templates if template options passed' do
+    it 'uses different standard templates if template options passed' do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/kickstart/my_kickstart',
         '/var/lib/metalware/rendered/kickstart/testnode01',
@@ -118,7 +118,7 @@ describe Metalware::Commands::Build do
       SpecUtils.use_mock_genders(self)
     end
 
-    it 'renders templates for each node' do
+    it 'renders standard templates for each node' do
       allow(Metalware::Templater).to receive(:render_to_file)
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/kickstart/my_kickstart',
