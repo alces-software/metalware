@@ -37,20 +37,20 @@ module Metalware
       # `file` method directly, so can cleanly stub this for testing.
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
-      def render(filename, template_parameters={})
-        Templater.new(template_parameters).render(filename)
+      def render(template, template_parameters={})
+        Templater.new(template_parameters).render(template)
       end
 
-      def render_to_file(template_file, save_file, template_parameters={})
+      def render_to_file(template, save_file, template_parameters={})
         File.open(save_file.chomp, "w") do |f|
-          f.puts render(template_file, template_parameters)
+          f.puts render(template, template_parameters)
         end
         # Alces::Stack::Log.info "Template Saved: #{save_file}"
       end
 
-      def render_and_append_to_file(template_file, append_file, template_parameters={})
+      def render_and_append_to_file(template, append_file, template_parameters={})
         File.open(append_file.chomp, 'a') do |f|
-          f.puts render(template_file, template_parameters)
+          f.puts render(template, template_parameters)
         end
         # Alces::Stack::Log.info "Template Appended: #{append_file}"
       end
@@ -62,17 +62,17 @@ module Metalware
     # - nodename
     # - index
     # - what else?
-    def initialize(hash={})
-      passed_magic_parameters = hash.select do |k,v|
+    def initialize(parameters={})
+      passed_magic_parameters = parameters.select do |k,v|
         [:index, :nodename, :firstboot].include?(k) && !v.nil?
       end
       @magic_namespace = MagicNamespace.new(passed_magic_parameters)
-      @passed_hash = hash
+      @passed_hash = parameters
       @config = parse_config
     end
 
-    def render(filename)
-      File.open(filename.chomp, 'r') do |f|
+    def render(template)
+      File.open(template.chomp, 'r') do |f|
         replace_erb(f.read, @config)
       end
     end
