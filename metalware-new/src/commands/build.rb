@@ -1,6 +1,7 @@
 
 require 'active_support/core_ext/string/strip'
 
+require 'commands/basecommand'
 require 'config'
 require 'templater'
 require 'constants'
@@ -12,15 +13,7 @@ require 'output'
 
 module Metalware
   module Commands
-    class Build
-      def initialize(args, options)
-        setup(args, options)
-        render_build_templates
-        wait_for_nodes_to_build
-        teardown
-      rescue Interrupt
-        handle_interrupt
-      end
+    class Build < BaseCommand
 
       private
 
@@ -32,6 +25,12 @@ module Metalware
         @config = Config.new(options.config)
         node_identifier = args.first
         @nodes = Nodes.create(@config, node_identifier, options.group)
+      end
+
+      def run
+        render_build_templates
+        wait_for_nodes_to_build
+        teardown
       end
 
       def render_build_templates
@@ -113,7 +112,7 @@ module Metalware
         FileUtils.rm_rf(files)
       end
 
-      def handle_interrupt
+      def handle_interrupt(_not_used)
         Output.stderr 'Exiting...'
         ask_if_should_rerender_pxelinux_configs
         teardown

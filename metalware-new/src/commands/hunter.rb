@@ -1,4 +1,5 @@
 
+require 'commands/basecommand'
 require 'net/dhcp'
 require 'pcap'
 
@@ -11,13 +12,7 @@ require 'hunter_updater'
 
 module Metalware
   module Commands
-    class Hunter
-      def initialize(_args, options)
-        setup(options)
-        listen!
-      rescue Interrupt
-        handle_interrupt
-      end
+    class Hunter < BaseCommand
 
       private
 
@@ -38,6 +33,10 @@ module Metalware
         # @hunter_logger = Alces::Stack::Log.create_log("/var/log/metalware/hunter.log")
 
         setup_network_connection
+      end
+
+      def run
+        listen!
       end
 
       def listen!
@@ -123,7 +122,7 @@ module Metalware
         "#{@options.prefix}#{@detection_count.to_s.rjust(@options.length, '0')}"
       end
 
-      def handle_interrupt
+      def handle_interrupt(_not_used)
         Output.stderr 'Exiting...'
         exit
       end
