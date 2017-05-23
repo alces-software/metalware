@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 
 gem 'commander'
 gem 'rugged'
+gem 'activesupport'
+gem 'recursive-open-struct'
 
 group :test do
   gem 'rspec'

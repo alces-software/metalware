@@ -23,8 +23,10 @@ require "erb"
 require "ostruct"
 require "json"
 require "yaml"
+require 'recursive-open-struct'
 
 require "constants"
+require 'active_support/core_ext/hash/keys'
 # require "alces/stack/log"
 
 module Metalware
@@ -36,9 +38,10 @@ module Metalware
       # `file` method directly, so can cleanly stub this for testing.
       # XXX need `template_parameters` param? Child class, which is only one
       # used (outside of tests), forbids this.
+      # XXX rename to `render`; rename other methods here appropriately too.
       def file(filename, template_parameters={})
         File.open(filename.chomp, 'r') do |f|
-          return replace_erb(f.read, template_parameters)
+          replace_erb(f.read, template_parameters)
         end
       end
 
@@ -56,8 +59,9 @@ module Metalware
         # Alces::Stack::Log.info "Template Appended: #{append_file}"
       end
 
-      def replace_erb(template, template_parameters={})
-        return ERB.new(template).result(OpenStruct.new(template_parameters).instance_eval {binding})
+      def replace_erb(template, template_parameters)
+        parameters_binding = template_parameters.instance_eval {binding}
+        ERB.new(template).result(parameters_binding)
       rescue StandardError => e
         $stderr.puts "Could not parse ERB"
         $stderr.puts template.to_s
@@ -67,93 +71,32 @@ module Metalware
     end
 
     class Combiner < Handler
-      def self.hostip
-        determine_hostip_script = '/opt/metalware/libexec/determine-hostip'
+      attr_reader :config
 
-        hostip = `#{determine_hostip_script}`.chomp
-        if $?.success?
-          hostip
-        else
-          # If script failed for any reason fall back to using `hostname -i`,
-          # which may or may not give the IP on the interface we actually
-          # want to use (note: the dance with pipes is so we only get the
-          # last word in the output, as I've had the IPv6 IP included first
-          # before, which breaks all the things).
-          `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
-        end
-      end
-
-      DEFAULT_HASH = {
-        hostip: self.hostip,
-        index: 0,
-        permanent_boot: false
-      }
-
+      # XXX Have this just take allowed keyword parameters:
+      # - nodename
+      # - index
+      # - what else?
       def initialize(hash={})
-        @combined_hash = DEFAULT_HASH.merge(hash)
-        fixed_nodename = combined_hash[:nodename]
-        @combined_hash.merge!(load_yaml_hash)
-        @parsed_hash = parse_combined_hash
-        if parsed_hash[:nodename] != fixed_nodename
-          raise HashOverrideError.new(fixed_nodename, @parsed_hash)
+        passed_magic_parameters = hash.select do |k,v|
+          [:index, :nodename].include?(k) && !v.nil?
         end
-      end
-      class HashOverrideError < StandardError
-        def initialize(nodename, index, parsed_hash={})
-          msg = "Original nodename: " << nodename.to_s << "\n"
-          msg << parsed_hash.to_s << "\n"
-          msg << "YAML and ERB cannot alter the values of nodename and index"
-          super(msg)
-        end
+        @magic_namespace = MagicNamespace.new(passed_magic_parameters)
+        @passed_hash = hash
+        @config = parse_config
       end
 
-      attr_reader :combined_hash
-      attr_reader :parsed_hash
-
-      def load_yaml_hash
-        hash = Hash.new
-        get_yaml_file_list.each do |yaml|
-          begin
-            yaml_path = "#{Constants::REPO_PATH}/config/#{yaml}.yaml"
-            yaml_payload = YAML.load(File.read(yaml_path))
-          rescue Errno::ENOENT # Skips missing files
-          rescue StandardError => e
-            $stderr.puts "Could not parse YAML file"
-            raise e
-          else
-            if !yaml_payload.is_a? Hash
-              raise "Expected YAML config to contain a hash"
-            else
-              hash.merge!(yaml_payload)
-            end
-          end
-        end
-        hash.inject({}) do |memo,(k,v)| memo[k.to_sym] = v; memo end
+      def file(filename, template={})
+        raise HashInputError if !template.empty?
+        super(filename, @config)
       end
 
-      def get_yaml_file_list
-        list = [ "all" ]
-        return list if !@combined_hash.key?(:nodename)
-        list_str = `nodeattr -l #{@combined_hash[:nodename]} 2>/dev/null`.chomp
-        if list_str.empty? then return list end
-        list.concat(list_str.split(/\n/).reverse)
-        list.push(@combined_hash[:nodename])
-        list.uniq
-      end
-
-      def parse_combined_hash
-        current_hash = Hash.new.merge(@combined_hash)
-        current_str = current_hash.to_s
-        old_str = ""
-        count = 0
-        while old_str != current_str
-          count += 1
-          raise LoopErbError if count > 10
-          old_str = "#{current_str}"
-          current_str = replace_erb(current_str, current_hash)
-          current_hash = eval(current_str)
+      # XXX Make these not nested classes, also possibly should use common
+      # error class or superclass for these.
+      class HashInputError < StandardError
+        def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
+          super
         end
-        return current_hash
       end
 
       class LoopErbError < StandardError
@@ -162,15 +105,121 @@ module Metalware
         end
       end
 
-      def file(filename, template={})
-        raise HashInputError if !template.empty?
-        super(filename, @parsed_hash)
+      private
+
+      def nodename
+        @magic_namespace.nodename
       end
 
-      class HashInputError < StandardError
-        def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
-          super
+      # The merging of the raw combined config files, any additional passed
+      # values, and the magic `alces` namespace; this is the config prior to
+      # parsing any nested ERB values.
+      def base_config
+        @base_config ||= raw_config
+          .merge(@passed_hash)
+          .merge(alces: @magic_namespace)
+      end
+
+      def raw_config
+        combined_configs = {}
+        ordered_node_config_files.each do |config_name|
+          begin
+            config_path = "#{Constants::REPO_PATH}/config/#{config_name}.yaml"
+            config = YAML.load(File.read(config_path))
+          rescue Errno::ENOENT # Skips missing files
+          rescue StandardError => e
+            $stderr.puts "Could not parse YAML config file"
+            raise e
+          else
+            if !config.is_a? Hash
+              raise "Expected YAML config file to contain a hash"
+            else
+              combined_configs.merge!(config)
+            end
+          end
         end
+        # XXX only symbolizes top-level keys, but not those in nested hashes =>
+        # confusing.
+        combined_configs.symbolize_keys
+      end
+
+      def ordered_node_config_files
+        list = [ "all" ]
+        return list if !nodename
+        list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
+        if list_str.empty? then return list end
+        list.concat(list_str.split(/\n/).reverse)
+        list.push(nodename)
+        list.uniq
+      end
+
+      def parse_config
+        current_parsed_config = base_config
+        current_config_string = current_parsed_config.to_s
+        previous_config_string = nil
+        count = 0
+
+        # Loop through the config and recursively parse any config values which
+        # contain ERB, until the parsed config is not changing or we have
+        # exceeded the maximum number of passes to make.
+        while previous_config_string != current_config_string
+          count += 1
+          raise LoopErbError if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
+
+          previous_config_string = current_config_string
+          current_parsed_config = perform_config_parsing_pass(current_parsed_config)
+          current_config_string = current_parsed_config.to_s
+        end
+
+        RecursiveOpenStruct.new(current_parsed_config)
+      end
+
+      def perform_config_parsing_pass(current_parsed_config)
+        current_parsed_config.map do |k,v|
+          [k, parse_config_value(v, current_parsed_config)]
+        end.to_h
+      end
+
+      def parse_config_value(value, current_parsed_config)
+        case value
+        when String
+          replace_erb(value, RecursiveOpenStruct.new(current_parsed_config))
+        when Hash
+          value.map do |k,v|
+            [k, parse_config_value(v, current_parsed_config)]
+          end.to_h
+        else
+          value
+        end
+      end
+    end
+
+    MagicNamespace = Struct.new(:index, :nodename, :hostip) do
+      def initialize(index: 0, nodename: nil)
+        super(index, nodename, MagicNamespace.hostip)
+      end
+
+      private
+
+      def self.hostip
+        hostip = `#{determine_hostip_script}`.chomp
+        if $?.success?
+          hostip
+        else
+          # If script failed for any reason fall back to using `hostname -i`,
+          # which may or may not give the IP on the interface we actually want
+          # to use (note: the dance with pipes is so we only get the last word
+          # in the output, as I've had the IPv6 IP included first before, which
+          # breaks all the things).
+          `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
+        end
+      end
+
+      def self.determine_hostip_script
+        File.join(
+          Constants::METALWARE_INSTALL_PATH,
+          'libexec/determine-hostip'
+        )
       end
     end
   end
