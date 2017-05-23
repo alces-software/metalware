@@ -1,5 +1,6 @@
 
 require 'commands/base_command'
+require 'metal_log'
 require 'net/dhcp'
 require 'pcap'
 
@@ -17,6 +18,7 @@ module Metalware
       private
 
       def setup(args, options)
+        @hunter_log = MetalLog.new("hunter")
 
         # XXX Always default interface to Metalware build interface (where
         # possible)?
@@ -29,7 +31,6 @@ module Metalware
 
         @detection_count = options.start
         @detected_macs = []
-        # @hunter_logger = Alces::Stack::Log.create_log("/var/log/metalware/hunter.log")
 
         setup_network_connection
       end
@@ -53,35 +54,33 @@ module Metalware
           filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
           network.add_filter(filter)
         end
-      # rescue
-        # Alces::Stack::Log.fatal "Failed to connect to network, check interface"
       end
 
       def process_packet(data)
-        # @hunter_logger.info "Processing received UDP packet"
+        @hunter_log.info "Processing received UDP packet"
         message = DHCP::Message.from_udp_payload(data, :debug => false)
         process_message(message) if message.is_a?(DHCP::Discover)
       end
 
       def process_message(message)
-        # @hunter_logger.info("Processing DHCP::Discover message options"){ message.options }
+        @hunter_log.info "Processing DHCP::Discover message options"
         message.options.each do |o|
           detected(hwaddr_from(message)) if pxe_client?(o)
         end
       end
 
       def hwaddr_from(message)
-        # @hunter_logger.info "Determining hardware address"
+        @hunter_log.info "Determining hardware address"
         message.chaddr.slice(0..(message.hlen - 1)).map do |b|
           b.to_s(16).upcase.rjust(2,'0')
         end.join(':').tap do |hwaddr|
-          # @hunter_logger.info "Detected hardware address: #{hwaddr}"
+          @hunter_log.info "Detected hardware address: #{hwaddr}"
         end
       end
 
       def pxe_client?(o)
         o.is_a?(DHCP::VendorClassIDOption) && o.payload.pack('C*').tap do |vendor|
-          # @hunter_logger.info "Detected vendor: #{vendor}"
+          @hunter_log.info "Detected vendor: #{vendor}"
         end =~ /^PXEClient/
       end
 
@@ -98,8 +97,8 @@ module Metalware
             answer.default = default_name
           end
           record_hunted_pair(name, hwaddr)
-          # Alces::Stack::Log.info("#{name}-#{hwaddr}")
-          # @hunter_logger.info("#{name}-#{hwaddr}")
+          MetalLog.info "#{name}-#{hwaddr}"
+          @hunter_log.info "#{name}-#{hwaddr}"
           Output.stderr 'Logged node'
 
         rescue => e
