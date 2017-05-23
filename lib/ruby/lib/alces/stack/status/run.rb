@@ -19,138 +19,117 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/tools/execution'
 require 'alces/tools/cli'
 require 'alces/stack/iterator'
-require 'alces/stack/status/monitor'
-require 'alces/stack/status/task'
-require 'alces/stack/iterator'
 require 'alces/stack/log'
+require 'alces/stack/options'
+require 'alces/stack/status/monitor'
+require 'alces/stack/status/job'
 require 'fileutils'
 
 module Alces
   module Stack
+    class RunOptions < Alces::Stack::Options 
+      def cmds
+        [:power, :ping]
+      end
+
+      def nodes
+        @nodes ||= set_nodes
+      end
+
+      private
+      def set_nodes
+        lambda_proc = lambda { |lambda_hash| lambda_hash[:nodename] }
+        a = Alces::Stack::Iterator.run(group, lambda_proc, nodename: nodename)
+        a.is_a?(Array) ? a : [a]
+      end
+    end
+
     module Status
       class Run
-        include Alces::Tools::Execution
-
         def initialize(options={})
-          @opt = Options.new(options)
-        end
-
-        class Options
-          def initialize(options)
-            @options = options
-            assert_preconditions
-          end
-
-          def assert_preconditions
-            raise InputError.new "Requires: -n xor -g" unless group? ^ nodename?
-          end
-          class InputError < StandardError; end
-
-          def nodes
-            lambda_proc = lambda { |options| options[:nodename] }
-            @nodes ||= lambda {
-                a = Alces::Stack::Iterator
-                      .run(group, lambda_proc, nodename: nodename)
-                a = [a] unless a.is_a? Array 
-                a
-              }.call
-          end
-
-          def cmds
-            [:power, :ping]
-          end
-
-          def method_missing(s, *a, &b)
-            if @options.key?(s)
-              @options[s]
-            elsif s[-1] == "?"
-              !!@options[s[0...-1].to_sym]
-            else
-              super
-            end
-          end
-        end
-
-        def set_signal
-          Signal.trap("INT") {
-            if @int_once
-              @monitor.kill
-            else
-              @int_once = true
-              begin
-                @monitor.wait
-              rescue
-              end
-            end
-            File.delete(@report_file) if File.exist?(@report_file.to_s)
-            Kernel.exit
-          }
-        end
-
-        def set_logging
-          status_log = Alces::Stack::Log.create_log("/var/log/metalware/status.log")
-          status_log.progname = "status"
-          Alces::Stack::Status::Monitor.log = status_log
-          Alces::Stack::Status::Task.log = status_log
-        end
-
-        def set_reporting
-          Alces::Stack::Status::Task.time = (@opt.wait < 5 ? 5 : @opt.wait)
-          @report_file = "/tmp/metalware-status.#{Process.pid}"
-          FileUtils.touch(@report_file)
-          File.delete(@report_file) if File.exist?(@report_file)
-          Alces::Stack::Status::Task.report_file = @report_file
-          @results = {}
+          @opt = RunOptions.new(options)
+          raise "Requires either a nodename (-n) OR group (-g) input" if @opt.nodename? == @opt.group?
         end
 
         def run!
-          set_logging
-          set_reporting
-          @monitor = Alces::Stack::Status::Monitor.new(@opt.nodes, @opt.cmds, 50).fork!
-          set_signal
-          next_loop, wait = true, true
-          while next_loop
-            File.open(@report_file, "a+") do |f|
-              f.flock(File::LOCK_EX)
-              process_data(f.read)
-              f.truncate(0)
+          start_monitor
+          collect_data
+          @monitor.thread.join
+        end
+        
+        def start_monitor
+          @monitor = Alces::Stack::Status::Monitor.new({
+              nodes: @opt.nodes,
+              cmds: @opt.cmds,
+              thread_limit: @opt.thread_limit,
+              time_limit: @opt.time_limit
+            })
+          @monitor.start
+        end
+
+        def collect_data
+          data = {}
+          empty_count = 0
+          while data["FINISHED"] != true
+            data = get_finished_data
+            if data.empty?
+              empty_count += 1
+              raise DataIncomplete if empty_count > 100 && @monitor.thread.stop?
+            elsif data["FINISHED"] != true
+              display_data data
+              empty_count = 0
             end
-            check_findished_node
-            next_loop = false unless wait
-            wait = @monitor.wait_wnohang.nil? if wait
-            sleep 1 if next_loop
-          end
-        ensure
-          File.delete(@report_file) if File.exist?(@report_file.to_s)
-        end
-
-        def process_data(data)
-          data.split("\n").each do |entry|
-            h = eval(entry.gsub(/\\n/, "\n"))
-            (@results[h[:nodename].to_sym] ||= {})[h[:cmd]] = h[:data]
+            sleep 1 # Only looks for updated data every second
           end
         end
 
-        def check_findished_node
-          return if (@cur_index ||= 0) >= @opt.nodes.length
-          h = (@results[@opt.nodes[@cur_index].to_sym] ||= {})
-          complete = true
-          @opt.cmds.each { |c| complete = false unless h.key? c }
-          return unless complete
-          display_result(h)
-          @results.delete @opt.nodes[@cur_index].to_sym
-          @cur_index += 1
-          check_findished_node
+        class DataIncomplete < StandardError
+          def initialize(msg = "Failed to receive data for all nodes")
+            super
+          end
         end
 
-        def display_result(h = {})
-          str = "#{@opt.nodes[@cur_index]} : "
-          @opt.cmds.each { |c| str << "#{c} #{h[c]}, " }
-          puts str
-          $stdout.flush
+        def display_data(data = {})
+          print_header unless @header_been_printed
+          
+          format_str = "%-10s"
+          printf format_str, data[:nodename]
+          @opt.cmds.each { |cmd| printf " | #{format_str}", data[cmd] }
+          puts
+        end
+
+        def print_header
+          @header_been_printed = true
+          header_data = {}
+          header_underline_hash = {}
+          header_underline_string = "----------"
+          header_data[:nodename] = "Node"
+          header_underline_hash[:nodename] = header_underline_string
+          @opt.cmds.each do |c|
+            header_data[c] = c.to_s.capitalize
+            header_underline_hash[c] = header_underline_string
+          end
+          display_data header_data
+          display_data header_underline_hash
+        end
+
+        def get_finished_data
+          @finished_node_index ||= 0
+          return {"FINISHED" => true} unless @finished_node_index < @opt.nodes.length
+          nodename = @opt.nodes[@finished_node_index]
+
+          current_results = Alces::Stack::Status::Job.results.tap do |r|
+            return {} if r.nil?
+            return {} unless r.key? nodename
+            r = r[nodename]
+            @opt.cmds.each { |cmd| return {} unless r.key? cmd }
+            r[:nodename] = nodename
+          end
+          
+          @finished_node_index += 1
+          current_results[nodename]
         end
       end
     end

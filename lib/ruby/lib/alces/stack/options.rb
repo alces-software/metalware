@@ -1,10 +1,3 @@
-<<DOC
-: '
-: NAME: status
-: SYNOPSIS: Displays the status of each node
-: VERSION: 1.2.0
-: '
-DOC
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,15 +19,22 @@ DOC
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-# Execute as ruby script if we're evaluating under bash
-if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
+module Alces
+  module Stack
+    class Options
+      def initialize(options = {})
+        @options = options
+      end
 
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-
-require 'alces/stack/status'
-
-Alces::Stack::Status::CLI.execute if $0 == __FILE__
+      def method_missing(s, *a, &b)
+        if @options.key?(s)
+          @options[s]
+        elsif s[-1] == "?"
+          !!@options[s[0...-1].to_sym]
+        else
+          super
+        end
+      end
+    end
+  end
+end
