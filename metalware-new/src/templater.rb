@@ -71,7 +71,7 @@ module Metalware
       @config = parse_config
     end
 
-    def render(filename, template_parameters={})
+    def render(filename)
       File.open(filename.chomp, 'r') do |f|
         replace_erb(f.read, @config)
       end
