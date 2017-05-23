@@ -1,0 +1,5 @@
+
+[
+        { nodename: testnode01, mac_address: testnode01-mac},
+        { nodename: testnode02, mac_address: testnode02-mac},
+]
