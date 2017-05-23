@@ -13,7 +13,7 @@ describe Metalware::Templater do
   def expect_renders(template_parameters, expected)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.
-    rendered = Metalware::Templater.file(
+    rendered = Metalware::Templater.render(
       TEST_TEMPLATE_PATH, template_parameters
     ).gsub(/\s+\n/, "\n")
 

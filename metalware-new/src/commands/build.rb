@@ -47,7 +47,7 @@ module Metalware
         kickstart_save_path = File.join(
           @config.rendered_files_path, 'kickstart', node.name
         )
-        Templater.save(kickstart_template_path, kickstart_save_path, parameters)
+        Templater.render_to_file(kickstart_template_path, kickstart_save_path, parameters)
       end
 
       def render_pxelinux(parameters, node)
@@ -57,7 +57,7 @@ module Metalware
         pxelinux_save_path = File.join(
           @config.pxelinux_cfg_path, node.hexadecimal_ip
         )
-        Templater.save(pxelinux_template_path, pxelinux_save_path, parameters)
+        Templater.render_to_file(pxelinux_template_path, pxelinux_save_path, parameters)
       end
 
       def template_path(template_type)

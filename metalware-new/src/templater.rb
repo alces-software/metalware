@@ -35,23 +35,22 @@ module Metalware
     class << self
       # XXX Have method to print template here, and do not expose access to
       # `file` method directly, so can cleanly stub this for testing.
-      # XXX rename to `render`; rename other methods here appropriately too.
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
-      def file(filename, template_parameters={})
-        Templater.new(template_parameters).file(filename)
+      def render(filename, template_parameters={})
+        Templater.new(template_parameters).render(filename)
       end
 
-      def save(template_file, save_file, template_parameters={})
+      def render_to_file(template_file, save_file, template_parameters={})
         File.open(save_file.chomp, "w") do |f|
-          f.puts file(template_file, template_parameters)
+          f.puts render(template_file, template_parameters)
         end
         # Alces::Stack::Log.info "Template Saved: #{save_file}"
       end
 
-      def append(template_file, append_file, template_parameters={})
+      def render_and_append_to_file(template_file, append_file, template_parameters={})
         File.open(append_file.chomp, 'a') do |f|
-          f.puts file(template_file, template_parameters)
+          f.puts render(template_file, template_parameters)
         end
         # Alces::Stack::Log.info "Template Appended: #{append_file}"
       end
@@ -72,8 +71,7 @@ module Metalware
       @config = parse_config
     end
 
-    # XXX rename to `render`; rename other methods here appropriately too.
-    def file(filename, template_parameters={})
+    def render(filename, template_parameters={})
       File.open(filename.chomp, 'r') do |f|
         replace_erb(f.read, @config)
       end

@@ -29,7 +29,7 @@ module Metalware
       end
 
       def render_template
-        Templater.save(
+        Templater.render_to_file(
           template_path, RENDERED_DHCPD_HOSTS_STAGING_FILE
         )
       end
