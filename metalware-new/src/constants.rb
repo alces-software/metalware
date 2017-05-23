@@ -9,5 +9,7 @@ module Metalware
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
+
+    NODEATTR_COMMAND = 'nodeattr'
   end
 end
