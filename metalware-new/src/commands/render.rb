@@ -1,5 +1,5 @@
 
-require 'commands/basecommand'
+require 'commands/base_command'
 require 'templater'
 
 module Metalware

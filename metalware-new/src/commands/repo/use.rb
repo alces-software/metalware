@@ -1,5 +1,5 @@
 
-require 'commands/basecommand'
+require 'commands/base_command'
 require 'rugged'
 require 'fileutils'
 
@@ -14,17 +14,17 @@ module Metalware
           @force = options.force
         end
 
-      	def run
+        def run
           if @force
             FileUtils::rm_rf Constants::REPO_PATH
             # Alces::Stack::Log.info "Force deleted old repo"
           end
-          
+
           Rugged::Repository.clone_at(@repo_url, Constants::REPO_PATH)
           # Alces::Stack::Log.info "Cloned '#{@opt.name_input}' from #{@opt.url}"
         rescue Rugged::InvalidError
-      	  raise $!, "Repository already exists. Use -f to force clone a new one"
-      	end
+          raise $!, "Repository already exists. Use -f to force clone a new one"
+        end
       end
     end
   end

@@ -1,5 +1,5 @@
 
-require 'commands/basecommand'
+require 'commands/base_command'
 require 'rugged'
 
 require 'constants'
@@ -8,7 +8,7 @@ module Metalware
   module Commands
     module Repo
       class Update < BaseCommand
-	      def setup(args, options)
+        def setup(args, options)
           @force = !!options.force
         end
 
@@ -49,23 +49,23 @@ module Metalware
             #                         "been reached!"
             raise "Internal error. Check metal log"
           end
-	      end
+        end
       end
 
       class LocalAheadOfRemote < StandardError
-      	def initialize(num)
-      	  msg = "The local repo is #{num} commits ahead of remote. -f will " \
-      	    "override local commits"
-      	  super msg;
-      	end
+        def initialize(num)
+          msg = "The local repo is #{num} commits ahead of remote. -f will " \
+            "override local commits"
+          super msg;
+        end
       end
 
       class UncommitedChanges < StandardError
-      	def initialize(num)
-      	  msg = "The local repo has #{num} uncommitted changes. -f will " \
-      	    "delete these changes. (untracked unaffected)"
-      	  super msg;
-      	end
+        def initialize(num)
+          msg = "The local repo has #{num} uncommitted changes. -f will " \
+            "delete these changes. (untracked unaffected)"
+          super msg;
+        end
       end
     end
   end

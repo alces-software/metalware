@@ -1,5 +1,5 @@
 
-require 'commands/basecommand'
+require 'commands/base_command'
 require 'net/dhcp'
 require 'pcap'
 
@@ -122,7 +122,7 @@ module Metalware
         "#{@options.prefix}#{@detection_count.to_s.rjust(@options.length, '0')}"
       end
 
-      def handle_interrupt(_not_used)
+      def handle_interrupt(_e)
         Output.stderr 'Exiting...'
         exit
       end

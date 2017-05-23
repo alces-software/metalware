@@ -1,7 +1,7 @@
 
 require 'active_support/core_ext/string/strip'
 
-require 'commands/basecommand'
+require 'commands/base_command'
 require 'config'
 require 'templater'
 require 'constants'
@@ -112,7 +112,7 @@ module Metalware
         FileUtils.rm_rf(files)
       end
 
-      def handle_interrupt(_not_used)
+      def handle_interrupt(_e)
         Output.stderr 'Exiting...'
         ask_if_should_rerender_pxelinux_configs
         teardown
