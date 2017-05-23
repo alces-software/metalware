@@ -1,4 +1,5 @@
 
+require 'commands/basecommand'
 require 'rugged'
 
 require 'constants'
@@ -6,8 +7,12 @@ require 'constants'
 module Metalware
   module Commands
     module Repo
-      class Update
-	def initialize(_args, options)
+      class Update < BaseCommand
+	      def setup(args, options)
+          @force = !!options.force
+        end
+
+        def run
           repo = Rugged::Repository.init_at(Constants::REPO_PATH)
           repo.fetch("origin")
 
@@ -16,7 +21,7 @@ module Metalware
           ahead_behind = repo.ahead_behind(local_commit, remote_commit)
           uncommited = local_commit.diff_workdir.size
 
-          if options.force
+          if @force
             # Alces::Stack::Log.warn
             #   "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
             # Alces::Stack::Log.warn
@@ -44,23 +49,23 @@ module Metalware
             #                         "been reached!"
             raise "Internal error. Check metal log"
           end
-	end
+	      end
       end
 
       class LocalAheadOfRemote < StandardError
-	def initialize(num)
-	  msg = "The local repo is #{num} commits ahead of remote. -f will " \
-	    "override local commits"
-	  super msg;
-	end
+      	def initialize(num)
+      	  msg = "The local repo is #{num} commits ahead of remote. -f will " \
+      	    "override local commits"
+      	  super msg;
+      	end
       end
 
       class UncommitedChanges < StandardError
-	def initialize(num)
-	  msg = "The local repo has #{num} uncommitted changes. -f will " \
-	    "delete these changes. (untracked unaffected)"
-	  super msg;
-	end
+      	def initialize(num)
+      	  msg = "The local repo has #{num} uncommitted changes. -f will " \
+      	    "delete these changes. (untracked unaffected)"
+      	  super msg;
+      	end
       end
     end
   end
