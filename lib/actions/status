@@ -1,8 +1,8 @@
 <<DOC
 : '
-: NAME: script
-: SYNOPSIS: Renders script templates
-: VERSION: 1.0.0
+: NAME: status
+: SYNOPSIS: Displays the status of each node
+: VERSION: 1.2.0
 : '
 DOC
 #==============================================================================
@@ -26,8 +26,6 @@ DOC
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-# vim: set filetype=ruby :
-
 # Execute as ruby script if we're evaluating under bash
 if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
 
@@ -37,6 +35,6 @@ $: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 require 'rubygems'
 require 'bundler/setup'
 
-require 'alces/stack/scripts'
+require 'alces/stack/status'
 
-Alces::Stack::Scripts::CLI.execute if $0 == __FILE__
+Alces::Stack::Status::CLI.execute if $0 == __FILE__

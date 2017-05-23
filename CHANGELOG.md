@@ -1,7 +1,21 @@
 # Change Log
 
-All notable changes to this project will be documented in this file.
-This project adheres to [Semantic Versioning](http://semver.org/).
+All notable changes to this project will be documented in this file.  This
+project adheres to [Semantic Versioning](http://semver.org/).
+
+## [1.2.0]
+
+### Changed
+
+- Refactored Metalware content to separate Metalware content repos
+- Improved determination of `hostip` when templating
+
+### Added
+
+- Created repo system for Metalware content and new `metal repo` command to
+  manage these
+- Added `metal status` tool to display the `ping` and `power` state of the
+  nodes
 
 ## [1.1.0] - 2017-03-20
 
@@ -9,8 +23,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Defined hierarchy for template inputs
 
 ### Added
-- Template engine (ERb) supports config files
-- Support for script file manipulation using ERb templates
+- Template engine (ERB) supports config files
+- Support for script file manipulation using ERB templates
 - Support permanent templating/ boot
 - Logging file manipulations and error events
 
@@ -20,8 +34,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Removed cobbler integration in 'metal hunter'
 
 ### Added
-- Support for host file manipulation based on ERb templates
+- Support for host file manipulation based on ERB templates
 - Support for kickstart file manipulation
 - Support for PXE boot file manipulation
-- Built in genders based node itteration
+- Built in genders based node iteration
 - Basic installation master and client deployment scripts

@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
+require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb"
 $: << "#{ENV['alces_BASE']}/test/boot"
 
 require 'alces/stack/boot'
@@ -74,7 +74,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
   def test_get_save_file
     boot = Alces::Stack::Boot::Run.new(@input_nodename)
     json = @input_nodename[:json]; @input_nodename.delete(:json)
-    combiner = Alces::Stack::Templater::Combiner.new(json, @input_nodename)
+    combiner = Alces::Stack::Templater::Combiner.new(nil, json, @input_nodename)
     save = boot.get_save_file(combiner)
     assert_equal("/var/lib/tftpboot/pxelinux.cfg/" \
                    "#{`gethostip -x #{@input_nodename[:nodename]}`.chomp}",
@@ -93,7 +93,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
                 .new.replace_erb(@template_str, @input_nodename)
     assert_equal(string.rstrip,
                  output.rstrip,
-                 "Did not print the template correctly") 
+                 "Did not print the template correctly")
   end
 
   def test_save_template
@@ -107,7 +107,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
               .new.replace_erb(@template_str, @input_nodename)
     assert_equal(string.rstrip,
                  output.rstrip,
-                 "Did not save the template correctly") 
+                 "Did not save the template correctly")
     `rm -f #{save}`
   end
 
@@ -124,7 +124,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
     @input_nodename_kickstart.delete(:json)
     @input_nodename_kickstart[:kickstart] = ""
     correct = Alces::Stack::Templater::Combiner
-                .new(json, @input_nodename_kickstart).file(@template_kickstart)
+                .new(nil, json, @input_nodename_kickstart).file(@template_kickstart)
     assert_equal(correct.strip,
                  content.chomp,
                  "Did not pass kickstart template correctly")
@@ -133,7 +133,7 @@ class TC_Boot_Quick < Test::Unit::TestCase
   def test_render_kickstart_group
     boot = Alces::Stack::Boot::Run.new(@input_group_kickstart)
     boot.render_kickstart
-    check_lambda = -> (hash) { 
+    check_lambda = -> (hash) {
       assert_equal("/var/lib/metalware/rendered/ks/test.ks.#{hash[:nodename]}",
                    boot.instance_variable_get(:@to_delete)[hash[:index]],
                    "Incorrect save file")

@@ -29,3 +29,7 @@ export alces_RUBYHOME="$alces_BASE/opt/ruby"
 export LD_LIBRARY_PATH="${alces_RUBYHOME}/lib:$LD_LIBRARY_PATH"
 export GEM_HOME="${alces_RUBYHOME}/lib/ruby/gems/2.1.0"
 export GEM_PATH="${alces_RUBYHOME}/lib/ruby/gems/2.1.0"
+
+if [ -z "$alces_REPO" ]; then
+  export alces_REPO="/var/lib/metalware/repos/default"
+fi

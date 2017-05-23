@@ -26,13 +26,13 @@ require 'alces/stack/log'
 
 module Alces
   module Stack
-    module Hosts
+    module Status
       class CLI
         include Alces::Tools::CLI
 
         root_only
-        name 'metal hosts'
-        description "Modifies the hosts file, modifier flag (e.g. --add) is required"
+        name 'metal status'
+        description ""
         log_to File.join(Alces::Stack.config.log_root,'alces-node-hosts.log')
 
         option  :nodename,
@@ -40,68 +40,34 @@ module Alces
                 '-n', '--node-name',
                 default: false
 
-        option  :nodegroup,
-                'Node group to be modified, overrides --node-name',
+        option  :group,
+                'Specify a gender group to run over',
                 '-g', '--node-group',
                 default: false
 
-        flag    :add_flag,
-                'Adds a new entry to /etc/hosts',
-                '-a', '--add',
-                default: false
+        option  :time_limit,
+                'How long to wait in seconds. Minimum 5s',
+                '-w', '--wait',
+                default: "5"
 
-        option  :json,
-                'JSON string containing additional templating parameters',
-                '-j', '--additional-parameters',
-                default: false
-
-        option  :template,
-                'Template file to be used',
-                '-t', '--template',
-                default: "compute.erb"
-
-        flag    :template_options,
-                'Show templating options',
-                '--template-options',
-                default: false
-
-        flag    :dry_run_flag,
-                'Prints the template output without modifying files',
-                '-x', '--dry-run',
-                default: false
-
-        def setup_signal_handler
-          trap('INT') do
-            STDERR.puts "\nExiting..." unless @exiting
-            @exiting = true
-            Kernel.exit(0)
-          end
-        end
-
-        def show_template_options
-          options = {
-            nodename: "Value specified by --node-name"
-          }
-          Alces::Stack::Templater.show_options(options)
-          exit 0
-        end
+        option  :thread_limit,
+                'Limit on number of tasks to run in parallel',
+                '-t', '--thread-limit',
+                default: 10
 
         def assert_preconditions!
-          Alces::Stack::Log.progname = "hosts"
-          Alces::Stack::Log.info "metal hosts #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          msg = "metal status #{ARGV.to_s.gsub(/[\[\],\"]/, "")}"
+          Alces::Stack::Log.progname = "status"
+          Alces::Stack::Log.info msg
           self.class.assert_preconditions!
         end
 
         def execute
-          setup_signal_handler
-          show_template_options if template_options
-
-          Alces::Stack::Hosts.run!(template, 
-              dry_run_flag: dry_run_flag,
-              add_flag: add_flag,
+          Alces::Stack::Status.run!(
               nodename: nodename,
-              nodegroup: nodegroup,
-              json: json
+              group: group,
+              thread_limit: thread_limit,
+              time_limit: time_limit.to_i < 5 ? 5 : time_limit.to_i
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect

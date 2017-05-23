@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/iterator'
 require 'fileutils'
 
@@ -31,8 +32,8 @@ module Alces
       class Run
         include Alces::Tools::Execution
 
-        def initialize(template, options={})
-          @finder = Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/scripts/", template)
+        def initialize(scripts, options={})
+          @scripts = scripts
           @group = options[:group]
           @json = options[:json]
           @dry_run_flag = options[:dry_run_flag]
@@ -40,18 +41,39 @@ module Alces
             options[:nodename] ? { nodename: options[:nodename] } : {}
           @ran_from_boot = options[:ran_from_boot]
           @save_location = "#{options[:save_location]}".chomp('/') << '/'
+          @repo = options[:repo]
+        end
+
+        def each_script(&block)
+          scripts = "#{@scripts}".to_s.gsub(/[\[\]\(\)\{\}]/,"")
+                                 .split(/\s*,\s*/)
+          scripts.each do |s|
+            yield set_repo_helper s
+          end
+        end
+
+        def set_repo_helper(filename)
+          if @repo && filename.scan("::").empty?
+            raise "SWITCHING REPOS NOT CURRENTLY SUPPORTED"
+            return "#{@options[:repo]}::#{filename}"  
+          else
+            return filename
+          end
         end
 
         def run!
           raise "Requires a nodename or group" if !@group && !@template_parameters[:nodename]
-          
+
           if @dry_run_flag
             lambda_proc = -> (template_parameters) { puts_template(template_parameters) }
           else
             lambda_proc = -> (template_parameters) { save_template(template_parameters) }
           end
 
-          Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
+          each_script do |template|
+            @finder = Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/scripts", template)
+            Alces::Stack::Iterator.run(@group, lambda_proc, @template_parameters)
+          end
         end
 
         def get_save_file(nodename)
@@ -60,7 +82,7 @@ module Alces
         end
 
         def save_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@finder.repo, @json, template_parameters)
           save = get_save_file(combiner.parsed_hash[:nodename])
           FileUtils.mkdir_p(File.dirname(save))
           combiner.save(@finder.template, save)
@@ -68,7 +90,7 @@ module Alces
         end
 
         def puts_template(template_parameters)
-          combiner = Alces::Stack::Templater::Combiner.new(@json, template_parameters)
+          combiner = Alces::Stack::Templater::Combiner.new(@finder.repo, @json, template_parameters)
           puts "SCRIPT TEMPLATE"
           puts "Hash: " << combiner.parsed_hash.to_s
           puts "Save: " << get_save_file(combiner.parsed_hash[:nodename])

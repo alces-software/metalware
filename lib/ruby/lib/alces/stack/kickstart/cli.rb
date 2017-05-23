@@ -33,8 +33,7 @@ module Alces
         root_only
         name 'metal kickstart'
         description "Renders kickstart templates"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-ho.log')
-
+        
         option  :nodename,
                 'Node name to be modified',
                 '-n', '--node-name',
@@ -53,7 +52,7 @@ module Alces
         option  :template,
                 'Template file to be used',
                 '-t', '--template',
-                default: "#{ENV['alces_BASE']}/etc/templates/kickstart/compute.erb"
+                default: "compute.erb"
 
         option  :save_append,
                 'String to append to end of save file',

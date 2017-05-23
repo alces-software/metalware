@@ -22,6 +22,7 @@
 require 'alces/tools/execution'
 require 'alces/tools/cli'
 require "alces/stack/templater"
+require "alces/stack/finder"
 require 'alces/stack/iterator'
 
 module Alces
@@ -32,7 +33,7 @@ module Alces
 
         def initialize(template, options={})
           @finder = 
-            Alces::Stack::Templater::Finder.new("#{ENV['alces_BASE']}/etc/templates/hosts/", template)
+            Alces::Stack::Finder.new("#{ENV['alces_REPO']}", "/hosts", template)
           @template_parameters = {
             nodename: options[:nodename]
           }
@@ -68,11 +69,15 @@ module Alces
 
         def add(template_parameters)
           append_file = "/etc/hosts"
-          Alces::Stack::Templater::Combiner.new(@json, template_parameters).append(@finder.template, append_file)
+          Alces::Stack::Templater::Combiner
+            .new(@finder.repo, @json, template_parameters)
+            .append(@finder.template, append_file)
         end
 
         def puts_template(template_parameters)
-          puts Alces::Stack::Templater::Combiner.new(@json, template_parameters).file(@finder.template)
+          puts Alces::Stack::Templater::Combiner
+            .new(@finder.repo, @json, template_parameters)
+            .file(@finder.template)
         end
       end
     end

@@ -21,7 +21,6 @@
 #==============================================================================
 require_relative "#{ENV['alces_BASE']}/test/helper/base-test-require.rb" 
 
-require 'capture'
 require "alces/stack/hosts"
 require "alces/stack/templater"
 
@@ -32,8 +31,7 @@ class TC_Hosts < Test::Unit::TestCase
     @bash = File.read("/etc/profile.d/alces-metalware.sh")
     @template = "test.erb"
     @template_str = "\nInsert into host, nodename: <%= nodename %>"
-    File.write("#{ENV['alces_BASE']}/etc/templates/hosts/#{@template}", @template_str)
-
+    File.write("#{ENV['alces_REPO']}/hosts/#{@template}", @template_str)
   end
 
   def test_error_inputs
@@ -60,6 +58,6 @@ class TC_Hosts < Test::Unit::TestCase
 
   def teardown
     `mv /etc/hosts.copy.#{Process.pid} /etc/hosts`
-    `rm #{ENV['alces_BASE']}/etc/templates/hosts/#{@template}`
+    `rm #{ENV['alces_REPO']}/hosts/#{@template}`
   end
 end

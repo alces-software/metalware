@@ -61,6 +61,11 @@ module Alces
                 '-t', '--template',
                 default: "empty.erb"
 
+        option  :repo,
+                'Repo to be used instead of default. Is overridden by <repo>:: tag',
+                '-r', '--repo',
+                default: false
+
         flag    :template_options,
                 'Show templating options',
                 '--template-options',
@@ -94,7 +99,8 @@ module Alces
               dry_run_flag: dry_run_flag,
               json: json,
               save_location: save_location,
-              ran_from_boot: false
+              ran_from_boot: false,
+              repo: repo
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect

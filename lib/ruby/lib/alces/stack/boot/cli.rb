@@ -33,7 +33,6 @@ module Alces
         root_only
         name 'metal boot'
         description "Creates the boot files for the node(s)"
-        log_to File.join(Alces::Stack.config.log_root,'alces-node-boot.log')
 
         option  :nodename,
                 'Node name to be modified',
@@ -54,6 +53,10 @@ module Alces
                 'Specify value for kernel append in template. Check --template-options',
                 '--kernelappendoptions',
                 default: ""
+
+        option  :repo,
+                'Specifies a repo to use for all templates. Is overridden by <repo>:: flag',
+                '-r', '--repo'
 
         option  :template,
                 'Specify template',
@@ -111,7 +114,8 @@ module Alces
               json: json,
               kickstart: kickstart,
               permanent_boot: permanent_boot_flag,
-              scripts: scripts
+              scripts: scripts,
+              repo: repo
             )
         rescue => e
           Alces::Stack::Log.fatal e.inspect

@@ -26,7 +26,8 @@ install_runtime_prerequisites() {
     yum -e0 -y install openssl readline zlib libffi && \
         yum -e0 -y install libpcap && \
         yum -e0 -y install ipmitool && \
-        yum -e0 -y install gettext
+        yum -e0 -y install gettext && \
+        yum -e0 -y install git
 }
 
 install_base_prerequisites() {

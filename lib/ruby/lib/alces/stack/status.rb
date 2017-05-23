@@ -1,10 +1,3 @@
-<<DOC
-: '
-: NAME: script
-: SYNOPSIS: Renders script templates
-: VERSION: 1.0.0
-: '
-DOC
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,17 +19,17 @@ DOC
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-# vim: set filetype=ruby :
+require 'alces/stack/status/cli'
+require 'alces/stack/status/run'
 
-# Execute as ruby script if we're evaluating under bash
-if [ "" ]; then 0; else eval 'alces_RUBY_EXEC "$@" || exit 1'; fi; end
-
-ENV['BUNDLE_GEMFILE'] ||= "#{ENV['alces_BASE']}/lib/ruby/Gemfile"
-$: << "#{ENV['alces_BASE']}/lib/ruby/lib"
-
-require 'rubygems'
-require 'bundler/setup'
-
-require 'alces/stack/scripts'
-
-Alces::Stack::Scripts::CLI.execute if $0 == __FILE__
+module Alces
+  module Stack
+    module Status
+      class << self
+        def run!(*args)
+          Run.new(*args).run!
+        end
+      end
+    end
+  end
+end

@@ -1,12 +1,12 @@
 <<DOC
 : '
-: NAME: script
-: SYNOPSIS: Renders script templates
+: NAME: repo
+: SYNOPSIS: Manage repositories from Git
 : VERSION: 1.0.0
 : '
 DOC
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -36,7 +36,8 @@ $: << "#{ENV['alces_BASE']}/lib/ruby/lib"
 
 require 'rubygems'
 require 'bundler/setup'
+Bundler.setup(:default, :git)
 
-require 'alces/stack/scripts'
+require 'alces/stack/repo'
 
-Alces::Stack::Scripts::CLI.execute if $0 == __FILE__
+Alces::Stack::Repo::CLI.execute if $0 == __FILE__

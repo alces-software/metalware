@@ -29,52 +29,75 @@ module Alces
   module Stack
     module Templater
       class << self
+        def wrap(s, width)
+          s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n")
+        end
+
+        def putw(s)
+          puts wrap(s, `tput cols`.to_i)
+        end
+
         def show_options(options={})
-          const = {
-            hostip: "#{`hostname -i`.chomp}",
-            index: "0 (integer)",
-            permanent_boot: "false (boolean)"
-          }
-          puts "ERB can replace template parameters with variables from 5 sources:"
-          puts "  1) JSON input from the command line using -j"
-          puts "  2) YAML config files stored in: #{ENV['alces_BASE']}/etc/config"
-          puts "  3) Command line inputs and index from the iterator (if applicable)"
-          puts "  4) Constants available to all templates"
+          putw "Template input:"
+          putw "Templates can be specifying by the full path to the file directly. " \
+               "Alternatively, the template name can be specified and the default " \
+               "path (see below) will be used instead. You do not need to include " \
+               "the '.erb' file extension. Other extensions are accepted however " \
+               "must be specified. A different repo can be specified by <repo>::" \
+               "<filename> flag. In this case the repo path (see below) is used."
           puts
-          puts "In the event of a conflict between the sources, the priority order is as given above."
-          puts "NOTE: nodename can not be overridden by JSON, YAML or ERB. This is to because loading the YAML files is dependent on the nodename."
+          putw "Default path : #{ENV['alces_REPO']}/templates/<action>/<filename>"
+          putw "Repo path    : /var/lib/metalware/repos/<repo>/template/<action>/<filename>"
           puts
-          puts "The yaml config files are stored in #{ENV['alces_BASE']}/etc/config"
-          puts "The config files are loaded according to the reverse order defined in the genders folder, with <nodename>.yaml being loaded last."
+          putw "ERB Priority Order:"
+          putw "ERB can replace template parameters with variables from 5 sources:"
+          putw "  1) JSON input from the command line using -j"
+          putw "  2) YAML config files stored in: #{ENV['alces_REPO']}/config"
+          putw "  3) Command line inputs and index from the iterator (if applicable)"
+          putw "  4) Constants available to all templates"
           puts
-          puts "The following command line parameters are replaced by ERB:"
+          putw "In the event of a conflict between the sources, the priority order" \
+               " is as given above."
+          putw "NOTE: nodename can not be overridden by JSON, YAML or ERB. This " \
+               "is to because loading the YAML files is dependent on the nodename."
+          puts
+          putw "The templater uses the YAML files contained in the config directory " \
+               "inside the repo (default or specified). The all.yaml config file " \
+               "is loaded first followed by remaining config files according to " \
+               "the reverse order defined in the genders file. Then " \
+               "<nodename>.yaml is loaded last."
+          puts
+          putw "The following command line parameters are replaced by ERB:"
           none_flag = true
           if options.keys.max_by(&:length).nil? then option_length = 0
           else option_length = options.keys.max_by(&:length).length end
-          const_length = const.keys.max_by(&:length).length
+          const_length = Alces::Stack::Templater::Combiner::DEFAULT_HASH
+                           .keys.max_by(&:length).length
           if option_length > const_length then align = option_length
           else align = const_length end
           options.each do |key, value|
             none_flag = false;
             spaces = align - key.length
-            print"    <%= #{key} %> "
+            str = "    <%= #{key} %> "
             while spaces > 0
               spaces -= 1
-              print " "
+              str << " "
             end
-            puts ": #{value}"
+            str << ": #{value}"
+            putw str
           end
-          puts "    (none)" if none_flag
+          putw "    (none)" if none_flag
           puts
-          puts "The constant values replaced by erb:"
-          const.each do |key, value|
+          putw "The constant values replaced by erb:"
+          Alces::Stack::Templater::Combiner::DEFAULT_HASH.each do |key, value|
             spaces = align - key.length
-            print"    <%= #{key} %> "
+            str = "    <%= #{key} %> "
             while spaces > 0
               spaces -= 1
-              print " "
+              str << " "
             end
-            puts ": #{value}"
+            str << ": #{value} (#{value.class})"
+            putw str
           end
         end
       end
@@ -111,15 +134,33 @@ module Alces
       end
 
       class Combiner < Handler
+        def self.hostip
+          determine_hostip_script = '/opt/metalware/libexec/determine-hostip'
+
+          hostip = `#{determine_hostip_script}`.chomp
+          if $?.success?
+            hostip
+          else
+            # If script failed for any reason fall back to using `hostname -i`,
+            # which may or may not give the IP on the interface we actually
+            # want to use (note: the dance with pipes is so we only get the
+            # last word in the output, as I've had the IPv6 IP included first
+            # before, which breaks all the things).
+            `hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1`.chomp
+          end
+        end
+
         DEFAULT_HASH = {
-            hostip: `hostname -i`.chomp,
-            index: 0,
-            permanent_boot: false
-          }
-        def initialize(json, hash={})
+          hostip: self.hostip,
+          index: 0,
+          permanent_boot: false
+        }
+
+        def initialize(repo, json, hash={})
+          repo = set_repo(repo)
           @combined_hash = DEFAULT_HASH.merge(hash)
           fixed_nodename = combined_hash[:nodename]
-          @combined_hash.merge!(load_yaml_hash)
+          @combined_hash.merge!(load_yaml_hash(repo))
           @combined_hash.merge!(load_json_hash(json))
           @parsed_hash = parse_combined_hash
           if parsed_hash[:nodename] != fixed_nodename
@@ -138,22 +179,30 @@ module Alces
         attr_reader :combined_hash
         attr_reader :parsed_hash
 
+        def set_repo(repo)
+          repo = nil if repo.to_s.empty?
+          repo ||= lambda {
+            Alces::Stack::Log.warn "Alces::Stack::Templater::Combiner Implicitly using default repo"
+            "#{ENV['alces_REPO']}"
+          }.call
+        end
+
         def load_json_hash(json)
           (json || "").empty? ? {} : JSON.parse(json,symbolize_names: true)
         end
 
-        def load_yaml_hash()
+        def load_yaml_hash(repo)
           hash = Hash.new
           get_yaml_file_list.each do |yaml|
-            begin 
-              yaml_payload = YAML.load(File.read("#{ENV['alces_BASE']}/etc/config/#{yaml}.yaml"))
+            begin
+              yaml_payload = YAML.load(File.read("#{repo}/config/#{yaml}.yaml"))
             rescue Errno::ENOENT # Skips missing files
             rescue StandardError => e
               $stderr.puts "Could not pass YAML file"
               raise e
             else
               if !yaml_payload.is_a? Hash
-                raise "Expected yaml config to contain a hash" 
+                raise "Expected yaml config to contain a hash"
               else
                 hash.merge!(yaml_payload)
               end
@@ -187,7 +236,7 @@ module Alces
           return current_hash
         end
 
-        class LoopErbError < StandardError 
+        class LoopErbError < StandardError
           def initialize(msg="Input hash may contains infinite recursive erb")
             super
           end
@@ -200,62 +249,6 @@ module Alces
 
         class HashInputError < StandardError
           def initialize(msg="Hash included through file method. Must be included in Combiner initializer")
-            super
-          end
-        end
-      end
-
-      class Finder
-        def initialize(default_location, template)
-          @default_location = default_location
-          @template = find_template(template).chomp
-          @filename_ext = File.basename(@template)
-          @filename_ext_trim_erb = File.basename(@template, ".erb")
-          @filename = File.basename(@template, ".*")
-          @path = File.dirname(@template)
-        end
-
-        attr_reader :template
-        attr_reader :filename
-        attr_reader :filename_ext
-        attr_reader :filename_ext_trim_erb
-        attr_reader :path
-
-        def filename_diff_ext(ext)
-          ext = ".#{ext}" if ext[0] != "."
-          return "#{@filename}#{ext}"
-        end
-
-        def find_template(template)
-          begin
-            template = template.dup
-          rescue StandardError
-            raise TemplateNotFound.new(template)
-          end
-          copy = "#{template}"
-          template.gsub!(/\/\//,"/")
-          template = "/" << template if template[0] != '/'
-          template_erb = "#{template}.erb"
-          # Checks if it's a full path to the default folder
-          if template =~ /\A#{@default_location}.*\Z/
-            return template if File.file?(template)
-            return template_erb if File.file?(template_erb)
-          end
-          # Checks to see if the file is in the template folder
-          path_template = "#{@default_location}#{template}"
-          path_template.gsub!(/\/\//,"/")
-          path_template_erb = "#{path_template}.erb"
-          return path_template if File.file?(path_template)
-          return path_template_erb if File.file?(path_template_erb)
-          # Checks the file structure
-          return template if File.file?(template)
-          return template_erb if File.file?(template_erb)
-          raise TemplateNotFound.new(copy)
-        end
-
-        class TemplateNotFound < StandardError
-          def intialize(template)
-            msg = "Could not find template file: " << template
             super
           end
         end
