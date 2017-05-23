@@ -8,13 +8,6 @@ require 'commander'
 require 'commander_extensions'
 require 'commands'
 
-# TODO: For `hosts` and `build` decide if we want to distinguish operating on
-# nodes vs groups by:
-# - using exclusive `-n`/`-g` options;
-# - using `node` and `group` subcommands;
-# - making node operations the default, and `-g` switches the command to
-# operate on a group
-
 module Metalware
   class Cli
     include Commander::Methods
@@ -54,12 +47,12 @@ module Metalware
       end
 
       command :hosts do |c|
-        c.syntax = 'metal hosts [options]'
+        c.syntax = 'metal hosts NODE_IDENTIFIER [options]'
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '-n NODE_NAME', '--node NODE_NAME', String, 'Node name'
-        c.option '-g GENDER_GROUP', '--group GENDER_GROUP', String, 'Gender group'
+        c.option '-g', '--group', String,
+          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.option '-t TEMPLATE', '--template TEMPLATE', String, 'Specify hosts template to use'
         c.option '-x', '--dry-run',
           'Do not modify hosts file, just output additions that would be made'
@@ -92,12 +85,12 @@ module Metalware
       end
 
       command :build do |c|
-        c.syntax = 'metal build [options]'
+        c.syntax = 'metal build NODE_IDENTIFIER [options]'
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '-n NODE_NAME', '--node NODE_NAME', String, 'Node name'
-        c.option '-g GENDER_GROUP', '--group GENDER_GROUP', String, 'Gender group'
+        c.option '-g', '--group', String,
+          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.option '-k KICKSTART_TEMPLATE', '--kickstart KICKSTART_TEMPLATE',
           String, 'Specify kickstart template to use'
         c.option '-p PXELINUX_TEMPLATE', '--pxelinux  PXELINUX_TEMPLATE',

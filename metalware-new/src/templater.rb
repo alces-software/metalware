@@ -30,6 +30,10 @@ require "constants"
 module Metalware
   module Templater
     class Handler
+      # XXX Make this use the Combiner rather than be a superclass of it, to
+      # better separate these.
+      # XXX Have method to print template here, and do not expose access to
+      # `file` method directly, so can cleanly stub this for testing.
       # XXX need `template_parameters` param? Child class, which is only one
       # used (outside of tests), forbids this.
       def file(filename, template_parameters={})
@@ -42,14 +46,14 @@ module Metalware
         File.open(save_file.chomp, "w") do |f|
           f.puts file(template_file, template_parameters)
         end
-        Alces::Stack::Log.info "Template Saved: #{save_file}"
+        # Alces::Stack::Log.info "Template Saved: #{save_file}"
       end
 
       def append(template_file, append_file, template_parameters={})
         File.open(append_file.chomp, 'a') do |f|
           f.puts file(template_file, template_parameters)
         end
-        Alces::Stack::Log.info "Template Appended: #{append_file}"
+        # Alces::Stack::Log.info "Template Appended: #{append_file}"
       end
 
       def replace_erb(template, template_parameters={})
