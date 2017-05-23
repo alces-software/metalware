@@ -220,6 +220,20 @@ module Metalware
         []
       end
 
+      def hosts_url
+        system_file_url 'hosts'
+      end
+
+      def genders_url
+        system_file_url 'genders'
+      end
+
+      def build_complete_url
+        if nodename
+          deployment_server_url "exec/kscomplete.php?name=#{nodename}"
+        end
+      end
+
       def hostip
         hostip = `#{determine_hostip_script}`.chomp
         if $?.success?
@@ -235,6 +249,14 @@ module Metalware
       end
 
       private
+
+      def system_file_url(system_file)
+        deployment_server_url "system/#{system_file}"
+      end
+
+      def deployment_server_url(url_path)
+        "http://#{hostip}/#{url_path}"
+      end
 
       def determine_hostip_script
         File.join(
