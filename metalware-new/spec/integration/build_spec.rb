@@ -37,12 +37,34 @@ describe '`metal build`' do
     sleep 0.6
   end
 
+  # XXX Switch usage of this to use `run_command` below, should be more robust.
   def fork_command(command)
     pid = fork do
       exec command
     end
     Process.detach(pid)
     pid
+  end
+
+  def run_command(command, &block)
+    Open3.popen3 command do |stdin, stdout, stderr, thread|
+      begin
+        pid = thread.pid
+        block.call(stdin, stdout, stderr, pid)
+      rescue Exception => e
+        begin
+          # Try to read output `stdout` and `stderr`, or just ensure original
+          # exception raised if not available.
+          max_bytes_to_read = 30000
+          stdout_data = stdout.read_nonblock(max_bytes_to_read)
+          stderr_data = stderr.read_nonblock(max_bytes_to_read)
+          puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
+        rescue
+          raise e
+        end
+        raise
+      end
+    end
   end
 
   def expect_clears_up_built_node_marker_files
@@ -171,18 +193,16 @@ describe '`metal build`' do
 
       it 'handles "yes" to interrupt prompt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        Open3.popen3 command do |stdin, stdout, stderr, thread|
-          metal_pid = thread.pid
-
+        run_command(command) do |stdin, stdout, stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
           wait_longer_than_build_poll
-          expect(process_exists?(metal_pid)).to be true
+          expect(process_exists?(pid)).to be true
 
-          expect_interrupt_does_not_kill(metal_pid)
+          expect_interrupt_does_not_kill(pid)
 
           stdin.puts('yes')
           wait_longer_than_build_poll
-          expect(process_exists?(metal_pid)).to be false
+          expect(process_exists?(pid)).to be false
           expect_clears_up_built_node_marker_files
 
           expect_permanent_pxelinux_rendered_for_testnode01
@@ -192,18 +212,16 @@ describe '`metal build`' do
 
       it 'handles "no" to interrupt prompt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        Open3.popen3 command do |stdin, stdout, stderr, thread|
-          metal_pid = thread.pid
-
+        run_command(command) do |stdin, stdout, stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
           wait_longer_than_build_poll
-          expect(process_exists?(metal_pid)).to be true
+          expect(process_exists?(pid)).to be true
 
-          expect_interrupt_does_not_kill(metal_pid)
+          expect_interrupt_does_not_kill(pid)
 
           stdin.puts('no')
           wait_longer_than_build_poll
-          expect(process_exists?(metal_pid)).to be false
+          expect(process_exists?(pid)).to be false
           expect_clears_up_built_node_marker_files
 
           expect_permanent_pxelinux_rendered_for_testnode01
