@@ -16,7 +16,8 @@ module Metalware
 
       private
 
-      def setup(options)
+      def setup(args, options)
+
         # XXX Always default interface to Metalware build interface (where
         # possible)?
         options.default \
