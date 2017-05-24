@@ -22,7 +22,6 @@ module Metalware
           kickstart: 'default',
           pxelinux: 'default'
         @options = options
-        @config = 
         node_identifier = args.first
         @nodes = Nodes.create(@config, node_identifier, options.group)
       end
