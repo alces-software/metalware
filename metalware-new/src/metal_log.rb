@@ -23,6 +23,7 @@ require 'logger'
 require 'config'
 require 'exceptions'
 require 'fileutils'
+require 'output'
 
 module Metalware
   class MetalLog < Logger
@@ -53,11 +54,9 @@ module Metalware
       super(f)
     end
 
-# POSSIBLE USE TO IMPLEMENT --strict
-=begin
-      def warn(*args, &block)
-        super(*args, &block)
-      end
-=end
+    def warn(msg)
+      Output.stderr "warning: #{msg}"
+      super msg
+    end
   end
 end

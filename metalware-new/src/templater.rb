@@ -29,8 +29,21 @@ require 'hashie'
 require "constants"
 require 'nodeattr_interface'
 require 'metal_log'
+require 'exceptions'
 
 module Metalware
+  class TemplaterRecursiveOpenStruct < RecursiveOpenStruct
+    def get_binding
+      return binding()
+    end
+
+    def method_missing(s, *a, &b)
+      value = super
+      MetalLog.warn "Missing template parameter: #{s}" if value.nil?
+      value
+    end
+  end
+
   class Templater
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
@@ -90,13 +103,8 @@ module Metalware
     private
 
     def replace_erb(template, template_parameters)
-      parameters_binding = template_parameters.instance_eval {binding}
+      parameters_binding = template_parameters.get_binding
       ERB.new(template).result(parameters_binding)
-    rescue StandardError => e
-      $stderr.puts "Could not parse ERB"
-      $stderr.puts template.to_s
-      $stderr.puts template_parameters.to_s
-      raise e
     end
 
     def nodename
@@ -164,7 +172,7 @@ module Metalware
         current_config_string = current_parsed_config.to_s
       end
 
-      RecursiveOpenStruct.new(current_parsed_config)
+      TemplaterRecursiveOpenStruct.new(current_parsed_config)
     end
 
     def perform_config_parsing_pass(current_parsed_config)
@@ -176,7 +184,7 @@ module Metalware
     def parse_config_value(value, current_parsed_config)
       case value
       when String
-        replace_erb(value, RecursiveOpenStruct.new(current_parsed_config))
+        replace_erb(value, TemplaterRecursiveOpenStruct.new(current_parsed_config))
       when Hash
         value.map do |k,v|
           [k, parse_config_value(v, current_parsed_config)]
