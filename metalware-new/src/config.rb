@@ -18,7 +18,7 @@ module Metalware
       log_serverity: "INFO"
     }
 
-    def initialize(file)
+    def initialize(file=nil)
       file ||= Constants::DEFAULT_CONFIG_PATH
       @config = (
         YAML.load_file(file) || {}
@@ -31,6 +31,11 @@ module Metalware
       define_method :"#{value}" do
         @config[value] || default
       end
+    end
+
+    def repo_config_path(config_name)
+      config_file = config_name + '.yaml'
+      File.join(repo_path, 'config', config_file)
     end
   end
 end

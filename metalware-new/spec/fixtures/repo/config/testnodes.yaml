@@ -1,0 +1,4 @@
+
+files:
+  namespace01:
+    - testnodes/some_file_in_repo

@@ -9,3 +9,12 @@ very_recursive_erb_repo_value: <%= third_level_erb_repo_value %>
 
 nested:
   repo_value: nested_repo_value
+
+files:
+  namespace01:
+    - some_file_in_repo
+    - /some/other/path
+    - http://example.com/some/url
+    - example.com/some/other/url2
+  namespace02:
+    - another_file_in_repo

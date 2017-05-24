@@ -157,7 +157,7 @@ module Metalware
     def ordered_node_config_files
       list = [ "all" ]
       return list if !nodename
-      # XXX Use `NodeattrInterface.groups_for_node` for this now.
+      # XXX Could use `Node#configs` for this now.
       list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
       if list_str.empty? then return list end
       list.concat(list_str.split(/\n/).reverse)

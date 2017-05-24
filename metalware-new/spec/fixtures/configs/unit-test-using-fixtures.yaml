@@ -1,0 +1,3 @@
+
+build_poll_sleep: 0
+repo_path: 'spec/fixtures/repo'
