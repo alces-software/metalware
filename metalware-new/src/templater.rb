@@ -33,13 +33,17 @@ require 'exceptions'
 
 module Metalware
   class TemplaterRecursiveOpenStruct < RecursiveOpenStruct
-    def get_binding
-      return binding()
+    def initialize(*a)
+      @missing_tags = []
+      super(*a)
     end
 
     def method_missing(s, *a, &b)
       value = super
-      MetalLog.warn "Missing template parameter: #{s}" if value.nil?
+      if value.nil? && ! @missing_tags.include?(s)
+        @missing_tags.push s
+        MetalLog.warn "Missing template parameter: #{s}"
+      end
       value
     end
   end
@@ -103,7 +107,7 @@ module Metalware
     private
 
     def replace_erb(template, template_parameters)
-      parameters_binding = template_parameters.get_binding
+      parameters_binding = template_parameters.instance_eval {binding}
       ERB.new(template).result(parameters_binding)
     end
 
@@ -207,70 +211,86 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:index, :nodename, :firstboot) do
-    def initialize(index: 0, nodename: nil, firstboot: nil)
-      super(index, nodename, firstboot)
+  class MagicNamespace
+    def initialize(*a)
+      @missing_tags = []
+      @struct = MagicNamespaceStruct.new(*a)
     end
 
-    def genders
-      # XXX Do we want to make genders available as a `Hashie::Mash` too?
-      # Depends if we want to be able to iterate through genders or just get
-      # list of nodes in a specified gender
-      GenderGroupProxy
-    end
-
-    def hunter
-      if File.exists? Constants::HUNTER_PATH
-        Hashie::Mash.load(Constants::HUNTER_PATH)
-      else
-        # XXX Should warn/log that resorting to this?
-        Hashie::Mash.new
+    def method_missing(s)
+      value = @struct.send(s)
+      if value.nil? && ! @missing_tags.include?(s)
+        @missing_tags.push s
+        MetalLog.warn "Missing template parameter: alces.#{s}"
       end
+      value
     end
 
-    def hosts_url
-      system_file_url 'hosts'
-    end
-
-    def genders_url
-      system_file_url 'genders'
-    end
-
-    def build_complete_url
-      if nodename
-        deployment_server_url "exec/kscomplete.php?name=#{nodename}"
+    MagicNamespaceStruct = Struct.new(:index, :nodename, :firstboot) do
+      def initialize(index: 0, nodename: nil, firstboot: nil)
+        super(index, nodename, firstboot)
       end
-    end
 
-    def hostip
-      SystemCommand.run(determine_hostip_script).chomp
-    rescue SystemCommandError
-      # If script failed for any reason fall back to using `hostname -i`,
-      # which may or may not give the IP on the interface we actually want
-      # to use (note: the dance with pipes is so we only get the last word
-      # in the output, as I've had the IPv6 IP included first before, which
-      # breaks all the things).
-      # XXX Warn about falling back to this?
-      SystemCommand.run(
-        "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
-      ).chomp
-    end
+      def genders
+        # XXX Do we want to make genders available as a `Hashie::Mash` too?
+        # Depends if we want to be able to iterate through genders or just get
+        # list of nodes in a specified gender
+        GenderGroupProxy
+      end
 
-    private
+      def hunter
+        if File.exists? Constants::HUNTER_PATH
+          Hashie::Mash.load(Constants::HUNTER_PATH)
+        else
+          # XXX Should warn/log that resorting to this?
+          Hashie::Mash.new
+        end
+      end
 
-    def system_file_url(system_file)
-      deployment_server_url "system/#{system_file}"
-    end
+      def hosts_url
+        system_file_url 'hosts'
+      end
 
-    def deployment_server_url(url_path)
-      "http://#{hostip}/#{url_path}"
-    end
+      def genders_url
+        system_file_url 'genders'
+      end
 
-    def determine_hostip_script
-      File.join(
-        Constants::METALWARE_INSTALL_PATH,
-        'libexec/determine-hostip'
-      )
+      def build_complete_url
+        if nodename
+          deployment_server_url "exec/kscomplete.php?name=#{nodename}"
+        end
+      end
+
+      def hostip
+        SystemCommand.run(determine_hostip_script).chomp
+      rescue SystemCommandError
+        # If script failed for any reason fall back to using `hostname -i`,
+        # which may or may not give the IP on the interface we actually want
+        # to use (note: the dance with pipes is so we only get the last word
+        # in the output, as I've had the IPv6 IP included first before, which
+        # breaks all the things).
+        # XXX Warn about falling back to this?
+        SystemCommand.run(
+          "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
+        ).chomp
+      end
+
+      private
+
+      def system_file_url(system_file)
+        deployment_server_url "system/#{system_file}"
+      end
+
+      def deployment_server_url(url_path)
+        "http://#{hostip}/#{url_path}"
+      end
+
+      def determine_hostip_script
+        File.join(
+          Constants::METALWARE_INSTALL_PATH,
+          'libexec/determine-hostip'
+        )
+      end
     end
   end
 end
