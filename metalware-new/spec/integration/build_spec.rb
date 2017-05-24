@@ -95,12 +95,12 @@ describe '`metal build`' do
 
   context 'for single node' do
     it 'works' do
-      metal_pid = fork_command "#{METAL} build node01 --config #{CONFIG_FILE} --trace"
+      metal_pid = fork_command "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
 
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be true
 
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.node01')
+      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
       wait_longer_than_build_poll
       expect(process_exists?(metal_pid)).to be false
 
