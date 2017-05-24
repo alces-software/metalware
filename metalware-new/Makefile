@@ -15,7 +15,7 @@ view-test-coverage:
 
 .PHONY: rsync
 rsync:
-	rsync -r --copy-links --perms . dev@${IP}:${REMOTE_DIR}
+	rsync -r --copy-links --delete --exclude tmp/ --perms . dev@${IP}:${REMOTE_DIR}
 
 .PHONY: watch-rsync
 watch-rsync:
