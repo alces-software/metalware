@@ -21,12 +21,13 @@
 #==============================================================================
 
 require 'metal_log'
+require 'config'
 
 module Metalware
   module Commands
     class BaseCommand
       def initialize(args, options)
-        MetalLog.info "metal #{ARGV.join(" ")}"
+        pre_setup(args, options)
         setup(args, options)
         run
       rescue Interrupt => e
@@ -35,7 +36,15 @@ module Metalware
         handle_fatal_exception(e)
       end
 
+      attr_reader :config
+
       private
+
+      def pre_setup(args, options)
+        @config = Config.new(options.config)
+        MetalLog.config = @config
+        MetalLog.info "metal #{ARGV.join(" ")}"
+      end
 
       def setup(args, options)
         raise NotImplementedError

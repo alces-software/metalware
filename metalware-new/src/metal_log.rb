@@ -20,12 +20,22 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'logger'
+require 'config'
+require 'exceptions'
+require 'fileutils'
 
 module Metalware
   class MetalLog < Logger
     class << self
       def method_missing(s, *a, &b)
         metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
+      end
+
+      attr_writer :config
+
+      def config
+        raise UnsetConfigLogError if @config.nil?
+        @config
       end
 
       private
@@ -36,8 +46,9 @@ module Metalware
     end
 
     def initialize(log_name)
-      path = "/var/log/metalware/#{log_name}.log"
-      f = File.open(path, "a")
+      file = "#{self.class.config.log_path}/#{log_name}.log"
+      FileUtils.mkdir_p File.dirname(file)
+      f = File.open(file, "a")
       f.sync = true
       super(f)
     end
