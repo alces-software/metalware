@@ -28,8 +28,6 @@ module Metalware
         @options = options
 
         @detection_count = options.start
-        @update_dhcp_flag = true # XXX Remove when remove dhcp updating
-        @templateFilename = File.join(Constants::REPO_PATH, 'dhcp', 'default') # XXX Also to remove
         @detected_macs = []
         # @hunter_logger = Alces::Stack::Log.create_log("/var/log/metalware/hunter.log")
 
