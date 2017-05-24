@@ -28,7 +28,7 @@ module Metalware
         metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
       end
 
-      private 
+      private
 
       def metal_log
         @metal_log ||= MetalLog.new("metal")
