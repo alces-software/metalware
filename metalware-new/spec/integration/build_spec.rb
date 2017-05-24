@@ -34,7 +34,7 @@ describe '`metal build`' do
   def wait_longer_than_build_poll
     # Hopefully longer enough than the `build_poll_sleep` that build process
     # notices whatever it needs to.
-    sleep 0.3
+    sleep 0.6
   end
 
   def fork_command(command)
