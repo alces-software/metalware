@@ -42,7 +42,9 @@ describe Metalware::Commands::Build do
   end
 
   before :each do
+    allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
+    SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
   end
 
@@ -85,7 +87,6 @@ describe Metalware::Commands::Build do
       time_to_wait = 0.2
       use_mock_nodes(not_built_nodes: 'testnode01')
 
-      allow(Metalware::Templater).to receive(:render_to_file)
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
@@ -96,7 +97,6 @@ describe Metalware::Commands::Build do
     end
 
     it 'renders pxelinux twice with firstboot switched if node builds' do
-      allow(Metalware::Templater).to receive(:render_to_file)
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
@@ -111,15 +111,37 @@ describe Metalware::Commands::Build do
        run_build('testnode01')
     end
 
+    context 'when using fixtures repo' do
+      before :each do
+        SpecUtils.use_unit_test_config(self, 'unit-test-using-fixtures.yaml')
+      end
+
+      describe 'files rendering' do
+        it 'renders relative path files relative to repo/files' do
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            Metalware::Config.new.repo_path + '/files/testnodes/some_file_in_repo',
+            '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
+            hash_including(nodename: 'testnode01', index: 0)
+          )
+
+          run_build('testnode01')
+        end
+
+        it 'renders absolute path files' do
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            '/some/other/path',
+            '/var/lib/metalware/rendered/testnode01/namespace01/path',
+            hash_including(nodename: 'testnode01', index: 0)
+          )
+
+          run_build('testnode01')
+        end
+      end
+    end
   end
 
   context 'when called for group' do
-    before :each do
-      SpecUtils.use_mock_genders(self)
-    end
-
     it 'renders standard templates for each node' do
-      allow(Metalware::Templater).to receive(:render_to_file)
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/kickstart/my_kickstart',
         '/var/lib/metalware/rendered/kickstart/testnode01',

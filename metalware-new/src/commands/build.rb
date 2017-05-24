@@ -34,8 +34,31 @@ module Metalware
 
       def render_build_templates
         @nodes.template_each firstboot: true do |parameters, node|
+          render_files(parameters, node)
           render_kickstart(parameters, node)
           render_pxelinux(parameters, node)
+        end
+      end
+
+      def render_files(parameters, node)
+        node.build_files.each do |namespace, files|
+          files.each do |file_identifier|
+            if Pathname.new(file_identifier).absolute?
+              file_path = file_identifier
+            else
+              file_path = File.join(@config.repo_path, 'files', file_identifier)
+            end
+
+            file_name = File.basename(file_identifier)
+            render_path = File.join(
+              @config.rendered_files_path,
+              node.name,
+              namespace.to_s,
+              file_name
+            )
+
+            Templater.render_to_file(file_path, render_path, parameters)
+          end
         end
       end
 
