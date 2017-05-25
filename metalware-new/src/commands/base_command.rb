@@ -42,7 +42,6 @@ module Metalware
 
       def pre_setup(args, options)
         @config = Config.new(options.config, strict: options.strict)
-        MetalLog.config = @config
         MetalLog.info "metal #{ARGV.join(" ")}"
       end
 

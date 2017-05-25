@@ -35,7 +35,10 @@ module Metalware
         end
       end
 
-      attr_writer :config
+      def reset_log(config)
+        @metal_log = nil
+        @config = config
+      end
 
       private
 

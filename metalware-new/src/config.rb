@@ -5,6 +5,7 @@ require 'active_support/core_ext/hash/keys'
 require 'constants'
 require 'exceptions'
 require 'ostruct'
+require 'metal_log'
 
 module Metalware
   class Config
@@ -26,6 +27,7 @@ module Metalware
         YAML.load_file(file) || {}
       ).symbolize_keys
       @cli = OpenStruct.new(options)
+      MetalLog.reset_log(self)
     rescue Errno::ENOENT
       raise MetalwareError, "Config file '#{file}' does not exist"
     end
