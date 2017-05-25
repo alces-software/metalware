@@ -6,7 +6,7 @@ require 'spec_utils'
 describe Metalware::Node do
   before do
     SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self, 'unit-test-using-fixtures.yaml')
+    SpecUtils.use_unit_test_config(self)
   end
 
   def node(name)

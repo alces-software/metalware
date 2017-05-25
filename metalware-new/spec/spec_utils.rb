@@ -14,11 +14,11 @@ module SpecUtils
       end
     end
 
-    def use_unit_test_config(example_group, config_name='unit-test.yaml')
+    def use_unit_test_config(example_group)
       example_group.instance_exec do
         stub_const(
           'Metalware::Constants::DEFAULT_CONFIG_PATH',
-          SpecUtils.fixtures_config(config_name)
+          SpecUtils.fixtures_config('unit-test.yaml')
         )
       end
     end

@@ -8,6 +8,7 @@ require 'exceptions'
 
 module Metalware
   class Config
+    # XXX DRY these paths up.
     VALUES_WITH_DEFAULTS = {
       build_poll_sleep: 10,
       built_nodes_storage_path: '/var/lib/metalware/cache/built-nodes',
@@ -15,7 +16,8 @@ module Metalware
       pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
       repo_path: '/var/lib/metalware/repo',
       log_path: '/var/log/metalware',
-      log_serverity: "INFO"
+      log_serverity: "INFO",
+      repo_configs_path: '/var/lib/metalware/repo/config/',
     }
 
     def initialize(file=nil)
@@ -35,7 +37,7 @@ module Metalware
 
     def repo_config_path(config_name)
       config_file = config_name + '.yaml'
-      File.join(repo_path, 'config', config_file)
+      File.join(repo_configs_path, config_file)
     end
   end
 end

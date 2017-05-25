@@ -111,31 +111,25 @@ describe Metalware::Commands::Build do
        run_build('testnode01')
     end
 
-    context 'when using fixtures repo' do
-      before :each do
-        SpecUtils.use_unit_test_config(self, 'unit-test-using-fixtures.yaml')
+    describe 'files rendering' do
+      it 'renders relative path files relative to repo/files' do
+        expect(Metalware::Templater).to receive(:render_to_file).with(
+          '/var/lib/metalware/repo/files/testnodes/some_file_in_repo',
+          '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
+          hash_including(nodename: 'testnode01', index: 0)
+        )
+
+        run_build('testnode01')
       end
 
-      describe 'files rendering' do
-        it 'renders relative path files relative to repo/files' do
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            Metalware::Config.new.repo_path + '/files/testnodes/some_file_in_repo',
-            '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
-            hash_including(nodename: 'testnode01', index: 0)
-          )
+      it 'renders absolute path files' do
+        expect(Metalware::Templater).to receive(:render_to_file).with(
+          '/some/other/path',
+          '/var/lib/metalware/rendered/testnode01/namespace01/path',
+          hash_including(nodename: 'testnode01', index: 0)
+        )
 
-          run_build('testnode01')
-        end
-
-        it 'renders absolute path files' do
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            '/some/other/path',
-            '/var/lib/metalware/rendered/testnode01/namespace01/path',
-            hash_including(nodename: 'testnode01', index: 0)
-          )
-
-          run_build('testnode01')
-        end
+        run_build('testnode01')
       end
     end
   end
