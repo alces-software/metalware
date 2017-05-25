@@ -27,6 +27,11 @@ module Metalware
         end
       end
 
+      def build_file_url(node_name, namespace, file_name)
+        path = File.join(node_name , namespace.to_s , file_name)
+        url path
+      end
+
       private
 
       def url(url_path)
