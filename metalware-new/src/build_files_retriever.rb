@@ -28,11 +28,29 @@ module Metalware
 
     def file_hash_for(namespace, identifier)
       name = File.basename(identifier)
+      template = template_path(identifier)
+
+      if File.exist?(template)
+        base_file_hash(identifier).merge({
+          template_path: template,
+          url: DeploymentServer.build_file_url(node_name, namespace, name)
+        })
+      else
+        base_file_hash(identifier).merge(
+          error: "Template path '#{template}' does not exist"
+        )
+      end
+    rescue => error
+      base_file_hash(identifier).merge(
+        error: "Retrieving '#{identifier}' gave error '#{error.message}'"
+      )
+    end
+
+    def base_file_hash(identifier)
+      name = File.basename(identifier)
       {
         raw: identifier,
-        name: name,
-        template_path: template_path(identifier),
-        url: DeploymentServer.build_file_url(node_name, namespace, name)
+        name: name
       }
     end
 
