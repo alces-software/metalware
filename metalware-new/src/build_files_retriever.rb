@@ -68,7 +68,7 @@ module Metalware
         identifier
       else
         # Path is within the repo `files` directory.
-        repo_template_path(name)
+        repo_template_path(identifier)
       end
     end
 
@@ -84,8 +84,8 @@ module Metalware
       File.join(Constants::CACHE_PATH, 'templates', template_name)
     end
 
-    def repo_template_path(template_name)
-      File.join(config.repo_path, 'files', template_name)
+    def repo_template_path(identifier)
+      File.join(config.repo_path, 'files', identifier)
     end
   end
 end

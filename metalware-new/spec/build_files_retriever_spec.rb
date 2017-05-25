@@ -6,7 +6,7 @@ require 'input'
 describe Metalware::BuildFilesRetriever do
   TEST_FILES_HASH = {
     namespace01: [
-      'some_file_in_repo',
+      'some/file_in_repo',
       '/some/other/path',
       'http://example.com/url',
     ],
@@ -35,10 +35,10 @@ describe Metalware::BuildFilesRetriever do
         retrieved_files = retriever.retrieve(TEST_FILES_HASH)
 
         expect(retrieved_files[:namespace01][0]).to eq({
-          raw: 'some_file_in_repo',
-          name: 'some_file_in_repo',
-          template_path: '/var/lib/metalware/repo/files/some_file_in_repo',
-          url: 'http://1.2.3.4/testnode01/namespace01/some_file_in_repo',
+          raw: 'some/file_in_repo',
+          name: 'file_in_repo',
+          template_path: '/var/lib/metalware/repo/files/some/file_in_repo',
+          url: 'http://1.2.3.4/testnode01/namespace01/file_in_repo',
         })
 
         expect(retrieved_files[:namespace01][1]).to eq({
@@ -78,7 +78,7 @@ describe Metalware::BuildFilesRetriever do
           retrieved_files = retriever.retrieve(TEST_FILES_HASH)
 
           repo_file_entry = retrieved_files[:namespace01][0]
-          template_path = '/var/lib/metalware/repo/files/some_file_in_repo'
+          template_path = '/var/lib/metalware/repo/files/some/file_in_repo'
           expect(repo_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
