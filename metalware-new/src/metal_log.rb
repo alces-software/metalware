@@ -37,11 +37,6 @@ module Metalware
 
       attr_writer :config
 
-      def config
-        raise UnsetConfigLogError if @config.nil?
-        @config
-      end
-
       private
 
       def metal_log
@@ -50,17 +45,31 @@ module Metalware
     end
 
     def initialize(log_name)
-      file = "#{self.class.config.log_path}/#{log_name}.log"
+      file = "#{config.log_path}/#{log_name}.log"
       FileUtils.mkdir_p File.dirname(file)
       f = File.open(file, "a")
       f.sync = true
       super(f)
-      level = self.class.config.log_serverity
+      self.level = config.log_serverity
     end
 
     def warn(msg)
-      Output.stderr "warning: #{msg}"
-      super msg
+      if config.cli.strict
+        e = StrictWarningError.new(msg)
+        e.set_backtrace(caller(2))
+        raise e
+      else
+        super msg
+        Output.stderr "warning: #{msg}"
+      end
+    end
+
+    private
+
+    def config
+      config = self.class.instance_variable_get :@config
+      raise UnsetConfigLogError if config.nil?
+      config
     end
   end
 end
