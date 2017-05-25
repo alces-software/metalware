@@ -29,6 +29,7 @@ require 'hashie'
 require "constants"
 require 'nodeattr_interface'
 require 'metal_log'
+require 'deployment_server'
 require 'exceptions'
 
 module Metalware
@@ -245,48 +246,19 @@ module Metalware
     end
 
     def hosts_url
-      system_file_url 'hosts'
+      DeploymentServer.system_file_url 'hosts'
     end
 
     def genders_url
-      system_file_url 'genders'
+      DeploymentServer.system_file_url 'genders'
     end
 
     def build_complete_url
-      if nodename
-        deployment_server_url "exec/kscomplete.php?name=#{nodename}"
-      end
+      DeploymentServer.build_complete_url(nodename)
     end
 
     def hostip
-      SystemCommand.run(determine_hostip_script).chomp
-    rescue SystemCommandError
-      # If script failed for any reason fall back to using `hostname -i`,
-      # which may or may not give the IP on the interface we actually want
-      # to use (note: the dance with pipes is so we only get the last word
-      # in the output, as I've had the IPv6 IP included first before, which
-      # breaks all the things).
-      # XXX Warn about falling back to this?
-      SystemCommand.run(
-        "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
-      ).chomp
-    end
-
-    private
-
-    def system_file_url(system_file)
-      deployment_server_url "system/#{system_file}"
-    end
-
-    def deployment_server_url(url_path)
-      "http://#{hostip}/#{url_path}"
-    end
-
-    def determine_hostip_script
-      File.join(
-        Constants::METALWARE_INSTALL_PATH,
-        'libexec/determine-hostip'
-      )
+      DeploymentServer.ip
     end
   end
 end
