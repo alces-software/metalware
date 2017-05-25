@@ -217,13 +217,20 @@ module Metalware
       @struct = MagicNamespaceStruct.new(*a)
     end
 
-    def method_missing(s)
-      value = @struct.send(s)
+    def method_missing(s, *a, &b)
+      if s == :[]
+        value = (a.length == 1 ? @struct[a[0]] : a.map { |v| @struct[v] })
+      else
+        value = @struct.send(s)
+      end
       if value.nil? && ! @missing_tags.include?(s)
         @missing_tags.push s
         MetalLog.warn "Missing template parameter: alces.#{s}"
       end
       value
+    rescue => e
+      MetalLog.debug "#{e.inspect}"
+      raise e
     end
 
     MagicNamespaceStruct = Struct.new(:index, :nodename, :firstboot) do

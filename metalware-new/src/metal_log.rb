@@ -52,6 +52,7 @@ module Metalware
       f = File.open(file, "a")
       f.sync = true
       super(f)
+      level = self.class.config.log_serverity
     end
 
     def warn(msg)
