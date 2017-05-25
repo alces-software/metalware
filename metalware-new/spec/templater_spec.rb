@@ -104,12 +104,10 @@ describe Metalware::Templater do
     end
 
     before do
-      # Stub this so mock `determine-hostip` script used.
-      stub_const('Metalware::Constants::METALWARE_INSTALL_PATH', FIXTURES_PATH)
-
       # Stub this so mock hunter config used.
       stub_const('Metalware::Constants::HUNTER_PATH', TEST_HUNTER_PATH)
 
+      SpecUtils.use_mock_determine_hostip_script(self)
       SpecUtils.use_mock_genders(self)
     end
 

@@ -23,6 +23,15 @@ module SpecUtils
       end
     end
 
+    def use_mock_determine_hostip_script(example_group)
+      example_group.instance_exec do
+        stub_const(
+          'Metalware::Constants::METALWARE_INSTALL_PATH',
+          FIXTURES_PATH
+        )
+      end
+    end
+
     # Other shared utils.
 
     def run_command(command_class, *args, **options_hash)
