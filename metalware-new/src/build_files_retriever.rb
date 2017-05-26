@@ -30,6 +30,7 @@ module Metalware
       name = File.basename(identifier)
       template = template_path(identifier)
 
+      # XXX Should give a warning if there is an error retrieving the file.
       if File.exist?(template)
         base_file_hash(identifier).merge({
           template_path: template,
