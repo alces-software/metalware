@@ -60,6 +60,7 @@ module Metalware
           files.each do |file|
             unless file[:error]
               render_path = node.rendered_build_file_path(namespace, file[:name])
+              FileUtils.mkdir_p(File.dirname render_path)
               Templater.render_to_file(file[:template_path], render_path, parameters)
             end
           end
