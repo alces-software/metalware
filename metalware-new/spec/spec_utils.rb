@@ -42,6 +42,19 @@ module SpecUtils
       http_error
     end
 
+    def create_mock_build_files_hash(example_group, node_name)
+      SpecUtils.use_unit_test_config(example_group)
+      SpecUtils.fake_download_error(example_group)
+
+      example_group.instance_exec do
+        config = Metalware::Config.new
+        node = Metalware::Node.new(config, node_name)
+        Metalware::BuildFilesRetriever.new(
+          node_name, config
+        ).retrieve(node.build_files)
+      end
+    end
+
     # Other shared utils.
 
     def run_command(command_class, *args, **options_hash)

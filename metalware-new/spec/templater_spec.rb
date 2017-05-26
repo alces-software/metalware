@@ -126,18 +126,8 @@ describe Metalware::Templater do
     end
 
     context 'with passed parameters' do
-      before :each do
-        SpecUtils.use_unit_test_config(self)
-        SpecUtils.fake_download_error(self)
-      end
-
       it 'overrides defaults with parameter values, where applicable' do
-        # XXX extract this?
-        config = Metalware::Config.new
-        node = Metalware::Node.new(config, 'testnode01')
-        build_files = Metalware::BuildFilesRetriever.new(
-          'testnode01', config
-        ).retrieve(node.build_files)
+        build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode01')
 
         templater = Metalware::Templater.new({
           nodename: 'testnode01',
