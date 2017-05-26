@@ -38,21 +38,21 @@ describe Metalware::BuildFilesRetriever do
           raw: 'some/file_in_repo',
           name: 'file_in_repo',
           template_path: '/var/lib/metalware/repo/files/some/file_in_repo',
-          url: 'http://1.2.3.4/testnode01/namespace01/file_in_repo',
+          url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo',
         })
 
         expect(retrieved_files[:namespace01][1]).to eq({
           raw: '/some/other/path',
           name: 'path',
           template_path: '/some/other/path',
-          url: 'http://1.2.3.4/testnode01/namespace01/path',
+          url: 'http://1.2.3.4/metalware/testnode01/namespace01/path',
         })
 
         expect(retrieved_files[:namespace01][2]).to eq({
           raw: 'http://example.com/url',
           name: 'url',
           template_path: '/var/lib/metalware/cache/templates/url',
-          url: 'http://1.2.3.4/testnode01/namespace01/url',
+          url: 'http://1.2.3.4/metalware/testnode01/namespace01/url',
         })
       end
 
