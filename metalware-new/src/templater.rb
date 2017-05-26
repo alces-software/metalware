@@ -90,7 +90,7 @@ module Metalware
     # - what else?
     def initialize(parameters={})
       passed_magic_parameters = parameters.select do |k,v|
-        [:index, :nodename, :firstboot].include?(k) && !v.nil?
+        [:index, :nodename, :firstboot, :files].include?(k) && !v.nil?
       end
       magic_struct = MagicNamespace.new(passed_magic_parameters)
       @magic_namespace = MissingParameterWrapper.new(magic_struct)
@@ -224,9 +224,10 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:index, :nodename, :firstboot) do
-    def initialize(index: 0, nodename: nil, firstboot: nil)
-      super(index, nodename, firstboot)
+  MagicNamespace = Struct.new(:index, :nodename, :firstboot, :files) do
+    def initialize(index: 0, nodename: nil, firstboot: nil, files: nil)
+      files = Hashie::Mash.new(files) if files
+      super(index, nodename, firstboot, files)
     end
 
     def genders

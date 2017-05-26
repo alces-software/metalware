@@ -119,24 +119,47 @@ describe Metalware::Templater do
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
         expect(magic_namespace.firstboot).to eq(nil)
+        expect(magic_namespace.files).to eq(nil)
         expect(magic_namespace.build_complete_url).to eq(nil)
         expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
 
     context 'with passed parameters' do
+      before :each do
+        SpecUtils.use_unit_test_config(self)
+        SpecUtils.fake_download_error(self)
+      end
+
       it 'overrides defaults with parameter values, where applicable' do
+        # XXX extract this?
+        config = Metalware::Config.new
+        node = Metalware::Node.new(config, 'testnode01')
+        build_files = Metalware::BuildFilesRetriever.new(
+          'testnode01', config
+        ).retrieve(node.build_files)
+
         templater = Metalware::Templater.new({
-          nodename: 'testnode04',
+          nodename: 'testnode01',
           index: 3,
           firstboot: true,
+          files: build_files
         })
         magic_namespace = templater.config.alces
 
         expect(magic_namespace.index).to eq(3)
-        expect(magic_namespace.nodename).to eq('testnode04')
+        expect(magic_namespace.nodename).to eq('testnode01')
         expect(magic_namespace.firstboot).to eq(true)
-        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode04')
+        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode01')
+
+        # Can reach inside the passed `files` object.
+        expect(
+          magic_namespace.files.namespace01.first.raw
+        ).to eq('/some/other/path')
+        expect(
+          magic_namespace.files.namespace02.first.raw
+        ).to eq('another_file_in_repo')
+
         expect_environment_dependent_parameters_present(magic_namespace)
       end
     end
