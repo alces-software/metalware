@@ -43,6 +43,17 @@ module Metalware
       end.symbolize_keys
     end
 
+    # The path the file with given `file_name` within the given `namespace`
+    # will be rendered to for this node.
+    def rendered_build_file_path(namespace, file_name)
+      File.join(
+        @config.rendered_files_path,
+        name,
+        namespace.to_s,
+        file_name
+      )
+    end
+
     private
 
     def build_complete_marker_file

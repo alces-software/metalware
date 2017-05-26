@@ -1,5 +1,6 @@
 
 require 'timeout'
+require 'fakefs/safe'
 
 require 'commands/build'
 require 'node'
@@ -46,6 +47,7 @@ describe Metalware::Commands::Build do
     use_mock_nodes
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
+    SpecUtils.fake_download_error(self)
   end
 
   context 'when called without group argument' do
@@ -112,24 +114,40 @@ describe Metalware::Commands::Build do
     end
 
     describe 'files rendering' do
-      it 'renders relative path files relative to repo/files' do
-        expect(Metalware::Templater).to receive(:render_to_file).with(
-          '/var/lib/metalware/repo/files/testnodes/some_file_in_repo',
-          '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
-          hash_including(nodename: 'testnode01', index: 0)
-        )
+      it 'renders only files which could be retrieved' do
+        # XXX This test is an experiment with using `FakeFS` and explicitly
+        # declaring the files it depends on, rather than relying on the
+        # combination of fudging config values, file paths and stubbing methods
+        # we do elsewhere. This may be a more robust and less brittle approach.
+        FakeFS do
+          # Clone in test Metalware configs at expected path, so can find
+          # `unit-test.yaml`.
+          # XXX Rather than stubbing `Constants::DEFAULT_CONFIG_PATH` and then
+          # cloning the test config there, could just clone this where it is
+          # normally expected.
+          FakeFS::FileSystem.clone('spec/fixtures/configs/')
 
-        run_build('testnode01')
-      end
+          # Clone in needed repo files to expected locations.
+          # XXX Once removed `repo_configs_path` from config can simplify this
+          # to use normal repo location for configs.
+          FakeFS::FileSystem.clone('spec/fixtures/repo/config', '/spec/fixtures/repo/config')
+          FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
+          FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 
-      it 'renders absolute path files' do
-        expect(Metalware::Templater).to receive(:render_to_file).with(
-          '/some/other/path',
-          '/var/lib/metalware/rendered/testnode01/namespace01/path',
-          hash_including(nodename: 'testnode01', index: 0)
-        )
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            '/var/lib/metalware/repo/files/testnodes/some_file_in_repo',
+            '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
+            hash_including(nodename: 'testnode01', index: 0)
+          )
 
-        run_build('testnode01')
+          # Should not try to render any other build files for this node.
+          node_rendered_path = '/var/lib/metalware/rendered/testnode01'
+          expect(Metalware::Templater).not_to receive(:render_to_file).with(
+            anything, /^#{node_rendered_path}/, anything
+          )
+
+          run_build('testnode01')
+        end
       end
     end
   end
