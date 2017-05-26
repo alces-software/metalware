@@ -52,10 +52,17 @@ describe Metalware::Commands::Build do
 
   context 'when called without group argument' do
     def expected_template_parameters
+      config = Metalware::Config.new
+      node = Metalware::Node.new(config, 'testnode01')
+      expected_build_files_hash = Metalware::BuildFilesRetriever.new(
+        'testnode01', config
+      ).retrieve(node.build_files)
+
       {
         nodename: 'testnode01',
         index: 0,
         firstboot: true,
+        files: expected_build_files_hash,
       }
     end
 
