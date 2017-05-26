@@ -1,5 +1,6 @@
 
 require 'commands/base_command'
+require 'metal_log'
 require 'rugged'
 
 require 'constants'
@@ -22,10 +23,10 @@ module Metalware
           uncommited = local_commit.diff_workdir.size
 
           if @force
-            # Alces::Stack::Log.warn
-            #   "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
-            # Alces::Stack::Log.warn
-            #   "Deleted #{uncommited} local change(s)" if uncommited > 0
+            MetalLog.warn
+               "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
+            MetalLog.warn
+               "Deleted #{uncommited} local change(s)" if uncommited > 0
           else
             raise LocalAheadOfRemote.new(ahead_behind[0]) if ahead_behind[0] > 0
             raise UncommitedChanges.new(uncommited) if uncommited > 0
@@ -33,7 +34,7 @@ module Metalware
 
           if uncommited + ahead_behind[0] + ahead_behind[1] == 0
             puts "Already up-to-date"
-            # Alces::Stack::Log.info "Already up-to-date"
+            MetalLog.info "Already up-to-date"
           elsif ahead_behind[0] + ahead_behind[1] + uncommited > 0
             repo.reset(remote_commit, :hard)
             puts "Repo has successfully been updated"
@@ -43,10 +44,9 @@ module Metalware
                   "#{diff[1]} insertion#{ diff[1] == 1 ? '' : 's'}(+), " \
                   "#{diff[2]} deletion#{ diff[2] == 1 ? '' : 's'}(-)"
             puts str
-            # Alces::Stack::Log.info str
+            MetalLog.info str
           else
-            # Alces::Stack::Log.fatal "Internal error. An impossible condition has " \
-            #                         "been reached!"
+            MetalLog.fatal "Internal error. An impossible condition has been reached!"
             raise "Internal error. Check metal log"
           end
         end

@@ -28,7 +28,7 @@ require 'hashie'
 
 require "constants"
 require 'nodeattr_interface'
-# require "alces/stack/log"
+require 'metal_log'
 
 module Metalware
   class Templater
@@ -47,14 +47,14 @@ module Metalware
         File.open(save_file.chomp, "w") do |f|
           f.puts render(template, template_parameters)
         end
-        # Alces::Stack::Log.info "Template Saved: #{save_file}"
+        MetalLog.info "Template Saved: #{save_file}"
       end
 
       def render_and_append_to_file(template, append_file, template_parameters={})
         File.open(append_file.chomp, 'a') do |f|
           f.puts render(template, template_parameters)
         end
-        # Alces::Stack::Log.info "Template Appended: #{append_file}"
+        MetalLog.info "Template Appended: #{append_file}"
       end
     end
 

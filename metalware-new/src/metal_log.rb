@@ -19,49 +19,45 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-
-require 'metal_log'
+require 'logger'
 require 'config'
+require 'exceptions'
+require 'fileutils'
 
 module Metalware
-  module Commands
-    class BaseCommand
-      def initialize(args, options)
-        pre_setup(args, options)
-        setup(args, options)
-        run
-      rescue Interrupt => e
-        handle_interrupt(e)
-      rescue Exception => e
-        handle_fatal_exception(e)
+  class MetalLog < Logger
+    class << self
+      def method_missing(s, *a, &b)
+        metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
       end
 
-      attr_reader :config
+      attr_writer :config
+
+      def config
+        raise UnsetConfigLogError if @config.nil?
+        @config
+      end
 
       private
 
-      def pre_setup(args, options)
-        @config = Config.new(options.config)
-        MetalLog.config = @config
-        MetalLog.info "metal #{ARGV.join(" ")}"
-      end
-
-      def setup(args, options)
-        raise NotImplementedError
-      end
-
-      def run
-        raise NotImplementedError
-      end
-
-      def handle_interrupt(e)
-        raise e
-      end
-
-      def handle_fatal_exception(e)
-        MetalLog.fatal e.inspect
-        raise e
+      def metal_log
+        @metal_log ||= MetalLog.new("metal")
       end
     end
+
+    def initialize(log_name)
+      file = "#{self.class.config.log_path}/#{log_name}.log"
+      FileUtils.mkdir_p File.dirname(file)
+      f = File.open(file, "a")
+      f.sync = true
+      super(f)
+    end
+
+# POSSIBLE USE TO IMPLEMENT --strict
+=begin
+      def warn(*args, &block)
+        super(*args, &block)
+      end
+=end
   end
 end

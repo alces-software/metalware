@@ -16,9 +16,8 @@ module Metalware
         options.default template: 'default'
         @options = options
 
-        config = Config.new(options.config)
         node_identifier = args.first
-        @nodes = Nodes.create(config, node_identifier, options.group)
+        @nodes = Nodes.create(@config, node_identifier, options.group)
       end
 
       def run
