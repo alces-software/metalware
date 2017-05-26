@@ -15,6 +15,5 @@ files:
     - some_file_in_repo
     - /some/other/path
     - http://example.com/some/url
-    - example.com/some/other/url2
   namespace02:
     - another_file_in_repo

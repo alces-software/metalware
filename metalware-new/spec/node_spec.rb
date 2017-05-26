@@ -28,7 +28,6 @@ describe Metalware::Node do
           'testnodes/some_file_in_repo',
           '/some/other/path',
           'http://example.com/some/url',
-          'example.com/some/other/url2',
         ].sort,
         namespace02: [
           'another_file_in_repo',
@@ -41,7 +40,6 @@ describe Metalware::Node do
           'testnode02/some_file_in_repo',
           '/some/other/path',
           'http://example.com/testnode02/some/url',
-          'example.com/some/other/url2',
         ].sort,
         namespace02: [
           'testnode02/another_file_in_repo',
