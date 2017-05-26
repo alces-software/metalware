@@ -51,16 +51,24 @@ describe Metalware::Commands::Build do
   end
 
   context 'when called without group argument' do
+    def expected_template_parameters
+      {
+        nodename: 'testnode01',
+        index: 0,
+        firstboot: true,
+      }
+    end
+
     it 'renders default standard templates for given node' do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/kickstart/default',
         '/var/lib/metalware/rendered/kickstart/testnode01',
-        hash_including(nodename: 'testnode01', index: 0)
+        expected_template_parameters,
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01', index: 0)
+        expected_template_parameters,
       ).at_least(:once)
 
       run_build('testnode01')
@@ -70,12 +78,12 @@ describe Metalware::Commands::Build do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/kickstart/my_kickstart',
         '/var/lib/metalware/rendered/kickstart/testnode01',
-        hash_including(nodename: 'testnode01', index: 0)
+        expected_template_parameters,
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/my_pxelinux',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01', index: 0)
+        expected_template_parameters,
       ).at_least(:once)
 
       run_build(
@@ -92,7 +100,7 @@ describe Metalware::Commands::Build do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01', firstboot: true)
+        expected_template_parameters,
       ).once
 
       expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
@@ -102,12 +110,12 @@ describe Metalware::Commands::Build do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01', firstboot: true)
+        expected_template_parameters,
       ).once.ordered
       expect(Metalware::Templater).to receive(:render_to_file).with(
         '/var/lib/metalware/repo/pxelinux/default',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01', firstboot: false)
+        expected_template_parameters.merge(firstboot: false),
       ).once.ordered
 
        run_build('testnode01')
@@ -137,7 +145,7 @@ describe Metalware::Commands::Build do
           expect(Metalware::Templater).to receive(:render_to_file).with(
             '/var/lib/metalware/repo/files/testnodes/some_file_in_repo',
             '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
-            hash_including(nodename: 'testnode01', index: 0)
+            expected_template_parameters
           )
 
           # Should not try to render any other build files for this node.
