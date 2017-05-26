@@ -32,6 +32,16 @@ module SpecUtils
       end
     end
 
+    def fake_download_error(example_group)
+      http_error = "418 I'm a teapot"
+      example_group.instance_exec do
+        allow(Metalware::Input).to receive(:download).and_raise(
+          OpenURI::HTTPError.new(http_error, nil)
+        )
+      end
+      http_error
+    end
+
     # Other shared utils.
 
     def run_command(command_class, *args, **options_hash)

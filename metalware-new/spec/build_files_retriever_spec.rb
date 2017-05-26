@@ -105,10 +105,7 @@ describe Metalware::BuildFilesRetriever do
 
     context 'when error retrieving URL file' do
       before :each do
-        @http_error = "418 I'm a teapot"
-        allow(Metalware::Input).to receive(:download).and_raise(
-          OpenURI::HTTPError.new(@http_error, nil)
-        )
+        @http_error = SpecUtils.fake_download_error(self)
       end
 
       it 'adds error to file entry' do
