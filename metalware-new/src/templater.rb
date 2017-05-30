@@ -254,6 +254,10 @@ module Metalware
       DeploymentServer.system_file_url 'genders'
     end
 
+    def kickstart_url
+      DeploymentServer.kickstart_url(nodename)
+    end
+
     def build_complete_url
       DeploymentServer.build_complete_url(nodename)
     end
