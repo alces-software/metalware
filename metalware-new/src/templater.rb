@@ -39,17 +39,18 @@ module Metalware
     end
 
     def method_missing(s, *a, &b)
-      if s == :[]
-        value = a.map { |v| @wrapped_obj[v] }
-        value = value[0] if value.length == 1
-      else
-        value = @wrapped_obj.send(s)
-      end
+      value = @wrapped_obj.send(s)
       if value.nil? && ! @missing_tags.include?(s)
         @missing_tags.push s
         MetalLog.warn "Missing template parameter: #{s}"
       end
       value
+    end
+
+    def [](a)
+      # ERB expects to be able to index in to the binding passed; this should
+      # function the same as a method call.
+      send(a)
     end
   end
 
