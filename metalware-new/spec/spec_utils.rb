@@ -23,6 +23,38 @@ module SpecUtils
       end
     end
 
+    def use_mock_determine_hostip_script(example_group)
+      example_group.instance_exec do
+        stub_const(
+          'Metalware::Constants::METALWARE_INSTALL_PATH',
+          FIXTURES_PATH
+        )
+      end
+    end
+
+    def fake_download_error(example_group)
+      http_error = "418 I'm a teapot"
+      example_group.instance_exec do
+        allow(Metalware::Input).to receive(:download).and_raise(
+          OpenURI::HTTPError.new(http_error, nil)
+        )
+      end
+      http_error
+    end
+
+    def create_mock_build_files_hash(example_group, node_name)
+      SpecUtils.use_unit_test_config(example_group)
+      SpecUtils.fake_download_error(example_group)
+
+      example_group.instance_exec do
+        config = Metalware::Config.new
+        node = Metalware::Node.new(config, node_name)
+        Metalware::BuildFilesRetriever.new(
+          node_name, config
+        ).retrieve(node.build_files)
+      end
+    end
+
     # Other shared utils.
 
     def run_command(command_class, *args, **options_hash)

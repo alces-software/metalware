@@ -9,6 +9,7 @@ require 'node'
 require 'nodes'
 require 'iterator'
 require 'output'
+require 'build_files_retriever'
 
 
 module Metalware
@@ -34,8 +35,48 @@ module Metalware
 
       def render_build_templates
         @nodes.template_each firstboot: true do |parameters, node|
+          parameters[:files] = build_files(node)
+          render_build_files(parameters, node)
           render_kickstart(parameters, node)
           render_pxelinux(parameters, node)
+        end
+      end
+
+      def build_files(node)
+        # Cache the build files as retrieved for each node so don't need to
+        # re-retrieve each time; in particular we don't want to re-make any
+        # network requests for files specified by a URL.
+        @build_files ||= {}
+        @build_files[node.name] ||= retrieve_build_files(node)
+      end
+
+      def retrieve_build_files(node)
+        retriever = BuildFilesRetriever.new(node.name, @config)
+        retriever.retrieve(node.build_files)
+      end
+
+      def render_build_files(parameters, node)
+        build_files(node).each do |namespace, files|
+          files.each do |file|
+            unless file[:error]
+              render_path = node.rendered_build_file_path(namespace, file[:name])
+              Templater.render_to_file(file[:template_path], render_path, parameters)
+            end
+          end
+        end
+      end
+
+      def retrieve_and_render_files(parameters, node)
+        retriever = BuildFilesRetriever.new(node.name, @config)
+        build_files_hash = retriever.retrieve(node.build_files)
+
+        build_files_hash.each do |namespace, files|
+          files.each do |file|
+            unless file[:error]
+              render_path = node.rendered_build_file_path(namespace, file[:name])
+              Templater.render_to_file(file[:template_path], render_path, parameters)
+            end
+          end
         end
       end
 
@@ -96,6 +137,7 @@ module Metalware
 
       def render_permanent_pxelinux_configs(nodes)
         nodes.template_each firstboot: false do |parameters, node|
+          parameters[:files] = build_files(node)
           render_pxelinux(parameters, node)
         end
       end

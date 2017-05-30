@@ -1,0 +1,7 @@
+
+files:
+  namespace01:
+    - testnode02/some_file_in_repo
+    - http://example.com/testnode02/some/url
+  namespace02:
+    - testnode02/another_file_in_repo

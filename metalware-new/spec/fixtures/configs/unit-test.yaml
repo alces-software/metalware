@@ -1,4 +1,5 @@
 
 build_poll_sleep: 0
-log_path: 'tmp/log/unit-test'
+log_path: 'tmp/unit-test/log'
 log_serverity: "DEBUG"
+repo_configs_path: 'spec/fixtures/repo/config'

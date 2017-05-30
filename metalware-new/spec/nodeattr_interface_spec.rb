@@ -28,4 +28,22 @@ describe Metalware::NodeattrInterface do
       }.to raise_error Metalware::NoGenderGroupError
     end
   end
+
+  describe '#groups_for_node' do
+    it 'returns groups for given node, ordered as in genders' do
+      testnode_groups = ['testnodes', 'nodes', 'cluster', 'all']
+      expect(
+        Metalware::NodeattrInterface.groups_for_node('testnode01')
+      ).to eq(testnode_groups)
+      expect(
+        Metalware::NodeattrInterface.groups_for_node('testnode02')
+      ).to eq(['pregroup'] + testnode_groups + ['postgroup'])
+    end
+
+    it 'raises if cannot find node' do
+      expect {
+        Metalware::NodeattrInterface.groups_for_node('non_existent')
+      }.to raise_error Metalware::NodeNotInGendersError
+    end
+  end
 end

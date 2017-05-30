@@ -104,12 +104,10 @@ describe Metalware::Templater do
     end
 
     before do
-      # Stub this so mock `determine-hostip` script used.
-      stub_const('Metalware::Constants::METALWARE_INSTALL_PATH', FIXTURES_PATH)
-
       # Stub this so mock hunter config used.
       stub_const('Metalware::Constants::HUNTER_PATH', TEST_HUNTER_PATH)
 
+      SpecUtils.use_mock_determine_hostip_script(self)
       SpecUtils.use_mock_genders(self)
     end
 
@@ -121,6 +119,7 @@ describe Metalware::Templater do
         expect(magic_namespace.index).to eq(0)
         expect(magic_namespace.nodename).to eq(nil)
         expect(magic_namespace.firstboot).to eq(nil)
+        expect(magic_namespace.files).to eq(nil)
         expect(magic_namespace.build_complete_url).to eq(nil)
         expect_environment_dependent_parameters_present(magic_namespace)
       end
@@ -128,17 +127,29 @@ describe Metalware::Templater do
 
     context 'with passed parameters' do
       it 'overrides defaults with parameter values, where applicable' do
+        build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode01')
+
         templater = Metalware::Templater.new({
-          nodename: 'testnode04',
+          nodename: 'testnode01',
           index: 3,
           firstboot: true,
+          files: build_files
         })
         magic_namespace = templater.config.alces
 
         expect(magic_namespace.index).to eq(3)
-        expect(magic_namespace.nodename).to eq('testnode04')
+        expect(magic_namespace.nodename).to eq('testnode01')
         expect(magic_namespace.firstboot).to eq(true)
-        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode04')
+        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode01')
+
+        # Can reach inside the passed `files` object.
+        expect(
+          magic_namespace.files.namespace01.first.raw
+        ).to eq('/some/other/path')
+        expect(
+          magic_namespace.files.namespace02.first.raw
+        ).to eq('another_file_in_repo')
+
         expect_environment_dependent_parameters_present(magic_namespace)
       end
     end

@@ -13,6 +13,9 @@ module Metalware
   class NoGenderGroupError < MetalwareError
   end
 
+  class NodeNotInGendersError < MetalwareError
+  end
+
   class SystemCommandError < MetalwareError
   end
 end
