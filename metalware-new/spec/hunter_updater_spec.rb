@@ -5,7 +5,7 @@ require 'hunter_updater'
 require 'output'
 
 
-describe Metalware::HunterUpdater do
+RSpec.describe Metalware::HunterUpdater do
   let :hunter_file { Tempfile.new.path }
   let :updater { Metalware::HunterUpdater.new(hunter_file) }
 

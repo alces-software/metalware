@@ -9,7 +9,7 @@ TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
-describe Metalware::Templater do
+RSpec.describe Metalware::Templater do
   def expect_renders(template_parameters, expected)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.

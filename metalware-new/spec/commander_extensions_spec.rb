@@ -4,7 +4,7 @@ require 'commander_extensions'
 # These specs inspired by those in Commander gem in `spec/runner_spec.rb`.
 
 
-describe CommanderExtensions do
+RSpec.describe CommanderExtensions do
   include CommanderExtensions::Delegates
 
   def mock_terminal

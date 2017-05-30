@@ -6,7 +6,7 @@ require 'spec_utils'
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
-describe '`metal build`' do
+RSpec.describe '`metal build`' do
   METAL = File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'bin/metal')
   TEST_DIR = 'tmp/integration-test'
   CONFIG_FILE = SpecUtils.fixtures_config('integration-test.yaml')
