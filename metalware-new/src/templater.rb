@@ -183,8 +183,7 @@ module Metalware
         current_config_string = current_parsed_config.to_s
       end
 
-      struct = RecursiveOpenStruct.new(current_parsed_config)
-      MissingParameterWrapper.new(struct)
+      create_template_parameters(current_parsed_config)
     end
 
     def perform_config_parsing_pass(current_parsed_config)
@@ -196,8 +195,8 @@ module Metalware
     def parse_config_value(value, current_parsed_config)
       case value
       when String
-        struct = RecursiveOpenStruct.new(current_parsed_config)
-        replace_erb(value, MissingParameterWrapper.new(struct))
+        parameters = create_template_parameters(current_parsed_config)
+        replace_erb(value, parameters)
       when Hash
         value.map do |k,v|
           [k, parse_config_value(v, current_parsed_config)]
@@ -205,6 +204,10 @@ module Metalware
       else
         value
       end
+    end
+
+    def create_template_parameters(config)
+      MissingParameterWrapper.new(RecursiveOpenStruct.new(config))
     end
   end
 
