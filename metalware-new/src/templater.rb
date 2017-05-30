@@ -32,20 +32,20 @@ require 'metal_log'
 require 'exceptions'
 
 module Metalware
-  class TemplaterRecursiveOpenStruct < RecursiveOpenStruct
-    def initialize(*a)
+  class MissingParameterWrapper
+    def initialize(wrapped_object)
       @missing_tags = []
-      super(*a)
+      @wrapped_object = wrapped_object
     end
 
     def method_missing(s, *a, &b)
-      value = super
+      value = @wrapped_object.send s
       if value.nil? && ! @missing_tags.include?(s)
         @missing_tags.push s
         MetalLog.warn "Missing template parameter: #{s}"
       end
-      value
-    end
+      value   
+    end  
   end
 
   class Templater
@@ -85,7 +85,8 @@ module Metalware
       passed_magic_parameters = parameters.select do |k,v|
         [:index, :nodename, :firstboot].include?(k) && !v.nil?
       end
-      @magic_namespace = MagicNamespace.new(passed_magic_parameters)
+      magic_struct = MagicNamespace.new(passed_magic_parameters)
+      @magic_namespace = MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
       @config = parse_config
     end
@@ -176,7 +177,8 @@ module Metalware
         current_config_string = current_parsed_config.to_s
       end
 
-      TemplaterRecursiveOpenStruct.new(current_parsed_config)
+      struct = RecursiveOpenStruct.new(current_parsed_config)
+      MissingParameterWrapper.new(struct)
     end
 
     def perform_config_parsing_pass(current_parsed_config)
@@ -188,7 +190,8 @@ module Metalware
     def parse_config_value(value, current_parsed_config)
       case value
       when String
-        replace_erb(value, TemplaterRecursiveOpenStruct.new(current_parsed_config))
+        struct = RecursiveOpenStruct.new(current_parsed_config)
+        replace_erb(value, MissingParameterWrapper.new(struct))
       when Hash
         value.map do |k,v|
           [k, parse_config_value(v, current_parsed_config)]
@@ -211,93 +214,70 @@ module Metalware
     end
   end
 
-  class MagicNamespace
-    def initialize(*a)
-      @missing_tags = []
-      @struct = MagicNamespaceStruct.new(*a)
+  MagicNamespace = Struct.new(:index, :nodename, :firstboot) do
+    def initialize(index: 0, nodename: nil, firstboot: nil)
+      super(index, nodename, firstboot)
     end
 
-    def method_missing(s, *a, &b)
-      if s == :[]
-        value = (a.length == 1 ? @struct[a[0]] : a.map { |v| @struct[v] })
+    def genders
+      # XXX Do we want to make genders available as a `Hashie::Mash` too?
+      # Depends if we want to be able to iterate through genders or just get
+      # list of nodes in a specified gender
+      GenderGroupProxy
+    end
+
+    def hunter
+      if File.exists? Constants::HUNTER_PATH
+        Hashie::Mash.load(Constants::HUNTER_PATH)
       else
-        value = @struct.send(s)
+        # XXX Should warn/log that resorting to this?
+        Hashie::Mash.new
       end
-      if value.nil? && ! @missing_tags.include?(s)
-        @missing_tags.push s
-        MetalLog.warn "Missing template parameter: alces.#{s}"
-      end
-      value
-    rescue => e
-      MetalLog.debug "#{e.inspect}"
-      raise e
     end
 
-    MagicNamespaceStruct = Struct.new(:index, :nodename, :firstboot) do
-      def initialize(index: 0, nodename: nil, firstboot: nil)
-        super(index, nodename, firstboot)
-      end
+    def hosts_url
+      system_file_url 'hosts'
+    end
 
-      def genders
-        # XXX Do we want to make genders available as a `Hashie::Mash` too?
-        # Depends if we want to be able to iterate through genders or just get
-        # list of nodes in a specified gender
-        GenderGroupProxy
-      end
+    def genders_url
+      system_file_url 'genders'
+    end
 
-      def hunter
-        if File.exists? Constants::HUNTER_PATH
-          Hashie::Mash.load(Constants::HUNTER_PATH)
-        else
-          # XXX Should warn/log that resorting to this?
-          Hashie::Mash.new
-        end
+    def build_complete_url
+      if nodename
+        deployment_server_url "exec/kscomplete.php?name=#{nodename}"
       end
+    end
 
-      def hosts_url
-        system_file_url 'hosts'
-      end
+    def hostip
+      SystemCommand.run(determine_hostip_script).chomp
+    rescue SystemCommandError
+      # If script failed for any reason fall back to using `hostname -i`,
+      # which may or may not give the IP on the interface we actually want
+      # to use (note: the dance with pipes is so we only get the last word
+      # in the output, as I've had the IPv6 IP included first before, which
+      # breaks all the things).
+      # XXX Warn about falling back to this?
+      SystemCommand.run(
+        "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
+      ).chomp
+    end
 
-      def genders_url
-        system_file_url 'genders'
-      end
+    private
 
-      def build_complete_url
-        if nodename
-          deployment_server_url "exec/kscomplete.php?name=#{nodename}"
-        end
-      end
+    def system_file_url(system_file)
+      deployment_server_url "system/#{system_file}"
+    end
 
-      def hostip
-        SystemCommand.run(determine_hostip_script).chomp
-      rescue SystemCommandError
-        # If script failed for any reason fall back to using `hostname -i`,
-        # which may or may not give the IP on the interface we actually want
-        # to use (note: the dance with pipes is so we only get the last word
-        # in the output, as I've had the IPv6 IP included first before, which
-        # breaks all the things).
-        # XXX Warn about falling back to this?
-        SystemCommand.run(
-          "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
-        ).chomp
-      end
+    def deployment_server_url(url_path)
+      "http://#{hostip}/#{url_path}"
+    end
 
-      private
-
-      def system_file_url(system_file)
-        deployment_server_url "system/#{system_file}"
-      end
-
-      def deployment_server_url(url_path)
-        "http://#{hostip}/#{url_path}"
-      end
-
-      def determine_hostip_script
-        File.join(
-          Constants::METALWARE_INSTALL_PATH,
-          'libexec/determine-hostip'
-        )
-      end
+    def determine_hostip_script
+      File.join(
+        Constants::METALWARE_INSTALL_PATH,
+        'libexec/determine-hostip'
+      )
     end
   end
 end
