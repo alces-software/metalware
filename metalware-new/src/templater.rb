@@ -49,8 +49,8 @@ module Metalware
         @missing_tags.push s
         MetalLog.warn "Missing template parameter: #{s}"
       end
-      value   
-    end  
+      value
+    end
   end
 
   class Templater
