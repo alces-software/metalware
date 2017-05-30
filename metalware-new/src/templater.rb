@@ -33,13 +33,18 @@ require 'exceptions'
 
 module Metalware
   class MissingParameterWrapper
-    def initialize(wrapped_object)
+    def initialize(wrapped_obj)
       @missing_tags = []
-      @wrapped_object = wrapped_object
+      @wrapped_obj = wrapped_obj
     end
 
     def method_missing(s, *a, &b)
-      value = @wrapped_object.send s
+      if s == :[]
+        value = a.map { |v| @wrapped_obj[v] }
+        value = value[0] if value.length == 1
+      else
+        value = @wrapped_obj.send(s)
+      end
       if value.nil? && ! @missing_tags.include?(s)
         @missing_tags.push s
         MetalLog.warn "Missing template parameter: #{s}"
