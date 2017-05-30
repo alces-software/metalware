@@ -20,6 +20,10 @@ RSpec.describe Metalware::Templater do
     expect(rendered).to eq(expected.strip_heredoc)
   end
 
+  before :each do
+    SpecUtils.use_unit_test_config(self)
+  end
+
   describe '#file' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
