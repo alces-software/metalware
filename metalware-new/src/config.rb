@@ -14,7 +14,8 @@ module Metalware
       rendered_files_path: '/var/lib/metalware/rendered',
       pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
       repo_path: '/var/lib/metalware/repo',
-      log_path: '/var/log/metalware'
+      log_path: '/var/log/metalware',
+      log_serverity: "INFO"
     }
 
     def initialize(file)

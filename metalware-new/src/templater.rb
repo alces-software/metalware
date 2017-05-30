@@ -29,8 +29,31 @@ require 'hashie'
 require "constants"
 require 'nodeattr_interface'
 require 'metal_log'
+require 'exceptions'
 
 module Metalware
+  class MissingParameterWrapper
+    def initialize(wrapped_obj)
+      @missing_tags = []
+      @wrapped_obj = wrapped_obj
+    end
+
+    def method_missing(s, *a, &b)
+      value = @wrapped_obj.send(s)
+      if value.nil? && ! @missing_tags.include?(s)
+        @missing_tags.push s
+        MetalLog.warn "Missing template parameter: #{s}"
+      end
+      value
+    end
+
+    def [](a)
+      # ERB expects to be able to index in to the binding passed; this should
+      # function the same as a method call.
+      send(a)
+    end
+  end
+
   class Templater
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
@@ -68,7 +91,8 @@ module Metalware
       passed_magic_parameters = parameters.select do |k,v|
         [:index, :nodename, :firstboot].include?(k) && !v.nil?
       end
-      @magic_namespace = MagicNamespace.new(passed_magic_parameters)
+      magic_struct = MagicNamespace.new(passed_magic_parameters)
+      @magic_namespace = MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
       @config = parse_config
     end
@@ -92,11 +116,6 @@ module Metalware
     def replace_erb(template, template_parameters)
       parameters_binding = template_parameters.instance_eval {binding}
       ERB.new(template).result(parameters_binding)
-    rescue StandardError => e
-      $stderr.puts "Could not parse ERB"
-      $stderr.puts template.to_s
-      $stderr.puts template_parameters.to_s
-      raise e
     end
 
     def nodename
@@ -164,7 +183,7 @@ module Metalware
         current_config_string = current_parsed_config.to_s
       end
 
-      RecursiveOpenStruct.new(current_parsed_config)
+      create_template_parameters(current_parsed_config)
     end
 
     def perform_config_parsing_pass(current_parsed_config)
@@ -176,7 +195,8 @@ module Metalware
     def parse_config_value(value, current_parsed_config)
       case value
       when String
-        replace_erb(value, RecursiveOpenStruct.new(current_parsed_config))
+        parameters = create_template_parameters(current_parsed_config)
+        replace_erb(value, parameters)
       when Hash
         value.map do |k,v|
           [k, parse_config_value(v, current_parsed_config)]
@@ -184,6 +204,10 @@ module Metalware
       else
         value
       end
+    end
+
+    def create_template_parameters(config)
+      MissingParameterWrapper.new(RecursiveOpenStruct.new(config))
     end
   end
 
