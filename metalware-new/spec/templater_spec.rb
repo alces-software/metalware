@@ -20,6 +20,10 @@ RSpec.describe Metalware::Templater do
     expect(rendered).to eq(expected.strip_heredoc)
   end
 
+  before :each do
+    SpecUtils.use_unit_test_config(self)
+  end
+
   describe '#file' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
@@ -120,6 +124,7 @@ RSpec.describe Metalware::Templater do
         expect(magic_namespace.nodename).to eq(nil)
         expect(magic_namespace.firstboot).to eq(nil)
         expect(magic_namespace.files).to eq(nil)
+        expect(magic_namespace.kickstart_url).to eq(nil)
         expect(magic_namespace.build_complete_url).to eq(nil)
         expect_environment_dependent_parameters_present(magic_namespace)
       end
@@ -140,6 +145,7 @@ RSpec.describe Metalware::Templater do
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode01')
         expect(magic_namespace.firstboot).to eq(true)
+        expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode01')
         expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode01')
 
         # Can reach inside the passed `files` object.

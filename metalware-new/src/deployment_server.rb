@@ -21,6 +21,13 @@ module Metalware
         url "system/#{system_file}"
       end
 
+      def kickstart_url(node_name)
+        if node_name
+          path = File.join('kickstart', node_name)
+          url path
+        end
+      end
+
       def build_complete_url(node_name)
         if node_name
           url "exec/kscomplete.php?name=#{node_name}"
