@@ -29,7 +29,10 @@ module Metalware
   class MetalLog < Logger
     class << self
       def method_missing(s, *a, &b)
-        metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
+        # Only log things outside of unit tests.
+        if $0 !~ /rspec$/
+          metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
+        end
       end
 
       attr_writer :config
