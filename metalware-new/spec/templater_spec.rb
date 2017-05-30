@@ -88,8 +88,8 @@ describe Metalware::Templater do
   describe 'magic alces namespace' do
     def expect_environment_dependent_parameters_present(magic_namespace)
       expect(magic_namespace.hostip).to eq('1.2.3.4')
-      expect(magic_namespace.hosts_url).to eq 'http://1.2.3.4/system/hosts'
-      expect(magic_namespace.genders_url).to eq 'http://1.2.3.4/system/genders'
+      expect(magic_namespace.hosts_url).to eq 'http://1.2.3.4/metalware/system/hosts'
+      expect(magic_namespace.genders_url).to eq 'http://1.2.3.4/metalware/system/genders'
 
       # Check hunter config.
       hunter_config = magic_namespace.hunter
@@ -140,7 +140,7 @@ describe Metalware::Templater do
         expect(magic_namespace.index).to eq(3)
         expect(magic_namespace.nodename).to eq('testnode01')
         expect(magic_namespace.firstboot).to eq(true)
-        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/exec/kscomplete.php?name=testnode01')
+        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode01')
 
         # Can reach inside the passed `files` object.
         expect(

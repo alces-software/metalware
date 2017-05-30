@@ -35,7 +35,8 @@ module Metalware
       private
 
       def url(url_path)
-        URI.join("http://#{ip}", url_path).to_s
+        full_path = File.join('metalware', url_path)
+        URI.join("http://#{ip}", full_path).to_s
       end
 
       def determine_hostip_script
