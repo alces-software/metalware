@@ -5,7 +5,7 @@ require 'iterator'
 require 'spec_utils'
 
 
-describe Metalware::Commands::Hosts do
+RSpec.describe Metalware::Commands::Hosts do
 
   def run_hosts(node_identifier, **options_hash)
     SpecUtils.run_command(

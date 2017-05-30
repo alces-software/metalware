@@ -4,7 +4,7 @@ require 'spec_utils'
 require 'exceptions'
 
 
-describe Metalware::NodeattrInterface do
+RSpec.describe Metalware::NodeattrInterface do
   before do
     SpecUtils.use_mock_genders(self)
   end

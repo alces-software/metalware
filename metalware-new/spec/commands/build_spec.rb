@@ -7,7 +7,7 @@ require 'node'
 require 'spec_utils'
 
 
-describe Metalware::Commands::Build do
+RSpec.describe Metalware::Commands::Build do
   def run_build(node_identifier, **options_hash)
     # Run command in timeout as `build` will wait indefinitely, but want to
     # abort tests if it looks like this is happening.

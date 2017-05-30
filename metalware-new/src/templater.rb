@@ -238,7 +238,7 @@ module Metalware
     end
 
     def hunter
-      if File.exists? Constants::HUNTER_PATH
+      if File.exist? Constants::HUNTER_PATH
         Hashie::Mash.load(Constants::HUNTER_PATH)
       else
         # XXX Should warn/log that resorting to this?

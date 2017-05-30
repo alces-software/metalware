@@ -25,7 +25,7 @@ module Metalware
     private
 
     def load_current_yaml
-      if File.exists? @hunter_file
+      if File.exist? @hunter_file
         YAML.load_file(@hunter_file) || {}
       else
         {}

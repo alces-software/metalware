@@ -7,7 +7,7 @@ require 'constants'
 require 'spec_utils'
 
 
-describe Metalware::Config do
+RSpec.describe Metalware::Config do
   it 'can have default values retrieved' do
     config_file = SpecUtils.fixtures_config('empty.yaml')
     config = Metalware::Config.new(config_file)

@@ -1,7 +1,7 @@
 
 require 'system_command'
 
-describe Metalware::SystemCommand do
+RSpec.describe Metalware::SystemCommand do
   it 'runs the command and returns stdout' do
     expect(
       Metalware::SystemCommand.run('echo something')
