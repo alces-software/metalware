@@ -26,6 +26,7 @@ detect_pdsh() {
 fetch_pdsh() {
     title "Fetching pdsh"
     if [ "$dep_source" == "fresh" ]; then
+        # XXX No longer works as Google Code has shut down :(.
         fetch_source "https://pdsh.googlecode.com/files/pdsh-2.29.tar.bz2" "pdsh-source.tar.bz2"
     else
         fetch_dist pdsh

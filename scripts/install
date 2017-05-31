@@ -63,11 +63,13 @@ title "Installing prerequisites"
 doing 'Base'
 install_base_prerequisites &> "${dep_logs}/base-prereqs.log"
 say_done $?
-if [ "${dep_source}" == "fresh" ]; then
+# Always installing build prerequisites for the moment as always installing
+# fresh gems each time.
+# if [ "${dep_source}" == "fresh" ]; then
     doing 'Build'
     install_build_prerequisites &> "${dep_logs}/build-prereqs.log"
     say_done $?
-fi
+# fi
 doing 'Runtime'
 install_runtime_prerequisites &> "${dep_logs}/runtime-prereqs.log"
 say_done $?
@@ -75,18 +77,13 @@ say_done $?
 title "Creating initial directory structure"
 doing 'Create'
 mkdir -p /var/log/metalware
-mkdir -p /var/lib/metalware/rendered/ks
-mkdir -p /var/lib/metalware/cache
-mkdir -p /var/lib/metalware/repos
-mkdir -p /var/www/html/ks
-chmod a+rw /var/lib/metalware/cache
-[[ -d "${target}" ]] || mkdir -p "${target}"
-cp -R "${source}/bin" "${source}/etc" "${source}/lib" "${source}/libexec" "${target}"
-if [[ -n "$alces_TEST" ]]; then
-    cp -R "${source}/test" "${target}"
-else
-    rm -f "${target}/bin/test"
-fi
+mkdir -p /var/lib/metalware/rendered/kickstart
+mkdir -p /var/lib/metalware/cache/{built-nodes,templates}
+mkdir -p /var/lib/metalware/repo
+chmod a+rw /var/lib/metalware/cache/built-nodes
+
+mkdir -p "${target}"
+cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
@@ -125,12 +122,6 @@ case $user_shell in
         ;;
 esac
 
-title "Downloading default repository"
-doing 'Repo'
-source /etc/profile.d/alces-metalware.${rc_script_ext}
-metal repo -cn default -r https://github.com/alces-software/metalware-default
-say_done $?
-
 cat <<EOF
 [33m
 ===============================================================================
@@ -146,6 +137,6 @@ Please login again, or manually run the following:
 
 source /etc/profile.d/alces-metalware.${rc_script_ext}
 
-Afterwards, execute 'metal' for further information.
+Afterwards, execute 'metal --help' for further information.
 [0m
 EOF
