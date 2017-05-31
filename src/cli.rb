@@ -130,6 +130,11 @@ module Metalware
         c.action Commands::Bash
       end
 
+      def run!
+        ARGV.push "--help" if ARGV.empty?
+        super
+      end
+
       run!
     end
   end
