@@ -11,17 +11,17 @@ module Metalware
       class Use < BaseCommand
         def setup(args, options)
           @repo_url = args.first
-          @force = options.force
+          @options = options
         end
 
         def run
-          if @force
+          if @options.force
             FileUtils::rm_rf Constants::REPO_PATH
             MetalLog.info "Force deleted old repo"
           end
 
           Rugged::Repository.clone_at(@repo_url, Constants::REPO_PATH)
-          MetalLog.info "Cloned '#{@opt.name_input}' from #{@opt.url}"
+          MetalLog.info "Cloned repo from #{@options.url}"
         rescue Rugged::InvalidError
           raise $!, "Repository already exists. Use -f to force clone a new one"
         end
