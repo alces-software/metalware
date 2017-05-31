@@ -72,7 +72,7 @@ module Alces
 
         def setup_signal_handler
           trap('INT') do
-            STDERR.puts "\nExiting..." unless @exiting
+            $stderr.puts "\nExiting..." unless @exiting
             @exiting = true
             Kernel.exit(0)
           end
