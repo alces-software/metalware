@@ -110,7 +110,7 @@ module Metalware
 
       command :power do |c|
         c.syntax = 'metal power NODE_IDENTIFIER [COMMAND] [options]'
-        c.summary = ''
+        c.summary = 'Volatile'
         c.description = ''
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
@@ -120,7 +120,7 @@ module Metalware
 
       command :console do |c|
         c.syntax = 'metal console NODE_IDENTIFIER [options]'
-        c.summary = ''
+        c.summary = 'Volatile'
         c.description = ''
         c.example 'description', 'command example'
         c.action Commands::Bash
