@@ -104,6 +104,22 @@ module Metalware
         c.action Commands::Build
       end
 
+      command :power do |c|
+        c.syntax = 'metal power NODE_IDENTIFIER [COMMAND] [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.action Commands::Bash
+      end
+
+      command :console do |c|
+        c.syntax = 'metal console [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.action Commands::Bash
+      end
+
       run!
     end
   end
