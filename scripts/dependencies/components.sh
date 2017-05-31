@@ -19,45 +19,35 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-alces_RUBYHOME="${target}/opt/ruby"
-alces_RUBY="${target}/opt/ruby/bin/ruby"
-
-detect_ruby() {
-    [ -d "${target}/opt/ruby" ]
+detect_components() {
+    [ -d "${target}/lib/ruby/vendor/ruby" ]
 }
 
-fetch_ruby() {
-    title "Fetching Ruby"
-    if [ "$dep_source" == "fresh" ]; then
-        fetch_source https://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.7.tar.gz ruby-source.tar.gz
-    else
-        fetch_dist ruby
+fetch_components() {
+    if [ "$dep_source" == "dist" ]; then
+        title "Fetching Ruby components"
+        fetch_dist 'components'
     fi
 }
 
-install_ruby() {
-    title "Installing Ruby"
-    if [ "$dep_source" == "fresh" ]; then
-        doing 'Extract'
-        tar -C "${dep_build}" -xzf "${dep_src}/ruby-source.tar.gz"
-        say_done $?
+install_components() {
+    title "Installing Ruby components"
+    cd "$target"
+    doing 'Configure'
+    "${alces_RUBYHOME}/bin/bundle" install \
+        --path=vendor \
+        --without=test \
+        &> "${dep_logs}/components-install.log"
+    say_done $?
 
-        cd "${dep_build}"/ruby-*
-
-        doing 'Configure'
-        ./configure --prefix="${alces_RUBYHOME}" --enable-shared --disable-install-doc \
-            --with-libyaml --with-opt-dir="${target}/opt/lib" \
-            &> "${dep_logs}/ruby-configure.log"
-        say_done $?
-
-        doing 'Compile'
-        make &> "${dep_logs}/ruby-make.log"
-        say_done $?
-
-        doing 'Install'
-        make install &> "${dep_logs}/ruby-install.log"
-        say_done $?
-    else
-        install_dist ruby
-    fi
+    # XXX Below disabled as we are always installing gems fresh each time for
+    # the moment.
+    # if [ "$dep_source" == "fresh" ]; then
+    #     cd "${target}/lib/ruby"
+    #     doing 'Configure'
+    #     "${alces_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
+    #     say_done $?
+    # else
+    #     install_dist 'components'
+    # fi
 }

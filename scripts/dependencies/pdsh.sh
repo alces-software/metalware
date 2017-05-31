@@ -19,25 +19,47 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-detect_components() {
-    [ -d "${target}/lib/ruby/vendor/ruby" ]
+detect_pdsh() {
+    [ -d "${target}/opt/pdsh" ]
 }
 
-fetch_components() {
-    if [ "$dep_source" == "dist" ]; then
-        title "Fetching Ruby components"
-        fetch_dist 'components'
+fetch_pdsh() {
+    title "Fetching pdsh"
+    if [ "$dep_source" == "fresh" ]; then
+        # XXX No longer works as Google Code has shut down :(.
+        fetch_source "https://pdsh.googlecode.com/files/pdsh-2.29.tar.bz2" "pdsh-source.tar.bz2"
+    else
+        fetch_dist pdsh
     fi
 }
 
-install_components() {
-    title "Installing Ruby components"
+install_pdsh() {
+    title "Installing pdsh"
     if [ "$dep_source" == "fresh" ]; then
-        cd "${target}/lib/ruby"
+        doing 'Extract'
+        tar -C "${dep_build}" -xjf "${dep_src}/pdsh-source.tar.bz2"
+        say_done $?
+
+        cd "${dep_build}"/pdsh-*
+
         doing 'Configure'
-        "${alces_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
+        ./configure --prefix="${target}/opt/pdsh" --with-ssh \
+            --with-rcmd-rank-list=ssh,rsh,exec \
+            --with-genders \
+            --with-readline \
+            CPPFLAGS="-I${target}/opt/genders/include" \
+            LDFLAGS="-L${target}/opt/genders/lib" \
+            &> "${dep_logs}/pdsh-configure.log"
+        say_done $?
+
+        doing 'Compile'
+        make &> "${dep_logs}/pdsh-make.log"
+        say_done $?
+
+        doing 'Install'
+        make install &> "${dep_logs}/pdsh-install.log"
         say_done $?
     else
-        install_dist 'components'
+        install_dist pdsh
     fi
 }

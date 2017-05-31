@@ -19,20 +19,45 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-detect_bundler() {
-    [ -f "${target}/opt/ruby/bin/bundle" ]
+alces_RUBYHOME="${target}/opt/ruby"
+alces_RUBY="${target}/opt/ruby/bin/ruby"
+
+detect_ruby() {
+    [ -d "${target}/opt/ruby" ]
 }
 
-fetch_bundler() {
+fetch_ruby() {
+    title "Fetching Ruby"
     if [ "$dep_source" == "fresh" ]; then
-        title "Fetching Bundler"
-        fetch_source https://rubygems.org/downloads/bundler-1.10.6.gem bundler.gem
+        fetch_source https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.1.tar.gz ruby-source.tar.gz
+    else
+        fetch_dist ruby-2.4.1
     fi
 }
 
-install_bundler() {
-    title "Installing Bundler"
-    doing 'Install'
-    "${target}/opt/ruby/bin/gem" install --local "${dep_src}/bundler.gem" &> "${dep_logs}/bundler-install.log"
-    say_done $?
+install_ruby() {
+    title "Installing Ruby"
+    if [ "$dep_source" == "fresh" ]; then
+        doing 'Extract'
+        tar -C "${dep_build}" -xzf "${dep_src}/ruby-source.tar.gz"
+        say_done $?
+
+        cd "${dep_build}"/ruby-*
+
+        doing 'Configure'
+        ./configure --prefix="${alces_RUBYHOME}" --enable-shared --disable-install-doc \
+            --with-libyaml --with-opt-dir="${target}/opt/lib" \
+            &> "${dep_logs}/ruby-configure.log"
+        say_done $?
+
+        doing 'Compile'
+        make &> "${dep_logs}/ruby-make.log"
+        say_done $?
+
+        doing 'Install'
+        make install &> "${dep_logs}/ruby-install.log"
+        say_done $?
+    else
+        install_dist ruby-2.4.1
+    fi
 }

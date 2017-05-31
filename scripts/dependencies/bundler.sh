@@ -19,46 +19,20 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-detect_pdsh() {
-    [ -d "${target}/opt/pdsh" ]
+detect_bundler() {
+    [ -f "${target}/opt/ruby/bin/bundle" ]
 }
 
-fetch_pdsh() {
-    title "Fetching pdsh"
+fetch_bundler() {
     if [ "$dep_source" == "fresh" ]; then
-        fetch_source "https://pdsh.googlecode.com/files/pdsh-2.29.tar.bz2" "pdsh-source.tar.bz2"
-    else
-        fetch_dist pdsh
+        title "Fetching Bundler"
+        fetch_source https://rubygems.org/downloads/bundler-1.10.6.gem bundler.gem
     fi
 }
 
-install_pdsh() {
-    title "Installing pdsh"
-    if [ "$dep_source" == "fresh" ]; then
-        doing 'Extract'
-        tar -C "${dep_build}" -xjf "${dep_src}/pdsh-source.tar.bz2"
-        say_done $?
-
-        cd "${dep_build}"/pdsh-*
-
-        doing 'Configure'
-        ./configure --prefix="${target}/opt/pdsh" --with-ssh \
-            --with-rcmd-rank-list=ssh,rsh,exec \
-            --with-genders \
-            --with-readline \
-            CPPFLAGS="-I${target}/opt/genders/include" \
-            LDFLAGS="-L${target}/opt/genders/lib" \
-            &> "${dep_logs}/pdsh-configure.log"
-        say_done $?
-
-        doing 'Compile'
-        make &> "${dep_logs}/pdsh-make.log"
-        say_done $?
-
-        doing 'Install'
-        make install &> "${dep_logs}/pdsh-install.log"
-        say_done $?
-    else
-        install_dist pdsh
-    fi
+install_bundler() {
+    title "Installing Bundler"
+    doing 'Install'
+    "${target}/opt/ruby/bin/gem" install bundler &> "${dep_logs}/bundler-install.log"
+    say_done $?
 }
