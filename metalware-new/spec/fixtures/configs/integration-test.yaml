@@ -5,4 +5,4 @@ rendered_files_path: 'tmp/integration-test/rendered'
 pxelinux_cfg_path: 'tmp/integration-test/pxelinux.cfg'
 repo_path: 'tmp/repo'
 log_path: 'tmp/log/integration-test'
-log_serverity: "DEBUG"
+log_severity: "DEBUG"

@@ -18,4 +18,7 @@ module Metalware
 
   class SystemCommandError < MetalwareError
   end
+
+  class StrictWarningError < MetalwareError
+  end
 end

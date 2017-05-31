@@ -24,6 +24,10 @@ module Metalware
         'Specify config file to use instead of default (/opt/metalware/etc/config.yaml)'
       )
 
+      global_option(
+      '--strict', 'Converts warnings to errors'
+      )
+
       command :'repo use' do |c|
         c.syntax = 'metal repo use REPO_URL [options]'
         c.summary = ''
