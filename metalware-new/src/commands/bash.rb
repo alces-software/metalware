@@ -39,7 +39,9 @@ module Metalware
         script = File.join(Constants::METALWARE_INSTALL_PATH,
                           "libexec",
                           "#{@command}")
-        exec("#{script} #{@cli_input}")
+        cmd = "#{script} #{@cli_input}"
+        MetalLog.info "Running: #{cmd}"
+        exec("#{cmd}")
       end
     end
   end

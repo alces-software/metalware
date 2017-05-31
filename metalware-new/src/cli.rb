@@ -108,12 +108,14 @@ module Metalware
         c.syntax = 'metal power NODE_IDENTIFIER [COMMAND] [options]'
         c.summary = ''
         c.description = ''
+        c.option '-g', '--group', String,
+          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.example 'description', 'command example'
         c.action Commands::Bash
       end
 
       command :console do |c|
-        c.syntax = 'metal console [options]'
+        c.syntax = 'metal console NODE_IDENTIFIER [options]'
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
