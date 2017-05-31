@@ -59,7 +59,7 @@ module Metalware
     def warn(msg)
       if config.cli.strict
         raise StrictWarningError, msg
-      else
+      elsif ! config.cli.quiet
         super msg
         Output.stderr "warning: #{msg}"
       end
