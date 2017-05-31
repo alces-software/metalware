@@ -58,9 +58,7 @@ module Metalware
 
     def warn(msg)
       if config.cli.strict
-        e = StrictWarningError.new(msg)
-        e.set_backtrace(caller(2))
-        raise e
+        raise StrictWarningError, msg
       else
         super msg
         Output.stderr "warning: #{msg}"
