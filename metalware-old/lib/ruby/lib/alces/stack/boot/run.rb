@@ -141,9 +141,9 @@ module Alces
         rescue StandardError => @e
         ensure
           @e ||= Interrupt
-          STDERR.print "Exiting...."
+          $stderr.print "Exiting...."
           e = teardown(@e)
-          STDERR.puts "Done"
+          $stderr.puts "Done"
           raise e unless e == Interrupt
           Alces::Stack::Log.info "clean exit"
           Kernel.exit(0)
@@ -299,8 +299,8 @@ module Alces
           tear_down_flag_dry = true if @opt.dry_run? && !@to_delete.empty?
           tear_down_flag = true if !@opt.dry_run? && !@to_delete_dry_run.empty?
           unless @opt.permanent_boot?
-            STDERR.puts "DRY RUN: Files that would be deleted:" unless @to_delete_dry_run.empty?
-            @to_delete_dry_run.each { |file| STDERR.puts "  #{file}" }
+            $stderr.puts "DRY RUN: Files that would be deleted:" unless @to_delete_dry_run.empty?
+            @to_delete_dry_run.each { |file| $stderr.puts "  #{file}" }
             @to_delete.each { |file| delete_file_log file }
           end
 

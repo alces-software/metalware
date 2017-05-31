@@ -47,7 +47,7 @@ module Alces
         end
 
         def listen!
-          STDERR.puts "WAITING FOR NEW NODES TO APPEAR ON THE NETWORK, PLEASE NETWORK BOOT THEM NOW... (CTRL+C TO TERMINATE)"
+          $stderr.puts "WAITING FOR NEW NODES TO APPEAR ON THE NETWORK, PLEASE NETWORK BOOT THEM NOW... (CTRL+C TO TERMINATE)"
           Thread.new do
             begin
               network.each do |p|
@@ -107,19 +107,19 @@ module Alces
           @detection_count += 1
 
           begin
-            STDERR.print "Detected a machine on the network (#{hwaddr}). Please enter the hostname [#{default_name}]: "
-            STDERR.flush
+            $stderr.print "Detected a machine on the network (#{hwaddr}). Please enter the hostname [#{default_name}]: "
+            $stderr.flush
             input = gets.chomp
             name = input.empty? ? default_name : input
             update_dhcp(name, hwaddr) if @update_dhcp_flag
             Alces::Stack::Log.info("#{name}-#{hwaddr}")
             @hunter_logger.info("#{name}-#{hwaddr}")
-            STDERR.puts "Logged node"
+            $stderr.puts "Logged node"
 
           rescue Exception => e
             warn e
-            STDERR.puts "FAIL: #{e.message}"; STDERR.flush
-            STDERR.print "Retry? (Y/N): "; STDERR.flush
+            $stderr.puts "FAIL: #{e.message}"; $stderr.flush
+            $stderr.print "Retry? (Y/N): "; $stderr.flush
             input=gets.chomp
             retry if input.to_s.downcase == 'y'
           end
