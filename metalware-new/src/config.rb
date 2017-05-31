@@ -17,7 +17,7 @@ module Metalware
       pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
       repo_path: '/var/lib/metalware/repo',
       log_path: '/var/log/metalware',
-      log_serverity: "INFO",
+      log_severity: "INFO",
       repo_configs_path: '/var/lib/metalware/repo/config/',
     }
 
