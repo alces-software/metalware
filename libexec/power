@@ -71,7 +71,7 @@ if [ -z $STEP_INTERVAL ]; then
  STEP_INTERVAL=0.5
 fi
 
-. ${ALCES_ROOT}/lib/functions/nodegather.sh
+. ${ALCES_ROOT}/libexec/nodegather.sh
 
 export OUTPUT=0
 export IPMI_PASSWORD="${PASSWORD}"
