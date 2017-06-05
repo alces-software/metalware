@@ -1,7 +1,7 @@
 
 require 'active_support/core_ext/string/strip'
 
-require 'commands/base_command'
+require 'base_command'
 require 'config'
 require 'templater'
 require 'constants'

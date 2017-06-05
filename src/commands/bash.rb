@@ -20,7 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'commands/base_command'
+require 'base_command'
 require 'metal_log'
 require 'config'
 require 'constants'
