@@ -25,11 +25,11 @@ module Metalware
       )
 
       global_option(
-        '--strict', 'Converts warnings to errors'
+        '--strict', 'Convert warnings to errors'
       )
 
       global_option(
-        '--quiet', 'Suppresses standard output'
+        '--quiet', 'Suppress any warnings from being displayed'
       )
 
       command :'repo use' do |c|
