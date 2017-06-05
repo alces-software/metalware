@@ -34,7 +34,7 @@ if [ "$BASH_VERSION" ]; then
         fi
 
         # Additional bash commands, ideally these will be migrated to ruby
-        if [ "$path" == "/" ]; then
+        if [ "$path" == "" ]; then
             cmds="$cmds power console"
         fi
 
