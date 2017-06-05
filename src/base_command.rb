@@ -23,10 +23,13 @@
 require 'metal_log'
 require 'config'
 require 'defaults'
+require 'repo'
 
 module Metalware
   module Commands
     class BaseCommand
+      COMMANDS_REQUIRING_REPO = [:build, :dhcp, :hosts, :'repo update']
+
       def initialize(args, options)
         pre_setup(args, options)
         setup(args, options)
@@ -43,8 +46,24 @@ module Metalware
 
       def pre_setup(args, options)
         setup_config(options)
+        validate_repo_exists_if_required
         setup_option_defaults(options)
         log_command
+      end
+
+      def validate_repo_exists_if_required
+        if command_requires_repo? && !repo.exists?
+          raise NoRepoError,
+            "'#{command_name}' requires a repo to operate on; please run 'metal repo use' first"
+        end
+      end
+
+      def command_requires_repo?
+        COMMANDS_REQUIRING_REPO.include? command_name
+      end
+
+      def repo
+        ::Metalware::Repo.new(config.repo_path)
       end
 
       def setup_config(options)
@@ -64,7 +83,7 @@ module Metalware
         class_name_parts = self.class.name.split('::')
         parts_without_namespace = \
           class_name_parts.slice(2, class_name_parts.length)
-        parts_without_namespace.join(' ').downcase
+        parts_without_namespace.join(' ').downcase.to_sym
       end
 
       def log_command
