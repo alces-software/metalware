@@ -4,6 +4,11 @@ require 'recursive-open-struct'
 
 
 module Metalware
+  # When new defaults are added here you may also want to add these to the
+  # option's help to be displayed.
+  # TODO: Could have these displayed in help automatically by overriding
+  # `Commander` method - not doing for now for simplicity of both writing the
+  # code and as this may be too much magic.
   Defaults = RecursiveOpenStruct.new({
     build: {
       kickstart: 'default',

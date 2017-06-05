@@ -8,6 +8,7 @@ require 'commander'
 
 require 'commander_extensions'
 require 'commands'
+require 'defaults'
 
 module Metalware
   class Cli
@@ -67,7 +68,8 @@ module Metalware
         c.example 'description', 'command example'
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.option '-t TEMPLATE', '--template TEMPLATE', String, 'Specify hosts template to use'
+        c.option '-t TEMPLATE', '--template TEMPLATE', String,
+          "Specify hosts template to use (default: #{Defaults.hosts.template})"
         c.option '-x', '--dry-run',
           'Do not modify hosts file, just output additions that would be made'
         c.action Commands::Hosts
@@ -79,13 +81,13 @@ module Metalware
         c.description = ''
         c.example 'description', 'command example'
         c.option '-i INTERFACE', '--interface INTERFACE', String,
-          'Local interface to hunt on'
+          "Local interface to hunt on (default: #{Defaults.hunter.interface})"
         c.option '-p PREFIX', '--prefix PREFIX', String,
-          'Root to suggest for detected node names'
+          "Root to suggest for detected node names (default: #{Defaults.hunter.prefix})"
         c.option '-l LENGTH', '--length LENGTH', Integer,
-          'Numeric sequence length to use for suggested detected node names'
+          "Numeric sequence length to use for suggested detected node names (default: #{Defaults.hunter.length})"
         c.option '-s START_NUMBER', '--start  START_NUMBER', Integer,
-          'Start integer to use for suggested detected node names'
+          "Start integer to use for suggested detected node names (default: #{Defaults.hunter.start})"
         c.action Commands::Hunter
       end
 
@@ -94,7 +96,8 @@ module Metalware
         c.summary = ''
         c.description = ''
         c.example 'description', 'command example'
-        c.option '-t TEMPLATE', '--template TEMPLATE', String, 'Specify dhcp template to use'
+        c.option '-t TEMPLATE', '--template TEMPLATE', String,
+          "Specify dhcp template to use (default: #{Defaults.dhcp.template})"
         c.action Commands::Dhcp
       end
 
@@ -106,9 +109,9 @@ module Metalware
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.option '-k KICKSTART_TEMPLATE', '--kickstart KICKSTART_TEMPLATE',
-          String, 'Specify kickstart template to use'
+          String, "Specify kickstart template to use (default: #{Defaults.build.kickstart})"
         c.option '-p PXELINUX_TEMPLATE', '--pxelinux  PXELINUX_TEMPLATE',
-          String, 'Specify pxelinux template to use'
+          String, "Specify pxelinux template to use (default: #{Defaults.build.pxelinux})"
         c.action Commands::Build
       end
 
