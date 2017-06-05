@@ -20,13 +20,6 @@ module Metalware
       def setup(args, options)
         @hunter_log = MetalLog.new("hunter")
 
-        # XXX Always default interface to Metalware build interface (where
-        # possible)?
-        options.default \
-          interface: 'eth0',
-          prefix: 'node',
-          length: 2,
-          start: 1
         @options = options
 
         @detection_count = options.start
