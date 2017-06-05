@@ -41,11 +41,19 @@ module Metalware
       private
 
       def pre_setup(args, options)
+        setup_config(options)
+        log_command
+      end
+
+      def setup_config(options)
         cli_options = {
           strict: !!options.strict,
           quiet: !!options.quiet
         }
         @config = Config.new(options.config, cli_options)
+      end
+
+      def log_command
         MetalLog.info "metal #{ARGV.join(" ")}"
       end
 
