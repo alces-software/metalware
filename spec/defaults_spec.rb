@@ -12,5 +12,9 @@ RSpec.describe Metalware::Defaults do
     it 'returns nil for not present option' do
       expect(Metalware::Defaults.hosts.foo).to be(nil)
     end
+
+    it 'returns an empty hash for unspecified commands' do
+      expect(Metalware::Defaults.render).to eq({})
+    end
   end
 end
