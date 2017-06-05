@@ -18,7 +18,6 @@ module Metalware
       private
 
       def setup(args, options)
-        options.default template: 'default'
         @options = options
       end
 

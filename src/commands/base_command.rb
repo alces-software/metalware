@@ -22,6 +22,7 @@
 
 require 'metal_log'
 require 'config'
+require 'defaults'
 
 module Metalware
   module Commands
@@ -42,6 +43,7 @@ module Metalware
 
       def pre_setup(args, options)
         setup_config(options)
+        setup_option_defaults(options)
         log_command
       end
 
@@ -51,6 +53,19 @@ module Metalware
           quiet: !!options.quiet
         }
         @config = Config.new(options.config, cli_options)
+      end
+
+      def setup_option_defaults(options)
+        # TODO: this won't work correctly for subcommands as we will need to
+        # specify defaults using more than just the command name; this does not
+        # matter for now though since this only applies to `repo` currently and
+        # no `repo` commands have defaults yet.
+        command_defaults = Defaults.send(command_name)
+        options.default(**command_defaults)
+      end
+
+      def command_name
+        self.class.name.split('::')[-1].downcase
       end
 
       def log_command

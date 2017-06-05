@@ -19,9 +19,6 @@ module Metalware
       private
 
       def setup(args, options)
-        options.default \
-          kickstart: 'default',
-          pxelinux: 'default'
         @options = options
         node_identifier = args.first
         @nodes = Nodes.create(@config, node_identifier, options.group)
