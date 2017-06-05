@@ -56,16 +56,15 @@ module Metalware
       end
 
       def setup_option_defaults(options)
-        # TODO: this won't work correctly for subcommands as we will need to
-        # specify defaults using more than just the command name; this does not
-        # matter for now though since this only applies to `repo` currently and
-        # no `repo` commands have defaults yet.
         command_defaults = Defaults.send(command_name)
         options.default(**command_defaults)
       end
 
       def command_name
-        self.class.name.split('::')[-1].downcase
+        class_name_parts = self.class.name.split('::')
+        parts_without_namespace = \
+          class_name_parts.slice(2, class_name_parts.length)
+        parts_without_namespace.join(' ').downcase
       end
 
       def log_command
