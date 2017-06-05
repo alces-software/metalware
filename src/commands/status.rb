@@ -23,6 +23,7 @@ require 'base_command'
 require 'status/monitor'
 require 'status/job'
 require 'fileutils'
+require 'exception'
 
 module Metalware
   module Commands
@@ -50,18 +51,12 @@ module Metalware
           data = get_finished_data
           if data.empty?
             empty_count += 1
-            raise DataIncomplete if empty_count > 100 && @monitor.thread.stop?
+            raise StatusDataIncomplete if empty_count > 100 && @monitor.thread.stop?
           elsif data["FINISHED"] != true
             display_data data
             empty_count = 0
           end
           sleep 1 # Only looks for updated data every second
-        end
-      end
-
-      class DataIncomplete < StandardError
-        def initialize(msg = "Failed to receive data for all nodes")
-          super
         end
       end
 
