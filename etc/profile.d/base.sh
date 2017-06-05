@@ -11,7 +11,7 @@ metal() {
     # else
     #     export alces_COLOUR=0
     # fi
-    (cd /opt/metalware && bin/metal "$@")
+    (cd /opt/metalware && PATH="/opt/metalware/opt/ruby/bin:$PATH" bin/metal "$@")
     # unset alces_COLOUR
 }
 
