@@ -26,7 +26,7 @@ if [ "$BASH_VERSION" ]; then
     _metal() {
         local cur="$2" prev="$3" cmds opts
 
-        path=$( IFS=$'/'; echo "${COMP_WORDS[*]}" | sed "s/^metal\/\|$cur$//g")
+        path=$( IFS=$'/'; echo "${COMP_WORDS[*]}" | sed "s/^metal\/\|$cur$//g" 2>/dev/null)
         cur_dir="/opt/metalware/src/commands/$path"
 
         if [ -d "$cur_dir" ]; then
