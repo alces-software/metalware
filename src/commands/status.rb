@@ -21,6 +21,7 @@
 #==============================================================================
 require 'base_command'
 require 'status/monitor'
+require 'nodes'
 require 'status/job'
 require 'fileutils'
 require 'exceptions'
@@ -28,6 +29,13 @@ require 'exceptions'
 module Metalware
   module Commands
     class Status < BaseCommand
+      def setup(args, options)
+        @opt = options
+        @cmds = [:power, :ping]
+        node_identifier = args.first
+        @nodes = Nodes.create(@config, node_identifier, options.group)
+      end
+
       def run
         start_monitor
         collect_data
@@ -37,9 +45,9 @@ module Metalware
       def start_monitor
         @monitor = Metalware::Status::Monitor.new({
             nodes: @opt.nodes,
-            cmds: @opt.cmds,
+            cmds: @cmds,
             thread_limit: @opt.thread_limit,
-            time_limit: @opt.time_limit
+            wait_limit: @opt.wait_limit
           })
         @monitor.start
       end
@@ -65,7 +73,7 @@ module Metalware
         
         format_str = "%-10s"
         printf format_str, data[:nodename]
-        @opt.cmds.each { |cmd| printf " | #{format_str}", data[cmd] }
+        @cmds.each { |cmd| printf " | #{format_str}", data[cmd] }
         puts
       end
 
@@ -76,7 +84,7 @@ module Metalware
         header_underline_string = "----------"
         header_data[:nodename] = "Node"
         header_underline_hash[:nodename] = header_underline_string
-        @opt.cmds.each do |c|
+        @cmds.each do |c|
           header_data[c] = c.to_s.capitalize
           header_underline_hash[c] = header_underline_string
         end
@@ -86,14 +94,14 @@ module Metalware
 
       def get_finished_data
         @finished_node_index ||= 0
-        return {"FINISHED" => true} unless @finished_node_index < @opt.nodes.length
-        nodename = @opt.nodes[@finished_node_index]
+        return {"FINISHED" => true} unless @finished_node_index < @nodes.length
+        nodename = @nodes[@finished_node_index]
 
         current_results = Metalware::Status::Job.results.tap do |r|
           return {} if r.nil?
           return {} unless r.key? nodename
           r = r[nodename]
-          @opt.cmds.each { |cmd| return {} unless r.key? cmd }
+          @cmds.each { |cmd| return {} unless r.key? cmd }
           r[:nodename] = nodename
         end
         
