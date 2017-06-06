@@ -119,6 +119,12 @@ module Metalware
     def replace_erb(template, template_parameters)
       parameters_binding = template_parameters.instance_eval {binding}
       ERB.new(template).result(parameters_binding)
+    rescue NoMethodError => e
+      # May be useful to include the name of the unset parameter in this error,
+      # however this is tricky as by the time we attempt to access a method on
+      # it the unset parameter is just `nil` as far as we can see here.
+      raise UnsetParameterAccessError,
+        "Attempted to call method `#{e.name}` of unset template parameter"
     end
 
     def nodename
