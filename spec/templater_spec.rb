@@ -24,7 +24,7 @@ RSpec.describe Metalware::Templater do
     SpecUtils.use_unit_test_config(self)
   end
 
-  describe '#file' do
+  describe '#render' do
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
         expected = <<-EOF
