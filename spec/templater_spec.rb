@@ -5,16 +5,16 @@ require 'templater'
 require 'spec_utils'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
-TEST_REPO_PATH = File.join(FIXTURES_PATH, 'repo')
+REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
 RSpec.describe Metalware::Templater do
-  def expect_renders(template_parameters, expected)
+  def expect_renders(template_parameters, expected, config: Metalware::Config.new)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.
     rendered = Metalware::Templater.render(
-      TEST_TEMPLATE_PATH, template_parameters
+      config, TEST_TEMPLATE_PATH, template_parameters
     ).gsub(/\s+\n/, "\n")
 
     expect(rendered).to eq(expected.strip_heredoc)
@@ -61,8 +61,8 @@ RSpec.describe Metalware::Templater do
     end
 
     context 'with repo' do
-      before :each do
-        stub_const('Metalware::Constants::REPO_PATH', TEST_REPO_PATH)
+      before do
+        @config = Metalware::Config.new(REPO_TEST_CONFIG_PATH)
       end
 
       it 'renders template with repo parameters' do
@@ -76,14 +76,14 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders({}, expected)
+        expect_renders({}, expected, config: @config)
       end
 
       it 'raises if maximum recursive config depth exceeded' do
         stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
 
         expect{
-          Metalware::Templater.new
+          Metalware::Templater.new(@config)
         }.to raise_error(Metalware::Templater::LoopErbError)
       end
     end
@@ -117,7 +117,7 @@ RSpec.describe Metalware::Templater do
 
     context 'without passed parameters' do
       it 'is created with default values' do
-        templater = Metalware::Templater.new
+        templater = Metalware::Templater.new(Metalware::Config.new)
         magic_namespace = templater.config.alces
 
         expect(magic_namespace.index).to eq(0)
@@ -134,7 +134,7 @@ RSpec.describe Metalware::Templater do
       it 'overrides defaults with parameter values, where applicable' do
         build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode01')
 
-        templater = Metalware::Templater.new({
+        templater = Metalware::Templater.new(Metalware::Config.new, {
           nodename: 'testnode01',
           index: 3,
           firstboot: true,
@@ -166,7 +166,7 @@ RSpec.describe Metalware::Templater do
       end
 
       it 'loads the hunter parameter as an empty array' do
-        templater = Metalware::Templater.new
+        templater = Metalware::Templater.new(Metalware::Config.new)
         magic_namespace = templater.config.alces
         expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
       end

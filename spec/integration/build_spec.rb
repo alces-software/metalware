@@ -148,7 +148,7 @@ RSpec.describe '`metal build`' do
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(PXELINUX_TEMPLATE, {
+          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
             nodename: 'testnode01', index: 0, firstboot: false
           })
         )
@@ -159,7 +159,7 @@ RSpec.describe '`metal build`' do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(PXELINUX_TEMPLATE, {
+          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
             nodename: 'testnode02', index: 1, firstboot: false
           })
         )
@@ -170,7 +170,7 @@ RSpec.describe '`metal build`' do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(PXELINUX_TEMPLATE, {
+          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
             nodename: 'testnode02', index: 1, firstboot: true
           })
         )

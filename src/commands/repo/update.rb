@@ -14,7 +14,7 @@ module Metalware
         end
 
         def run
-          repo = Rugged::Repository.init_at(Constants::REPO_PATH)
+          repo = Rugged::Repository.init_at(config.repo_path)
           repo.fetch("origin")
 
           local_commit = repo.branches["master"].target
