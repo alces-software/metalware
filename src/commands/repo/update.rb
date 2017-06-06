@@ -1,5 +1,5 @@
 
-require 'commands/base_command'
+require 'base_command'
 require 'metal_log'
 require 'rugged'
 

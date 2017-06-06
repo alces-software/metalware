@@ -16,23 +16,29 @@ metal() {
 }
 
 if [ "$ZSH_VERSION" ]; then
-  export metal
+    export metal
 else
-  export -f metal
+    export -f metal
 fi
 alias met=metal
 
-# XXX Disabled as completion not done yet for new Metalware.
-# if [ "$BASH_VERSION" ]; then
-#     _metal() {
-#         local cur="$2" prev="$3" cmds opts
+if [ "$BASH_VERSION" ]; then
+    _metal() {
+        local cur="$2" prev="$3" cmds opts
 
-#         COMPREPLY=()
+        path=$( IFS=$'/'; echo "${COMP_WORDS[*]}" | sed "s/^metal\/\|$cur$//g" 2>/dev/null)
+        cur_dir="/opt/metalware/src/commands/$path"
 
-#         cmds=$(ls /opt/metalware/lib/actions)
+        if [ -d "$cur_dir" ]; then
+            cmds=$(ls $cur_dir | sed s/\.rb//g)
+        fi
 
-#         COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
-#     }
+        # Additional bash commands, ideally these will be migrated to ruby
+        if [ "$path" == "" ]; then
+            cmds="$cmds power console"
+        fi
 
-#     complete -o default -F _metal metal me
-# fi
+        COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+    }
+    complete -o default -F _metal metal me
+fi
