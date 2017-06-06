@@ -28,6 +28,10 @@ module Metalware
         prefix: 'node',
         length: 2,
         start: 1,
+      },
+      status: {
+        wait_limit: 10,
+        thread_limit: 50
       }
     })
 

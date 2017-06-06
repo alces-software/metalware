@@ -23,7 +23,7 @@ require 'base_command'
 require 'status/monitor'
 require 'status/job'
 require 'fileutils'
-require 'exception'
+require 'exceptions'
 
 module Metalware
   module Commands

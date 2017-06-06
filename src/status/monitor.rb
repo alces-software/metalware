@@ -19,7 +19,6 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/iterator'
 require 'metal_log'
 require 'status/job'
 require 'ostruct'
