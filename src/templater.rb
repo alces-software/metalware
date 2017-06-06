@@ -64,7 +64,7 @@ module Metalware
       end
 
       def render_to_stdout(config, template, template_parameters={})
-          puts render(config, template, template_parameters)
+        puts render(config, template, template_parameters)
       end
 
       def render_to_file(config, template, save_file, template_parameters={})
