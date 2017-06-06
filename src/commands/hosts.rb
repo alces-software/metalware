@@ -16,7 +16,7 @@ module Metalware
         @options = options
 
         node_identifier = args.first
-        @nodes = Nodes.create(@config, node_identifier, options.group)
+        @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
