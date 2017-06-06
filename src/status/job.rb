@@ -22,90 +22,88 @@
 require 'alces/stack/log'
 require 'timeout'
 
-module Alces
-  module Stack
-    module Status
-      class Job
-        class << self
-          def report_data(nodename, cmd, data)
-            @results ||= {}
-            @results[nodename] ||= {}
-            @results[nodename][cmd] = data
+module Metalware
+  module Status
+    class Job
+      class << self
+        def report_data(nodename, cmd, data)
+          @results ||= {}
+          @results[nodename] ||= {}
+          @results[nodename][cmd] = data
+        end
+
+        attr_reader :results
+      end
+
+      def initialize(nodename, cmd, time_limit = 10)
+        @nodename = nodename
+        @cmd = cmd
+        @time_limit = time_limit
+        @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
+        @metal = "#{ENV['alces_BASE']}/bin/metal"
+      end
+
+      attr_reader :thread
+
+      def start
+        @thread = Thread.new {
+          begin
+            @status_log.info "Job Thread: #{Thread.current}"
+            run_command
+          rescue => e
+            @status_log.fatal "JOB #{Thread.current}: #{e.inspect}"
           end
-
-          attr_reader :results
-        end
-
-        def initialize(nodename, cmd, time_limit = 10)
-          @nodename = nodename
-          @cmd = cmd
-          @time_limit = time_limit
-          @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
-          @metal = "#{ENV['alces_BASE']}/bin/metal"
-        end
-
-        attr_reader :thread
-
-        def start
-          @thread = Thread.new {
-            begin
-              @status_log.info "Job Thread: #{Thread.current}"
-              run_command
-            rescue => e
-              @status_log.fatal "JOB #{Thread.current}: #{e.inspect}"
-            end
-          }
-          self
-        end
-
-        # ----- THREAD METHODS BELOW THIS LINE ------
-        CMD_LIBRARY = {
-          :power => :job_power_status,
-          :ping => :job_ping_node
         }
+        self
+      end
 
-        def run_command
-          Timeout::timeout(@time_limit) {
-            @data = send(CMD_LIBRARY[@cmd] ? CMD_LIBRARY[@cmd] : @cmd)
-          }
-        rescue Timeout::Error
-          @data = "timeout"
-        ensure
-          kill_bash_process if @bash_pid
-          self.class.report_data(@nodename, @cmd, @data)
-        end
+      # ----- THREAD METHODS BELOW THIS LINE ------
+      CMD_LIBRARY = {
+        :power => :job_power_status,
+        :ping => :job_ping_node
+      }
 
-        def kill_bash_process
-          Timeout::timeout(10) { _send_signal_and_wait(2) }
-        rescue Timeout::Error
-          _send_signal_and_wait(9)
-        rescue Errno::ESRCH
-        end
+      def run_command
+        Timeout::timeout(@time_limit) {
+          @data = send(CMD_LIBRARY[@cmd] ? CMD_LIBRARY[@cmd] : @cmd)
+        }
+      rescue Timeout::Error
+        @data = "timeout"
+      ensure
+        kill_bash_process if @bash_pid
+        self.class.report_data(@nodename, @cmd, @data)
+      end
 
-        def _send_signal_and_wait(signum)
-          Process.kill signum, @bash_pid
-          Process.wait(@bash_pid)
-        end
+      def kill_bash_process
+        Timeout::timeout(10) { _send_signal_and_wait(2) }
+      rescue Timeout::Error
+        _send_signal_and_wait(9)
+      rescue Errno::ESRCH
+      end
 
-        def run_bash(cmd)
-          pipe = IO.popen(cmd)
-          @bash_pid = pipe.pid
-          pipe.read
-        end
+      def _send_signal_and_wait(signum)
+        Process.kill signum, @bash_pid
+        Process.wait(@bash_pid)
+      end
 
-        def job_power_status
-          cmd = "#{@metal} power #{@nodename} status 2>&1"
-          result = run_bash(cmd)
-                    .scan(/Chassis Power is .*\Z/)[0].to_s
-                    .scan(Regexp.union(/on/, /off/))[0]
-          result.nil? ? "error" : result
-        end
+      def run_bash(cmd)
+        pipe = IO.popen(cmd)
+        @bash_pid = pipe.pid
+        pipe.read
+      end
 
-        def job_ping_node
-          cmd = "ping -c 1 #{@nodename} >/dev/null 2>&1; echo $?"
-          result = run_bash(cmd)
-          result.chomp == "0" ? "ok" : "error"
-        end
+      def job_power_status
+        cmd = "#{@metal} power #{@nodename} status 2>&1"
+        result = run_bash(cmd)
+                  .scan(/Chassis Power is .*\Z/)[0].to_s
+                  .scan(Regexp.union(/on/, /off/))[0]
+        result.nil? ? "error" : result
+      end
+
+      def job_ping_node
+        cmd = "ping -c 1 #{@nodename} >/dev/null 2>&1; echo $?"
+        result = run_bash(cmd)
+        result.chomp == "0" ? "ok" : "error"
       end
     end
   end

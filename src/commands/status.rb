@@ -35,7 +35,7 @@ module Metalware
       end
       
       def start_monitor
-        @monitor = Alces::Stack::Status::Monitor.new({
+        @monitor = Metalware::Status::Monitor.new({
             nodes: @opt.nodes,
             cmds: @opt.cmds,
             thread_limit: @opt.thread_limit,
@@ -89,7 +89,7 @@ module Metalware
         return {"FINISHED" => true} unless @finished_node_index < @opt.nodes.length
         nodename = @opt.nodes[@finished_node_index]
 
-        current_results = Alces::Stack::Status::Job.results.tap do |r|
+        current_results = Metalware::Status::Job.results.tap do |r|
           return {} if r.nil?
           return {} unless r.key? nodename
           r = r[nodename]

@@ -22,72 +22,70 @@
 require 'alces/stack/iterator'
 require 'alces/stack/log'
 require 'alces/stack/options'
-require 'alces/stack/status/job'
+require 'status/job'
 
-module Alces
-  module Stack
-    module Status
-      class Monitor
-        def initialize(options = {})
-          @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
-          @opt = Alces::Stack::Options.new(options)
-          @queue = Queue.new
-          @running = []
-        end
+module Metalware
+  module Status
+    class Monitor
+      def initialize(options = {})
+        @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
+        @opt = Alces::Stack::Options.new(options)
+        @queue = Queue.new
+        @running = []
+      end
 
-        def start
-          @thread = Thread.new {
-            begin
-              @status_log.info "Monitor Thread: #{Thread.current}"
-              create_jobs
-              monitor_jobs
-            rescue => e
-              @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
-              @status_log.fatal e.backtrace
-            end
-          }
-          self
-        rescue => e
-          @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
-          @status_log.fatal e.backtrace
-        end
-
-        attr_reader :thread
-
-        # ----- THREAD METHODS BELOW THIS LINE ------
-        def add_job_queue(nodename, cmd)
-          @queue.push({ nodename: nodename, cmd: cmd })
-        end
-
-        def start_next_job(idx)
-          job = @queue.pop
-          @running[idx] = Alces::Stack::Status::Job
-            .new(job[:nodename], job[:cmd], @opt.time_limit).start
-        end
-
-        def create_jobs
-          idx = 0
-          @opt.nodes.each do |node|
-            @opt.cmds.each do |cmd|
-              add_job_queue(node, cmd)
-              if idx < @opt.thread_limit
-                start_next_job(idx)
-                idx += 1
-              end
-            end 
+      def start
+        @thread = Thread.new {
+          begin
+            @status_log.info "Monitor Thread: #{Thread.current}"
+            create_jobs
+            monitor_jobs
+          rescue => e
+            @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
+            @status_log.fatal e.backtrace
           end
-        end
+        }
+        self
+      rescue => e
+        @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
+        @status_log.fatal e.backtrace
+      end
 
-        def monitor_jobs
-          while @running.length > 0
-            @running.each_with_index do |job, idx|
-              unless job.thread.alive?
-                job.thread.join
-                if @queue.length > 0
-                  start_next_job(idx)
-                else
-                  @running.delete_at(idx)
-                end
+      attr_reader :thread
+
+      # ----- THREAD METHODS BELOW THIS LINE ------
+      def add_job_queue(nodename, cmd)
+        @queue.push({ nodename: nodename, cmd: cmd })
+      end
+
+      def start_next_job(idx)
+        job = @queue.pop
+        @running[idx] = Metalware::Status::Job
+          .new(job[:nodename], job[:cmd], @opt.time_limit).start
+      end
+
+      def create_jobs
+        idx = 0
+        @opt.nodes.each do |node|
+          @opt.cmds.each do |cmd|
+            add_job_queue(node, cmd)
+            if idx < @opt.thread_limit
+              start_next_job(idx)
+              idx += 1
+            end
+          end 
+        end
+      end
+
+      def monitor_jobs
+        while @running.length > 0
+          @running.each_with_index do |job, idx|
+            unless job.thread.alive?
+              job.thread.join
+              if @queue.length > 0
+                start_next_job(idx)
+              else
+                @running.delete_at(idx)
               end
             end
           end
