@@ -20,16 +20,16 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'alces/stack/iterator'
-require 'alces/stack/log'
-require 'alces/stack/options'
+require 'metal_log'
 require 'status/job'
+require 'ostruct'
 
 module Metalware
   module Status
     class Monitor
       def initialize(options = {})
-        @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
-        @opt = Alces::Stack::Options.new(options)
+        @status_log = MetalLog.new('status')
+        @opt = OpenStruct.new(options)
         @queue = Queue.new
         @running = []
       end

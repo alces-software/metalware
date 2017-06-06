@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'alces/stack/log'
+require 'metal_log'
 require 'timeout'
 
 module Metalware
@@ -39,7 +39,7 @@ module Metalware
         @nodename = nodename
         @cmd = cmd
         @time_limit = time_limit
-        @status_log = Alces::Stack::Log.create_log('/var/log/metalware/status.log')
+        @status_log = MetalLog.new('status')
         @metal = "#{ENV['alces_BASE']}/bin/metal"
       end
 
