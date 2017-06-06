@@ -60,7 +60,7 @@ module Metalware
     end
 
     def repo
-      ::Metalware::Repo.new(config.repo_path)
+      Repo.new(config.repo_path)
     end
 
     def setup_config(options)
