@@ -43,7 +43,7 @@ module Metalware
       value = @wrapped_obj.send(s)
       if value.nil? && ! @missing_tags.include?(s)
         @missing_tags.push s
-        MetalLog.warn "Missing template parameter: #{s}"
+        MetalLog.warn "Unset template parameter: #{s}"
       end
       value
     end
