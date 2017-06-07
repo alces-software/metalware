@@ -59,24 +59,24 @@ module Metalware
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
-      def render(template, template_parameters={})
-        Templater.new(template_parameters).render(template)
+      def render(config, template, template_parameters={})
+        Templater.new(config, template_parameters).render(template)
       end
 
-      def render_to_stdout(template, template_parameters={})
-          puts render(template, template_parameters)
+      def render_to_stdout(config, template, template_parameters={})
+          puts render(config, template, template_parameters)
       end
 
-      def render_to_file(template, save_file, template_parameters={})
+      def render_to_file(config, template, save_file, template_parameters={})
         File.open(save_file.chomp, "w") do |f|
-          f.puts render(template, template_parameters)
+          f.puts render(config, template, template_parameters)
         end
         MetalLog.info "Template Saved: #{save_file}"
       end
 
-      def render_and_append_to_file(template, append_file, template_parameters={})
-        File.open(append_file.chomp, 'a') do |f|
-          f.puts render(template, template_parameters)
+      def render_and_append_to_file(config, template, append_file, template_parameters={})
+        File.open(config, append_file.chomp, 'a') do |f|
+          f.puts render(config, template, template_parameters)
         end
         MetalLog.info "Template Appended: #{append_file}"
       end
@@ -88,7 +88,9 @@ module Metalware
     # - nodename
     # - index
     # - what else?
-    def initialize(parameters={})
+    def initialize(metalware_config, parameters={})
+      @metalware_config = metalware_config
+
       passed_magic_parameters = parameters.select do |k,v|
         [:index, :nodename, :firstboot, :files].include?(k) && !v.nil?
       end
@@ -136,7 +138,7 @@ module Metalware
       combined_configs = {}
       ordered_node_config_files.each do |config_name|
         begin
-          config_path = "#{Constants::REPO_PATH}/config/#{config_name}.yaml"
+          config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
           config = YAML.load_file(config_path)
         rescue Errno::ENOENT # Skips missing files
         rescue StandardError => e

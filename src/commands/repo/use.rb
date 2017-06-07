@@ -16,11 +16,11 @@ module Metalware
 
         def run
           if @options.force
-            FileUtils::rm_rf Constants::REPO_PATH
+            FileUtils::rm_rf config.repo_path
             MetalLog.info "Force deleted old repo"
           end
 
-          Rugged::Repository.clone_at(@repo_url, Constants::REPO_PATH)
+          Rugged::Repository.clone_at(@repo_url, config.repo_path)
           MetalLog.info "Cloned repo from #{@options.url}"
         rescue Rugged::InvalidError
           raise $!, "Repository already exists. Use -f to force clone a new one"

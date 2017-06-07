@@ -29,12 +29,12 @@ module Metalware
 
       def render_template
         Templater.render_to_file(
-          template_path, RENDERED_DHCPD_HOSTS_STAGING_FILE
+          config, template_path, RENDERED_DHCPD_HOSTS_STAGING_FILE
         )
       end
 
       def template_path
-        File.join(Constants::REPO_PATH, 'dhcp', @options.template)
+        File.join(config.repo_path, 'dhcp', @options.template)
       end
 
       def validate_rendered_template!

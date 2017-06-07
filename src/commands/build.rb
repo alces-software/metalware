@@ -21,7 +21,7 @@ module Metalware
       def setup(args, options)
         @options = options
         node_identifier = args.first
-        @nodes = Nodes.create(@config, node_identifier, options.group)
+        @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
@@ -48,7 +48,7 @@ module Metalware
       end
 
       def retrieve_build_files(node)
-        retriever = BuildFilesRetriever.new(node.name, @config)
+        retriever = BuildFilesRetriever.new(node.name, config)
         retriever.retrieve(node.build_files)
       end
 
@@ -58,21 +58,21 @@ module Metalware
             unless file[:error]
               render_path = node.rendered_build_file_path(namespace, file[:name])
               FileUtils.mkdir_p(File.dirname render_path)
-              Templater.render_to_file(file[:template_path], render_path, parameters)
+              Templater.render_to_file(config, file[:template_path], render_path, parameters)
             end
           end
         end
       end
 
       def retrieve_and_render_files(parameters, node)
-        retriever = BuildFilesRetriever.new(node.name, @config)
+        retriever = BuildFilesRetriever.new(node.name, config)
         build_files_hash = retriever.retrieve(node.build_files)
 
         build_files_hash.each do |namespace, files|
           files.each do |file|
             unless file[:error]
               render_path = node.rendered_build_file_path(namespace, file[:name])
-              Templater.render_to_file(file[:template_path], render_path, parameters)
+              Templater.render_to_file(config, file[:template_path], render_path, parameters)
             end
           end
         end
@@ -82,9 +82,9 @@ module Metalware
         kickstart_template_path = template_path :kickstart
         # XXX Ensure this path has been created
         kickstart_save_path = File.join(
-          @config.rendered_files_path, 'kickstart', node.name
+          config.rendered_files_path, 'kickstart', node.name
         )
-        Templater.render_to_file(kickstart_template_path, kickstart_save_path, parameters)
+        Templater.render_to_file(config, kickstart_template_path, kickstart_save_path, parameters)
       end
 
       def render_pxelinux(parameters, node)
@@ -92,14 +92,14 @@ module Metalware
         # file yet - best place to do this may be when creating `Node` objects?
         pxelinux_template_path = template_path :pxelinux
         pxelinux_save_path = File.join(
-          @config.pxelinux_cfg_path, node.hexadecimal_ip
+          config.pxelinux_cfg_path, node.hexadecimal_ip
         )
-        Templater.render_to_file(pxelinux_template_path, pxelinux_save_path, parameters)
+        Templater.render_to_file(config, pxelinux_template_path, pxelinux_save_path, parameters)
       end
 
       def template_path(template_type)
         File.join(
-          @config.repo_path,
+          config.repo_path,
           template_type.to_s,
           @options.__send__(template_type)
         )
@@ -125,7 +125,7 @@ module Metalware
           all_nodes_reported_built = rerendered_nodes.length == @nodes.length
           break if all_nodes_reported_built
 
-          sleep @config.build_poll_sleep
+          sleep config.build_poll_sleep
         end
       end
 
@@ -146,7 +146,7 @@ module Metalware
       end
 
       def clear_up_built_node_marker_files
-        glob = File.join(@config.built_nodes_storage_path, '*')
+        glob = File.join(config.built_nodes_storage_path, '*')
         files = Dir.glob(glob)
         FileUtils.rm_rf(files)
       end

@@ -16,7 +16,7 @@ module Metalware
         @options = options
 
         node_identifier = args.first
-        @nodes = Nodes.create(@config, node_identifier, options.group)
+        @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
@@ -26,15 +26,15 @@ module Metalware
       def add_nodes_to_hosts
         @nodes.template_each do |parameters|
           if @options.dry_run
-            Templater.render_to_stdout(template_path, parameters)
+            Templater.render_to_stdout(config, template_path, parameters)
           else
-            Templater.render_and_append_to_file(template_path, HOSTS_FILE, parameters)
+            Templater.render_and_append_to_file(config, template_path, HOSTS_FILE, parameters)
           end
         end
       end
 
       def template_path
-        File.join(Constants::REPO_PATH, 'hosts', @options.template)
+        File.join(config.repo_path, 'hosts', @options.template)
       end
     end
   end

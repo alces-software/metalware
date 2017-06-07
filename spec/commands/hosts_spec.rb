@@ -21,6 +21,7 @@ RSpec.describe Metalware::Commands::Hosts do
   context 'when called without group argument' do
     it 'appends to hosts file by default' do
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/default',
         '/etc/hosts',
         hash_including(nodename: 'testnode01', index: 0)
@@ -31,6 +32,7 @@ RSpec.describe Metalware::Commands::Hosts do
 
     it 'uses a different template if template option passed' do
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/my_template',
         '/etc/hosts',
         hash_including(nodename: 'testnode01', index: 0)
@@ -42,6 +44,7 @@ RSpec.describe Metalware::Commands::Hosts do
     context 'when dry-run' do
       it 'outputs what would be appended' do
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          instance_of(Metalware::Config),
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode01')
         )
@@ -55,16 +58,19 @@ RSpec.describe Metalware::Commands::Hosts do
     it 'appends to hosts file by default' do
       # XXX Dedupe these very similar assertions
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/default',
         '/etc/hosts',
         hash_including(nodename: 'testnode01', index: 0)
       )
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/default',
         '/etc/hosts',
         hash_including(nodename: 'testnode02', index: 1)
       )
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+        instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/default',
         '/etc/hosts',
         hash_including(nodename: 'testnode03', index: 2)
@@ -77,14 +83,17 @@ RSpec.describe Metalware::Commands::Hosts do
       it 'outputs what would be appended' do
         # XXX Dedupe these too
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          instance_of(Metalware::Config),
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode01', index: 0)
         )
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          instance_of(Metalware::Config),
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode02', index: 1)
         )
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
+          instance_of(Metalware::Config),
           '/var/lib/metalware/repo/hosts/default',
           hash_including(nodename: 'testnode03', index: 2)
         )
