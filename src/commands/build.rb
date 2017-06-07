@@ -30,6 +30,10 @@ module Metalware
         teardown
       end
 
+      def requires_repo?
+        true
+      end
+
       def render_build_templates
         @nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)

@@ -28,8 +28,6 @@ require 'repo'
 module Metalware
   module Commands
     class BaseCommand
-      COMMANDS_REQUIRING_REPO = [:build, :dhcp, :hosts, :'repo update']
-
       def initialize(args, options)
         pre_setup(args, options)
         setup(args, options)
@@ -52,14 +50,14 @@ module Metalware
       end
 
       def validate_repo_exists_if_required
-        if command_requires_repo? && !repo.exists?
+        if requires_repo? && !repo.exists?
           raise NoRepoError,
             "'#{command_name}' requires a repo to operate on; please run 'metal repo use' first"
         end
       end
 
-      def command_requires_repo?
-        COMMANDS_REQUIRING_REPO.include? command_name
+      def requires_repo?
+        false
       end
 
       def repo

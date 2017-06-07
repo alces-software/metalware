@@ -27,6 +27,10 @@ module Metalware
         install_rendered_template
       end
 
+      def requires_repo?
+        true
+      end
+
       def render_template
         Templater.render_to_file(
           config, template_path, RENDERED_DHCPD_HOSTS_STAGING_FILE
