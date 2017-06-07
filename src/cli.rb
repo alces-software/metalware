@@ -122,7 +122,7 @@ module Metalware
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.example 'description', 'command example'
-        c.action Commands::Bash
+        c.action Bash
       end
 
       command :console do |c|
@@ -130,7 +130,7 @@ module Metalware
         c.summary = 'Volatile'
         c.description = ''
         c.example 'description', 'command example'
-        c.action Commands::Bash
+        c.action Bash
       end
 
       def run!

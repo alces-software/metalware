@@ -26,84 +26,82 @@ require 'defaults'
 require 'repo'
 
 module Metalware
-  module Commands
-    class BaseCommand
-      def initialize(args, options)
-        pre_setup(args, options)
-        setup(args, options)
-        run
-      rescue Interrupt => e
-        handle_interrupt(e)
-      rescue Exception => e
-        handle_fatal_exception(e)
+  class BaseCommand
+    def initialize(args, options)
+      pre_setup(args, options)
+      setup(args, options)
+      run
+    rescue Interrupt => e
+      handle_interrupt(e)
+    rescue Exception => e
+      handle_fatal_exception(e)
+    end
+
+    attr_reader :config
+
+    private
+
+    def pre_setup(args, options)
+      setup_config(options)
+      validate_repo_exists_if_required
+      setup_option_defaults(options)
+      log_command
+    end
+
+    def validate_repo_exists_if_required
+      if requires_repo? && !repo.exists?
+        raise NoRepoError,
+          "'#{command_name}' requires a repo to operate on; please run 'metal repo use' first"
       end
+    end
 
-      attr_reader :config
+    def requires_repo?
+      false
+    end
 
-      private
+    def repo
+      Repo.new(config.repo_path)
+    end
 
-      def pre_setup(args, options)
-        setup_config(options)
-        validate_repo_exists_if_required
-        setup_option_defaults(options)
-        log_command
-      end
+    def setup_config(options)
+      cli_options = {
+        strict: !!options.strict,
+        quiet: !!options.quiet
+      }
+      @config = Config.new(options.config, cli_options)
+    end
 
-      def validate_repo_exists_if_required
-        if requires_repo? && !repo.exists?
-          raise NoRepoError,
-            "'#{command_name}' requires a repo to operate on; please run 'metal repo use' first"
-        end
-      end
+    def setup_option_defaults(options)
+      command_defaults = Defaults.send(command_name)
+      options.default(**command_defaults)
+    end
 
-      def requires_repo?
-        false
-      end
+    def command_name
+      class_name_parts = self.class.name.split('::')
+      parts_without_namespace = \
+        class_name_parts.slice(2, class_name_parts.length)
+      parts_without_namespace.join(' ').downcase.to_sym
+    end
 
-      def repo
-        ::Metalware::Repo.new(config.repo_path)
-      end
+    def log_command
+      MetalLog.info "metal #{ARGV.join(" ")}"
+    end
 
-      def setup_config(options)
-        cli_options = {
-          strict: !!options.strict,
-          quiet: !!options.quiet
-        }
-        @config = Config.new(options.config, cli_options)
-      end
+    def setup(args, options)
+      raise NotImplementedError
+    end
 
-      def setup_option_defaults(options)
-        command_defaults = Defaults.send(command_name)
-        options.default(**command_defaults)
-      end
+    def run
+      raise NotImplementedError
+    end
 
-      def command_name
-        class_name_parts = self.class.name.split('::')
-        parts_without_namespace = \
-          class_name_parts.slice(2, class_name_parts.length)
-        parts_without_namespace.join(' ').downcase.to_sym
-      end
+    def handle_interrupt(e)
+      raise e
+    end
 
-      def log_command
-        MetalLog.info "metal #{ARGV.join(" ")}"
-      end
-
-      def setup(args, options)
-        raise NotImplementedError
-      end
-
-      def run
-        raise NotImplementedError
-      end
-
-      def handle_interrupt(e)
-        raise e
-      end
-
-      def handle_fatal_exception(e)
-        MetalLog.fatal e.inspect
-        raise e
-      end
+    def handle_fatal_exception(e)
+      MetalLog.fatal e.inspect
+      raise e
     end
   end
 end

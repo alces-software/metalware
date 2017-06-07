@@ -26,23 +26,21 @@ require 'config'
 require 'constants'
 
 module Metalware
-  module Commands
-    class Bash < BaseCommand
-      private
+  class Bash < BaseCommand
+    private
 
-      def setup(args, options)
-        @command = ARGV[0]
-        @cli_input = ARGV[1..(ARGV.length - 1)].join(" ")
-      end
+    def setup(args, options)
+      @command = ARGV[0]
+      @cli_input = ARGV[1..(ARGV.length - 1)].join(" ")
+    end
 
-      def run
-        script = File.join(Constants::METALWARE_INSTALL_PATH,
-                          "libexec",
-                          "#{@command}")
-        cmd = "#{script} #{@cli_input}"
-        MetalLog.info "Running: #{cmd}"
-        exec("#{cmd}")
-      end
+    def run
+      script = File.join(Constants::METALWARE_INSTALL_PATH,
+                         "libexec",
+                         "#{@command}")
+      cmd = "#{script} #{@cli_input}"
+      MetalLog.info "Running: #{cmd}"
+      exec("#{cmd}")
     end
   end
 end
