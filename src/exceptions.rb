@@ -24,4 +24,7 @@ module Metalware
 
   class NoRepoError < MetalwareError
   end
+
+  class UnsetParameterAccessError < MetalwareError
+  end
 end

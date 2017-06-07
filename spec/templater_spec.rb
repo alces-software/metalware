@@ -6,6 +6,7 @@ require 'spec_utils'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
+UNSET_PARAMETER_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'unset_parameter_template.erb')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
@@ -85,6 +86,12 @@ RSpec.describe Metalware::Templater do
         expect{
           Metalware::Templater.new(@config)
         }.to raise_error(Metalware::Templater::LoopErbError)
+      end
+
+      it 'raises if attempt to access a property of an unset parameter' do
+        expect {
+          Metalware::Templater.render(@config, UNSET_PARAMETER_TEMPLATE_PATH, {})
+        }.to raise_error Metalware::UnsetParameterAccessError
       end
     end
   end

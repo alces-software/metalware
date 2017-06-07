@@ -43,7 +43,7 @@ module Metalware
       value = @wrapped_obj.send(s)
       if value.nil? && ! @missing_tags.include?(s)
         @missing_tags.push s
-        MetalLog.warn "Missing template parameter: #{s}"
+        MetalLog.warn "Unset template parameter: #{s}"
       end
       value
     end
@@ -64,7 +64,7 @@ module Metalware
       end
 
       def render_to_stdout(config, template, template_parameters={})
-          puts render(config, template, template_parameters)
+        puts render(config, template, template_parameters)
       end
 
       def render_to_file(config, template, save_file, template_parameters={})
@@ -119,6 +119,12 @@ module Metalware
     def replace_erb(template, template_parameters)
       parameters_binding = template_parameters.instance_eval {binding}
       ERB.new(template).result(parameters_binding)
+    rescue NoMethodError => e
+      # May be useful to include the name of the unset parameter in this error,
+      # however this is tricky as by the time we attempt to access a method on
+      # it the unset parameter is just `nil` as far as we can see here.
+      raise UnsetParameterAccessError,
+        "Attempted to call method `#{e.name}` of unset template parameter"
     end
 
     def nodename
