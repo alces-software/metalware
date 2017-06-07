@@ -23,6 +23,7 @@
 require 'metal_log'
 require 'config'
 require 'defaults'
+require 'repo'
 
 module Metalware
   module Commands
@@ -43,8 +44,24 @@ module Metalware
 
       def pre_setup(args, options)
         setup_config(options)
+        validate_repo_exists_if_required
         setup_option_defaults(options)
         log_command
+      end
+
+      def validate_repo_exists_if_required
+        if requires_repo? && !repo.exists?
+          raise NoRepoError,
+            "'#{command_name}' requires a repo to operate on; please run 'metal repo use' first"
+        end
+      end
+
+      def requires_repo?
+        false
+      end
+
+      def repo
+        ::Metalware::Repo.new(config.repo_path)
       end
 
       def setup_config(options)
@@ -56,16 +73,15 @@ module Metalware
       end
 
       def setup_option_defaults(options)
-        # TODO: this won't work correctly for subcommands as we will need to
-        # specify defaults using more than just the command name; this does not
-        # matter for now though since this only applies to `repo` currently and
-        # no `repo` commands have defaults yet.
         command_defaults = Defaults.send(command_name)
         options.default(**command_defaults)
       end
 
       def command_name
-        self.class.name.split('::')[-1].downcase
+        class_name_parts = self.class.name.split('::')
+        parts_without_namespace = \
+          class_name_parts.slice(2, class_name_parts.length)
+        parts_without_namespace.join(' ').downcase.to_sym
       end
 
       def log_command

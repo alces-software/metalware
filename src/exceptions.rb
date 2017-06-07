@@ -21,4 +21,7 @@ module Metalware
 
   class StrictWarningError < MetalwareError
   end
+
+  class NoRepoError < MetalwareError
+  end
 end

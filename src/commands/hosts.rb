@@ -23,6 +23,10 @@ module Metalware
         add_nodes_to_hosts
       end
 
+      def requires_repo?
+        true
+      end
+
       def add_nodes_to_hosts
         @nodes.template_each do |parameters|
           if @options.dry_run

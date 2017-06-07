@@ -52,6 +52,10 @@ module Metalware
         end
       end
 
+      def requires_repo?
+        true
+      end
+
       class LocalAheadOfRemote < StandardError
         def initialize(num)
           msg = "The local repo is #{num} commits ahead of remote. -f will " \

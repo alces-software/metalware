@@ -55,6 +55,14 @@ module SpecUtils
       end
     end
 
+    def mock_repo_exists(example_group)
+      example_group.instance_exec do
+        allow_any_instance_of(
+          Metalware::Repo
+        ).to receive(:exists?).and_return(true)
+      end
+    end
+
     # Other shared utils.
 
     def run_command(command_class, *args, **options_hash)
