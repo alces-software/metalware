@@ -39,7 +39,7 @@ RSpec.describe Metalware::Commands::Build do
   def expect_runs_longer_than(seconds, &block)
     expect do
       Timeout::timeout(seconds, &block)
-    end.to raise_error TimeoutError
+    end.to raise_error Timeout::Error
   end
 
   before :each do
