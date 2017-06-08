@@ -72,7 +72,7 @@ module Metalware
             empty_count = 0
           end
           
-          sleep 1 # Only looks for updated data every second
+          sleep 1 if data.empty?# Only looks for updated data every second
         end
       end
 
