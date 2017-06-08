@@ -78,10 +78,10 @@ usage()
 {
   echo "(c) 2008-2011 Alces Software Ltd & Stephen F Norledge"
   echo "alces-ipmi command, perform ipmi commands on single or multiple machines"
-  echo "usage: alces ipmi [-g] <name> -c <command>"
+  echo "usage: alces ipmi [-g] <name> -k <command>"
   echo "  options:"
   echo "    -g specify genders node group"
-  echo "    -c specify ipmi command"
+  echo "    -k specify ipmi command"
   echo "  parameters:"
   echo "    <name> node name or genders group name"
   echo
@@ -93,7 +93,7 @@ while ! [ -z "${*}" ]; do
       NODEGROUP="${2}"
       shift 1
       ;;
-    '-c')
+    '-k')
       CMD="${2}"
       shift 1
       ;;

@@ -37,7 +37,7 @@ module Metalware
         c.syntax = 'metal repo use REPO_URL [options]'
         c.summary = ''
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.option '-f', '--force',
           'Force use of a new repo even if local changes have been made to the current repo'
         c.action Commands::Repo::Use
@@ -47,7 +47,7 @@ module Metalware
         c.syntax = 'metal repo update [options]'
         c.summary = ''
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.option '-f', '--force',
           'Force update even if local changes have been made to the repo'
         c.action Commands::Repo::Update
@@ -57,14 +57,14 @@ module Metalware
         c.syntax = 'metal render TEMPLATE [NODE] [options]'
         c.summary = ''
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.action Commands::Render
       end
 
       command :hosts do |c|
         c.syntax = 'metal hosts NODE_IDENTIFIER [options]'
         c.summary = ''
-        c.description = ''
+        #c.description = ''
         c.example 'description', 'command example'
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
@@ -79,7 +79,7 @@ module Metalware
         c.syntax = 'metal hunter [options]'
         c.summary = ''
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.option '-i INTERFACE', '--interface INTERFACE', String,
           "Local interface to hunt on (default: #{Defaults.hunter.interface})"
         c.option '-p PREFIX', '--prefix PREFIX', String,
@@ -95,7 +95,7 @@ module Metalware
         c.syntax = 'metal dhcp [options]'
         c.summary = ''
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.option '-t TEMPLATE', '--template TEMPLATE', String,
           "Specify dhcp template to use (default: #{Defaults.dhcp.template})"
         c.action Commands::Dhcp
@@ -105,7 +105,7 @@ module Metalware
         c.syntax = 'metal build NODE_IDENTIFIER [options]'
         c.summary = ''
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.option '-k KICKSTART_TEMPLATE', '--kickstart KICKSTART_TEMPLATE',
@@ -121,7 +121,7 @@ module Metalware
         c.description = ''
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.action BashCommand
       end
 
@@ -129,7 +129,7 @@ module Metalware
         c.syntax = 'metal console NODE_IDENTIFIER [options]'
         c.summary = 'Volatile'
         c.description = ''
-        c.example 'description', 'command example'
+        #c.example 'description', 'command example'
         c.action BashCommand
       end
 
@@ -148,6 +148,19 @@ module Metalware
           'Sets the maximum number of network operations' \
           "(default: #{Defaults.status.thread_limit})"
         c.action Commands::Status
+      end
+
+      command :ipmi do |c|
+        c.syntax = 'metal ipmi NODE_IDENTIFIER [options]'
+        c.summary = 'Volatile. Perform ipmi commands on single or multiple machines'
+        c.description = "***VOLATILE***\n\n" \
+                    'Perform ipmi commands on single or multiple machines'
+        #c.example 'description', 'command example'
+        c.option '-g',
+          'Specifies that NODE_IDENTIFIER is the group. MUST be before NODE_IDENTIFIER'
+        c.option '-k COMMAND',
+          'Specifies the ipmi command'
+        c.action BashCommand
       end
 
       def run!
