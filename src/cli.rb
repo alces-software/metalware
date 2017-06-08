@@ -142,7 +142,7 @@ module Metalware
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.option '--wait-limit WAIT_LIMIT', Integer,
           'Sets how long (in seconds) wait for a response from the node ' \
-          'before assuming an error has occurred. Minimum 5 seconds. ' \
+          'before assuming an error has occurred. Minimum 1 seconds. ' \
           "(default: #{Defaults.status.wait_limit})"
         c.option '--thread-limit THREAD_LIMIT', Integer,
           'Sets the maximum number of network operations' \

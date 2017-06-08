@@ -31,6 +31,11 @@ module Metalware
     class Status < BaseCommand
       def setup(args, options)
         @opt = options
+        if @opt.thread_limit < 1
+          raise InvalidInput, "The thread limit can not be less than 1"
+        elsif @opt.wait_limit < 1
+          raise InvalidInput, "The wait limit can not be less than 1s"
+        end
         @cmds = [:power, :ping]
         node_identifier = args.first
         @nodes = Nodes.create(@config, node_identifier, options.group)

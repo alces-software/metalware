@@ -39,4 +39,7 @@ module Metalware
       super
     end
   end
+
+  class InvalidInput < MetalwareError
+  end
 end
