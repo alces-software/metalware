@@ -40,7 +40,6 @@ module Metalware
         @cmd = cmd
         @time_limit = time_limit
         @status_log = MetalLog.new('status')
-        @metal = "#{ENV['alces_BASE']}/bin/metal"
       end
 
       attr_reader :thread
