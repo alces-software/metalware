@@ -34,6 +34,7 @@ module Metalware
         @cmds = [:power, :ping]
         node_identifier = args.first
         @nodes = Nodes.create(@config, node_identifier, options.group)
+        @nodes = @nodes.to_a.map { |e| e.name }
       end
 
       def run
@@ -44,7 +45,7 @@ module Metalware
       
       def start_monitor
         @monitor = Metalware::Status::Monitor.new({
-            nodes: @opt.nodes,
+            nodes: @nodes,
             cmds: @cmds,
             thread_limit: @opt.thread_limit,
             wait_limit: @opt.wait_limit
@@ -57,6 +58,7 @@ module Metalware
         empty_count = 0
         while data["FINISHED"] != true
           data = get_finished_data
+          
           if data.empty?
             empty_count += 1
             raise StatusDataIncomplete if empty_count > 100 && @monitor.thread.stop?
@@ -64,6 +66,7 @@ module Metalware
             display_data data
             empty_count = 0
           end
+          
           sleep 1 # Only looks for updated data every second
         end
       end

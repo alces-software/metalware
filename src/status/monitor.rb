@@ -35,19 +35,11 @@ module Metalware
 
       def start
         @thread = Thread.new {
-          begin
-            @status_log.info "Monitor Thread: #{Thread.current}"
-            create_jobs
-            monitor_jobs
-          rescue => e
-            @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
-            @status_log.fatal e.backtrace
-          end
+          @status_log.info "Monitor Thread: #{Thread.current}"
+          create_jobs
+          monitor_jobs
         }
         self
-      rescue => e
-        @status_log.fatal "MONITOR #{Thread.current}: #{e.inspect}"
-        @status_log.fatal e.backtrace
       end
 
       attr_reader :thread
