@@ -75,7 +75,7 @@ module Metalware
       end
 
       def render_and_append_to_file(config, template, append_file, template_parameters={})
-        File.open(config, append_file.chomp, 'a') do |f|
+        File.open(append_file.chomp, 'a') do |f|
           f.puts render(config, template, template_parameters)
         end
         MetalLog.info "Template Appended: #{append_file}"
