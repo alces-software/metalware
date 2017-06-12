@@ -27,4 +27,10 @@ module Metalware
 
   class UnsetParameterAccessError < MetalwareError
   end
+
+  class StatusDataIncomplete < MetalwareError
+    def initialize(msg = "Failed to receive data for all nodes")
+      super
+    end
+  end
 end

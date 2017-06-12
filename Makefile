@@ -3,7 +3,8 @@ REMOTE_DIR='/tmp/metalware'
 
 .PHONY: unit-test
 unit-test:
-	bundle exec rspec --exclude-pattern 'spec/integration/**/*'
+	bundle exec rspec \
+		--exclude-pattern 'spec/slow/**/*, spec/integration/**/*'
 
 .PHONY: test
 test:

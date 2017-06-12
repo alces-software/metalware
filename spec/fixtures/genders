@@ -3,3 +3,4 @@ login1 master,masters,cluster,all
 testnode02 pregroup
 testnode[01-03] testnodes,nodes,cluster,all
 testnode02 postgroup
+node[01-10] status

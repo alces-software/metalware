@@ -133,6 +133,23 @@ module Metalware
         c.action Bash
       end
 
+      command :status do |c|
+        c.syntax = 'metal status NODE_IDENTIFIER [options]'
+        c.summary = 'Display the current network status of the nodes'
+        c.description = "The status tool will attempt to determine the power and" \
+                        " ping status of the node(s)."
+        c.option '-g', '--group', String,
+          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
+        c.option '--wait-limit', Integer,
+          'Sets how long (in seconds) wait for a response from the node ' \
+          'before assuming an error has occurred. Minimum 5 seconds. ' \
+          "(default: #{Defaults.status.wait_limit})"
+        c.option '--thread-limit', Integer,
+          'Sets the maximum number of network operations' \
+          "(default: #{Defaults.status.thread_limit})"
+        c.action Commands::Status
+      end
+
       def run!
         ARGV.push "--help" if ARGV.empty?
         super

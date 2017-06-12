@@ -24,6 +24,7 @@ require 'metal_log'
 require 'config'
 require 'defaults'
 require 'repo'
+require 'exceptions'
 
 module Metalware
   class BaseCommand
