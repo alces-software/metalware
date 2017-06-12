@@ -26,7 +26,7 @@ require 'config'
 require 'constants'
 
 module Metalware
-  class Bash < BaseCommand
+  class BashCommand < BaseCommand
     private
 
     def setup(args, options)

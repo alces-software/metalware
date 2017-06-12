@@ -122,7 +122,7 @@ module Metalware
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.example 'description', 'command example'
-        c.action Bash
+        c.action BashCommand
       end
 
       command :console do |c|
@@ -130,7 +130,7 @@ module Metalware
         c.summary = 'Volatile'
         c.description = ''
         c.example 'description', 'command example'
-        c.action Bash
+        c.action BashCommand
       end
 
       command :status do |c|
@@ -140,11 +140,11 @@ module Metalware
                         " ping status of the node(s)."
         c.option '-g', '--group', String,
           'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.option '--wait-limit', Integer,
+        c.option '--wait-limit WAIT_LIMIT', Integer,
           'Sets how long (in seconds) wait for a response from the node ' \
-          'before assuming an error has occurred. Minimum 5 seconds. ' \
+          'before assuming an error has occurred. Minimum 1 seconds. ' \
           "(default: #{Defaults.status.wait_limit})"
-        c.option '--thread-limit', Integer,
+        c.option '--thread-limit THREAD_LIMIT', Integer,
           'Sets the maximum number of network operations' \
           "(default: #{Defaults.status.thread_limit})"
         c.action Commands::Status

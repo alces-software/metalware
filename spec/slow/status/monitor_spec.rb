@@ -40,7 +40,7 @@ RSpec.describe Metalware::Status::Monitor do
   end
 
   after(:each) do
-    Thread.list.each { |t| 
+    Thread.list.each { |t|
       unless t == Thread.current
         t.kill
         t.join
@@ -89,7 +89,7 @@ RSpec.describe Metalware::Status::Monitor do
     it 'monitor_jobs runs until complete' do
       @monitor.create_jobs
       num_jobs = @m_input[:nodes].length * @m_input[:cmds].length
-      
+
       queue = @monitor.instance_variable_get(:@queue)
       running = @monitor.instance_variable_get(:@running)
       expect(running.length).to eq(@m_input[:thread_limit])

@@ -21,6 +21,7 @@
 #==============================================================================
 require 'metal_log'
 require 'timeout'
+require 'constants'
 
 module Metalware
   module Status
@@ -40,7 +41,6 @@ module Metalware
         @cmd = cmd
         @time_limit = time_limit
         @status_log = MetalLog.new('status')
-        @metal = "#{ENV['alces_BASE']}/bin/metal"
       end
 
       attr_reader :thread
@@ -93,7 +93,8 @@ module Metalware
       end
 
       def job_power_status
-        cmd = "#{@metal} power #{@nodename} status 2>&1"
+        script = File.join(Constants::METALWARE_INSTALL_PATH, "libexec/power")
+        cmd = "#{script} #{@nodename} status 2>&1"
         result = run_bash(cmd)
                   .scan(/Chassis Power is .*\Z/)[0].to_s
                   .scan(Regexp.union(/on/, /off/))[0]

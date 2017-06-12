@@ -28,9 +28,18 @@ module Metalware
   class UnsetParameterAccessError < MetalwareError
   end
 
+  class UnexpectedError < MetalwareError
+    def initialize(msg = "An unexpected error has occurred")
+      super
+    end
+  end
+
   class StatusDataIncomplete < MetalwareError
     def initialize(msg = "Failed to receive data for all nodes")
       super
     end
+  end
+
+  class InvalidInput < MetalwareError
   end
 end
