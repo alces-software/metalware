@@ -2,7 +2,7 @@
 ruby '2.4.1'
 source 'https://rubygems.org'
 
-gem 'commander'
+gem 'commander', git: 'https://github.com/alces-software/commander'
 gem 'rugged'
 gem 'activesupport'
 gem 'recursive-open-struct'
