@@ -1,4 +1,11 @@
 GIT
+  remote: https://github.com/alces-software/commander
+  revision: fefd8480ce0e3fe716ea14ed848bd8c65f58708e
+  specs:
+    commander (4.4.3)
+      highline (~> 1.7.2)
+
+GIT
   remote: https://github.com/alces-software/ruby-pcap.git
   revision: 42728a34e955ad00a5d033f4ef999a75a15f6f67
   specs:
@@ -7,20 +14,18 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.1.0)
+    activesupport (5.1.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-    commander (4.4.3)
-      highline (~> 1.7.2)
     concurrent-ruby (1.0.5)
     diff-lcs (1.3)
     docile (1.1.5)
     fakefs (0.11.0)
     hashie (3.5.5)
     highline (1.7.8)
-    i18n (0.8.1)
+    i18n (0.8.4)
     json (2.1.0)
     minitest (5.10.2)
     net-dhcp (1.3.3)
@@ -43,7 +48,7 @@ GEM
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
-    simplecov-html (0.10.0)
+    simplecov-html (0.10.1)
     thread_safe (0.3.6)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)
@@ -53,7 +58,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
-  commander
+  commander!
   fakefs
   hashie
   net-dhcp
@@ -67,4 +72,4 @@ RUBY VERSION
    ruby 2.4.1p111
 
 BUNDLED WITH
-   1.14.6
+   1.15.1
