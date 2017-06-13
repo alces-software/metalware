@@ -169,8 +169,8 @@ module Metalware
         c.description = 'Runs the COMMAND for the node/ group specified by ' \
           'NODE_IDENTIFIER. Commands that contain spaces must be quoted. The ' \
           'command is first rendered by the templater and supports erb tags.'
-        c.option '-g',
-          'Specifies that NODE_IDENTIFIER is the group.'
+        c.option '-g', '--group', String,
+          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
         c.action Commands::Each
       end
 

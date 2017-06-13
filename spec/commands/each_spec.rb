@@ -20,30 +20,40 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
-require 'templater'
-require 'nodes'
+require 'commands/each'
+require 'spec_utils'
+require 'ostruct'
 
-module Metalware
-  module Commands
-    class Each < BaseCommand
-      def setup(args, options)
-        node_identifier = args[0]
-        @nodes = Nodes.create(config, node_identifier, options.group)
-        @command = args[1]
-      end
+RSpec.describe Metalware::Commands::Each do
+  before :each do
+    SpecUtils.use_mock_genders(self)
+    SpecUtils.use_unit_test_config(self)
+    SpecUtils.mock_repo_exists(self)
+  end
 
-      def run
-        @nodes.template_each do |parameters, node|
-          rendered_cmd = Templater.new(config, parameters)
-                                  .render_from_string(@command)
-          opt = {
-            out: $stdout.fileno ? $stdout.fileno : 1,
-            err: $stderr.fileno ? $stderr.fileno : 2
-          }
-          system(rendered_cmd, opt)
-        end
-      end
-    end
+  def run_command_echo(node, group = false)
+    allow_any_instance_of(Metalware::Commands::Each).to \
+      receive(:setup_option_defaults)
+    opt = OpenStruct.new({group: group})
+    old_stdout = $stdout
+    $stdout = Tempfile.new("stdout")
+    Metalware::Commands::Each.new([node, "echo <%= alces.nodename %>"], opt)
+    $stdout.flush
+    $stdout.rewind
+    $stdout.read
+  ensure
+    $stdout.delete
+    $stdout = old_stdout
+  end
+
+  it 'runs the command on a single node' do
+    output = run_command_echo("slave01")
+    expect(output).to eq("slave01\n")
+  end
+
+  it 'runs the command over a group' do
+    expected = (1..3).inject("") { |str, num| "#{str}testnode0#{num}\n" }
+    output = run_command_echo("nodes", true)
+    expect(output).to eq(expected)
   end
 end

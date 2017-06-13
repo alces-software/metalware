@@ -108,6 +108,10 @@ module Metalware
       end
     end
 
+    def render_from_string(str)
+      replace_erb(str, @config)
+    end
+
     # XXX Make this not a nested class, also possibly should use common error
     # class or superclass.
     class LoopErbError < StandardError
