@@ -83,6 +83,7 @@ module Metalware
     end
 
     attr_reader :config
+    attr_reader :nodename
 
     # XXX Have this just take allowed keyword parameters:
     # - nodename
@@ -90,6 +91,7 @@ module Metalware
     # - what else?
     def initialize(metalware_config, parameters={})
       @metalware_config = metalware_config
+      @nodename = parameters[:nodename]
 
       passed_magic_parameters = parameters.select do |k,v|
         [:index, :nodename, :firstboot, :files].include?(k) && !v.nil?
@@ -104,6 +106,10 @@ module Metalware
       File.open(template.chomp, 'r') do |f|
         replace_erb(f.read, @config)
       end
+    end
+
+    def render_from_string(str)
+      replace_erb(str, @config)
     end
 
     # XXX Make this not a nested class, also possibly should use common error
@@ -125,10 +131,6 @@ module Metalware
       # it the unset parameter is just `nil` as far as we can see here.
       raise UnsetParameterAccessError,
         "Attempted to call method `#{e.name}` of unset template parameter"
-    end
-
-    def nodename
-      @magic_namespace.nodename
     end
 
     # The merging of the raw combined config files, any additional passed

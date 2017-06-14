@@ -163,6 +163,17 @@ module Metalware
         c.action BashCommand
       end
 
+      command :each do |c|
+        c.syntax = 'metal each NODE_IDENTIFIER COMMAND [options]'
+        c.summary = 'Runs a command for a node(s)'
+        c.description = 'Runs the COMMAND for the node/ group specified by ' \
+          'NODE_IDENTIFIER. Commands that contain spaces must be quoted. The ' \
+          'command is first rendered by the templater and supports erb tags.'
+        c.option '-g', '--group', String,
+          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
+        c.action Commands::Each
+      end
+
       def run!
         ARGV.push "--help" if ARGV.empty?
         super
