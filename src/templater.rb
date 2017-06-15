@@ -139,7 +139,22 @@ module Metalware
       trim_mode = '-'
 
       safe_level = 0
-      ERB.new(template, safe_level, trim_mode).result(binding)
+      erb = ERB.new(template, safe_level, trim_mode)
+
+      begin
+        erb.result(binding)
+      rescue SyntaxError => error
+        handle_error_rendering_erb(template, error)
+      end
+    end
+
+    def handle_error_rendering_erb(template, error)
+      Output.stderr "\nRendering template failed!\n\n"
+      Output.stderr "Template:\n\n"
+      Output.stderr_indented_error_message template
+      Output.stderr "\nError message:\n\n"
+      Output.stderr_indented_error_message error.message
+      abort
     end
 
     # The merging of the raw combined config files, any additional passed
