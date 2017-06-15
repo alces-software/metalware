@@ -124,13 +124,22 @@ module Metalware
 
     def replace_erb(template, template_parameters)
       parameters_binding = template_parameters.instance_eval {binding}
-      ERB.new(template).result(parameters_binding)
+      render_erb_template(template, parameters_binding)
     rescue NoMethodError => e
       # May be useful to include the name of the unset parameter in this error,
       # however this is tricky as by the time we attempt to access a method on
       # it the unset parameter is just `nil` as far as we can see here.
       raise UnsetParameterAccessError,
         "Attempted to call method `#{e.name}` of unset template parameter"
+    end
+
+    def render_erb_template(template, binding)
+      # This mode allows templates to prevent inserting a newline for a given
+      # line by ending the ERB tag on that line with `-%>`.
+      trim_mode = '-'
+
+      safe_level = 0
+      ERB.new(template, safe_level, trim_mode).result(binding)
     end
 
     # The merging of the raw combined config files, any additional passed
