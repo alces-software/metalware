@@ -42,4 +42,7 @@ module Metalware
 
   class InvalidInput < MetalwareError
   end
+
+  class IterableRecursiveOpenStructPropertyError < MetalwareError
+  end
 end

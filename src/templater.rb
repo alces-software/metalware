@@ -22,7 +22,6 @@
 require "erb"
 require "ostruct"
 require "yaml"
-require 'recursive-open-struct'
 require 'active_support/core_ext/hash/keys'
 require 'hashie'
 
@@ -31,6 +30,7 @@ require 'nodeattr_interface'
 require 'metal_log'
 require 'deployment_server'
 require 'exceptions'
+require 'iterable_recursive_open_struct'
 
 module Metalware
   class MissingParameterWrapper
@@ -218,7 +218,7 @@ module Metalware
     end
 
     def create_template_parameters(config)
-      MissingParameterWrapper.new(RecursiveOpenStruct.new(config))
+      MissingParameterWrapper.new(IterableRecursiveOpenStruct.new(config))
     end
   end
 
