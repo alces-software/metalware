@@ -1,0 +1,4 @@
+networks:
+  foo: 'not bar'
+  prv:
+    ip: 10.10.0.1

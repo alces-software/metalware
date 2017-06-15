@@ -96,6 +96,23 @@ RSpec.describe Metalware::Templater do
     end
   end
 
+  describe 'merge config files' do
+    it 'performs a deep merge' do
+      config = Metalware::Config.new(File.join(FIXTURES_PATH, "configs/deep-merge.yaml"))
+      templater = Metalware::Templater.new(config, {nodename: "deepmerge"})
+      expect(templater.send(:raw_config)).to eq({
+        networks: {
+          foo: 'not bar',
+          something: 'value',
+          prv: {
+            ip: "10.10.0.1",
+            interface: "eth1"
+          }
+        }
+      })
+    end
+  end
+
   describe 'magic alces namespace' do
     def expect_environment_dependent_parameters_present(magic_namespace)
       expect(magic_namespace.hostip).to eq('1.2.3.4')

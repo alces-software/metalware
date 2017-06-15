@@ -22,7 +22,7 @@
 require "erb"
 require "ostruct"
 require "yaml"
-require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/hash'
 require 'hashie'
 
 require "constants"
@@ -165,13 +165,11 @@ module Metalware
           if !config.is_a? Hash
             raise "Expected YAML config file to contain a hash"
           else
-            combined_configs.merge!(config)
+            combined_configs.deep_merge!(config)
           end
         end
       end
-      # XXX only symbolizes top-level keys, but not those in nested hashes =>
-      # confusing.
-      combined_configs.symbolize_keys
+      combined_configs.deep_transform_keys{ |k| k.to_sym }
     end
 
     def ordered_node_config_files
@@ -179,8 +177,7 @@ module Metalware
       return list if !nodename
       # XXX Could use `Node#configs` for this now.
       list_str = `nodeattr -l #{nodename} 2>/dev/null`.chomp
-      if list_str.empty? then return list end
-      list.concat(list_str.split(/\n/).reverse)
+      list.concat(list_str.split(/\n/).reverse) unless list_str.empty?
       list.push(nodename)
       list.uniq
     end
