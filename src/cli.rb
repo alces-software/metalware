@@ -33,6 +33,12 @@ module Metalware
         '--quiet', 'Suppress any warnings from being displayed'
       )
 
+      command :'repo' do |c|
+        c.syntax = 'metal repo [options]'
+        c.summary = 'Manage template and config repository'
+        c.sub_command_help = true
+      end
+
       command :'repo use' do |c|
         c.syntax = 'metal repo use REPO_URL [options]'
         c.summary = ''
@@ -40,6 +46,7 @@ module Metalware
         #c.example 'description', 'command example'
         c.option '-f', '--force',
           'Force use of a new repo even if local changes have been made to the current repo'
+        c.hidden = true
         c.action Commands::Repo::Use
       end
 
@@ -50,6 +57,7 @@ module Metalware
         #c.example 'description', 'command example'
         c.option '-f', '--force',
           'Force update even if local changes have been made to the repo'
+        c.hidden = true
         c.action Commands::Repo::Update
       end
 
