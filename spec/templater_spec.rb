@@ -98,6 +98,7 @@ RSpec.describe Metalware::Templater do
 
   describe 'merge config files' do
     it 'performs a deep merge' do
+      SpecUtils.use_mock_genders(self)
       config = Metalware::Config.new(File.join(FIXTURES_PATH, "configs/deep-merge.yaml"))
       templater = Metalware::Templater.new(config, {nodename: "deepmerge"})
       expect(templater.send(:raw_config)).to eq({
