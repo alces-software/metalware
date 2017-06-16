@@ -24,19 +24,19 @@ alias met=metal
 
 if [ "$BASH_VERSION" ]; then
     _metal() {
-        local cur="$2" prev="$3" cmds opts
+        local cur="$2" cmds input cur_ruby
 
-        path=$( IFS=$'/'; echo "${COMP_WORDS[*]}" | sed "s/^metal\/\|$cur$//g" 2>/dev/null)
-        cur_dir="/opt/metalware/src/commands/$path"
-
-        if [ -d "$cur_dir" ]; then
-            cmds=$(ls $cur_dir | sed s/\.rb//g)
+        if [[ -z "$cur" ]]; then
+            cur_ruby="__CUR_IS_EMPTY__"
+        else
+            cur_ruby=$cur
         fi
 
-        # Additional bash commands, ideally these will be migrated to ruby
-        if [ "$path" == "" ]; then
-            cmds="$cmds power console"
-        fi
+        cmds=$(
+            cd /tmp/metalware &&
+            PATH="/opt/metalware/opt/ruby/bin:$PATH"
+            bin/autocomplete $cur_ruby ${COMP_WORDS[*]}
+        )
 
         COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
     }

@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+class AutoComplete
+  def initialize
+    @cur = (ARGV[0] == "__CUR_IS_EMPTY__" ? nil : ARGV[0])
+    @complete = ARGV[1..-1]
+    @values = []
+  end
+
+  def run
+    add_commands
+    return_values
+  end
+
+  def root_dir
+    File.expand_path "#{File.dirname(__FILE__)}/.."
+  end
+
+  def add_commands()
+    cur_cmds = @complete.dup.reject! { |v| ["metal", "#{@cur}"].include? v }
+    cmd_path = File.join("#{root_dir}", "src/commands", cur_cmds.join("/"))
+    add_return_values( Dir.entries(cmd_path).tap { |entries|
+      entries.reject! { |e| [".", ".."].include? e }
+      entries.map! { |e| File.basename(e, ".rb") }
+    })
+    # Additional bash commands, ideally these will be migrated to ruby
+    if cmd_path == "#{root_dir}/src/commands/"
+      add_return_values(["power", "console", "ipmi"])
+    end
+  rescue Errno::ENOENT
+  end
+
+  def add_return_values(values)
+    values.is_a?(Array) ? @values.concat(values) : @values.push(values)
+  end
+
+  def return_values
+    puts @values.join(" ")
+  end
+end
+
+AutoComplete.new.run
