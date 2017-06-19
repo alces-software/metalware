@@ -153,7 +153,7 @@ module Metalware
 
     def raw_config
       combined_configs = {}
-      node.configs.reverse.each do |config_name|
+      node.configs.each do |config_name|
         begin
           config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
           config = YAML.load_file(config_path)

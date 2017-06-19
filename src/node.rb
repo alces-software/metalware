@@ -22,10 +22,10 @@ module Metalware
       File.file? build_complete_marker_file
     end
 
-    # The repo config files for this node in order of precedence from highest
-    # to lowest.
+    # The repo config files for this node in order of precedence from lowest to
+    # highest.
     def configs
-      [name, *groups, 'all'].reject(&:nil?).uniq
+      [name, *groups, 'all'].reverse.reject(&:nil?).uniq
     end
 
     # Get the configured `files` for this node, to be rendered and used in
@@ -35,7 +35,7 @@ module Metalware
     # basename in lower precendence configs.
     def build_files
       files_memo = Hash.new {|k,v| k[v] = []}
-      configs.reverse.reduce(files_memo) do |files, config_name|
+      configs.reduce(files_memo) do |files, config_name|
         config = load_config(config_name)
         new_files = config[:files]
         merge_in_files!(files, new_files)
