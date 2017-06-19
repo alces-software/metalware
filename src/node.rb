@@ -4,6 +4,7 @@ require 'open3'
 require 'constants'
 require 'system_command'
 require 'nodeattr_interface'
+require 'exceptions'
 
 module Metalware
   class Node
@@ -33,12 +34,11 @@ module Metalware
           config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
           config = YAML.load_file(config_path)
         rescue Errno::ENOENT # Skips missing files
-        rescue StandardError => e
-          $stderr.puts "Could not parse YAML config file"
-          raise e
+        rescue StandardError
+          raise YAMLConfigError, "Could not parse YAML config file"
         else
           if !config.is_a? Hash
-            raise "Expected YAML config file to contain a hash"
+            raise YAMLConfigError, "Expected YAML config file to contain a hash"
           else
             combined_configs.deep_merge!(config)
           end

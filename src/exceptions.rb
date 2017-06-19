@@ -45,4 +45,7 @@ module Metalware
 
   class IterableRecursiveOpenStructPropertyError < MetalwareError
   end
+
+  class YAMLConfigError < MetalwareError
+  end
 end
