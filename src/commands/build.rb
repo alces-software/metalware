@@ -7,7 +7,6 @@ require 'templater'
 require 'constants'
 require 'node'
 require 'nodes'
-require 'iterator'
 require 'output'
 require 'build_files_retriever'
 

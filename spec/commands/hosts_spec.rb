@@ -1,7 +1,6 @@
 
 require 'commands/hosts'
 require 'templater'
-require 'iterator'
 require 'spec_utils'
 
 

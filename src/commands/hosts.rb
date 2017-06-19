@@ -1,7 +1,6 @@
 
 require 'base_command'
 require 'constants'
-require 'iterator'
 require 'nodes'
 require 'templater'
 
