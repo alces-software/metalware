@@ -2,9 +2,9 @@
 # Overview
 
 - Will have new `metal configure` command group for configuring values to be
-  used within config files for all nodes, a group of nodes, or an individual
-  node:
-  - `metal configure all`
+  used within config files for a Metalware domain, a group of nodes, or an
+  individual node:
+  - `metal configure domain`
   - `metal configure group GROUP`
   - `metal configure node NODE`
 
@@ -22,10 +22,10 @@
   interfaces.
 
 - The `configure` commands will save the entered answers to a file in
-  `/var/lib/metalware/config`, specific to the resource being configured.
+  `/var/lib/metalware/answers`, specific to the resource being configured.
 
 - Repo configs will be able to use a new object in the magic `alces` namespace,
-  `alces.config.$question_identifier`, where `$question_identifier` is the
+  `alces.answers.$question_identifier`, where `$question_identifier` is the
   identifier for a particular question specified in `configure.yaml`; when
   templating the corresponding question answer will then be used in these
   places.
@@ -51,8 +51,8 @@ questions:
   another_example: &another_example
     question: 'Enter anything?'
 
-all:
-  # Both these questions will be asked for `metal configure all`.
+domain:
+  # Both these questions will be asked for `metal configure domain`.
   example_question_identifier: *example_question_identifier
   another_example: *another_example
 
@@ -75,7 +75,7 @@ node:
 - Any name key can be used when specifying a question for a particular
   category. Often the same identifier will be used for the question definition
   and when specifying a question for a category, e.g. a `cluster_name` question
-  may be defined in `questions` and then used as `cluster_name` under `all`,
+  may be defined in `questions` and then used as `cluster_name` under `domain`,
   however this will not necessarily always need to be the case.
 
 ## Notes on `type`
@@ -110,13 +110,13 @@ building these in to Metalware would be better since:
 
 The `metal configure` commands each take their specified questions and ask
 them, save the results to a particular file within a new
-`/var/lib/metalware/config/` directory, and perform any other actions
+`/var/lib/metalware/answers/` directory, and perform any other actions
 appropriate to the resource being configured.
 
-## `metal configure all`
+## `metal configure domain`
 
-Asks the `all` questions; the validated, converted answers will be saved to
-`/var/lib/metalware/config/all.yaml` in the following format:
+Asks the `domain` questions; the validated, converted answers will be saved to
+`/var/lib/metalware/answers/domain.yaml` in the following format:
 
 ```yaml
 answers:
@@ -126,12 +126,12 @@ answers:
 
 ## `metal configure group $GROUP`
 
-Asks for a genders line to be entered first, then similarly to `all` asks the
-`group` questions; the results will then be saved to
-`/var/lib/metalware/config/groups/$GROUP.yaml`
+Asks for a genders line to be entered first, then similarly to `configure
+domain` asks the `group` questions; the results will then be saved to
+`/var/lib/metalware/answers/groups/$GROUP.yaml`
 
 ```yaml
-genders: 'somenodes[01-03] somenodes,cluster,all'
+genders: 'somenodes[01-03] somenodes,cluster,domain'
 answers:
   another_example: 'foo'
 ```
@@ -149,11 +149,11 @@ genders indicating this and that any changes to it directly may not persist.
 ## `metal configure node $NODE`
 
 Similarly asks the questions configured for `node`, and saves these to
-`/var/lib/metalware/config/nodes/$NODE.yaml`. Note that unlike `configure all`,
-required before any nodes/group can be built, or `configure group`, required
-before a particular group can be built, it will not be required to `configure
-node` before building a particular node; `configure node` just provides a way
-to further specialize a particular node's configuration.
+`/var/lib/metalware/answers/nodes/$NODE.yaml`. Note that unlike `configure
+domain`, required before any nodes/group can be built, or `configure group`,
+required before a particular group can be built, it will not be required to
+`configure node` before building a particular node; `configure node` just
+provides a way to further specialize a particular node's configuration.
 
 ## Re-running `configure` commands
 
@@ -163,15 +163,15 @@ to each question with the saved answer.
 When saving the answers after re-running `configure`, we will want to make sure
 just the new answers are saved. For instance:
 
-- `metal configure all` run, an answer `'foo'` is given for the `some_question`
-  question;
+- `metal configure domain` run, an answer `'foo'` is given for the
+  `some_question` question;
 
-- the question `some_question` for `all` is removed from
+- the question `some_question` for `domain` is removed from
   `/var/lib/metalware/repo/configure.yaml`;
 
-- `metal configure all` is run again; `some_question` won't be asked and we
+- `metal configure domain` is run again; `some_question` won't be asked and we
   should make sure the previous answer is not still included in the resulting
-  config file.
+  `answers` file.
 
 
 # `hosts` generation
@@ -224,7 +224,8 @@ change with any `configure` command it seems sensible to automatically
 re-render the `hosts` file after every `configure` command, similarly to the
 plan for `genders` after any `configure group` command. If we add this it will
 largely make the `hosts` command obsolete, although we may want to retain it
-for re-rendering after manually changing the template or a config file.
+for re-rendering after manually changing the template, or a config or answers
+file.
 
 We will also need to consider if we this how a `hosts` template other than the
 default will be selected for automatic re-rendering, or alternatively if we
@@ -241,8 +242,8 @@ commands have been run first:
 - All `metal configure` commands will require the repo be set up (`repo use`
   has been run) before running.
 
-- `metal build` will require that `metal configure all` has been run first,
-  i.e. that `/var/lib/metalware/config/all.yaml` has been generated, so any
+- `metal build` will require that `metal configure domain` has been run first,
+  i.e. that `/var/lib/metalware/config/domain.yaml` has been generated, so any
   necessary config has been set up before templating.
 
 - Additionally, `metal build -g $GROUP` will require that `metal configure
@@ -253,14 +254,24 @@ commands have been run first:
   `/var/lib/metalware/config/nodes/$NODE.yaml` file is not required to build
   `$NODE`.
 
+Note: functionality for handling commands depending on `repo` already exists in
+`BaseCommand`; we will likely want to add to this, and possibly generalize
+specifying a commands dependencies in some way.
+
+Following discussion, a possible good abstraction for this would be to specify
+a `DEPENDENCIES` constant in each command class. This could maybe be a map of
+command names to file paths, specifying the command which needs to be run first
+and the files which indicate this has occurred. `BaseCommand` could then use
+this to check each dependency command has been run and display an appropriate
+message if not.
 
 ## Templating
 
-When loading `alces.config` values from files in `/var/lib/metalware/config/`
+When loading `alces.answers` values from files in `/var/lib/metalware/answers/`
 for use in templates, the same procedure will be followed as for loading the
 repo configs, i.e.
 
-- first `all.yaml` will be loaded;
+- first `domain.yaml` will be loaded;
 
 - if no `nodename` is passed, then nothing else will be loaded;
 
@@ -270,19 +281,27 @@ repo configs, i.e.
 
 - any `nodes/$NODE.yaml` file for the specific node will be loaded.
 
-When templating, attempting to use an `alces.config` value which is not set in
-the config should be a fatal error. All config values should be set up, as even
-if a particular config question is optional and nothing has been entered a
-value of `nil` should still be saved, in which case `nil` will be used when
-templating - however if the specified identifier is not present at all then
-this indicates the repo has an inconsistent `config` directory and
-`configure.yaml` file, which should be addressed.
+When templating, attempting to use an `alces.answers` value which is not set in
+the answers file should be a fatal error. All answers used in the repo
+configs/templates should appear in the merged answers, as even if a particular
+`configure.yaml` question is optional and nothing has been entered a value of
+`nil` should still be saved, in which case `nil` will be used when templating -
+however if the specified identifier is not present at all then this indicates
+the repo has an inconsistent `config` directory and `configure.yaml` file,
+which should be addressed.
 
 
 ## Questions
 
-- May want to change `all` to `cluster` everywhere?
+- May want to change `all` to `cluster` everywhere? - following discussion we
+  will change this to `domain` as this most accurately describes what Metalware
+  sets up (a single Metalware installation could, with the right repo and
+  config, be used to setup multiple Flight Compute clusters). Note: this
+  document has been updated to reflect this.
 
 - Change either `/var/lib/metalware/config` or `/var/lib/metalware/repo/config`
   to something else, as they are related but the naming may be confusing? Maybe
-  also name `/var/lib/metalware/repo/configure.yaml` something else?
+  also name `/var/lib/metalware/repo/configure.yaml` something else? -
+  following discussion we will use `/var/lib/metalware/answers` to store the
+  `configure.yaml` answers, and `alces.answers` to access these; this document
+  has been updated to reflect this.
