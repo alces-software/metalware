@@ -47,8 +47,8 @@ RSpec.describe Metalware::Commands::Each do
   end
 
   it 'runs the command on a single node' do
-    output = run_command_echo("slave01")
-    expect(output).to eq("slave01\n")
+    output = run_command_echo("node01")
+    expect(output).to eq("node01\n")
   end
 
   it 'runs the command over a group' do
