@@ -1,0 +1,215 @@
+anchor_options:
+  group_option: &group_option
+    tags: [-g, --group]
+    type: String
+    description: >
+          Switch NODE_IDENTIFIER to specify a gender group rather than a single
+          node
+
+subcommands:
+  repo_use: &repo_use
+    syntax: metal repo use REPO_URL [options]
+    summary: Clone a new template git repo
+    description: >
+      Clones a new git repo from a URL. The repo should contain the default
+      templates used by the other commands. It may also include a config
+      directory containing template parameter YAML files.
+    action:
+      Commands::Repo::Use
+    options:
+      - tags: [-f, --force]
+        description: >
+          Force use of a new repo even if local changes have been made to the
+          current repo
+
+  repo_update: &repo_update
+    syntax: metal repo update [options]
+    summary: Updates the git repository
+    description: >
+      Updates the local git repository to match the remote. The update command
+      does not support local changes. The force will trigger a hard reset and
+      will delete local changes. All other git commands can be preformed
+      manually on the repo.
+    action: Commands::Repo::Update
+    options:
+      - tags: [-f, --force]
+        description: >
+          Force update even if local changes have been made to the repo
+
+commands:
+  build:
+    syntax: metal build NODE_IDENTIFIER [options]
+    summary: Renders the templates used to build the nodes
+    description: >
+      Build is used to rendered template files before waiting for the compute
+      nodes to pxe-boot and build. Build by default will render the pxelinux and
+      kickstart templates. In additional, build renders the "files" list in 
+      [config].yaml for the gender group and node.
+
+
+      Build will then wait for the nodes to build. Once a node has finished
+      building, it needs to curl "alces.build_complete_url" which notifies build
+      that the node is complete. This will trigger the pxelinux file to be
+      re-rendered with "firstboot" set to false. Build will exit once all the
+      nodes have finished building.
+    action: Commands::Build
+    options:
+      - *group_option
+      - tags: [-k KICKSTART_TEMPLATE, --kickstart KICKSTART_TEMPLATE]
+        type: String
+        description: >
+          Specify kickstart template to use (default:
+          #{Defaults.build.kickstart})
+      - tags: [-p PXELINUX_TEMPLATE, --pxelinux  PXELINUX_TEMPLATE]
+        type: String
+        description: >
+          Specify pxelinux template to use (default: #{Defaults.build.pxelinux})
+
+  console:
+    syntax: metal console NODE_IDENTIFIER [options]
+    summary: Volatile. Display a node's console in the terminal
+    description: >
+      Displays the console of a node in the terminal. The console command
+      operates over the BMC network and can be used as node is booting.
+    action: BashCommand
+
+  dhcp:
+    syntax: metal dhcp [options]
+    summary: Renders and reboots dhcp from the hunter cache
+    description: >
+      Dhcp renders a template which is used to update the dhcp server. Dhcp is
+      designed  to run after hunter and read from its cache. Hunter cache can be
+      iterated over in the template with "alces.hunter.each". The rendered dhcp
+      template is validated before the dhcp server is reset.
+    action: Commands::Dhcp
+    options:
+      - tags: [-t TEMPLATE, --template TEMPLATE]
+        type: String
+        description: >
+          Specify dhcp template to use (default: #{Defaults.dhcp.template})
+
+  each:
+    syntax: metal each NODE_IDENTIFIER COMMAND [options]
+    summary: Runs a command for a node(s)
+    description: >
+      Runs the COMMAND for the node/ group specified by NODE_IDENTIFIER.
+      Commands that contain spaces must be quoted. The command is first rendered
+      by the templater and supports erb tags.
+    action: Commands::Each
+    options:
+      - *group_option
+
+  hosts:
+    syntax: metal hosts NODE_IDENTIFIER [options]
+    summary: Adds a node(s) to the hosts file
+    description: >
+      Renders the hosts template for the node (or group) and appends it to
+      /etc/hosts. Note that it does not check if the node already exists in the
+      file.
+    action: Commands::Hosts
+    options:
+      - *group_option
+      - tags: [-t TEMPLATE, --template TEMPLATE]
+        type: String
+        description: >
+          Specify hosts template to use (default: #{Defaults.hosts.template})
+      - tags: [-x, --dry-run]
+        description: >
+          Do not modify hosts file, just output additions that would be made
+
+  hunter:
+    syntax: metal hunter [options]
+    summary: Detects and caches DHCP discover messages
+    description: >
+      Hunter is used in conjunction with the dhcp command to update 
+      dhcp server. Hunter listens out for dhcp discovery messages from the
+      booting nodes. Hunter assigns the nodes a node name based of PREFIX or
+      user input. The node's name and MAC address is then cached.
+
+
+      Hunter will continue
+      listening for nodes until it is interrupted. A single MAC address will
+      only be cached once per run even if the compute node reboots. Refer to
+      dhcp command to updated the dhcp server.
+    action: Commands::Hunter
+    options:
+      - tags: [-i INTERFACE, --interface INTERFACE]
+        type: String
+        description: >
+          Local interface to hunt on (default: #{Defaults.hunter.interface})
+      - tags: [-p PREFIX, --prefix PREFIX]
+        type: String
+        description: >
+          Root to suggest for detected node names
+          (default: #{Defaults.hunter.prefix})
+      - tags: [-l LENGTH, --length LENGTH]
+        type: Integer
+        description: >
+          Numeric sequence length to use for suggested detected node names
+          (default: #{Defaults.hunter.length})
+      - tags: [-s START_NUMBER, --start START_NUMBER]
+        type: Integer
+        description: >
+          Start integer to use for suggested detected node names
+          (default: #{Defaults.hunter.start})
+
+  ipmi:
+    syntax: metal ipmi NODE_IDENTIFIER [options]
+    summary: Volatile. Perform ipmi commands on single or multiple machines
+    description: >
+      ***VOLATILE***
+
+       Perform ipmi commands on single or multiple machines
+    action: BashCommand
+    options:
+      - tags: [-g]
+        description: >
+          Specifies that NODE_IDENTIFIER is the group. MUST be before
+          NODE_IDENTIFIER
+      - tags: [-k COMMAND]
+        type: String
+        description: >
+          Specifies the ipmi command
+
+  power:
+    syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
+    summary: Volatile. Run power commands on a node.
+    description: >
+      Allows ipmi power commands to be ran on a node(s)
+
+
+      The following commands are supported:
+
+      on        - Turns the node on
+
+      off       - Turns the node off
+
+      status    - Display the power status
+
+      locate    - Turns the node locater light on
+
+      locateoff - Turns the node locater light off
+
+      cycle     - Power cycle the node
+
+      reset     - Warm reset the node
+    action: BashCommand
+    options:
+      - *group_option
+
+  render:
+    syntax: metal render TEMPLATE [NODE] [options]
+    summary: Render a given template
+    description: >
+      Renders the file specified by TEMPLATE and sends the output to standard
+      out. The template can be rendered for a specific node using the optional
+      NODE input.
+    action: Commands::Render
+
+  repo:
+    syntax: metal repo [options]
+    summary: Manage template and config repository
+    # description can also be used for subcommands
+    subcommands: 
+      use: *repo_use
+      update: *repo_update
