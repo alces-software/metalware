@@ -94,6 +94,18 @@ RSpec.describe Metalware::Templater do
         }.to raise_error Metalware::UnsetParameterAccessError
       end
     end
+
+    context 'when passed node not in genders file' do
+      it 'does not raise error' do
+        expect {
+          Metalware::Templater.render(
+            Metalware::Config.new,
+            TEST_TEMPLATE_PATH,
+            nodename: 'not_in_genders_node01'
+          )
+        }.to_not raise_error
+      end
+    end
   end
 
   describe 'merge config files' do

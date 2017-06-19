@@ -153,7 +153,7 @@ module Metalware
 
     def raw_config
       combined_configs = {}
-      ordered_node_config_files.each do |config_name|
+      node.configs.reverse.each do |config_name|
         begin
           config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
           config = YAML.load_file(config_path)
@@ -172,12 +172,8 @@ module Metalware
       combined_configs.deep_transform_keys{ |k| k.to_sym }
     end
 
-    def ordered_node_config_files
-      list = [ "all" ]
-      return list if !nodename
-      list.concat(NodeattrInterface.groups_for_node(nodename).reverse)
-      list.push(nodename)
-      list.uniq
+    def node
+      @node ||= Node.new(@metalware_config, nodename)
     end
 
     def parse_config
