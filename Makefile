@@ -21,7 +21,6 @@ rsync:
 		--copy-links \
 		--delete \
 		--exclude tmp/ \
-		--exclude metalware-old/ \
 		--exclude .git/ \
 		--exclude coverage/ \
 		--perms \
