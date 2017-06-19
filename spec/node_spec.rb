@@ -24,6 +24,12 @@ RSpec.describe Metalware::Node do
       node = node(name)
       expect(node.configs).to eq([name, 'all'])
     end
+
+    it "just returns 'all' when passed nil node name" do
+      name = nil
+      node = node(name)
+      expect(node.configs).to eq(['all'])
+    end
   end
 
   describe '#build_files' do
