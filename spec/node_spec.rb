@@ -18,6 +18,12 @@ RSpec.describe Metalware::Node do
       testnode01 = node('testnode01')
       expect(testnode01.configs).to eq(['testnode01', 'testnodes', 'nodes', 'cluster', 'all'])
     end
+
+    it "just returns 'node' and 'all' configs for node not in genders" do
+      name = 'not_in_genders_node01'
+      node = node(name)
+      expect(node.configs).to eq([name, 'all'])
+    end
   end
 
   describe '#build_files' do

@@ -25,7 +25,7 @@ module Metalware
     # The repo config files for this node in order of precedence from highest
     # to lowest.
     def configs
-      [name] + groups
+      [name, *groups, 'all'].uniq
     end
 
     # Get the configured `files` for this node, to be rendered and used in
@@ -62,6 +62,10 @@ module Metalware
 
     def groups
       NodeattrInterface.groups_for_node(name)
+    rescue NodeNotInGendersError
+      # It's OK for a node to not be in the genders file, it just means it's
+      # not part of any groups.
+      []
     end
 
     def load_config(config_name)
