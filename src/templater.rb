@@ -146,30 +146,9 @@ module Metalware
     # values, and the magic `alces` namespace; this is the config prior to
     # parsing any nested ERB values.
     def base_config
-      @base_config ||= raw_config
+      @base_config ||= node.raw_config
         .merge(@passed_hash)
         .merge(alces: @magic_namespace)
-    end
-
-    def raw_config
-      combined_configs = {}
-      node.configs.each do |config_name|
-        begin
-          config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
-          config = YAML.load_file(config_path)
-        rescue Errno::ENOENT # Skips missing files
-        rescue StandardError => e
-          $stderr.puts "Could not parse YAML config file"
-          raise e
-        else
-          if !config.is_a? Hash
-            raise "Expected YAML config file to contain a hash"
-          else
-            combined_configs.deep_merge!(config)
-          end
-        end
-      end
-      combined_configs.deep_transform_keys{ |k| k.to_sym }
     end
 
     def node

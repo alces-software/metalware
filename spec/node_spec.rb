@@ -32,6 +32,23 @@ RSpec.describe Metalware::Node do
     end
   end
 
+  describe '#raw_config' do
+    it 'performs a deep merge of all config files' do
+      config = Metalware::Config.new(File.join(FIXTURES_PATH, "configs/deep-merge.yaml"))
+      node = Metalware::Node.new(config, 'deepmerge')
+      expect(node.raw_config).to eq({
+        networks: {
+          foo: 'not bar',
+          something: 'value',
+          prv: {
+            ip: "10.10.0.1",
+            interface: "eth1"
+          }
+        }
+      })
+    end
+  end
+
   describe '#build_files' do
     it 'returns merged hash of files' do
       testnode01 = node('testnode01')
