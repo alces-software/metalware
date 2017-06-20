@@ -1,6 +1,5 @@
 
-require 'base_command'
-require 'configurator'
+require 'configure_command'
 require 'constants'
 
 
@@ -8,28 +7,11 @@ module Metalware
   module Commands
     module Configure
 
-      class Domain < BaseCommand
+      class Domain < ConfigureCommand
         def setup(_args, _options)
         end
 
-        def run
-          configurator.configure
-        end
-
-        def handle_interrupt(_e)
-          abort 'Exiting without saving...'
-        end
-
-        private
-
-        def configurator
-          Configurator.new(
-            highline: self,
-            configure_file: config.configure_file,
-            questions: :domain,
-            answers_file: answers_file
-          )
-        end
+        protected
 
         def answers_file
           File.join(Constants::ANSWERS_PATH, 'domain.yaml')
