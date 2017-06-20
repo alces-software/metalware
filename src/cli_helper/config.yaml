@@ -37,6 +37,15 @@ subcommands:
       answers will then be used when rendering templates.
     action: Commands::Configure::Group
 
+  configure_node: &configure_node
+    syntax: metal configure node NODE_NAME [options]
+    summary: Configure a Metalware node
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure a node for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Node
+
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
     summary: Clone a new template git repo
@@ -102,6 +111,7 @@ commands:
     subcommands:
       domain: *configure_domain
       group: *configure_group
+      node: *configure_node
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
