@@ -33,7 +33,7 @@ if [ "$BASH_VERSION" ]; then
         fi
 
         cmds=$(
-            cd /tmp/metalware &&
+            cd /opt/metalware &&
             PATH="/opt/metalware/opt/ruby/bin:$PATH"
             bin/autocomplete $cur_ruby ${COMP_WORDS[*]}
         )
