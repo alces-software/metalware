@@ -6,11 +6,13 @@ module Metalware
   class Configurator
     def initialize(highline:, configure_file:, questions:, answers_file:)
       @highline = highline
+      @configure_file = configure_file
+      @questions_section = questions
       @answers_file = answers_file
 
       @questions = YAML.load_file(configure_file).
       with_indifferent_access[questions].
-      map{ |identifier, properties| Question.new(identifier, properties) }
+      map{ |identifier, properties| create_question(identifier, properties) }
     end
 
     def configure
@@ -20,7 +22,11 @@ module Metalware
 
     private
 
-    attr_reader :highline, :questions, :answers_file
+    attr_reader :highline,
+      :configure_file,
+      :questions_section,
+      :answers_file,
+      :questions
 
     def ask_questions
       questions.map do |question|
@@ -35,16 +41,29 @@ module Metalware
       end
     end
 
+    def create_question(identifier, properties)
+      Question.new(
+        identifier: identifier,
+        properties: properties,
+        configure_file: configure_file,
+        questions_section: questions_section
+      )
+    end
+
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string]
 
       attr_reader :identifier, :question, :type, :choices
 
-      def initialize(identifier, properties)
+      def initialize(identifier:, properties:, configure_file:, questions_section:)
         @identifier = identifier
         @question = properties[:question]
-        @type = type_for(properties[:type])
         @choices = properties[:choices]
+        @type = type_for(
+          properties[:type],
+          configure_file: configure_file,
+          questions_section: questions_section
+        )
       end
 
       def ask(highline)
@@ -64,14 +83,17 @@ module Metalware
 
       private
 
-      def type_for(value)
+      def type_for(value, configure_file:, questions_section:)
         value = value&.to_sym
         if value.nil?
           :string
         elsif valid_type?(value)
           value
         else
-          raise UnknownQuestionTypeError
+          message = \
+            "Unknown question type '#{value}' for " +
+            "#{questions_section}.#{identifier} in #{configure_file}"
+          raise UnknownQuestionTypeError, message
         end
       end
 

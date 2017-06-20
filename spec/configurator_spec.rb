@@ -225,7 +225,8 @@ RSpec.describe Metalware::Configurator do
       expect {
         configurator
       }.to raise_error(
-        Metalware::UnknownQuestionTypeError
+        Metalware::UnknownQuestionTypeError,
+        /'foobar'.*test\.unknown_q.*#{configure_file_path}/
       )
     end
   end
