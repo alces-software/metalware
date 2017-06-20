@@ -80,6 +80,7 @@ mkdir -p /var/log/metalware
 mkdir -p /var/lib/metalware/rendered/{kickstart,system}
 mkdir -p /var/lib/metalware/cache/{built-nodes,templates}
 mkdir -p /var/lib/metalware/repo
+mkdir -p /var/lib/metalware/answers/{groups,nodes}
 chmod a+rw /var/lib/metalware/cache/built-nodes
 
 # Link certain files in to Metalware dir; these can then be retrieved by a

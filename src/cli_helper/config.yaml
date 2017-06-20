@@ -19,6 +19,15 @@ global_options:
       Suppress any warnings from being displayed
 
 subcommands:
+  configure_domain: &configure_domain
+    syntax: metal configure domain [options]
+    summary: Configure Metalware domain
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure the domain for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Domain
+
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
     summary: Clone a new template git repo
@@ -77,6 +86,12 @@ commands:
         default: default
         description: >
           Specify pxelinux template to use
+
+  configure:
+    syntax: metal configure [options]
+    summary: Configure different aspects of this Metalware installation
+    subcommands:
+      domain: *configure_domain
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
