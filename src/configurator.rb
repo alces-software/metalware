@@ -15,7 +15,7 @@ module Metalware
     def configure
       identifier, properties = questions.first
       question = Question.new(identifier, properties)
-      answer = highline.ask(question.question)
+      answer = question.ask(highline)
       answers = {
         identifier => answer
       }
@@ -27,11 +27,21 @@ module Metalware
     private
 
     class Question
-      attr_reader :identifier, :question
+      attr_reader :identifier, :question, :type
 
       def initialize(identifier, properties)
         @identifier = identifier
         @question = properties[:question]
+        @type = properties[:type]
+      end
+
+      def ask(highline)
+        case type
+        when 'integer'
+          highline.ask(question, Integer)
+        else
+          highline.ask(question)
+        end
       end
     end
 

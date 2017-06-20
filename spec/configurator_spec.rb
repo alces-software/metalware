@@ -91,5 +91,30 @@ RSpec.describe Metalware::Configurator do
         'string_q' => 'My string'
       })
     end
+
+    it 'asks questions with type `integer`' do
+      define_questions({
+        test: {
+          integer_q: {
+            question: 'Can you enter an integer?',
+            type: 'integer'
+          }
+        }
+      })
+
+      expect(highline).to receive(
+        :ask
+      ).with(
+        'Can you enter an integer?', Integer
+      ).and_return(
+        7
+      )
+
+      configurator.configure
+
+      expect(answers).to eq({
+        'integer_q' => 7
+      })
+    end
   end
 end
