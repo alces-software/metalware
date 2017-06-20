@@ -6,6 +6,18 @@ anchor_options:
           Switch NODE_IDENTIFIER to specify a gender group rather than a single
           node
 
+global_options:
+  - tags: [-c FILE, --config FILE]
+    description: >
+      Specify config file to use instead of default
+      (/opt/metalware/etc/config.yaml)
+  - tags: [--strict]
+    description: >
+      Convert warnings to errors
+  - tags: [--quiet]
+    description: >
+      Suppress any warnings from being displayed
+
 subcommands:
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
@@ -60,7 +72,7 @@ commands:
         description: >
           Specify kickstart template to use (default:
           #{Defaults.build.kickstart})
-      - tags: [-p PXELINUX_TEMPLATE, --pxelinux  PXELINUX_TEMPLATE]
+      - tags: [-p PXELINUX_TEMPLATE, --pxelinux PXELINUX_TEMPLATE]
         type: String
         description: >
           Specify pxelinux template to use (default: #{Defaults.build.pxelinux})

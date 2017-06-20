@@ -39,19 +39,6 @@ module Metalware
       program :version, '2.0.0'
       program :description, 'Alces tools for the management and configuration of bare metal machines'
 
-      global_option(
-        '-c FILE', '--config FILE',
-        'Specify config file to use instead of default (/opt/metalware/etc/config.yaml)'
-      )
-
-      global_option(
-        '--strict', 'Convert warnings to errors'
-      )
-
-      global_option(
-        '--quiet', 'Suppress any warnings from being displayed'
-      )
-
       CliHelper::Parser.new(self).parse_commands
 
       def run!

@@ -36,7 +36,7 @@ module Metalware
         if @calling_obj.is_a? Metalware::Cli
           parse_commands_metalware_cli
         else
-          raise "Could not parse commands, unrecognized class: #{@calling_obj.class}"
+          @yaml
         end
       end
 
@@ -44,29 +44,33 @@ module Metalware
         @yaml["commands"].each do |command, attributes|
           parse_command_attributes(command, attributes)
         end
+        @yaml["global_options"].each do |opt|
+          @calling_obj.global_option(*opt["tags"], opt["description"].chomp)
+        end
       end
 
+      # TODO: Currently the parser does not support the example option
       def parse_command_attributes(command, attributes)
         @calling_obj.command command do |c|
           attributes.each do |a, v|
-            if a == "action"
-              c.send(a, eval(v))
-            elsif a == "options"
+            case a
+            when "action"
+              c.action eval(v)
+            when "options"
               v.each do |opt|
-                c.send("option",
-                       *opt["tags"],
+                c.option(*opt["tags"],
                        opt["type"],
-                       "#{opt["description"]}")
+                       "#{opt["description"]}".chomp)
               end
-            elsif a == "subcommands"
-              c.send("sub_command_group=", true)
+            when "subcommands"
+              c.sub_command_group = true
               v.each do |subcommand, subattributes|
                 subattributes[:sub_command] = true
                 subcommand = "#{command} #{subcommand}"
                 parse_command_attributes(subcommand, subattributes)
               end
             else
-              c.send("#{a}=", v)
+              c.send("#{a}=", v.respond_to?(:chomp) ? v.chomp : v)
             end
           end
         end
