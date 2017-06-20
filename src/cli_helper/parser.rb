@@ -21,12 +21,11 @@
 #==============================================================================
 require 'yaml'
 require 'commands'
-require 'defaults'
 
 module Metalware
   module CliHelper
     class Parser
-      def initialize(calling_obj)
+      def initialize(calling_obj = nil)
         @calling_obj = calling_obj
         config = File.join(File.dirname(__FILE__), "config.yaml")
         @yaml = YAML.load_file(config)
@@ -38,6 +37,8 @@ module Metalware
         else
           @yaml
         end
+      rescue NameError
+        @yaml
       end
 
       def parse_commands_metalware_cli
