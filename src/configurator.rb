@@ -19,6 +19,8 @@ module Metalware
 
     private
 
+    attr_reader :highline, :questions, :answers_file
+
     def ask_questions
       questions.map do |identifier, properties|
         question = Question.new(identifier, properties)
@@ -58,7 +60,5 @@ module Metalware
         end
       end
     end
-
-    attr_reader :highline, :questions, :answers_file
   end
 end
