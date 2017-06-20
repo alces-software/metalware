@@ -27,18 +27,23 @@ module Metalware
     private
 
     class Question
-      attr_reader :identifier, :question, :type
+      attr_reader :identifier, :question, :type, :choices
 
       def initialize(identifier, properties)
         @identifier = identifier
         @question = properties[:question]
         @type = properties[:type]
+        @choices = properties[:choices]
       end
 
       def ask(highline)
         case type
         when 'boolean'
           highline.agree(question)
+        when 'choice'
+          highline.choose(*choices) do |menu|
+            menu.prompt = question
+          end
         when 'integer'
           highline.ask(question, Integer)
         else

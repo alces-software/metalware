@@ -141,5 +141,31 @@ RSpec.describe Metalware::Configurator do
         'boolean_q' => true
       })
     end
+
+    it "offers choices for question with type 'choice'" do
+      define_questions({
+        test: {
+          choice_q: {
+            question: 'What choice would you like?',
+            type: 'choice',
+            choices: ['foo', 'bar']
+          }
+        }
+      })
+
+      expect(highline).to receive(
+        :choose
+      ).with(
+        'foo', 'bar'
+      ).and_return(
+        'bar'
+      )
+
+      configurator.configure
+
+      expect(answers).to eq({
+        'choice_q' => 'bar'
+      })
+    end
   end
 end
