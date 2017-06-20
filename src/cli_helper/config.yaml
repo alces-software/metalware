@@ -82,7 +82,7 @@ commands:
     description: >
       Build is used to rendered template files before waiting for the compute
       nodes to pxe-boot and build. Build by default will render the pxelinux and
-      kickstart templates. In additional, build renders the "files" list in 
+      kickstart templates. In additional, build renders the "files" list in
       [config].yaml for the gender group and node.
 
 
@@ -171,7 +171,7 @@ commands:
     syntax: metal hunter [options]
     summary: Detects and caches DHCP discover messages
     description: >
-      Hunter is used in conjunction with the dhcp command to update 
+      Hunter is used in conjunction with the dhcp command to update
       dhcp server. Hunter listens out for dhcp discovery messages from the
       booting nodes. Hunter assigns the nodes a node name based of PREFIX or
       user input. The node's name and MAC address is then cached.
@@ -261,7 +261,7 @@ commands:
     syntax: metal repo [options]
     summary: Manage template and config repository
     # description can also be used for subcommands
-    subcommands: 
+    subcommands:
       use: *repo_use
       update: *repo_update
 
