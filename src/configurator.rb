@@ -13,18 +13,25 @@ module Metalware
     end
 
     def configure
-      identifier, properties = questions.first
-      question = Question.new(identifier, properties)
-      answer = question.ask(highline)
-      answers = {
-        identifier => answer
-      }
+      answers = ask_questions
+      save_answers(answers)
+    end
+
+    private
+
+    def ask_questions
+      questions.map do |identifier, properties|
+        question = Question.new(identifier, properties)
+        answer = question.ask(highline)
+        [identifier, answer]
+      end.to_h
+    end
+
+    def save_answers(answers)
       File.open(answers_file, 'w') do |f|
         f.write(YAML.dump(answers))
       end
     end
-
-    private
 
     class Question
       attr_reader :identifier, :question, :type, :choices

@@ -167,5 +167,44 @@ RSpec.describe Metalware::Configurator do
         'choice_q' => 'bar'
       })
     end
+
+    it 'asks all questions in order' do
+      define_questions({
+        test: {
+          string_q: {
+            question: 'String?',
+            type: 'string',
+          },
+          integer_q: {
+            question: 'Integer?',
+            type: 'integer',
+          },
+          boolean_q: {
+            question: 'Boolean?',
+            type: 'boolean',
+          },
+        },
+        some_other_questions: {
+          not_asked_q: {
+            question: 'Not asked?'
+          }
+        }
+      })
+
+      allow(highline).to receive(
+        :ask
+      ).and_return('Some string', 11)
+      allow(highline).to receive(
+        :agree
+      ).and_return(false)
+
+      configurator.configure
+
+      expect(answers).to eq(
+        'string_q' => 'Some string',
+        'integer_q' => 11,
+        'boolean_q' => false,
+      )
+    end
   end
 end
