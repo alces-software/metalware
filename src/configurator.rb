@@ -10,9 +10,7 @@ module Metalware
       @questions_section = questions
       @answers_file = answers_file
 
-      @questions = YAML.load_file(configure_file).
-      with_indifferent_access[questions].
-      map{ |identifier, properties| create_question(identifier, properties) }
+      @questions = load_questions
     end
 
     def configure
@@ -27,6 +25,12 @@ module Metalware
       :questions_section,
       :answers_file,
       :questions
+
+    def load_questions
+      @questions = YAML.load_file(configure_file).
+        with_indifferent_access[questions_section].
+        map{ |identifier, properties| create_question(identifier, properties) }
+    end
 
     def ask_questions
       questions.map do |question|
