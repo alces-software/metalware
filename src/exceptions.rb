@@ -48,4 +48,7 @@ module Metalware
 
   class YAMLConfigError < MetalwareError
   end
+
+  class UnknownQuestionTypeError < MetalwareError
+  end
 end

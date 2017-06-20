@@ -206,5 +206,27 @@ RSpec.describe Metalware::Configurator do
         'boolean_q' => false,
       )
     end
+
+    it 'fails fast for question with unknown type' do
+      define_questions({
+        test: {
+          # This question
+          string_q: {
+            question: 'String?',
+            type: 'string',
+          },
+          unknown_q: {
+            question: 'Something odd?',
+            type: 'foobar',
+          }
+        },
+      })
+
+      expect {
+        configurator
+      }.to raise_error(
+        Metalware::UnknownQuestionTypeError
+      )
+    end
   end
 end
