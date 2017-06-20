@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
-$:.unshift File.expand_path(File.join(__FILE__, "../../src"))
-require 'bundler/setup'
-require 'cli_helper/parser'
+require "yaml"
 
 class AutoComplete
   def initialize
@@ -9,12 +7,14 @@ class AutoComplete
     @complete = ARGV[2..-1] # skips the second input as this is always `metal`
     @complete.pop unless @cur.nil? # Remove the current element from completed
     @values = []
-    @yaml = Metalware::CliHelper::Parser.new.parse_commands
+    config = File.join(File.dirname(__FILE__), "../src/cli_helper/config.yaml")
+    @yaml = YAML.load_file(config)
     @input_only_contains_commands = true
   end
 
   def run
     auto_complete_commands
+    auto_complete_options
     return_values
   end
 
@@ -23,6 +23,19 @@ class AutoComplete
       add_return_values(current_hash.keys)
     elsif current_hash.key?("subcommands") && @input_only_contains_commands
       add_return_values(current_hash["subcommands"].keys)
+    end
+  end
+
+  def auto_complete_options
+    return if @cur.to_s[0] != "-"
+    add_return_values(["-h", "--help", "--trace", "--version"])
+    @yaml["global_options"].each do |opt|
+      add_return_values(opt["tags"])
+    end
+    if current_hash["options"].is_a?(Array)
+      current_hash["options"].each do |opt|
+        add_return_values(opt["tags"])
+      end
     end
   end
 

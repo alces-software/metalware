@@ -32,16 +32,6 @@ module Metalware
       end
 
       def parse_commands
-        if @calling_obj.is_a? Metalware::Cli
-          parse_commands_metalware_cli
-        else
-          @yaml
-        end
-      rescue NameError
-        @yaml
-      end
-
-      def parse_commands_metalware_cli
         @yaml["commands"].each do |command, attributes|
           parse_command_attributes(command, attributes)
         end
