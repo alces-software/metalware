@@ -116,5 +116,30 @@ RSpec.describe Metalware::Configurator do
         'integer_q' => 7
       })
     end
+
+    it "uses confirmation for questions with type 'boolean'" do
+      define_questions({
+        test: {
+          boolean_q: {
+            question: 'Should this cluster be awesome?',
+            type: 'boolean'
+          }
+        }
+      })
+
+      expect(highline).to receive(
+        :agree
+      ).with(
+       'Should this cluster be awesome?'
+      ).and_return(
+        true
+      )
+
+      configurator.configure
+
+      expect(answers).to eq({
+        'boolean_q' => true
+      })
+    end
   end
 end

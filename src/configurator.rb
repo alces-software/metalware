@@ -37,6 +37,8 @@ module Metalware
 
       def ask(highline)
         case type
+        when 'boolean'
+          highline.agree(question)
         when 'integer'
           highline.ask(question, Integer)
         else
