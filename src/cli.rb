@@ -1,4 +1,24 @@
-
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
 # See http://stackoverflow.com/questions/837123/adding-a-directory-to-load-path-ruby.
 $:.unshift File.dirname(__FILE__)
 
@@ -7,8 +27,7 @@ require 'bundler/setup'
 require 'commander'
 
 require 'commander_extensions'
-require 'commands'
-require 'defaults'
+require 'cli_helper/parser'
 
 module Metalware
   class Cli
@@ -20,167 +39,7 @@ module Metalware
       program :version, '2.0.0'
       program :description, 'Alces tools for the management and configuration of bare metal machines'
 
-      global_option(
-        '-c FILE', '--config FILE',
-        'Specify config file to use instead of default (/opt/metalware/etc/config.yaml)'
-      )
-
-      global_option(
-        '--strict', 'Convert warnings to errors'
-      )
-
-      global_option(
-        '--quiet', 'Suppress any warnings from being displayed'
-      )
-
-      command :'repo' do |c|
-        c.syntax = 'metal repo [options]'
-        c.summary = 'Manage template and config repository'
-        c.sub_command_group = true
-      end
-
-      command :'repo use' do |c|
-        c.syntax = 'metal repo use REPO_URL [options]'
-        c.summary = ''
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.option '-f', '--force',
-          'Force use of a new repo even if local changes have been made to the current repo'
-        c.sub_command = true
-        c.action Commands::Repo::Use
-      end
-
-      command :'repo update' do |c|
-        c.syntax = 'metal repo update [options]'
-        c.summary = ''
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.option '-f', '--force',
-          'Force update even if local changes have been made to the repo'
-        c.sub_command = true
-        c.action Commands::Repo::Update
-      end
-
-      command :render do |c|
-        c.syntax = 'metal render TEMPLATE [NODE] [options]'
-        c.summary = ''
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.action Commands::Render
-      end
-
-      command :hosts do |c|
-        c.syntax = 'metal hosts NODE_IDENTIFIER [options]'
-        c.summary = ''
-        #c.description = ''
-        c.example 'description', 'command example'
-        c.option '-g', '--group', String,
-          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.option '-t TEMPLATE', '--template TEMPLATE', String,
-          "Specify hosts template to use (default: #{Defaults.hosts.template})"
-        c.option '-x', '--dry-run',
-          'Do not modify hosts file, just output additions that would be made'
-        c.action Commands::Hosts
-      end
-
-      command :hunter do |c|
-        c.syntax = 'metal hunter [options]'
-        c.summary = ''
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.option '-i INTERFACE', '--interface INTERFACE', String,
-          "Local interface to hunt on (default: #{Defaults.hunter.interface})"
-        c.option '-p PREFIX', '--prefix PREFIX', String,
-          "Root to suggest for detected node names (default: #{Defaults.hunter.prefix})"
-        c.option '-l LENGTH', '--length LENGTH', Integer,
-          "Numeric sequence length to use for suggested detected node names (default: #{Defaults.hunter.length})"
-        c.option '-s START_NUMBER', '--start  START_NUMBER', Integer,
-          "Start integer to use for suggested detected node names (default: #{Defaults.hunter.start})"
-        c.action Commands::Hunter
-      end
-
-      command :dhcp do |c|
-        c.syntax = 'metal dhcp [options]'
-        c.summary = ''
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.option '-t TEMPLATE', '--template TEMPLATE', String,
-          "Specify dhcp template to use (default: #{Defaults.dhcp.template})"
-        c.action Commands::Dhcp
-      end
-
-      command :build do |c|
-        c.syntax = 'metal build NODE_IDENTIFIER [options]'
-        c.summary = ''
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.option '-g', '--group', String,
-          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.option '-k KICKSTART_TEMPLATE', '--kickstart KICKSTART_TEMPLATE',
-          String, "Specify kickstart template to use (default: #{Defaults.build.kickstart})"
-        c.option '-p PXELINUX_TEMPLATE', '--pxelinux  PXELINUX_TEMPLATE',
-          String, "Specify pxelinux template to use (default: #{Defaults.build.pxelinux})"
-        c.action Commands::Build
-      end
-
-      command :power do |c|
-        c.syntax = 'metal power NODE_IDENTIFIER [COMMAND] [options]'
-        c.summary = 'Volatile'
-        c.description = ''
-        c.option '-g', '--group', String,
-          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        #c.example 'description', 'command example'
-        c.action BashCommand
-      end
-
-      command :console do |c|
-        c.syntax = 'metal console NODE_IDENTIFIER [options]'
-        c.summary = 'Volatile'
-        c.description = ''
-        #c.example 'description', 'command example'
-        c.action BashCommand
-      end
-
-      command :status do |c|
-        c.syntax = 'metal status NODE_IDENTIFIER [options]'
-        c.summary = 'Display the current network status of the nodes'
-        c.description = "The status tool will attempt to determine the power and" \
-                        " ping status of the node(s)."
-        c.option '-g', '--group', String,
-          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.option '--wait-limit WAIT_LIMIT', Integer,
-          'Sets how long (in seconds) wait for a response from the node ' \
-          'before assuming an error has occurred. Minimum 1 seconds. ' \
-          "(default: #{Defaults.status.wait_limit})"
-        c.option '--thread-limit THREAD_LIMIT', Integer,
-          'Sets the maximum number of network operations' \
-          "(default: #{Defaults.status.thread_limit})"
-        c.action Commands::Status
-      end
-
-      command :ipmi do |c|
-        c.syntax = 'metal ipmi NODE_IDENTIFIER [options]'
-        c.summary = 'Volatile. Perform ipmi commands on single or multiple machines'
-        c.description = "***VOLATILE***\n\n" \
-                    'Perform ipmi commands on single or multiple machines'
-        #c.example 'description', 'command example'
-        c.option '-g',
-          'Specifies that NODE_IDENTIFIER is the group. MUST be before NODE_IDENTIFIER'
-        c.option '-k COMMAND',
-          'Specifies the ipmi command'
-        c.action BashCommand
-      end
-
-      command :each do |c|
-        c.syntax = 'metal each NODE_IDENTIFIER COMMAND [options]'
-        c.summary = 'Runs a command for a node(s)'
-        c.description = 'Runs the COMMAND for the node/ group specified by ' \
-          'NODE_IDENTIFIER. Commands that contain spaces must be quoted. The ' \
-          'command is first rendered by the templater and supports erb tags.'
-        c.option '-g', '--group', String,
-          'Switch NODE_IDENTIFIER to specify a gender group rather than a single node'
-        c.action Commands::Each
-      end
+      CliHelper::Parser.new(self).parse_commands
 
       def run!
         ARGV.push "--help" if ARGV.empty?
