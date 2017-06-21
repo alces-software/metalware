@@ -19,6 +19,33 @@ global_options:
       Suppress any warnings from being displayed
 
 subcommands:
+  configure_domain: &configure_domain
+    syntax: metal configure domain [options]
+    summary: Configure Metalware domain
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure the domain for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Domain
+
+  configure_group: &configure_group
+    syntax: metal configure group GROUP_NAME [options]
+    summary: Configure a Metalware group
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure a group for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Group
+
+  configure_node: &configure_node
+    syntax: metal configure node NODE_NAME [options]
+    summary: Configure a Metalware node
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure a node for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Node
+
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
     summary: Clone a new template git repo
@@ -55,7 +82,7 @@ commands:
     description: >
       Build is used to rendered template files before waiting for the compute
       nodes to pxe-boot and build. Build by default will render the pxelinux and
-      kickstart templates. In additional, build renders the "files" list in 
+      kickstart templates. In additional, build renders the "files" list in
       [config].yaml for the gender group and node.
 
 
@@ -77,6 +104,14 @@ commands:
         default: default
         description: >
           Specify pxelinux template to use
+
+  configure:
+    syntax: metal configure [options]
+    summary: Configure different aspects of this Metalware installation
+    subcommands:
+      domain: *configure_domain
+      group: *configure_group
+      node: *configure_node
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
@@ -136,7 +171,7 @@ commands:
     syntax: metal hunter [options]
     summary: Detects and caches DHCP discover messages
     description: >
-      Hunter is used in conjunction with the dhcp command to update 
+      Hunter is used in conjunction with the dhcp command to update
       dhcp server. Hunter listens out for dhcp discovery messages from the
       booting nodes. Hunter assigns the nodes a node name based of PREFIX or
       user input. The node's name and MAC address is then cached.
@@ -226,7 +261,7 @@ commands:
     syntax: metal repo [options]
     summary: Manage template and config repository
     # description can also be used for subcommands
-    subcommands: 
+    subcommands:
       use: *repo_use
       update: *repo_update
 

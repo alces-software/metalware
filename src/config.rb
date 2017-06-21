@@ -43,6 +43,10 @@ module Metalware
       File.join(repo_configs_path, config_file)
     end
 
+    def configure_file
+      File.join(repo_path, 'configure.yaml')
+    end
+
     attr_reader :cli
   end
 end
