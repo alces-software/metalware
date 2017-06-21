@@ -1,3 +1,4 @@
+require 'recursive-open-struct'
 
 module Metalware
   class IterableRecursiveOpenStruct < RecursiveOpenStruct
