@@ -22,7 +22,6 @@
 
 require 'metal_log'
 require 'config'
-require 'defaults'
 require 'repo'
 require 'exceptions'
 
@@ -45,7 +44,6 @@ module Metalware
     def pre_setup(args, options)
       setup_config(options)
       validate_repo_exists_if_required
-      setup_option_defaults(options)
       log_command
     end
 
@@ -70,11 +68,6 @@ module Metalware
         quiet: !!options.quiet
       }
       @config = Config.new(options.config, cli_options)
-    end
-
-    def setup_option_defaults(options)
-      command_defaults = Defaults.send(command_name)
-      options.default(**command_defaults)
     end
 
     def command_name

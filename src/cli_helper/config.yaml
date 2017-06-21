@@ -69,13 +69,14 @@ commands:
       - *group_option
       - tags: [-k KICKSTART_TEMPLATE, --kickstart KICKSTART_TEMPLATE]
         type: String
+        default: default
         description: >
-          Specify kickstart template to use (default:
-          #{Defaults.build.kickstart})
+          Specify kickstart template to use
       - tags: [-p PXELINUX_TEMPLATE, --pxelinux PXELINUX_TEMPLATE]
         type: String
+        default: default
         description: >
-          Specify pxelinux template to use (default: #{Defaults.build.pxelinux})
+          Specify pxelinux template to use
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
@@ -97,8 +98,9 @@ commands:
     options:
       - tags: [-t TEMPLATE, --template TEMPLATE]
         type: String
+        default: default
         description: >
-          Specify dhcp template to use (default: #{Defaults.dhcp.template})
+          Specify dhcp template to use
 
   each:
     syntax: metal each NODE_IDENTIFIER COMMAND [options]
@@ -123,8 +125,9 @@ commands:
       - *group_option
       - tags: [-t TEMPLATE, --template TEMPLATE]
         type: String
+        default: default
         description: >
-          Specify hosts template to use (default: #{Defaults.hosts.template})
+          Specify hosts template to use
       - tags: [-x, --dry-run]
         description: >
           Do not modify hosts file, just output additions that would be made
@@ -147,23 +150,24 @@ commands:
     options:
       - tags: [-i INTERFACE, --interface INTERFACE]
         type: String
+        default: eth0
         description: >
-          Local interface to hunt on (default: #{Defaults.hunter.interface})
+          Local interface to hunt on
       - tags: [-p PREFIX, --prefix PREFIX]
         type: String
+        default: node
         description: >
           Root to suggest for detected node names
-          (default: #{Defaults.hunter.prefix})
       - tags: [-l LENGTH, --length LENGTH]
         type: Integer
+        default: 2
         description: >
           Numeric sequence length to use for suggested detected node names
-          (default: #{Defaults.hunter.length})
       - tags: [-s START_NUMBER, --start START_NUMBER]
         type: Integer
+        default: 1
         description: >
           Start integer to use for suggested detected node names
-          (default: #{Defaults.hunter.start})
 
   ipmi:
     syntax: metal ipmi NODE_IDENTIFIER [options]
@@ -237,12 +241,12 @@ commands:
       - *group_option
       - tags: [--wait-limit WAIT_LIMIT]
         type: Integer
+        default: 10
         description: >
           Sets how long (in seconds) wait for a response from the node before
-          assuming an error has occurred. Minimum 1 seconds. (default:
-          #{Defaults.status.wait_limit})
+          assuming an error has occurred. Minimum 1 seconds.
       - tags: [--thread-limit THREAD_LIMIT]
         type: Integer
+        default: 50
         description: >
           Sets the maximum number of network operations
-          (default: #{Defaults.status.thread_limit})
