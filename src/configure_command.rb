@@ -13,6 +13,10 @@ module Metalware
       abort 'Exiting without saving...'
     end
 
+    def requires_repo?
+      true
+    end
+
     protected
 
     def answers_file
