@@ -7,6 +7,9 @@ require 'spec_utils'
 RSpec.describe Metalware::Commands::Hosts do
 
   def run_hosts(node_identifier, **options_hash)
+    # Adds default
+    options_hash[:template] = "default" unless options_hash.key?(:template)
+
     SpecUtils.run_command(
       Metalware::Commands::Hosts, node_identifier, **options_hash
     )

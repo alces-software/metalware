@@ -9,6 +9,10 @@ require 'spec_utils'
 
 RSpec.describe Metalware::Commands::Build do
   def run_build(node_identifier, **options_hash)
+    # Adds the default values if they do not exist
+    options_hash[:kickstart] = "default" unless options_hash.key?(:kickstart)
+    options_hash[:pxelinux] = "default" unless options_hash.key?(:pxelinux)
+
     # Run command in timeout as `build` will wait indefinitely, but want to
     # abort tests if it looks like this is happening.
     Timeout::timeout 0.5 do

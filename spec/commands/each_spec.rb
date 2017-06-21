@@ -32,18 +32,15 @@ RSpec.describe Metalware::Commands::Each do
   end
 
   def run_command_echo(node, group = false)
-    allow_any_instance_of(Metalware::Commands::Each).to \
-      receive(:setup_option_defaults)
     opt = OpenStruct.new({group: group})
-    old_stdout = $stdout
-    $stdout = Tempfile.new("stdout")
+    $stdout = tmp = Tempfile.new("stdout")
     Metalware::Commands::Each.new([node, "echo <%= alces.nodename %>"], opt)
     $stdout.flush
     $stdout.rewind
     $stdout.read
   ensure
-    $stdout.delete
-    $stdout = old_stdout
+    tmp.delete if tmp.respond_to?(:delete)
+    $stdout = STDOUT
   end
 
   it 'runs the command on a single node' do

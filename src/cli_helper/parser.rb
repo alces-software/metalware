@@ -50,7 +50,8 @@ module Metalware
             when "options"
               v.each do |opt|
                 c.option(*opt["tags"],
-                       opt["type"],
+                       eval(opt["type"].to_s),
+                       {default: opt["default"]},
                        "#{opt["description"]}".chomp)
               end
             when "subcommands"
