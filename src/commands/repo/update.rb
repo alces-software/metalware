@@ -23,9 +23,9 @@ module Metalware
           uncommited = local_commit.diff_workdir.size
 
           if @force
-            MetalLog.warn
+            MetalLog.warn \
                "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
-            MetalLog.warn
+            MetalLog.warn \
                "Deleted #{uncommited} local change(s)" if uncommited > 0
           else
             raise LocalAheadOfRemote.new(ahead_behind[0]) if ahead_behind[0] > 0
