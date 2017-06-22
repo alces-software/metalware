@@ -6,6 +6,7 @@ require 'spec_utils'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
+REPO_EMPTY_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-empty.yaml')
 UNSET_PARAMETER_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'unset_parameter_template.erb')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
@@ -26,6 +27,10 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render' do
+    before do
+      @config = Metalware::Config.new(REPO_EMPTY_CONFIG_PATH)
+    end
+
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
         expected = <<-EOF
@@ -38,7 +43,7 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders({}, expected)
+        expect_renders({}, expected, config: @config)
       end
     end
 
@@ -57,7 +62,7 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders(template_parameters, expected)
+        expect_renders(template_parameters, expected, config: @config)
       end
     end
 
