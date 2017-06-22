@@ -111,15 +111,7 @@ module Metalware
     def render_from_string(str)
       replace_erb(str, @config)
     end
-
-    # XXX Make this not a nested class, also possibly should use common error
-    # class or superclass.
-    class LoopErbError < StandardError
-      def initialize(msg="Input hash may contain infinitely recursive ERB")
-        super
-      end
-    end
-
+    
     private
 
     def replace_erb(template, template_parameters)
