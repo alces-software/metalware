@@ -5,3 +5,4 @@ testnode[01-03] testnodes,nodes,cluster,domain
 testnode02 postgroup
 node[01-10] status
 deepmerge deepmerge
+answer1 ag3,ag2,ag1

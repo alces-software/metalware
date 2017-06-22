@@ -26,16 +26,21 @@ module Metalware
     # Return the raw merged config for this node, without parsing any embedded
     # ERB (this should be done using the Templater if needed, as we won't know
     # all the template parameters until a template is being rendered).
-    # XXX refactor this to use `load_config`, and use this from `build_files`.
+    # XXX refactor `build_files` to use this
     def raw_config
-      config_hashes = configs.map do |c|
-        load_config(c)
-      end
-      combine_configs(config_hashes)
+      combine_hashes(configs.map { |c| load_config(c) })
     end
 
-    def combine_configs(config_hashes)
-      combined = config_hashes.each_with_object({}) do |config, combined_config|
+    def answers
+      answers = configs.map do |c|
+        f = File.join(Metalware::Constants::ANSWERS_PATH, c + ".yaml")
+        File.file?(f) ? YAML.load_file(f) : {}
+      end
+      combine_hashes(answers)
+    end
+
+    def combine_hashes(hashes)
+      combined = hashes.each_with_object({}) do |config, combined_config|
         raise CombineConfigError unless config.is_a? Hash
         combined_config.deep_merge!(config)
       end

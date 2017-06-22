@@ -1,12 +1,21 @@
 
+require 'spec_helper'
+
 require 'node'
 require 'spec_utils'
-
+require 'fileutils'
+require 'config'
+require 'constants'
+require 'fakefs_helper'
 
 RSpec.describe Metalware::Node do
   before do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
+  end
+
+  after do
+    FakeFS.clear!
   end
 
   def node(name)
@@ -46,6 +55,27 @@ RSpec.describe Metalware::Node do
           }
         }
       })
+    end
+  end
+
+  describe "#answer_hash" do
+    it 'performs a deep merge of answer files' do
+      config = Metalware::Config.new
+      @fshelper = FakeFSHelper.new(config)
+      answers = Dir[File.join(FIXTURES_PATH, "answers/node-test-set1/*")]
+      @fshelper.load_config_files
+      @fshelper.add_answer_files(answers)
+      expected_hash = {
+        value_set_by_domain: "domain",
+        value_set_by_ag1: "ag1",
+        value_set_by_ag2: "ag2",
+        value_set_by_answer1: "answer1"
+      }
+
+      result_hash = @fshelper.run do
+        Metalware::Node.new(config, 'answer1').answers
+      end
+      expect(result_hash).to eq(expected_hash)
     end
   end
 
