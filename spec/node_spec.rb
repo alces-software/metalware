@@ -35,6 +35,10 @@ RSpec.describe Metalware::Node do
     SpecUtils.use_unit_test_config(self)
   end
 
+  after do
+    FakeFS.clear!
+  end
+
   def node(name)
     Metalware::Node.new(Metalware::Config.new, name)
   end
