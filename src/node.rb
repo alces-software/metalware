@@ -28,23 +28,18 @@ module Metalware
     # all the template parameters until a template is being rendered).
     # XXX refactor this to use `load_config`, and use this from `build_files`.
     def raw_config
-      combined_configs = {}
-      configs.each do |config_name|
-        begin
-          config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
-          config = YAML.load_file(config_path)
-        rescue Errno::ENOENT # Skips missing files
-        rescue StandardError
-          raise YAMLConfigError, "Could not parse YAML config file"
-        else
-          if !config.is_a? Hash
-            raise YAMLConfigError, "Expected YAML config file to contain a hash"
-          else
-            combined_configs.deep_merge!(config)
-          end
-        end
+      config_hashes = configs.map do |c|
+        load_config(c)
       end
-      combined_configs.deep_transform_keys{ |k| k.to_sym }
+      combine_configs(config_hashes)
+    end
+
+    def combine_configs(config_hashes)
+      combined = config_hashes.each_with_object({}) do |config, combined_config|
+        raise CombineConfigError unless config.is_a? Hash
+        combined_config.deep_merge!(config)
+      end
+      combined.deep_transform_keys{ |k| k.to_sym }
     end
 
     # The repo config files for this node in order of precedence from lowest to

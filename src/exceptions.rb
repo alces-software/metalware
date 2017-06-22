@@ -46,7 +46,10 @@ module Metalware
   class IterableRecursiveOpenStructPropertyError < MetalwareError
   end
 
-  class YAMLConfigError < MetalwareError
+  class CombineConfigError < MetalwareError
+    def intialize(msg="Could not combine config hashes")
+      super
+    end
   end
 
   class UnknownQuestionTypeError < MetalwareError

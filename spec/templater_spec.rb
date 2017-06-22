@@ -85,7 +85,7 @@ RSpec.describe Metalware::Templater do
 
         expect{
           Metalware::Templater.new(@config)
-        }.to raise_error(Metalware::Templater::LoopErbError)
+        }.to raise_error(Metalware::LoopErbError)
       end
 
       it 'raises if attempt to access a property of an unset parameter' do
