@@ -122,7 +122,7 @@ RSpec.describe Metalware::Templater do
       # Check genders config.
       genders_config = magic_namespace.genders
       expect(genders_config.masters).to eq(['login1'])
-      expect(genders_config.all).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
+      expect(genders_config.domain).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
       expect(genders_config.non_existent).to eq([])
     end
 
