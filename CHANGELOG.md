@@ -23,6 +23,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - Added the Node class which contains all the functions specific to a node. Example: combining the template parameter hash and pulling the gender groups it belongs to
 - Added the magic namespace to the template parameters used by erb
 - Added dhcp command which updates dhcp sever using the hunter cache
+- Replaced the all gender group with domain
 
 ## [1.2.0]
 

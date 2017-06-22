@@ -37,19 +37,19 @@ RSpec.describe Metalware::Node do
   describe '#configs' do
     it 'returns possible configs for node in precedence order' do
       testnode01 = node('testnode01')
-      expect(testnode01.configs).to eq(["all", "cluster", "nodes", "testnodes", "testnode01"])
+      expect(testnode01.configs).to eq(["domain", "cluster", "nodes", "testnodes", "testnode01"])
     end
 
-    it "just returns 'node' and 'all' configs for node not in genders" do
+    it "just returns 'node' and 'domain' configs for node not in genders" do
       name = 'not_in_genders_node01'
       node = node(name)
-      expect(node.configs).to eq(['all', name])
+      expect(node.configs).to eq(['domain', name])
     end
 
-    it "just returns 'all' when passed nil node name" do
+    it "just returns 'domain' when passed nil node name" do
       name = nil
       node = node(name)
-      expect(node.configs).to eq(['all'])
+      expect(node.configs).to eq(['domain'])
     end
   end
 

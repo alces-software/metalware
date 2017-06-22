@@ -39,7 +39,7 @@ RSpec.describe Metalware::NodeattrInterface do
         Metalware::NodeattrInterface.nodes_in_group('nodes')
       ).to eq(['testnode01', 'testnode02', 'testnode03'])
       expect(
-        Metalware::NodeattrInterface.nodes_in_group('all')
+        Metalware::NodeattrInterface.nodes_in_group('domain')
       ).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
     end
 
@@ -52,7 +52,7 @@ RSpec.describe Metalware::NodeattrInterface do
 
   describe '#groups_for_node' do
     it 'returns groups for given node, ordered as in genders' do
-      testnode_groups = ['testnodes', 'nodes', 'cluster', 'all']
+      testnode_groups = ['testnodes', 'nodes', 'cluster', 'domain']
       expect(
         Metalware::NodeattrInterface.groups_for_node('testnode01')
       ).to eq(testnode_groups)

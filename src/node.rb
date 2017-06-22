@@ -71,7 +71,7 @@ module Metalware
     # The repo config files for this node in order of precedence from lowest to
     # highest.
     def configs
-      [name, *groups, 'all'].reverse.reject(&:nil?).uniq
+      [name, *groups, 'domain'].reverse.reject(&:nil?).uniq
     end
 
     # Get the configured `files` for this node, to be rendered and used in
