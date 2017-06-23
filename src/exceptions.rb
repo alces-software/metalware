@@ -21,14 +21,13 @@
 #==============================================================================
 
 module Metalware
-  # We never want UnsetConfigLogError to be caught
-  class UnsetConfigLogError < Exception
-    def initialize(msg = "Error in MetalLog. Config not set.")
-      super
-    end
+  class MetalwareError < StandardError
   end
 
-  class MetalwareError < StandardError
+  class UnsetConfigLogError < MetalwareError
+    def initialize(msg = "Error in MetalLog. Config not set")
+      super
+    end
   end
 
   class NoGenderGroupError < MetalwareError
