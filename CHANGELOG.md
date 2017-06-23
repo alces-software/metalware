@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.0]
+
+### Changed
+
+- Created general combine_hash method in `Node` used by raw_config and answer methods
+- Fixed bug in tests that was caused by defining repo_path and repo_config_path independently in Config.
+- The MissingParameterWrapper automatically converts Hashes to a IterableRecursiveOpenStruct.
+
+### Added
+
+- Created FakeFSHelper to be used by the tests to spoof the file system
+- Added an answer method to Node which combines the answers given by `metal configure`
+- Loads the Node object into the magic namespace and use it to determine the nodename
+- Load the answers into the magic namespace with the missing parameters wrapper.
+
 ## [2.0.0]
 
 ### Changed

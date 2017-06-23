@@ -139,6 +139,31 @@ RSpec.describe Metalware::Templater do
       SpecUtils.use_mock_genders(self)
     end
 
+    context 'with answer files' do
+      it 'loads the answer files' do
+        config = Metalware::Config.new
+        @fshelper = FakeFSHelper.new(config)
+        answers = Dir[File.join(FIXTURES_PATH, "answers/node-test-set1/*")]
+        @fshelper.load_config_files
+        @fshelper.add_answer_files(answers)
+
+        answers = @fshelper.run do
+          templater = Metalware::Templater.new(config, {nodename: "answer1"})
+          templater.config.alces.answers
+        end
+
+        expected = {
+          value_set_by_domain: "domain",
+          value_set_by_ag1: "ag1",
+          value_set_by_ag2: "ag2",
+          value_set_by_answer1: "answer1"
+        }
+
+        expect(answers.instance_variable_get(:@wrapped_obj).to_hash).to \
+          eq(expected)
+      end
+    end
+
     context 'without passed parameters' do
       it 'is created with default values' do
         templater = Metalware::Templater.new(Metalware::Config.new)
@@ -195,9 +220,5 @@ RSpec.describe Metalware::Templater do
         expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
       end
     end
-
-    # context 'load with answers to questions' do
-      
-    # end
   end
 end

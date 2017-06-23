@@ -36,7 +36,11 @@ module Metalware
   class MissingParameterWrapper
     def initialize(wrapped_obj)
       @missing_tags = []
-      @wrapped_obj = wrapped_obj
+      @wrapped_obj = if wrapped_obj.is_a?(Hash)
+        IterableRecursiveOpenStruct.new(wrapped_obj)
+      else
+        wrapped_obj
+      end
     end
 
     def method_missing(s, *a, &b)
@@ -92,10 +96,13 @@ module Metalware
     def initialize(metalware_config, parameters={})
       @metalware_config = metalware_config
       @nodename = parameters[:nodename]
-
-      passed_magic_parameters = parameters.select do |k,v|
-        [:index, :nodename, :firstboot, :files].include?(k) && !v.nil?
+      passed_magic_parameters = parameters.dup.tap do |par|
+        par.select! do |k,v|
+          [:index, :firstboot, :files].include?(k) && !v.nil?
+        end
+        par[:node] = node if nodename
       end
+
       magic_struct = MagicNamespace.new(passed_magic_parameters)
       @magic_namespace = MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
@@ -220,10 +227,19 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:index, :nodename, :firstboot, :files) do
-    def initialize(index: 0, nodename: nil, firstboot: nil, files: nil)
+  MagicNamespace = Struct.new(:index, :node, :firstboot, :files) do
+    def initialize(index: 0, node: nil, firstboot: nil, files: nil)
       files = Hashie::Mash.new(files) if files
-      super(index, nodename, firstboot, files)
+      @node = node
+      super(index, nil, firstboot, files)
+    end
+
+    def nodename
+      @node ? @node.name : nil
+    end
+
+    def answers
+      MissingParameterWrapper.new(@node ? @node.answers : {})
     end
 
     def genders
