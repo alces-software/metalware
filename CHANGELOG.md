@@ -17,6 +17,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - All CLI information is stored in a config
 - Tests have been mirgrated to use rspec
 - The Iterator has been replaced with a Nodes class
+- Deprecated the use of repo_configs_path in Config. Also set repo_configs_path off repo_path if not otherwise specified
 
 ### Added
 

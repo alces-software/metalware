@@ -39,7 +39,7 @@ module Metalware
       repo_path: '/var/lib/metalware/repo',
       log_path: '/var/log/metalware',
       log_severity: "INFO",
-      repo_configs_path: '/var/lib/metalware/repo/config/',
+      repo_configs_path: 'Deprecated'
     }
 
     def initialize(file=nil, options = {})
@@ -54,8 +54,21 @@ module Metalware
     end
 
     KEYS_WITH_DEFAULTS.each do |key, default|
-      define_method :"#{key}" do
-        @config[key] || default
+      if key == :repo_configs_path
+        define_method :repo_configs_path do
+          if @config[:repo_configs_path]
+            MetalLog.warn \
+"Deprecated: repo_configs_path can be implicitly inferred from repo_path in " \
+"the config file. Using the value set by repo_configs_path"
+            @config[:repo_configs_path]
+          else
+            "#{repo_path}/config"
+          end
+        end
+      else
+        define_method :"#{key}" do
+          @config[key] || default
+        end
       end
     end
 
