@@ -243,9 +243,5 @@ RSpec.describe Metalware::Templater do
         expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
       end
     end
-
-    # context 'load with answers to questions' do
-      
-    # end
   end
 end
