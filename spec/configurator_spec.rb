@@ -31,7 +31,7 @@ RSpec.describe Metalware::Configurator do
     Metalware::Configurator.new(
       highline: highline,
       configure_file: configure_file_path,
-      questions: 'test',
+      questions_section: 'test',
       answers_file: answers_file_path
     )
   }
@@ -223,7 +223,7 @@ RSpec.describe Metalware::Configurator do
       })
 
       expect {
-        configurator
+        configurator.send(:questions)
       }.to raise_error(
         Metalware::UnknownQuestionTypeError,
         /'foobar'.*test\.unknown_q.*#{configure_file_path}/

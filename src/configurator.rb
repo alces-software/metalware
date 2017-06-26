@@ -24,13 +24,11 @@ require 'active_support/core_ext/hash'
 
 module Metalware
   class Configurator
-    def initialize(highline:, configure_file:, questions:, answers_file:)
+    def initialize(highline:, configure_file:, questions_section:, answers_file:)
       @highline = highline
       @configure_file = configure_file
-      @questions_section = questions
+      @questions_section = questions_section
       @answers_file = answers_file
-
-      @questions = load_questions
     end
 
     def configure
@@ -43,11 +41,10 @@ module Metalware
     attr_reader :highline,
       :configure_file,
       :questions_section,
-      :answers_file,
-      :questions
+      :answers_file
 
-    def load_questions
-      @questions = YAML.load_file(configure_file).
+    def questions
+      @questions ||= YAML.load_file(configure_file).
         with_indifferent_access[questions_section].
         map{ |identifier, properties| create_question(identifier, properties) }
     end

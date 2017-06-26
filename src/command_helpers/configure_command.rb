@@ -30,7 +30,7 @@ module Metalware
         Configurator.new(
           highline: self,
           configure_file: config.configure_file,
-          questions: questions_section,
+          questions_section: questions_section,
           answers_file: answers_file
         )
       end
