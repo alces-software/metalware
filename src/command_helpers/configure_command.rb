@@ -28,7 +28,6 @@ module Metalware
 
       def configurator
         Configurator.new(
-          highline: self,
           configure_file: config.configure_file,
           questions_section: questions_section,
           answers_file: answers_file

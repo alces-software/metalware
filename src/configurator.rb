@@ -21,10 +21,12 @@
 #==============================================================================
 
 require 'active_support/core_ext/hash'
+require 'highline'
 
 module Metalware
   class Configurator
-    def initialize(highline:, configure_file:, questions_section:, answers_file:)
+    def initialize(highline: HighLine.new, configure_file:,
+                   questions_section:, answers_file:)
       @highline = highline
       @configure_file = configure_file
       @questions_section = questions_section
