@@ -20,7 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'rugged'
 require 'fileutils'
 
@@ -29,7 +29,7 @@ require 'constants'
 module Metalware
   module Commands
     module Repo
-      class Use < BaseCommand
+      class Use < CommandHelpers::BaseCommand
         def setup(args, options)
           @repo_url = args.first
           @options = options

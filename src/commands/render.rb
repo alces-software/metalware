@@ -20,12 +20,12 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'templater'
 
 module Metalware
   module Commands
-    class Render < BaseCommand
+    class Render < CommandHelpers::BaseCommand
       def setup(args, options)
         @args = args
       end

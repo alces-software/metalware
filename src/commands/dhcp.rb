@@ -20,7 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'constants'
 require 'output'
 require 'templater'
@@ -29,7 +29,7 @@ require 'system_command'
 
 module Metalware
   module Commands
-    class Dhcp < BaseCommand
+    class Dhcp < CommandHelpers::BaseCommand
       DHCPD_HOSTS_FILE = '/etc/dhcp/dhcpd.hosts'
       RENDERED_DHCPD_HOSTS_STAGING_FILE = File.join(
         Constants::CACHE_PATH, 'last-rendered.dhcpd.hosts'

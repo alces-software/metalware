@@ -10,6 +10,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - Created general combine_hash method in `Node` used by raw_config and answer methods
 - Fixed bug in tests that was caused by defining repo_path and repo_config_path independently in Config.
 - The MissingParameterWrapper automatically converts Hashes to a IterableRecursiveOpenStruct.
+- Moved auxiliary Commands (e.g. BaseCommand) into the CommandHelpers module.
 
 ### Added
 

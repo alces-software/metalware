@@ -20,13 +20,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'templater'
 require 'nodes'
 
 module Metalware
   module Commands
-    class Each < BaseCommand
+    class Each < CommandHelpers::BaseCommand
       def setup(args, options)
         node_identifier = args[0]
         @nodes = Nodes.create(config, node_identifier, options.group)

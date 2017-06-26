@@ -20,27 +20,29 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'metal_log'
 require 'config'
 require 'constants'
 
 module Metalware
-  class BashCommand < BaseCommand
-    private
+  module CommandHelpers
+    class BashCommand < CommandHelpers::BaseCommand
+      private
 
-    def setup(args, options)
-      @command = ARGV[0]
-      @cli_input = ARGV[1..(ARGV.length - 1)].join(" ")
-    end
+      def setup(args, options)
+        @command = ARGV[0]
+        @cli_input = ARGV[1..(ARGV.length - 1)].join(" ")
+      end
 
-    def run
-      script = File.join(Constants::METALWARE_INSTALL_PATH,
-                         "libexec",
-                         "#{@command}")
-      cmd = "#{script} #{@cli_input}"
-      MetalLog.info "Running: #{cmd}"
-      exec("#{cmd}")
+      def run
+        script = File.join(Constants::METALWARE_INSTALL_PATH,
+                           "libexec",
+                           "#{@command}")
+        cmd = "#{script} #{@cli_input}"
+        MetalLog.info "Running: #{cmd}"
+        exec("#{cmd}")
+      end
     end
   end
 end

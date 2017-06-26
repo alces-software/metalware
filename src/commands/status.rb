@@ -19,7 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'base_command'
+require 'command_helpers/base_command'
 require 'status/monitor'
 require 'nodes'
 require 'status/job'
@@ -28,7 +28,7 @@ require 'exceptions'
 
 module Metalware
   module Commands
-    class Status < BaseCommand
+    class Status < CommandHelpers::BaseCommand
       def setup(args, options)
         @opt = options
         if @opt.thread_limit < 1
