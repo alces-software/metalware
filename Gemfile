@@ -10,6 +10,7 @@ gem 'pcap', git: 'https://github.com/alces-software/ruby-pcap.git'
 gem 'net-dhcp'
 gem 'hashie'
 gem 'fakefs'
+gem 'highline', '1.7.8'
 
 group :test do
   gem 'rspec'

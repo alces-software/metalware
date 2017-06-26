@@ -22,6 +22,9 @@
 
 require 'active_support/core_ext/hash'
 require 'highline'
+require 'patches/highline'
+
+HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
 module Metalware
   class Configurator
@@ -65,11 +68,14 @@ module Metalware
     end
 
     def create_question(identifier, properties)
-      Question.new(
-        identifier: identifier,
-        properties: properties,
-        configure_file: configure_file,
-        questions_section: questions_section
+      Question.new({
+          identifier: identifier,
+          properties: properties,
+          configure_file: configure_file,
+          questions_section: questions_section
+        }.tap { |h|
+          h[:default] = properties["default"] if properties.key?("default")
+        }
       )
     end
 
@@ -78,10 +84,12 @@ module Metalware
 
       attr_reader :identifier, :question, :type, :choices
 
-      def initialize(identifier:, properties:, configure_file:, questions_section:)
+      def initialize(identifier:, properties:, configure_file:,
+                     questions_section:, default: nil)
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
+        @default = default
         @type = type_for(
           properties[:type],
           configure_file: configure_file,
@@ -89,18 +97,41 @@ module Metalware
         )
       end
 
+      def add_default(question, type = :string)
+        unless @default.nil?
+          parsed_default = nil
+          case type
+          when :boolean
+              if @defualt == "true" || @defualt.is_a?(TrueClass)
+                parsed_default = true
+              elsif @default == "false" || @default.is_a?(FalseClass)
+                parsed_default = false
+              end
+          when :string
+            parsed_default = @default.to_s
+          when :integer
+            parsed_default = (@default.is_a?(Integer) ? @default : @default.to_i)
+          else
+            msg = "Unrecognized data type (#{type}) as a default"
+            raise UnknownDataTypeError, msg
+          end
+          question.default = parsed_default
+        end
+      end
+
       def ask(highline)
         case type
         when :boolean
-          highline.agree(question)
+          highline.agree(question) { |q| add_default(q ,:boolean) }
         when :choice
           highline.choose(*choices) do |menu|
             menu.prompt = question
+            add_default(q)
           end
         when :integer
-          highline.ask(question, Integer)
+          highline.ask(question, Integer)  { |q| add_default(q, :integer) }
         else
-          highline.ask(question)
+          highline.ask(question)  { |q| add_default(q) }
         end
       end
 
