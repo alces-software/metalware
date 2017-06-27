@@ -270,28 +270,16 @@ RSpec.describe Metalware::Configurator do
             question: 'Integer?',
             type: 'integer',
             default: 10
-          },
-          bool_true: {
-            question: 'True?',
-            type: 'boolean',
-            default: 'true'
-          },
-          bool_false: {
-            question: 'False?',
-            type: 'boolean',
-            default: false
           }
         }
       })
 
-      configure_with_input("\n\n\n\n\nyes\nno\n")
+      configure_with_input("\n\n\n\n\n")
 
       expect(answers).to eq({
         'string_q' => str_ans,
         'string_erb' => erb_ans,
-        'integer_q' => 10,
-        'bool_true' => true,
-        'bool_false' => false
+        'integer_q' => 10
       })
     end
   end

@@ -101,12 +101,6 @@ module Metalware
         unless @default.nil?
           parsed_default = nil
           case type
-          when :boolean
-              if @defualt == "true" || @defualt.is_a?(TrueClass)
-                parsed_default = true
-              elsif @default == "false" || @default.is_a?(FalseClass)
-                parsed_default = false
-              end
           when :string
             parsed_default = @default.to_s
           when :integer
@@ -122,7 +116,7 @@ module Metalware
       def ask(highline)
         case type
         when :boolean
-          highline.agree(question) { |q| add_default(q ,:boolean) }
+          highline.agree(question)
         when :choice
           highline.choose(*choices) do |menu|
             menu.prompt = question
