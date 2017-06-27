@@ -54,6 +54,15 @@ module Metalware
         map{ |identifier, properties| create_question(identifier, properties) }
     end
 
+    def old_answers
+      @old_answers ||= if File.exists?(@answers_file)
+        data = YAML.load_file(@answers_file)
+        data ? data : {}
+      else
+        {}
+      end
+    end
+
     def ask_questions
       questions.map do |question|
         answer = question.ask(highline)
@@ -72,7 +81,8 @@ module Metalware
           identifier: identifier,
           properties: properties,
           configure_file: configure_file,
-          questions_section: questions_section
+          questions_section: questions_section,
+          old_answer: old_answers[identifier]
         }
       )
     end
@@ -83,11 +93,12 @@ module Metalware
       attr_reader :identifier, :question, :type, :choices
 
       def initialize(identifier:, properties:, configure_file:,
-                     questions_section:, default: nil)
+                     questions_section:, old_answer: nil)
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
         @default = properties[:default]
+        @old_answer = old_answer
         @type = type_for(
           properties[:type],
           configure_file: configure_file,
@@ -114,13 +125,16 @@ module Metalware
       private
 
       def add_default(question, type = :string)
-        unless @default.nil?
+        new_default = \
+          (@old_answer && !@old_answer.to_s.empty?) ? @old_answer : @default
+
+        unless new_default.nil?
           parsed_default = nil
           case type
           when :string
-            parsed_default = @default.to_s
+            parsed_default = new_default.to_s
           when :integer
-            parsed_default = (@default.is_a?(Integer) ? @default : @default.to_i)
+            parsed_default = new_default.to_i
           else
             msg = "Unrecognized data type (#{type}) as a default"
             raise UnknownDataTypeError, msg

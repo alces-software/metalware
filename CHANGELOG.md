@@ -11,6 +11,9 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed bug in tests that was caused by defining repo_path and repo_config_path independently in Config.
 - The MissingParameterWrapper automatically converts Hashes to a IterableRecursiveOpenStruct.
 - Moved auxiliary Commands (e.g. BaseCommand) into the CommandHelpers module.
+- Patched HighLine to prevent errors when the default answer to questions contains an erb tag.
+- Allow Configure questions to have predefined default answers.
+- Override the Configure default answers to be that of the previous answer of the same question.
 
 ### Added
 
