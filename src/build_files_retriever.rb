@@ -60,7 +60,7 @@ module Metalware
       else
         error_file_hash(
           identifier,
-          error:  "Template path '#{template}' does not exist"
+          error:  "Template path '#{template}' for '#{identifier}' does not exist"
         )
       end
     rescue => error
