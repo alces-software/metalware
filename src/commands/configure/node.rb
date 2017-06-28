@@ -15,7 +15,8 @@ module Metalware
         protected
 
         def answers_file
-          File.join(Constants::ANSWERS_PATH, 'nodes', node_name)
+          file_name = "#{node_name}.yaml"
+          File.join(Constants::ANSWERS_PATH, 'nodes', file_name)
         end
 
         private
