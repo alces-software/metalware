@@ -106,7 +106,7 @@ RSpec.describe Metalware::Templater do
 
         expect{
           Metalware::Templater.new(@config)
-        }.to raise_error(Metalware::Templater::LoopErbError)
+        }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
       end
 
       it 'raises if attempt to access a property of an unset parameter' do

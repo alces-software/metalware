@@ -112,14 +112,6 @@ module Metalware
       replace_erb(str, @config)
     end
 
-    # XXX Make this not a nested class, also possibly should use common error
-    # class or superclass.
-    class LoopErbError < StandardError
-      def initialize(msg="Input hash may contain infinitely recursive ERB")
-        super
-      end
-    end
-
     private
 
     def replace_erb(template, template_parameters)
@@ -181,7 +173,9 @@ module Metalware
       # exceeded the maximum number of passes to make.
       while previous_config_string != current_config_string
         count += 1
-        raise LoopErbError if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
+        if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
+          raise RecursiveConfigDepthExceededError
+        end
 
         previous_config_string = current_config_string
         current_parsed_config = perform_config_parsing_pass(current_parsed_config)
