@@ -49,8 +49,6 @@ module CommanderExtensions
   class Command < Commander::Command
     def run(*args)
       super(*args)
-      # TODO could be useful to catch and log all exceptions while running
-      # commands here; can then re-raise.
     rescue CommandUsageError => error
       abort "error: #{error}. Usage: #{syntax}"
     end

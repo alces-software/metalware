@@ -58,33 +58,26 @@ RSpec.describe '`metal build`' do
     sleep 0.6
   end
 
-  # XXX Switch usage of this to use `run_command` below, should be more robust.
-  def fork_command(command)
-    pid = fork do
-      exec command
-    end
-    Process.detach(pid)
-    pid
-  end
-
   def run_command(command, &block)
-    Open3.popen3 command do |stdin, stdout, stderr, thread|
-      begin
-        pid = thread.pid
-        block.call(stdin, stdout, stderr, pid)
-      rescue Exception => e
-        begin
-          # Try to read output `stdout` and `stderr`, or just ensure original
-          # exception raised if not available.
-          max_bytes_to_read = 30000
-          stdout_data = stdout.read_nonblock(max_bytes_to_read)
-          stderr_data = stderr.read_nonblock(max_bytes_to_read)
-          puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
-        rescue
-          raise e
+      Timeout::timeout 5 do
+        Open3.popen3 command do |stdin, stdout, stderr, thread|
+          begin
+            pid = thread.pid
+            block.call(stdin, stdout, stderr, pid)
+          rescue Exception => e
+            begin
+              # Try to read output `stdout` and `stderr`, or just ensure original
+              # exception raised if not available.
+              max_bytes_to_read = 30000
+              stdout_data = stdout.read_nonblock(max_bytes_to_read)
+              stderr_data = stderr.read_nonblock(max_bytes_to_read)
+              puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
+            rescue
+              raise e
+            end
+            raise
+          end
         end
-        raise
-      end
     end
   end
 
@@ -116,36 +109,38 @@ RSpec.describe '`metal build`' do
 
   context 'for single node' do
     it 'works' do
-      metal_pid = fork_command "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
+      command = "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
+      run_command(command) do |stdin, stdout, stderr, pid|
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be true
 
-      wait_longer_than_build_poll
-      expect(process_exists?(metal_pid)).to be true
+        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be false
 
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-      wait_longer_than_build_poll
-      expect(process_exists?(metal_pid)).to be false
-
-      expect_clears_up_built_node_marker_files
+        expect_clears_up_built_node_marker_files
+      end
     end
   end
 
   context 'for gender group' do
     it 'works' do
-      metal_pid = fork_command "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+      command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+      run_command(command) do |stdin, stdout, stderr, pid|
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be true
 
-      wait_longer_than_build_poll
-      expect(process_exists?(metal_pid)).to be true
+        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be true
 
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-      wait_longer_than_build_poll
-      expect(process_exists?(metal_pid)).to be true
+        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode02')
+        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode03')
+        wait_longer_than_build_poll
+        expect(process_exists?(pid)).to be false
 
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode02')
-      FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode03')
-      wait_longer_than_build_poll
-      expect(process_exists?(metal_pid)).to be false
-
-      expect_clears_up_built_node_marker_files
+        expect_clears_up_built_node_marker_files
+      end
     end
 
     describe 'interrupt handling' do
@@ -198,18 +193,19 @@ RSpec.describe '`metal build`' do
       end
 
       it 'exits on second interrupt' do
-        metal_pid = fork_command "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
+        run_command(command) do |stdin, stdout, stderr, pid|
+          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+          wait_longer_than_build_poll
+          expect(process_exists?(pid)).to be true
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-        wait_longer_than_build_poll
-        expect(process_exists?(metal_pid)).to be true
+          expect_interrupt_does_not_kill(pid)
+          expect_interrupt_kills(pid)
+          expect_clears_up_built_node_marker_files
 
-        expect_interrupt_does_not_kill(metal_pid)
-        expect_interrupt_kills(metal_pid)
-        expect_clears_up_built_node_marker_files
-
-        expect_permanent_pxelinux_rendered_for_testnode01
-        expect_permanent_pxelinux_rendered_for_testnode02
+          expect_permanent_pxelinux_rendered_for_testnode01
+          expect_permanent_pxelinux_rendered_for_testnode02
+        end
       end
 
       it 'handles "yes" to interrupt prompt' do

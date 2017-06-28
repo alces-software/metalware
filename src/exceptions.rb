@@ -45,6 +45,12 @@ module Metalware
   class NoRepoError < MetalwareError
   end
 
+  class RecursiveConfigDepthExceededError < MetalwareError
+    def initialize(msg="Input hash may contain infinitely recursive ERB")
+      super
+    end
+  end
+
   class UnsetParameterAccessError < MetalwareError
   end
 

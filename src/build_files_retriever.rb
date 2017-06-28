@@ -51,20 +51,36 @@ module Metalware
       name = File.basename(identifier)
       template = template_path(identifier)
 
-      # XXX Should give a warning if there is an error retrieving the file.
       if File.exist?(template)
-        base_file_hash(identifier).merge({
+        success_file_hash(
+          identifier,
           template_path: template,
           url: DeploymentServer.build_file_url(node_name, namespace, name)
-        })
+        )
       else
-        base_file_hash(identifier).merge(
-          error: "Template path '#{template}' does not exist"
+        error_file_hash(
+          identifier,
+          error:  "Template path '#{template}' for '#{identifier}' does not exist"
         )
       end
     rescue => error
-      base_file_hash(identifier).merge(
+      error_file_hash(
+        identifier,
         error: "Retrieving '#{identifier}' gave error '#{error.message}'"
+      )
+    end
+
+    def success_file_hash(identifier, template_path:, url:)
+      base_file_hash(identifier).merge(
+        template_path: template_path,
+        url: url
+      )
+    end
+
+    def error_file_hash(identifier, error:)
+      MetalLog.warn("Build file: #{error}")
+      base_file_hash(identifier).merge(
+        error: error
       )
     end
 
@@ -81,7 +97,6 @@ module Metalware
       if url?(identifier)
         # Download the template to the Metalware cache; will render it from
         # there.
-        # XXX Need to ensure cache template path is created.
         cache_template_path(name).tap do |template|
           Input.download(identifier, template)
         end

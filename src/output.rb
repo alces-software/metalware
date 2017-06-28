@@ -20,7 +20,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-# XXX Worth logging when outputting in this module as well?
 module Metalware
   module Output
     class << self
