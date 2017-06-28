@@ -41,6 +41,13 @@ class FakeFSHelper
     end
   end
 
+  # Deprecated, please use clone_repo
+  def load_repo(path = @metal_config.repo_path)
+    FakeFS::FileSystem.clone(path, @metal_config.repo_path)
+  end
+
+  # Deprecated, please use clone_repo
+  # TODO: remove references to load_config_files
   def load_config_files(config_names = [])
     FakeFS::FileSystem.clone(@metal_config.configure_file)
     config_names.each do |c|
@@ -48,11 +55,16 @@ class FakeFSHelper
     end
   end
 
+
   def clone(*a)
     FakeFS::FileSystem.clone(*a)
   end
 
   def clone_repo(path = @metal_config.repo_path)
     FakeFS::FileSystem.clone(path, @metal_config.repo_path)
+  end
+
+  def clear
+    FakeFS.clear!
   end
 end

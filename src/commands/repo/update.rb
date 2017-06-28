@@ -30,6 +30,8 @@ module Metalware
   module Commands
     module Repo
       class Update < CommandHelpers::BaseCommand
+        private
+
         def setup(args, options)
           @force = !!options.force
         end
@@ -71,12 +73,15 @@ module Metalware
             raise "Internal error. Check metal log"
           end
         end
+
+        def dependencies_hash
+          {
+            repo: true
+          }
+        end
       end
 
-      def requires_repo?
-        true
-      end
-
+      # TODO: Moves these errors into Exceptions class
       class LocalAheadOfRemote < StandardError
         def initialize(num)
           msg = "The local repo is #{num} commits ahead of remote. -f will " \

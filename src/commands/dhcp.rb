@@ -48,8 +48,10 @@ module Metalware
         install_rendered_template
       end
 
-      def requires_repo?
-        true
+      def dependencies_hash
+        {
+          repo: "dhcp"
+        }
       end
 
       def render_template

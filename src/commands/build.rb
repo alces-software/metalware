@@ -50,8 +50,10 @@ module Metalware
         teardown
       end
 
-      def requires_repo?
-        true
+      def dependencies_hash
+        {
+          repo: ["pxelinux", "kickstart"]
+        }
       end
 
       def render_build_templates

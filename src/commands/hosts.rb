@@ -43,8 +43,10 @@ module Metalware
         add_nodes_to_hosts
       end
 
-      def requires_repo?
-        true
+      def dependencies_hash
+        {
+          repo: "hosts"
+        }
       end
 
       def add_nodes_to_hosts

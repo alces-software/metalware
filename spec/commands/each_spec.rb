@@ -28,7 +28,6 @@ RSpec.describe Metalware::Commands::Each do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
-    SpecUtils.mock_repo_exists(self)
   end
 
   def run_command_echo(node, group = false)

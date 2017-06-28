@@ -14,10 +14,6 @@ module Metalware
         abort 'Exiting without saving...'
       end
 
-      def requires_repo?
-        true
-      end
-
       protected
 
       def answers_file
@@ -25,6 +21,12 @@ module Metalware
       end
 
       private
+
+      def dependencies_hash
+        {
+          repo: true
+        }
+      end
 
       def configurator
         Configurator.new(

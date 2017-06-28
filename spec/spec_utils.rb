@@ -22,6 +22,7 @@
 require 'constants'
 
 require 'constants'
+require 'dependencies'
 
 module SpecUtils
   GENDERS_FILE = File.join(FIXTURES_PATH, 'genders')
@@ -56,6 +57,14 @@ module SpecUtils
       end
     end
 
+    def use_mock_dependencies(example_group)
+      example_group.instance_exec do
+        allow_any_instance_of(
+          Metalware::Dependencies
+        ).to receive(:enforce)
+      end
+    end
+
     def fake_download_error(example_group)
       http_error = "418 I'm a teapot"
       example_group.instance_exec do
@@ -76,14 +85,6 @@ module SpecUtils
         Metalware::BuildFilesRetriever.new(
           node_name, config
         ).retrieve(node.build_files)
-      end
-    end
-
-    def mock_repo_exists(example_group)
-      example_group.instance_exec do
-        allow_any_instance_of(
-          Metalware::Repo
-        ).to receive(:exists?).and_return(true)
       end
     end
 
