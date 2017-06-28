@@ -32,7 +32,7 @@ module Metalware
         # use (note: the dance with pipes is so we only get the last word in
         # the output, as I've had the IPv6 IP included first before, which
         # breaks all the things).
-        # XXX Warn about falling back to this?
+        log_hostip_fallback_warning
         SystemCommand.run(
           "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
         ).chomp
@@ -65,6 +65,22 @@ module Metalware
       def url(url_path)
         full_path = File.join('metalware', url_path)
         URI.join("http://#{ip}", full_path).to_s
+      end
+
+      def log_hostip_fallback_warning
+        # Only log this warning once per run, as if it occurs once it will
+        # probably occur many times for the same reason. We don't cache the IP
+        # itself however as it could change.
+        unless @warning_logged
+          MetalLog.warn(
+            <<-EOF.strip_heredoc
+              Could not robustly determine deployment server IP on build interface; falling back to use 'hostname -i'.
+              This is expected if Metalware is not running on a Controller appliance.'
+
+            EOF
+          )
+        end
+        @warning_logged = true
       end
 
       def determine_hostip_script
