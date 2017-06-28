@@ -112,6 +112,10 @@ NAME:
         Display backtrace when an error occurs
 ```
 
+## Documentation
+
+- [Templating system](docs/templating-system.md)
+
 ## Contributing
 
 Fork the project. Make your feature addition or bug fix. Send a pull request. Bonus points for topic branches.
