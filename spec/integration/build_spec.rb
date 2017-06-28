@@ -59,23 +59,25 @@ RSpec.describe '`metal build`' do
   end
 
   def run_command(command, &block)
-    Open3.popen3 command do |stdin, stdout, stderr, thread|
-      begin
-        pid = thread.pid
-        block.call(stdin, stdout, stderr, pid)
-      rescue Exception => e
-        begin
-          # Try to read output `stdout` and `stderr`, or just ensure original
-          # exception raised if not available.
-          max_bytes_to_read = 30000
-          stdout_data = stdout.read_nonblock(max_bytes_to_read)
-          stderr_data = stderr.read_nonblock(max_bytes_to_read)
-          puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
-        rescue
-          raise e
+      Timeout::timeout 5 do
+        Open3.popen3 command do |stdin, stdout, stderr, thread|
+          begin
+            pid = thread.pid
+            block.call(stdin, stdout, stderr, pid)
+          rescue Exception => e
+            begin
+              # Try to read output `stdout` and `stderr`, or just ensure original
+              # exception raised if not available.
+              max_bytes_to_read = 30000
+              stdout_data = stdout.read_nonblock(max_bytes_to_read)
+              stderr_data = stderr.read_nonblock(max_bytes_to_read)
+              puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
+            rescue
+              raise e
+            end
+            raise
+          end
         end
-        raise
-      end
     end
   end
 
