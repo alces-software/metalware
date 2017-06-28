@@ -104,7 +104,6 @@ module Metalware
 
       def render_kickstart(parameters, node)
         kickstart_template_path = template_path :kickstart
-        # XXX Ensure this path has been created
         kickstart_save_path = File.join(
           config.rendered_files_path, 'kickstart', node.name
         )

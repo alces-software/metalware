@@ -54,7 +54,6 @@ module Metalware
       self.class.send(:new, nodes)
     end
 
-    # XXX Is this method still worthwhile with new Templater?
     def template_each(**additional_template_parameters, &block)
       @nodes.each_with_index do |node, index|
         template_parameters = {

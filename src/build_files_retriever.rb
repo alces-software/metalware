@@ -97,7 +97,6 @@ module Metalware
       if url?(identifier)
         # Download the template to the Metalware cache; will render it from
         # there.
-        # XXX Need to ensure cache template path is created.
         cache_template_path(name).tap do |template|
           Input.download(identifier, template)
         end

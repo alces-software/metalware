@@ -134,7 +134,6 @@ module Metalware
     end
 
     def replace_file_with_same_basename!(files_namespace, file_identifier)
-      # XXX May want to give a warning here when replacing a file.
       files_namespace.reject! {|f| same_basename?(file_identifier, f)}
       files_namespace << file_identifier
       files_namespace.sort! # Sort for consistent ordering.

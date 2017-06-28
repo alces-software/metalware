@@ -27,7 +27,6 @@ module Metalware
     DEFAULT_CONFIG_PATH = File.join(METALWARE_INSTALL_PATH, 'etc/config.yaml')
 
     METALWARE_DATA_PATH = '/var/lib/metalware'
-    # XXX Ensure created on Metalware install.
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
     HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
 
