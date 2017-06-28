@@ -214,9 +214,9 @@ module Metalware
     class << self
       def method_missing(group_symbol)
         NodeattrInterface.nodes_in_group(group_symbol)
-      rescue NoGenderGroupError
-        # XXX Should warn/log that resorting to this? Here or in
-        # `MagicNamespace`?
+      rescue NoGenderGroupError => error
+        warning = "#{error}. Falling back to empty array for alces.#{group_symbol}."
+        MetalLog.warn warning
         []
       end
     end
@@ -239,7 +239,10 @@ module Metalware
       if File.exist? Constants::HUNTER_PATH
         Hashie::Mash.load(Constants::HUNTER_PATH)
       else
-        # XXX Should warn/log that resorting to this?
+        warning = \
+          "#{Constants::HUNTER_PATH} does not exist; need to run " +
+          "'metal hunter' first. Falling back to empty hash for alces.hunter."
+        MetalLog.warn warning
         Hashie::Mash.new
       end
     end
