@@ -79,48 +79,36 @@ RSpec.describe Metalware::Commands::Hosts do
   end
 
   context 'when called for group' do
-    it 'appends to hosts file by default' do
-      # XXX Dedupe these very similar assertions
-      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
-        instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts',
-        hash_including(nodename: 'testnode01', index: 0)
-      )
-      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
-        instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts',
-        hash_including(nodename: 'testnode02', index: 1)
-      )
-      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
-        instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts',
+    let :group_parameters {
+      [
+        hash_including(nodename: 'testnode01', index: 0),
+        hash_including(nodename: 'testnode02', index: 1),
         hash_including(nodename: 'testnode03', index: 2)
-      )
+      ]
+    }
+
+    it 'appends to hosts file by default' do
+      group_parameters.each do |parameters|
+        expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+          instance_of(Metalware::Config),
+          '/var/lib/metalware/repo/hosts/default',
+          '/etc/hosts',
+          parameters
+        ).ordered
+      end
 
       run_hosts('testnodes', group: true)
     end
 
     context 'when dry-run' do
       it 'outputs what would be appended' do
-        # XXX Dedupe these too
+      group_parameters.each do |parameters|
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
           instance_of(Metalware::Config),
           '/var/lib/metalware/repo/hosts/default',
-          hash_including(nodename: 'testnode01', index: 0)
-        )
-        expect(Metalware::Templater).to receive(:render_to_stdout).with(
-          instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
-          hash_including(nodename: 'testnode02', index: 1)
-        )
-        expect(Metalware::Templater).to receive(:render_to_stdout).with(
-          instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
-          hash_including(nodename: 'testnode03', index: 2)
-        )
+          parameters
+        ).ordered
+      end
 
         run_hosts('testnodes', group: true, dry_run: true)
       end
