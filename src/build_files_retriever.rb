@@ -51,7 +51,6 @@ module Metalware
       name = File.basename(identifier)
       template = template_path(identifier)
 
-      # XXX Should give a warning if there is an error retrieving the file.
       if File.exist?(template)
         success_file_hash(
           identifier,
@@ -79,6 +78,7 @@ module Metalware
     end
 
     def error_file_hash(identifier, error:)
+      MetalLog.warn("Build file: #{error}")
       base_file_hash(identifier).merge(
         error: error
       )
