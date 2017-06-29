@@ -67,26 +67,54 @@ Once installed and your shell configuration is sourced, you can access the Metal
 
 ```
 [root@localhost ~]# metal
-Usage: metal COMMAND [[OPTION]... [ARGS]]
-Perform high performance computing software management activities.
+NAME:
 
-Commands:
-  metal console         Perform IPMI Console commands.
-  metal help            Display help and usage information.
-  metal hunter          Collect information about booting nodes.
-  metal ipmi            Perform IPMI commands.
-  metal power           Perform IPMI Power commands.
+    metal
 
-For more help on a particular command run:
-  metal COMMAND help
+  DESCRIPTION:
 
-Examples:
-  metal power node01 status  Display power status of node01.
-  metal console node05       Connect to the console of node05.
+    Alces tools for the management and configuration of bare metal machines
 
-Report metal bugs to support@alces-software.com
-Alces Software home page: <http://alces-software.com/>
+  COMMANDS:
+        
+    build   Renders the templates used to build the nodes               
+    console Volatile. Display a node's console in the terminal          
+    dhcp    Renders and reboots dhcp from the hunter cache              
+    each    Runs a command for a node(s)                
+    help    Display global or [command] help documentation              
+    hosts   Adds a node(s) to the hosts file            
+    hunter  Detects and caches DHCP discover messages           
+    ipmi    Volatile. Perform ipmi commands on single or multiple machines      
+    power   Volatile. Run power commands on a node.             
+    render  Render a given template             
+    repo    Manage template and config repository               
+    status  Display the current network status of the nodes     
+
+  GLOBAL OPTIONS:
+        
+    -c FILE, --config FILE 
+        Specify config file to use instead of default
+(/opt/metalware/etc/config.yaml)
+        
+    --strict 
+        Convert warnings to errors
+        
+    --quiet 
+        Suppress any warnings from being displayed
+        
+    -h, --help 
+        Display help documentation
+        
+    --version 
+        Display version information
+        
+    --trace 
+        Display backtrace when an error occurs
 ```
+
+## Documentation
+
+- [Templating system](docs/templating-system.md)
 
 ## Contributing
 

@@ -124,7 +124,7 @@ module Metalware
     def render_from_string(str)
       replace_erb(str, @config)
     end
-    
+
     private
 
     def replace_erb(template, template_parameters)
@@ -186,7 +186,9 @@ module Metalware
       # exceeded the maximum number of passes to make.
       while previous_config_string != current_config_string
         count += 1
-        raise LoopErbError if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
+        if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
+          raise RecursiveConfigDepthExceededError
+        end
 
         previous_config_string = current_config_string
         current_parsed_config = perform_config_parsing_pass(current_parsed_config)
@@ -225,9 +227,9 @@ module Metalware
     class << self
       def method_missing(group_symbol)
         NodeattrInterface.nodes_in_group(group_symbol)
-      rescue NoGenderGroupError
-        # XXX Should warn/log that resorting to this? Here or in
-        # `MagicNamespace`?
+      rescue NoGenderGroupError => error
+        warning = "#{error}. Falling back to empty array for alces.#{group_symbol}."
+        MetalLog.warn warning
         []
       end
     end
@@ -259,7 +261,10 @@ module Metalware
       if File.exist? Constants::HUNTER_PATH
         Hashie::Mash.load(Constants::HUNTER_PATH)
       else
-        # XXX Should warn/log that resorting to this?
+        warning = \
+          "#{Constants::HUNTER_PATH} does not exist; need to run " +
+          "'metal hunter' first. Falling back to empty hash for alces.hunter."
+        MetalLog.warn warning
         Hashie::Mash.new
       end
     end

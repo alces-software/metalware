@@ -1,3 +1,24 @@
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
 
 require 'yaml'
 require 'active_support/core_ext/hash/keys'
@@ -18,7 +39,7 @@ module Metalware
       repo_path: '/var/lib/metalware/repo',
       log_path: '/var/log/metalware',
       log_severity: "INFO",
-      repo_configs_path: '/var/lib/metalware/repo/config/',
+      repo_configs_path: 'Deprecated'
     }
 
     def initialize(file=nil, options = {})
@@ -33,8 +54,21 @@ module Metalware
     end
 
     KEYS_WITH_DEFAULTS.each do |key, default|
-      define_method :"#{key}" do
-        @config[key] || default
+      if key == :repo_configs_path
+        define_method :repo_configs_path do
+          if @config[:repo_configs_path]
+            MetalLog.warn \
+"Deprecated: repo_configs_path can be implicitly inferred from repo_path in " \
+"the config file. Using the value set by repo_configs_path"
+            @config[:repo_configs_path]
+          else
+            "#{repo_path}/config"
+          end
+        end
+      else
+        define_method :"#{key}" do
+          @config[key] || default
+        end
       end
     end
 
