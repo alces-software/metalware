@@ -73,8 +73,6 @@ module Metalware
           properties: properties,
           configure_file: configure_file,
           questions_section: questions_section
-        }.tap { |h|
-          h[:default] = properties["default"] if properties.key?("default")
         }
       )
     end
@@ -89,28 +87,12 @@ module Metalware
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
-        @default = default
+        @default = properties[:default]
         @type = type_for(
           properties[:type],
           configure_file: configure_file,
           questions_section: questions_section
         )
-      end
-
-      def add_default(question, type = :string)
-        unless @default.nil?
-          parsed_default = nil
-          case type
-          when :string
-            parsed_default = @default.to_s
-          when :integer
-            parsed_default = (@default.is_a?(Integer) ? @default : @default.to_i)
-          else
-            msg = "Unrecognized data type (#{type}) as a default"
-            raise UnknownDataTypeError, msg
-          end
-          question.default = parsed_default
-        end
       end
 
       def ask(highline)
@@ -130,6 +112,22 @@ module Metalware
       end
 
       private
+
+      def add_default(question, type = :string)
+        unless @default.nil?
+          parsed_default = nil
+          case type
+          when :string
+            parsed_default = @default.to_s
+          when :integer
+            parsed_default = (@default.is_a?(Integer) ? @default : @default.to_i)
+          else
+            msg = "Unrecognized data type (#{type}) as a default"
+            raise UnknownDataTypeError, msg
+          end
+          question.default = parsed_default
+        end
+      end
 
       def type_for(value, configure_file:, questions_section:)
         value = value&.to_sym
