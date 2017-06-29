@@ -47,4 +47,12 @@ class FakeFSHelper
       FakeFS::FileSystem.clone(@metal_config.repo_config_path(c))
     end
   end
+
+  def clone(*a)
+    FakeFS::FileSystem.clone(*a)
+  end
+
+  def clone_repo(path = @metal_config.repo_path)
+    FakeFS::FileSystem.clone(path, @metal_config.repo_path)
+  end
 end

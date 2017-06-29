@@ -3,6 +3,7 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
+require 'fakefs_helper'
 require 'node'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
@@ -16,10 +17,15 @@ RSpec.describe Metalware::Templater do
   def expect_renders(template_parameters, expected, config: Metalware::Config.new)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.
-    rendered = Metalware::Templater.render(
-      config, TEST_TEMPLATE_PATH, template_parameters
-    ).gsub(/\s+\n/, "\n")
+    fshelper = FakeFSHelper.new(config)
+    fshelper.clone(FIXTURES_PATH)
+    fshelper.clone_repo(config.repo_path)
 
+    rendered = fshelper.run do
+      Metalware::Templater.render(
+        config, TEST_TEMPLATE_PATH, template_parameters
+      ).gsub(/\s+\n/, "\n")
+    end
     expect(rendered).to eq(expected.strip_heredoc)
   end
 

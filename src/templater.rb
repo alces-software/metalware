@@ -44,24 +44,6 @@ module Metalware
       end
     end
 
-    def method_missing(s, *a, &b)
-      value = @wrapped_obj.send(s)
-      if value.nil? && ! @missing_tags.include?(s)
-        msg = "Unset template parameter: #{s}"
-        # TODO: This code causes alces.answer.<missing-parameter> to throw an error
-        # This is the correct behavior but it is breaking the tests
-        # The offending tests need to be switched over to using FakeFS, then this
-        # code can be uncommented.
-        #if @fatal
-        #  raise MissingParameter, msg
-        #else
-          @missing_tags.push s
-          MetalLog.warn msg
-        #end
-      end
-      value
-    end
-
     def inspect
       @wrapped_obj
     end
@@ -70,6 +52,17 @@ module Metalware
       # ERB expects to be able to index in to the binding passed; this should
       # function the same as a method call.
       send(a)
+    end
+
+    def method_missing(s, *a, &b)
+      value = @wrapped_obj.send(s)
+      if value.nil? && ! @missing_tags.include?(s)
+        msg = "Unset template parameter: #{s}"
+        raise(MissingParameter, msg) if @fatal
+        @missing_tags.push(s)
+        MetalLog.warn msg
+      end
+      value
     end
   end
 
