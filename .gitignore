@@ -1,7 +1,3 @@
-.bundle
-*~
-*.bak
-lib/ruby/vendor/ruby
+coverage
 tmp
-.vagrant
-opt
+spec/examples.txt

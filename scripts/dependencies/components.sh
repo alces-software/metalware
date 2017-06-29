@@ -32,12 +32,22 @@ fetch_components() {
 
 install_components() {
     title "Installing Ruby components"
-    if [ "$dep_source" == "fresh" ]; then
-        cd "${target}/lib/ruby"
-        doing 'Configure'
-        "${alces_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
-        say_done $?
-    else
-        install_dist 'components'
-    fi
+    cd "$target"
+    doing 'Configure'
+    "${alces_RUBYHOME}/bin/bundle" install \
+        --path=vendor \
+        --without=test \
+        &> "${dep_logs}/components-install.log"
+    say_done $?
+
+    # XXX Below disabled as we are always installing gems fresh each time for
+    # the moment.
+    # if [ "$dep_source" == "fresh" ]; then
+    #     cd "${target}/lib/ruby"
+    #     doing 'Configure'
+    #     "${alces_RUBYHOME}/bin/bundle" install --local --path=vendor &> "${dep_logs}/components-install.log"
+    #     say_done $?
+    # else
+    #     install_dist 'components'
+    # fi
 }

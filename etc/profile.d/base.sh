@@ -5,32 +5,40 @@
 ##
 ################################################################################
 metal() {
-    if [[ -t 1 && "$TERM" != linux ]]; then
-        export alces_COLOUR=1
-    else
-        export alces_COLOUR=0
-    fi
-    "/opt/metalware/bin/metal" "$@"
-    unset alces_COLOUR
+    # XXX Disabled for now as does not do anything for new Metalware.
+    # if [[ -t 1 && "$TERM" != linux ]]; then
+    #     export alces_COLOUR=1
+    # else
+    #     export alces_COLOUR=0
+    # fi
+    (cd /opt/metalware && PATH="/opt/metalware/opt/ruby/bin:$PATH" bin/metal "$@")
+    # unset alces_COLOUR
 }
 
 if [ "$ZSH_VERSION" ]; then
-  export metal
+    export metal
 else
-  export -f metal
+    export -f metal
 fi
 alias met=metal
 
 if [ "$BASH_VERSION" ]; then
     _metal() {
-        local cur="$2" prev="$3" cmds opts
+        local cur="$2" cmds input cur_ruby
 
-        COMPREPLY=()
+        if [[ -z "$cur" ]]; then
+            cur_ruby="__CUR_IS_EMPTY__"
+        else
+            cur_ruby=$cur
+        fi
 
-        cmds=$(ls /opt/metalware/lib/actions)
+        cmds=$(
+            cd /opt/metalware &&
+            PATH="/opt/metalware/opt/ruby/bin:$PATH"
+            bin/autocomplete $cur_ruby ${COMP_WORDS[*]}
+        )
 
         COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
     }
-
     complete -o default -F _metal metal me
 fi

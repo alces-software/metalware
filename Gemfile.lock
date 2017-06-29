@@ -1,0 +1,75 @@
+GIT
+  remote: https://github.com/alces-software/commander
+  revision: d322ed15c6a12ede79e9bb8e9465738818efe0fc
+  specs:
+    commander (4.5.1)
+      highline (~> 1.7.2)
+
+GIT
+  remote: https://github.com/alces-software/ruby-pcap.git
+  revision: 42728a34e955ad00a5d033f4ef999a75a15f6f67
+  specs:
+    pcap (0.7.7)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (5.1.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (~> 0.7)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    concurrent-ruby (1.0.5)
+    diff-lcs (1.3)
+    docile (1.1.5)
+    fakefs (0.11.0)
+    hashie (3.5.5)
+    highline (1.7.8)
+    i18n (0.8.4)
+    json (2.1.0)
+    minitest (5.10.2)
+    net-dhcp (1.3.3)
+    recursive-open-struct (1.0.5)
+    rspec (3.6.0)
+      rspec-core (~> 3.6.0)
+      rspec-expectations (~> 3.6.0)
+      rspec-mocks (~> 3.6.0)
+    rspec-core (3.6.0)
+      rspec-support (~> 3.6.0)
+    rspec-expectations (3.6.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.6.0)
+    rspec-mocks (3.6.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.6.0)
+    rspec-support (3.6.0)
+    rugged (0.25.1.1)
+    simplecov (0.14.1)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.1)
+    thread_safe (0.3.6)
+    tzinfo (1.2.3)
+      thread_safe (~> 0.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  commander!
+  fakefs
+  hashie
+  net-dhcp
+  pcap!
+  recursive-open-struct
+  rspec
+  rugged
+  simplecov
+
+RUBY VERSION
+   ruby 2.4.1p111
+
+BUNDLED WITH
+   1.15.1

@@ -29,9 +29,9 @@ detect_ruby() {
 fetch_ruby() {
     title "Fetching Ruby"
     if [ "$dep_source" == "fresh" ]; then
-        fetch_source https://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.7.tar.gz ruby-source.tar.gz
+        fetch_source https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.1.tar.gz ruby-source.tar.gz
     else
-        fetch_dist ruby
+        fetch_dist ruby-2.4.1
     fi
 }
 
@@ -58,6 +58,6 @@ install_ruby() {
         make install &> "${dep_logs}/ruby-install.log"
         say_done $?
     else
-        install_dist ruby
+        install_dist ruby-2.4.1
     fi
 }

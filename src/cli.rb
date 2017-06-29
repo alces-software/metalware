@@ -1,0 +1,52 @@
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+# See http://stackoverflow.com/questions/837123/adding-a-directory-to-load-path-ruby.
+$:.unshift File.dirname(__FILE__)
+
+require 'rubygems'
+require 'bundler/setup'
+require 'commander'
+
+require 'commander_extensions'
+require 'cli_helper/parser'
+
+module Metalware
+  class Cli
+    include Commander::Methods
+    include CommanderExtensions::Delegates
+
+    def run
+      program :name, 'metal'
+      program :version, '2.0.0'
+      program :description, 'Alces tools for the management and configuration of bare metal machines'
+
+      CliHelper::Parser.new(self).parse_commands
+
+      def run!
+        ARGV.push "--help" if ARGV.empty?
+        super
+      end
+
+      run!
+    end
+  end
+end

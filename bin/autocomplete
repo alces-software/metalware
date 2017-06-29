@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+
+require "yaml"
+
+class AutoComplete
+  def initialize
+    @cur = (ARGV[0] == "__CUR_IS_EMPTY__" ? nil : ARGV[0])
+    @complete = ARGV[2..-1] # skips the second input as this is always `metal`
+    @complete.pop unless @cur.nil? # Remove the current element from completed
+    @values = []
+    config = File.join(File.dirname(__FILE__), "../src/cli_helper/config.yaml")
+    @yaml = YAML.load_file(config)
+    @input_only_contains_commands = true
+  end
+
+  def run
+    auto_complete_commands
+    auto_complete_options
+    return_values
+  end
+
+  def auto_complete_commands
+    if @complete.empty?
+      add_return_values(current_hash.keys)
+    elsif current_hash.key?("subcommands") && @input_only_contains_commands
+      add_return_values(current_hash["subcommands"].keys)
+    end
+  end
+
+  def auto_complete_options
+    return if @cur.to_s[0] != "-"
+    add_return_values(["-h", "--help", "--trace", "--version"])
+    @yaml["global_options"].each do |opt|
+      add_return_values(opt["tags"])
+    end
+    if current_hash["options"].is_a?(Array)
+      current_hash["options"].each do |opt|
+        add_return_values(opt["tags"])
+      end
+    end
+  end
+
+  def current_hash
+    @current_hash ||= lambda() {
+      cmd_hash = @yaml["commands"]
+      @complete.each_with_index do |cmd, idx|
+        if cmd_hash.key?("subcommands")
+          new_hash = cmd_hash["subcommands"][cmd]
+        elsif idx == 0
+          new_hash = cmd_hash[cmd]
+        else
+          new_hash = {}
+        end
+        if new_hash.nil? || new_hash.empty?
+          @input_only_contains_commands = false
+          break
+        end
+        cmd_hash = new_hash
+      end
+      cmd_hash
+    }.call
+  end
+
+  def add_return_values(values)
+    values.is_a?(Array) ? @values.concat(values) : @values.push(values)
+  end
+
+  def return_values
+    puts @values.join(" ")
+  end
+end
+
+AutoComplete.new.run

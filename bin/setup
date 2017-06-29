@@ -1,0 +1,47 @@
+#!/bin/bash
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# Install RVM.
+gpg2 --keyserver hkp://pgp.mit.edu --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+curl -sSL https://get.rvm.io | bash -s stable
+# XXX Need to log out and in again here for script to work on first run.
+rvm rvmrc warning ignore allGemfiles
+
+# Required for rugged gem.
+yum install cmake -y
+
+# Required for pcap gem.
+yum install libpcap libpcap-devel -y
+
+# Required for `nodeattr`.
+yum install genders -y
+
+# Install Ruby and gems.
+rvm install ruby-2.4.1
+cd .. && cd -  # Let RVM automatically use correct Ruby for dir.
+# XXX Need to log out and in again here for script to work on first run.
+gem install bundler
+bundle install

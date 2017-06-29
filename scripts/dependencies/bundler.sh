@@ -33,6 +33,6 @@ fetch_bundler() {
 install_bundler() {
     title "Installing Bundler"
     doing 'Install'
-    "${target}/opt/ruby/bin/gem" install --local "${dep_src}/bundler.gem" &> "${dep_logs}/bundler-install.log"
+    "${target}/opt/ruby/bin/gem" install bundler &> "${dep_logs}/bundler-install.log"
     say_done $?
 }
