@@ -1,3 +1,24 @@
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
 
 require 'commands/hosts'
 require 'templater'
@@ -58,48 +79,36 @@ RSpec.describe Metalware::Commands::Hosts do
   end
 
   context 'when called for group' do
-    it 'appends to hosts file by default' do
-      # XXX Dedupe these very similar assertions
-      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
-        instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts',
-        hash_including(nodename: 'testnode01', index: 0)
-      )
-      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
-        instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts',
-        hash_including(nodename: 'testnode02', index: 1)
-      )
-      expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
-        instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
-        '/etc/hosts',
+    let :group_parameters {
+      [
+        hash_including(nodename: 'testnode01', index: 0),
+        hash_including(nodename: 'testnode02', index: 1),
         hash_including(nodename: 'testnode03', index: 2)
-      )
+      ]
+    }
+
+    it 'appends to hosts file by default' do
+      group_parameters.each do |parameters|
+        expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
+          instance_of(Metalware::Config),
+          '/var/lib/metalware/repo/hosts/default',
+          '/etc/hosts',
+          parameters
+        ).ordered
+      end
 
       run_hosts('testnodes', group: true)
     end
 
     context 'when dry-run' do
       it 'outputs what would be appended' do
-        # XXX Dedupe these too
+      group_parameters.each do |parameters|
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
           instance_of(Metalware::Config),
           '/var/lib/metalware/repo/hosts/default',
-          hash_including(nodename: 'testnode01', index: 0)
-        )
-        expect(Metalware::Templater).to receive(:render_to_stdout).with(
-          instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
-          hash_including(nodename: 'testnode02', index: 1)
-        )
-        expect(Metalware::Templater).to receive(:render_to_stdout).with(
-          instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
-          hash_including(nodename: 'testnode03', index: 2)
-        )
+          parameters
+        ).ordered
+      end
 
         run_hosts('testnodes', group: true, dry_run: true)
       end
