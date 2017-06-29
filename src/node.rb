@@ -36,6 +36,17 @@ module Metalware
       @name = name
     end
 
+    # Two nodes are equal <=> their names are equal; everything else is derived
+    # from this. This does mean they will appear equal if they are initialized
+    # with different config files, but this is a bug if it occurs in practise.
+    def ==(other_node)
+      if other_node.is_a? Node
+        name == other_node.name
+      else
+        false
+      end
+    end
+
     def hexadecimal_ip
       SystemCommand.run "gethostip -x #{name}"
     end

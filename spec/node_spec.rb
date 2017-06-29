@@ -147,4 +147,19 @@ RSpec.describe Metalware::Node do
       })
     end
   end
+
+  describe '#==' do
+    it 'returns false if other object is not a Node' do
+      other_object = Struct.new(:name).new('foonode')
+      expect(node('foonode')).not_to eq(other_object)
+    end
+
+    it 'defines nodes with the same name as equal' do
+      expect(node('foonode')).to eq(node('foonode'))
+    end
+
+    it 'defines nodes with different names as not equal' do
+      expect(node('foonode')).not_to eq(node('barnode'))
+    end
+  end
 end
