@@ -26,7 +26,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - Added dhcp command which updates dhcp sever using the hunter cache
 - Replaced the all gender group with domain
 
-## [1.2.0]
+## [1.2.0] - 2017-05-23
 
 ### Changed
 
