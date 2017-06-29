@@ -60,4 +60,7 @@ module Metalware
       super
     end
   end
+
+  class MissingParameter < MetalwareError
+  end
 end

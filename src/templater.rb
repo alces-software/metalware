@@ -34,7 +34,8 @@ require 'iterable_recursive_open_struct'
 
 module Metalware
   class MissingParameterWrapper
-    def initialize(wrapped_obj)
+    def initialize(wrapped_obj, fatal = false)
+      @fatal = fatal
       @missing_tags = []
       @wrapped_obj = if wrapped_obj.is_a?(Hash)
         IterableRecursiveOpenStruct.new(wrapped_obj)
@@ -46,10 +47,23 @@ module Metalware
     def method_missing(s, *a, &b)
       value = @wrapped_obj.send(s)
       if value.nil? && ! @missing_tags.include?(s)
-        @missing_tags.push s
-        MetalLog.warn "Unset template parameter: #{s}"
+        msg = "Unset template parameter: #{s}"
+        # TODO: This code causes alces.answer.<missing-parameter> to throw an error
+        # This is the correct behavior but it is breaking the tests
+        # The offending tests need to be switched over to using FakeFS, then this
+        # code can be uncommented.
+        #if @fatal
+        #  raise MissingParameter, msg
+        #else
+          @missing_tags.push s
+          MetalLog.warn msg
+        #end
       end
       value
+    end
+
+    def inspect
+      @wrapped_obj
     end
 
     def [](a)
@@ -96,12 +110,11 @@ module Metalware
     def initialize(metalware_config, parameters={})
       @metalware_config = metalware_config
       @nodename = parameters[:nodename]
-      passed_magic_parameters = parameters.dup.tap do |par|
-        par.select! do |k,v|
+      passed_magic_parameters = parameters.select { |k,v|
           [:index, :firstboot, :files].include?(k) && !v.nil?
-        end
+      }.tap { |par| 
         par[:node] = node if nodename
-      end
+      }
 
       magic_struct = MagicNamespace.new(passed_magic_parameters)
       @magic_namespace = MissingParameterWrapper.new(magic_struct)
@@ -227,19 +240,19 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:index, :node, :firstboot, :files) do
+  MagicNamespace = Struct.new(:index, :firstboot, :files) do
     def initialize(index: 0, node: nil, firstboot: nil, files: nil)
       files = Hashie::Mash.new(files) if files
       @node = node
-      super(index, nil, firstboot, files)
+      super(index, firstboot, files)
     end
 
     def nodename
-      @node ? @node.name : nil
+      @node&.name
     end
 
     def answers
-      MissingParameterWrapper.new(@node ? @node.answers : {})
+      MissingParameterWrapper.new(@node ? @node.answers : {}, true)
     end
 
     def genders

@@ -32,8 +32,21 @@ module Metalware
     end
 
     def answers
+      @answers ||= combine_answers
+    end
+
+    def combine_answers
       answers = configs.map do |c|
-        f = File.join(Metalware::Constants::ANSWERS_PATH, c + ".yaml")
+        dir = case c
+        when "domain"
+          "/"
+        when "#{@name}"
+          "nodes"
+        else
+          "groups"
+        end
+
+        f = File.join(Metalware::Constants::ANSWERS_PATH, dir, c + ".yaml")
         File.file?(f) ? YAML.load_file(f) : {}
       end
       combine_hashes(answers)

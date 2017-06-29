@@ -13,10 +13,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Created FakeFSHelper to be used by the tests to spoof the file system
-- Added an answer method to Node which combines the answers given by `metal configure`
-- Loads the Node object into the magic namespace and use it to determine the nodename
-- Load the answers into the magic namespace with the missing parameters wrapper.
+- Saved `metal configure` answers are available when templating under the `alces.answers` namespace.
 
 ## [2.0.0]
 

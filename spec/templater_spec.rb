@@ -3,6 +3,7 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
+require 'node'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
@@ -147,20 +148,19 @@ RSpec.describe Metalware::Templater do
         @fshelper.load_config_files
         @fshelper.add_answer_files(answers)
 
-        answers = @fshelper.run do
-          templater = Metalware::Templater.new(config, {nodename: "answer1"})
-          templater.config.alces.answers
+        expect(Metalware::Node).to receive(:new).and_return(
+          OpenStruct.new({
+            answers: "answers_set",
+            raw_config: {}
+          })
+        )
+
+        templater = @fshelper.run do
+          Metalware::Templater.new(config, {nodename: "answer1"})
         end
 
-        expected = {
-          value_set_by_domain: "domain",
-          value_set_by_ag1: "ag1",
-          value_set_by_ag2: "ag2",
-          value_set_by_answer1: "answer1"
-        }
-
-        expect(answers.instance_variable_get(:@wrapped_obj).to_hash).to \
-          eq(expected)
+        expect(templater.config.alces.answers).to be_a(Metalware::MissingParameterWrapper)
+        expect(templater.config.alces.answers.inspect).to eq("answers_set")
       end
     end
 
