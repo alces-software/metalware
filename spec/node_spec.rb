@@ -39,9 +39,11 @@ RSpec.describe Metalware::Node do
     Metalware::Node.new(Metalware::Config.new, name)
   end
 
+  let :testnode01 { node('testnode01') }
+  let :testnode02 { node('testnode02') }
+
   describe '#configs' do
     it 'returns possible configs for node in precedence order' do
-      testnode01 = node('testnode01')
       expect(testnode01.configs).to eq(["domain", "cluster", "nodes", "testnodes", "testnode01"])
     end
 
@@ -122,7 +124,6 @@ RSpec.describe Metalware::Node do
 
   describe '#build_files' do
     it 'returns merged hash of files' do
-      testnode01 = node('testnode01')
       expect(testnode01.build_files).to eq({
         namespace01: [
           'testnodes/some_file_in_repo',
@@ -134,7 +135,6 @@ RSpec.describe Metalware::Node do
         ].sort
       })
 
-      testnode02 = node('testnode02')
       expect(testnode02.build_files).to eq({
         namespace01: [
           'testnode02/some_file_in_repo',
