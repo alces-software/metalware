@@ -72,9 +72,21 @@ module Metalware
   class IterableRecursiveOpenStructPropertyError < MetalwareError
   end
 
-  class YAMLConfigError < MetalwareError
+  class CombineConfigError < MetalwareError
+    def intialize(msg="Could not combine config hashes")
+      super
+    end
   end
 
   class UnknownQuestionTypeError < MetalwareError
+  end
+
+  class LoopErbError < MetalwareError
+    def initialize(msg="Input hash may contain infinitely recursive ERB")
+      super
+    end
+  end
+
+  class MissingParameter < MetalwareError
   end
 end

@@ -34,24 +34,35 @@ require 'iterable_recursive_open_struct'
 
 module Metalware
   class MissingParameterWrapper
-    def initialize(wrapped_obj)
+    def initialize(wrapped_obj, raise_on_missing: false)
+      @raise_on_missing = raise_on_missing
       @missing_tags = []
-      @wrapped_obj = wrapped_obj
+      @wrapped_obj = if wrapped_obj.is_a?(Hash)
+        IterableRecursiveOpenStruct.new(wrapped_obj)
+      else
+        wrapped_obj
+      end
     end
 
-    def method_missing(s, *a, &b)
-      value = @wrapped_obj.send(s)
-      if value.nil? && ! @missing_tags.include?(s)
-        @missing_tags.push s
-        MetalLog.warn "Unset template parameter: #{s}"
-      end
-      value
+    def inspect
+      @wrapped_obj
     end
 
     def [](a)
       # ERB expects to be able to index in to the binding passed; this should
       # function the same as a method call.
       send(a)
+    end
+
+    def method_missing(s, *a, &b)
+      value = @wrapped_obj.send(s)
+      if value.nil? && ! @missing_tags.include?(s)
+        msg = "Unset template parameter: #{s}"
+        raise(MissingParameter, msg) if @raise_on_missing
+        @missing_tags.push(s)
+        MetalLog.warn msg
+      end
+      value
     end
   end
 
@@ -92,11 +103,11 @@ module Metalware
     def initialize(metalware_config, parameters={})
       @metalware_config = metalware_config
       @nodename = parameters[:nodename]
+      passed_magic_parameters = parameters.select { |k,v|
+          [:index, :firstboot, :files].include?(k) && !v.nil?
+      }
 
-      passed_magic_parameters = parameters.select do |k,v|
-        [:index, :nodename, :firstboot, :files].include?(k) && !v.nil?
-      end
-      magic_struct = MagicNamespace.new(passed_magic_parameters)
+      magic_struct = MagicNamespace.new(**passed_magic_parameters, node: node)
       @magic_namespace = MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
       @config = parse_config
@@ -222,10 +233,19 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:index, :nodename, :firstboot, :files) do
-    def initialize(index: 0, nodename: nil, firstboot: nil, files: nil)
+  MagicNamespace = Struct.new(:index, :firstboot, :files) do
+    def initialize(index: 0, node: nil, firstboot: nil, files: nil)
       files = Hashie::Mash.new(files) if files
-      super(index, nodename, firstboot, files)
+      @node = node
+      super(index, firstboot, files)
+    end
+
+    def nodename
+      node.name
+    end
+
+    def answers
+      MissingParameterWrapper.new(node.answers, raise_on_missing: true)
     end
 
     def genders
@@ -266,5 +286,9 @@ module Metalware
     def hostip
       DeploymentServer.ip
     end
+
+    private
+
+    attr_reader :node
   end
 end

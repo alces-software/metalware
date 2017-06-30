@@ -24,9 +24,12 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
+require 'fakefs_helper'
+require 'node'
 
 TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
+REPO_EMPTY_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-empty.yaml')
 UNSET_PARAMETER_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'unset_parameter_template.erb')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
@@ -35,10 +38,15 @@ RSpec.describe Metalware::Templater do
   def expect_renders(template_parameters, expected, config: Metalware::Config.new)
     # Strip trailing spaces from rendered output to make comparisons less
     # brittle.
-    rendered = Metalware::Templater.render(
-      config, TEST_TEMPLATE_PATH, template_parameters
-    ).gsub(/\s+\n/, "\n")
+    fshelper = FakeFSHelper.new(config)
+    fshelper.clone(FIXTURES_PATH)
+    fshelper.clone_repo(config.repo_path)
 
+    rendered = fshelper.run do
+      Metalware::Templater.render(
+        config, TEST_TEMPLATE_PATH, template_parameters
+      ).gsub(/\s+\n/, "\n")
+    end
     expect(rendered).to eq(expected.strip_heredoc)
   end
 
@@ -47,6 +55,10 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render' do
+    before do
+      @config = Metalware::Config.new(REPO_EMPTY_CONFIG_PATH)
+    end
+
     context 'when templater passed no parameters' do
       it 'renders template with no extra parameters' do
         expected = <<-EOF
@@ -59,7 +71,7 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders({}, expected)
+        expect_renders({}, expected, config: @config)
       end
     end
 
@@ -78,7 +90,7 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders(template_parameters, expected)
+        expect_renders(template_parameters, expected, config: @config)
       end
     end
 
@@ -153,6 +165,26 @@ RSpec.describe Metalware::Templater do
 
       SpecUtils.use_mock_determine_hostip_script(self)
       SpecUtils.use_mock_genders(self)
+    end
+
+    context 'when node has answers' do
+      # XXX May be possible to combine this with other passed parameter test
+      # below? They rely on file system however and this relies on a mocked
+      # Node object.
+      it 'provides access to the answers' do
+        expect(Metalware::Node).to receive(:new).and_return(
+          OpenStruct.new({
+            answers: 'testnode01_answers',
+            raw_config: {}
+          })
+        )
+
+        config = Metalware::Config.new
+        templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
+
+        expect(templater.config.alces.answers).to be_a(Metalware::MissingParameterWrapper)
+        expect(templater.config.alces.answers.inspect).to eq('testnode01_answers')
+      end
     end
 
     context 'without passed parameters' do

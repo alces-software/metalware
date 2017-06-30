@@ -47,25 +47,13 @@ module Metalware
     # Return the raw merged config for this node, without parsing any embedded
     # ERB (this should be done using the Templater if needed, as we won't know
     # all the template parameters until a template is being rendered).
-    # XXX refactor this to use `load_config`, and use this from `build_files`.
+    # XXX refactor `build_files` to use this
     def raw_config
-      combined_configs = {}
-      configs.each do |config_name|
-        begin
-          config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
-          config = YAML.load_file(config_path)
-        rescue Errno::ENOENT # Skips missing files
-        rescue StandardError
-          raise YAMLConfigError, "Could not parse YAML config file"
-        else
-          if !config.is_a? Hash
-            raise YAMLConfigError, "Expected YAML config file to contain a hash"
-          else
-            combined_configs.deep_merge!(config)
-          end
-        end
-      end
-      combined_configs.deep_transform_keys{ |k| k.to_sym }
+      combine_hashes(configs.map { |c| load_config(c) })
+    end
+
+    def answers
+      @answers ||= combine_answers
     end
 
     # The repo config files for this node in order of precedence from lowest to
@@ -116,8 +104,12 @@ module Metalware
 
     def load_config(config_name)
       config_path = @metalware_config.repo_config_path(config_name)
-      if File.exist? config_path
-        YAML.load_file(config_path).symbolize_keys
+      load_yaml(config_path).symbolize_keys
+    end
+
+    def load_yaml(file)
+      if File.file? file
+        YAML.load_file(file)
       else
         {}
       end
@@ -141,6 +133,42 @@ module Metalware
 
     def same_basename?(path1, path2)
       File.basename(path1) == File.basename(path2)
+    end
+
+    def combine_answers
+      config_answers = configs.map { |c| load_yaml(answers_path_for(c)) }
+      combine_hashes(config_answers)
+    end
+
+    def answers_path_for(config_name)
+      File.join(
+        Metalware::Constants::ANSWERS_PATH,
+        answers_directory_for(config_name),
+        "#{config_name}.yaml"
+      )
+    end
+
+    def answers_directory_for(config_name)
+      # XXX Using only the config name to determine the answers directory will
+      # lead to answers not being picked up if a group has the same name as the
+      # node, or either is 'domain'; we should probably use more information
+      # when determining this (possibly we should extract a `Config` object).
+      case config_name
+      when "domain"
+        "/"
+      when name
+        "nodes"
+      else
+        "groups"
+      end
+    end
+
+    def combine_hashes(hashes)
+      combined = hashes.each_with_object({}) do |config, combined_config|
+        raise CombineConfigError unless config.is_a? Hash
+        combined_config.deep_merge!(config)
+      end
+      combined.deep_transform_keys{ |k| k.to_sym }
     end
   end
 end

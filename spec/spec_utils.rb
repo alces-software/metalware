@@ -19,6 +19,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+require 'constants'
 
 module SpecUtils
   GENDERS_FILE = File.join(FIXTURES_PATH, 'genders')

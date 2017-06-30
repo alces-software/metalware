@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.0]
+
+### Changed
+
+- Created general combine_hash method in `Node` used by raw_config and answer methods
+- Fixed bug in tests that was caused by defining repo_path and repo_config_path independently in Config.
+- The MissingParameterWrapper automatically converts Hashes to a IterableRecursiveOpenStruct.
+
+### Added
+
+- Saved `metal configure` answers are available when templating under the `alces.answers` namespace.
+
 ## [2.0.0] - 2017-06-29
 
 - Rewrote and restructured much of Metalware to be more consistent and
