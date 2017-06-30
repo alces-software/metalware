@@ -179,5 +179,16 @@ RSpec.describe Metalware::Node do
       expect(testnode02.index).to eq(0)
       expect(testnode03.index).to eq(2)
     end
+
+    it "returns 0 for node not in genders" do
+      name = 'not_in_genders_node01'
+      node = node(name)
+      expect(node.index).to eq(0)
+    end
+
+    it "returns 0 for nil node name" do
+      node = node(nil)
+      expect(node.index).to eq(0)
+    end
   end
 end

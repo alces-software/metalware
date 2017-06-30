@@ -100,7 +100,11 @@ module Metalware
     end
 
     def index
-      Nodes.create(@metalware_config, primary_group, true).index(self)
+      if primary_group
+        Nodes.create(@metalware_config, primary_group, true).index(self)
+      else
+        0
+      end
     end
 
     private
