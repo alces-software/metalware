@@ -63,8 +63,12 @@ Values available within this namespace are:
 <td><code>index</code></td>
 <td>
 
-The index of the current node within the group being templated, for the current
-group of nodes being templated.
+The index of the current node within its primary group. The primary group for a
+node is the first group associated with that node in the genders file, i.e. the
+first group to appear in the output of `nodeattr -l $NODE_NAME`. The
+<code>index</code> is guaranteed to be consistent between invocations of
+different commands which template for the same node, so long as the genders
+file remains consistent.
 
 </td>
 
