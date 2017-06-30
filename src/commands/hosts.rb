@@ -20,14 +20,14 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'constants'
 require 'nodes'
 require 'templater'
 
 module Metalware
   module Commands
-    class Hosts < BaseCommand
+    class Hosts < CommandHelpers::BaseCommand
       HOSTS_FILE = '/etc/hosts'
 
       private

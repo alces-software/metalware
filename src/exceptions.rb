@@ -81,6 +81,9 @@ module Metalware
   class UnknownQuestionTypeError < MetalwareError
   end
 
+  class UnknownDataTypeError < MetalwareError
+  end
+
   class LoopErbError < MetalwareError
     def initialize(msg="Input hash may contain infinitely recursive ERB")
       super

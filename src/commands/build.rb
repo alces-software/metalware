@@ -22,7 +22,7 @@
 
 require 'active_support/core_ext/string/strip'
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'config'
 require 'templater'
 require 'constants'
@@ -34,7 +34,7 @@ require 'build_files_retriever'
 
 module Metalware
   module Commands
-    class Build < BaseCommand
+    class Build < CommandHelpers::BaseCommand
 
       private
 

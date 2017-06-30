@@ -21,16 +21,19 @@
 #==============================================================================
 
 require 'active_support/core_ext/hash'
+require 'highline'
+require 'patches/highline'
+
+HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
 module Metalware
   class Configurator
-    def initialize(highline:, configure_file:, questions:, answers_file:)
+    def initialize(highline: HighLine.new, configure_file:,
+                   questions_section:, answers_file:)
       @highline = highline
       @configure_file = configure_file
-      @questions_section = questions
+      @questions_section = questions_section
       @answers_file = answers_file
-
-      @questions = load_questions
     end
 
     def configure
@@ -43,11 +46,10 @@ module Metalware
     attr_reader :highline,
       :configure_file,
       :questions_section,
-      :answers_file,
-      :questions
+      :answers_file
 
-    def load_questions
-      @questions = YAML.load_file(configure_file).
+    def questions
+      @questions ||= YAML.load_file(configure_file).
         with_indifferent_access[questions_section].
         map{ |identifier, properties| create_question(identifier, properties) }
     end
@@ -66,11 +68,12 @@ module Metalware
     end
 
     def create_question(identifier, properties)
-      Question.new(
-        identifier: identifier,
-        properties: properties,
-        configure_file: configure_file,
-        questions_section: questions_section
+      Question.new({
+          identifier: identifier,
+          properties: properties,
+          configure_file: configure_file,
+          questions_section: questions_section
+        }
       )
     end
 
@@ -79,10 +82,12 @@ module Metalware
 
       attr_reader :identifier, :question, :type, :choices
 
-      def initialize(identifier:, properties:, configure_file:, questions_section:)
+      def initialize(identifier:, properties:, configure_file:,
+                     questions_section:, default: nil)
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
+        @default = properties[:default]
         @type = type_for(
           properties[:type],
           configure_file: configure_file,
@@ -97,15 +102,32 @@ module Metalware
         when :choice
           highline.choose(*choices) do |menu|
             menu.prompt = question
+            add_default(q)
           end
         when :integer
-          highline.ask(question, Integer)
+          highline.ask(question, Integer)  { |q| add_default(q, :integer) }
         else
-          highline.ask(question)
+          highline.ask(question)  { |q| add_default(q) }
         end
       end
 
       private
+
+      def add_default(question, type = :string)
+        unless @default.nil?
+          parsed_default = nil
+          case type
+          when :string
+            parsed_default = @default.to_s
+          when :integer
+            parsed_default = (@default.is_a?(Integer) ? @default : @default.to_i)
+          else
+            msg = "Unrecognized data type (#{type}) as a default"
+            raise UnknownDataTypeError, msg
+          end
+          question.default = parsed_default
+        end
+      end
 
       def type_for(value, configure_file:, questions_section:)
         value = value&.to_sym

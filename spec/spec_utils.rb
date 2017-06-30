@@ -21,6 +21,8 @@
 #==============================================================================
 require 'constants'
 
+require 'constants'
+
 module SpecUtils
   GENDERS_FILE = File.join(FIXTURES_PATH, 'genders')
 

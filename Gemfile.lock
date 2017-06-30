@@ -61,6 +61,7 @@ DEPENDENCIES
   commander!
   fakefs
   hashie
+  highline (= 1.7.8)
   net-dhcp
   pcap!
   recursive-open-struct

@@ -5,10 +5,13 @@ require 'highline'
 
 require 'configurator'
 
-
 RSpec.describe Metalware::Configurator do
+  let :input {
+    Tempfile.new
+  }
+
   let :highline {
-    HighLine.new
+    HighLine.new(input)
   }
 
   let :configure_file {
@@ -31,7 +34,7 @@ RSpec.describe Metalware::Configurator do
     Metalware::Configurator.new(
       highline: highline,
       configure_file: configure_file_path,
-      questions: 'test',
+      questions_section: 'test',
       answers_file: answers_file_path
     )
   }
@@ -39,6 +42,22 @@ RSpec.describe Metalware::Configurator do
   def define_questions(questions_hash)
     configure_file.write(questions_hash.to_yaml)
     configure_file.rewind
+  end
+
+  def configure_with_input(input_string)
+    $stdout = Tempfile.open
+
+    input.write(input_string)
+    input.rewind
+
+    configurator.configure
+    $stdout.close
+  rescue => e
+    $stdout.rewind
+    STDERR.puts $stdout.read
+    raise e
+  ensure
+    $stdout = STDOUT
   end
 
   describe '#configure' do
@@ -223,11 +242,45 @@ RSpec.describe Metalware::Configurator do
       })
 
       expect {
-        configurator
+        configurator.send(:questions)
       }.to raise_error(
         Metalware::UnknownQuestionTypeError,
         /'foobar'.*test\.unknown_q.*#{configure_file_path}/
       )
+    end
+
+    it 'loads default values' do
+
+
+      str_ans = "I am a little teapot!!"
+      erb_ans = '<%= I_am_an_erb_tag %>'
+
+      define_questions({
+        test: {
+          string_q: {
+            question: 'String?',
+            type: 'string',
+            default: str_ans
+          },
+          string_erb: {
+            question: 'Erb?',
+            default: erb_ans,
+          },
+          integer_q: {
+            question: 'Integer?',
+            type: 'integer',
+            default: 10
+          }
+        }
+      })
+
+      configure_with_input("\n\n\n\n\n")
+
+      expect(answers).to eq({
+        'string_q' => str_ans,
+        'string_erb' => erb_ans,
+        'integer_q' => 10
+      })
     end
   end
 end

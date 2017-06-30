@@ -1,5 +1,5 @@
 
-require 'configure_command'
+require 'command_helpers/configure_command'
 require 'constants'
 
 
@@ -7,7 +7,7 @@ module Metalware
   module Commands
     module Configure
 
-      class Domain < ConfigureCommand
+      class Domain < CommandHelpers::ConfigureCommand
         def setup(_args, _options)
         end
 

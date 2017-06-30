@@ -1,5 +1,5 @@
 
-require 'configure_command'
+require 'command_helpers/configure_command'
 require 'constants'
 
 
@@ -7,7 +7,7 @@ module Metalware
   module Commands
     module Configure
 
-      class Node < ConfigureCommand
+      class Node < CommandHelpers::ConfigureCommand
         def setup(args, _options)
           @node_name = args.first
         end

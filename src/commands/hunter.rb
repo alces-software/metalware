@@ -20,7 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'metal_log'
 require 'net/dhcp'
 require 'pcap'
@@ -34,7 +34,7 @@ require 'hunter_updater'
 
 module Metalware
   module Commands
-    class Hunter < BaseCommand
+    class Hunter < CommandHelpers::BaseCommand
 
       private
 

@@ -119,7 +119,7 @@ commands:
     description: >
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
-    action: BashCommand
+    action: CommandHelpers::BashCommand
 
   dhcp:
     syntax: metal dhcp [options]
@@ -211,7 +211,7 @@ commands:
       ***VOLATILE***
 
        Perform ipmi commands on single or multiple machines
-    action: BashCommand
+    action: CommandHelpers::BashCommand
     options:
       - tags: [-g]
         description: >
@@ -244,7 +244,7 @@ commands:
       cycle     - Power cycle the node
 
       reset     - Warm reset the node
-    action: BashCommand
+    action: CommandHelpers::BashCommand
     options:
       - *group_option
 

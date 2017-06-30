@@ -19,32 +19,24 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-
-require 'command_helpers/base_command'
-require 'rugged'
-require 'fileutils'
-
-require 'constants'
-
 module Metalware
-  module Commands
-    module Repo
-      class Use < CommandHelpers::BaseCommand
-        def setup(args, options)
-          @repo_url = args.first
-          @options = options
+  module Patches
+    module HighLine
+      module Questions
+        def sanitize_default_erb_tags
+          @sanitized_default ||= @default.gsub("<%", "<%%")
         end
 
-        def run
-          if @options.force
-            FileUtils::rm_rf config.repo_path
-            MetalLog.info "Force deleted old repo"
+        def append_default(  )
+          if @question =~ /([\t ]+)\Z/
+            @question << "|#{sanitize_default_erb_tags}|#{$1}"
+          elsif @question == ""
+            @question << "|#{sanitize_default_erb_tags}|  "
+          elsif @question[-1, 1] == "\n"
+            @question[-2, 0] =  "  |#{sanitize_default_erb_tags}|"
+          else
+            @question << "  |#{sanitize_default_erb_tags}|"
           end
-
-          Rugged::Repository.clone_at(@repo_url, config.repo_path)
-          MetalLog.info "Cloned repo from #{@repo_url}"
-        rescue Rugged::InvalidError
-          raise $!, "Repository already exists. Use -f to force clone a new one"
         end
       end
     end
