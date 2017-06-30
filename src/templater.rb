@@ -105,11 +105,9 @@ module Metalware
       @nodename = parameters[:nodename]
       passed_magic_parameters = parameters.select { |k,v|
           [:index, :firstboot, :files].include?(k) && !v.nil?
-      }.tap { |par| 
-        par[:node] = node if nodename
       }
 
-      magic_struct = MagicNamespace.new(passed_magic_parameters)
+      magic_struct = MagicNamespace.new(**passed_magic_parameters, node: node)
       @magic_namespace = MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
       @config = parse_config
@@ -243,11 +241,11 @@ module Metalware
     end
 
     def nodename
-      @node&.name
+      @node.name
     end
 
     def answers
-      MissingParameterWrapper.new(@node ? @node.answers : {}, true)
+      MissingParameterWrapper.new(@node.answers, true)
     end
 
     def genders
