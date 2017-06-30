@@ -75,7 +75,7 @@ RSpec.describe Metalware::Node do
     end
   end
 
-  describe "#answer_hash" do
+  describe "#answers" do
     it 'performs a deep merge of answer files' do
       config = Metalware::Config.new
       fshelper = FakeFSHelper.new(config)
