@@ -34,8 +34,8 @@ require 'iterable_recursive_open_struct'
 
 module Metalware
   class MissingParameterWrapper
-    def initialize(wrapped_obj, fatal = false)
-      @fatal = fatal
+    def initialize(wrapped_obj, raise_on_missing: false)
+      @raise_on_missing = raise_on_missing
       @missing_tags = []
       @wrapped_obj = if wrapped_obj.is_a?(Hash)
         IterableRecursiveOpenStruct.new(wrapped_obj)
@@ -58,7 +58,7 @@ module Metalware
       value = @wrapped_obj.send(s)
       if value.nil? && ! @missing_tags.include?(s)
         msg = "Unset template parameter: #{s}"
-        raise(MissingParameter, msg) if @fatal
+        raise(MissingParameter, msg) if @raise_on_missing
         @missing_tags.push(s)
         MetalLog.warn msg
       end
@@ -245,7 +245,7 @@ module Metalware
     end
 
     def answers
-      MissingParameterWrapper.new(node.answers, true)
+      MissingParameterWrapper.new(node.answers, raise_on_missing: true)
     end
 
     def genders
