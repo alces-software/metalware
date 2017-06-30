@@ -22,46 +22,47 @@
 require 'exceptions'
 require 'dependencies'
 require 'config'
+require 'constants'
 
 require 'fakefs_helper'
 require 'spec_helper'
 require 'fileutils'
 
 RSpec.describe Metalware::Dependencies do
+  before :each do
+    @config = Metalware::Config.new
+    @fshelper = FakeFSHelper.new(@config)
+    @fshelper.load_repo(File.join(FIXTURES_PATH, "repo"))
+  end
+
+  def run_dependencies(config, dep = {})
+    @fshelper.run do
+      Metalware::Dependencies.new(config, "test", dep).enforce
+    end
+  end
+
   context 'repo dependencies' do
-    before :each do
-      @config = Metalware::Config.new
-      @fshelper = FakeFSHelper.new(@config)
-      @fshelper.load_repo(File.join(FIXTURES_PATH, "repo"))
-    end
-
-    def run_dependencies(config, command, dep = {})
-      @fshelper.run do
-        Metalware::Dependencies.new(config, command, dep).enforce
-      end
-    end
-
     it 'fails if the repo doesn\'t exist' do
       @fshelper.clear
       expect {
-        run_dependencies(@config, "test", { repo: true })
+        run_dependencies(@config, { repo: true })
       }.to raise_error(Metalware::DependencyFailure)
     end
 
     it 'check if the base repo exists' do
       expect {
-        run_dependencies(@config, "test", { repo: true })
+        run_dependencies(@config, { repo: true })
       }.not_to raise_error
     end
 
     it 'check if repo template exists' do
       expect {
-        run_dependencies(@config, "test", {
+        run_dependencies(@config, {
           repo: "dependency-test1/default"
         })
       }.not_to raise_error
       expect {
-        run_dependencies(@config, "test", {
+        run_dependencies(@config, {
           repo: ["dependency-test1/default", "dependency-test2/default"]
         })
       }.not_to raise_error
@@ -69,7 +70,7 @@ RSpec.describe Metalware::Dependencies do
 
     it 'fail if repo template doesn\'t exist' do
       expect {
-        run_dependencies(@config, "test", {
+        run_dependencies(@config, {
           repo: "dependency-test1/not-found"
         })
       }.to raise_error(Metalware::DependencyFailure)
@@ -77,9 +78,62 @@ RSpec.describe Metalware::Dependencies do
 
     it 'fail if validating a repo directory' do
       expect {
-        run_dependencies(@config, "test", {
+        run_dependencies(@config, {
           repo: "dependency-test1"
         })
+      }.to raise_error(Metalware::DependencyFailure)
+    end
+  end
+
+  context 'configure dependencies' do
+    before :each do
+      @fshelper.clone_answers(File.join(FIXTURES_PATH, "answers/basic_structure"))
+    end
+
+    it 'fails if the repo doesn\'t exist' do
+      @fshelper.clear
+      expect {
+        run_dependencies(@config, { configure: "domain.yaml" })
+      }.to raise_error(Metalware::DependencyFailure)
+    end
+
+    # NOTE: This is the backwards compatibility test
+    it 'pass if the repo exists but configure.yaml doens\'t' do
+      @fshelper.run do
+        File.delete(File.join(@config.repo_path, "configure.yaml"))
+        File.delete(File.join(Metalware::Constants::ANSWERS_PATH, "domain.yaml"))
+      end
+
+      expect {
+        run_dependencies(@config, { configure: "domain.yaml" })
+      }.not_to raise_error
+    end
+
+    it 'fails if answers directory doesn\'t exist' do
+      @fshelper.run do
+        File.delete(Metalware::Constants::ANSWERS_PATH)
+      end
+
+      expect {
+        run_dependencies(@config, { configure: "domain.yaml" })
+      }.to raise_error(Metalware::DependencyFailure)
+    end
+
+    it 'validates that the answer files exists' do
+      expect {
+        run_dependencies(@config,
+                         { configure: ["domain.yaml", "groups/group1.yaml"] })
+      }.not_to raise_error
+    end
+
+    it 'validates missing answer files' do
+      @fshelper.run do
+        File.delete(File.join(Metalware::Constants::ANSWERS_PATH, "groups/group1.yaml"))
+      end
+
+      expect {
+        run_dependencies(@config,
+                         { configure: ["domain.yaml", "groups/group1.yaml"] })
       }.to raise_error(Metalware::DependencyFailure)
     end
   end

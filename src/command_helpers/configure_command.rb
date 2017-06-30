@@ -24,7 +24,8 @@ module Metalware
 
       def dependencies_hash
         {
-          repo: true
+          repo: "configure.yaml",
+          configure: true
         }
       end
 

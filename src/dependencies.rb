@@ -20,6 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'exceptions'
+require 'constants'
 
 module Metalware
   class Dependencies
@@ -42,10 +43,9 @@ module Metalware
     attr_reader :config, :command
 
     def validate_dependency(dep, value)
-      send(:"validate_#{dep}")
+      return if send(:"validate_#{dep}") == "skip"
       return if value.is_a?(TrueClass)
-      path = generate_file_path(dep, value)
-      unless path_exists?(path)
+      unless file_exists?(dep, value)
         raise DependencyFailure, get_generic_failure_message(dep, value)
       end
     end
@@ -53,23 +53,39 @@ module Metalware
     def validate_repo
       @validated_repo ||= begin
         msg = "'#{command}' requires a repo. Please run 'metal repo use'"
-        path = generate_file_path(:repo, "")
-        raise DependencyFailure, msg unless path_exists?(path, true)
+        raise DependencyFailure, msg unless file_exists?(:repo, "", true)
         true
       end
     end
 
-    def generate_file_path(dep, value)
-      case dep
-      when :repo
-        File.join(@config.repo_path, value)
-      else
-        msg = "Could not generate file path for dependency #{dep}"
-        raise DependencyInternalError, msg
+    def validate_configure
+      @validate_configure ||= begin
+        # Maintains backwards compatibility
+        # If configure.yaml does not exist, the dependency is not checked
+        # The repo must still exist however
+        if file_exists?(:repo, "configure.yaml")
+          msg = "Could not locate answer files: #{Metalware::Constants::ANSWERS_PATH}"
+          raise DependencyFailure, msg unless file_exists?(:configure , "", true)
+        else
+          validate_repo
+          "skip"
+        end
       end
     end
 
-    def path_exists?(path, validate_directory = false)
+    def file_exists?(dep, value, validate_directory = false)
+      path = begin
+        case dep
+        when :repo
+          File.join(@config.repo_path, value)
+        when :configure
+          File.join(Metalware::Constants::ANSWERS_PATH, value)
+        else
+          msg = "Could not generate file path for dependency #{dep}"
+          raise DependencyInternalError, msg
+        end
+      end
+
       if validate_directory
         Dir.exists?(path)
       else
@@ -82,6 +98,11 @@ module Metalware
       case dep
       when :repo
         msg = "Could not find repo file: #{value}"
+      when :configure
+        cmd = File.basename(value, ".yaml")
+        cmd = "group #{cmd}" unless cmd == "domain"
+        msg = "Could not locate required answer file: #{value}. Please run " \
+              "'metal configure #{cmd}'"
       end
       msg
     end
