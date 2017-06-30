@@ -167,27 +167,23 @@ RSpec.describe Metalware::Templater do
       SpecUtils.use_mock_genders(self)
     end
 
-    context 'with answer files' do
-      it 'loads the answer files' do
-        config = Metalware::Config.new
-        @fshelper = FakeFSHelper.new(config)
-        answers = Dir[File.join(FIXTURES_PATH, "answers/node-test-set1/*")]
-        @fshelper.load_config_files
-        @fshelper.add_answer_files(answers)
-
+    context 'when node has answers' do
+      # XXX May be possible to combine this with other passed parameter test
+      # below? They rely on file system however and this relies on a mocked
+      # Node object.
+      it 'provides access to the answers' do
         expect(Metalware::Node).to receive(:new).and_return(
           OpenStruct.new({
-            answers: "answers_set",
+            answers: 'testnode01_answers',
             raw_config: {}
           })
         )
 
-        templater = @fshelper.run do
-          Metalware::Templater.new(config, {nodename: "answer1"})
-        end
+        config = Metalware::Config.new
+        templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
 
         expect(templater.config.alces.answers).to be_a(Metalware::MissingParameterWrapper)
-        expect(templater.config.alces.answers.inspect).to eq("answers_set")
+        expect(templater.config.alces.answers.inspect).to eq('testnode01_answers')
       end
     end
 
