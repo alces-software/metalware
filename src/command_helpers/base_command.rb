@@ -31,6 +31,7 @@ module Metalware
       def initialize(args, options)
         pre_setup(args, options)
         setup(args, options)
+        post_setup
         run
       rescue Interrupt => e
         handle_interrupt(e)
@@ -44,8 +45,11 @@ module Metalware
 
       def pre_setup(args, options)
         setup_config(options)
-        enforce_dependencies
         log_command
+      end
+
+      def post_setup
+        enforce_dependencies
       end
 
       def validate_repo_exists_if_required
@@ -65,7 +69,7 @@ module Metalware
 
       def dependencies_hash
         {
-          #repo: [], Array of directories or true for base dir
+          #repo: [], Array of files or true for base dir
         }
       end
 

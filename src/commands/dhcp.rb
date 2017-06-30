@@ -50,7 +50,7 @@ module Metalware
 
       def dependencies_hash
         {
-          repo: "dhcp"
+          repo: "dhcp/#{@options.template}"
         }
       end
 

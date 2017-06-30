@@ -45,7 +45,7 @@ module Metalware
 
       def dependencies_hash
         {
-          repo: "hosts"
+          repo: "hosts/#{@options.template}"
         }
       end
 

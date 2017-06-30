@@ -30,50 +30,60 @@ module Metalware
     end
 
     def enforce
-      @dep_hash.each { |dep, value| run_dependency(dep, value) if value }
+      @dep_hash.each { |dep, values|
+        next unless values # Rejects nil and false
+        values = [values] unless values.is_a?(Array)
+        values.each { |value| validate_dependency(dep, value) }
+      }
     end
 
     private
 
     attr_reader :config, :command
 
-    def run_dependency(dep, value)
+    def validate_dependency(dep, value)
+      send(:"validate_#{dep}")
+      return if value.is_a?(TrueClass)
+      path = generate_file_path(dep, value)
+      unless path_exists?(path)
+        raise DependencyFailure, get_generic_failure_message(dep, value)
+      end
+    end
+
+    def validate_repo
+      @validated_repo ||= begin
+        msg = "'#{command}' requires a repo. Please run 'metal repo use'"
+        path = generate_file_path(:repo, "")
+        raise DependencyFailure, msg unless path_exists?(path, true)
+        true
+      end
+    end
+
+    def generate_file_path(dep, value)
       case dep
       when :repo
-        check_repo_dependency(value)
+        File.join(@config.repo_path, value)
       else
-        msg = "Unknown dependency: #{dep}"
+        msg = "Could not generate file path for dependency #{dep}"
         raise DependencyInternalError, msg
       end
     end
 
-    def check_repo_dependency(dirs_input)
-      dirs = case dirs_input
-      when TrueClass # Only check if the repo exists if the value is true
-        [""]
-      when Array
-        dirs_input.unshift("")
-      when String
-        ["", dirs_input]
+    def path_exists?(path, validate_directory = false)
+      if validate_directory
+        Dir.exists?(path)
       else
-        msg = "Unrecognized repo dependency value: #{dirs_input}"
-        raise DependencyInternalError, msg
+        File.file?(path)
       end
-      dirs.each do |dir|
-        path = File.join(config.repo_path, dir)
-        if dir == ""
-          msg = "'#{command}' requires a repo; please run 'metal repo use'"
-          if !File.directory?(path)
-            raise DependencyFailure, msg
-          elsif Dir[File.join(path, "*")].empty?
-            raise DependencyFailure, msg
-          end
-        elsif !File.directory?(path)
-          msg = "Repo found but missing '#{dir}' directory, please check the " \
-                "repo and try again"
-          raise DependencyFailure, msg
-        end
+    end
+
+    def get_generic_failure_message(dep, value)
+      msg = "The '#{dep}' dependency (value: #{value}) has failed"
+      case dep
+      when :repo
+        msg = "Could not find repo file: #{value}"
       end
+      msg
     end
   end
 end

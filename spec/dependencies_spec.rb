@@ -54,23 +54,31 @@ RSpec.describe Metalware::Dependencies do
       }.not_to raise_error
     end
 
-    it 'check if repo directories exist' do
+    it 'check if repo template exists' do
       expect {
         run_dependencies(@config, "test", {
-          repo: "dependency-test1"
+          repo: "dependency-test1/default"
         })
       }.not_to raise_error
       expect {
         run_dependencies(@config, "test", {
-          repo: ["dependency-test1", "dependency-test2"]
+          repo: ["dependency-test1/default", "dependency-test2/default"]
         })
       }.not_to raise_error
     end
 
-    it 'check if repo directories doesn\'t exist' do
+    it 'fail if repo template doesn\'t exist' do
       expect {
         run_dependencies(@config, "test", {
-          repo: "not-found"
+          repo: "dependency-test1/not-found"
+        })
+      }.to raise_error(Metalware::DependencyFailure)
+    end
+
+    it 'fail if validating a repo directory' do
+      expect {
+        run_dependencies(@config, "test", {
+          repo: "dependency-test1"
         })
       }.to raise_error(Metalware::DependencyFailure)
     end

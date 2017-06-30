@@ -52,7 +52,8 @@ module Metalware
 
       def dependencies_hash
         {
-          repo: ["pxelinux", "kickstart"]
+          repo: ["pxelinux/#{@options.pxelinux}",
+                 "kickstart/#{@options.kickstart}"]
         }
       end
 
