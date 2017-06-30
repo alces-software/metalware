@@ -165,7 +165,7 @@ RSpec.describe '`metal build`' do
         )
         expect(testnode01_pxelinux).to eq(
           Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
-            nodename: 'testnode01', index: 0, firstboot: false
+            nodename: 'testnode01', firstboot: false
           })
         )
       end
@@ -176,7 +176,7 @@ RSpec.describe '`metal build`' do
         )
         expect(testnode01_pxelinux).to eq(
           Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
-            nodename: 'testnode02', index: 1, firstboot: false
+            nodename: 'testnode02', firstboot: false
           })
         )
       end
@@ -187,7 +187,7 @@ RSpec.describe '`metal build`' do
         )
         expect(testnode01_pxelinux).to eq(
           Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
-            nodename: 'testnode02', index: 1, firstboot: true
+            nodename: 'testnode02', firstboot: true
           })
         )
       end

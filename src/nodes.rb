@@ -55,10 +55,9 @@ module Metalware
     end
 
     def template_each(**additional_template_parameters, &block)
-      @nodes.each_with_index do |node, index|
+      @nodes.each do |node|
         template_parameters = {
           nodename: node.name,
-          index: index,
         }.merge(additional_template_parameters)
 
         block.call(template_parameters, node)

@@ -48,7 +48,7 @@ RSpec.describe Metalware::Commands::Hosts do
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/default',
         '/etc/hosts',
-        hash_including(nodename: 'testnode01', index: 0)
+        hash_including(nodename: 'testnode01')
       )
 
       run_hosts('testnode01')
@@ -59,7 +59,7 @@ RSpec.describe Metalware::Commands::Hosts do
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/my_template',
         '/etc/hosts',
-        hash_including(nodename: 'testnode01', index: 0)
+        hash_including(nodename: 'testnode01')
       )
 
       run_hosts('testnode01', template: 'my_template')
@@ -81,9 +81,9 @@ RSpec.describe Metalware::Commands::Hosts do
   context 'when called for group' do
     let :group_parameters {
       [
-        hash_including(nodename: 'testnode01', index: 0),
-        hash_including(nodename: 'testnode02', index: 1),
-        hash_including(nodename: 'testnode03', index: 2)
+        hash_including(nodename: 'testnode01'),
+        hash_including(nodename: 'testnode02'),
+        hash_including(nodename: 'testnode03')
       ]
     }
 
