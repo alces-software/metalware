@@ -241,11 +241,11 @@ module Metalware
     end
 
     def nodename
-      @node.name
+      node.name
     end
 
     def answers
-      MissingParameterWrapper.new(@node.answers, true)
+      MissingParameterWrapper.new(node.answers, true)
     end
 
     def genders
@@ -286,5 +286,9 @@ module Metalware
     def hostip
       DeploymentServer.ip
     end
+
+    private
+
+    attr_reader :node
   end
 end
