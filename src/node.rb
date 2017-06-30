@@ -56,31 +56,6 @@ module Metalware
       @answers ||= combine_answers
     end
 
-    def combine_answers
-      answers = configs.map do |c|
-        dir = case c
-        when "domain"
-          "/"
-        when "#{@name}"
-          "nodes"
-        else
-          "groups"
-        end
-
-        f = File.join(Metalware::Constants::ANSWERS_PATH, dir, c + ".yaml")
-        File.file?(f) ? YAML.load_file(f) : {}
-      end
-      combine_hashes(answers)
-    end
-
-    def combine_hashes(hashes)
-      combined = hashes.each_with_object({}) do |config, combined_config|
-        raise CombineConfigError unless config.is_a? Hash
-        combined_config.deep_merge!(config)
-      end
-      combined.deep_transform_keys{ |k| k.to_sym }
-    end
-
     # The repo config files for this node in order of precedence from lowest to
     # highest.
     def configs
@@ -154,6 +129,31 @@ module Metalware
 
     def same_basename?(path1, path2)
       File.basename(path1) == File.basename(path2)
+    end
+
+    def combine_answers
+      answers = configs.map do |c|
+        dir = case c
+        when "domain"
+          "/"
+        when "#{@name}"
+          "nodes"
+        else
+          "groups"
+        end
+
+        f = File.join(Metalware::Constants::ANSWERS_PATH, dir, c + ".yaml")
+        File.file?(f) ? YAML.load_file(f) : {}
+      end
+      combine_hashes(answers)
+    end
+
+    def combine_hashes(hashes)
+      combined = hashes.each_with_object({}) do |config, combined_config|
+        raise CombineConfigError unless config.is_a? Hash
+        combined_config.deep_merge!(config)
+      end
+      combined.deep_transform_keys{ |k| k.to_sym }
     end
   end
 end
