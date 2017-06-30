@@ -136,20 +136,31 @@ module Metalware
     end
 
     def combine_answers
-      answers = configs.map do |c|
-        dir = case c
-        when "domain"
-          "/"
-        when "#{@name}"
-          "nodes"
-        else
-          "groups"
-        end
+      config_answers = configs.map { |c| load_yaml(answers_path_for(c)) }
+      combine_hashes(config_answers)
+    end
 
-        f = File.join(Metalware::Constants::ANSWERS_PATH, dir, c + ".yaml")
-        load_yaml(f)
+    def answers_path_for(config_name)
+      File.join(
+        Metalware::Constants::ANSWERS_PATH,
+        answers_directory_for(config_name),
+        "#{config_name}.yaml"
+      )
+    end
+
+    def answers_directory_for(config_name)
+      # XXX Using only the config name to determine the answers directory will
+      # lead to answers not being picked up if a group has the same name as the
+      # node, or either is 'domain'; we should probably use more information
+      # when determining this (possibly we should extract a `Config` object).
+      case config_name
+      when "domain"
+        "/"
+      when name
+        "nodes"
+      else
+        "groups"
       end
-      combine_hashes(answers)
     end
 
     def combine_hashes(hashes)
