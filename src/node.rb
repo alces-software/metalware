@@ -99,6 +99,10 @@ module Metalware
       )
     end
 
+    def index
+      Nodes.create(@metalware_config, primary_group, true).index(self)
+    end
+
     private
 
     def build_complete_marker_file
@@ -111,6 +115,10 @@ module Metalware
       # It's OK for a node to not be in the genders file, it just means it's
       # not part of any groups.
       []
+    end
+
+    def primary_group
+      groups.first
     end
 
     def load_config(config_name)

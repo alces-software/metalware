@@ -33,7 +33,7 @@ module Metalware
     # Private as can only get `Nodes` instance via other methods in this class.
     private_class_method :new
 
-    delegate :length, :each, to: :@nodes
+    delegate :length, :each, :index, to: :@nodes
 
     # Create instance of `Nodes` from a single node or gender group.
     def self.create(config, node_identifier, is_group)
