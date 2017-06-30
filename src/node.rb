@@ -104,8 +104,12 @@ module Metalware
 
     def load_config(config_name)
       config_path = @metalware_config.repo_config_path(config_name)
-      if File.exist? config_path
-        YAML.load_file(config_path).symbolize_keys
+      load_yaml(config_path).symbolize_keys
+    end
+
+    def load_yaml(file)
+      if File.file? file
+        YAML.load_file(file)
       else
         {}
       end
@@ -143,7 +147,7 @@ module Metalware
         end
 
         f = File.join(Metalware::Constants::ANSWERS_PATH, dir, c + ".yaml")
-        File.file?(f) ? YAML.load_file(f) : {}
+        load_yaml(f)
       end
       combine_hashes(answers)
     end
