@@ -1,6 +1,7 @@
 
 require 'command_helpers/configure_command'
 require 'constants'
+require 'utils'
 
 
 module Metalware
@@ -44,20 +45,11 @@ module Metalware
         end
 
         def groups_cache
-          @groups_cache ||= load_yaml(groups_cache_file)
+          @groups_cache ||= Utils.safely_load_yaml(groups_cache_file)
         end
 
         def groups_cache_file
           File.join(Constants::CACHE_PATH, 'groups.yaml')
-        end
-
-        # XXX duplicated from Node; extract
-        def load_yaml(file)
-          if File.file? file
-            YAML.load_file(file)
-          else
-            {}
-          end
         end
       end
 
