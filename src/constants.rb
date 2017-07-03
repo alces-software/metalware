@@ -24,7 +24,8 @@ module Metalware
   module Constants
     METALWARE_INSTALL_PATH = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
 
-    DEFAULT_CONFIG_PATH = File.join(METALWARE_INSTALL_PATH, 'etc/config.yaml')
+    METALWARE_CONFIGS_PATH = File.join(METALWARE_INSTALL_PATH, 'etc')
+    DEFAULT_CONFIG_PATH = File.join(METALWARE_CONFIGS_PATH, 'config.yaml')
 
     METALWARE_DATA_PATH = '/var/lib/metalware'
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
