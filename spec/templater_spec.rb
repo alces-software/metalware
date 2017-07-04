@@ -33,13 +33,17 @@ TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
 RSpec.describe Metalware::Templater do
+  let :config {
+    Metalware::Config.new
+  }
+
   let :filesystem {
     FileSystem.setup do |fs|
       fs.with_fixtures('/', at: '/fixtures')
     end
   }
 
-  def expect_renders(template_parameters, expected, config: Metalware::Config.new)
+  def expect_renders(template_parameters, expected)
     filesystem.test do |fs|
       # Strip trailing spaces from rendered output to make comparisons less
       # brittle.
@@ -89,8 +93,7 @@ RSpec.describe Metalware::Templater do
 
     context 'with repo' do
       before :each do
-        @config = Metalware::Config.new
-        filesystem.with_fixtures('repo', at: @config.repo_path)
+        filesystem.with_fixtures('repo', at: config.repo_path)
       end
 
       it 'renders template with repo parameters' do
@@ -104,7 +107,7 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders({}, expected, config: @config)
+        expect_renders({}, expected)
       end
 
       it 'raises if maximum recursive config depth exceeded' do
@@ -112,7 +115,7 @@ RSpec.describe Metalware::Templater do
 
         filesystem.test do
           expect{
-            Metalware::Templater.new(@config)
+            Metalware::Templater.new(config)
           }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
         end
       end
@@ -120,7 +123,7 @@ RSpec.describe Metalware::Templater do
       it 'raises if attempt to access a property of an unset parameter' do
         filesystem.test do
           expect {
-            Metalware::Templater.render(@config, UNSET_PARAMETER_TEMPLATE_PATH, {})
+            Metalware::Templater.render(config, UNSET_PARAMETER_TEMPLATE_PATH, {})
           }.to raise_error Metalware::UnsetParameterAccessError
         end
       end
@@ -131,7 +134,7 @@ RSpec.describe Metalware::Templater do
         filesystem.test do
           expect {
             Metalware::Templater.render(
-              Metalware::Config.new,
+              config,
               TEST_TEMPLATE_PATH,
               nodename: 'not_in_genders_node01'
             )
@@ -179,7 +182,6 @@ RSpec.describe Metalware::Templater do
           })
         )
 
-        config = Metalware::Config.new
         templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
 
         expect(templater.config.alces.answers).to be_a(Metalware::MissingParameterWrapper)
@@ -189,7 +191,7 @@ RSpec.describe Metalware::Templater do
 
     context 'without passed parameters' do
       it 'is created with default values' do
-        templater = Metalware::Templater.new(Metalware::Config.new)
+        templater = Metalware::Templater.new(config)
         magic_namespace = templater.config.alces
 
         expect(magic_namespace.index).to eq(0)
@@ -206,7 +208,7 @@ RSpec.describe Metalware::Templater do
       it 'overrides defaults with parameter values, where applicable' do
         build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode03')
 
-        templater = Metalware::Templater.new(Metalware::Config.new, {
+        templater = Metalware::Templater.new(config, {
           nodename: 'testnode03',
           firstboot: true,
           files: build_files
@@ -237,7 +239,7 @@ RSpec.describe Metalware::Templater do
       end
 
       it 'loads the hunter parameter as an empty array' do
-        templater = Metalware::Templater.new(Metalware::Config.new)
+        templater = Metalware::Templater.new(config)
         magic_namespace = templater.config.alces
         expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
       end
