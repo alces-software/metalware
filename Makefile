@@ -4,11 +4,12 @@ REMOTE_DIR='/tmp/metalware'
 .PHONY: unit-test
 unit-test:
 	bundle exec rspec \
+		--force-colour \
 		--exclude-pattern 'spec/slow/**/*, spec/integration/**/*'
 
 .PHONY: test
 test:
-	bundle exec rspec
+	bundle exec rspec --force-colour
 
 .PHONY: view-test-coverage
 view-test-coverage:
