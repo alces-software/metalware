@@ -30,11 +30,6 @@ require 'constants'
 require 'fakefs_helper'
 
 RSpec.describe Metalware::Node do
-  before do
-    SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self)
-  end
-
   def node(name)
     Metalware::Node.new(Metalware::Config.new, name)
   end
@@ -43,21 +38,86 @@ RSpec.describe Metalware::Node do
   let :testnode02 { node('testnode02') }
   let :testnode03 { node('testnode03') }
 
-  describe '#configs' do
-    it 'returns possible configs for node in precedence order' do
-      expect(testnode01.configs).to eq(["domain", "cluster", "nodes", "testnodes", "testnode01"])
+  before do
+    SpecUtils.use_mock_genders(self)
+  end
+
+  # XXX adapt these to use FakeFS and make dependencies explicit?
+  context 'without using FakeFS' do
+    before do
+      SpecUtils.use_unit_test_config(self)
     end
 
-    it "just returns 'node' and 'domain' configs for node not in genders" do
-      name = 'not_in_genders_node01'
-      node = node(name)
-      expect(node.configs).to eq(['domain', name])
+    describe '#configs' do
+      it 'returns possible configs for node in precedence order' do
+        expect(testnode01.configs).to eq(["domain", "cluster", "nodes", "testnodes", "testnode01"])
+      end
+
+      it "just returns 'node' and 'domain' configs for node not in genders" do
+        name = 'not_in_genders_node01'
+        node = node(name)
+        expect(node.configs).to eq(['domain', name])
+      end
+
+      it "just returns 'domain' when passed nil node name" do
+        name = nil
+        node = node(name)
+        expect(node.configs).to eq(['domain'])
+      end
     end
 
-    it "just returns 'domain' when passed nil node name" do
-      name = nil
-      node = node(name)
-      expect(node.configs).to eq(['domain'])
+    describe '#build_files' do
+      it 'returns merged hash of files' do
+        expect(testnode01.build_files).to eq({
+          namespace01: [
+            'testnodes/some_file_in_repo',
+            '/some/other/path',
+            'http://example.com/some/url',
+          ].sort,
+          namespace02: [
+            'another_file_in_repo',
+          ].sort
+        })
+
+        expect(testnode02.build_files).to eq({
+          namespace01: [
+            'testnode02/some_file_in_repo',
+            '/some/other/path',
+            'http://example.com/testnode02/some/url',
+          ].sort,
+          namespace02: [
+            'testnode02/another_file_in_repo',
+          ].sort
+        })
+      end
+    end
+
+    describe '#index' do
+      it "returns consistent index of node within its 'primary' group" do
+        # We define the 'primary' group for a node as the first group it is
+        # associated with in the genders file. This means for `testnode01` and
+        # `testnode03` this is `testnodes`, but for `testnode02` it is
+        # `pregroup`, in which it is the first node and so has index 0.
+        #
+        # This has the potential to cause confusion but I see no better way to
+        # handle this currently, as a node can always have multiple groups and we
+        # have to choose one to be the primary group. Later we may add more
+        # structure and validation around handling this.
+        expect(testnode01.index).to eq(0)
+        expect(testnode02.index).to eq(0)
+        expect(testnode03.index).to eq(2)
+      end
+
+      it "returns 0 for node not in genders" do
+        name = 'not_in_genders_node01'
+        node = node(name)
+        expect(node.index).to eq(0)
+      end
+
+      it "returns 0 for nil node name" do
+        node = node(nil)
+        expect(node.index).to eq(0)
+      end
     end
   end
 
@@ -123,31 +183,6 @@ RSpec.describe Metalware::Node do
     end
   end
 
-  describe '#build_files' do
-    it 'returns merged hash of files' do
-      expect(testnode01.build_files).to eq({
-        namespace01: [
-          'testnodes/some_file_in_repo',
-          '/some/other/path',
-          'http://example.com/some/url',
-        ].sort,
-        namespace02: [
-          'another_file_in_repo',
-        ].sort
-      })
-
-      expect(testnode02.build_files).to eq({
-        namespace01: [
-          'testnode02/some_file_in_repo',
-          '/some/other/path',
-          'http://example.com/testnode02/some/url',
-        ].sort,
-        namespace02: [
-          'testnode02/another_file_in_repo',
-        ].sort
-      })
-    end
-  end
 
   describe '#==' do
     it 'returns false if other object is not a Node' do
@@ -161,34 +196,6 @@ RSpec.describe Metalware::Node do
 
     it 'defines nodes with different names as not equal' do
       expect(node('foonode')).not_to eq(node('barnode'))
-    end
-  end
-
-  describe '#index' do
-    it "returns consistent index of node within its 'primary' group" do
-      # We define the 'primary' group for a node as the first group it is
-      # associated with in the genders file. This means for `testnode01` and
-      # `testnode03` this is `testnodes`, but for `testnode02` it is
-      # `pregroup`, in which it is the first node and so has index 0.
-      #
-      # This has the potential to cause confusion but I see no better way to
-      # handle this currently, as a node can always have multiple groups and we
-      # have to choose one to be the primary group. Later we may add more
-      # structure and validation around handling this.
-      expect(testnode01.index).to eq(0)
-      expect(testnode02.index).to eq(0)
-      expect(testnode03.index).to eq(2)
-    end
-
-    it "returns 0 for node not in genders" do
-      name = 'not_in_genders_node01'
-      node = node(name)
-      expect(node.index).to eq(0)
-    end
-
-    it "returns 0 for nil node name" do
-      node = node(nil)
-      expect(node.index).to eq(0)
     end
   end
 end
