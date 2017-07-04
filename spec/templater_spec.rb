@@ -36,13 +36,13 @@ TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 RSpec.describe Metalware::Templater do
   def expect_renders(template_parameters, expected, config: Metalware::Config.new)
-    # Strip trailing spaces from rendered output to make comparisons less
-    # brittle.
     fshelper = FakeFSHelper.new(config)
     fshelper.clone(FIXTURES_PATH)
     fshelper.clone_repo(config.repo_path)
 
     rendered = fshelper.run do
+      # Strip trailing spaces from rendered output to make comparisons less
+      # brittle.
       Metalware::Templater.render(
         config, TEST_TEMPLATE_PATH, template_parameters
       ).gsub(/\s+\n/, "\n")
