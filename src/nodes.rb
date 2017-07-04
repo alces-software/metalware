@@ -33,7 +33,7 @@ module Metalware
     # Private as can only get `Nodes` instance via other methods in this class.
     private_class_method :new
 
-    delegate :length, :each, to: :@nodes
+    delegate :length, :each, :index, to: :@nodes
 
     # Create instance of `Nodes` from a single node or gender group.
     def self.create(config, node_identifier, is_group)
@@ -55,10 +55,9 @@ module Metalware
     end
 
     def template_each(**additional_template_parameters, &block)
-      @nodes.each_with_index do |node, index|
+      @nodes.each do |node|
         template_parameters = {
           nodename: node.name,
-          index: index,
         }.merge(additional_template_parameters)
 
         block.call(template_parameters, node)

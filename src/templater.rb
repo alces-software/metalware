@@ -122,7 +122,7 @@ module Metalware
       @metalware_config = metalware_config
       @nodename = parameters[:nodename]
       passed_magic_parameters = parameters.select { |k,v|
-          [:index, :firstboot, :files].include?(k) && !v.nil?
+          [:firstboot, :files].include?(k) && !v.nil?
       }
 
       magic_struct = MagicNamespace.new(**passed_magic_parameters, node: node)
@@ -251,12 +251,14 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:index, :firstboot, :files) do
-    def initialize(index: 0, node: nil, firstboot: nil, files: nil)
+  MagicNamespace = Struct.new(:firstboot, :files) do
+    def initialize(node: nil, firstboot: nil, files: nil)
       files = Hashie::Mash.new(files) if files
       @node = node
-      super(index, firstboot, files)
+      super(firstboot, files)
     end
+
+    delegate :index, to: :node
 
     def nodename
       node.name

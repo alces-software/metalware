@@ -39,9 +39,12 @@ RSpec.describe Metalware::Node do
     Metalware::Node.new(Metalware::Config.new, name)
   end
 
+  let :testnode01 { node('testnode01') }
+  let :testnode02 { node('testnode02') }
+  let :testnode03 { node('testnode03') }
+
   describe '#configs' do
     it 'returns possible configs for node in precedence order' do
-      testnode01 = node('testnode01')
       expect(testnode01.configs).to eq(["domain", "cluster", "nodes", "testnodes", "testnode01"])
     end
 
@@ -122,7 +125,6 @@ RSpec.describe Metalware::Node do
 
   describe '#build_files' do
     it 'returns merged hash of files' do
-      testnode01 = node('testnode01')
       expect(testnode01.build_files).to eq({
         namespace01: [
           'testnodes/some_file_in_repo',
@@ -134,7 +136,6 @@ RSpec.describe Metalware::Node do
         ].sort
       })
 
-      testnode02 = node('testnode02')
       expect(testnode02.build_files).to eq({
         namespace01: [
           'testnode02/some_file_in_repo',
@@ -145,6 +146,49 @@ RSpec.describe Metalware::Node do
           'testnode02/another_file_in_repo',
         ].sort
       })
+    end
+  end
+
+  describe '#==' do
+    it 'returns false if other object is not a Node' do
+      other_object = Struct.new(:name).new('foonode')
+      expect(node('foonode')).not_to eq(other_object)
+    end
+
+    it 'defines nodes with the same name as equal' do
+      expect(node('foonode')).to eq(node('foonode'))
+    end
+
+    it 'defines nodes with different names as not equal' do
+      expect(node('foonode')).not_to eq(node('barnode'))
+    end
+  end
+
+  describe '#index' do
+    it "returns consistent index of node within its 'primary' group" do
+      # We define the 'primary' group for a node as the first group it is
+      # associated with in the genders file. This means for `testnode01` and
+      # `testnode03` this is `testnodes`, but for `testnode02` it is
+      # `pregroup`, in which it is the first node and so has index 0.
+      #
+      # This has the potential to cause confusion but I see no better way to
+      # handle this currently, as a node can always have multiple groups and we
+      # have to choose one to be the primary group. Later we may add more
+      # structure and validation around handling this.
+      expect(testnode01.index).to eq(0)
+      expect(testnode02.index).to eq(0)
+      expect(testnode03.index).to eq(2)
+    end
+
+    it "returns 0 for node not in genders" do
+      name = 'not_in_genders_node01'
+      node = node(name)
+      expect(node.index).to eq(0)
+    end
+
+    it "returns 0 for nil node name" do
+      node = node(nil)
+      expect(node.index).to eq(0)
     end
   end
 end

@@ -36,6 +36,17 @@ module Metalware
       @name = name
     end
 
+    # Two nodes are equal <=> their names are equal; everything else is derived
+    # from this. This does mean they will appear equal if they are initialized
+    # with different config files, but this is a bug if it occurs in practise.
+    def ==(other_node)
+      if other_node.is_a? Node
+        name == other_node.name
+      else
+        false
+      end
+    end
+
     def hexadecimal_ip
       SystemCommand.run "gethostip -x #{name}"
     end
@@ -88,6 +99,14 @@ module Metalware
       )
     end
 
+    def index
+      if primary_group
+        Nodes.create(@metalware_config, primary_group, true).index(self)
+      else
+        0
+      end
+    end
+
     private
 
     def build_complete_marker_file
@@ -100,6 +119,10 @@ module Metalware
       # It's OK for a node to not be in the genders file, it just means it's
       # not part of any groups.
       []
+    end
+
+    def primary_group
+      groups.first
     end
 
     def load_config(config_name)

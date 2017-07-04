@@ -204,21 +204,20 @@ RSpec.describe Metalware::Templater do
 
     context 'with passed parameters' do
       it 'overrides defaults with parameter values, where applicable' do
-        build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode01')
+        build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode03')
 
         templater = Metalware::Templater.new(Metalware::Config.new, {
-          nodename: 'testnode01',
-          index: 3,
+          nodename: 'testnode03',
           firstboot: true,
           files: build_files
         })
         magic_namespace = templater.config.alces
 
-        expect(magic_namespace.index).to eq(3)
-        expect(magic_namespace.nodename).to eq('testnode01')
+        expect(magic_namespace.index).to eq(2)
+        expect(magic_namespace.nodename).to eq('testnode03')
         expect(magic_namespace.firstboot).to eq(true)
-        expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode01')
-        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode01')
+        expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')
+        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode03')
 
         # Can reach inside the passed `files` object.
         expect(

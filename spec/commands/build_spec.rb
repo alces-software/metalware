@@ -80,7 +80,6 @@ RSpec.describe Metalware::Commands::Build do
     def expected_template_parameters
       {
         nodename: 'testnode01',
-        index: 0,
         firstboot: true,
         files: SpecUtils.create_mock_build_files_hash(self, 'testnode01'),
       }
@@ -201,25 +200,25 @@ RSpec.describe Metalware::Commands::Build do
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/kickstart/my_kickstart',
         '/var/lib/metalware/rendered/kickstart/testnode01',
-        hash_including(nodename: 'testnode01', index: 0)
+        hash_including(nodename: 'testnode01')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/pxelinux/my_pxelinux',
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01', index: 0)
+        hash_including(nodename: 'testnode01')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/kickstart/my_kickstart',
         '/var/lib/metalware/rendered/kickstart/testnode02',
-        hash_including(nodename: 'testnode02', index: 1)
+        hash_including(nodename: 'testnode02')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/pxelinux/my_pxelinux',
         '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
-        hash_including(nodename: 'testnode02', index: 1)
+        hash_including(nodename: 'testnode02')
       )
 
       run_build(
