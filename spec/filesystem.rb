@@ -27,6 +27,10 @@ require 'fakefs/safe'
 
 class FileSystem
 
+  # Only interface to `FileSystem` is to call `FileSystem.setup` and then later
+  # `test` on the resulting object, or to call `FileSystem.test` directly.
+  private_class_method :new
+
   # Perform optional configuration of the `FileSystem` prior to a `test`. The
   # yielded and returned `FileSystemConfigurator` caches any unknown method
   # calls it receives. When `test` is later called on it, it runs
