@@ -24,29 +24,31 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
-require 'fakefs_helper'
 require 'node'
+require 'filesystem'
 
-TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
-REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
-UNSET_PARAMETER_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'unset_parameter_template.erb')
+TEST_TEMPLATE_PATH = '/fixtures/template.erb'
+UNSET_PARAMETER_TEMPLATE_PATH = '/fixtures/unset_parameter_template.erb'
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 
 
 RSpec.describe Metalware::Templater do
-  def expect_renders(template_parameters, expected, config: Metalware::Config.new)
-    fshelper = FakeFSHelper.new(config)
-    fshelper.clone(FIXTURES_PATH)
-    fshelper.clone_repo(config.repo_path)
+  let :filesystem {
+    FileSystem.setup do |fs|
+      fs.with_fixtures('/', at: '/fixtures')
+    end
+  }
 
-    rendered = fshelper.run do
+  def expect_renders(template_parameters, expected, config: Metalware::Config.new)
+    filesystem.test do |fs|
       # Strip trailing spaces from rendered output to make comparisons less
       # brittle.
-      Metalware::Templater.render(
+      rendered = Metalware::Templater.render(
         config, TEST_TEMPLATE_PATH, template_parameters
       ).gsub(/\s+\n/, "\n")
+
+      expect(rendered).to eq(expected.strip_heredoc)
     end
-    expect(rendered).to eq(expected.strip_heredoc)
   end
 
   describe '#render' do
@@ -86,8 +88,9 @@ RSpec.describe Metalware::Templater do
     end
 
     context 'with repo' do
-      before do
-        @config = Metalware::Config.new(REPO_TEST_CONFIG_PATH)
+      before :each do
+        @config = Metalware::Config.new
+        filesystem.with_fixtures('repo', at: @config.repo_path)
       end
 
       it 'renders template with repo parameters' do
@@ -107,27 +110,33 @@ RSpec.describe Metalware::Templater do
       it 'raises if maximum recursive config depth exceeded' do
         stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
 
-        expect{
-          Metalware::Templater.new(@config)
-        }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
+        filesystem.test do
+          expect{
+            Metalware::Templater.new(@config)
+          }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
+        end
       end
 
       it 'raises if attempt to access a property of an unset parameter' do
-        expect {
-          Metalware::Templater.render(@config, UNSET_PARAMETER_TEMPLATE_PATH, {})
-        }.to raise_error Metalware::UnsetParameterAccessError
+        filesystem.test do
+          expect {
+            Metalware::Templater.render(@config, UNSET_PARAMETER_TEMPLATE_PATH, {})
+          }.to raise_error Metalware::UnsetParameterAccessError
+        end
       end
     end
 
     context 'when passed node not in genders file' do
       it 'does not raise error' do
-        expect {
-          Metalware::Templater.render(
-            Metalware::Config.new,
-            TEST_TEMPLATE_PATH,
-            nodename: 'not_in_genders_node01'
-          )
-        }.to_not raise_error
+        filesystem.test do
+          expect {
+            Metalware::Templater.render(
+              Metalware::Config.new,
+              TEST_TEMPLATE_PATH,
+              nodename: 'not_in_genders_node01'
+            )
+          }.to_not raise_error
+        end
       end
     end
   end

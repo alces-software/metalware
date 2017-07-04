@@ -26,7 +26,30 @@ require 'fakefs/safe'
 
 
 class FileSystem
-  def self.test(&block)
+
+  # Perform optional configuration of the `FileSystem` prior to a `test`. The
+  # yielded and returned `FileSystemConfigurator` caches any unknown method
+  # calls it receives. When `test` is later called on it, it runs
+  # `FileSystem#test` in the usual way but any cached `FileSystem` method calls
+  # will be executed prior to yielding the setup `FileSystem` to the
+  # user-passed block.
+  #
+  # Since there is a single global `FakeFS`, this has an advantage over running
+  # method calls to set this up directly as it prevents it from being in an
+  # inconsistent state, as well as ensuring the `FakeFS` is used only while the
+  # `FakeFS do` block is executing in `test`.
+  #
+  # XXX This has the disadvantage that for calls which fail the exception is
+  # not thrown from where the actual failing call is made; it could be worth
+  # actually running the methods to check this, and then replaying them afresh
+  # when `test` is run.
+  def self.setup(&block)
+    FileSystemConfigurator.new.tap do |configurator|
+      yield configurator if block
+    end
+  end
+
+  def self.test(configurator=FileSystemConfigurator.new, &block)
     # Ensure the FakeFS is in a fresh state. XXX needed?
     FakeFS.deactivate!
     FakeFS.clear!
@@ -34,6 +57,9 @@ class FileSystem
     FakeFS do
       filesystem = new
       filesystem.create_initial_directory_hierarchy
+
+      configurator.configure_filesystem(filesystem)
+
       yield filesystem
     end
   end
@@ -97,4 +123,30 @@ class FileSystem
   def fixtures_path(relative_fixtures_path)
     File.join(FIXTURES_PATH, relative_fixtures_path)
   end
+
+  class FileSystemConfigurator
+    def initialize
+      @method_calls = []
+    end
+
+    def method_missing(name, *args, &block)
+      method_calls << MethodCall.new(name, args, block)
+    end
+
+    def configure_filesystem(filesystem)
+      method_calls.each do |method|
+        filesystem.send(method.name, *method.args, &method.block)
+      end
+    end
+
+    def test(&block)
+      FileSystem.test(self, &block)
+    end
+
+    private
+
+    attr_reader :method_calls
+  end
+
+  MethodCall = Struct.new(:name, :args, :block)
 end
