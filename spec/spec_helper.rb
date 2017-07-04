@@ -50,10 +50,6 @@ $:.unshift File.join(File.dirname(__FILE__), '../src')
 # simplecov, even entirely untested ones.
 require 'cli'
 
-# Require this here so can call `Debugging` functions anytime from any tests
-# without needing to add there.
-require 'debugging'
-
 FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 
 RSpec.configure do |config|

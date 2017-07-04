@@ -75,6 +75,23 @@ class FileSystem
     FileUtils.touch Metalware::Constants::DEFAULT_CONFIG_PATH
   end
 
+  # Print every directory and file loaded in the FakeFS.
+  def debug!
+    begin
+      # This can fail oddly if nothing matches (see
+      # https://github.com/fakefs/fakefs/issues/371), hence the `rescue` with a
+      # simpler glob.
+      matches = Dir['**/*']
+    rescue NoMethodError
+      matches = Dir['*']
+    end
+
+    matches.each do |path|
+      identifier = File.file?(path) ? 'f' : 'd'
+      puts "#{identifier}: #{path}"
+    end
+  end
+
   private
 
   def fixtures_path(relative_fixtures_path)
