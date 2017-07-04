@@ -27,7 +27,7 @@ require 'spec_utils'
 require 'fileutils'
 require 'config'
 require 'constants'
-require 'fakefs_helper'
+require 'filesystem'
 
 RSpec.describe Metalware::Node do
   def node(name)
@@ -139,47 +139,38 @@ RSpec.describe Metalware::Node do
   end
 
   describe "#answers" do
+    let :config { Metalware::Config.new }
+
     it 'performs a deep merge of answer files' do
-      config = Metalware::Config.new
-      fshelper = FakeFSHelper.new(config)
-      answers = File.join(FIXTURES_PATH, "answers/node-test-set1")
-      fshelper.clone_repo
-      fshelper.clone_answers(answers)
-      expected_hash = {
+      expected_answers = {
         value_set_by_domain: "domain",
         value_set_by_ag1: "ag1",
         value_set_by_ag2: "ag2",
         value_set_by_answer1: "answer1"
       }
 
-      result_hash = fshelper.run do
-        Metalware::Node.new(config, 'answer1').answers
+      FileSystem.test do |fs|
+        fs.with_fixtures('answers/node-test-set1', at: config.answer_files_path)
+        answers = node('answer1').answers
+        expect(answers).to eq(expected_answers)
       end
-      expect(result_hash).to eq(expected_hash)
     end
 
-    # XXX factor out duplication between this and above
     it 'just includes domain answers for nil node name' do
-      config = Metalware::Config.new
-      fshelper = FakeFSHelper.new(config)
-      answers = File.join(FIXTURES_PATH, "answers/node-test-set1")
-      fshelper.clone_repo
-      fshelper.clone_answers(answers)
-
       # A nil node uses no configs but the 'domain' config, so all answers will
       # be loaded from the 'domain' answers file.
-      expected_hash = {
+      expected_answers = {
         value_set_by_domain: "domain",
         value_set_by_ag1: "domain",
         value_set_by_ag2: "domain",
         value_set_by_answer1: "domain"
       }
 
-      result_hash = fshelper.run do
-        node = Metalware::Node.new(config, nil)
-        node.answers
+      FileSystem.test do |fs|
+        fs.with_fixtures('answers/node-test-set1', at: config.answer_files_path)
+        answers = node(nil).answers
+        expect(answers).to eq(expected_answers)
       end
-      expect(result_hash).to eq(expected_hash)
     end
   end
 

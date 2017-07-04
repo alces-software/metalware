@@ -50,6 +50,11 @@ class FileSystem
     })
   end
 
+  def with_fixtures(fixtures_dir, at:)
+    path = fixtures_path(fixtures_dir)
+    FakeFS::FileSystem.clone(path, at)
+  end
+
   # Create same directory hierarchy that would be created by a Metalware
   # install.
   def create_initial_directory_hierarchy
@@ -68,5 +73,11 @@ class FileSystem
 
     FileUtils.mkdir_p Metalware::Constants::METALWARE_CONFIGS_PATH
     FileUtils.touch Metalware::Constants::DEFAULT_CONFIG_PATH
+  end
+
+  private
+
+  def fixtures_path(relative_fixtures_path)
+    File.join(FIXTURES_PATH, relative_fixtures_path)
   end
 end
