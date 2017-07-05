@@ -37,7 +37,7 @@ module Metalware
           raise DependencyInternalError, msg
         end
         send(:"validate_#{dep}")
-        values.each { |value| validate_dependency(dep, value) }
+        values.each { |value| validate_dependency_value(dep, value) }
       }
     end
 
@@ -45,11 +45,9 @@ module Metalware
 
     attr_reader :config, :command
 
-    def validate_dependency(dep, value)
-      return if send(:"validate_#{dep}") == "skip"
-      return if value.is_a?(TrueClass)
+    def validate_dependency_value(dep, value)
       unless file_exists?(dep, value)
-        raise DependencyFailure, get_generic_failure_message(dep, value)
+        raise DependencyFailure, get_value_failure_message(dep, value)
       end
     end
 
@@ -57,22 +55,22 @@ module Metalware
       @validated_repo ||= begin
         msg = "'#{command}' requires a repo. Please run 'metal repo use'"
         raise DependencyFailure, msg unless file_exists?(:repo, "", true)
-        true
+        true # Sets the @validate_repo value so it only runs once
       end
     end
 
     def validate_configure
       @validate_configure ||= begin
-        # Maintains backwards compatibility
-        # If configure.yaml does not exist, the dependency is not checked
-        # The repo must still exist however
-        if file_exists?(:repo, "configure.yaml")
-          msg = "Could not locate answer files: #{Metalware::Constants::ANSWERS_PATH}"
-          raise DependencyFailure, msg unless file_exists?(:configure , "", true)
-        else
-          validate_repo
-          "skip"
+        validate_repo
+        unless file_exists?(:repo, "configure.yaml")
+          raise(DependencyFailure,
+                get_value_failure_message(:repo, "configure.yaml"))
         end
+        unless file_exists?(:configure , "", true)
+          msg = "Could not locate answer files: #{config.answer_files_path}"
+          raise DependencyFailure, msg
+        end
+        true # Sets the @validate_configure value so it only runs once
       end
     end
 
@@ -82,7 +80,7 @@ module Metalware
         when :repo
           File.join(@config.repo_path, value)
         when :configure
-          File.join(Metalware::Constants::ANSWERS_PATH, value)
+          File.join(config.answer_files_path, value)
         else
           msg = "Could not generate file path for dependency #{dep}"
           raise DependencyInternalError, msg
@@ -96,7 +94,7 @@ module Metalware
       end
     end
 
-    def get_generic_failure_message(dep, value)
+    def get_value_failure_message(dep, value)
       msg = "The '#{dep}' dependency (value: #{value}) has failed"
       case dep
       when :repo

@@ -15,7 +15,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
     FileUtils.touch Metalware::Constants::DEFAULT_CONFIG_PATH
 
     FileUtils.mkdir_p Metalware::Constants::CACHE_PATH
-    FileUtils.mkdir_p File.join(Metalware::Constants::ANSWERS_PATH, 'groups')
+    FileUtils.mkdir_p File.join(config.answer_files_path, 'groups')
 
     FileUtils.mkdir_p config.repo_path
     File.write config.configure_file, YAML.dump({

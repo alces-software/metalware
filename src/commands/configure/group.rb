@@ -22,7 +22,7 @@ module Metalware
 
         def answers_file
           file_name = "#{group_name}.yaml"
-          File.join(Constants::ANSWERS_PATH, 'groups', file_name)
+          File.join(config.answer_files_path, 'groups', file_name)
         end
 
         private

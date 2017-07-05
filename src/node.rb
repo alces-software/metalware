@@ -158,7 +158,7 @@ module Metalware
 
     def answers_path_for(config_name)
       File.join(
-        Metalware::Constants::ANSWERS_PATH,
+        @metalware_config.answer_files_path,
         answers_directory_for(config_name),
         "#{config_name}.yaml"
       )

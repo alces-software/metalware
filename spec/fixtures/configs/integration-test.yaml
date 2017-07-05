@@ -6,3 +6,4 @@ pxelinux_cfg_path: 'tmp/integration-test/pxelinux.cfg'
 repo_path: 'spec/fixtures/minimal-repo'
 log_path: 'tmp/log/integration-test'
 log_severity: "DEBUG"
+answer_files_path: 'tmp/answers'

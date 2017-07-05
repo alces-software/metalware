@@ -97,21 +97,9 @@ RSpec.describe Metalware::Dependencies do
       }.to raise_error(Metalware::DependencyFailure)
     end
 
-    # NOTE: This is the backwards compatibility test
-    it 'pass if the repo exists but configure.yaml doens\'t' do
-      @fshelper.run do
-        File.delete(File.join(@config.repo_path, "configure.yaml"))
-        File.delete(File.join(Metalware::Constants::ANSWERS_PATH, "domain.yaml"))
-      end
-
-      expect {
-        run_dependencies(@config, { configure: ["domain.yaml"] })
-      }.not_to raise_error
-    end
-
     it 'fails if answers directory doesn\'t exist' do
       @fshelper.run do
-        File.delete(Metalware::Constants::ANSWERS_PATH)
+        File.delete(@config.answer_files_path)
       end
 
       expect {
@@ -128,7 +116,7 @@ RSpec.describe Metalware::Dependencies do
 
     it 'validates missing answer files' do
       @fshelper.run do
-        File.delete(File.join(Metalware::Constants::ANSWERS_PATH, "groups/group1.yaml"))
+        File.delete(File.join(@config.answer_files_path, "groups/group1.yaml"))
       end
 
       expect {

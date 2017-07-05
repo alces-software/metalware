@@ -30,7 +30,6 @@ module Metalware
     METALWARE_DATA_PATH = '/var/lib/metalware'
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
     HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
-    ANSWERS_PATH = File.join(METALWARE_DATA_PATH, 'answers')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 

@@ -35,16 +35,16 @@ class FakeFSHelper
 
   # TODO: Replace this with clone_answers
   def add_answer_files(files)
-    FakeFS::FileUtils.mkdir_p(Metalware::Constants::ANSWERS_PATH)
+    FakeFS::FileUtils.mkdir_p(@metal_config.answer_files_path)
     files = [files] if files.is_a?(String)
     files.each do |f|
-      d = File.join(Metalware::Constants::ANSWERS_PATH, File.basename(f))
+      d = File.join(@metal_config.answer_files_path, File.basename(f))
       FakeFS::FileSystem.clone(f, d)
     end
   end
 
-  def clone_answers(path = Metalware::Constants.ANSWERS_PATH)
-    FakeFS::FileSystem.clone(path, Metalware::Constants::ANSWERS_PATH)
+  def clone_answers(path = @metal_config.answer_files_path)
+    FakeFS::FileSystem.clone(path, @metal_config.answer_files_path)
   end
 
   # Deprecated, please use clone_repo
