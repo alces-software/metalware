@@ -89,58 +89,54 @@ module Metalware
         :question,
         :type,
         :choices,
-        :default,
-        :old_answer
+        :default
 
       def initialize(identifier:, properties:, configure_file:,
                      questions_section:, old_answer: nil)
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
-        @default = properties[:default]
-        @old_answer = old_answer
+
         @type = type_for(
           properties[:type],
           configure_file: configure_file,
           questions_section: questions_section
         )
+
+        @default = determine_default(
+          question_default: properties[:default],
+          old_answer: old_answer
+        )
       end
 
       def ask(highline)
-        case type
-        when :boolean
-          highline.agree(question)
-        when :choice
-          highline.choose(*choices) do |menu|
-            menu.prompt = question
-            add_default(q)
-          end
-        when :integer
-          highline.ask(question, Integer)  { |q| add_default(q, :integer) }
-        else
-          highline.ask(question)  { |q| add_default(q) }
+        ask_method = "ask_#{type}_question"
+        self.send(ask_method, highline) do |highline_question|
+          highline_question.default = default
         end
       end
 
       private
 
-      def add_default(question, type = :string)
-        new_default = \
-          (old_answer && !old_answer.to_s.empty?) ? old_answer : default
+      def ask_boolean_question(highline)
+        highline.agree(question)
+        # Cannot set default for boolean questions, so do not yield to passed
+        # block.
+      end
 
-        unless new_default.nil?
-          parsed_default = nil
-          case type
-          when :string
-            parsed_default = new_default.to_s
-          when :integer
-            parsed_default = new_default.to_i
-          else
-            msg = "Unrecognized data type (#{type}) as a default"
-            raise UnknownDataTypeError, msg
-          end
-          question.default = parsed_default
+      def ask_choice_question(highline, &block)
+        highline.choose(*choices) do |menu|
+          menu.prompt = question
+          yield menu
         end
+      end
+
+      def ask_integer_question(highline, &block)
+        highline.ask(question, Integer)  { |q| yield q }
+      end
+
+      def ask_string_question(highline, &block)
+        highline.ask(question)  { |q| yield q }
       end
 
       def type_for(value, configure_file:, questions_section:)
@@ -159,6 +155,23 @@ module Metalware
 
       def valid_type?(value)
         VALID_TYPES.include?(value)
+      end
+
+      def determine_default(question_default:, old_answer:)
+        # XXX Remove validation/conversion here and do in earlier step for
+        # validating `configure.yaml`? Similarly in `type_for` etc.
+        raw_default = old_answer.present? ? old_answer : question_default
+        unless raw_default.nil?
+          case type
+          when :string
+            raw_default.to_s
+          when :integer
+            raw_default.to_i
+          else
+            msg = "Unrecognized data type (#{type}) as a default"
+            raise UnknownDataTypeError, msg
+          end
+        end
       end
     end
 
