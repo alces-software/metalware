@@ -23,9 +23,11 @@
 require 'commands/hosts'
 require 'templater'
 require 'spec_utils'
-
+require 'config'
 
 RSpec.describe Metalware::Commands::Hosts do
+
+  let :config { Metalware::Config.new }
 
   def run_hosts(node_identifier, **options_hash)
     # Adds default
@@ -46,7 +48,7 @@ RSpec.describe Metalware::Commands::Hosts do
     it 'appends to hosts file by default' do
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
         instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/default',
+        "#{config.repo_path}/hosts/default",
         '/etc/hosts',
         hash_including(nodename: 'testnode01', index: 0)
       )
@@ -57,7 +59,7 @@ RSpec.describe Metalware::Commands::Hosts do
     it 'uses a different template if template option passed' do
       expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
         instance_of(Metalware::Config),
-        '/var/lib/metalware/repo/hosts/my_template',
+        "#{config.repo_path}/hosts/my_template",
         '/etc/hosts',
         hash_including(nodename: 'testnode01', index: 0)
       )
@@ -69,7 +71,7 @@ RSpec.describe Metalware::Commands::Hosts do
       it 'outputs what would be appended' do
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
           instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
+          "#{config.repo_path}/hosts/default",
           hash_including(nodename: 'testnode01')
         )
 
@@ -91,7 +93,7 @@ RSpec.describe Metalware::Commands::Hosts do
       group_parameters.each do |parameters|
         expect(Metalware::Templater).to receive(:render_and_append_to_file).with(
           instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
+          "#{config.repo_path}/hosts/default",
           '/etc/hosts',
           parameters
         ).ordered
@@ -105,7 +107,7 @@ RSpec.describe Metalware::Commands::Hosts do
       group_parameters.each do |parameters|
         expect(Metalware::Templater).to receive(:render_to_stdout).with(
           instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
+          "#{config.repo_path}/hosts/default",
           parameters
         ).ordered
       end

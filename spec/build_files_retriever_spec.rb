@@ -22,7 +22,8 @@
 
 require 'build_files_retriever'
 require 'input'
-
+require 'spec_utils'
+require 'config'
 
 RSpec.describe Metalware::BuildFilesRetriever do
   TEST_FILES_HASH = {
@@ -35,6 +36,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
       'another_file'
     ]
   }
+
+  let :config { Metalware::Config.new }
 
   before do
     SpecUtils.use_mock_determine_hostip_script(self)
@@ -58,7 +61,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
         expect(retrieved_files[:namespace01][0]).to eq({
           raw: 'some/file_in_repo',
           name: 'file_in_repo',
-          template_path: '/var/lib/metalware/repo/files/some/file_in_repo',
+          template_path: File.join(config.repo_path, 'files/some/file_in_repo'),
           url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo',
         })
 
@@ -99,7 +102,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           retrieved_files = retriever.retrieve(TEST_FILES_HASH)
 
           repo_file_entry = retrieved_files[:namespace01][0]
-          template_path = '/var/lib/metalware/repo/files/some/file_in_repo'
+          template_path = "#{config.repo_path}/files/some/file_in_repo"
           expect(repo_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
