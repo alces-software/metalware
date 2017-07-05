@@ -2,6 +2,10 @@
 ruby '2.4.1'
 source 'https://rubygems.org'
 
+# Required to fix issue with FakeFS; refer to
+# https://github.com/fakefs/fakefs#fakefs-----typeerror-superclass-mismatch-for-class-file.
+require 'pp'
+
 gem 'commander', git: 'https://github.com/alces-software/commander'
 gem 'rugged'
 gem 'activesupport'
