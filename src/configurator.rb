@@ -85,7 +85,12 @@ module Metalware
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string]
 
-      attr_reader :identifier, :question, :type, :choices
+      attr_reader :identifier,
+        :question,
+        :type,
+        :choices,
+        :default,
+        :old_answer
 
       def initialize(identifier:, properties:, configure_file:,
                      questions_section:, old_answer: nil)
@@ -121,7 +126,7 @@ module Metalware
 
       def add_default(question, type = :string)
         new_default = \
-          (@old_answer && !@old_answer.to_s.empty?) ? @old_answer : @default
+          (old_answer && !old_answer.to_s.empty?) ? old_answer : default
 
         unless new_default.nil?
           parsed_default = nil
