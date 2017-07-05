@@ -29,48 +29,56 @@ require 'spec_helper'
 require 'fileutils'
 
 RSpec.describe Metalware::Dependencies do
-  before :each do
-    @config = Metalware::Config.new
-    @fshelper = FakeFSHelper.new(@config)
-    @fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
-  end
+  let :config { Metalware::Config.new }
+  let :fshelper { FakeFSHelper.new(config) }
 
-  def run_dependencies(config, dep = {})
-    @fshelper.run do
-      Metalware::Dependencies.new(config, "test", dep).enforce
+  def enforce_dependencies(dependencies_hash = {})
+    fshelper.run do
+      Metalware::Dependencies.new(config, "test", dependencies_hash).enforce
     end
   end
 
-  context 'repo dependencies' do
-    it 'fails if the repo doesn\'t exist' do
-      @fshelper.clear
+  context 'with a blank filesystem' do
+    it 'repo dependencies fail' do
       expect {
-        run_dependencies(@config, { repo: [] })
+        enforce_dependencies({ repo: [] })
       }.to raise_error(Metalware::DependencyFailure)
+    end
+
+    it 'configure dependencies fail' do
+      expect {
+        enforce_dependencies({ configure: ["domain.yaml"] })
+      }.to raise_error(Metalware::DependencyFailure)
+    end
+  end
+
+  context 'with repo dependencies' do
+    before :each do
+      fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
     end
 
     it 'check if the base repo exists' do
       expect {
-        run_dependencies(@config, { repo: [] })
+        enforce_dependencies({ repo: [] })
       }.not_to raise_error
     end
 
     it 'check if repo template exists' do
       expect {
-        run_dependencies(@config, {
+        enforce_dependencies({
           repo: ["dependency-test1/default"]
         })
       }.not_to raise_error
       expect {
-        run_dependencies(@config, {
+        enforce_dependencies({
           repo: ["dependency-test1/default", "dependency-test2/default"]
         })
       }.not_to raise_error
     end
 
-    it 'fail if repo template doesn\'t exist' do
+    it "fail if repo template doesn't exist" do
       expect {
-        run_dependencies(@config, {
+        enforce_dependencies({
           repo: ["dependency-test1/not-found"]
         })
       }.to raise_error(Metalware::DependencyFailure)
@@ -78,49 +86,43 @@ RSpec.describe Metalware::Dependencies do
 
     it 'fail if validating a repo directory' do
       expect {
-        run_dependencies(@config, {
+        enforce_dependencies({
           repo: ["dependency-test1"]
         })
       }.to raise_error(Metalware::DependencyFailure)
     end
   end
 
-  context 'configure dependencies' do
+  context 'with configure dependencies' do
     before :each do
-      @fshelper.clone_answers(File.join(FIXTURES_PATH, "answers/basic_structure"))
+      fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
+      fshelper.clone_answers(File.join(FIXTURES_PATH, "answers/basic_structure"))
     end
 
-    it 'fails if the repo doesn\'t exist' do
-      @fshelper.clear
-      expect {
-        run_dependencies(@config, { configure: ["domain.yaml"] })
-      }.to raise_error(Metalware::DependencyFailure)
-    end
-
-    it 'fails if answers directory doesn\'t exist' do
-      @fshelper.run do
-        File.delete(@config.answer_files_path)
+    it "fails if answers directory doesn't exist" do
+      fshelper.run do
+        File.delete(config.answer_files_path)
       end
 
       expect {
-        run_dependencies(@config, { configure: ["domain.yaml"] })
+        enforce_dependencies({ configure: ["domain.yaml"] })
       }.to raise_error(Metalware::DependencyFailure)
     end
 
     it 'validates that the answer files exists' do
       expect {
-        run_dependencies(@config,
+        enforce_dependencies(
                          { configure: ["domain.yaml", "groups/group1.yaml"] })
       }.not_to raise_error
     end
 
     it 'validates missing answer files' do
-      @fshelper.run do
-        File.delete(File.join(@config.answer_files_path, "groups/group1.yaml"))
+      fshelper.run do
+        File.delete(File.join(config.answer_files_path, "groups/group1.yaml"))
       end
 
       expect {
-        run_dependencies(@config,
+        enforce_dependencies(
                          { configure: ["domain.yaml", "groups/group1.yaml"] })
       }.to raise_error(Metalware::DependencyFailure)
     end
