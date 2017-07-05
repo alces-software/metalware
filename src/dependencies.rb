@@ -32,8 +32,11 @@ module Metalware
 
     def enforce
       @dep_hash.each { |dep, values|
-        next unless values # Rejects nil and false
-        values = [values] unless values.is_a?(Array)
+        unless values.is_a?(Array)
+          msg = "Dependency values must be an array, check: #{dep}"
+          raise DependencyInternalError, msg
+        end
+        send(:"validate_#{dep}")
         values.each { |value| validate_dependency(dep, value) }
       }
     end

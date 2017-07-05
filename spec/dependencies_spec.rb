@@ -45,20 +45,20 @@ RSpec.describe Metalware::Dependencies do
     it 'fails if the repo doesn\'t exist' do
       @fshelper.clear
       expect {
-        run_dependencies(@config, { repo: true })
+        run_dependencies(@config, { repo: [] })
       }.to raise_error(Metalware::DependencyFailure)
     end
 
     it 'check if the base repo exists' do
       expect {
-        run_dependencies(@config, { repo: true })
+        run_dependencies(@config, { repo: [] })
       }.not_to raise_error
     end
 
     it 'check if repo template exists' do
       expect {
         run_dependencies(@config, {
-          repo: "dependency-test1/default"
+          repo: ["dependency-test1/default"]
         })
       }.not_to raise_error
       expect {
@@ -71,7 +71,7 @@ RSpec.describe Metalware::Dependencies do
     it 'fail if repo template doesn\'t exist' do
       expect {
         run_dependencies(@config, {
-          repo: "dependency-test1/not-found"
+          repo: ["dependency-test1/not-found"]
         })
       }.to raise_error(Metalware::DependencyFailure)
     end
@@ -79,7 +79,7 @@ RSpec.describe Metalware::Dependencies do
     it 'fail if validating a repo directory' do
       expect {
         run_dependencies(@config, {
-          repo: "dependency-test1"
+          repo: ["dependency-test1"]
         })
       }.to raise_error(Metalware::DependencyFailure)
     end
@@ -93,7 +93,7 @@ RSpec.describe Metalware::Dependencies do
     it 'fails if the repo doesn\'t exist' do
       @fshelper.clear
       expect {
-        run_dependencies(@config, { configure: "domain.yaml" })
+        run_dependencies(@config, { configure: ["domain.yaml"] })
       }.to raise_error(Metalware::DependencyFailure)
     end
 
@@ -105,7 +105,7 @@ RSpec.describe Metalware::Dependencies do
       end
 
       expect {
-        run_dependencies(@config, { configure: "domain.yaml" })
+        run_dependencies(@config, { configure: ["domain.yaml"] })
       }.not_to raise_error
     end
 
@@ -115,7 +115,7 @@ RSpec.describe Metalware::Dependencies do
       end
 
       expect {
-        run_dependencies(@config, { configure: "domain.yaml" })
+        run_dependencies(@config, { configure: ["domain.yaml"] })
       }.to raise_error(Metalware::DependencyFailure)
     end
 

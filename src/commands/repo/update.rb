@@ -76,7 +76,7 @@ module Metalware
 
         def dependencies_hash
           {
-            repo: true
+            repo: []
           }
         end
       end
