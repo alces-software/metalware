@@ -55,12 +55,7 @@ module Metalware
     end
 
     def old_answers
-      @old_answers ||= if File.exists?(@answers_file)
-        data = YAML.load_file(@answers_file)
-        data ? data : {}
-      else
-        {}
-      end
+      @old_answers ||= Utils.safely_load_yaml(answers_file)
     end
 
     def ask_questions
