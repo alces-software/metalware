@@ -54,6 +54,10 @@ module Metalware
         map{ |identifier, properties| create_question(identifier, properties) }
     end
 
+    def old_answers
+      @old_answers ||= Utils.safely_load_yaml(answers_file)
+    end
+
     def ask_questions
       questions.map do |question|
         answer = question.ask(highline)
@@ -72,7 +76,8 @@ module Metalware
           identifier: identifier,
           properties: properties,
           configure_file: configure_file,
-          questions_section: questions_section
+          questions_section: questions_section,
+          old_answer: old_answers[identifier]
         }
       )
     end
@@ -80,53 +85,58 @@ module Metalware
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string]
 
-      attr_reader :identifier, :question, :type, :choices
+      attr_reader :identifier,
+        :question,
+        :type,
+        :choices,
+        :default
 
       def initialize(identifier:, properties:, configure_file:,
-                     questions_section:, default: nil)
+                     questions_section:, old_answer: nil)
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
-        @default = properties[:default]
+
         @type = type_for(
           properties[:type],
           configure_file: configure_file,
           questions_section: questions_section
         )
+
+        @default = determine_default(
+          question_default: properties[:default],
+          old_answer: old_answer
+        )
       end
 
       def ask(highline)
-        case type
-        when :boolean
-          highline.agree(question)
-        when :choice
-          highline.choose(*choices) do |menu|
-            menu.prompt = question
-            add_default(q)
-          end
-        when :integer
-          highline.ask(question, Integer)  { |q| add_default(q, :integer) }
-        else
-          highline.ask(question)  { |q| add_default(q) }
+        ask_method = "ask_#{type}_question"
+        self.send(ask_method, highline) do |highline_question|
+          highline_question.default = default
         end
       end
 
       private
 
-      def add_default(question, type = :string)
-        unless @default.nil?
-          parsed_default = nil
-          case type
-          when :string
-            parsed_default = @default.to_s
-          when :integer
-            parsed_default = (@default.is_a?(Integer) ? @default : @default.to_i)
-          else
-            msg = "Unrecognized data type (#{type}) as a default"
-            raise UnknownDataTypeError, msg
-          end
-          question.default = parsed_default
+      def ask_boolean_question(highline)
+        highline.agree(question)
+        # Cannot set default for boolean questions, so do not yield to passed
+        # block.
+      end
+
+      def ask_choice_question(highline, &block)
+        highline.choose(*choices) do |menu|
+          menu.prompt = question
+          yield menu
         end
+      end
+
+      def ask_integer_question(highline, &block)
+        highline.ask(question, Integer)  { |q| yield q }
+      end
+
+      def ask_string_question(highline, &block)
+        highline.ask(question)  { |q| yield q }
       end
 
       def type_for(value, configure_file:, questions_section:)
@@ -145,6 +155,23 @@ module Metalware
 
       def valid_type?(value)
         VALID_TYPES.include?(value)
+      end
+
+      def determine_default(question_default:, old_answer:)
+        # XXX Remove validation/conversion here and do in earlier step for
+        # validating `configure.yaml`? Similarly in `type_for` etc.
+        raw_default = old_answer.present? ? old_answer : question_default
+        unless raw_default.nil?
+          case type
+          when :string
+            raw_default.to_s
+          when :integer
+            raw_default.to_i
+          else
+            msg = "Unrecognized data type (#{type}) as a default"
+            raise UnknownDataTypeError, msg
+          end
+        end
       end
     end
 
