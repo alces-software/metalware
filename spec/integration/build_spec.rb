@@ -37,8 +37,6 @@ RSpec.describe '`metal build`' do
   TEST_KICKSTART_DIR = File.join(TEST_CONFIG.rendered_files_path, 'kickstart')
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
   TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
-  TEST_NODES_ANSWERS_PATH = "tmp/answers"
-  TEST_NODES_ANSWER_FILES = ["domain.yaml", "groups/nodes.yaml"]
 
   TEST_REPO = 'spec/fixtures/minimal-repo/'
   PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
@@ -106,14 +104,6 @@ RSpec.describe '`metal build`' do
       # that is used is insured to be constant, regardless of future changes
       Metalware::SystemCommand.run \
         'cd tmp/repo && git checkout feature/topologies-changes'
-    end
-
-    TEST_NODES_ANSWER_FILES.each do |f|
-      file = File.join(TEST_NODES_ANSWERS_PATH, f)
-      unless File.exists? file
-        FileUtils.mkdir_p File.dirname(file)
-        FileUtils.touch file
-      end
     end
   end
 
