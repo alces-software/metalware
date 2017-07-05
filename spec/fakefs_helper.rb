@@ -33,41 +33,16 @@ class FakeFSHelper
     FakeFS do yield end
   end
 
-  # TODO: Replace this with clone_answers
-  def add_answer_files(files)
-    FakeFS::FileUtils.mkdir_p(@metal_config.answer_files_path)
-    files = [files] if files.is_a?(String)
-    files.each do |f|
-      d = File.join(@metal_config.answer_files_path, File.basename(f))
-      FakeFS::FileSystem.clone(f, d)
-    end
-  end
-
-  def clone_answers(path = @metal_config.answer_files_path)
-    FakeFS::FileSystem.clone(path, @metal_config.answer_files_path)
-  end
-
-  # Deprecated, please use clone_repo
-  def load_repo(path = @metal_config.repo_path)
-    FakeFS::FileSystem.clone(path, @metal_config.repo_path)
-  end
-
-  # Deprecated, please use clone_repo
-  # TODO: remove references to load_config_files
-  def load_config_files(config_names = [])
-    FakeFS::FileSystem.clone(@metal_config.configure_file)
-    config_names.each do |c|
-      FakeFS::FileSystem.clone(@metal_config.repo_config_path(c))
-    end
-  end
-
-
   def clone(*a)
     FakeFS::FileSystem.clone(*a)
   end
 
   def clone_repo(path = @metal_config.repo_path)
-    FakeFS::FileSystem.clone(path, @metal_config.repo_path)
+    clone(path, @metal_config.repo_path)
+  end
+
+  def clone_answers(path = @metal_config.answer_files_path)
+    clone(path, @metal_config.answer_files_path)
   end
 
   def clear

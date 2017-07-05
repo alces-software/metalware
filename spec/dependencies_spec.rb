@@ -32,7 +32,7 @@ RSpec.describe Metalware::Dependencies do
   before :each do
     @config = Metalware::Config.new
     @fshelper = FakeFSHelper.new(@config)
-    @fshelper.load_repo(File.join(FIXTURES_PATH, "repo"))
+    @fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
   end
 
   def run_dependencies(config, dep = {})
