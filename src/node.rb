@@ -181,7 +181,7 @@ module Metalware
 
     def combine_hashes(hashes)
       combined = hashes.each_with_object({}) do |config, combined_config|
-        raise CombineConfigError unless config.is_a? Hash
+        raise CombineHashError unless config.is_a? Hash
         combined_config.deep_merge!(config)
       end
       combined.deep_transform_keys{ |k| k.to_sym }
