@@ -31,16 +31,16 @@ module Metalware
 
     def setup(args, options)
       @command = ARGV[0]
-      @cli_input = ARGV[1..(ARGV.length - 1)].join(" ")
+      @cli_input = ARGV[1..(ARGV.length - 1)]
     end
 
     def run
       script = File.join(Constants::METALWARE_INSTALL_PATH,
                          "libexec",
                          "#{@command}")
-      cmd = "#{script} #{@cli_input}"
-      MetalLog.info "Running: #{cmd}"
-      exec("#{cmd}")
+      MetalLog.info "Running: #{script}"
+      MetalLog.info "Inputs: #{@cli_input}"
+      exec(script, *@cli_input)
     end
   end
 end
