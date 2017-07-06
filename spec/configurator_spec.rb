@@ -10,8 +10,12 @@ RSpec.describe Metalware::Configurator do
     Tempfile.new
   }
 
+  let :output {
+    Tempfile.new
+  }
+
   let :highline {
-    HighLine.new(input)
+    HighLine.new(input, output)
   }
 
   let :configure_file {
@@ -324,6 +328,37 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_input("\n\n\n\n\n\n")
       expect(answers).to eq(new_answers)
+    end
+
+    it 're-asks the required questions if no answer is given' do
+      define_questions({
+        test: {
+          string_q: {
+            question: "I should be re-asked"
+          }
+        }
+      })
+
+      expect{
+        configure_with_input("\n")
+      }.to raise_error(EOFError)
+    end
+
+    it 'allows optional questions to have empty answers' do
+      define_questions({
+        test: {
+          string_q: {
+            question: "I should NOT be re-asked",
+            optional: true
+          }
+        }
+      })
+      expected = {
+        "string_q" => ""
+      }
+
+      configure_with_input("\n")
+      expect(answers).to eq(expected)
     end
   end
 end
