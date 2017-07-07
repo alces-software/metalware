@@ -66,11 +66,8 @@ RSpec.describe '`metal build`' do
             block.call(stdin, stdout, stderr, pid)
           rescue Exception => e
             begin
-              # Try to read output `stdout` and `stderr`, or just ensure original
-              # exception raised if not available.
-              max_bytes_to_read = 30000
-              stdout_data = stdout.read_nonblock(max_bytes_to_read)
-              stderr_data = stderr.read_nonblock(max_bytes_to_read)
+              stdout_data = read_io_stream(stdout)
+              stderr_data = read_io_stream(stderr)
               puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
             rescue
               raise e
@@ -78,7 +75,14 @@ RSpec.describe '`metal build`' do
             raise
           end
         end
-    end
+      end
+  end
+
+  def read_io_stream(stream)
+    max_bytes_to_read = 30000
+    stream.read_nonblock(max_bytes_to_read)
+  rescue EOFError
+    ''
   end
 
   def expect_clears_up_built_node_marker_files
