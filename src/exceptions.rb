@@ -72,8 +72,8 @@ module Metalware
   class IterableRecursiveOpenStructPropertyError < MetalwareError
   end
 
-  class CombineConfigError < MetalwareError
-    def intialize(msg="Could not combine config hashes")
+  class CombineHashError < MetalwareError
+    def initialize(msg="Could not combine config or answer hashes")
       super
     end
   end
@@ -91,5 +91,16 @@ module Metalware
   end
 
   class MissingParameter < MetalwareError
+  end
+  
+  # Use this error as the general catch all in Dependencies
+  # The dependency can't be checked as the logic doesn't make sense
+  # NOTE: We should try and prevent these errors from appearing in production
+  class DependencyInternalError < MetalwareError
+  end
+
+  # Use this error when the dependency is checked but isn't met
+  # NOTE: This is the only dependency error we see in production
+  class DependencyFailure < MetalwareError
   end
 end

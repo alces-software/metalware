@@ -14,6 +14,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - Patched HighLine to prevent errors when the default answer to questions contains an erb tag.
 - Allow Configure questions to have predefined default answers.
 - Override the Configure default answers to be that of the previous answer of the same question.
+- Require `metal configure` commands to be ran before `metal build` if the repository contains the questions `configure.yaml`
 
 ### Added
 

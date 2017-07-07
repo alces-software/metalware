@@ -82,9 +82,9 @@ RSpec.describe Metalware::Node do
     it 'performs a deep merge of answer files' do
       config = Metalware::Config.new
       fshelper = FakeFSHelper.new(config)
-      answers = Dir[File.join(FIXTURES_PATH, "answers/node-test-set1/*")]
-      fshelper.load_config_files
-      fshelper.add_answer_files(answers)
+      answers = File.join(FIXTURES_PATH, "answers/node-test-set1")
+      fshelper.clone_repo
+      fshelper.clone_answers(answers)
       expected_hash = {
         value_set_by_domain: "domain",
         value_set_by_ag1: "ag1",
@@ -102,9 +102,9 @@ RSpec.describe Metalware::Node do
     it 'just includes domain answers for nil node name' do
       config = Metalware::Config.new
       fshelper = FakeFSHelper.new(config)
-      answers = Dir[File.join(FIXTURES_PATH, "answers/node-test-set1/*")]
-      fshelper.load_config_files
-      fshelper.add_answer_files(answers)
+      answers = File.join(FIXTURES_PATH, "answers/node-test-set1")
+      fshelper.clone_repo
+      fshelper.clone_answers(answers)
 
       # A nil node uses no configs but the 'domain' config, so all answers will
       # be loaded from the 'domain' answers file.

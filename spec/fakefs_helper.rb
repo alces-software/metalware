@@ -20,6 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'fakefs/safe'
+require 'constants'
 
 class FakeFSHelper
   def initialize(metal_config)
@@ -32,27 +33,19 @@ class FakeFSHelper
     FakeFS do yield end
   end
 
-  def add_answer_files(files)
-    FakeFS::FileUtils.mkdir_p(Metalware::Constants::ANSWERS_PATH)
-    files = [files] if files.is_a?(String)
-    files.each do |f|
-      d = File.join(Metalware::Constants::ANSWERS_PATH, File.basename(f))
-      FakeFS::FileSystem.clone(f, d)
-    end
-  end
-
-  def load_config_files(config_names = [])
-    FakeFS::FileSystem.clone(@metal_config.configure_file)
-    config_names.each do |c|
-      FakeFS::FileSystem.clone(@metal_config.repo_config_path(c))
-    end
-  end
-
   def clone(*a)
     FakeFS::FileSystem.clone(*a)
   end
 
   def clone_repo(path = @metal_config.repo_path)
-    FakeFS::FileSystem.clone(path, @metal_config.repo_path)
+    clone(path, @metal_config.repo_path)
+  end
+
+  def clone_answers(path = @metal_config.answer_files_path)
+    clone(path, @metal_config.answer_files_path)
+  end
+
+  def clear
+    FakeFS.clear!
   end
 end

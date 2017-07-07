@@ -14,7 +14,7 @@ module Metalware
         protected
 
         def answers_file
-          File.join(Constants::ANSWERS_PATH, 'domain.yaml')
+          File.join(config.answer_files_path, 'domain.yaml')
         end
       end
 

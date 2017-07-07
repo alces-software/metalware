@@ -22,7 +22,7 @@
 
 require 'metal_log'
 require 'config'
-require 'repo'
+require 'dependencies'
 require 'exceptions'
 
 module Metalware
@@ -31,6 +31,7 @@ module Metalware
       def initialize(args, options)
         pre_setup(args, options)
         setup(args, options)
+        post_setup
         run
       rescue Interrupt => e
         handle_interrupt(e)
@@ -44,8 +45,11 @@ module Metalware
 
       def pre_setup(args, options)
         setup_config(options)
-        validate_repo_exists_if_required
         log_command
+      end
+
+      def post_setup
+        enforce_dependencies
       end
 
       def validate_repo_exists_if_required
@@ -55,20 +59,22 @@ module Metalware
         end
       end
 
-      def requires_repo?
-        false
-      end
-
-      def repo
-        Repo.new(config.repo_path)
-      end
-
       def setup_config(options)
         cli_options = {
           strict: !!options.strict,
           quiet: !!options.quiet
         }
         @config = Config.new(options.config, cli_options)
+      end
+
+      def dependencies_hash
+        {
+          #repo: [], Array of files or true for base dir
+        }
+      end
+
+      def enforce_dependencies
+        Dependencies.new(config, command_name, dependencies_hash).enforce
       end
 
       def command_name

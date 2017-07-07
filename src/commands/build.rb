@@ -40,8 +40,8 @@ module Metalware
 
       def setup(args, options)
         @options = options
-        node_identifier = args.first
-        @nodes = Nodes.create(config, node_identifier, options.group)
+        @node_identifier = args.first
+        @nodes = Nodes.create(config, @node_identifier, options.group)
       end
 
       def run
@@ -50,8 +50,14 @@ module Metalware
         teardown
       end
 
-      def requires_repo?
-        true
+      def dependencies_hash
+        {
+          repo: ["pxelinux/#{@options.pxelinux}",
+                 "kickstart/#{@options.kickstart}"],
+          configure: ["domain.yaml"].tap { |arr|
+            arr.push("groups/#{@node_identifier}.yaml") if @options.group
+          }
+        }
       end
 
       def render_build_templates
