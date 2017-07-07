@@ -21,7 +21,6 @@
 #==============================================================================
 
 require 'timeout'
-require 'fakefs/safe'
 
 require 'commands/build'
 require 'node'
@@ -157,15 +156,9 @@ RSpec.describe Metalware::Commands::Build do
 
     describe 'files rendering' do
       it 'renders only files which could be retrieved' do
-        # XXX This test is an experiment with using `FakeFS` and explicitly
-        # declaring the files it depends on, rather than relying on the
-        # combination of fudging config values, file paths and stubbing methods
-        # we do elsewhere. This may be a more robust and less brittle approach.
-        FakeFS do
-          FakeFS::FileSystem.clone('etc/config.yaml')
-
-          # Clone in needed repo files to expected locations.
-          FakeFS::FileSystem.clone('spec/fixtures/repo/config', '/var/lib/metalware/repo/config')
+        FileSystem.test do |fs|
+          # Create needed repo files.
+          fs.with_fixtures('repo/config', at: '/var/lib/metalware/repo/config')
           FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
           FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 
