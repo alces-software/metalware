@@ -23,7 +23,6 @@
 require 'config'
 require 'constants'
 require 'spec_utils'
-require 'system_command'
 
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
@@ -95,16 +94,6 @@ RSpec.describe '`metal build`' do
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
-
-    unless File.exists? TEST_REPO
-      Metalware::SystemCommand.run \
-        'git clone https://github.com/alces-software/metalware-default.git tmp/repo'
-      # TODO: Once `feature/topologies-changes` is merged into master, a tag
-      # should be created to replace the checkout branch. This way the exact branch
-      # that is used is insured to be constant, regardless of future changes
-      Metalware::SystemCommand.run \
-        'cd tmp/repo && git checkout feature/topologies-changes'
-    end
   end
 
   after do
