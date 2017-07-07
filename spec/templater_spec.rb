@@ -29,7 +29,7 @@ TEST_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'template.erb')
 REPO_TEST_CONFIG_PATH = File.join(FIXTURES_PATH, 'configs/repo-unit-test.yaml')
 UNSET_PARAMETER_TEMPLATE_PATH = File.join(FIXTURES_PATH, 'unset_parameter_template.erb')
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
-
+EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
 RSpec.describe Metalware::Templater do
   def expect_renders(template_parameters, expected, config: Metalware::Config.new)
@@ -42,12 +42,20 @@ RSpec.describe Metalware::Templater do
     expect(rendered).to eq(expected.strip_heredoc)
   end
 
+  # TODO: Their is a lot of override of repos in these tests making it hard to
+  # follow which test is using which repo. However once the work with FakeFS is
+  # merged into this branch, it should be replace with use the standard location
+  # of the repo
   before :each do
     SpecUtils.use_unit_test_config(self)
   end
 
   describe '#render' do
-    context 'when templater passed no parameters' do
+    context 'without a repo' do
+      before :each do
+        @config = Metalware::Config.new(EMPTY_REPO_PATH)
+      end
+
       it 'renders template with no extra parameters' do
         expected = <<-EOF
         This is a test template
@@ -59,11 +67,9 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders({}, expected)
+        expect_renders({}, expected, config: @config)
       end
-    end
 
-    context 'when templater passed parameters' do
       it 'renders template with extra passed parameters' do
         template_parameters = ({
           some_passed_value: 'my_value'
@@ -78,7 +84,7 @@ RSpec.describe Metalware::Templater do
         alces.index: 0
         EOF
 
-        expect_renders(template_parameters, expected)
+        expect_renders(template_parameters, expected, config: @config)
       end
     end
 
