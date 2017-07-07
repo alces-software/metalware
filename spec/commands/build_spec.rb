@@ -71,7 +71,6 @@ RSpec.describe Metalware::Commands::Build do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
     SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self)
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependencies(self)
   end
@@ -163,17 +162,10 @@ RSpec.describe Metalware::Commands::Build do
         # combination of fudging config values, file paths and stubbing methods
         # we do elsewhere. This may be a more robust and less brittle approach.
         FakeFS do
-          # Clone in test Metalware configs at expected path, so can find
-          # `unit-test.yaml`.
-          # XXX Rather than stubbing `Constants::DEFAULT_CONFIG_PATH` and then
-          # cloning the test config there, could just clone this where it is
-          # normally expected.
-          FakeFS::FileSystem.clone('spec/fixtures/configs/')
+          FakeFS::FileSystem.clone('etc/config.yaml')
 
           # Clone in needed repo files to expected locations.
-          # XXX Once removed `repo_configs_path` from config can simplify this
-          # to use normal repo location for configs.
-          FakeFS::FileSystem.clone('spec/fixtures/repo/config', '/spec/fixtures/repo/config')
+          FakeFS::FileSystem.clone('spec/fixtures/repo/config', '/var/lib/metalware/repo/config')
           FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
           FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 
