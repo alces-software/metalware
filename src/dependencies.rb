@@ -78,7 +78,7 @@ module Metalware
       path = begin
         case dep
         when :repo
-          File.join(@config.repo_path, value)
+          File.join(config.repo_path, value)
         when :configure
           File.join(config.answer_files_path, value)
         else
