@@ -37,7 +37,7 @@ RSpec.describe '`metal build`' do
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
   TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
 
-  TEST_REPO = 'tmp/repo'
+  TEST_REPO = 'spec/fixtures/minimal-repo/'
   PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
 
   def kill_any_metal_processes
@@ -94,13 +94,6 @@ RSpec.describe '`metal build`' do
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
-
-    if !File.exists? TEST_REPO
-      SystemCommand.run \
-        'git clone https://github.com/alces-software/metalware-default.git tmp/repo'
-      SystemCommand.run \
-        'cd tmp/repo && git checkout feature/adaptations-for-new-metalware'
-    end
   end
 
   after do
