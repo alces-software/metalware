@@ -78,10 +78,12 @@ RSpec.describe Metalware::Commands::Build do
 
   context 'when called without group argument' do
     def expected_template_parameters
+      config = Metalware::Config.new
+      files = SpecUtils.create_mock_build_files_hash(self, config: config, node_name: 'testnode01')
       {
         nodename: 'testnode01',
         firstboot: true,
-        files: SpecUtils.create_mock_build_files_hash(self, 'testnode01'),
+        files: files,
       }
     end
 

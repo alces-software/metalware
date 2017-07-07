@@ -166,6 +166,7 @@ RSpec.describe Metalware::Templater do
       # Stub this so mock hunter config used.
       stub_const('Metalware::Constants::HUNTER_PATH', TEST_HUNTER_PATH)
 
+      SpecUtils.use_unit_test_config(self)
       SpecUtils.use_mock_determine_hostip_script(self)
       SpecUtils.use_mock_genders(self)
     end
@@ -206,7 +207,9 @@ RSpec.describe Metalware::Templater do
 
     context 'with passed parameters' do
       it 'overrides defaults with parameter values, where applicable' do
-        build_files = SpecUtils.create_mock_build_files_hash(self, 'testnode03')
+        build_files = SpecUtils.create_mock_build_files_hash(
+          self, config: config, node_name: 'testnode03'
+        )
 
         templater = Metalware::Templater.new(config, {
           nodename: 'testnode03',

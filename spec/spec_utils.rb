@@ -75,8 +75,7 @@ module SpecUtils
       http_error
     end
 
-    def create_mock_build_files_hash(example_group, node_name)
-      SpecUtils.use_unit_test_config(example_group)
+    def create_mock_build_files_hash(example_group, config:, node_name:)
       SpecUtils.fake_download_error(example_group)
 
       example_group.instance_exec do
