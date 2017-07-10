@@ -15,6 +15,7 @@ gem 'net-dhcp'
 gem 'hashie'
 gem 'fakefs'
 gem 'highline', '1.7.8'
+gem 'dry-validation'
 
 group :test do
   gem 'rspec'
