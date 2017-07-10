@@ -24,6 +24,8 @@ require 'config'
 require 'constants'
 require 'spec_utils'
 
+require 'minimal_repo'
+
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
@@ -37,7 +39,7 @@ RSpec.describe '`metal build`' do
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
   TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
 
-  TEST_REPO = 'spec/fixtures/minimal-repo/'
+  TEST_REPO = File.join(TEST_DIR, 'repo')
   PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
 
   def kill_any_metal_processes
@@ -98,6 +100,8 @@ RSpec.describe '`metal build`' do
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
+
+    MinimalRepo.create_at(TEST_REPO)
   end
 
   after do

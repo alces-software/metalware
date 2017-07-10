@@ -22,6 +22,8 @@
 
 require 'fakefs/safe'
 
+require 'minimal_repo'
+
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
 
 
@@ -71,13 +73,7 @@ class FileSystem
   # This should construct the most minimal possible valid Metalware repo, at
   # the default repo path.
   def with_minimal_repo
-    # XXX Create other parts of minimal repo.
-    File.write '/var/lib/metalware/repo/configure.yaml', YAML.dump({
-      questions: {},
-      domain: {},
-      group: {},
-      node: {},
-    })
+    MinimalRepo.create_at('/var/lib/metalware/repo')
   end
 
   def with_fixtures(fixtures_dir, at:)
