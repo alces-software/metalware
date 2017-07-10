@@ -251,8 +251,8 @@ RSpec.describe Metalware::Templater do
       end
     end
 
-    context 'when no hunter config file present' do
-      it 'loads the hunter parameter as an empty array' do
+    context 'when no hunter cache file present' do
+      it 'loads the hunter parameter as an empty Hashie' do
         filesystem.test do
           templater = Metalware::Templater.new(config)
           magic_namespace = templater.config.alces
