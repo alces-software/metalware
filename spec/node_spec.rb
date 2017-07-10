@@ -121,6 +121,43 @@ RSpec.describe Metalware::Node do
     end
   end
 
+  describe '#group_index' do
+    let :filesystem { FileSystem.setup }
+
+    def expect_group_index_raises_for_node(node)
+      filesystem.test do
+        expect{ node.group_index }.to raise_error(
+          Metalware::UnconfiguredGroupError
+        )
+      end
+    end
+
+    it 'raises when groups.yaml does not exist' do
+      expect_group_index_raises_for_node(testnode01)
+    end
+
+    context 'when some primary groups have been cached' do
+      before :each do
+        filesystem.with_fixtures('cache/groups.yaml', at: Metalware::Constants::GROUPS_CACHE_PATH)
+      end
+
+      it "returns the index of the node's primary group" do
+        filesystem.test do
+          expect(testnode01.group_index).to eq(1)
+        end
+      end
+
+      it "raises when the node's primary group is not in the cache" do
+        expect_group_index_raises_for_node(testnode02)
+      end
+
+      it 'raises for the null object node' do
+        expect_group_index_raises_for_node(node(nil))
+      end
+    end
+
+  end
+
   describe '#raw_config' do
     it 'performs a deep merge of all config files' do
       config = Metalware::Config.new(File.join(FIXTURES_PATH, "configs/deep-merge.yaml"))

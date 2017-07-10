@@ -108,6 +108,16 @@ module Metalware
       end
     end
 
+    def group_index
+      if cached_primary_group_index
+        cached_primary_group_index
+      else
+        error = "Cannot get 'group_index', the primary group " +
+          "'#{primary_group}' for this node (#{name}) has not been configured"
+        raise UnconfiguredGroupError, error
+      end
+    end
+
     private
 
     def build_complete_marker_file
@@ -120,6 +130,18 @@ module Metalware
       # It's OK for a node to not be in the genders file, it just means it's
       # not part of any groups.
       []
+    end
+
+    def cached_primary_group_index
+      cached_primary_groups.index(primary_group)
+    end
+
+    def cached_primary_groups
+      groups_cache['primary_groups'] || []
+    end
+
+    def groups_cache
+      Utils.safely_load_yaml(Constants::GROUPS_CACHE_PATH)
     end
 
     def primary_group
