@@ -85,6 +85,15 @@ class FileSystem
     FakeFS::FileSystem.clone(path, at)
   end
 
+  # XXX use following two methods where above is used instead.
+  def with_repo_fixtures(repo_fixtures_dir)
+    with_fixtures(repo_fixtures_dir, at: '/var/lib/metalware/repo')
+  end
+
+  def with_answer_fixtures(answer_fixtures_dir)
+    with_fixtures(answer_fixtures_dir, at: '/var/lib/metalware/answers')
+  end
+
   # Create same directory hierarchy that would be created by a Metalware
   # install.
   def create_initial_directory_hierarchy
