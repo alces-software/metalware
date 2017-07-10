@@ -100,18 +100,6 @@ RSpec.describe Metalware::Dependencies do
       filesystem.with_repo_fixtures('repo')
     end
 
-    # XXX this test is not actually much use; it is testing the same thing as
-    # the following test, as 'domain.yaml' is specified in both, and if it just
-    # used an empty array then it would fail as the answers directory is always
-    # created after a fresh install.
-    it "fails if answers directory doesn't exist" do
-      filesystem.test do
-        expect {
-          enforce_dependencies({ configure: ["domain.yaml"] })
-        }.to raise_error(Metalware::DependencyFailure)
-      end
-    end
-
     it 'validates missing answer files' do
       filesystem.test do
         expect {
