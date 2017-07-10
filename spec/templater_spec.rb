@@ -164,11 +164,13 @@ RSpec.describe Metalware::Templater do
       expect(genders_config.non_existent).to eq([])
     end
 
-    before do
-      # Stub this so mock hunter config used.
-      stub_const('Metalware::Constants::HUNTER_PATH', TEST_HUNTER_PATH)
+    let :filesystem {
+      FileSystem.setup do |fs|
+        fs.with_repo_fixtures 'repo'
+      end
+    }
 
-      SpecUtils.use_unit_test_config(self)
+    before do
       SpecUtils.use_mock_determine_hostip_script(self)
       SpecUtils.use_mock_genders(self)
     end
@@ -192,62 +194,72 @@ RSpec.describe Metalware::Templater do
       end
     end
 
-    context 'without passed parameters' do
-      it 'is created with default values' do
-        templater = Metalware::Templater.new(config)
-        magic_namespace = templater.config.alces
-
-        expect(magic_namespace.index).to eq(0)
-        expect(magic_namespace.nodename).to eq(nil)
-        expect(magic_namespace.firstboot).to eq(nil)
-        expect(magic_namespace.files).to eq(nil)
-        expect(magic_namespace.kickstart_url).to eq(nil)
-        expect(magic_namespace.build_complete_url).to eq(nil)
-        expect_environment_dependent_parameters_present(magic_namespace)
+    context 'with hunter cache file present' do
+      before :each do
+        filesystem.with_fixtures 'cache/hunter.yaml',
+          at: '/var/lib/metalware/cache/hunter.yaml'
       end
-    end
 
-    context 'with passed parameters' do
-      it 'overrides defaults with parameter values, where applicable' do
-        build_files = SpecUtils.create_mock_build_files_hash(
-          self, config: config, node_name: 'testnode03'
-        )
+      context 'without passed parameters' do
+        it 'is created with default values' do
+          filesystem.test do
+            templater = Metalware::Templater.new(config)
+            magic_namespace = templater.config.alces
 
-        templater = Metalware::Templater.new(config, {
-          nodename: 'testnode03',
-          firstboot: true,
-          files: build_files
-        })
-        magic_namespace = templater.config.alces
+            expect(magic_namespace.index).to eq(0)
+            expect(magic_namespace.nodename).to eq(nil)
+            expect(magic_namespace.firstboot).to eq(nil)
+            expect(magic_namespace.files).to eq(nil)
+            expect(magic_namespace.kickstart_url).to eq(nil)
+            expect(magic_namespace.build_complete_url).to eq(nil)
+            expect_environment_dependent_parameters_present(magic_namespace)
+          end
+        end
+      end
 
-        expect(magic_namespace.index).to eq(2)
-        expect(magic_namespace.nodename).to eq('testnode03')
-        expect(magic_namespace.firstboot).to eq(true)
-        expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')
-        expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode03')
+      context 'with passed parameters' do
+        it 'overrides defaults with parameter values, where applicable' do
+          filesystem.test do
+            build_files = SpecUtils.create_mock_build_files_hash(
+              self, config: config, node_name: 'testnode03'
+            )
 
-        # Can reach inside the passed `files` object.
-        expect(
-          magic_namespace.files.namespace01.first.raw
-        ).to eq('/some/other/path')
-        expect(
-          magic_namespace.files.namespace02.first.raw
-        ).to eq('another_file_in_repo')
+            templater = Metalware::Templater.new(config, {
+              nodename: 'testnode03',
+              firstboot: true,
+              files: build_files
+            })
+            magic_namespace = templater.config.alces
 
-        expect_environment_dependent_parameters_present(magic_namespace)
+            expect(magic_namespace.index).to eq(2)
+            expect(magic_namespace.nodename).to eq('testnode03')
+            expect(magic_namespace.firstboot).to eq(true)
+            expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')
+            expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode03')
+
+            # Can reach inside the passed `files` object.
+            expect(
+              magic_namespace.files.namespace01.first.raw
+            ).to eq('/some/other/path')
+            expect(
+              magic_namespace.files.namespace02.first.raw
+            ).to eq('another_file_in_repo')
+
+            expect_environment_dependent_parameters_present(magic_namespace)
+          end
+        end
       end
     end
 
     context 'when no hunter config file present' do
-      before do
-        stub_const('Metalware::Constants::HUNTER_PATH', '/non-existent')
-      end
-
       it 'loads the hunter parameter as an empty array' do
-        templater = Metalware::Templater.new(config)
-        magic_namespace = templater.config.alces
-        expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
+        filesystem.test do
+          templater = Metalware::Templater.new(config)
+          magic_namespace = templater.config.alces
+          expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
+        end
       end
     end
+
   end
 end
