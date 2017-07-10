@@ -22,6 +22,7 @@
 require 'exceptions'
 require 'constants'
 require 'utils'
+require 'validator/configure'
 
 module Metalware
   class Dependency
@@ -64,10 +65,10 @@ module Metalware
       @validate_configure ||= begin
         validate_repo
         valid_configure_yaml = valid_file?(:repo, "configure.yaml") { |path|
-          Configurator.valid_configure_file?(path)
+          Validator::Configure.new(path).valid?
         }
         unless valid_configure_yaml
-          msg = get_value_failure_message(:repo, "configure.yaml")
+          msg = "'#{command}' requires a valid 'repo/configure.yaml' file"
           raise(DependencyFailure, msg)
         end
         unless valid_file?(:configure , "", true)

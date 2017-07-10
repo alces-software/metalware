@@ -103,4 +103,7 @@ module Metalware
   # NOTE: This is the only dependency error we see in production
   class DependencyFailure < MetalwareError
   end
+
+  class ValidatorInternalError < MetalwareError
+  end
 end

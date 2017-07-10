@@ -23,7 +23,8 @@ require 'exceptions'
 require 'dependency'
 require 'config'
 require 'constants'
-require 'configurator'
+require 'validator/configure'
+require 'ostruct'
 
 require 'fakefs_helper'
 require 'spec_helper'
@@ -41,8 +42,8 @@ RSpec.describe Metalware::Dependency do
 
   context 'with a blank filesystem' do
     before :each do
-      allow(Metalware::Configurator).to \
-        receive(:valid_configure_file?).and_return(true)
+      allow(Metalware::Validator::Configure).to \
+        receive(:new).and_return(OpenStruct.new({valid?: true}))
     end
 
     it 'repo dependencies fail' do
@@ -61,8 +62,8 @@ RSpec.describe Metalware::Dependency do
   context 'with repo dependencies' do
     before :each do
       fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
-      allow(Metalware::Configurator).to \
-        receive(:valid_configure_file?).and_return(true)
+      allow(Metalware::Validator::Configure).to \
+        receive(:new).and_return(OpenStruct.new({valid?: true}))
     end
 
     it 'check if the base repo exists' do
@@ -105,8 +106,8 @@ RSpec.describe Metalware::Dependency do
     before :each do
       fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
       fshelper.clone_answers(File.join(FIXTURES_PATH, "answers/basic_structure"))
-      allow(Metalware::Configurator).to \
-        receive(:valid_configure_file?).and_return(true)
+      allow(Metalware::Validator::Configure).to \
+        receive(:new).and_return(OpenStruct.new({valid?: true}))
     end
 
     it "fails if answers directory doesn't exist" do
