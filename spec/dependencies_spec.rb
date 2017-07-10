@@ -23,6 +23,7 @@ require 'exceptions'
 require 'dependencies'
 require 'config'
 require 'constants'
+require 'configurator'
 
 require 'spec_helper'
 require 'fileutils'
@@ -93,7 +94,7 @@ RSpec.describe Metalware::Dependencies do
     end
   end
 
-  context 'with configure dependencies' do
+  context 'with blank configure.yaml dependencies' do
     before :each do
       filesystem.with_repo_fixtures('repo')
     end
