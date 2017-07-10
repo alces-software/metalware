@@ -22,7 +22,7 @@
 
 require 'metal_log'
 require 'config'
-require 'dependencies'
+require 'dependency'
 require 'exceptions'
 
 module Metalware
@@ -49,7 +49,7 @@ module Metalware
       end
 
       def post_setup
-        enforce_dependencies
+        enforce_dependency
       end
 
       def validate_repo_exists_if_required
@@ -67,14 +67,14 @@ module Metalware
         @config = Config.new(options.config, cli_options)
       end
 
-      def dependencies_hash
+      def dependency_hash
         {
           #repo: [], Array of files or true for base dir
         }
       end
 
-      def enforce_dependencies
-        Dependencies.new(config, command_name, dependencies_hash).enforce
+      def enforce_dependency
+        Dependency.new(config, command_name, dependency_hash).enforce
       end
 
       def command_name

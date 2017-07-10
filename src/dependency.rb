@@ -24,7 +24,7 @@ require 'constants'
 require 'utils'
 
 module Metalware
-  class Dependencies
+  class Dependency
     def initialize(metal_config, command_input, dependency_hash = {})
       @config = metal_config
       @dependency_hash = dependency_hash

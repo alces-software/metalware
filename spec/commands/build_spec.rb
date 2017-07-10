@@ -73,7 +73,7 @@ RSpec.describe Metalware::Commands::Build do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
     SpecUtils.fake_download_error(self)
-    SpecUtils.use_mock_dependencies(self)
+    SpecUtils.use_mock_dependency(self)
   end
 
   context 'when called without group argument' do

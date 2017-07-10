@@ -20,7 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'exceptions'
-require 'dependencies'
+require 'dependency'
 require 'config'
 require 'constants'
 require 'configurator'
@@ -29,13 +29,13 @@ require 'fakefs_helper'
 require 'spec_helper'
 require 'fileutils'
 
-RSpec.describe Metalware::Dependencies do
+RSpec.describe Metalware::Dependency do
   let :config { Metalware::Config.new }
   let :fshelper { FakeFSHelper.new(config) }
 
-  def enforce_dependencies(dependencies_hash = {})
+  def enforce_dependencies(dependency_hash = {})
     fshelper.run do
-      Metalware::Dependencies.new(config, "test", dependencies_hash).enforce
+      Metalware::Dependency.new(config, "test", dependency_hash).enforce
     end
   end
 
