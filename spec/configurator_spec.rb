@@ -340,7 +340,15 @@ RSpec.describe Metalware::Configurator do
       })
 
       expect{
-        configure_with_input("\n")
+        old_stderr = STDERR
+        begin
+          $stderr = Tempfile.new
+          STDERR = $stderr
+          configure_with_input("\n")
+        ensure
+          STDERR = old_stderr
+          $stderr = STDERR
+        end
       }.to raise_error(EOFError)
     end
 
