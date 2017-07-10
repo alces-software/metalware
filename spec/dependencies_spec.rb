@@ -23,6 +23,7 @@ require 'exceptions'
 require 'dependencies'
 require 'config'
 require 'constants'
+require 'configurator'
 
 require 'fakefs_helper'
 require 'spec_helper'
@@ -39,6 +40,11 @@ RSpec.describe Metalware::Dependencies do
   end
 
   context 'with a blank filesystem' do
+    before :each do
+      allow(Metalware::Configurator).to \
+        receive(:valid_configure_file?).and_return(true)
+    end
+
     it 'repo dependencies fail' do
       expect {
         enforce_dependencies({ repo: [] })
@@ -55,6 +61,8 @@ RSpec.describe Metalware::Dependencies do
   context 'with repo dependencies' do
     before :each do
       fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
+      allow(Metalware::Configurator).to \
+        receive(:valid_configure_file?).and_return(true)
     end
 
     it 'check if the base repo exists' do
@@ -93,10 +101,12 @@ RSpec.describe Metalware::Dependencies do
     end
   end
 
-  context 'with configure dependencies' do
+  context 'with blank configure.yaml dependencies' do
     before :each do
       fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
       fshelper.clone_answers(File.join(FIXTURES_PATH, "answers/basic_structure"))
+      allow(Metalware::Configurator).to \
+        receive(:valid_configure_file?).and_return(true)
     end
 
     it "fails if answers directory doesn't exist" do
