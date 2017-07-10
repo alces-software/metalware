@@ -196,8 +196,7 @@ RSpec.describe Metalware::Templater do
 
     context 'with hunter cache file present' do
       before :each do
-        filesystem.with_fixtures 'cache/hunter.yaml',
-          at: '/var/lib/metalware/cache/hunter.yaml'
+        filesystem.with_hunter_cache_fixture 'cache/hunter.yaml'
       end
 
       it 'is created with default values when no parameters passed' do

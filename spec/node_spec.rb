@@ -138,7 +138,7 @@ RSpec.describe Metalware::Node do
 
     context 'when some primary groups have been cached' do
       before :each do
-        filesystem.with_fixtures('cache/groups.yaml', at: Metalware::Constants::GROUPS_CACHE_PATH)
+        filesystem.with_groups_cache_fixture('cache/groups.yaml')
       end
 
       it "returns the index of the node's primary group" do
