@@ -72,13 +72,12 @@ module Metalware
     end
 
     def create_question(identifier, properties)
-      Question.new({
-          identifier: identifier,
-          properties: properties,
-          configure_file: configure_file,
-          questions_section: questions_section,
-          old_answer: old_answers[identifier]
-        }
+      Question.new(
+        identifier: identifier,
+        properties: properties,
+        configure_file: configure_file,
+        questions_section: questions_section,
+        old_answer: old_answers[identifier]
       )
     end
 
