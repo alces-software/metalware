@@ -39,9 +39,7 @@ RSpec.describe Metalware::Dependencies do
   end
 
   context 'with a fresh filesystem' do
-    # XXX Skipped as, with filesystem after fresh install, repo dependencies
-    # specified with an empty array should not pass, but they will.
-    xit 'repo dependencies fail' do
+    it 'repo dependencies fail' do
       expect {
         enforce_dependencies({ repo: [] })
       }.to raise_error(Metalware::DependencyFailure)

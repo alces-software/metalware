@@ -83,6 +83,10 @@ class FileSystem
 
   # XXX use following two methods where above is used instead.
   def with_repo_fixtures(repo_fixtures_dir)
+    # Create the minimal parts of a Metalware repo, these can then be
+    # overridden by the specified fixtures.
+    with_minimal_repo
+
     with_fixtures(repo_fixtures_dir, at: '/var/lib/metalware/repo')
   end
 
