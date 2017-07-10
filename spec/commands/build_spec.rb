@@ -158,7 +158,7 @@ RSpec.describe Metalware::Commands::Build do
       it 'renders only files which could be retrieved' do
         FileSystem.test do |fs|
           # Create needed repo files.
-          fs.with_fixtures('repo/config', at: '/var/lib/metalware/repo/config')
+          fs.with_repo_fixtures('repo')
           FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
           FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 

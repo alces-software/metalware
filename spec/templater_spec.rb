@@ -39,6 +39,8 @@ RSpec.describe Metalware::Templater do
 
   let :filesystem {
     FileSystem.setup do |fs|
+      # XXX be a bit more fine-grained with the fixtures we load; only load
+      # what we need in these tests rather than everything.
       fs.with_fixtures('/', at: '/fixtures')
     end
   }
@@ -93,7 +95,7 @@ RSpec.describe Metalware::Templater do
 
     context 'with repo' do
       before :each do
-        filesystem.with_fixtures('repo', at: config.repo_path)
+        filesystem.with_repo_fixtures('repo')
       end
 
       it 'renders template with repo parameters' do

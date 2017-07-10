@@ -150,7 +150,7 @@ RSpec.describe Metalware::Node do
       }
 
       FileSystem.test do |fs|
-        fs.with_fixtures('answers/node-test-set1', at: config.answer_files_path)
+        fs.with_answer_fixtures('answers/node-test-set1')
         answers = node('answer1').answers
         expect(answers).to eq(expected_answers)
       end

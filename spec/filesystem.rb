@@ -81,7 +81,6 @@ class FileSystem
     FakeFS::FileSystem.clone(path, at)
   end
 
-  # XXX use following two methods where above is used instead.
   def with_repo_fixtures(repo_fixtures_dir)
     # Create the minimal parts of a Metalware repo, these can then be
     # overridden by the specified fixtures.
