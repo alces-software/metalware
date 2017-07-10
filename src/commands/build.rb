@@ -50,7 +50,7 @@ module Metalware
         teardown
       end
 
-      def dependencies_hash
+      def dependency_hash
         {
           repo: ["pxelinux/#{@options.pxelinux}",
                  "kickstart/#{@options.kickstart}"],

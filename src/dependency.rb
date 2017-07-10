@@ -23,7 +23,7 @@ require 'exceptions'
 require 'constants'
 
 module Metalware
-  class Dependencies
+  class Dependency
     def initialize(metal_config, command_input, dependency_hash = {})
       @config = metal_config
       @dependency_hash = dependency_hash
