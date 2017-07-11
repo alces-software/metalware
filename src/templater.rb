@@ -19,15 +19,15 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+
 require "erb"
-require "ostruct"
-require "yaml"
 
 require "constants"
 require 'metal_log'
 require 'exceptions'
 require 'iterable_recursive_open_struct'
 require 'magic_namespace'
+
 
 module Metalware
   class MissingParameterWrapper
