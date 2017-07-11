@@ -19,48 +19,33 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-
-require 'command_helpers/base_command'
-require 'constants'
-require 'nodes'
-require 'templater'
+require 'exceptions'
 
 module Metalware
-  module Commands
-    class Hosts < CommandHelpers::BaseCommand
-      HOSTS_FILE = '/etc/hosts'
+  module Validator
+    class BaseValidator
+      def initialize(*_a)
+        raise NotImplementedError
+      end
+
+      def valid?
+        !!validate
+      end
 
       private
 
-      def setup(args, options)
-        @options = options
-
-        node_identifier = args.first
-        @nodes = Nodes.create(config, node_identifier, options.group)
+      def validate
+        raise NotImplementedError
       end
 
-      def run
-        add_nodes_to_hosts
-      end
-
-      def dependency_hash
-        {
-          repo: ["hosts/#{@options.template}"]
-        }
-      end
-
-      def add_nodes_to_hosts
-        @nodes.template_each do |parameters|
-          if @options.dry_run
-            Templater.render_to_stdout(config, template_path, parameters)
-          else
-            Templater.render_and_append_to_file(config, template_path, HOSTS_FILE, parameters)
-          end
+      # Expects an array of lambdas representing the tests. The results of the
+      # lambdas are converted to true or false based on truthiness. valid_tests?
+      # returns true iff all the lambdas return a truthie value.
+      def valid_tests?(test_array)
+        test_array.each do |test_lambda|
+          return false unless !!(test_lambda.call)
         end
-      end
-
-      def template_path
-        File.join(config.repo_path, 'hosts', @options.template)
+        true
       end
     end
   end

@@ -74,7 +74,7 @@ module Metalware
           end
         end
 
-        def dependencies_hash
+        def dependency_hash
           {
             repo: []
           }

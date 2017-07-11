@@ -20,25 +20,32 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'exceptions'
-require 'dependencies'
+require 'dependency'
 require 'config'
 require 'constants'
+require 'validator/configure'
+require 'ostruct'
 
 require 'fakefs_helper'
 require 'spec_helper'
 require 'fileutils'
 
-RSpec.describe Metalware::Dependencies do
+RSpec.describe Metalware::Dependency do
   let :config { Metalware::Config.new }
   let :fshelper { FakeFSHelper.new(config) }
 
-  def enforce_dependencies(dependencies_hash = {})
+  def enforce_dependencies(dependency_hash = {})
     fshelper.run do
-      Metalware::Dependencies.new(config, "test", dependencies_hash).enforce
+      Metalware::Dependency.new(config, "test", dependency_hash).enforce
     end
   end
 
   context 'with a blank filesystem' do
+    before :each do
+      allow(Metalware::Validator::Configure).to \
+        receive(:new).and_return(OpenStruct.new({valid?: true}))
+    end
+
     it 'repo dependencies fail' do
       expect {
         enforce_dependencies({ repo: [] })
@@ -55,6 +62,8 @@ RSpec.describe Metalware::Dependencies do
   context 'with repo dependencies' do
     before :each do
       fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
+      allow(Metalware::Validator::Configure).to \
+        receive(:new).and_return(OpenStruct.new({valid?: true}))
     end
 
     it 'check if the base repo exists' do
@@ -93,10 +102,12 @@ RSpec.describe Metalware::Dependencies do
     end
   end
 
-  context 'with configure dependencies' do
+  context 'with blank configure.yaml dependencies' do
     before :each do
       fshelper.clone_repo(File.join(FIXTURES_PATH, "repo"))
       fshelper.clone_answers(File.join(FIXTURES_PATH, "answers/basic_structure"))
+      allow(Metalware::Validator::Configure).to \
+        receive(:new).and_return(OpenStruct.new({valid?: true}))
     end
 
     it "fails if answers directory doesn't exist" do

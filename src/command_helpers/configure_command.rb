@@ -22,7 +22,7 @@ module Metalware
 
       private
 
-      def dependencies_hash
+      def dependency_hash
         {
           repo: ["configure.yaml"],
           configure: []

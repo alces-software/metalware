@@ -48,7 +48,7 @@ module Metalware
         install_rendered_template
       end
 
-      def dependencies_hash
+      def dependency_hash
         {
           repo: ["dhcp/#{@options.template}"]
         }
