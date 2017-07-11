@@ -20,13 +20,14 @@ module Metalware
     end
   end
 
-  MagicNamespace = Struct.new(:firstboot, :files) do
+  class MagicNamespace
     def initialize(node: nil, firstboot: nil, files: nil)
-      files = Hashie::Mash.new(files) if files
       @node = node
-      super(firstboot, files)
+      @firstboot = firstboot
+      @files = Hashie::Mash.new(files) if files
     end
 
+    attr_reader :firstboot, :files
     delegate :index, to: :node
 
     def group_index
