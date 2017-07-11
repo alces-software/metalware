@@ -1,5 +1,6 @@
 
 require 'spec_utils'
+require 'filesystem'
 
 
 RSpec.describe Metalware::Commands::Configure::Group do
@@ -7,23 +8,6 @@ RSpec.describe Metalware::Commands::Configure::Group do
     SpecUtils.run_command(
       Metalware::Commands::Configure::Group, group
     )
-  end
-
-  # XXX extract this
-  def create_directory_hierarchy
-    FileUtils.mkdir_p Metalware::Constants::METALWARE_CONFIGS_PATH
-    FileUtils.touch Metalware::Constants::DEFAULT_CONFIG_PATH
-
-    FileUtils.mkdir_p Metalware::Constants::CACHE_PATH
-    FileUtils.mkdir_p File.join(config.answer_files_path, 'groups')
-
-    FileUtils.mkdir_p config.repo_path
-    File.write config.configure_file, YAML.dump({
-      questions: {},
-      domain: {},
-      group: {},
-      node: {},
-    })
   end
 
   let :config { Metalware::Config.new }
@@ -35,8 +19,9 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
   context 'when `cache/groups.yaml` does not exist' do
     it 'creates it and inserts new primary group' do
-      FakeFSHelper.new(config).run do
-        create_directory_hierarchy
+      FileSystem.test do |fs|
+        fs.with_minimal_repo
+
         run_configure_group 'testnodes'
 
         expect(primary_groups).to eq [
@@ -49,8 +34,8 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
   context 'when `cache/groups.yaml` exists' do
     it 'inserts primary group if new' do
-      FakeFSHelper.new(config).run do
-        create_directory_hierarchy
+      FileSystem.test do |fs|
+        fs.with_minimal_repo
         File.write groups_file, YAML.dump({
           primary_groups: [
             'first_group',
@@ -68,8 +53,8 @@ RSpec.describe Metalware::Commands::Configure::Group do
     end
 
     it 'does nothing if primary group already presnt' do
-      FakeFSHelper.new(config).run do
-        create_directory_hierarchy
+      FileSystem.test do |fs|
+        fs.with_minimal_repo
         File.write groups_file, YAML.dump({
           primary_groups: [
             'first_group',

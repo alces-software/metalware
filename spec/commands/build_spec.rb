@@ -21,7 +21,6 @@
 #==============================================================================
 
 require 'timeout'
-require 'fakefs/safe'
 
 require 'commands/build'
 require 'node'
@@ -71,17 +70,18 @@ RSpec.describe Metalware::Commands::Build do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
     SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self)
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependencies(self)
   end
 
   context 'when called without group argument' do
     def expected_template_parameters
+      config = Metalware::Config.new
+      files = SpecUtils.create_mock_build_files_hash(self, config: config, node_name: 'testnode01')
       {
         nodename: 'testnode01',
         firstboot: true,
-        files: SpecUtils.create_mock_build_files_hash(self, 'testnode01'),
+        files: files,
       }
     end
 
@@ -156,22 +156,9 @@ RSpec.describe Metalware::Commands::Build do
 
     describe 'files rendering' do
       it 'renders only files which could be retrieved' do
-        # XXX This test is an experiment with using `FakeFS` and explicitly
-        # declaring the files it depends on, rather than relying on the
-        # combination of fudging config values, file paths and stubbing methods
-        # we do elsewhere. This may be a more robust and less brittle approach.
-        FakeFS do
-          # Clone in test Metalware configs at expected path, so can find
-          # `unit-test.yaml`.
-          # XXX Rather than stubbing `Constants::DEFAULT_CONFIG_PATH` and then
-          # cloning the test config there, could just clone this where it is
-          # normally expected.
-          FakeFS::FileSystem.clone('spec/fixtures/configs/')
-
-          # Clone in needed repo files to expected locations.
-          # XXX Once removed `repo_configs_path` from config can simplify this
-          # to use normal repo location for configs.
-          FakeFS::FileSystem.clone('spec/fixtures/repo/config', '/spec/fixtures/repo/config')
+        FileSystem.test do |fs|
+          # Create needed repo files.
+          fs.with_repo_fixtures('repo')
           FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
           FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 

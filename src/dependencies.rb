@@ -54,7 +54,7 @@ module Metalware
     def validate_repo
       @validated_repo ||= begin
         msg = "'#{command}' requires a repo. Please run 'metal repo use'"
-        raise DependencyFailure, msg unless file_exists?(:repo, "", true)
+        raise DependencyFailure, msg unless file_exists?(:repo, '.git', true)
         true # Sets the @validate_repo value so it only runs once
       end
     end
