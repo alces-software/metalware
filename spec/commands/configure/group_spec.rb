@@ -14,7 +14,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
   let :groups_file {
     File.join(Metalware::Constants::CACHE_PATH, 'groups.yaml' )
   }
-  let :groups_yaml { YAML.load_file(groups_file) }
+  let :groups_yaml { Metalware::Data.load(groups_file) }
   let :primary_groups { groups_yaml[:primary_groups] }
 
   context 'when `cache/groups.yaml` does not exist' do
@@ -36,7 +36,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
     it 'inserts primary group if new' do
       FileSystem.test do |fs|
         fs.with_minimal_repo
-        File.write groups_file, YAML.dump({
+        Metalware::Data.dump(groups_file, {
           primary_groups: [
             'first_group',
           ]
@@ -55,7 +55,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
     it 'does nothing if primary group already presnt' do
       FileSystem.test do |fs|
         fs.with_minimal_repo
-        File.write groups_file, YAML.dump({
+        Metalware::Data.dump(groups_file, {
           primary_groups: [
             'first_group',
             'second_group',

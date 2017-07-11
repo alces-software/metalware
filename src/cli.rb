@@ -28,6 +28,7 @@ require 'commander'
 
 require 'commander_extensions'
 require 'cli_helper/parser'
+require 'data'
 
 module Metalware
   class Cli

@@ -44,13 +44,13 @@ module Metalware
 
     def initialize(file=nil, options = {})
       file ||= Constants::DEFAULT_CONFIG_PATH
-      @config = (
-        YAML.load_file(file) || {}
-      ).symbolize_keys
+      unless File.file?(file)
+        raise MetalwareError, "Config file '#{file}' does not exist"
+      end
+
+      @config = Data.load(file).symbolize_keys
       @cli = OpenStruct.new(options)
       MetalLog.reset_log(self)
-    rescue Errno::ENOENT
-      raise MetalwareError, "Config file '#{file}' does not exist"
     end
 
     KEYS_WITH_DEFAULTS.each do |key, default|

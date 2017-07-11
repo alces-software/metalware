@@ -26,7 +26,6 @@ require 'constants'
 require 'system_command'
 require 'nodeattr_interface'
 require 'exceptions'
-require 'utils'
 
 module Metalware
   class Node
@@ -141,7 +140,7 @@ module Metalware
     end
 
     def groups_cache
-      Utils.safely_load_yaml(Constants::GROUPS_CACHE_PATH)
+      Data.load(Constants::GROUPS_CACHE_PATH)
     end
 
     def primary_group
@@ -150,7 +149,7 @@ module Metalware
 
     def load_config(config_name)
       config_path = @metalware_config.repo_config_path(config_name)
-      Utils.safely_load_yaml(config_path).symbolize_keys
+      Data.load(config_path).symbolize_keys
     end
 
     def merge_in_files!(existing_files, new_files)
@@ -174,7 +173,7 @@ module Metalware
     end
 
     def combine_answers
-      config_answers = configs.map { |c| Utils.safely_load_yaml(answers_path_for(c)) }
+      config_answers = configs.map { |c| Data.load(answers_path_for(c)) }
       combine_hashes(config_answers)
     end
 

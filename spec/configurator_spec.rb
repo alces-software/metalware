@@ -31,7 +31,7 @@ RSpec.describe Metalware::Configurator do
   }
 
   let :answers {
-    YAML.load_file(answers_file_path)
+    Metalware::Data.load(answers_file_path)
   }
 
   let :configurator {
