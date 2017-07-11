@@ -4,11 +4,19 @@ require 'data'
 
 RSpec.describe Metalware::Data do
   let :data_file_path { '/home/some_data.yaml' }
-  let :some_data {{
+
+  let :string_keyed_data {{
       'a_key' => 'foo',
       'another_key' => {
-        'nested': 'bar',
+        'nested' => 'bar',
       },
+  }}
+
+  let :symbol_keyed_data {{
+    a_key: 'foo',
+    another_key: {
+      nested: 'bar',
+    }
   }}
 
   describe '#load' do
@@ -16,14 +24,9 @@ RSpec.describe Metalware::Data do
 
     it 'loads the data file and recursively converts all keys to symbols' do
       FileSystem.test do
-        File.write(data_file_path, YAML.dump(some_data))
+        File.write(data_file_path, YAML.dump(string_keyed_data))
 
-        expect(subject).to eq({
-          a_key: 'foo',
-          another_key: {
-            nested: 'bar',
-          }
-        })
+        expect(subject).to eq(symbol_keyed_data)
       end
     end
 
@@ -51,13 +54,13 @@ RSpec.describe Metalware::Data do
   end
 
   describe '#dump' do
-    it 'dumps the data to the data file' do
+    it 'dumps the data to the data file with all keys as strings' do
       FileSystem.test do
-        Metalware::Data.dump(data_file_path, some_data)
+        Metalware::Data.dump(data_file_path, symbol_keyed_data)
 
         expect(
           YAML.load_file(data_file_path)
-        ).to eq(some_data)
+        ).to eq(string_keyed_data)
       end
     end
   end

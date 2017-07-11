@@ -15,7 +15,8 @@ module Metalware
       end
 
       def dump(data_file, data)
-        File.write(data_file, YAML.dump(data))
+        yaml = data.deep_transform_keys { |k| k.to_s }.to_yaml
+        File.write(data_file, yaml)
       end
     end
 
