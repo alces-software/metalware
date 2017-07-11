@@ -77,7 +77,27 @@ file remains consistent.
 href='https://github.com/alces-software/metalware-default/blob/226cf530d4ce6bdc09a6c65ba3f4bfc553032752/config/domain.yaml#L3'>
 metalware-default
 </a>
-</td> </tr>
+</td>
+</tr>
+
+<tr>
+<td><code>group_index</code></td>
+<td>
+
+The unique index of the current node's primary group. This is guaranteed to
+remain consistent for a particular primary group; it may change for a node if
+that node's primary group is changed.
+
+</td>
+
+<td>
+<pre lang="yaml">
+
+ip: "10.10.<%= alces.group_index %>.<%= alces.index %>"
+
+</pre>
+</td>
+</tr>
 
 
 <tr>

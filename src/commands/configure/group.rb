@@ -32,7 +32,7 @@ module Metalware
         def record_primary_group
           unless primary_group_recorded?
             primary_groups << group_name
-            File.write(groups_cache_file, YAML.dump(groups_cache))
+            File.write(Constants::GROUPS_CACHE_PATH, YAML.dump(groups_cache))
           end
         end
 
@@ -45,11 +45,7 @@ module Metalware
         end
 
         def groups_cache
-          @groups_cache ||= Utils.safely_load_yaml(groups_cache_file)
-        end
-
-        def groups_cache_file
-          File.join(Constants::CACHE_PATH, 'groups.yaml')
+          @groups_cache ||= Utils.safely_load_yaml(Constants::GROUPS_CACHE_PATH)
         end
       end
 

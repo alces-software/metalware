@@ -260,6 +260,14 @@ module Metalware
 
     delegate :index, to: :node
 
+    def group_index
+      node.group_index
+    rescue UnconfiguredGroupError
+      # If the node's primary group is not configured yet, return nil rather
+      # than blow up.
+      nil
+    end
+
     def nodename
       node.name
     end

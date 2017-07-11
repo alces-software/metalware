@@ -194,10 +194,10 @@ RSpec.describe Metalware::Templater do
       end
     end
 
-    context 'with hunter cache file present' do
+    context 'with cache files present' do
       before :each do
-        filesystem.with_fixtures 'cache/hunter.yaml',
-          at: '/var/lib/metalware/cache/hunter.yaml'
+        filesystem.with_hunter_cache_fixture 'cache/hunter.yaml'
+        filesystem.with_groups_cache_fixture 'cache/groups.yaml'
       end
 
       it 'is created with default values when no parameters passed' do
@@ -206,6 +206,7 @@ RSpec.describe Metalware::Templater do
           magic_namespace = templater.config.alces
 
           expect(magic_namespace.index).to eq(0)
+          expect(magic_namespace.group_index).to eq(nil)
           expect(magic_namespace.nodename).to eq(nil)
           expect(magic_namespace.firstboot).to eq(nil)
           expect(magic_namespace.files).to eq(nil)
@@ -229,6 +230,7 @@ RSpec.describe Metalware::Templater do
           magic_namespace = templater.config.alces
 
           expect(magic_namespace.index).to eq(2)
+          expect(magic_namespace.group_index).to eq(1)
           expect(magic_namespace.nodename).to eq('testnode03')
           expect(magic_namespace.firstboot).to eq(true)
           expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')

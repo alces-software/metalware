@@ -93,6 +93,20 @@ class FileSystem
     with_fixtures(answer_fixtures_dir, at: '/var/lib/metalware/answers')
   end
 
+  def with_groups_cache_fixture(groups_cache_file)
+    with_fixtures(
+      groups_cache_file,
+      at: Metalware::Constants::GROUPS_CACHE_PATH
+    )
+  end
+
+  def with_hunter_cache_fixture(hunter_cache_file)
+    with_fixtures(
+      hunter_cache_file,
+      at: Metalware::Constants::HUNTER_PATH
+    )
+  end
+
   # Create same directory hierarchy that would be created by a Metalware
   # install.
   def create_initial_directory_hierarchy
