@@ -10,8 +10,12 @@ RSpec.describe Metalware::Configurator do
     Tempfile.new
   }
 
+  let :output {
+    Tempfile.new
+  }
+
   let :highline {
-    HighLine.new(input)
+    HighLine.new(input, output)
   }
 
   let :configure_file {
@@ -324,6 +328,53 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_input("\n\n\n\n\n\n")
       expect(answers).to eq(new_answers)
+    end
+
+    it 're-asks the required questions if no answer is given' do
+      define_questions({
+        test: {
+          string_q: {
+            question: "I should be re-asked"
+          }
+        }
+      })
+
+      expect{
+        old_stderr = STDERR
+        begin
+          $stderr = Tempfile.new
+          STDERR = $stderr
+          configure_with_input("\n\n")
+        ensure
+          STDERR = old_stderr
+          $stderr = STDERR
+        end
+        # NOTE: EOFError occurs because HighLine is reading from an array of
+        # end-line-characters. However as this is not a valid input it keeps
+        # re-asking until it reaches the end and throws EOFError
+      }.to raise_error(EOFError)
+
+      output.rewind
+      # Checks it was re-asked twice.
+      # The '?' is printed when the question is re-asked
+      expect(output.read.scan(/\?/).count).to eq(2)
+    end
+
+    it 'allows optional questions to have empty answers' do
+      define_questions({
+        test: {
+          string_q: {
+            question: "I should NOT be re-asked",
+            optional: true
+          }
+        }
+      })
+      expected = {
+        "string_q" => ""
+      }
+
+      configure_with_input("\n")
+      expect(answers).to eq(expected)
     end
   end
 end

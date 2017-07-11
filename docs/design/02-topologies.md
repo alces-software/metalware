@@ -46,7 +46,7 @@ questions:
       - 11
     default: 11 # Optional; default value to use when no input entered, if any.
     type: 'integer' # Optional/default `'string'`. For validation and converting; see below for details.
-    required: true # Optional/default `true`
+    optional: true # Makes the question optional. Default if missing:`false`
 
   another_example: &another_example
     question: 'Enter anything?'

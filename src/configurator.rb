@@ -85,17 +85,15 @@ module Metalware
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string]
 
-      attr_reader :identifier,
-        :question,
-        :type,
-        :choices,
-        :default
+      attr_reader :identifier, :question, :type, :choices,
+                  :default, :required
 
       def initialize(identifier:, properties:, configure_file:,
                      questions_section:, old_answer: nil)
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
+        @required = !properties[:optional]
 
         @type = type_for(
           properties[:type],
@@ -112,7 +110,11 @@ module Metalware
       def ask(highline)
         ask_method = "ask_#{type}_question"
         self.send(ask_method, highline) do |highline_question|
-          highline_question.default = default
+          if default.present?
+            highline_question.default = default
+          elsif required
+            highline_question.validate = ensure_answer_given
+          end
         end
       end
 
@@ -173,7 +175,26 @@ module Metalware
           end
         end
       end
-    end
 
+      def ensure_answer_given
+        HighLinePrettyValidateProc.new("a non-empty input") { |input|
+          !input.empty?
+        }
+      end
+
+      class HighLinePrettyValidateProc < Proc
+        def initialize(print_message, &b)
+          # NOTE: print_message is prefaced with "must match" when used by
+          # HighLine validate
+          @print_message = print_message
+          super(&b)
+        end
+
+        # HighLine uses the result of inspect to generate the message to display
+        def inspect
+          @print_message
+        end
+      end
+    end
   end
 end
