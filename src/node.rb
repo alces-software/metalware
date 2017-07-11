@@ -85,7 +85,7 @@ module Metalware
         new_files = config[:files]
         merge_in_files!(files, new_files)
         files
-      end.symbolize_keys
+      end
     end
 
     # The path the file with given `file_name` within the given `namespace`
@@ -149,7 +149,7 @@ module Metalware
 
     def load_config(config_name)
       config_path = @metalware_config.repo_config_path(config_name)
-      Data.load(config_path).symbolize_keys
+      Data.load(config_path)
     end
 
     def merge_in_files!(existing_files, new_files)
@@ -201,11 +201,10 @@ module Metalware
     end
 
     def combine_hashes(hashes)
-      combined = hashes.each_with_object({}) do |config, combined_config|
+      hashes.each_with_object({}) do |config, combined_config|
         raise CombineHashError unless config.is_a? Hash
         combined_config.deep_merge!(config)
       end
-      combined.deep_transform_keys{ |k| k.to_sym }
     end
   end
 end

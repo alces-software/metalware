@@ -38,7 +38,7 @@ module Metalware
       remove_colliding_entries!(current_yaml, node_name, mac_address)
 
       new_yaml = current_yaml.merge({
-        node_name.to_sym => mac_address
+        node_name => mac_address
       })
       Data.dump(@hunter_file, new_yaml)
     end

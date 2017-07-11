@@ -48,7 +48,7 @@ module Metalware
         raise MetalwareError, "Config file '#{file}' does not exist"
       end
 
-      @config = Data.load(file).symbolize_keys
+      @config = Data.load(file)
       @cli = OpenStruct.new(options)
       MetalLog.reset_log(self)
     end
