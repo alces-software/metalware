@@ -25,9 +25,9 @@ require "erb"
 require "constants"
 require 'metal_log'
 require 'exceptions'
-require 'iterable_recursive_open_struct'
-require 'missing_parameter_wrapper'
-require 'magic_namespace'
+require 'templating/iterable_recursive_open_struct'
+require 'templating/missing_parameter_wrapper'
+require 'templating/magic_namespace'
 
 
 module Metalware

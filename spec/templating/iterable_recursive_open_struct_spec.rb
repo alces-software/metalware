@@ -20,7 +20,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'iterable_recursive_open_struct'
+require 'templating/iterable_recursive_open_struct'
 
 RSpec.describe Metalware::IterableRecursiveOpenStruct do
   subject {

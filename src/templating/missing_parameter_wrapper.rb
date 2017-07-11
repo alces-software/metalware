@@ -1,6 +1,6 @@
 
 require 'exceptions'
-require 'iterable_recursive_open_struct'
+require 'templating/iterable_recursive_open_struct'
 
 
 module Metalware
