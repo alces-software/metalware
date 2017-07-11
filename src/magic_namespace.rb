@@ -5,6 +5,7 @@ require 'active_support/core_ext/hash'
 require "constants"
 require 'deployment_server'
 require 'nodeattr_interface'
+require 'missing_parameter_wrapper'
 
 
 module Metalware
