@@ -136,7 +136,7 @@ module Metalware
     end
 
     def cached_primary_groups
-      groups_cache['primary_groups'] || []
+      groups_cache[:primary_groups] || []
     end
 
     def groups_cache

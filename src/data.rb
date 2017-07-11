@@ -11,7 +11,7 @@ module Metalware
           YAML.load_file(data_file) || {}
         else
           {}
-        end
+        end.deep_transform_keys { |k| k.to_sym }
       end
 
       def dump(data_file, data)

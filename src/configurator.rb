@@ -49,8 +49,7 @@ module Metalware
       :answers_file
 
     def questions
-      @questions ||= Data.load(configure_file).
-        with_indifferent_access[questions_section].
+      @questions ||= Data.load(configure_file)[questions_section].
         map{ |identifier, properties| create_question(identifier, properties) }
     end
 

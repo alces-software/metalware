@@ -6,17 +6,24 @@ RSpec.describe Metalware::Data do
   let :data_file_path { '/home/some_data.yaml' }
   let :some_data {{
       'a_key' => 'foo',
-      'another_key' => 'bar',
+      'another_key' => {
+        'nested': 'bar',
+      },
   }}
 
   describe '#load' do
     subject { Metalware::Data.load(data_file_path) }
 
-    it 'loads the data file' do
+    it 'loads the data file and recursively converts all keys to symbols' do
       FileSystem.test do
         File.write(data_file_path, YAML.dump(some_data))
 
-        expect(subject).to eq(some_data)
+        expect(subject).to eq({
+          a_key: 'foo',
+          another_key: {
+            nested: 'bar',
+          }
+        })
       end
     end
 
