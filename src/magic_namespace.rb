@@ -8,18 +8,6 @@ require 'nodeattr_interface'
 
 
 module Metalware
-  module GenderGroupProxy
-    class << self
-      def method_missing(group_symbol)
-        NodeattrInterface.nodes_in_group(group_symbol)
-      rescue NoGenderGroupError => error
-        warning = "#{error}. Falling back to empty array for alces.#{group_symbol}."
-        MetalLog.warn warning
-        []
-      end
-    end
-  end
-
   class MagicNamespace
     def initialize(node: nil, firstboot: nil, files: nil)
       @node = node
@@ -88,5 +76,18 @@ module Metalware
     private
 
     attr_reader :node
+
+    module GenderGroupProxy
+      class << self
+        def method_missing(group_symbol)
+          NodeattrInterface.nodes_in_group(group_symbol)
+        rescue NoGenderGroupError => error
+          warning = "#{error}. Falling back to empty array for alces.#{group_symbol}."
+          MetalLog.warn warning
+          []
+        end
+      end
+    end
+
   end
 end
