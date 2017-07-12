@@ -26,6 +26,7 @@ require 'constants'
 require 'system_command'
 require 'nodeattr_interface'
 require 'exceptions'
+require 'primary_group'
 require 'templating/configuration'
 
 module Metalware
@@ -107,8 +108,8 @@ module Metalware
     end
 
     def group_index
-      if cached_primary_group_index
-        cached_primary_group_index
+      if primary_group_index
+        primary_group_index
       else
         error = "Cannot get 'group_index', the primary group " +
           "'#{primary_group}' for this node (#{name}) has not been configured"
@@ -129,16 +130,8 @@ module Metalware
       File.join(metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
     end
 
-    def cached_primary_group_index
-      cached_primary_groups.index(primary_group)
-    end
-
-    def cached_primary_groups
-      groups_cache[:primary_groups] || []
-    end
-
-    def groups_cache
-      Data.load(Constants::GROUPS_CACHE_PATH)
+    def primary_group_index
+      PrimaryGroup.index(primary_group)
     end
 
     def primary_group

@@ -5,6 +5,7 @@ require 'active_support/core_ext/hash'
 require "constants"
 require 'deployment_server'
 require 'nodeattr_interface'
+require 'primary_group'
 require 'templating/missing_parameter_wrapper'
 
 
@@ -45,8 +46,8 @@ module Metalware
       end
 
       def groups(&block)
-        cached_primary_groups.each do |group_name|
-          yield group_namespace_for(group_name)
+        PrimaryGroup.each do |group|
+          yield group_namespace_for(group.name)
         end
       end
 
@@ -88,15 +89,6 @@ module Metalware
 
       def group_namespace_for(group_name)
         GroupNamespace.new(metalware_config, group_name)
-      end
-
-      # XXX Following two methods duplicated from `Node`.
-      def cached_primary_groups
-        groups_cache[:primary_groups] || []
-      end
-
-      def groups_cache
-        Data.load(Constants::GROUPS_CACHE_PATH)
       end
 
       module GenderGroupProxy
