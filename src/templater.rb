@@ -19,71 +19,18 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+
 require "erb"
-require "ostruct"
-require "yaml"
-require 'active_support/core_ext/hash'
-require 'hashie'
 
 require "constants"
-require 'nodeattr_interface'
 require 'metal_log'
-require 'deployment_server'
 require 'exceptions'
-require 'iterable_recursive_open_struct'
+require 'templating/iterable_recursive_open_struct'
+require 'templating/missing_parameter_wrapper'
+require 'templating/magic_namespace'
+
 
 module Metalware
-  class MissingParameterWrapper
-    def initialize(wrapped_obj, raise_on_missing: false)
-      @raise_on_missing = raise_on_missing
-      @missing_tags = []
-      @wrapped_obj = if wrapped_obj.is_a?(Hash)
-        IterableRecursiveOpenStruct.new(wrapped_obj)
-      else
-        wrapped_obj
-      end
-    end
-
-    def method_missing(s, *a, &b)
-      value = @wrapped_obj.send(s)
-      if value.nil? && ! @missing_tags.include?(s)
-        msg = "Unset template parameter: #{s}"
-        # TODO: This code causes alces.answer.<missing-parameter> to throw an error
-        # This is the correct behavior but it is breaking the tests
-        # The offending tests need to be switched over to using FakeFS, then this
-        # code can be uncommented.
-        #if @fatal
-        #  raise MissingParameter, msg
-        #else
-          @missing_tags.push s
-          MetalLog.warn msg
-        #end
-      end
-      value
-    end
-
-    def inspect
-      @wrapped_obj
-    end
-
-    def [](a)
-      # ERB expects to be able to index in to the binding passed; this should
-      # function the same as a method call.
-      send(a)
-    end
-
-    def method_missing(s, *a, &b)
-      value = @wrapped_obj.send(s)
-      if value.nil? && ! @missing_tags.include?(s)
-        msg = "Unset template parameter: #{s}"
-        raise(MissingParameter, msg) if @raise_on_missing
-        @missing_tags.push(s)
-        MetalLog.warn msg
-      end
-      value
-    end
-  end
-
   class Templater
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
@@ -125,8 +72,8 @@ module Metalware
           [:firstboot, :files].include?(k) && !v.nil?
       }
 
-      magic_struct = MagicNamespace.new(**passed_magic_parameters, node: node)
-      @magic_namespace = MissingParameterWrapper.new(magic_struct)
+      magic_struct = Templating::MagicNamespace.new(**passed_magic_parameters, node: node)
+      @magic_namespace = Templating::MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
       @config = parse_config
     end
@@ -235,88 +182,9 @@ module Metalware
     end
 
     def create_template_parameters(config)
-      MissingParameterWrapper.new(IterableRecursiveOpenStruct.new(config))
+      Templating::MissingParameterWrapper.new(
+        Templating::IterableRecursiveOpenStruct.new(config)
+      )
     end
-  end
-
-  module GenderGroupProxy
-    class << self
-      def method_missing(group_symbol)
-        NodeattrInterface.nodes_in_group(group_symbol)
-      rescue NoGenderGroupError => error
-        warning = "#{error}. Falling back to empty array for alces.#{group_symbol}."
-        MetalLog.warn warning
-        []
-      end
-    end
-  end
-
-  MagicNamespace = Struct.new(:firstboot, :files) do
-    def initialize(node: nil, firstboot: nil, files: nil)
-      files = Hashie::Mash.new(files) if files
-      @node = node
-      super(firstboot, files)
-    end
-
-    delegate :index, to: :node
-
-    def group_index
-      node.group_index
-    rescue UnconfiguredGroupError
-      # If the node's primary group is not configured yet, return nil rather
-      # than blow up.
-      nil
-    end
-
-    def nodename
-      node.name
-    end
-
-    def answers
-      MissingParameterWrapper.new(node.answers, raise_on_missing: true)
-    end
-
-    def genders
-      # XXX Do we want to make genders available as a `Hashie::Mash` too?
-      # Depends if we want to be able to iterate through genders or just get
-      # list of nodes in a specified gender
-      GenderGroupProxy
-    end
-
-    def hunter
-      if File.exist? Constants::HUNTER_PATH
-        Hashie::Mash.load(Constants::HUNTER_PATH)
-      else
-        warning = \
-          "#{Constants::HUNTER_PATH} does not exist; need to run " +
-          "'metal hunter' first. Falling back to empty hash for alces.hunter."
-        MetalLog.warn warning
-        Hashie::Mash.new
-      end
-    end
-
-    def hosts_url
-      DeploymentServer.system_file_url 'hosts'
-    end
-
-    def genders_url
-      DeploymentServer.system_file_url 'genders'
-    end
-
-    def kickstart_url
-      DeploymentServer.kickstart_url(nodename)
-    end
-
-    def build_complete_url
-      DeploymentServer.build_complete_url(nodename)
-    end
-
-    def hostip
-      DeploymentServer.ip
-    end
-
-    private
-
-    attr_reader :node
   end
 end

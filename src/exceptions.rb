@@ -90,7 +90,7 @@ module Metalware
     end
   end
 
-  class MissingParameter < MetalwareError
+  class MissingParameterError < MetalwareError
   end
 
   # Use this error as the general catch all in Dependencies

@@ -148,6 +148,9 @@ RSpec.describe Metalware::Templater do
     end
   end
 
+  # XXX These tests test `Templating::MagicNamespace` via the `Templater`; this
+  # is useful to check they work together but we may want to test some things
+  # directly on the `MagicNamespace`.
   describe 'magic alces namespace' do
     def expect_environment_dependent_parameters_present(magic_namespace)
       expect(magic_namespace.hostip).to eq('1.2.3.4')
@@ -191,7 +194,7 @@ RSpec.describe Metalware::Templater do
 
         templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
 
-        expect(templater.config.alces.answers).to be_a(Metalware::MissingParameterWrapper)
+        expect(templater.config.alces.answers).to be_a(Metalware::Templating::MissingParameterWrapper)
         expect(templater.config.alces.answers.inspect).to eq('testnode01_answers')
       end
     end
