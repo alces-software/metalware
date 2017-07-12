@@ -44,6 +44,12 @@ module Metalware
         GenderGroupProxy
       end
 
+      def groups(&block)
+        cached_primary_groups.each do |group_name|
+          yield group_namespace_for(group_name)
+        end
+      end
+
       def hunter
         if File.exist? Constants::HUNTER_PATH
           Hashie::Mash.load(Constants::HUNTER_PATH)
@@ -79,6 +85,19 @@ module Metalware
       private
 
       attr_reader :metalware_config, :node
+
+      def group_namespace_for(group_name)
+        GroupNamespace.new(metalware_config, group_name)
+      end
+
+      # XXX Following two methods duplicated from `Node`.
+      def cached_primary_groups
+        groups_cache[:primary_groups] || []
+      end
+
+      def groups_cache
+        Data.load(Constants::GROUPS_CACHE_PATH)
+      end
 
       module GenderGroupProxy
         class << self
