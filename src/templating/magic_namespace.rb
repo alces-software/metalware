@@ -11,7 +11,8 @@ require 'templating/missing_parameter_wrapper'
 module Metalware
   module Templating
     class MagicNamespace
-      def initialize(node: nil, firstboot: nil, files: nil)
+      def initialize(config:, node: nil, firstboot: nil, files: nil)
+        @metalware_config = config
         @node = node
         @firstboot = firstboot
         @files = Hashie::Mash.new(files) if files
@@ -77,7 +78,7 @@ module Metalware
 
       private
 
-      attr_reader :node
+      attr_reader :metalware_config, :node
 
       module GenderGroupProxy
         class << self
