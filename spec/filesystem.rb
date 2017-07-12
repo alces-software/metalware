@@ -33,6 +33,12 @@ class FileSystem
   # `test` on the resulting object, or to call `FileSystem.test` directly.
   private_class_method :new
 
+  # Delegate file system handling methods appropriately here, so these can be
+  # called on a `FileSystemConfigurator` instance and will then be correctly
+  # invoked when `FileSystem.test` is run with that instance. If these were run
+  # directly outside of a `test` block then the real file system would be used.
+  delegate :mkdir_p, to: FileUtils
+
   # Perform optional configuration of the `FileSystem` prior to a `test`. The
   # yielded and returned `FileSystemConfigurator` caches any unknown method
   # calls it receives. When `test` is later called on it, it runs
