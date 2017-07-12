@@ -72,12 +72,13 @@ module Metalware
           [:firstboot, :files].include?(k) && !v.nil?
       }
 
-      magic_struct = Templating::MagicNamespace.new(
+      raw_magic_namespace = Templating::MagicNamespace.new(
         config: metalware_config,
         node: node,
         **passed_magic_parameters
       )
-      @magic_namespace = Templating::MissingParameterWrapper.new(magic_struct)
+      @magic_namespace = \
+        Templating::MissingParameterWrapper.new(raw_magic_namespace)
       @passed_hash = parameters
       @config = parse_config
     end
