@@ -10,6 +10,12 @@ module Metalware
         @name = group_name
       end
 
+      def nodes(&block)
+        NodeattrInterface.nodes_in_group(name).each do |node_name|
+          yield node_name
+        end
+      end
+
       private
 
       attr_reader :metalware_config

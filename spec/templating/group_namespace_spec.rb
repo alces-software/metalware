@@ -39,4 +39,20 @@ RSpec.describe Metalware::Templating::GroupNamespace do
       end
     end
   end
+
+  describe '#nodes' do
+    # XXX Change this to provide full templater config for each node.
+    it 'calls the block with node name for each node in the group' do
+      SpecUtils.use_mock_genders(self, genders_file: 'genders/group_namespace')
+
+      node_names = []
+      subject.nodes do |node_name|
+        node_names << node_name
+      end
+
+      expect(node_names).to eq([
+        'node01','node05','node10', 'node11', 'node12'
+      ])
+    end
+  end
 end
