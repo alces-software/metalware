@@ -31,7 +31,7 @@ RSpec.describe Metalware::HunterUpdater do
   let :updater { Metalware::HunterUpdater.new(hunter_file) }
 
   def hunter_yaml
-    YAML.load_file(hunter_file)
+    Metalware::Data.load(hunter_file)
   end
 
   describe '#add' do
@@ -50,7 +50,9 @@ RSpec.describe Metalware::HunterUpdater do
 
     context 'with existing hunter content' do
       before :each do
-        File.write(hunter_file, YAML.dump({somenode01: 'some_mac_address'}))
+        Metalware::Data.dump(hunter_file, {
+          somenode01: 'some_mac_address'
+        })
       end
 
       it 'outputs info if replacing node name' do

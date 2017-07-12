@@ -1,7 +1,6 @@
 
 require 'command_helpers/configure_command'
 require 'constants'
-require 'utils'
 
 
 module Metalware
@@ -32,7 +31,7 @@ module Metalware
         def record_primary_group
           unless primary_group_recorded?
             primary_groups << group_name
-            File.write(Constants::GROUPS_CACHE_PATH, YAML.dump(groups_cache))
+            Data.dump(Constants::GROUPS_CACHE_PATH, groups_cache)
           end
         end
 
@@ -45,7 +44,7 @@ module Metalware
         end
 
         def groups_cache
-          @groups_cache ||= Utils.safely_load_yaml(Constants::GROUPS_CACHE_PATH)
+          @groups_cache ||= Data.load(Constants::GROUPS_CACHE_PATH)
         end
       end
 

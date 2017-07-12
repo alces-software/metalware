@@ -34,24 +34,16 @@ module Metalware
     def add(node_name, mac_address)
       node_name = node_name.to_sym
 
-      current_yaml = load_current_yaml
+      current_yaml = Data.load(@hunter_file)
       remove_colliding_entries!(current_yaml, node_name, mac_address)
 
-      new_yaml = YAML.dump(current_yaml.merge({
-        node_name.to_sym => mac_address
-      }))
-      File.write(@hunter_file, new_yaml)
+      new_yaml = current_yaml.merge({
+        node_name => mac_address
+      })
+      Data.dump(@hunter_file, new_yaml)
     end
 
     private
-
-    def load_current_yaml
-      if File.exist? @hunter_file
-        YAML.load_file(@hunter_file) || {}
-      else
-        {}
-      end
-    end
 
     def remove_colliding_entries!(current_yaml, new_node_name, new_mac_address)
       node_name_present = current_yaml.keys.include?(new_node_name)

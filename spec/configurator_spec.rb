@@ -31,7 +31,7 @@ RSpec.describe Metalware::Configurator do
   }
 
   let :answers {
-    YAML.load_file(answers_file_path)
+    Metalware::Data.load(answers_file_path)
   }
 
   let :configurator {
@@ -42,7 +42,7 @@ RSpec.describe Metalware::Configurator do
     Metalware::Configurator.new(
       highline: hl,
       configure_file: configure_file_path,
-      questions_section: 'test',
+      questions_section: :test,
       answers_file: answers_file_path
     )
   end
@@ -97,7 +97,7 @@ RSpec.describe Metalware::Configurator do
       configurator.configure
 
       expect(answers).to eq({
-        'string_q' => 'My string'
+        string_q: 'My string'
       })
     end
 
@@ -122,7 +122,7 @@ RSpec.describe Metalware::Configurator do
       configurator.configure
 
       expect(answers).to eq({
-        'string_q' => 'My string'
+        string_q: 'My string'
       })
     end
 
@@ -147,7 +147,7 @@ RSpec.describe Metalware::Configurator do
       configurator.configure
 
       expect(answers).to eq({
-        'integer_q' => 7
+        integer_q: 7
       })
     end
 
@@ -172,7 +172,7 @@ RSpec.describe Metalware::Configurator do
       configurator.configure
 
       expect(answers).to eq({
-        'boolean_q' => true
+        boolean_q: true
       })
     end
 
@@ -198,7 +198,7 @@ RSpec.describe Metalware::Configurator do
       configurator.configure
 
       expect(answers).to eq({
-        'choice_q' => 'bar'
+        choice_q: 'bar'
       })
     end
 
@@ -235,9 +235,9 @@ RSpec.describe Metalware::Configurator do
       configurator.configure
 
       expect(answers).to eq(
-        'string_q' => 'Some string',
-        'integer_q' => 11,
-        'boolean_q' => false,
+        string_q: 'Some string',
+        integer_q: 11,
+        boolean_q: false,
       )
     end
 
@@ -291,9 +291,9 @@ RSpec.describe Metalware::Configurator do
       configure_with_input("\n\n\n\n\n")
 
       expect(answers).to eq({
-        'string_q' => str_ans,
-        'string_erb' => erb_ans,
-        'integer_q' => 10
+        string_q: str_ans,
+        string_erb: erb_ans,
+        integer_q: 10,
       })
     end
 
@@ -313,11 +313,11 @@ RSpec.describe Metalware::Configurator do
       })
 
       old_answers = {
-        "string_q" => "CORRECT",
-        "integer_q" => -100,
-        "should_not_see_me" => "OHHH SNAP"
+        string_q: "CORRECT",
+        integer_q: -100,
+        should_not_see_me: "OHHH SNAP"
       }
-      new_answers = old_answers.dup.tap { |h| h.delete("should_not_see_me") }
+      new_answers = old_answers.dup.tap { |h| h.delete(:should_not_see_me) }
 
       first_run_configure = nil
       redirect_stdout do
@@ -370,7 +370,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
       expected = {
-        "string_q" => ""
+        string_q: ''
       }
 
       configure_with_input("\n")

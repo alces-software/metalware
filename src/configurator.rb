@@ -49,13 +49,12 @@ module Metalware
       :answers_file
 
     def questions
-      @questions ||= YAML.load_file(configure_file).
-        with_indifferent_access[questions_section].
+      @questions ||= Data.load(configure_file)[questions_section].
         map{ |identifier, properties| create_question(identifier, properties) }
     end
 
     def old_answers
-      @old_answers ||= Utils.safely_load_yaml(answers_file)
+      @old_answers ||= Data.load(answers_file)
     end
 
     def ask_questions
@@ -66,19 +65,16 @@ module Metalware
     end
 
     def save_answers(answers)
-      File.open(answers_file, 'w') do |f|
-        f.write(YAML.dump(answers))
-      end
+      Data.dump(answers_file, answers)
     end
 
     def create_question(identifier, properties)
-      Question.new({
-          identifier: identifier,
-          properties: properties,
-          configure_file: configure_file,
-          questions_section: questions_section,
-          old_answer: old_answers[identifier]
-        }
+      Question.new(
+        identifier: identifier,
+        properties: properties,
+        configure_file: configure_file,
+        questions_section: questions_section,
+        old_answer: old_answers[identifier]
       )
     end
 
