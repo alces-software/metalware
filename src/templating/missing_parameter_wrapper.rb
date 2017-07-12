@@ -25,7 +25,7 @@ module Metalware
           # The offending tests need to be switched over to using FakeFS, then this
           # code can be uncommented.
           #if @fatal
-          #  raise MissingParameter, msg
+          #  raise MissingParameterError, msg
           #else
           @missing_tags.push s
           MetalLog.warn msg
@@ -48,7 +48,7 @@ module Metalware
         value = @wrapped_obj.send(s)
         if value.nil? && ! @missing_tags.include?(s)
           msg = "Unset template parameter: #{s}"
-          raise(MissingParameter, msg) if @raise_on_missing
+          raise(MissingParameterError, msg) if @raise_on_missing
           @missing_tags.push(s)
           MetalLog.warn msg
         end
