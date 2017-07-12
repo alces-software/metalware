@@ -211,7 +211,6 @@ RSpec.describe Metalware::Validator::Configure do
     end
   end
 
-=begin
   context 'with invalid string questions' do
     it 'fails with a non-string default with no type specified' do
       h = correct_hash.deep_merge({
@@ -222,7 +221,7 @@ RSpec.describe Metalware::Validator::Configure do
           }
         }
       })
-      expect(run_configure_validation(h)).to eq(false)
+      expect(run_configure_validation(h).keys).to eq([:default_string_type])
     end
 
     it 'fails with a non-string default with a type specified' do
@@ -235,11 +234,10 @@ RSpec.describe Metalware::Validator::Configure do
           }
         }
       })
-      expect(run_configure_validation(h)).to eq(false)
+      expect(run_configure_validation(h).keys).to eq([:default_string_type])
     end
   end
 
-=begin
   context 'with invalid integer questions' do
     it 'fails with non-integer default' do
       h = correct_hash.deep_merge({
@@ -251,8 +249,7 @@ RSpec.describe Metalware::Validator::Configure do
           }
         }
       })
-      expect(run_configure_validation(h)).to eq(false)
+      expect(run_configure_validation(h).keys).to eq([:default_integer_type])
     end
   end
-=end
 end

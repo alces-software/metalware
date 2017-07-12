@@ -28,6 +28,7 @@ module Metalware
     class Configure
       # NOTE: Supported types in error.yaml message must be updated manually
       SupportedTypes = ["string", "integer", "boolean"].freeze
+      ErrorFile = File.join(File.dirname(__FILE__), "errors.yaml").freeze
 
       def initialize(file)
         @yaml = Data.load(file)
@@ -55,7 +56,7 @@ module Metalware
 
       QuestionSchema = Dry::Validation.Schema do
         configure do
-          config.messages_file = File.join(File.dirname(__FILE__), "errors.yaml")
+          config.messages_file = ErrorFile
           config.namespace = :configure_question
 
           def question_type?(value)
@@ -73,12 +74,28 @@ module Metalware
           optional(:type).value(:question_type?)
           optional(:default).value(:filled?)
           optional(:optional).value(:bool?)
+
+          # NOTE: The crazy logic on the LHS of the then ('>') is because
+          # the RHS determines the error message. Hence the RHS needs to be
+          # as simple as possible otherwise the error message will be crazy
+          rule(default_string_type: [:default, :type]) do |default, type|
+            (default.filled? & (type.none? | type.eql?("string"))) > default.str?
+          end
+
+          rule(default_integer_type: [:default, :type]) do |default, type|
+            (default.filled? & type.eql?("integer")) > default.int?
+          end
+
+          # Boolean does not currently support a default answer
+          rule(default_boolean_type: [:default, :type]) do |default, type|
+            default.none? | type.excluded_from?(["boolean"])
+          end
         end
       end
 
       ConfigureSchema = Dry::Validation.Schema do
         configure do
-          config.messages_file = File.join(File.dirname(__FILE__), "errors.yaml")
+          config.messages_file = ErrorFile
           config.namespace = :configure
         end
 

@@ -11,3 +11,5 @@ en:
         valid_top_level_question_keys: >
           Questions can only have the following fields: quesition, type, default
           choice, optional
+        default_type?: >
+          Type miss-match between question type and default value
