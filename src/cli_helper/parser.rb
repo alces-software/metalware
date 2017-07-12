@@ -28,6 +28,12 @@ module Metalware
       def initialize(calling_obj = nil)
         @calling_obj = calling_obj
         config = File.join(File.dirname(__FILE__), "config.yaml")
+        
+        # NOTE: Now that Metalware has a `Data` module the majority of yaml
+        # handling occurs through that.
+        # CliHelper and autocomplete are exceptions as they should only ever be
+        # altered by developers and need to load the file as is, instead of
+        # Metalware altering it to what it thinks it needs to be.
         @yaml = YAML.load_file(config)
       end
 
