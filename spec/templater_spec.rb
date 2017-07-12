@@ -30,7 +30,7 @@ require 'filesystem'
 TEST_TEMPLATE_PATH = '/fixtures/template.erb'
 UNSET_PARAMETER_TEMPLATE_PATH = '/fixtures/unset_parameter_template.erb'
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
-
+EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
 RSpec.describe Metalware::Templater do
   let :config {
@@ -58,7 +58,11 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render' do
-    context 'when templater passed no parameters' do
+    context 'without a repo' do
+      before :each do
+        @config = Metalware::Config.new(EMPTY_REPO_PATH)
+      end
+
       it 'renders template with no extra parameters' do
         expected = <<-EOF
         This is a test template
@@ -72,9 +76,7 @@ RSpec.describe Metalware::Templater do
 
         expect_renders({}, expected)
       end
-    end
 
-    context 'when templater passed parameters' do
       it 'renders template with extra passed parameters' do
         template_parameters = ({
           some_passed_value: 'my_value'

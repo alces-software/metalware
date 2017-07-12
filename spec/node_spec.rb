@@ -160,9 +160,7 @@ RSpec.describe Metalware::Node do
 
   describe '#raw_config' do
     it 'performs a deep merge of all config files' do
-      config = Metalware::Config.new(File.join(FIXTURES_PATH, "configs/deep-merge.yaml"))
-      node = Metalware::Node.new(config, 'deepmerge')
-      expect(node.raw_config).to eq({
+      expected_answers = {
         networks: {
           foo: 'not bar',
           something: 'value',
@@ -171,7 +169,14 @@ RSpec.describe Metalware::Node do
             interface: "eth1"
           }
         }
-      })
+      }
+
+      FileSystem.test do |fs|
+        fs.with_repo_fixtures("repo_deep_merge")
+        config = Metalware::Config.new
+        node = Metalware::Node.new(config, 'deepmerge')
+        expect(node.raw_config).to eq(expected_answers)
+      end
     end
   end
 
