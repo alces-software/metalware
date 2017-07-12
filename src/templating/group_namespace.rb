@@ -12,9 +12,11 @@ module Metalware
 
       private
 
+      attr_reader :metalware_config
+
       def templating_configuration
         @templating_configuration ||=
-          Configuration.for_primary_group(name, config: @metalware_config)
+          Configuration.for_primary_group(name, config: metalware_config)
       end
     end
   end

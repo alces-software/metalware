@@ -91,7 +91,7 @@ module Metalware
     # will be rendered to for this node.
     def rendered_build_file_path(namespace, file_name)
       File.join(
-        @metalware_config.rendered_files_path,
+        metalware_config.rendered_files_path,
         name,
         namespace.to_s,
         file_name
@@ -100,7 +100,7 @@ module Metalware
 
     def index
       if primary_group
-        Nodes.create(@metalware_config, primary_group, true).index(self)
+        Nodes.create(metalware_config, primary_group, true).index(self)
       else
         0
       end
@@ -118,13 +118,15 @@ module Metalware
 
     private
 
+    attr_reader :metalware_config
+
     def templating_configuration
       @templating_configuration ||=
-        Templating::Configuration.for_node(name, config: @metalware_config)
+        Templating::Configuration.for_node(name, config: metalware_config)
     end
 
     def build_complete_marker_file
-      File.join(@metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
+      File.join(metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
     end
 
     def cached_primary_group_index
