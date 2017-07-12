@@ -31,11 +31,6 @@ RSpec.describe Metalware::Commands::Configure::Group do
     )
   end
 
-  let :mocked_validator {
-    OpenStruct.new({
-      validate: OpenStruct.new({ success?: true })
-    })
-  }
   let :config { Metalware::Config.new }
   let :groups_file {
     File.join(Metalware::Constants::CACHE_PATH, 'groups.yaml' )
@@ -47,10 +42,6 @@ RSpec.describe Metalware::Commands::Configure::Group do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
     end
-  }
-  before :each {
-    allow(Metalware::Validator::Configure).to \
-        receive(:new).and_return(mocked_validator)
   }
 
   describe 'recording groups' do

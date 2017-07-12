@@ -33,11 +33,6 @@ require 'filesystem'
 RSpec.describe Metalware::Dependency do
   let :config { Metalware::Config.new }
   let :filesystem { FileSystem.setup }
-  let :mocked_validator {
-    OpenStruct.new({
-      validate: OpenStruct.new({ success?: true })
-    })
-  }
 
   def enforce_dependencies(dependencies_hash = {})
     filesystem.test do |fs|
@@ -46,11 +41,6 @@ RSpec.describe Metalware::Dependency do
   end
 
   context 'with a fresh filesystem' do
-    before :each do
-      allow(Metalware::Validator::Configure).to \
-        receive(:new).and_return(mocked_validator)
-    end
-
     it 'repo dependencies fail' do
       expect {
         enforce_dependencies({ repo: [] })
@@ -67,8 +57,6 @@ RSpec.describe Metalware::Dependency do
   context 'with repo dependencies' do
     before :each do
       filesystem.with_repo_fixtures('repo')
-      allow(Metalware::Validator::Configure).to \
-        receive(:new).and_return(mocked_validator)
     end
 
     it 'check if the base repo exists' do
@@ -110,8 +98,6 @@ RSpec.describe Metalware::Dependency do
   context 'with blank configure.yaml dependencies' do
     before :each do
       filesystem.with_repo_fixtures('repo')
-      allow(Metalware::Validator::Configure).to \
-        receive(:new).and_return(mocked_validator)
     end
 
     it 'validates missing answer files' do
@@ -125,6 +111,7 @@ RSpec.describe Metalware::Dependency do
 
     context 'when answer files exist' do
       before :each do
+        filesystem.with_minimal_repo
         filesystem.with_answer_fixtures('answers/basic_structure')
       end
 
