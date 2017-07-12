@@ -22,9 +22,9 @@
 
 require 'templating/iterable_recursive_open_struct'
 
-RSpec.describe Metalware::IterableRecursiveOpenStruct do
+RSpec.describe Metalware::Templating::IterableRecursiveOpenStruct do
   subject {
-    Metalware::IterableRecursiveOpenStruct.new({
+    Metalware::Templating::IterableRecursiveOpenStruct.new({
       prop: 'value',
       nested: {
         prop: 'nested_value',
@@ -57,7 +57,7 @@ RSpec.describe Metalware::IterableRecursiveOpenStruct do
 
       # Converts any hash values to same class before iterating.
       expect(values.last).to eq(
-        Metalware::IterableRecursiveOpenStruct.new({prop: 'nested_value'})
+        Metalware::Templating::IterableRecursiveOpenStruct.new({prop: 'nested_value'})
       )
     end
   end

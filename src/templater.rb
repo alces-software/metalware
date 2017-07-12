@@ -72,8 +72,8 @@ module Metalware
           [:firstboot, :files].include?(k) && !v.nil?
       }
 
-      magic_struct = MagicNamespace.new(**passed_magic_parameters, node: node)
-      @magic_namespace = MissingParameterWrapper.new(magic_struct)
+      magic_struct = Templating::MagicNamespace.new(**passed_magic_parameters, node: node)
+      @magic_namespace = Templating::MissingParameterWrapper.new(magic_struct)
       @passed_hash = parameters
       @config = parse_config
     end
@@ -182,7 +182,9 @@ module Metalware
     end
 
     def create_template_parameters(config)
-      MissingParameterWrapper.new(IterableRecursiveOpenStruct.new(config))
+      Templating::MissingParameterWrapper.new(
+        Templating::IterableRecursiveOpenStruct.new(config)
+      )
     end
   end
 end

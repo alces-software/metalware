@@ -191,7 +191,7 @@ RSpec.describe Metalware::Templater do
 
         templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
 
-        expect(templater.config.alces.answers).to be_a(Metalware::MissingParameterWrapper)
+        expect(templater.config.alces.answers).to be_a(Metalware::Templating::MissingParameterWrapper)
         expect(templater.config.alces.answers.inspect).to eq('testnode01_answers')
       end
     end
