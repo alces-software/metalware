@@ -26,6 +26,9 @@ require 'dry-validation'
 module Metalware
   module Validator
     class Configure
+      # NOTE: Supported types in error.yaml message must be updated manually
+      SupportedTypes = ["string", "integer", "boolean"].freeze
+
       def initialize(file)
         @yaml = Data.load(file)
       end
@@ -34,14 +37,15 @@ module Metalware
         configure_results = ConfigureSchema.call(yaml: @yaml)
         if configure_results.success?
           [:domain, :group, :node].each do |section|
-            # @yaml[section].each do |identifier, parameters|
-            #   payload = {
-            #     section: section,
-            #     identifier: identifier,
-            #     parameters: parameters
-            #   }
-            #   question_results = QuestionSchema
-            # end
+            @yaml[section].each do |identifier, parameters|
+              payload = {
+                section: section,
+                identifier: identifier,
+                parameters: parameters
+              }
+              question_results = QuestionSchema.call(payload)
+              return question_results unless question_results.success?
+            end
           end
         end
         configure_results
@@ -50,14 +54,26 @@ module Metalware
       private
 
       QuestionSchema = Dry::Validation.Schema do
-        # validate(valid_top_level_question_keys: :here) do |q|
-        #   (q.keys - [:question, :type, :default, :choice, :optional]).empty?
-        # end
+        configure do
+          config.messages_file = File.join(File.dirname(__FILE__), "errors.yaml")
+          config.namespace = :configure_question
 
-        #required(:group).value(type?: Hash)
-        #required(:domain).value(type?: Hash)
-        
-        #required(:node).value(type?: Hash)
+          def question_type?(value)
+            SupportedTypes.include?(value)
+          end
+        end
+
+        validate(valid_top_level_question_keys: :parameters) do |q|
+          (q.keys - [:question, :type, :default, :choice, :optional]).empty?
+        end
+
+        required(:parameters).value(:hash?)
+        required(:parameters).schema do
+          required(:question).value(:str?, :filled?)
+          optional(:type).value(:question_type?)
+          optional(:default).value(:filled?)
+          optional(:optional).value(:bool?)
+        end
       end
 
       ConfigureSchema = Dry::Validation.Schema do

@@ -4,3 +4,10 @@ en:
       configure:
         valid_top_level_keys: >
           Configure.yaml must only contain domain, group, node and questions
+
+      configure_question:
+        question_type?: >
+          Type must be: string, integer or boolean
+        valid_top_level_question_keys: >
+          Questions can only have the following fields: quesition, type, default
+          choice, optional
