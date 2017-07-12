@@ -1,0 +1,6 @@
+en:
+  errors:
+    rules:
+      configure:
+        valid_top_level_keys: >
+          Configure.yaml must only contain domain, group, node and questions

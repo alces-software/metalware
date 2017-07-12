@@ -31,53 +31,51 @@ module Metalware
       end
 
       def validate
-        ConfigureSchema.call(yaml: @yaml)
+        configure_results = ConfigureSchema.call(yaml: @yaml)
+        if configure_results.success?
+          [:domain, :group, :node].each do |section|
+            # @yaml[section].each do |identifier, parameters|
+            #   payload = {
+            #     section: section,
+            #     identifier: identifier,
+            #     parameters: parameters
+            #   }
+            #   question_results = QuestionSchema
+            # end
+          end
+        end
+        configure_results
       end
 
       private
 
-
-
-      # TODO: These our temporary messages for the additional validations I have
-      # added. Ideally these will be moved to a separate file
-      # http://dry-rb.org/gems/dry-validation/error-messages/
-      def self.messages
-        super.merge( en: { errors: {
-          valid_top_level_keys: 'Configure.yaml must only contain domain, '\
-                                'group, node and questions',
-          question_block?: 'Is not a valid block of questions to be asked',
-          valid_top_level_question_keys: 'The only top level question keys '\
-            "allowed are: question, type, default, choice, and optional"
-        
-        }})
-      end
-
-      QuestionBlockSchema = Dry::Validation.Schema do
-        required(:domain).value(type?: Hash)
-        #required(:question_block_input).value(:valid_question?)
-      end
-
       QuestionSchema = Dry::Validation.Schema do
-        validate(valid_top_level_question_keys: [:domain, :group, :node]) do |q|
-          (q.keys - [:question, :type, :default, :choice, :optional]).empty?
-        end
+        # validate(valid_top_level_question_keys: :here) do |q|
+        #   (q.keys - [:question, :type, :default, :choice, :optional]).empty?
+        # end
 
-        #required(:domain).value(:valid_question?)
+        #required(:group).value(type?: Hash)
+        #required(:domain).value(type?: Hash)
+        
+        #required(:node).value(type?: Hash)
       end
 
       ConfigureSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = File.join(File.dirname(__FILE__), "errors.yaml")
+          config.namespace = :configure
+        end
+
         # White-lists the keys allowed in the configure.yaml file
         validate(valid_top_level_keys: :yaml) do |yaml|
           (yaml.keys - [:domain, :group, :node, :questions]).empty?
         end
 
-        # Note this is the 'yaml' file input converted to a hash 
-        required(:yaml).schema do
-          required(:domain).value(type?: Hash)
-          required(:group).value(type?: Hash)
-          required(:node).value(type?: Hash)
+        required(:yaml).schema do 
+          required(:domain).value(:hash?)
+          required(:group).value(:hash?)
+          required(:node).value(:hash?)
         end
-        required(:yaml).schema(QuestionSchema)
       end
     end
   end

@@ -93,6 +93,7 @@ RSpec.describe Metalware::Validator::Configure do
     end
   end
 
+=begin
   context 'with general invalid inputs' do
     it 'fails with invalid top level keys' do
       h = correct_hash.deep_merge({
@@ -134,6 +135,7 @@ RSpec.describe Metalware::Validator::Configure do
       expect(run_configure_validation(h)).not_to be_empty
     end
   end
+=end
 
   context 'with missing question blocks' do
     it 'fails when domain is missing' do
