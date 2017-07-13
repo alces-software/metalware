@@ -11,7 +11,7 @@ RSpec.describe Metalware::Templating::GroupNamespace do
     )
   end
 
-  let :group_name { 'testgroup' }
+  let :group_name { 'testnodes' }
 
   let :filesystem {
     FileSystem.setup do |fs|
@@ -33,7 +33,7 @@ RSpec.describe Metalware::Templating::GroupNamespace do
       filesystem.test do
         expect(subject.answers).to eq({
           domain_value: 'domain_value',
-          overriding_domain_value: 'testgroup_value',
+          overriding_domain_value: 'testnodes_value',
           genders_host_range: 'node0[10-20]',
         })
       end
