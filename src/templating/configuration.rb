@@ -1,6 +1,8 @@
 
 require 'node'
 
+# XXX Make `answers` and `raw_config` more similar; basically performing the
+# same thing.
 
 # A `Templating::Configuration` represents the configuration used when
 # rendering templates for a particular object, which currently can be either a
