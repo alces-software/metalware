@@ -26,8 +26,12 @@ require 'dry-validation'
 module Metalware
   module Validator
     class Configure
+      # TODO: 'choice' is going to be removed as a valid type. Instead the type
+      # will that of the data contained. Whether their is any choices will be
+      # determined by whether they are supplied.
+
       # NOTE: Supported types in error.yaml message must be updated manually
-      SupportedTypes = ["string", "integer", "boolean"].freeze
+      SupportedTypes = ["string", "integer", "boolean", "choice"].freeze
       ErrorFile = File.join(File.dirname(__FILE__), "errors.yaml").freeze
 
       def initialize(file)
@@ -86,9 +90,9 @@ module Metalware
             (default.filled? & type.eql?("integer")) > default.int?
           end
 
-          # Boolean does not currently support a default answer
+          # Boolean and choice does not currently support default answers
           rule(default_boolean_type: [:default, :type]) do |default, type|
-            default.none? | type.excluded_from?(["boolean"])
+            default.none? | type.excluded_from?(["boolean", "choice"])
           end
         end
       end
