@@ -11,7 +11,7 @@ module Metalware
 
         # XXX get rid of handling `additional_parameters`? And just take what
         # we need.
-        def parse_for_node(node_name:, config:, additional_parameters:)
+        def parse_for_node(node_name:, config:, additional_parameters: {})
           new(
             node_name: node_name,
             config: config,

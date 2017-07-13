@@ -15,7 +15,7 @@ RSpec.describe Metalware::Templating::GroupNamespace do
 
   let :filesystem {
     FileSystem.setup do |fs|
-      fs.with_minimal_repo
+      fs.with_repo_fixtures('repo')
       fs.with_answer_fixtures('answers/group_namespace_tests')
     end
   }
@@ -41,18 +41,27 @@ RSpec.describe Metalware::Templating::GroupNamespace do
   end
 
   describe '#nodes' do
-    # XXX Change this to provide full templater config for each node.
-    it 'calls the block with node name for each node in the group' do
+    it 'calls the block with templater config for each node in the group' do
       SpecUtils.use_mock_genders(self, genders_file: 'genders/group_namespace')
 
-      node_names = []
-      subject.nodes do |node_name|
-        node_names << node_name
-      end
+      filesystem.test do
+        node_names = []
+        some_repo_values = []
 
-      expect(node_names).to eq([
-        'node01','node05','node10', 'node11', 'node12'
-      ])
+        subject.nodes do |node|
+          node_names << node.alces.nodename
+          some_repo_values << node.some_repo_value
+        end
+
+        expect(node_names).to eq([
+          'node01','node05','node10', 'node11', 'node12'
+        ])
+
+        expected_repo_values = (['repo_value'] * 5).tap do |expected|
+          expected[1] = 'value_just_for_node05'
+        end
+        expect(some_repo_values).to eq(expected_repo_values)
+      end
     end
   end
 end
