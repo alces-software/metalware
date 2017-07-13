@@ -7,6 +7,7 @@ require 'deployment_server'
 require 'nodeattr_interface'
 require 'primary_group'
 require 'templating/missing_parameter_wrapper'
+require 'templating/group_namespace'
 
 
 module Metalware
