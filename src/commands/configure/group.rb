@@ -12,12 +12,11 @@ module Metalware
           @group_name = args.first
         end
 
-        def run
-          super
+        protected
+
+        def custom_configuration
           record_primary_group
         end
-
-        protected
 
         def answers_file
           file_name = "#{group_name}.yaml"

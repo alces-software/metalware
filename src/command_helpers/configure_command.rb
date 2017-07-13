@@ -8,6 +8,7 @@ module Metalware
     class ConfigureCommand < CommandHelpers::BaseCommand
       def run
         configurator.configure
+        custom_configuration
       end
 
       def handle_interrupt(_e)
@@ -15,6 +16,11 @@ module Metalware
       end
 
       protected
+
+      def custom_configuration
+        # Custom additional configuration for a `configure` command, if any,
+        # should be performed in this method in subclasses.
+      end
 
       def answers_file
         raise NotImplementedError
