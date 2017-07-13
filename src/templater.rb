@@ -61,28 +61,17 @@ module Metalware
     end
 
     attr_reader :config
-    attr_reader :nodename
 
     # XXX Have this just take allowed keyword parameters:
     # - nodename
     # - index
     # - what else?
     def initialize(metalware_config, parameters={})
-      @metalware_config = metalware_config
-      @nodename = parameters[:nodename]
-      passed_magic_parameters = parameters.select { |k,v|
-          [:firstboot, :files].include?(k) && !v.nil?
-      }
-
-      raw_magic_namespace = Templating::MagicNamespace.new(
+      @config = Templating::RepoConfigParser.parse_for_node(
+        node_name: parameters[:nodename],
         config: metalware_config,
-        node: node,
-        **passed_magic_parameters
+        additional_parameters: parameters
       )
-      @magic_namespace = \
-        Templating::MissingParameterWrapper.new(raw_magic_namespace)
-      @passed_hash = parameters
-      @config = Templating::RepoConfigParser.parse(base_config)
     end
 
     def render(template)
@@ -98,22 +87,5 @@ module Metalware
     private
 
     delegate :replace_erb, to: Templating::Renderer
-
-    # The merging of the raw combined config files, any additional passed
-    # values, and the magic `alces` namespace; this is the config prior to
-    # parsing any nested ERB values.
-    # XXX Get rid of merging in `passed_hash`? This will cause an issue if a
-    # config specifies a value with the same name as something in the
-    # `passed_hash`, as it will overshadow it, and we don't actually want to
-    # support this any more.
-    def base_config
-      @base_config ||= node.raw_config
-        .merge(@passed_hash)
-        .merge(alces: @magic_namespace)
-    end
-
-    def node
-      @node ||= Node.new(@metalware_config, nodename)
-    end
   end
 end
