@@ -72,8 +72,13 @@ module Metalware
           [:firstboot, :files].include?(k) && !v.nil?
       }
 
-      magic_struct = Templating::MagicNamespace.new(**passed_magic_parameters, node: node)
-      @magic_namespace = Templating::MissingParameterWrapper.new(magic_struct)
+      raw_magic_namespace = Templating::MagicNamespace.new(
+        config: metalware_config,
+        node: node,
+        **passed_magic_parameters
+      )
+      @magic_namespace = \
+        Templating::MissingParameterWrapper.new(raw_magic_namespace)
       @passed_hash = parameters
       @config = parse_config
     end
@@ -128,6 +133,10 @@ module Metalware
     # The merging of the raw combined config files, any additional passed
     # values, and the magic `alces` namespace; this is the config prior to
     # parsing any nested ERB values.
+    # XXX Get rid of merging in `passed_hash`? This will cause an issue if a
+    # config specifies a value with the same name as something in the
+    # `passed_hash`, as it will overshadow it, and we don't actually want to
+    # support this any more.
     def base_config
       @base_config ||= node.raw_config
         .merge(@passed_hash)

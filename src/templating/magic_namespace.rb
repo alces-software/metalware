@@ -5,13 +5,15 @@ require 'active_support/core_ext/hash'
 require "constants"
 require 'deployment_server'
 require 'nodeattr_interface'
+require 'primary_group'
 require 'templating/missing_parameter_wrapper'
 
 
 module Metalware
   module Templating
     class MagicNamespace
-      def initialize(node: nil, firstboot: nil, files: nil)
+      def initialize(config:, node: nil, firstboot: nil, files: nil)
+        @metalware_config = config
         @node = node
         @firstboot = firstboot
         @files = Hashie::Mash.new(files) if files
@@ -41,6 +43,12 @@ module Metalware
         # Depends if we want to be able to iterate through genders or just get
         # list of nodes in a specified gender
         GenderGroupProxy
+      end
+
+      def groups(&block)
+        PrimaryGroup.each do |group|
+          yield group_namespace_for(group.name)
+        end
       end
 
       def hunter
@@ -77,7 +85,11 @@ module Metalware
 
       private
 
-      attr_reader :node
+      attr_reader :metalware_config, :node
+
+      def group_namespace_for(group_name)
+        GroupNamespace.new(metalware_config, group_name)
+      end
 
       module GenderGroupProxy
         class << self

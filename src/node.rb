@@ -26,10 +26,18 @@ require 'constants'
 require 'system_command'
 require 'nodeattr_interface'
 require 'exceptions'
+require 'primary_group'
+require 'templating/configuration'
 
 module Metalware
   class Node
     attr_reader :name
+    delegate :raw_config,
+      :answers,
+      # XXX `Node#configs` does not actually need to be public, it is only used
+      # in the `Node` tests
+      :configs,
+      to: :templating_configuration
 
     def initialize(metalware_config, name)
       @metalware_config = metalware_config
@@ -55,22 +63,12 @@ module Metalware
       File.file? build_complete_marker_file
     end
 
-    # Return the raw merged config for this node, without parsing any embedded
-    # ERB (this should be done using the Templater if needed, as we won't know
-    # all the template parameters until a template is being rendered).
-    # XXX refactor `build_files` to use this
-    def raw_config
-      combine_hashes(configs.map { |c| load_config(c) })
-    end
-
-    def answers
-      @answers ||= combine_answers
-    end
-
-    # The repo config files for this node in order of precedence from lowest to
-    # highest.
-    def configs
-      [name, *groups, 'domain'].reverse.reject(&:nil?).uniq
+    def groups
+      NodeattrInterface.groups_for_node(name)
+    rescue NodeNotInGendersError
+      # It's OK for a node to not be in the genders file, it just means it's
+      # not part of any groups.
+      []
     end
 
     # Get the configured `files` for this node, to be rendered and used in
@@ -78,10 +76,12 @@ module Metalware
     # from all `files` namespaces within all configs for the node, with
     # identifiers in higher precedence configs replacing those with the same
     # basename in lower precendence configs.
+    # XXX this may be better living in `Templating::Configuration`? `configs`
+    # and `load_config` could then be private.
     def build_files
       files_memo = Hash.new {|k,v| k[v] = []}
       configs.reduce(files_memo) do |files, config_name|
-        config = load_config(config_name)
+        config = templating_configuration.load_config(config_name)
         new_files = config[:files]
         merge_in_files!(files, new_files)
         files
@@ -92,7 +92,7 @@ module Metalware
     # will be rendered to for this node.
     def rendered_build_file_path(namespace, file_name)
       File.join(
-        @metalware_config.rendered_files_path,
+        metalware_config.rendered_files_path,
         name,
         namespace.to_s,
         file_name
@@ -101,15 +101,15 @@ module Metalware
 
     def index
       if primary_group
-        Nodes.create(@metalware_config, primary_group, true).index(self)
+        Nodes.create(metalware_config, primary_group, true).index(self)
       else
         0
       end
     end
 
     def group_index
-      if cached_primary_group_index
-        cached_primary_group_index
+      if primary_group_index
+        primary_group_index
       else
         error = "Cannot get 'group_index', the primary group " +
           "'#{primary_group}' for this node (#{name}) has not been configured"
@@ -119,37 +119,23 @@ module Metalware
 
     private
 
+    attr_reader :metalware_config
+
+    def templating_configuration
+      @templating_configuration ||=
+        Templating::Configuration.for_node(name, config: metalware_config)
+    end
+
     def build_complete_marker_file
-      File.join(@metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
+      File.join(metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
     end
 
-    def groups
-      NodeattrInterface.groups_for_node(name)
-    rescue NodeNotInGendersError
-      # It's OK for a node to not be in the genders file, it just means it's
-      # not part of any groups.
-      []
-    end
-
-    def cached_primary_group_index
-      cached_primary_groups.index(primary_group)
-    end
-
-    def cached_primary_groups
-      groups_cache[:primary_groups] || []
-    end
-
-    def groups_cache
-      Data.load(Constants::GROUPS_CACHE_PATH)
+    def primary_group_index
+      PrimaryGroup.index(primary_group)
     end
 
     def primary_group
       groups.first
-    end
-
-    def load_config(config_name)
-      config_path = @metalware_config.repo_config_path(config_name)
-      Data.load(config_path)
     end
 
     def merge_in_files!(existing_files, new_files)
@@ -170,41 +156,6 @@ module Metalware
 
     def same_basename?(path1, path2)
       File.basename(path1) == File.basename(path2)
-    end
-
-    def combine_answers
-      config_answers = configs.map { |c| Data.load(answers_path_for(c)) }
-      combine_hashes(config_answers)
-    end
-
-    def answers_path_for(config_name)
-      File.join(
-        @metalware_config.answer_files_path,
-        answers_directory_for(config_name),
-        "#{config_name}.yaml"
-      )
-    end
-
-    def answers_directory_for(config_name)
-      # XXX Using only the config name to determine the answers directory will
-      # lead to answers not being picked up if a group has the same name as the
-      # node, or either is 'domain'; we should probably use more information
-      # when determining this (possibly we should extract a `Config` object).
-      case config_name
-      when "domain"
-        "/"
-      when name
-        "nodes"
-      else
-        "groups"
-      end
-    end
-
-    def combine_hashes(hashes)
-      hashes.each_with_object({}) do |config, combined_config|
-        raise CombineHashError unless config.is_a? Hash
-        combined_config.deep_merge!(config)
-      end
     end
   end
 end
