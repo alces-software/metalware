@@ -3,11 +3,17 @@ module Metalware
   module Templating
     class GroupNamespace
       attr_reader :name
-      delegate :answers, to: :templating_configuration
 
       def initialize(metalware_config, group_name)
         @metalware_config = metalware_config
         @name = group_name
+      end
+
+      def answers
+        MissingParameterWrapper.new(
+          templating_configuration.answers,
+          raise_on_missing: true
+        )
       end
 
       def nodes(&block)

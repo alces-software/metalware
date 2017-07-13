@@ -31,7 +31,7 @@ RSpec.describe Metalware::Templating::GroupNamespace do
   describe '#answers' do
     it 'returns the group answers merged into the domain answers' do
       filesystem.test do
-        expect(subject.answers).to eq({
+        expect(subject.answers.to_h).to eq({
           domain_value: 'domain_value',
           overriding_domain_value: 'testnodes_value',
           genders_host_range: 'node0[10-20]',
