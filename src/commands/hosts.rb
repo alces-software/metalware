@@ -54,7 +54,7 @@ module Metalware
           if @options.dry_run
             Templater.render_to_stdout(config, template_path, parameters)
           else
-            Templater.render_and_append_to_file(config, template_path, HOSTS_FILE, parameters)
+            Templater.render_and_append_to_file(config, template_path, Constants::HOSTS_PATH, parameters)
           end
         end
       end

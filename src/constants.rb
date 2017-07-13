@@ -35,5 +35,7 @@ module Metalware
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 
     NODEATTR_COMMAND = 'nodeattr'
+
+    HOSTS_PATH = '/etc/hosts'
   end
 end
