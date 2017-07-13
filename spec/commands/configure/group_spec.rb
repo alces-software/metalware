@@ -17,59 +17,60 @@ RSpec.describe Metalware::Commands::Configure::Group do
   let :groups_yaml { Metalware::Data.load(groups_file) }
   let :primary_groups { groups_yaml[:primary_groups] }
 
-  context 'when `cache/groups.yaml` does not exist' do
-    it 'creates it and inserts new primary group' do
-      FileSystem.test do |fs|
-        fs.with_minimal_repo
+  describe 'recording groups' do
+    context 'when `cache/groups.yaml` does not exist' do
+      it 'creates it and inserts new primary group' do
+        FileSystem.test do |fs|
+          fs.with_minimal_repo
 
-        run_configure_group 'testnodes'
+          run_configure_group 'testnodes'
 
-        expect(primary_groups).to eq [
-          'testnodes'
-        ]
-      end
-    end
-  end
-
-
-  context 'when `cache/groups.yaml` exists' do
-    it 'inserts primary group if new' do
-      FileSystem.test do |fs|
-        fs.with_minimal_repo
-        Metalware::Data.dump(groups_file, {
-          primary_groups: [
-            'first_group',
+          expect(primary_groups).to eq [
+            'testnodes'
           ]
-        })
-
-        run_configure_group 'second_group'
-
-        expect(primary_groups).to eq [
-          'first_group',
-          'second_group',
-        ]
+        end
       end
-
     end
 
-    it 'does nothing if primary group already presnt' do
-      FileSystem.test do |fs|
-        fs.with_minimal_repo
-        Metalware::Data.dump(groups_file, {
-          primary_groups: [
+    context 'when `cache/groups.yaml` exists' do
+      it 'inserts primary group if new' do
+        FileSystem.test do |fs|
+          fs.with_minimal_repo
+          Metalware::Data.dump(groups_file, {
+            primary_groups: [
+              'first_group',
+            ]
+          })
+
+          run_configure_group 'second_group'
+
+          expect(primary_groups).to eq [
             'first_group',
             'second_group',
           ]
-        })
+        end
 
-        run_configure_group 'second_group'
-
-        expect(primary_groups).to eq [
-          'first_group',
-          'second_group',
-        ]
       end
 
+      it 'does nothing if primary group already presnt' do
+        FileSystem.test do |fs|
+          fs.with_minimal_repo
+          Metalware::Data.dump(groups_file, {
+            primary_groups: [
+              'first_group',
+              'second_group',
+            ]
+          })
+
+          run_configure_group 'second_group'
+
+          expect(primary_groups).to eq [
+            'first_group',
+            'second_group',
+          ]
+        end
+      end
     end
+
   end
 end
