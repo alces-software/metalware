@@ -17,12 +17,16 @@ RSpec.describe Metalware::Commands::Configure::Group do
   let :groups_yaml { Metalware::Data.load(groups_file) }
   let :primary_groups { groups_yaml[:primary_groups] }
 
+  let :filesystem {
+    FileSystem.setup do |fs|
+      fs.with_minimal_repo
+    end
+  }
+
   describe 'recording groups' do
     context 'when `cache/groups.yaml` does not exist' do
       it 'creates it and inserts new primary group' do
-        FileSystem.test do |fs|
-          fs.with_minimal_repo
-
+        filesystem.test do
           run_configure_group 'testnodes'
 
           expect(primary_groups).to eq [
@@ -34,8 +38,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
     context 'when `cache/groups.yaml` exists' do
       it 'inserts primary group if new' do
-        FileSystem.test do |fs|
-          fs.with_minimal_repo
+        filesystem.test do
           Metalware::Data.dump(groups_file, {
             primary_groups: [
               'first_group',
@@ -53,8 +56,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
       end
 
       it 'does nothing if primary group already presnt' do
-        FileSystem.test do |fs|
-          fs.with_minimal_repo
+        filesystem.test do
           Metalware::Data.dump(groups_file, {
             primary_groups: [
               'first_group',
