@@ -29,6 +29,7 @@ require 'templating/iterable_recursive_open_struct'
 require 'templating/missing_parameter_wrapper'
 require 'templating/magic_namespace'
 require 'templating/renderer'
+require 'templating/repo_config_parser'
 
 
 module Metalware
@@ -81,7 +82,7 @@ module Metalware
       @magic_namespace = \
         Templating::MissingParameterWrapper.new(raw_magic_namespace)
       @passed_hash = parameters
-      @config = parse_config
+      @config = Templating::RepoConfigParser.parse(base_config)
     end
 
     def render(template)
@@ -113,55 +114,6 @@ module Metalware
 
     def node
       @node ||= Node.new(@metalware_config, nodename)
-    end
-
-    def parse_config
-      current_parsed_config = base_config
-      current_config_string = current_parsed_config.to_s
-      previous_config_string = nil
-      count = 0
-
-      # Loop through the config and recursively parse any config values which
-      # contain ERB, until the parsed config is not changing or we have
-      # exceeded the maximum number of passes to make.
-      while previous_config_string != current_config_string
-        count += 1
-        if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
-          raise RecursiveConfigDepthExceededError
-        end
-
-        previous_config_string = current_config_string
-        current_parsed_config = perform_config_parsing_pass(current_parsed_config)
-        current_config_string = current_parsed_config.to_s
-      end
-
-      create_template_parameters(current_parsed_config)
-    end
-
-    def perform_config_parsing_pass(current_parsed_config)
-      current_parsed_config.map do |k,v|
-        [k, parse_config_value(v, current_parsed_config)]
-      end.to_h
-    end
-
-    def parse_config_value(value, current_parsed_config)
-      case value
-      when String
-        parameters = create_template_parameters(current_parsed_config)
-        replace_erb(value, parameters)
-      when Hash
-        value.map do |k,v|
-          [k, parse_config_value(v, current_parsed_config)]
-        end.to_h
-      else
-        value
-      end
-    end
-
-    def create_template_parameters(config)
-      Templating::MissingParameterWrapper.new(
-        Templating::IterableRecursiveOpenStruct.new(config)
-      )
     end
   end
 end
