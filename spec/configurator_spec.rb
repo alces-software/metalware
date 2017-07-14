@@ -43,7 +43,10 @@ RSpec.describe Metalware::Configurator do
       highline: hl,
       configure_file: configure_file_path,
       questions_section: :test,
-      answers_file: answers_file_path
+      answers_file: answers_file_path,
+      # Do not want to use readline to get input in tests as tests will then
+      # hang waiting for input.
+      use_readline: false
     )
   end
 

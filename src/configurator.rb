@@ -32,12 +32,14 @@ module Metalware
       highline: HighLine.new,
       configure_file:,
       questions_section:,
-      answers_file:
+      answers_file:,
+      use_readline: true
     )
       @highline = highline
       @configure_file = configure_file
       @questions_section = questions_section
       @answers_file = answers_file
+      @use_readline = use_readline
     end
 
     def configure
@@ -50,7 +52,8 @@ module Metalware
     attr_reader :highline,
       :configure_file,
       :questions_section,
-      :answers_file
+      :answers_file,
+      :use_readline
 
     def questions
       @questions ||= Data.load(configure_file)[questions_section].
@@ -78,7 +81,8 @@ module Metalware
         properties: properties,
         configure_file: configure_file,
         questions_section: questions_section,
-        old_answer: old_answers[identifier]
+        old_answer: old_answers[identifier],
+        use_readline: use_readline
       )
     end
 
@@ -90,19 +94,22 @@ module Metalware
         :type,
         :choices,
         :default,
-        :required
+        :required,
+        :use_readline
 
       def initialize(
         identifier:,
         properties:,
         configure_file:,
         questions_section:,
-        old_answer: nil
+        old_answer: nil,
+        use_readline:
       )
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
         @required = !properties[:optional]
+        @use_readline = use_readline
 
         @type = type_for(
           properties[:type],
@@ -119,6 +126,8 @@ module Metalware
       def ask(highline)
         ask_method = "ask_#{type}_question"
         self.send(ask_method, highline) do |highline_question|
+          highline_question.readline = true if use_readline
+
           if default.present?
             highline_question.default = default
           elsif required
