@@ -1,6 +1,6 @@
 
 some_repo_value: repo_value
-erb_repo_value: <%= alces[:index] + 1 %>
+erb_repo_value: <%= alces.index + 1 %>
 
 first_level_erb_repo_value: <%= some_repo_value %>
 second_level_erb_repo_value: <%= first_level_erb_repo_value %>
