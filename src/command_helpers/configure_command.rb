@@ -5,7 +5,7 @@ require 'constants'
 
 module Metalware
   module CommandHelpers
-    class ConfigureCommand < CommandHelpers::BaseCommand
+    class ConfigureCommand < BaseCommand
       def run
         configurator.configure
         custom_configuration
