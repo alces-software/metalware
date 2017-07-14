@@ -94,15 +94,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      expect(highline).to receive(
-        :ask
-      ).with(
-        'Can you enter a string?'
-      ).and_return(
-        'My string'
-      )
-
-      configurator.configure
+      configure_with_answers(['My string'])
 
       expect(answers).to eq({
         string_q: 'My string'
@@ -119,15 +111,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      expect(highline).to receive(
-        :ask
-      ).with(
-        'Can you enter a string?'
-      ).and_return(
-        'My string'
-      )
-
-      configurator.configure
+      configure_with_answers(['My string'])
 
       expect(answers).to eq({
         string_q: 'My string'
@@ -144,15 +128,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      expect(highline).to receive(
-        :ask
-      ).with(
-        'Can you enter an integer?', Integer
-      ).and_return(
-        7
-      )
-
-      configurator.configure
+      configure_with_answers(['7'])
 
       expect(answers).to eq({
         integer_q: 7
@@ -174,12 +150,10 @@ RSpec.describe Metalware::Configurator do
       ).with(
         # Note that an indication of what the input should be has been appended
         # to the asked question.
-       'Should this cluster be awesome? [yes/no]'
-      ).and_return(
-        true
-      )
+        'Should this cluster be awesome? [yes/no]'
+      ).and_call_original
 
-      configurator.configure
+      configure_with_answers(['yes'])
 
       expect(answers).to eq({
         boolean_q: true
@@ -201,11 +175,9 @@ RSpec.describe Metalware::Configurator do
         :choose
       ).with(
         'foo', 'bar'
-      ).and_return(
-        'bar'
-      )
+      ).and_call_original
 
-      configurator.configure
+      configure_with_answers(['bar'])
 
       expect(answers).to eq({
         choice_q: 'bar'
@@ -235,14 +207,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      allow(highline).to receive(
-        :ask
-      ).and_return('Some string', 11)
-      allow(highline).to receive(
-        :agree
-      ).and_return(false)
-
-      configurator.configure
+      configure_with_answers(['Some string', '11', 'no'])
 
       expect(answers).to eq(
         string_q: 'Some string',
