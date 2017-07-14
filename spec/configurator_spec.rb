@@ -43,7 +43,10 @@ RSpec.describe Metalware::Configurator do
       highline: hl,
       configure_file: configure_file_path,
       questions_section: :test,
-      answers_file: answers_file_path
+      answers_file: answers_file_path,
+      # Do not want to use readline to get input in tests as tests will then
+      # hang waiting for input.
+      use_readline: false
     )
   end
 
@@ -75,6 +78,11 @@ RSpec.describe Metalware::Configurator do
     end
   end
 
+  def configure_with_answers(answers)
+    # Each answer must be entered followed by a newline to terminate it.
+    configure_with_input(answers.join("\n") + "\n")
+  end
+
   describe '#configure' do
     it 'asks questions with type `string`' do
       define_questions({
@@ -86,15 +94,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      expect(highline).to receive(
-        :ask
-      ).with(
-        'Can you enter a string?'
-      ).and_return(
-        'My string'
-      )
-
-      configurator.configure
+      configure_with_answers(['My string'])
 
       expect(answers).to eq({
         string_q: 'My string'
@@ -111,15 +111,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      expect(highline).to receive(
-        :ask
-      ).with(
-        'Can you enter a string?'
-      ).and_return(
-        'My string'
-      )
-
-      configurator.configure
+      configure_with_answers(['My string'])
 
       expect(answers).to eq({
         string_q: 'My string'
@@ -136,15 +128,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      expect(highline).to receive(
-        :ask
-      ).with(
-        'Can you enter an integer?', Integer
-      ).and_return(
-        7
-      )
-
-      configurator.configure
+      configure_with_answers(['7'])
 
       expect(answers).to eq({
         integer_q: 7
@@ -164,12 +148,12 @@ RSpec.describe Metalware::Configurator do
       expect(highline).to receive(
         :agree
       ).with(
-       'Should this cluster be awesome?'
-      ).and_return(
-        true
-      )
+        # Note that an indication of what the input should be has been appended
+        # to the asked question.
+        'Should this cluster be awesome? [yes/no]'
+      ).and_call_original
 
-      configurator.configure
+      configure_with_answers(['yes'])
 
       expect(answers).to eq({
         boolean_q: true
@@ -191,11 +175,9 @@ RSpec.describe Metalware::Configurator do
         :choose
       ).with(
         'foo', 'bar'
-      ).and_return(
-        'bar'
-      )
+      ).and_call_original
 
-      configurator.configure
+      configure_with_answers(['bar'])
 
       expect(answers).to eq({
         choice_q: 'bar'
@@ -225,14 +207,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      allow(highline).to receive(
-        :ask
-      ).and_return('Some string', 11)
-      allow(highline).to receive(
-        :agree
-      ).and_return(false)
-
-      configurator.configure
+      configure_with_answers(['Some string', '11', 'no'])
 
       expect(answers).to eq(
         string_q: 'Some string',
@@ -284,16 +259,28 @@ RSpec.describe Metalware::Configurator do
             question: 'Integer?',
             type: 'integer',
             default: 10
-          }
+          },
+          true_boolean_q: {
+            question: 'Boolean?',
+            type: 'boolean',
+            default: true
+          },
+          false_boolean_q: {
+            question: 'More boolean?',
+            type: 'boolean',
+            default: false
+          },
         }
       })
 
-      configure_with_input("\n\n\n\n\n")
+      configure_with_answers([''] * 5)
 
       expect(answers).to eq({
         string_q: str_ans,
         string_erb: erb_ans,
         integer_q: 10,
+        true_boolean_q: true,
+        false_boolean_q: false
       })
     end
 
@@ -308,14 +295,26 @@ RSpec.describe Metalware::Configurator do
             question: 'Integer?',
             type: 'integer',
             default: 10
-          }
+          },
+          false_saved_boolean_q: {
+            question: 'Boolean?',
+            type: 'boolean',
+            default: true
+          },
+          true_saved_boolean_q: {
+            question: 'More boolean?',
+            type: 'boolean',
+            default: false
+          },
         }
       })
 
       old_answers = {
         string_q: "CORRECT",
         integer_q: -100,
-        should_not_see_me: "OHHH SNAP"
+        false_saved_boolean_q: false,
+        true_saved_boolean_q: true,
+        should_not_see_me: "OHHH SNAP",
       }
       new_answers = old_answers.dup.tap { |h| h.delete(:should_not_see_me) }
 
@@ -326,7 +325,7 @@ RSpec.describe Metalware::Configurator do
       end
       expect(first_run_configure.send(:old_answers)).to eq(old_answers)
 
-      configure_with_input("\n\n\n\n\n\n")
+      configure_with_answers([''] * 4)
       expect(answers).to eq(new_answers)
     end
 
@@ -344,7 +343,7 @@ RSpec.describe Metalware::Configurator do
         begin
           $stderr = Tempfile.new
           STDERR = $stderr
-          configure_with_input("\n\n")
+          configure_with_answers([''] * 2)
         ensure
           STDERR = old_stderr
           $stderr = STDERR
@@ -373,7 +372,7 @@ RSpec.describe Metalware::Configurator do
         string_q: ''
       }
 
-      configure_with_input("\n")
+      configure_with_answers([''])
       expect(answers).to eq(expected)
     end
   end

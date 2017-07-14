@@ -28,12 +28,18 @@ HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
 module Metalware
   class Configurator
-    def initialize(highline: HighLine.new, configure_file:,
-                   questions_section:, answers_file:)
+    def initialize(
+      highline: HighLine.new,
+      configure_file:,
+      questions_section:,
+      answers_file:,
+      use_readline: true
+    )
       @highline = highline
       @configure_file = configure_file
       @questions_section = questions_section
       @answers_file = answers_file
+      @use_readline = use_readline
     end
 
     def configure
@@ -46,7 +52,8 @@ module Metalware
     attr_reader :highline,
       :configure_file,
       :questions_section,
-      :answers_file
+      :answers_file,
+      :use_readline
 
     def questions
       @questions ||= Data.load(configure_file)[questions_section].
@@ -74,22 +81,35 @@ module Metalware
         properties: properties,
         configure_file: configure_file,
         questions_section: questions_section,
-        old_answer: old_answers[identifier]
+        old_answer: old_answers[identifier],
+        use_readline: use_readline
       )
     end
 
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string]
 
-      attr_reader :identifier, :question, :type, :choices,
-                  :default, :required
+      attr_reader :identifier,
+        :question,
+        :type,
+        :choices,
+        :default,
+        :required,
+        :use_readline
 
-      def initialize(identifier:, properties:, configure_file:,
-                     questions_section:, old_answer: nil)
+      def initialize(
+        identifier:,
+        properties:,
+        configure_file:,
+        questions_section:,
+        old_answer: nil,
+        use_readline:
+      )
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
         @required = !properties[:optional]
+        @use_readline = use_readline
 
         @type = type_for(
           properties[:type],
@@ -106,6 +126,8 @@ module Metalware
       def ask(highline)
         ask_method = "ask_#{type}_question"
         self.send(ask_method, highline) do |highline_question|
+          highline_question.readline = true if use_readline
+
           if default.present?
             highline_question.default = default
           elsif required
@@ -117,9 +139,7 @@ module Metalware
       private
 
       def ask_boolean_question(highline)
-        highline.agree(question)
-        # Cannot set default for boolean questions, so do not yield to passed
-        # block.
+        highline.agree(question + ' [yes/no]') { |q| yield q }
       end
 
       def ask_choice_question(highline, &block)
@@ -158,13 +178,17 @@ module Metalware
       def determine_default(question_default:, old_answer:)
         # XXX Remove validation/conversion here and do in earlier step for
         # validating `configure.yaml`? Similarly in `type_for` etc.
-        raw_default = old_answer.present? ? old_answer : question_default
+        raw_default = old_answer.nil? ? question_default : old_answer
         unless raw_default.nil?
           case type
           when :string
             raw_default.to_s
           when :integer
             raw_default.to_i
+          when :boolean
+            # Default for a boolean question needs to be set to the input
+            # HighLine's `agree` expects, i.e. 'yes' or 'no'.
+            raw_default ? 'yes' : 'no'
           else
             msg = "Unrecognized data type (#{type}) as a default"
             raise UnknownDataTypeError, msg
