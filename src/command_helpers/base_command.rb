@@ -68,9 +68,7 @@ module Metalware
       end
 
       def dependencies_hash
-        {
-          #repo: [], Array of files or true for base dir
-        }
+        {}
       end
 
       def enforce_dependencies
