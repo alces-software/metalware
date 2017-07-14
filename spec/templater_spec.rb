@@ -150,6 +150,28 @@ RSpec.describe Metalware::Templater do
           end
         end
       end
+
+      context 'when parsing recursive boolean values' do
+        let :template {
+          <<-EOF
+          <% if recursive_true_repo_value -%>
+          true worked
+          <% end %>
+          <% unless recursive_false_repo_value -%>
+          false worked
+          <% end %>
+          EOF
+        }
+
+        it 'renders them as booleans not strings' do
+          expected = <<-EOF
+          true worked
+          false worked
+          EOF
+
+          expect_renders({}, expected)
+        end
+      end
     end
 
     context 'when passed node not in genders file' do

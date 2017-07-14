@@ -93,12 +93,32 @@ module Metalware
       def parse_config_value(value, current_parsed_config)
         case value
         when String
-          parameters = create_template_parameters(current_parsed_config)
-          Renderer.replace_erb(value, parameters)
+          parse_string_config_value(value, current_parsed_config)
         when Hash
           value.map do |k,v|
             [k, parse_config_value(v, current_parsed_config)]
           end.to_h
+        else
+          value
+        end
+      end
+
+      def parse_string_config_value(value, config)
+        parameters = create_template_parameters(config)
+        rendered_value = Renderer.replace_erb(value, parameters)
+        convert_rendered_value(rendered_value)
+      end
+
+      def convert_rendered_value(value)
+        # Currently we just special case so rendered boolean strings are
+        # converted to booleans, so using recursive boolean values in templates
+        # works as expected; without this the wrong thing can silently happen
+        # as "false" is truthy. This is a bit ugly though.
+        case value
+        when 'true'
+          true
+        when 'false'
+          false
         else
           value
         end
