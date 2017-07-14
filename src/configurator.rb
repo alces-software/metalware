@@ -28,8 +28,12 @@ HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
 module Metalware
   class Configurator
-    def initialize(highline: HighLine.new, configure_file:,
-                   questions_section:, answers_file:)
+    def initialize(
+      highline: HighLine.new,
+      configure_file:,
+      questions_section:,
+      answers_file:
+    )
       @highline = highline
       @configure_file = configure_file
       @questions_section = questions_section
@@ -81,11 +85,20 @@ module Metalware
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string]
 
-      attr_reader :identifier, :question, :type, :choices,
-                  :default, :required
+      attr_reader :identifier,
+        :question,
+        :type,
+        :choices,
+        :default,
+        :required
 
-      def initialize(identifier:, properties:, configure_file:,
-                     questions_section:, old_answer: nil)
+      def initialize(
+        identifier:,
+        properties:,
+        configure_file:,
+        questions_section:,
+        old_answer: nil
+      )
         @identifier = identifier
         @question = properties[:question]
         @choices = properties[:choices]
