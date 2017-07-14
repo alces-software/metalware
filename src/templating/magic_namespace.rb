@@ -36,7 +36,16 @@ module Metalware
       end
 
       def answers
-        MissingParameterWrapper.new(node.answers, raise_on_missing: true)
+        # If we're templating for a particular node then we should be strict
+        # about accessing answers which don't exist, as this indicates a
+        # problem in the repo; otherwise (e.g. when rendering hosts or genders
+        # templates) we should not be strict, to avoid erroring as many answers
+        # may be unset.
+        if node.name.present?
+          MissingParameterWrapper.new(node.answers, raise_on_missing: true)
+        else
+          Hashie::Mash.new
+        end
       end
 
       def genders

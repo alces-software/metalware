@@ -38,6 +38,7 @@ class FileSystem
   # invoked when `FileSystem.test` is run with that instance. If these were run
   # directly outside of a `test` block then the real file system would be used.
   delegate :mkdir_p, to: FileUtils
+  delegate :dump, to: Metalware::Data
 
   # Perform optional configuration of the `FileSystem` prior to a `test`. The
   # yielded and returned `FileSystemConfigurator` caches any unknown method

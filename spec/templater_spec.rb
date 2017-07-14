@@ -206,6 +206,16 @@ RSpec.describe Metalware::Templater do
           expect{ answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
         end
       end
+
+      context 'when no node passed' do
+        let :templater {
+          Metalware::Templater.new(config)
+        }
+
+        it 'returns nil for all values in answers namespace' do
+          expect(answers.anything).to be nil
+        end
+      end
     end
 
     context 'with cache files present' do
