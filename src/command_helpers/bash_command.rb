@@ -27,7 +27,7 @@ require 'constants'
 
 module Metalware
   module CommandHelpers
-    class BashCommand < CommandHelpers::BaseCommand
+    class BashCommand < BaseCommand
       private
       def setup(args, options)
         @command = ARGV[0]

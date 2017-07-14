@@ -6,6 +6,7 @@ module MinimalRepo
       '.git',
       'config',
       'hosts',
+      'genders',
       'dhcp',
       'files',
       'pxelinux',
@@ -16,6 +17,7 @@ module MinimalRepo
       'pxelinux/default': "<%= alces.firstboot ? 'FIRSTBOOT' : 'NOT_FIRSTBOOT' %>\n",
       'kickstart/default': '',
       'hosts/default': '',
+      'genders/default': '',
       'dhcp/default': '',
       'config/domain.yaml': '',
       'configure.yaml': YAML.dump({

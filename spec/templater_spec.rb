@@ -27,8 +27,6 @@ require 'spec_utils'
 require 'node'
 require 'filesystem'
 
-TEST_TEMPLATE_PATH = '/fixtures/template.erb'
-UNSET_PARAMETER_TEMPLATE_PATH = '/fixtures/unset_parameter_template.erb'
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
@@ -39,18 +37,33 @@ RSpec.describe Metalware::Templater do
 
   let :filesystem {
     FileSystem.setup do |fs|
-      # XXX be a bit more fine-grained with the fixtures we load; only load
-      # what we need in these tests rather than everything.
-      fs.with_fixtures('/', at: '/fixtures')
+      fs.write template_path, template.strip_heredoc
     end
   }
+
+  # XXX Could adjust tests using this to only use template with parts they
+  # need, to make them simpler and less dependent on changes to this or each
+  # other.
+  let :template {
+    <<-EOF
+    This is a test template
+    some_passed_value: <%= some_passed_value %>
+    some_repo_value: <%= some_repo_value %>
+    erb_repo_value: <%= erb_repo_value %>
+    very_recursive_erb_repo_value: <%= very_recursive_erb_repo_value %>
+    nested.repo_value: <%= nested ? nested.repo_value : nil %>
+    alces.index: <%= alces.index %>
+    EOF
+  }
+
+  let :template_path { '/template' }
 
   def expect_renders(template_parameters, expected)
     filesystem.test do |fs|
       # Strip trailing spaces from rendered output to make comparisons less
       # brittle.
       rendered = Metalware::Templater.render(
-        config, TEST_TEMPLATE_PATH, template_parameters
+        config, template_path, template_parameters
       ).gsub(/\s+\n/, "\n")
 
       expect(rendered).to eq(expected.strip_heredoc)
@@ -124,11 +137,39 @@ RSpec.describe Metalware::Templater do
         end
       end
 
-      it 'raises if attempt to access a property of an unset parameter' do
-        filesystem.test do
-          expect {
-            Metalware::Templater.render(config, UNSET_PARAMETER_TEMPLATE_PATH, {})
-          }.to raise_error Metalware::UnsetParameterAccessError
+      context 'when template uses property of unset parameter' do
+        let :template {
+          'unset.parameter: <%= unset.parameter %>'
+        }
+
+        it 'raises' do
+          filesystem.test do
+            expect {
+              Metalware::Templater.render(config, template_path, {})
+            }.to raise_error Metalware::UnsetParameterAccessError
+          end
+        end
+      end
+
+      context 'when parsing recursive boolean values' do
+        let :template {
+          <<-EOF
+          <% if recursive_true_repo_value -%>
+          true worked
+          <% end %>
+          <% unless recursive_false_repo_value -%>
+          false worked
+          <% end %>
+          EOF
+        }
+
+        it 'renders them as booleans not strings' do
+          expected = <<-EOF
+          true worked
+          false worked
+          EOF
+
+          expect_renders({}, expected)
         end
       end
     end
@@ -139,7 +180,7 @@ RSpec.describe Metalware::Templater do
           expect {
             Metalware::Templater.render(
               config,
-              TEST_TEMPLATE_PATH,
+              template_path,
               nodename: 'not_in_genders_node01'
             )
           }.to_not raise_error
@@ -180,22 +221,41 @@ RSpec.describe Metalware::Templater do
       SpecUtils.use_mock_genders(self)
     end
 
-    context 'when node has answers' do
-      # XXX May be possible to combine this with other passed parameter test
-      # below? They rely on file system however and this relies on a mocked
-      # Node object.
-      it 'provides access to the answers' do
-        expect(Metalware::Node).to receive(:new).and_return(
-          OpenStruct.new({
-            answers: 'testnode01_answers',
-            raw_config: {}
-          })
-        )
+    # XXX May be possible to combine these with other passed parameter testsgqic
+    # below?
+    describe 'answers' do
+      before :each do
+        filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml', {
+          some_question: 'some_answer'
+        }
+      end
 
-        templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
+      let :answers { templater.config.alces.answers }
 
-        expect(templater.config.alces.answers).to be_a(Metalware::Templating::MissingParameterWrapper)
-        expect(templater.config.alces.answers.inspect).to eq('testnode01_answers')
+      context 'when node passed' do
+        let :templater {
+          Metalware::Templater.new(config, {nodename: 'testnode01'})
+        }
+
+        it 'can access answers for the node' do
+          filesystem.test do
+            expect(answers.some_question).to eq('some_answer')
+          end
+        end
+
+        it "raises if attempt to access an answer which isn't present" do
+          expect{ answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
+        end
+      end
+
+      context 'when no node passed' do
+        let :templater {
+          Metalware::Templater.new(config)
+        }
+
+        it 'returns nil for all values in answers namespace' do
+          expect(answers.anything).to be nil
+        end
       end
     end
 

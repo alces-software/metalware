@@ -5,9 +5,11 @@ require 'constants'
 
 module Metalware
   module CommandHelpers
-    class ConfigureCommand < CommandHelpers::BaseCommand
+    class ConfigureCommand < BaseCommand
       def run
         configurator.configure
+        custom_configuration
+        render_domain_templates
       end
 
       def handle_interrupt(_e)
@@ -15,6 +17,11 @@ module Metalware
       end
 
       protected
+
+      def custom_configuration
+        # Custom additional configuration for a `configure` command, if any,
+        # should be performed in this method in subclasses.
+      end
 
       def answers_file
         raise NotImplementedError
@@ -39,6 +46,31 @@ module Metalware
 
       def questions_section
         self.class.name.split('::')[-1].downcase.to_sym
+      end
+
+      # Render the templates which are relevant across the whole domain; these
+      # are re-rendered at the end of every configure command as the data used
+      # in the templates could change with each command.
+      def render_domain_templates
+        render_template(genders_template, to: Constants::GENDERS_PATH)
+        render_template(hosts_template, to: Constants::HOSTS_PATH)
+      end
+
+      def render_template(template, to:)
+        Templater.render_to_file(config, template, to)
+      end
+
+      def genders_template
+        template_path('genders')
+      end
+
+      def hosts_template
+        template_path('hosts')
+      end
+
+      def template_path(template_type)
+        # We currently always/only render the 'default' templates.
+        File.join(config.repo_path, template_type, 'default')
       end
     end
   end
