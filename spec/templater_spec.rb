@@ -180,22 +180,31 @@ RSpec.describe Metalware::Templater do
       SpecUtils.use_mock_genders(self)
     end
 
-    context 'when node has answers' do
-      # XXX May be possible to combine this with other passed parameter test
-      # below? They rely on file system however and this relies on a mocked
-      # Node object.
-      it 'provides access to the answers' do
-        expect(Metalware::Node).to receive(:new).and_return(
-          OpenStruct.new({
-            answers: 'testnode01_answers',
-            raw_config: {}
-          })
-        )
+    # XXX May be possible to combine these with other passed parameter testsgqic
+    # below?
+    describe 'answers' do
+      before :each do
+        filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml', {
+          some_question: 'some_answer'
+        }
+      end
 
-        templater = Metalware::Templater.new(config, {nodename: 'testnode01'})
+      let :answers { templater.config.alces.answers }
 
-        expect(templater.config.alces.answers).to be_a(Metalware::Templating::MissingParameterWrapper)
-        expect(templater.config.alces.answers.inspect).to eq('testnode01_answers')
+      context 'when node passed' do
+        let :templater {
+          Metalware::Templater.new(config, {nodename: 'testnode01'})
+        }
+
+        it 'can access answers for the node' do
+          filesystem.test do
+            expect(answers.some_question).to eq('some_answer')
+          end
+        end
+
+        it "raises if attempt to access an answer which isn't present" do
+          expect{ answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
+        end
       end
     end
 
