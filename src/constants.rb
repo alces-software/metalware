@@ -36,6 +36,7 @@ module Metalware
 
     NODEATTR_COMMAND = 'nodeattr'
 
+    GENDERS_PATH = File.join(METALWARE_CONFIGS_PATH, 'genders')
     HOSTS_PATH = '/etc/hosts'
   end
 end
