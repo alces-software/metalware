@@ -27,8 +27,6 @@ require 'spec_utils'
 require 'node'
 require 'filesystem'
 
-TEST_TEMPLATE_PATH = '/fixtures/template.erb'
-UNSET_PARAMETER_TEMPLATE_PATH = '/fixtures/unset_parameter_template.erb'
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
@@ -39,18 +37,33 @@ RSpec.describe Metalware::Templater do
 
   let :filesystem {
     FileSystem.setup do |fs|
-      # XXX be a bit more fine-grained with the fixtures we load; only load
-      # what we need in these tests rather than everything.
-      fs.with_fixtures('/', at: '/fixtures')
+      fs.write template_path, template.strip_heredoc
     end
   }
+
+  # XXX Could adjust tests using this to only use template with parts they
+  # need, to make them simpler and less dependent on changes to this or each
+  # other.
+  let :template {
+    <<-EOF
+    This is a test template
+    some_passed_value: <%= some_passed_value %>
+    some_repo_value: <%= some_repo_value %>
+    erb_repo_value: <%= erb_repo_value %>
+    very_recursive_erb_repo_value: <%= very_recursive_erb_repo_value %>
+    nested.repo_value: <%= nested ? nested.repo_value : nil %>
+    alces.index: <%= alces.index %>
+    EOF
+  }
+
+  let :template_path { '/template' }
 
   def expect_renders(template_parameters, expected)
     filesystem.test do |fs|
       # Strip trailing spaces from rendered output to make comparisons less
       # brittle.
       rendered = Metalware::Templater.render(
-        config, TEST_TEMPLATE_PATH, template_parameters
+        config, template_path, template_parameters
       ).gsub(/\s+\n/, "\n")
 
       expect(rendered).to eq(expected.strip_heredoc)
@@ -124,11 +137,17 @@ RSpec.describe Metalware::Templater do
         end
       end
 
-      it 'raises if attempt to access a property of an unset parameter' do
-        filesystem.test do
-          expect {
-            Metalware::Templater.render(config, UNSET_PARAMETER_TEMPLATE_PATH, {})
-          }.to raise_error Metalware::UnsetParameterAccessError
+      context 'when template uses property of unset parameter' do
+        let :template {
+          'unset.parameter: <%= unset.parameter %>'
+        }
+
+        it 'raises' do
+          filesystem.test do
+            expect {
+              Metalware::Templater.render(config, template_path, {})
+            }.to raise_error Metalware::UnsetParameterAccessError
+          end
         end
       end
     end
@@ -139,7 +158,7 @@ RSpec.describe Metalware::Templater do
           expect {
             Metalware::Templater.render(
               config,
-              TEST_TEMPLATE_PATH,
+              template_path,
               nodename: 'not_in_genders_node01'
             )
           }.to_not raise_error
