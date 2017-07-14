@@ -259,16 +259,28 @@ RSpec.describe Metalware::Configurator do
             question: 'Integer?',
             type: 'integer',
             default: 10
-          }
+          },
+          true_boolean_q: {
+            question: 'Boolean?',
+            type: 'boolean',
+            default: true
+          },
+          false_boolean_q: {
+            question: 'More boolean?',
+            type: 'boolean',
+            default: false
+          },
         }
       })
 
-      configure_with_answers([''] * 3)
+      configure_with_answers([''] * 5)
 
       expect(answers).to eq({
         string_q: str_ans,
         string_erb: erb_ans,
         integer_q: 10,
+        true_boolean_q: true,
+        false_boolean_q: false
       })
     end
 
@@ -283,14 +295,26 @@ RSpec.describe Metalware::Configurator do
             question: 'Integer?',
             type: 'integer',
             default: 10
-          }
+          },
+          false_saved_boolean_q: {
+            question: 'Boolean?',
+            type: 'boolean',
+            default: true
+          },
+          true_saved_boolean_q: {
+            question: 'More boolean?',
+            type: 'boolean',
+            default: false
+          },
         }
       })
 
       old_answers = {
         string_q: "CORRECT",
         integer_q: -100,
-        should_not_see_me: "OHHH SNAP"
+        false_saved_boolean_q: false,
+        true_saved_boolean_q: true,
+        should_not_see_me: "OHHH SNAP",
       }
       new_answers = old_answers.dup.tap { |h| h.delete(:should_not_see_me) }
 
@@ -301,7 +325,7 @@ RSpec.describe Metalware::Configurator do
       end
       expect(first_run_configure.send(:old_answers)).to eq(old_answers)
 
-      configure_with_answers([''] * 2)
+      configure_with_answers([''] * 4)
       expect(answers).to eq(new_answers)
     end
 
