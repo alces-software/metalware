@@ -167,7 +167,9 @@ RSpec.describe Metalware::Configurator do
       expect(highline).to receive(
         :agree
       ).with(
-       'Should this cluster be awesome?'
+        # Note that an indication of what the input should be has been appended
+        # to the asked question.
+       'Should this cluster be awesome? [yes/no]'
       ).and_return(
         true
       )

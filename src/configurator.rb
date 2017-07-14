@@ -139,7 +139,7 @@ module Metalware
       private
 
       def ask_boolean_question(highline)
-        highline.agree(question)
+        highline.agree(question + ' [yes/no]')
         # Cannot set default for boolean questions, so do not yield to passed
         # block.
       end
