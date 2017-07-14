@@ -78,6 +78,11 @@ RSpec.describe Metalware::Configurator do
     end
   end
 
+  def configure_with_answers(answers)
+    # Each answer must be entered followed by a newline to terminate it.
+    configure_with_input(answers.join("\n") + "\n")
+  end
+
   describe '#configure' do
     it 'asks questions with type `string`' do
       define_questions({
@@ -293,7 +298,7 @@ RSpec.describe Metalware::Configurator do
         }
       })
 
-      configure_with_input("\n\n\n\n\n")
+      configure_with_answers([''] * 3)
 
       expect(answers).to eq({
         string_q: str_ans,
@@ -331,7 +336,7 @@ RSpec.describe Metalware::Configurator do
       end
       expect(first_run_configure.send(:old_answers)).to eq(old_answers)
 
-      configure_with_input("\n\n\n\n\n\n")
+      configure_with_answers([''] * 2)
       expect(answers).to eq(new_answers)
     end
 
@@ -349,7 +354,7 @@ RSpec.describe Metalware::Configurator do
         begin
           $stderr = Tempfile.new
           STDERR = $stderr
-          configure_with_input("\n\n")
+          configure_with_answers([''] * 2)
         ensure
           STDERR = old_stderr
           $stderr = STDERR
@@ -378,7 +383,7 @@ RSpec.describe Metalware::Configurator do
         string_q: ''
       }
 
-      configure_with_input("\n")
+      configure_with_answers([''])
       expect(answers).to eq(expected)
     end
   end
