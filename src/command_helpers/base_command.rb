@@ -52,13 +52,6 @@ module Metalware
         enforce_dependencies
       end
 
-      def validate_repo_exists_if_required
-        if requires_repo? && !repo.exists?
-          raise NoRepoError,
-            "'#{command_name}' requires a repo to operate on; please run 'metal repo use' first"
-        end
-      end
-
       def setup_config(options)
         cli_options = {
           strict: !!options.strict,
