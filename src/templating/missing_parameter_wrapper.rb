@@ -26,12 +26,12 @@ module Metalware
         send(a)
       end
 
-      def method_missing(s, *a, &b)
-        value = @wrapped_obj.send(s)
-        if value.nil? && ! @missing_tags.include?(s)
-          msg = "Unset template parameter: #{s}"
-          raise(MissingParameterError, msg) if @raise_on_missing
-          @missing_tags.push(s)
+      def method_missing(method, *args, &block)
+        value = @wrapped_obj.send(method, *args, &block)
+        if value.nil? && ! @missing_tags.include?(method)
+          msg = "Unset template parameter: #{method}"
+          raise MissingParameterError, msg if @raise_on_missing
+          @missing_tags.push(method)
           MetalLog.warn msg
         end
         value
