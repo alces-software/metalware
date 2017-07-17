@@ -31,8 +31,8 @@ module Metalware
       # determined by whether they are supplied.
 
       # NOTE: Supported types in error.yaml message must be updated manually
-      SupportedTypes = ["string", "integer", "boolean", "choice"].freeze
-      ErrorFile = File.join(File.dirname(__FILE__), "errors.yaml").freeze
+      SUPPORTED_TYPES = ["string", "integer", "boolean", "choice"].freeze
+      ERROR_FILE = File.join(File.dirname(__FILE__), "errors.yaml").freeze
 
       def initialize(file)
         @yaml = Data.load(file)
@@ -60,11 +60,11 @@ module Metalware
 
       QuestionSchema = Dry::Validation.Schema do
         configure do
-          config.messages_file = ErrorFile
+          config.messages_file = ERROR_FILE
           config.namespace = :configure_question
 
           def question_type?(value)
-            SupportedTypes.include?(value)
+            SUPPORTED_TYPES.include?(value)
           end
         end
 
@@ -99,7 +99,7 @@ module Metalware
 
       ConfigureSchema = Dry::Validation.Schema do
         configure do
-          config.messages_file = ErrorFile
+          config.messages_file = ERROR_FILE
           config.namespace = :configure
         end
 
