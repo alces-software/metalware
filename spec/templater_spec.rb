@@ -244,7 +244,9 @@ RSpec.describe Metalware::Templater do
         end
 
         it "raises if attempt to access an answer which isn't present" do
-          expect{ answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
+          filesystem.test do
+            expect{ answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
+          end
         end
       end
 
@@ -254,7 +256,9 @@ RSpec.describe Metalware::Templater do
         }
 
         it 'returns nil for all values in answers namespace' do
-          expect(answers.anything).to be nil
+          filesystem.test do
+            expect(answers.anything).to be nil
+          end
         end
       end
     end
