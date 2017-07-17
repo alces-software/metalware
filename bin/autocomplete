@@ -70,7 +70,7 @@ class AutoComplete
   end
 
   def current_hash
-    @current_hash ||= lambda {
+    @current_hash ||= lambda do
       cmd_hash = @yaml['commands']
       @complete.each_with_index do |cmd, idx|
         new_hash = if cmd_hash.key?('subcommands')
@@ -87,7 +87,7 @@ class AutoComplete
         cmd_hash = new_hash
       end
       cmd_hash
-    }.call
+    end.call
   end
 
   def add_return_values(values)
