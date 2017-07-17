@@ -20,21 +20,23 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'exceptions'
-require 'dependencies'
+require 'dependency'
 require 'config'
 require 'constants'
+require 'validator/configure'
+require 'ostruct'
 
 require 'spec_helper'
 require 'fileutils'
 require 'filesystem'
 
-RSpec.describe Metalware::Dependencies do
+RSpec.describe Metalware::Dependency do
   let :config { Metalware::Config.new }
   let :filesystem { FileSystem.setup }
 
   def enforce_dependencies(dependencies_hash = {})
     filesystem.test do |fs|
-      Metalware::Dependencies.new(config, "test", dependencies_hash).enforce
+      Metalware::Dependency.new(config, "test", dependencies_hash).enforce
     end
   end
 
@@ -93,7 +95,7 @@ RSpec.describe Metalware::Dependencies do
     end
   end
 
-  context 'with configure dependencies' do
+  context 'with blank configure.yaml dependencies' do
     before :each do
       filesystem.with_repo_fixtures('repo')
     end
@@ -109,6 +111,7 @@ RSpec.describe Metalware::Dependencies do
 
     context 'when answer files exist' do
       before :each do
+        filesystem.with_minimal_repo
         filesystem.with_answer_fixtures('answers/basic_structure')
       end
 

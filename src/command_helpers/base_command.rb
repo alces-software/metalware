@@ -22,7 +22,7 @@
 
 require 'metal_log'
 require 'config'
-require 'dependencies'
+require 'dependency'
 require 'exceptions'
 
 module Metalware
@@ -49,7 +49,7 @@ module Metalware
       end
 
       def post_setup
-        enforce_dependencies
+        enforce_dependency
       end
 
       def setup_config(options)
@@ -60,19 +60,22 @@ module Metalware
         @config = Config.new(options.config, cli_options)
       end
 
-      def dependencies_hash
+      def dependency_hash
         {}
       end
 
-      def enforce_dependencies
-        Dependencies.new(config, command_name, dependencies_hash).enforce
+      def enforce_dependency
+        Dependency.new(config, command_name, dependency_hash).enforce
       end
 
       def command_name
-        class_name_parts = self.class.name.split('::')
         parts_without_namespace = \
           class_name_parts.slice(2, class_name_parts.length)
-        parts_without_namespace.join(' ').downcase.to_sym
+        parts_without_namespace.join(' ').to_sym
+      end
+
+      def class_name_parts
+        self.class.name.split('::').map(&:downcase).map(&:to_sym)
       end
 
       def log_command

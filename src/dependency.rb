@@ -21,17 +21,18 @@
 #==============================================================================
 require 'exceptions'
 require 'constants'
+require 'validator/configure'
 
 module Metalware
-  class Dependencies
-    def initialize(metal_config, command_input, dep_hash = {})
+  class Dependency
+    def initialize(metal_config, command_input, dependency_hash = {})
       @config = metal_config
-      @dep_hash = dep_hash
+      @dependency_hash = dependency_hash
       @command = command_input
     end
 
     def enforce
-      @dep_hash.each { |dep, values|
+      @dependency_hash.each { |dep, values|
         unless values.is_a?(Array)
           msg = "Dependency values must be an array, check: #{dep}"
           raise DependencyInternalError, msg
@@ -46,7 +47,7 @@ module Metalware
     attr_reader :config, :command
 
     def validate_dependency_value(dep, value)
-      unless file_exists?(dep, value)
+      unless valid_file?(dep, value)
         raise DependencyFailure, get_value_failure_message(dep, value)
       end
     end
@@ -54,7 +55,7 @@ module Metalware
     def validate_repo
       @validated_repo ||= begin
         msg = "'#{command}' requires a repo. Please run 'metal repo use'"
-        raise DependencyFailure, msg unless file_exists?(:repo, '.git', true)
+        raise DependencyFailure, msg unless valid_file?(:repo, '.git', true)
         true # Sets the @validate_repo value so it only runs once
       end
     end
@@ -62,11 +63,14 @@ module Metalware
     def validate_configure
       @validate_configure ||= begin
         validate_repo
-        unless file_exists?(:repo, "configure.yaml")
-          raise(DependencyFailure,
-                get_value_failure_message(:repo, "configure.yaml"))
+        valid_configure_yaml = valid_file?(:repo, "configure.yaml") { |path|
+          Validator::Configure.new(path).validate.success?
+        }
+        unless valid_configure_yaml
+          msg = "'#{command}' requires a valid 'repo/configure.yaml' file"
+          raise(DependencyFailure, msg)
         end
-        unless file_exists?(:configure , "", true)
+        unless valid_file?(:configure , "", true)
           msg = "Could not locate answer files: #{config.answer_files_path}"
           raise DependencyFailure, msg
         end
@@ -74,7 +78,7 @@ module Metalware
       end
     end
 
-    def file_exists?(dep, value, validate_directory = false)
+    def valid_file?(dep, value, validate_directory = false, &block)
       path = begin
         case dep
         when :repo
@@ -89,8 +93,10 @@ module Metalware
 
       if validate_directory
         Dir.exists?(path)
+      elsif File.file?(path)
+        block.nil? ? true : !!(yield path)
       else
-        File.file?(path)
+        false
       end
     end
 

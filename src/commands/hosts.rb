@@ -43,7 +43,7 @@ module Metalware
         add_nodes_to_hosts
       end
 
-      def dependencies_hash
+      def dependency_hash
         {
           repo: ["hosts/#{@options.template}"]
         }

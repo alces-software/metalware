@@ -29,7 +29,7 @@ module Metalware
 
       private
 
-      def dependencies_hash
+      def dependency_hash
         {
           repo: ["configure.yaml"],
           configure: []
@@ -45,7 +45,7 @@ module Metalware
       end
 
       def questions_section
-        self.class.name.split('::')[-1].downcase.to_sym
+        class_name_parts.last
       end
 
       # Render the templates which are relevant across the whole domain; these
