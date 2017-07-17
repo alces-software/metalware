@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,7 +28,6 @@ require 'output'
 require 'templater'
 require 'system_command'
 
-
 module Metalware
   module Commands
     class Dhcp < CommandHelpers::BaseCommand
@@ -38,7 +39,7 @@ module Metalware
 
       private
 
-      def setup(args, options)
+      def setup(_args, options)
         @options = options
       end
 
@@ -50,7 +51,7 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["dhcp/#{@options.template}"]
+          repo: ["dhcp/#{@options.template}"],
         }
       end
 

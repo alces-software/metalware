@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -29,15 +31,16 @@ module Metalware
   module CommandHelpers
     class BashCommand < BaseCommand
       private
-      def setup(args, options)
+
+      def setup(_args, _options)
         @command = ARGV[0]
         @cli_input = ARGV[1..(ARGV.length - 1)]
       end
 
       def run
         script = File.join(Constants::METALWARE_INSTALL_PATH,
-                           "libexec",
-                           "#{@command}")
+                           'libexec',
+                           @command.to_s)
         MetalLog.info "Running: #{script}"
         MetalLog.info "Inputs: #{@cli_input}"
         exec(script, *@cli_input)

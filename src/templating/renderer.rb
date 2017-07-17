@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 module Metalware
   module Templating
     module Renderer
@@ -6,14 +8,14 @@ module Metalware
         # Replace all ERB in given template, generating the binding to use from
         # the given parameters.
         def replace_erb(template, template_parameters)
-          parameters_binding = template_parameters.instance_eval {binding}
+          parameters_binding = template_parameters.instance_eval { binding }
           render_erb_template(template, parameters_binding)
         rescue NoMethodError => e
           # May be useful to include the name of the unset parameter in this error,
           # however this is tricky as by the time we attempt to access a method on
           # it the unset parameter is just `nil` as far as we can see here.
           raise UnsetParameterAccessError,
-            "Attempted to call method `#{e.name}` of unset template parameter"
+                "Attempted to call method `#{e.name}` of unset template parameter"
         end
 
         private

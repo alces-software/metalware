@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -32,14 +34,14 @@ module Metalware
     end
 
     def enforce
-      @dependency_hash.each { |dep, values|
+      @dependency_hash.each do |dep, values|
         unless values.is_a?(Array)
           msg = "Dependency values must be an array, check: #{dep}"
           raise DependencyInternalError, msg
         end
         send(:"validate_#{dep}")
         values.each { |value| validate_dependency_value(dep, value) }
-      }
+      end
     end
 
     private
@@ -63,14 +65,14 @@ module Metalware
     def validate_configure
       @validate_configure ||= begin
         validate_repo
-        valid_configure_yaml = valid_file?(:repo, "configure.yaml") { |path|
+        valid_configure_yaml = valid_file?(:repo, 'configure.yaml') do |path|
           Validator::Configure.new(path).validate.success?
-        }
+        end
         unless valid_configure_yaml
           msg = "'#{command}' requires a valid 'repo/configure.yaml' file"
           raise(DependencyFailure, msg)
         end
-        unless valid_file?(:configure , "", true)
+        unless valid_file?(:configure, '', true)
           msg = "Could not locate answer files: #{config.answer_files_path}"
           raise DependencyFailure, msg
         end
@@ -92,7 +94,7 @@ module Metalware
       end
 
       if validate_directory
-        Dir.exists?(path)
+        Dir.exist?(path)
       elsif File.file?(path)
         block.nil? ? true : !!(yield path)
       else
@@ -106,8 +108,8 @@ module Metalware
       when :repo
         msg = "Could not find repo file: #{value}"
       when :configure
-        cmd = File.basename(value, ".yaml")
-        cmd = "group #{cmd}" unless cmd == "domain"
+        cmd = File.basename(value, '.yaml')
+        cmd = "group #{cmd}" unless cmd == 'domain'
         msg = "Could not locate required answer file: #{value}. Please run " \
               "'metal configure #{cmd}'"
       end

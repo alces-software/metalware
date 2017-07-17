@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -33,11 +35,11 @@ module Metalware
   class Node
     attr_reader :name
     delegate :raw_config,
-      :answers,
-      # XXX `Node#configs` does not actually need to be public, it is only used
-      # in the `Node` tests
-      :configs,
-      to: :templating_configuration
+             :answers,
+             # XXX `Node#configs` does not actually need to be public, it is only used
+             # in the `Node` tests
+             :configs,
+             to: :templating_configuration
 
     def initialize(metalware_config, name)
       @metalware_config = metalware_config
@@ -79,12 +81,11 @@ module Metalware
     # XXX this may be better living in `Templating::Configuration`? `configs`
     # and `load_config` could then be private.
     def build_files
-      files_memo = Hash.new {|k,v| k[v] = []}
-      configs.reduce(files_memo) do |files, config_name|
+      files_memo = Hash.new { |k, v| k[v] = [] }
+      configs.each_with_object(files_memo) do |config_name, files|
         config = templating_configuration.load_config(config_name)
         new_files = config[:files]
         merge_in_files!(files, new_files)
-        files
       end
     end
 
@@ -111,8 +112,8 @@ module Metalware
       if primary_group_index
         primary_group_index
       else
-        error = "Cannot get 'group_index', the primary group " +
-          "'#{primary_group}' for this node (#{name}) has not been configured"
+        error = "Cannot get 'group_index', the primary group " \
+                "'#{primary_group}' for this node (#{name}) has not been configured"
         raise UnconfiguredGroupError, error
       end
     end
@@ -139,17 +140,15 @@ module Metalware
     end
 
     def merge_in_files!(existing_files, new_files)
-      if new_files
-        new_files.each do |namespace, file_identifiers|
-          file_identifiers.each do |file_identifier|
-            replace_file_with_same_basename!(existing_files[namespace], file_identifier)
-          end
+      new_files&.each do |namespace, file_identifiers|
+        file_identifiers.each do |file_identifier|
+          replace_file_with_same_basename!(existing_files[namespace], file_identifier)
         end
       end
     end
 
     def replace_file_with_same_basename!(files_namespace, file_identifier)
-      files_namespace.reject! {|f| same_basename?(file_identifier, f)}
+      files_namespace.reject! { |f| same_basename?(file_identifier, f) }
       files_namespace << file_identifier
       files_namespace.sort! # Sort for consistent ordering.
     end

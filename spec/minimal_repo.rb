@@ -1,7 +1,8 @@
 
+# frozen_string_literal: true
+
 module MinimalRepo
   class << self
-
     DIRECTORIES = [
       '.git',
       'config',
@@ -11,7 +12,7 @@ module MinimalRepo
       'files',
       'pxelinux',
       'kickstart',
-    ]
+    ].freeze
 
     FILES = {
       'pxelinux/default': "<%= alces.firstboot ? 'FIRSTBOOT' : 'NOT_FIRSTBOOT' %>\n",
@@ -20,13 +21,11 @@ module MinimalRepo
       'genders/default': '',
       'dhcp/default': '',
       'config/domain.yaml': '',
-      'configure.yaml': YAML.dump({
-        questions: {},
-        domain: {},
-        group: {},
-        node: {},
-      })
-    }
+      'configure.yaml': YAML.dump(questions: {},
+                                  domain: {},
+                                  group: {},
+                                  node: {}),
+    }.freeze
 
     def create_at(path)
       create_directories_at(path)
@@ -48,6 +47,5 @@ module MinimalRepo
         File.write(file_path, content)
       end
     end
-
   end
 end

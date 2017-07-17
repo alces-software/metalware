@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -31,20 +33,20 @@ TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
 RSpec.describe Metalware::Templater do
-  let :config {
+  let :config do
     Metalware::Config.new
-  }
+  end
 
-  let :filesystem {
+  let :filesystem do
     FileSystem.setup do |fs|
       fs.write template_path, template.strip_heredoc
     end
-  }
+  end
 
   # XXX Could adjust tests using this to only use template with parts they
   # need, to make them simpler and less dependent on changes to this or each
   # other.
-  let :template {
+  let :template do
     <<-EOF
     This is a test template
     some_passed_value: <%= some_passed_value %>
@@ -54,12 +56,12 @@ RSpec.describe Metalware::Templater do
     nested.repo_value: <%= nested ? nested.repo_value : nil %>
     alces.index: <%= alces.index %>
     EOF
-  }
+  end
 
   let :template_path { '/template' }
 
   def expect_renders(template_parameters, expected)
-    filesystem.test do |fs|
+    filesystem.test do |_fs|
       # Strip trailing spaces from rendered output to make comparisons less
       # brittle.
       rendered = Metalware::Templater.render(
@@ -91,9 +93,9 @@ RSpec.describe Metalware::Templater do
       end
 
       it 'renders template with extra passed parameters' do
-        template_parameters = ({
-          some_passed_value: 'my_value'
-        })
+        template_parameters = {
+          some_passed_value: 'my_value',
+        }
         expected = <<-EOF
         This is a test template
         some_passed_value: my_value
@@ -131,28 +133,28 @@ RSpec.describe Metalware::Templater do
         stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
 
         filesystem.test do
-          expect{
+          expect do
             Metalware::Templater.new(config)
-          }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
+          end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
         end
       end
 
       context 'when template uses property of unset parameter' do
-        let :template {
+        let :template do
           'unset.parameter: <%= unset.parameter %>'
-        }
+        end
 
         it 'raises' do
           filesystem.test do
-            expect {
+            expect do
               Metalware::Templater.render(config, template_path, {})
-            }.to raise_error Metalware::UnsetParameterAccessError
+            end.to raise_error Metalware::UnsetParameterAccessError
           end
         end
       end
 
       context 'when parsing recursive boolean values' do
-        let :template {
+        let :template do
           <<-EOF
           <% if recursive_true_repo_value -%>
           true worked
@@ -161,7 +163,7 @@ RSpec.describe Metalware::Templater do
           false worked
           <% end %>
           EOF
-        }
+        end
 
         it 'renders them as booleans not strings' do
           expected = <<-EOF
@@ -177,13 +179,13 @@ RSpec.describe Metalware::Templater do
     context 'when passed node not in genders file' do
       it 'does not raise error' do
         filesystem.test do
-          expect {
+          expect do
             Metalware::Templater.render(
               config,
               template_path,
               nodename: 'not_in_genders_node01'
             )
-          }.to_not raise_error
+          end.to_not raise_error
         end
       end
     end
@@ -210,11 +212,11 @@ RSpec.describe Metalware::Templater do
       expect(genders_config.non_existent).to eq([])
     end
 
-    let :filesystem {
+    let :filesystem do
       FileSystem.setup do |fs|
         fs.with_repo_fixtures 'repo'
       end
-    }
+    end
 
     before do
       SpecUtils.use_mock_determine_hostip_script(self)
@@ -225,17 +227,16 @@ RSpec.describe Metalware::Templater do
     # below?
     describe 'answers' do
       before :each do
-        filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml', {
-          some_question: 'some_answer'
-        }
+        filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml',
+                        some_question: 'some_answer'
       end
 
       let :answers { templater.config.alces.answers }
 
       context 'when node passed' do
-        let :templater {
-          Metalware::Templater.new(config, {nodename: 'testnode01'})
-        }
+        let :templater do
+          Metalware::Templater.new(config, nodename: 'testnode01')
+        end
 
         it 'can access answers for the node' do
           filesystem.test do
@@ -245,15 +246,15 @@ RSpec.describe Metalware::Templater do
 
         it "raises if attempt to access an answer which isn't present" do
           filesystem.test do
-            expect{ answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
+            expect { answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
           end
         end
       end
 
       context 'when no node passed' do
-        let :templater {
+        let :templater do
           Metalware::Templater.new(config)
-        }
+        end
 
         it 'returns nil for all values in answers namespace' do
           filesystem.test do
@@ -291,11 +292,9 @@ RSpec.describe Metalware::Templater do
             self, config: config, node_name: 'testnode03'
           )
 
-          templater = Metalware::Templater.new(config, {
-            nodename: 'testnode03',
-            firstboot: true,
-            files: build_files
-          })
+          templater = Metalware::Templater.new(config, nodename: 'testnode03',
+                                                       firstboot: true,
+                                                       files: build_files)
           magic_namespace = templater.config.alces
 
           expect(magic_namespace.index).to eq(2)
@@ -327,6 +326,5 @@ RSpec.describe Metalware::Templater do
         end
       end
     end
-
   end
 end

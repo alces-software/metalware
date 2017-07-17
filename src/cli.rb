@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 # See http://stackoverflow.com/questions/837123/adding-a-directory-to-load-path-ruby.
-$:.unshift File.dirname(__FILE__)
+$LOAD_PATH.unshift File.dirname(__FILE__)
 
 require 'rubygems'
 require 'bundler/setup'
@@ -43,7 +45,7 @@ module Metalware
       CliHelper::Parser.new(self).parse_commands
 
       def run!
-        ARGV.push "--help" if ARGV.empty?
+        ARGV.push '--help' if ARGV.empty?
         super
       end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -60,12 +62,12 @@ RSpec.describe '`metal build`' do
     sleep 0.6
   end
 
-  def run_command(command, &block)
-    Timeout::timeout 5 do
+  def run_command(command)
+    Timeout.timeout 5 do
       Open3.popen3 command do |stdin, stdout, stderr, thread|
         begin
           pid = thread.pid
-          block.call(stdin, stdout, stderr, pid)
+          yield(stdin, stdout, stderr, pid)
         rescue Exception => e
           begin
             stdout_data = read_io_stream(stdout)
@@ -81,7 +83,7 @@ RSpec.describe '`metal build`' do
   end
 
   def read_io_stream(stream)
-    max_bytes_to_read = 30000
+    max_bytes_to_read = 30_000
     stream.read_nonblock(max_bytes_to_read)
   rescue EOFError
     ''
@@ -111,7 +113,7 @@ RSpec.describe '`metal build`' do
   context 'for single node' do
     it 'works' do
       command = "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
-      run_command(command) do |stdin, stdout, stderr, pid|
+      run_command(command) do |_stdin, _stdout, _stderr, pid|
         wait_longer_than_build_poll
         expect(process_exists?(pid)).to be true
 
@@ -127,7 +129,7 @@ RSpec.describe '`metal build`' do
   context 'for gender group' do
     it 'works' do
       command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-      run_command(command) do |stdin, stdout, stderr, pid|
+      run_command(command) do |_stdin, _stdout, _stderr, pid|
         wait_longer_than_build_poll
         expect(process_exists?(pid)).to be true
 
@@ -161,41 +163,35 @@ RSpec.describe '`metal build`' do
       end
 
       def expect_permanent_pxelinux_rendered_for_testnode01
-        testnode01_pxelinux =  File.read(
+        testnode01_pxelinux = File.read(
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
-            nodename: 'testnode01', firstboot: false
-          })
+          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode01', firstboot: false)
         )
       end
 
       def expect_permanent_pxelinux_rendered_for_testnode02
-        testnode01_pxelinux =  File.read(
+        testnode01_pxelinux = File.read(
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
-            nodename: 'testnode02', firstboot: false
-          })
+          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode02', firstboot: false)
         )
       end
 
       def expect_firstboot_pxelinux_rendered_for_testnode02
-        testnode01_pxelinux =  File.read(
+        testnode01_pxelinux = File.read(
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, {
-            nodename: 'testnode02', firstboot: true
-          })
+          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode02', firstboot: true)
         )
       end
 
       it 'exits on second interrupt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |stdin, stdout, stderr, pid|
+        run_command(command) do |_stdin, _stdout, _stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
           wait_longer_than_build_poll
           expect(process_exists?(pid)).to be true
@@ -211,7 +207,7 @@ RSpec.describe '`metal build`' do
 
       it 'handles "yes" to interrupt prompt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |stdin, stdout, stderr, pid|
+        run_command(command) do |stdin, _stdout, _stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
           wait_longer_than_build_poll
           expect(process_exists?(pid)).to be true
@@ -230,7 +226,7 @@ RSpec.describe '`metal build`' do
 
       it 'handles "no" to interrupt prompt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |stdin, stdout, stderr, pid|
+        run_command(command) do |stdin, _stdout, _stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
           wait_longer_than_build_poll
           expect(process_exists?(pid)).to be true

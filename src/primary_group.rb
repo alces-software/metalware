@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 # XXX Possibly more behaviour should be moved here, from
 # `Templating::GroupNamespace` and/or `Nodes` classes.
 module Metalware
@@ -6,7 +8,7 @@ module Metalware
     class << self
       include Enumerable
 
-      def each(&block)
+      def each
         cached_primary_groups.each do |group_name|
           yield new(group_name)
         end

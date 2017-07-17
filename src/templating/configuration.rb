@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'node'
 
 # XXX Make `answers` and `raw_config` more similar; basically performing the

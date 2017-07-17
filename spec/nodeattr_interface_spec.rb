@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -24,7 +26,6 @@ require 'nodeattr_interface'
 require 'spec_utils'
 require 'exceptions'
 
-
 RSpec.describe Metalware::NodeattrInterface do
   before do
     SpecUtils.use_mock_genders(self)
@@ -44,9 +45,9 @@ RSpec.describe Metalware::NodeattrInterface do
     end
 
     it 'raises if cannot find gender group' do
-      expect {
+      expect do
         Metalware::NodeattrInterface.nodes_in_group('non_existent')
-      }.to raise_error Metalware::NoGenderGroupError
+      end.to raise_error Metalware::NoGenderGroupError
     end
   end
 
@@ -62,9 +63,9 @@ RSpec.describe Metalware::NodeattrInterface do
     end
 
     it 'raises if cannot find node' do
-      expect {
+      expect do
         Metalware::NodeattrInterface.groups_for_node('non_existent')
-      }.to raise_error Metalware::NodeNotInGendersError
+      end.to raise_error Metalware::NodeNotInGendersError
     end
   end
 end

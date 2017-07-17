@@ -1,7 +1,8 @@
 
+# frozen_string_literal: true
+
 require 'exceptions'
 require 'templating/iterable_recursive_open_struct'
-
 
 module Metalware
   module Templating
@@ -28,7 +29,7 @@ module Metalware
 
       def method_missing(method, *args, &block)
         value = @wrapped_obj.send(method, *args, &block)
-        if value.nil? && ! @missing_tags.include?(method)
+        if value.nil? && !@missing_tags.include?(method)
           msg = "Unset template parameter: #{method}"
           raise MissingParameterError, msg if @raise_on_missing
           @missing_tags.push(method)

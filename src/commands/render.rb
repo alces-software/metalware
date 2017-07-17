@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,7 +28,7 @@ require 'templater'
 module Metalware
   module Commands
     class Render < CommandHelpers::BaseCommand
-      def setup(args, options)
+      def setup(args, _options)
         @args = args
       end
 
@@ -35,7 +37,7 @@ module Metalware
 
         template_parameters = {
           nodename: maybe_node,
-        }.reject { |param, value| value.nil? }
+        }.reject { |_param, value| value.nil? }
 
         Templater.render_to_stdout(config, template_path, template_parameters)
       end

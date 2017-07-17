@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -33,9 +35,9 @@ RSpec.describe Metalware::BuildFilesRetriever do
       'http://example.com/url',
     ],
     namespace02: [
-      'another_file'
-    ]
-  }
+      'another_file',
+    ],
+  }.freeze
 
   let :config { Metalware::Config.new }
 
@@ -58,26 +60,20 @@ RSpec.describe Metalware::BuildFilesRetriever do
         retriever = Metalware::BuildFilesRetriever.new('testnode01', Metalware::Config.new)
         retrieved_files = retriever.retrieve(TEST_FILES_HASH)
 
-        expect(retrieved_files[:namespace01][0]).to eq({
-          raw: 'some/file_in_repo',
-          name: 'file_in_repo',
-          template_path: File.join(config.repo_path, 'files/some/file_in_repo'),
-          url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo',
-        })
+        expect(retrieved_files[:namespace01][0]).to eq(raw: 'some/file_in_repo',
+                                                       name: 'file_in_repo',
+                                                       template_path: File.join(config.repo_path, 'files/some/file_in_repo'),
+                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo')
 
-        expect(retrieved_files[:namespace01][1]).to eq({
-          raw: '/some/other/path',
-          name: 'path',
-          template_path: '/some/other/path',
-          url: 'http://1.2.3.4/metalware/testnode01/namespace01/path',
-        })
+        expect(retrieved_files[:namespace01][1]).to eq(raw: '/some/other/path',
+                                                       name: 'path',
+                                                       template_path: '/some/other/path',
+                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/path')
 
-        expect(retrieved_files[:namespace01][2]).to eq({
-          raw: 'http://example.com/url',
-          name: 'url',
-          template_path: '/var/lib/metalware/cache/templates/url',
-          url: 'http://1.2.3.4/metalware/testnode01/namespace01/url',
-        })
+        expect(retrieved_files[:namespace01][2]).to eq(raw: 'http://example.com/url',
+                                                       name: 'url',
+                                                       template_path: '/var/lib/metalware/cache/templates/url',
+                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/url')
       end
 
       it 'downloads any URL identifiers to cache' do
@@ -106,8 +102,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
           expect(repo_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
-          expect(repo_file_entry.has_key? :template_path).to be false
-          expect(repo_file_entry.has_key? :url).to be false
+          expect(repo_file_entry.key?(:template_path)).to be false
+          expect(repo_file_entry.key?(:url)).to be false
         end
       end
 
@@ -121,8 +117,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
           expect(absolute_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
-          expect(absolute_file_entry.has_key? :template_path).to be false
-          expect(absolute_file_entry.has_key? :url).to be false
+          expect(absolute_file_entry.key?(:template_path)).to be false
+          expect(absolute_file_entry.key?(:url)).to be false
         end
       end
     end
@@ -141,11 +137,9 @@ RSpec.describe Metalware::BuildFilesRetriever do
         expect(url_file_entry[:error]).to match(/#{url}.*#{@http_error}/)
 
         # Does not make sense to have these keys if file not retrievable.
-        expect(url_file_entry.has_key? :template_path).to be false
-        expect(url_file_entry.has_key? :url).to be false
+        expect(url_file_entry.key?(:template_path)).to be false
+        expect(url_file_entry.key?(:url)).to be false
       end
     end
-
   end
-
 end

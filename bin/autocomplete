@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -21,16 +23,16 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require "yaml"
+require 'yaml'
 
 class AutoComplete
   def initialize
-    @cur = (ARGV[0] == "__CUR_IS_EMPTY__" ? nil : ARGV[0])
+    @cur = (ARGV[0] == '__CUR_IS_EMPTY__' ? nil : ARGV[0])
     @complete = ARGV[2..-1] # skips the second input as this is always `metal`
     @complete.pop unless @cur.nil? # Remove the current element from completed
     @values = []
-    config = File.join(File.dirname(__FILE__), "../src/cli_helper/config.yaml")
-    
+    config = File.join(File.dirname(__FILE__), '../src/cli_helper/config.yaml')
+
     # NOTE: Now that Metalware has a `Data` module the majority of yaml
     # handling occurs through that.
     # CliHelper and autocomplete are exceptions as they should only ever be
@@ -49,35 +51,35 @@ class AutoComplete
   def auto_complete_commands
     if @complete.empty?
       add_return_values(current_hash.keys)
-    elsif current_hash.key?("subcommands") && @input_only_contains_commands
-      add_return_values(current_hash["subcommands"].keys)
+    elsif current_hash.key?('subcommands') && @input_only_contains_commands
+      add_return_values(current_hash['subcommands'].keys)
     end
   end
 
   def auto_complete_options
-    return if @cur.to_s[0] != "-"
-    add_return_values(["-h", "--help", "--trace", "--version"])
-    @yaml["global_options"].each do |opt|
-      add_return_values(opt["tags"])
+    return if @cur.to_s[0] != '-'
+    add_return_values(['-h', '--help', '--trace', '--version'])
+    @yaml['global_options'].each do |opt|
+      add_return_values(opt['tags'])
     end
-    if current_hash["options"].is_a?(Array)
-      current_hash["options"].each do |opt|
-        add_return_values(opt["tags"])
+    if current_hash['options'].is_a?(Array)
+      current_hash['options'].each do |opt|
+        add_return_values(opt['tags'])
       end
     end
   end
 
   def current_hash
-    @current_hash ||= lambda() {
-      cmd_hash = @yaml["commands"]
+    @current_hash ||= lambda {
+      cmd_hash = @yaml['commands']
       @complete.each_with_index do |cmd, idx|
-        if cmd_hash.key?("subcommands")
-          new_hash = cmd_hash["subcommands"][cmd]
-        elsif idx == 0
-          new_hash = cmd_hash[cmd]
-        else
-          new_hash = {}
-        end
+        new_hash = if cmd_hash.key?('subcommands')
+                     cmd_hash['subcommands'][cmd]
+                   elsif idx == 0
+                     cmd_hash[cmd]
+                   else
+                     {}
+                   end
         if new_hash.nil? || new_hash.empty?
           @input_only_contains_commands = false
           break
@@ -93,7 +95,7 @@ class AutoComplete
   end
 
   def return_values
-    puts @values.join(" ")
+    puts @values.join(' ')
   end
 end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -35,22 +37,22 @@ RSpec.describe Metalware::Dependency do
   let :filesystem { FileSystem.setup }
 
   def enforce_dependencies(dependencies_hash = {})
-    filesystem.test do |fs|
-      Metalware::Dependency.new(config, "test", dependencies_hash).enforce
+    filesystem.test do |_fs|
+      Metalware::Dependency.new(config, 'test', dependencies_hash).enforce
     end
   end
 
   context 'with a fresh filesystem' do
     it 'repo dependencies fail' do
-      expect {
-        enforce_dependencies({ repo: [] })
-      }.to raise_error(Metalware::DependencyFailure)
+      expect do
+        enforce_dependencies(repo: [])
+      end.to raise_error(Metalware::DependencyFailure)
     end
 
     it 'configure dependencies fail' do
-      expect {
-        enforce_dependencies({ configure: ["domain.yaml"] })
-      }.to raise_error(Metalware::DependencyFailure)
+      expect do
+        enforce_dependencies(configure: ['domain.yaml'])
+      end.to raise_error(Metalware::DependencyFailure)
     end
   end
 
@@ -60,38 +62,30 @@ RSpec.describe Metalware::Dependency do
     end
 
     it 'check if the base repo exists' do
-      expect {
-        enforce_dependencies({ repo: [] })
-      }.not_to raise_error
+      expect do
+        enforce_dependencies(repo: [])
+      end.not_to raise_error
     end
 
     it 'check if repo template exists' do
-      expect {
-        enforce_dependencies({
-          repo: ["dependency-test1/default"]
-        })
-      }.not_to raise_error
-      expect {
-        enforce_dependencies({
-          repo: ["dependency-test1/default", "dependency-test2/default"]
-        })
-      }.not_to raise_error
+      expect do
+        enforce_dependencies(repo: ['dependency-test1/default'])
+      end.not_to raise_error
+      expect do
+        enforce_dependencies(repo: ['dependency-test1/default', 'dependency-test2/default'])
+      end.not_to raise_error
     end
 
     it "fail if repo template doesn't exist" do
-      expect {
-        enforce_dependencies({
-          repo: ["dependency-test1/not-found"]
-        })
-      }.to raise_error(Metalware::DependencyFailure)
+      expect do
+        enforce_dependencies(repo: ['dependency-test1/not-found'])
+      end.to raise_error(Metalware::DependencyFailure)
     end
 
     it 'fail if validating a repo directory' do
-      expect {
-        enforce_dependencies({
-          repo: ["dependency-test1"]
-        })
-      }.to raise_error(Metalware::DependencyFailure)
+      expect do
+        enforce_dependencies(repo: ['dependency-test1'])
+      end.to raise_error(Metalware::DependencyFailure)
     end
   end
 
@@ -102,10 +96,11 @@ RSpec.describe Metalware::Dependency do
 
     it 'validates missing answer files' do
       filesystem.test do
-        expect {
+        expect do
           enforce_dependencies(
-            { configure: ["domain.yaml", "groups/group1.yaml"] })
-        }.to raise_error(Metalware::DependencyFailure)
+            configure: ['domain.yaml', 'groups/group1.yaml']
+          )
+        end.to raise_error(Metalware::DependencyFailure)
       end
     end
 
@@ -116,10 +111,11 @@ RSpec.describe Metalware::Dependency do
       end
 
       it 'validates that the answer files exists' do
-        expect {
+        expect do
           enforce_dependencies(
-            { configure: ["domain.yaml", "groups/group1.yaml"] })
-        }.not_to raise_error
+            configure: ['domain.yaml', 'groups/group1.yaml']
+          )
+        end.not_to raise_error
       end
     end
   end

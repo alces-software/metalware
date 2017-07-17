@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -32,51 +34,55 @@ module Metalware
       class Update < CommandHelpers::BaseCommand
         private
 
-        def setup(args, options)
+        def setup(_args, options)
           @force = !!options.force
         end
 
         def run
           repo = Rugged::Repository.init_at(config.repo_path)
-          repo.fetch("origin")
+          repo.fetch('origin')
 
-          local_commit = repo.branches["master"].target
-          remote_commit = repo.branches["origin/master"].target
+          local_commit = repo.branches['master'].target
+          remote_commit = repo.branches['origin/master'].target
           ahead_behind = repo.ahead_behind(local_commit, remote_commit)
           uncommited = local_commit.diff_workdir.size
 
           if @force
-            MetalLog.warn \
-               "Deleted #{ahead_behind[0]} local commit(s)" if ahead_behind[0] > 0
-            MetalLog.warn \
-               "Deleted #{uncommited} local change(s)" if uncommited > 0
+            if ahead_behind[0] > 0
+              MetalLog.warn \
+                "Deleted #{ahead_behind[0]} local commit(s)"
+            end
+            if uncommited > 0
+              MetalLog.warn \
+                "Deleted #{uncommited} local change(s)"
+            end
           else
-            raise LocalAheadOfRemote.new(ahead_behind[0]) if ahead_behind[0] > 0
-            raise UncommitedChanges.new(uncommited) if uncommited > 0
+            raise LocalAheadOfRemote, ahead_behind[0] if ahead_behind[0] > 0
+            raise UncommitedChanges, uncommited if uncommited > 0
           end
 
           if uncommited + ahead_behind[0] + ahead_behind[1] == 0
-            puts "Already up-to-date"
-            MetalLog.info "Already up-to-date"
+            puts 'Already up-to-date'
+            MetalLog.info 'Already up-to-date'
           elsif ahead_behind[0] + ahead_behind[1] + uncommited > 0
             repo.reset(remote_commit, :hard)
-            puts "Repo has successfully been updated"
-            puts "(Removed local commits/changes)" if ahead_behind[0] + uncommited > 0
+            puts 'Repo has successfully been updated'
+            puts '(Removed local commits/changes)' if ahead_behind[0] + uncommited > 0
             diff = local_commit.diff(remote_commit).stat
-            str = "#{diff[0]} file#{ diff[0] == 1 ? '' : 's'} changed, " \
-                  "#{diff[1]} insertion#{ diff[1] == 1 ? '' : 's'}(+), " \
-                  "#{diff[2]} deletion#{ diff[2] == 1 ? '' : 's'}(-)"
+            str = "#{diff[0]} file#{diff[0] == 1 ? '' : 's'} changed, " \
+                  "#{diff[1]} insertion#{diff[1] == 1 ? '' : 's'}(+), " \
+                  "#{diff[2]} deletion#{diff[2] == 1 ? '' : 's'}(-)"
             puts str
             MetalLog.info str
           else
-            MetalLog.fatal "Internal error. An impossible condition has been reached!"
-            raise "Internal error. Check metal log"
+            MetalLog.fatal 'Internal error. An impossible condition has been reached!'
+            raise 'Internal error. Check metal log'
           end
         end
 
         def dependency_hash
           {
-            repo: []
+            repo: [],
           }
         end
       end
@@ -85,16 +91,16 @@ module Metalware
       class LocalAheadOfRemote < StandardError
         def initialize(num)
           msg = "The local repo is #{num} commits ahead of remote. -f will " \
-            "override local commits"
-          super msg;
+            'override local commits'
+          super msg
         end
       end
 
       class UncommitedChanges < StandardError
         def initialize(num)
           msg = "The local repo has #{num} uncommitted changes. -f will " \
-            "delete these changes. (untracked unaffected)"
-          super msg;
+            'delete these changes. (untracked unaffected)'
+          super msg
         end
       end
     end

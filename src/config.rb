@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -39,10 +41,10 @@ module Metalware
       pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
       repo_path: '/var/lib/metalware/repo',
       log_path: '/var/log/metalware',
-      log_severity: "INFO"
-    }
+      log_severity: 'INFO',
+    }.freeze
 
-    def initialize(file=nil, options = {})
+    def initialize(file = nil, options = {})
       file ||= Constants::DEFAULT_CONFIG_PATH
       unless File.file?(file)
         raise MetalwareError, "Config file '#{file}' does not exist"
@@ -61,7 +63,7 @@ module Metalware
 
     def repo_config_path(config_name)
       config_file = config_name + '.yaml'
-      File.join(repo_path, "config", config_file)
+      File.join(repo_path, 'config', config_file)
     end
 
     def configure_file

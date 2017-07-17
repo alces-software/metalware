@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -24,16 +26,16 @@ module Metalware
     module HighLine
       module Questions
         def sanitize_default_erb_tags
-          @sanitized_default ||= @default.gsub("<%", "<%%")
+          @sanitized_default ||= @default.gsub('<%', '<%%')
         end
 
-        def append_default(  )
+        def append_default
           if @question =~ /([\t ]+)\Z/
-            @question << "|#{sanitize_default_erb_tags}|#{$1}"
-          elsif @question == ""
+            @question << "|#{sanitize_default_erb_tags}|#{Regexp.last_match(1)}"
+          elsif @question == ''
             @question << "|#{sanitize_default_erb_tags}|  "
           elsif @question[-1, 1] == "\n"
-            @question[-2, 0] =  "  |#{sanitize_default_erb_tags}|"
+            @question[-2, 0] = "  |#{sanitize_default_erb_tags}|"
           else
             @question << "  |#{sanitize_default_erb_tags}|"
           end

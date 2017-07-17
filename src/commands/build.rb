@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -31,11 +33,9 @@ require 'nodes'
 require 'output'
 require 'build_files_retriever'
 
-
 module Metalware
   module Commands
     class Build < CommandHelpers::BaseCommand
-
       private
 
       def setup(args, options)
@@ -54,9 +54,9 @@ module Metalware
         {
           repo: ["pxelinux/#{@options.pxelinux}",
                  "kickstart/#{@options.kickstart}"],
-          configure: ["domain.yaml"].tap { |arr|
+          configure: ['domain.yaml'].tap do |arr|
             arr.push("groups/#{@node_identifier}.yaml") if @options.group
-          }
+          end,
         }
       end
 
@@ -85,11 +85,10 @@ module Metalware
       def render_build_files(parameters, node)
         build_files(node).each do |namespace, files|
           files.each do |file|
-            unless file[:error]
-              render_path = node.rendered_build_file_path(namespace, file[:name])
-              FileUtils.mkdir_p(File.dirname render_path)
-              Templater.render_to_file(config, file[:template_path], render_path, parameters)
-            end
+            next if file[:error]
+            render_path = node.rendered_build_file_path(namespace, file[:name])
+            FileUtils.mkdir_p(File.dirname(render_path))
+            Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
         end
       end
@@ -136,18 +135,18 @@ module Metalware
 
       def wait_for_nodes_to_build
         Output.stderr 'Waiting for nodes to report as built...',
-          '(Ctrl-C to terminate)'
+                      '(Ctrl-C to terminate)'
 
         rerendered_nodes = []
         loop do
           @nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
-          end.
-          tap do |nodes|
+          end
+                .tap do |nodes|
             render_permanent_pxelinux_configs(nodes)
             rerendered_nodes.push(*nodes)
-          end.
-          each do |node|
+          end
+                .each do |node|
             Output.stderr "Node #{node.name} built."
           end
 
@@ -195,9 +194,7 @@ module Metalware
           Re-render permanent PXELINUX templates for all nodes as if build succeeded?
           [yes/no]
         EOF
-        if agree(should_rerender)
-          render_all_permanent_pxelinux_configs
-        end
+        render_all_permanent_pxelinux_configs if agree(should_rerender)
       end
     end
   end

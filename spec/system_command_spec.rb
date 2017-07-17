@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -30,8 +32,8 @@ RSpec.describe Metalware::SystemCommand do
   end
 
   it 'raises if the command fails' do
-    expect{
+    expect do
       Metalware::SystemCommand.run('false')
-    }.to raise_error Metalware::SystemCommandError
+    end.to raise_error Metalware::SystemCommandError
   end
 end

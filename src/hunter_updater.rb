@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -24,7 +26,6 @@ require 'yaml'
 
 require 'output'
 
-
 module Metalware
   class HunterUpdater
     def initialize(hunter_file)
@@ -37,9 +38,7 @@ module Metalware
       current_yaml = Data.load(@hunter_file)
       remove_colliding_entries!(current_yaml, node_name, mac_address)
 
-      new_yaml = current_yaml.merge({
-        node_name => mac_address
-      })
+      new_yaml = current_yaml.merge(node_name => mac_address)
       Data.dump(@hunter_file, new_yaml)
     end
 
@@ -53,14 +52,14 @@ module Metalware
         existing_mac_address = current_yaml[new_node_name]
 
         Output.stderr \
-          "Replacing existing entry for #{new_node_name} " +
+          "Replacing existing entry for #{new_node_name} " \
           "(existing entry has MAC address #{existing_mac_address})."
 
       elsif mac_address_present
         existing_node_name = current_yaml.invert[new_mac_address]
 
         Output.stderr \
-          "Replacing existing entry with MAC address #{new_mac_address} " +
+          "Replacing existing entry with MAC address #{new_mac_address} " \
           "(existing entry for node #{existing_node_name})."
 
         current_yaml.reject! do |_, mac_address|
