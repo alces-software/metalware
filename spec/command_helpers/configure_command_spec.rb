@@ -8,7 +8,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
 
   # Subclass of `ConfigureCommand` for use in tests, to test it independently
   # of any individual subclass.
-  class TestCommand < Metalware::CommandHelpers::ConfigureCommand
+  class Domain < Metalware::CommandHelpers::ConfigureCommand
     protected
 
     def setup(args, options)
@@ -17,7 +17,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
     # Overridden as superclass method depends on this being in the
     # `Metalware::Commands` namespace.
     def command_name
-      TEST_COMMAND_NAME
+      :domain
     end
 
     def answers_file
@@ -28,13 +28,6 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   it 'renders the hosts and genders files' do
     FileSystem.test do |fs|
       fs.with_minimal_repo
-
-      # `configure.yaml` needs to contain a key with the same name as the
-      # command.
-      Metalware::Data.dump(
-        '/var/lib/metalware/repo/configure.yaml',
-        {TEST_COMMAND_NAME => []}
-      )
 
       # Genders file needs to be rendered first, as how this is rendered will
       # effect the groups and nodes used when rendering the hosts file.
@@ -50,7 +43,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
           Metalware::Constants::HOSTS_PATH
       ).ordered.and_call_original
 
-      SpecUtils.run_command(TestCommand)
+      SpecUtils.run_command(Domain)
     end
   end
 end
