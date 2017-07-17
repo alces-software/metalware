@@ -39,3 +39,12 @@ watch-rsync:
 .PHONY: remote-run
 remote-run: rsync
 	ssh -t dev@${IP} "sudo su - -c \"cd ${REMOTE_DIR} && ${COMMAND}\""
+
+.PHONY: rubocop
+rubocop:
+	bundle exec rubocop --parallel --display-cop-names --display-style-guide --color
+
+# Fix Rubocop issues, where possible.
+.PHONY: rubocop-fix
+rubocop-fix:
+	bundle exec rubocop --display-cop-names --display-style-guide --color --auto-correct
