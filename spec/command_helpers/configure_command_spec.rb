@@ -1,4 +1,8 @@
 
+require 'filesystem'
+require 'spec_utils'
+
+
 RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   TEST_COMMAND_NAME = :testcommand
 
