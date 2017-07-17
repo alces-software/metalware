@@ -63,7 +63,7 @@ RSpec.describe '`metal build`' do
   end
 
   def run_command(command)
-    Timeout.timeout 5 do
+    Timeout.timeout 10 do
       Open3.popen3 command do |stdin, stdout, stderr, thread|
         begin
           pid = thread.pid

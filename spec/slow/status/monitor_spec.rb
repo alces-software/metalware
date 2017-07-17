@@ -100,7 +100,7 @@ RSpec.describe Metalware::Status::Monitor do
 
       monitor_thr = Thread.new { @monitor.monitor_jobs }
 
-      Timeout.timeout(10) do
+      Timeout.timeout(15) do
         until queue.empty?
           cur_len = queue.length
           running.sample.thread.kill
