@@ -43,7 +43,7 @@ RSpec.describe '`metal build`' do
   PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
 
   def kill_any_metal_processes
-    `pkill bin/metal --full`
+    `pkill bin/metal -f`
   end
 
   # Refer to http://stackoverflow.com/a/3568291/2620402.

@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+
+# These should correspond with the packages installed in `bin/setup` (for
+# setting up development environment) and `scripts/install` (for production
+# install); Travis CI runs on Ubuntu however so we need to use apt-get to
+# install dependencies for it.
+
+# Required for rugged gem.
+sudo apt-get install cmake -y
+
+# Required for pcap gem.
+sudo apt-get install libpcap-dev -y
+
+# Required for `nodeattr`.
+sudo apt-get install genders -y
