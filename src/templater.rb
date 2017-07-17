@@ -85,8 +85,6 @@ module Metalware
       replace_erb(str, @config)
     end
 
-    private
-
     delegate :replace_erb, to: Templating::Renderer
   end
 end

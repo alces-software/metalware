@@ -44,12 +44,12 @@ module Metalware
 
       CliHelper::Parser.new(self).parse_commands
 
-      def run!
-        ARGV.push '--help' if ARGV.empty?
-        super
-      end
-
       run!
+    end
+
+    def run!
+      ARGV.push '--help' if ARGV.empty?
+      super
     end
   end
 end

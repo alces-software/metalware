@@ -81,6 +81,8 @@ module Metalware
       rescue Timeout::Error
         _send_signal_and_wait(9)
       rescue Errno::ESRCH
+        # XXX Not handling this gives a Rubocop warning; should we do something
+        # here?
       end
 
       def _send_signal_and_wait(signum)

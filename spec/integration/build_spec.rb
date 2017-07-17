@@ -68,7 +68,7 @@ RSpec.describe '`metal build`' do
         begin
           pid = thread.pid
           yield(stdin, stdout, stderr, pid)
-        rescue Exception => e
+        rescue IntentionallyCatchAnyException => e
           begin
             stdout_data = read_io_stream(stdout)
             stderr_data = read_io_stream(stderr)

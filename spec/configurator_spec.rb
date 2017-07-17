@@ -87,6 +87,8 @@ RSpec.describe Metalware::Configurator do
       $stdout.rewind
       STDERR.puts $stdout.read
     rescue
+      # XXX Not handling this gives a Rubocop warning; should we do something
+      # here?
     end
     raise e
   ensure

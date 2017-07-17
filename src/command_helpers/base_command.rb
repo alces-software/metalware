@@ -37,7 +37,7 @@ module Metalware
         run
       rescue Interrupt => e
         handle_interrupt(e)
-      rescue Exception => e
+      rescue IntentionallyCatchAnyException => e
         handle_fatal_exception(e)
       end
 
