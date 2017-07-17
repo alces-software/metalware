@@ -69,10 +69,13 @@ module Metalware
       end
 
       def command_name
-        class_name_parts = self.class.name.split('::')
         parts_without_namespace = \
           class_name_parts.slice(2, class_name_parts.length)
-        parts_without_namespace.join(' ').downcase.to_sym
+        parts_without_namespace.join(' ').to_sym
+      end
+
+      def class_name_parts
+        self.class.name.split('::').map(&:downcase).map(&:to_sym)
       end
 
       def log_command
