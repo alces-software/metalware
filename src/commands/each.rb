@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -34,12 +36,12 @@ module Metalware
       end
 
       def run
-        @nodes.template_each do |parameters, node|
+        @nodes.template_each do |parameters, _node|
           rendered_cmd = Templater.new(config, parameters)
                                   .render_from_string(@command)
           opt = {
             out: $stdout.fileno ? $stdout.fileno : 1,
-            err: $stderr.fileno ? $stderr.fileno : 2
+            err: $stderr.fileno ? $stderr.fileno : 2,
           }
           system(rendered_cmd, opt)
         end

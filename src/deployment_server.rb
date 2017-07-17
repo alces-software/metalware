@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -23,7 +25,6 @@
 module Metalware
   module DeploymentServer
     class << self
-
       def ip
         SystemCommand.run(determine_hostip_script).chomp
       rescue SystemCommandError
@@ -50,13 +51,11 @@ module Metalware
       end
 
       def build_complete_url(node_name)
-        if node_name
-          url "exec/kscomplete.php?name=#{node_name}"
-        end
+        url "exec/kscomplete.php?name=#{node_name}" if node_name
       end
 
       def build_file_url(node_name, namespace, file_name)
-        path = File.join(node_name , namespace.to_s , file_name)
+        path = File.join(node_name, namespace.to_s, file_name)
         url path
       end
 
@@ -89,7 +88,6 @@ module Metalware
           'libexec/determine-hostip'
         )
       end
-
     end
   end
 end

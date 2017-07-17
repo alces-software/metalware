@@ -1,7 +1,8 @@
 
+# frozen_string_literal: true
+
 require 'filesystem'
 require 'spec_utils'
-
 
 RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   TEST_COMMAND_NAME = :testcommand
@@ -11,8 +12,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   class TestCommand < Metalware::CommandHelpers::ConfigureCommand
     protected
 
-    def setup(args, options)
-    end
+    def setup(args, options); end
 
     # Overridden to be three element array with third a valid `configure.yaml`
     # questions section; `BaseCommand` expects command classes to be namespaced
@@ -34,15 +34,15 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
       # Genders file needs to be rendered first, as how this is rendered will
       # effect the groups and nodes used when rendering the hosts file.
       expect(Metalware::Templater).to receive(:render_to_file).with(
-          instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/genders/default',
-          Metalware::Constants::GENDERS_PATH
+        instance_of(Metalware::Config),
+        '/var/lib/metalware/repo/genders/default',
+        Metalware::Constants::GENDERS_PATH
       ).ordered.and_call_original
 
       expect(Metalware::Templater).to receive(:render_to_file).with(
-          instance_of(Metalware::Config),
-          '/var/lib/metalware/repo/hosts/default',
-          Metalware::Constants::HOSTS_PATH
+        instance_of(Metalware::Config),
+        '/var/lib/metalware/repo/hosts/default',
+        Metalware::Constants::HOSTS_PATH
       ).ordered.and_call_original
 
       SpecUtils.run_command(TestCommand)

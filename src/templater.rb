@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,9 +22,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require "erb"
+require 'erb'
 
-require "constants"
+require 'constants'
 require 'metal_log'
 require 'exceptions'
 require 'templating/iterable_recursive_open_struct'
@@ -31,28 +33,27 @@ require 'templating/magic_namespace'
 require 'templating/renderer'
 require 'templating/repo_config_parser'
 
-
 module Metalware
   class Templater
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
-      def render(config, template, template_parameters={})
+      def render(config, template, template_parameters = {})
         Templater.new(config, template_parameters).render(template)
       end
 
-      def render_to_stdout(config, template, template_parameters={})
+      def render_to_stdout(config, template, template_parameters = {})
         puts render(config, template, template_parameters)
       end
 
-      def render_to_file(config, template, save_file, template_parameters={})
-        File.open(save_file.chomp, "w") do |f|
+      def render_to_file(config, template, save_file, template_parameters = {})
+        File.open(save_file.chomp, 'w') do |f|
           f.puts render(config, template, template_parameters)
         end
         MetalLog.info "Template Saved: #{save_file}"
       end
 
-      def render_and_append_to_file(config, template, append_file, template_parameters={})
+      def render_and_append_to_file(config, template, append_file, template_parameters = {})
         File.open(append_file.chomp, 'a') do |f|
           f.puts render(config, template, template_parameters)
         end
@@ -66,7 +67,7 @@ module Metalware
     # - nodename
     # - index
     # - what else?
-    def initialize(metalware_config, parameters={})
+    def initialize(metalware_config, parameters = {})
       @config = Templating::RepoConfigParser.parse_for_node(
         node_name: parameters[:nodename],
         config: metalware_config,
@@ -83,8 +84,6 @@ module Metalware
     def render_from_string(str)
       replace_erb(str, @config)
     end
-
-    private
 
     delegate :replace_erb, to: Templating::Renderer
   end

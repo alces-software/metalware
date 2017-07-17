@@ -1,6 +1,7 @@
 
-require 'templating/renderer'
+# frozen_string_literal: true
 
+require 'templating/renderer'
 
 module Metalware
   module Templating
@@ -8,7 +9,6 @@ module Metalware
       private_class_method :new
 
       class << self
-
         # XXX get rid of handling `additional_parameters`? And just take what
         # we need.
         def parse_for_node(node_name:, config:, additional_parameters: {})
@@ -66,26 +66,26 @@ module Metalware
       # support this any more.
       def base_config
         @base_config ||= node.raw_config
-          .merge(additional_parameters)
-          .merge(alces: magic_namespace)
+                             .merge(additional_parameters)
+                             .merge(alces: magic_namespace)
       end
 
       def magic_namespace
         MissingParameterWrapper.new(MagicNamespace.new(
-          config: metalware_config,
-          node: node,
-          **magic_parameters
+                                      config: metalware_config,
+                                      node: node,
+                                      **magic_parameters
         ))
       end
 
       def magic_parameters
-        additional_parameters.select { |k,v|
+        additional_parameters.select do |k, v|
           [:firstboot, :files].include?(k) && !v.nil?
-        }
+        end
       end
 
       def perform_config_parsing_pass(current_parsed_config)
-        current_parsed_config.map do |k,v|
+        current_parsed_config.map do |k, v|
           [k, parse_config_value(v, current_parsed_config)]
         end.to_h
       end
@@ -95,7 +95,7 @@ module Metalware
         when String
           parse_string_config_value(value, current_parsed_config)
         when Hash
-          value.map do |k,v|
+          value.map do |k, v|
             [k, parse_config_value(v, current_parsed_config)]
           end.to_h
         else

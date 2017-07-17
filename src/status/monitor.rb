@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -34,11 +36,11 @@ module Metalware
       end
 
       def start
-        @thread = Thread.new {
+        @thread = Thread.new do
           @status_log.info "Monitor Thread: #{Thread.current}"
           create_jobs
           monitor_jobs
-        }
+        end
         self
       end
 
@@ -46,13 +48,13 @@ module Metalware
 
       # ----- THREAD METHODS BELOW THIS LINE ------
       def add_job_queue(nodename, cmd)
-        @queue.push({ nodename: nodename, cmd: cmd })
+        @queue.push(nodename: nodename, cmd: cmd)
       end
 
       def start_next_job(idx)
         job = @queue.pop
         @running[idx] = Metalware::Status::Job
-          .new(job[:nodename], job[:cmd], @opt.time_limit).start
+                        .new(job[:nodename], job[:cmd], @opt.time_limit).start
       end
 
       def create_jobs
@@ -64,20 +66,19 @@ module Metalware
               start_next_job(idx)
               idx += 1
             end
-          end 
+          end
         end
       end
 
       def monitor_jobs
-        while @running.length > 0
+        until @running.empty?
           @running.each_with_index do |job, idx|
-            unless job.thread.alive?
-              job.thread.join
-              if @queue.length > 0
-                start_next_job(idx)
-              else
-                @running.delete_at(idx)
-              end
+            next if job.thread.alive?
+            job.thread.join
+            if !@queue.empty?
+              start_next_job(idx)
+            else
+              @running.delete_at(idx)
             end
           end
         end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -25,7 +27,7 @@ module Metalware
   end
 
   class UnsetConfigLogError < MetalwareError
-    def initialize(msg = "Error in MetalLog. Config not set")
+    def initialize(msg = 'Error in MetalLog. Config not set')
       super
     end
   end
@@ -46,7 +48,7 @@ module Metalware
   end
 
   class RecursiveConfigDepthExceededError < MetalwareError
-    def initialize(msg="Input hash may contain infinitely recursive ERB")
+    def initialize(msg = 'Input hash may contain infinitely recursive ERB')
       super
     end
   end
@@ -55,13 +57,13 @@ module Metalware
   end
 
   class UnexpectedError < MetalwareError
-    def initialize(msg = "An unexpected error has occurred")
+    def initialize(msg = 'An unexpected error has occurred')
       super
     end
   end
 
   class StatusDataIncomplete < MetalwareError
-    def initialize(msg = "Failed to receive data for all nodes")
+    def initialize(msg = 'Failed to receive data for all nodes')
       super
     end
   end
@@ -73,7 +75,7 @@ module Metalware
   end
 
   class CombineHashError < MetalwareError
-    def initialize(msg="Could not combine config or answer hashes")
+    def initialize(msg = 'Could not combine config or answer hashes')
       super
     end
   end
@@ -85,7 +87,7 @@ module Metalware
   end
 
   class LoopErbError < MetalwareError
-    def initialize(msg="Input hash may contain infinitely recursive ERB")
+    def initialize(msg = 'Input hash may contain infinitely recursive ERB')
       super
     end
   end
@@ -107,3 +109,8 @@ module Metalware
   class UnconfiguredGroupError < MetalwareError
   end
 end
+
+
+# Alias for Exception to use to indicate we want to catch everything, and to
+# also tell Rubocop to be quiet about this.
+IntentionallyCatchAnyException = Exception

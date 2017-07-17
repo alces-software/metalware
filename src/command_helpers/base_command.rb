@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -35,7 +37,7 @@ module Metalware
         run
       rescue Interrupt => e
         handle_interrupt(e)
-      rescue Exception => e
+      rescue IntentionallyCatchAnyException => e
         handle_fatal_exception(e)
       end
 
@@ -43,7 +45,7 @@ module Metalware
 
       private
 
-      def pre_setup(args, options)
+      def pre_setup(_args, options)
         setup_config(options)
         log_command
       end
@@ -55,7 +57,7 @@ module Metalware
       def setup_config(options)
         cli_options = {
           strict: !!options.strict,
-          quiet: !!options.quiet
+          quiet: !!options.quiet,
         }
         @config = Config.new(options.config, cli_options)
       end
@@ -79,10 +81,10 @@ module Metalware
       end
 
       def log_command
-        MetalLog.info "metal #{ARGV.join(" ")}"
+        MetalLog.info "metal #{ARGV.join(' ')}"
       end
 
-      def setup(args, options)
+      def setup(_args, _options)
         raise NotImplementedError
       end
 

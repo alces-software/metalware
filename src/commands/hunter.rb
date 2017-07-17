@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -31,15 +33,13 @@ require 'constants'
 # require 'alces/stack/log'
 require 'hunter_updater'
 
-
 module Metalware
   module Commands
     class Hunter < CommandHelpers::BaseCommand
-
       private
 
-      def setup(args, options)
-        @hunter_log = MetalLog.new("hunter")
+      def setup(_args, options)
+        @hunter_log = MetalLog.new('hunter')
 
         @options = options
 
@@ -71,22 +71,22 @@ module Metalware
       end
 
       def process_packet(data)
-        @hunter_log.info "Processing received UDP packet"
-        message = DHCP::Message.from_udp_payload(data, :debug => false)
+        @hunter_log.info 'Processing received UDP packet'
+        message = DHCP::Message.from_udp_payload(data, debug: false)
         process_message(message) if message.is_a?(DHCP::Discover)
       end
 
       def process_message(message)
-        @hunter_log.info "Processing DHCP::Discover message options"
+        @hunter_log.info 'Processing DHCP::Discover message options'
         message.options.each do |o|
           detected(hwaddr_from(message)) if pxe_client?(o)
         end
       end
 
       def hwaddr_from(message)
-        @hunter_log.info "Determining hardware address"
+        @hunter_log.info 'Determining hardware address'
         message.chaddr.slice(0..(message.hlen - 1)).map do |b|
-          b.to_s(16).upcase.rjust(2,'0')
+          b.to_s(16).upcase.rjust(2, '0')
         end.join(':').tap do |hwaddr|
           @hunter_log.info "Detected hardware address: #{hwaddr}"
         end
@@ -114,7 +114,6 @@ module Metalware
           MetalLog.info "#{name}-#{hwaddr}"
           @hunter_log.info "#{name}-#{hwaddr}"
           Output.stderr 'Logged node'
-
         rescue => e
           warn e # XXX Needed?
           Output.stderr "FAIL: #{e.message}"

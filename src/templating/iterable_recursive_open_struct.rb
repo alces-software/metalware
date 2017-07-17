@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -28,9 +30,9 @@ module Metalware
         convert_hash_values_to_own_class.each(&block)
       end
 
-      def each=(*args)
+      def each=(*_args)
         raise IterableRecursiveOpenStructPropertyError,
-          "Cannot set property 'each', reserved to use for iteration"
+              "Cannot set property 'each', reserved to use for iteration"
       end
 
       private

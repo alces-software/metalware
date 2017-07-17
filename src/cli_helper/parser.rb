@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -27,8 +29,8 @@ module Metalware
     class Parser
       def initialize(calling_obj = nil)
         @calling_obj = calling_obj
-        config = File.join(File.dirname(__FILE__), "config.yaml")
-        
+        config = File.join(File.dirname(__FILE__), 'config.yaml')
+
         # NOTE: Now that Metalware has a `Data` module the majority of yaml
         # handling occurs through that.
         # CliHelper and autocomplete are exceptions as they should only ever be
@@ -38,11 +40,11 @@ module Metalware
       end
 
       def parse_commands
-        @yaml["commands"].each do |command, attributes|
+        @yaml['commands'].each do |command, attributes|
           parse_command_attributes(command, attributes)
         end
-        @yaml["global_options"].each do |opt|
-          @calling_obj.global_option(*opt["tags"], opt["description"].chomp)
+        @yaml['global_options'].each do |opt|
+          @calling_obj.global_option(*opt['tags'], opt['description'].chomp)
         end
       end
 
@@ -51,19 +53,19 @@ module Metalware
         @calling_obj.command command do |c|
           attributes.each do |a, v|
             case a
-            when "action"
+            when 'action'
               c.action eval(v)
-            when "options"
+            when 'options'
               v.each do |opt|
-                if [:Integer, "Integer"].include? opt["type"]
-                  opt["type"] = "OptionParser::DecimalInteger"
+                if [:Integer, 'Integer'].include? opt['type']
+                  opt['type'] = 'OptionParser::DecimalInteger'
                 end
-                c.option(*opt["tags"],
-                       eval(opt["type"].to_s),
-                       {default: opt["default"]},
-                       "#{opt["description"]}".chomp)
+                c.option(*opt['tags'],
+                         eval(opt['type'].to_s),
+                         { default: opt['default'] },
+                         (opt['description']).to_s.chomp)
               end
-            when "subcommands"
+            when 'subcommands'
               c.sub_command_group = true
               v.each do |subcommand, subattributes|
                 subattributes[:sub_command] = true

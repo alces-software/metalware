@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -28,14 +30,13 @@ module SpecUtils
   # Use `instance_exec` in many functions in this module to execute blocks the
   # context of the passed RSpec example group.
   class << self
-
     # Mocks.
 
     def use_mock_genders(example_group, genders_file: 'genders/default')
       genders_path = File.join(FIXTURES_PATH, genders_file)
 
       example_group.instance_exec do
-        stub_const("Metalware::Constants::NODEATTR_COMMAND", "nodeattr -f #{genders_path}")
+        stub_const('Metalware::Constants::NODEATTR_COMMAND', "nodeattr -f #{genders_path}")
       end
     end
 

@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'command_helpers/base_command'
 require 'configurator'
 require 'constants'
@@ -31,8 +33,8 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["configure.yaml"],
-          configure: []
+          repo: ['configure.yaml'],
+          configure: [],
         }
       end
 

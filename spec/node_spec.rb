@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -50,7 +52,7 @@ RSpec.describe Metalware::Node do
 
     describe '#configs' do
       it 'returns possible configs for node in precedence order' do
-        expect(testnode01.configs).to eq(["domain", "cluster", "nodes", "testnodes", "testnode01"])
+        expect(testnode01.configs).to eq(['domain', 'cluster', 'nodes', 'testnodes', 'testnode01'])
       end
 
       it "just returns 'node' and 'domain' configs for node not in genders" do
@@ -68,27 +70,23 @@ RSpec.describe Metalware::Node do
 
     describe '#build_files' do
       it 'returns merged hash of files' do
-        expect(testnode01.build_files).to eq({
-          namespace01: [
-            'testnodes/some_file_in_repo',
-            '/some/other/path',
-            'http://example.com/some/url',
-          ].sort,
-          namespace02: [
-            'another_file_in_repo',
-          ].sort
-        })
+        expect(testnode01.build_files).to eq(namespace01: [
+          'testnodes/some_file_in_repo',
+          '/some/other/path',
+          'http://example.com/some/url',
+        ].sort,
+                                             namespace02: [
+                                               'another_file_in_repo',
+                                             ].sort)
 
-        expect(testnode02.build_files).to eq({
-          namespace01: [
-            'testnode02/some_file_in_repo',
-            '/some/other/path',
-            'http://example.com/testnode02/some/url',
-          ].sort,
-          namespace02: [
-            'testnode02/another_file_in_repo',
-          ].sort
-        })
+        expect(testnode02.build_files).to eq(namespace01: [
+          'testnode02/some_file_in_repo',
+          '/some/other/path',
+          'http://example.com/testnode02/some/url',
+        ].sort,
+                                             namespace02: [
+                                               'testnode02/another_file_in_repo',
+                                             ].sort)
       end
     end
 
@@ -108,13 +106,13 @@ RSpec.describe Metalware::Node do
         expect(testnode03.index).to eq(2)
       end
 
-      it "returns 0 for node not in genders" do
+      it 'returns 0 for node not in genders' do
         name = 'not_in_genders_node01'
         node = node(name)
         expect(node.index).to eq(0)
       end
 
-      it "returns 0 for nil node name" do
+      it 'returns 0 for nil node name' do
         node = node(nil)
         expect(node.index).to eq(0)
       end
@@ -126,7 +124,7 @@ RSpec.describe Metalware::Node do
 
     def expect_group_index_raises_for_node(node)
       filesystem.test do
-        expect{ node.group_index }.to raise_error(
+        expect { node.group_index }.to raise_error(
           Metalware::UnconfiguredGroupError
         )
       end
@@ -155,7 +153,6 @@ RSpec.describe Metalware::Node do
         expect_group_index_raises_for_node(node(nil))
       end
     end
-
   end
 
   describe '#raw_config' do
@@ -165,14 +162,14 @@ RSpec.describe Metalware::Node do
           foo: 'not bar',
           something: 'value',
           prv: {
-            ip: "10.10.0.1",
-            interface: "eth1"
-          }
-        }
+            ip: '10.10.0.1',
+            interface: 'eth1',
+          },
+        },
       }
 
       FileSystem.test do |fs|
-        fs.with_repo_fixtures("repo_deep_merge")
+        fs.with_repo_fixtures('repo_deep_merge')
         config = Metalware::Config.new
         node = Metalware::Node.new(config, 'deepmerge')
         expect(node.raw_config).to eq(expected_answers)
@@ -180,15 +177,15 @@ RSpec.describe Metalware::Node do
     end
   end
 
-  describe "#answers" do
+  describe '#answers' do
     let :config { Metalware::Config.new }
 
     it 'performs a deep merge of answer files' do
       expected_answers = {
-        value_set_by_domain: "domain",
-        value_set_by_ag1: "ag1",
-        value_set_by_ag2: "ag2",
-        value_set_by_answer1: "answer1"
+        value_set_by_domain: 'domain',
+        value_set_by_ag1: 'ag1',
+        value_set_by_ag2: 'ag2',
+        value_set_by_answer1: 'answer1',
       }
 
       FileSystem.test do |fs|
@@ -202,10 +199,10 @@ RSpec.describe Metalware::Node do
       # A nil node uses no configs but the 'domain' config, so all answers will
       # be loaded from the 'domain' answers file.
       expected_answers = {
-        value_set_by_domain: "domain",
-        value_set_by_ag1: "domain",
-        value_set_by_ag2: "domain",
-        value_set_by_answer1: "domain"
+        value_set_by_domain: 'domain',
+        value_set_by_ag1: 'domain',
+        value_set_by_ag2: 'domain',
+        value_set_by_answer1: 'domain',
       }
 
       FileSystem.test do |fs|
@@ -215,7 +212,6 @@ RSpec.describe Metalware::Node do
       end
     end
   end
-
 
   describe '#==' do
     it 'returns false if other object is not a Node' do

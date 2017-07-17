@@ -1,14 +1,15 @@
 
+# frozen_string_literal: true
+
 require 'hashie'
 require 'active_support/core_ext/hash'
 
-require "constants"
+require 'constants'
 require 'deployment_server'
 require 'nodeattr_interface'
 require 'primary_group'
 require 'templating/missing_parameter_wrapper'
 require 'templating/group_namespace'
-
 
 module Metalware
   module Templating
@@ -55,7 +56,7 @@ module Metalware
         GenderGroupProxy
       end
 
-      def groups(&block)
+      def groups
         PrimaryGroup.each do |group|
           yield group_namespace_for(group.name)
         end
@@ -66,7 +67,7 @@ module Metalware
           Hashie::Mash.load(Constants::HUNTER_PATH)
         else
           warning = \
-            "#{Constants::HUNTER_PATH} does not exist; need to run " +
+            "#{Constants::HUNTER_PATH} does not exist; need to run " \
             "'metal hunter' first. Falling back to empty hash for alces.hunter."
           MetalLog.warn warning
           Hashie::Mash.new
@@ -112,7 +113,6 @@ module Metalware
           end
         end
       end
-
     end
   end
 end

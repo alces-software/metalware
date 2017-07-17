@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -32,17 +34,15 @@ RSpec.describe Metalware::Commands::Configure::Group do
   end
 
   let :config { Metalware::Config.new }
-  let :groups_file {
-    File.join(Metalware::Constants::CACHE_PATH, 'groups.yaml' )
-  }
+  let :groups_file do
+    File.join(Metalware::Constants::CACHE_PATH, 'groups.yaml')
+  end
   let :groups_yaml { Metalware::Data.load(groups_file) }
   let :primary_groups { groups_yaml[:primary_groups] }
 
-  let :filesystem {
-    FileSystem.setup do |fs|
-      fs.with_minimal_repo
-    end
-  }
+  let :filesystem do
+    FileSystem.setup(&:with_minimal_repo)
+  end
 
   describe 'recording groups' do
     context 'when `cache/groups.yaml` does not exist' do
@@ -51,7 +51,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
           run_configure_group 'testnodes'
 
           expect(primary_groups).to eq [
-            'testnodes'
+            'testnodes',
           ]
         end
       end
@@ -60,11 +60,9 @@ RSpec.describe Metalware::Commands::Configure::Group do
     context 'when `cache/groups.yaml` exists' do
       it 'inserts primary group if new' do
         filesystem.test do
-          Metalware::Data.dump(groups_file, {
-            primary_groups: [
-              'first_group',
-            ]
-          })
+          Metalware::Data.dump(groups_file, primary_groups: [
+                                 'first_group',
+                               ])
 
           run_configure_group 'second_group'
 
@@ -73,17 +71,14 @@ RSpec.describe Metalware::Commands::Configure::Group do
             'second_group',
           ]
         end
-
       end
 
       it 'does nothing if primary group already presnt' do
         filesystem.test do
-          Metalware::Data.dump(groups_file, {
-            primary_groups: [
-              'first_group',
-              'second_group',
-            ]
-          })
+          Metalware::Data.dump(groups_file, primary_groups: [
+                                 'first_group',
+                                 'second_group',
+                               ])
 
           run_configure_group 'second_group'
 
@@ -94,6 +89,5 @@ RSpec.describe Metalware::Commands::Configure::Group do
         end
       end
     end
-
   end
 end

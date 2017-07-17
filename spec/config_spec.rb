@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -27,7 +29,6 @@ require 'exceptions'
 require 'constants'
 require 'spec_utils'
 
-
 RSpec.describe Metalware::Config do
   it 'can have default values retrieved' do
     config_file = SpecUtils.fixtures_config('empty.yaml')
@@ -47,9 +48,9 @@ RSpec.describe Metalware::Config do
 
   it 'raises if config file does not exist' do
     config_file = File.join(FIXTURES_PATH, 'configs/non-existent.yaml')
-    expect {
+    expect do
       Metalware::Config.new(config_file)
-    }.to raise_error(Metalware::MetalwareError)
+    end.to raise_error(Metalware::MetalwareError)
   end
 
   it 'uses default config file if none given' do

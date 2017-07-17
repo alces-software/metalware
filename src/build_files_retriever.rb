@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,7 +28,6 @@ require 'open-uri'
 require 'constants'
 require 'input'
 
-
 module Metalware
   class BuildFilesRetriever
     attr_reader :node_name, :config
@@ -40,7 +41,7 @@ module Metalware
       file_namespaces.map do |namespace, identifiers|
         [
           namespace,
-          identifiers.map { |identifier| file_hash_for(namespace, identifier) }
+          identifiers.map { |identifier| file_hash_for(namespace, identifier) },
         ]
       end.to_h
     end
@@ -60,7 +61,7 @@ module Metalware
       else
         error_file_hash(
           identifier,
-          error:  "Template path '#{template}' for '#{identifier}' does not exist"
+          error: "Template path '#{template}' for '#{identifier}' does not exist"
         )
       end
     rescue => error
@@ -88,7 +89,7 @@ module Metalware
       name = File.basename(identifier)
       {
         raw: identifier,
-        name: name
+        name: name,
       }
     end
 
@@ -110,7 +111,7 @@ module Metalware
     end
 
     def url?(identifier)
-      identifier =~ URI::regexp
+      identifier =~ URI.regexp
     end
 
     def absolute_path?(identifier)

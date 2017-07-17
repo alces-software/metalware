@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,12 +28,11 @@ require 'spec_utils'
 require 'config'
 
 RSpec.describe Metalware::Commands::Hosts do
-
   let :config { Metalware::Config.new }
 
   def run_hosts(node_identifier, **options_hash)
     # Adds default
-    options_hash[:template] = "default" unless options_hash.key?(:template)
+    options_hash[:template] = 'default' unless options_hash.key?(:template)
 
     SpecUtils.run_command(
       Metalware::Commands::Hosts, node_identifier, **options_hash
@@ -81,13 +82,13 @@ RSpec.describe Metalware::Commands::Hosts do
   end
 
   context 'when called for group' do
-    let :group_parameters {
+    let :group_parameters do
       [
         hash_including(nodename: 'testnode01'),
         hash_including(nodename: 'testnode02'),
-        hash_including(nodename: 'testnode03')
+        hash_including(nodename: 'testnode03'),
       ]
-    }
+    end
 
     it 'appends to hosts file by default' do
       group_parameters.each do |parameters|
@@ -104,13 +105,13 @@ RSpec.describe Metalware::Commands::Hosts do
 
     context 'when dry-run' do
       it 'outputs what would be appended' do
-      group_parameters.each do |parameters|
-        expect(Metalware::Templater).to receive(:render_to_stdout).with(
-          instance_of(Metalware::Config),
-          "#{config.repo_path}/hosts/default",
-          parameters
-        ).ordered
-      end
+        group_parameters.each do |parameters|
+          expect(Metalware::Templater).to receive(:render_to_stdout).with(
+            instance_of(Metalware::Config),
+            "#{config.repo_path}/hosts/default",
+            parameters
+          ).ordered
+        end
 
         run_hosts('testnodes', group: true, dry_run: true)
       end

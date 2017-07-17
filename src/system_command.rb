@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -22,7 +24,6 @@
 
 require 'exceptions'
 
-
 module Metalware
   module SystemCommand
     class << self
@@ -33,7 +34,7 @@ module Metalware
         stdout, stderr, status = Open3.capture3(command)
         if status.exitstatus != 0
           raise SystemCommandError,
-            "'#{command}' produced error '#{stderr.strip}'"
+                "'#{command}' produced error '#{stderr.strip}'"
         else
           stdout
         end

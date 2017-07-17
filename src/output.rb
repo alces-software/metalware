@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -25,9 +27,7 @@ module Metalware
     class << self
       def stderr(*lines)
         # Don't output anything in unit tests to prevent noise.
-        if $0 !~ /rspec$/
-          $stderr.puts(*lines)
-        end
+        $stderr.puts(*lines) if $PROGRAM_NAME !~ /rspec$/
       end
 
       def stderr_indented_error_message(text)

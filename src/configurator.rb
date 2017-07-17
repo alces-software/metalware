@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -50,14 +52,14 @@ module Metalware
     private
 
     attr_reader :highline,
-      :configure_file,
-      :questions_section,
-      :answers_file,
-      :use_readline
+                :configure_file,
+                :questions_section,
+                :answers_file,
+                :use_readline
 
     def questions
-      @questions ||= Data.load(configure_file)[questions_section].
-        map{ |identifier, properties| create_question(identifier, properties) }
+      @questions ||= Data.load(configure_file)[questions_section]
+                         .map { |identifier, properties| create_question(identifier, properties) }
     end
 
     def old_answers
@@ -87,15 +89,15 @@ module Metalware
     end
 
     class Question
-      VALID_TYPES = [:boolean, :choice, :integer, :string]
+      VALID_TYPES = [:boolean, :choice, :integer, :string].freeze
 
       attr_reader :identifier,
-        :question,
-        :type,
-        :choices,
-        :default,
-        :required,
-        :use_readline
+                  :question,
+                  :type,
+                  :choices,
+                  :default,
+                  :required,
+                  :use_readline
 
       def initialize(
         identifier:,
@@ -125,7 +127,7 @@ module Metalware
 
       def ask(highline)
         ask_method = "ask_#{type}_question"
-        self.send(ask_method, highline) do |highline_question|
+        send(ask_method, highline) do |highline_question|
           highline_question.readline = true if use_readline
 
           if default.present?
@@ -142,19 +144,19 @@ module Metalware
         highline.agree(question + ' [yes/no]') { |q| yield q }
       end
 
-      def ask_choice_question(highline, &block)
+      def ask_choice_question(highline)
         highline.choose(*choices) do |menu|
           menu.prompt = question
           yield menu
         end
       end
 
-      def ask_integer_question(highline, &block)
-        highline.ask(question, Integer)  { |q| yield q }
+      def ask_integer_question(highline)
+        highline.ask(question, Integer) { |q| yield q }
       end
 
-      def ask_string_question(highline, &block)
-        highline.ask(question)  { |q| yield q }
+      def ask_string_question(highline)
+        highline.ask(question) { |q| yield q }
       end
 
       def type_for(value, configure_file:, questions_section:)
@@ -165,7 +167,7 @@ module Metalware
           value
         else
           message = \
-            "Unknown question type '#{value}' for " +
+            "Unknown question type '#{value}' for " \
             "#{questions_section}.#{identifier} in #{configure_file}"
           raise UnknownQuestionTypeError, message
         end
@@ -197,9 +199,9 @@ module Metalware
       end
 
       def ensure_answer_given
-        HighLinePrettyValidateProc.new("a non-empty input") { |input|
+        HighLinePrettyValidateProc.new('a non-empty input') do |input|
           !input.empty?
-        }
+        end
       end
 
       class HighLinePrettyValidateProc < Proc

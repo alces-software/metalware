@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -27,18 +29,17 @@ require 'node'
 require 'spec_utils'
 require 'config'
 
-
 RSpec.describe Metalware::Commands::Build do
   let :metal_config { Metalware::Config.new }
 
   def run_build(node_identifier, **options_hash)
     # Adds the default values if they do not exist
-    options_hash[:kickstart] = "default" unless options_hash.key?(:kickstart)
-    options_hash[:pxelinux] = "default" unless options_hash.key?(:pxelinux)
+    options_hash[:kickstart] = 'default' unless options_hash.key?(:kickstart)
+    options_hash[:pxelinux] = 'default' unless options_hash.key?(:pxelinux)
 
     # Run command in timeout as `build` will wait indefinitely, but want to
     # abort tests if it looks like this is happening.
-    Timeout::timeout 0.5 do
+    Timeout.timeout 0.5 do
       SpecUtils.run_command(
         Metalware::Commands::Build, node_identifier, **options_hash
       )
@@ -65,7 +66,7 @@ RSpec.describe Metalware::Commands::Build do
 
   def expect_runs_longer_than(seconds, &block)
     expect do
-      Timeout::timeout(seconds, &block)
+      Timeout.timeout(seconds, &block)
     end.to raise_error Timeout::Error
   end
 
@@ -93,13 +94,13 @@ RSpec.describe Metalware::Commands::Build do
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/kickstart/default",
         '/var/lib/metalware/rendered/kickstart/testnode01',
-        expected_template_parameters,
+        expected_template_parameters
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters,
+        expected_template_parameters
       ).at_least(:once)
 
       run_build('testnode01')
@@ -110,13 +111,13 @@ RSpec.describe Metalware::Commands::Build do
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/kickstart/my_kickstart",
         '/var/lib/metalware/rendered/kickstart/testnode01',
-        expected_template_parameters,
+        expected_template_parameters
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/pxelinux/my_pxelinux",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters,
+        expected_template_parameters
       ).at_least(:once)
 
       run_build(
@@ -134,7 +135,7 @@ RSpec.describe Metalware::Commands::Build do
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters,
+        expected_template_parameters
       ).once
 
       expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
@@ -145,16 +146,16 @@ RSpec.describe Metalware::Commands::Build do
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters,
+        expected_template_parameters
       ).once.ordered
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters.merge(firstboot: false),
+        expected_template_parameters.merge(firstboot: false)
       ).once.ordered
 
-       run_build('testnode01')
+      run_build('testnode01')
     end
 
     describe 'files rendering' do
@@ -219,5 +220,4 @@ RSpec.describe Metalware::Commands::Build do
       )
     end
   end
-
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -23,14 +25,12 @@
 require 'templating/iterable_recursive_open_struct'
 
 RSpec.describe Metalware::Templating::IterableRecursiveOpenStruct do
-  subject {
-    Metalware::Templating::IterableRecursiveOpenStruct.new({
-      prop: 'value',
-      nested: {
-        prop: 'nested_value',
-      }
-    })
-  }
+  subject do
+    Metalware::Templating::IterableRecursiveOpenStruct.new(prop: 'value',
+                                                           nested: {
+                                                             prop: 'nested_value',
+                                                           })
+  end
 
   describe 'property setting and access' do
     it 'works as for RecursiveOpenStruct' do
@@ -47,7 +47,7 @@ RSpec.describe Metalware::Templating::IterableRecursiveOpenStruct do
       keys = []
       values = []
 
-      subject.each do |k,v|
+      subject.each do |k, v|
         keys << k
         values << v
       end
@@ -57,16 +57,16 @@ RSpec.describe Metalware::Templating::IterableRecursiveOpenStruct do
 
       # Converts any hash values to same class before iterating.
       expect(values.last).to eq(
-        Metalware::Templating::IterableRecursiveOpenStruct.new({prop: 'nested_value'})
+        Metalware::Templating::IterableRecursiveOpenStruct.new(prop: 'nested_value')
       )
     end
   end
 
   describe '#each=' do
     it 'raises to prevent setting value for each' do
-      expect {
+      expect do
         subject.each = 'some_value'
-      }.to raise_error Metalware::IterableRecursiveOpenStructPropertyError
+      end.to raise_error Metalware::IterableRecursiveOpenStructPropertyError
     end
   end
 end

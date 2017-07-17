@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -31,8 +33,8 @@ module Metalware
       # determined by whether they are supplied.
 
       # NOTE: Supported types in error.yaml message must be updated manually
-      SUPPORTED_TYPES = ["string", "integer", "boolean", "choice"].freeze
-      ERROR_FILE = File.join(File.dirname(__FILE__), "errors.yaml").freeze
+      SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
+      ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def initialize(file)
         @yaml = Data.load(file)
@@ -46,7 +48,7 @@ module Metalware
               payload = {
                 section: section,
                 identifier: identifier,
-                parameters: parameters
+                parameters: parameters,
               }
               question_results = QuestionSchema.call(payload)
               return question_results unless question_results.success?
@@ -83,16 +85,16 @@ module Metalware
           # the RHS determines the error message. Hence the RHS needs to be
           # as simple as possible otherwise the error message will be crazy
           rule(default_string_type: [:default, :type]) do |default, type|
-            (default.filled? & (type.none? | type.eql?("string"))) > default.str?
+            (default.filled? & (type.none? | type.eql?('string'))) > default.str?
           end
 
           rule(default_integer_type: [:default, :type]) do |default, type|
-            (default.filled? & type.eql?("integer")) > default.int?
+            (default.filled? & type.eql?('integer')) > default.int?
           end
 
           # Boolean and choice does not currently support default answers
           rule(default_boolean_type: [:default, :type]) do |default, type|
-            default.none? | type.excluded_from?(["boolean", "choice"])
+            default.none? | type.excluded_from?(['boolean', 'choice'])
           end
         end
       end
@@ -108,7 +110,7 @@ module Metalware
           (yaml.keys - [:domain, :group, :node, :questions]).empty?
         end
 
-        required(:yaml).schema do 
+        required(:yaml).schema do
           required(:domain).value(:hash?)
           required(:group).value(:hash?)
           required(:node).value(:hash?)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -45,7 +47,7 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["hosts/#{@options.template}"]
+          repo: ["hosts/#{@options.template}"],
         }
       end
 

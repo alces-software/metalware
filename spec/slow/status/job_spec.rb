@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -34,14 +36,14 @@ RSpec.describe Metalware::Status::Job do
       until 1 == 2; end
     })
     Metalware::Status::Job.send(:define_method, :bash_sleep, lambda {
-      run_bash("sleep 100")
+      run_bash('sleep 100')
     })
   end
 
   before :example do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
-    @config = Metalware::Config.new()
+    @config = Metalware::Config.new
     @cmd = :busy_sleep
     @node = 'node_name_not_found'
     @time_limit = 2
@@ -49,12 +51,12 @@ RSpec.describe Metalware::Status::Job do
   end
 
   after(:each) do
-    Thread.list.each { |t|
+    Thread.list.each do |t|
       unless t == Thread.current
         t.kill
         t.join
       end
-    }
+    end
     Metalware::Status::Job.instance_variable_set(:@results, nil)
   end
 
@@ -65,7 +67,7 @@ RSpec.describe Metalware::Status::Job do
   end
 
   it 'runs bash commands' do
-    output = "STDOUT"
+    output = 'STDOUT'
     cmd = "echo -n \"#{output}\""
     expect(@job.instance_variable_get(:@bash_pid)).to eq(nil)
     expect(@job.run_bash(cmd)).to eq(output)
@@ -78,31 +80,29 @@ RSpec.describe Metalware::Status::Job do
     sleep @time_limit / 2
     @job.thread.kill
     @job.thread.join
-    expect{
+    expect do
       Process.kill(0, @job.instance_variable_get(:@bash_pid))
-    }.to raise_error(Errno::ESRCH)
+    end.to raise_error(Errno::ESRCH)
   end
 
   context 'when started' do
     it 'busy_sleep timesout and reports results' do
-      Timeout::timeout(@time_limit + 1) {
+      Timeout.timeout(@time_limit + 1) do
         @job.start
         sleep @time_limit / 2
         expect(@job.thread.alive?).to eq(true)
         @job.thread.join
-      }
+      end
 
       results = Metalware::Status::Job.results
-      expect(results).to eq({
-        @node => {
-          @cmd => "timeout"
-        }
-      })
+      expect(results).to eq(@node => {
+                              @cmd => 'timeout',
+                            })
     end
 
     it 'calls commands through CLI library' do
-      @job.define_singleton_method(:job_power_status, lambda { "POWER_STATUS" })
-      @job.define_singleton_method(:job_ping_node, lambda { "PING_NODE" })
+      @job.define_singleton_method(:job_power_status, -> { 'POWER_STATUS' })
+      @job.define_singleton_method(:job_ping_node, -> { 'PING_NODE' })
 
       @job.instance_variable_set(:@cmd, :ping)
       @job.start
@@ -112,12 +112,10 @@ RSpec.describe Metalware::Status::Job do
       @job.start
       @job.thread.join
 
-      expect(Metalware::Status::Job.results).to eq({
-        @node => {
-          ping: "PING_NODE",
-          power: "POWER_STATUS"
-        }
-      })
+      expect(Metalware::Status::Job.results).to eq(@node => {
+                                                     ping: 'PING_NODE',
+                                                     power: 'POWER_STATUS',
+                                                   })
     end
   end
 end

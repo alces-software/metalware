@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -27,37 +29,37 @@ require 'highline'
 require 'configurator'
 
 RSpec.describe Metalware::Configurator do
-  let :input {
+  let :input do
     Tempfile.new
-  }
+  end
 
-  let :output {
+  let :output do
     Tempfile.new
-  }
+  end
 
-  let :highline {
+  let :highline do
     HighLine.new(input, output)
-  }
+  end
 
-  let :configure_file {
+  let :configure_file do
     Tempfile.new('configure.yaml')
-  }
+  end
 
-  let :configure_file_path {
+  let :configure_file_path do
     configure_file.path
-  }
+  end
 
-  let :answers_file_path {
+  let :answers_file_path do
     Tempfile.new('test.yaml').path
-  }
+  end
 
-  let :answers {
+  let :answers do
     Metalware::Data.load(answers_file_path)
-  }
+  end
 
-  let :configurator {
+  let :configurator do
     make_configurator
-  }
+  end
 
   def make_configurator(hl = highline)
     Metalware::Configurator.new(
@@ -76,15 +78,17 @@ RSpec.describe Metalware::Configurator do
     configure_file.rewind
   end
 
-  def redirect_stdout(&block)
+  def redirect_stdout
     $stdout = tmp = Tempfile.new
-    block.call
+    yield
     tmp.close
   rescue => e
     begin
       $stdout.rewind
       STDERR.puts $stdout.read
     rescue
+      # XXX Not handling this gives a Rubocop warning; should we do something
+      # here?
     end
     raise e
   ensure
@@ -106,65 +110,50 @@ RSpec.describe Metalware::Configurator do
 
   describe '#configure' do
     it 'asks questions with type `string`' do
-      define_questions({
-        test: {
-          string_q: {
-            question: 'Can you enter a string?',
-            type: 'string'
-          }
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'Can you enter a string?',
+                           type: 'string',
+                         },
+                       })
 
       configure_with_answers(['My string'])
 
-      expect(answers).to eq({
-        string_q: 'My string'
-      })
+      expect(answers).to eq(string_q: 'My string')
     end
 
-
     it 'asks questions with no `type` as `string`' do
-      define_questions({
-        test: {
-          string_q: {
-            question: 'Can you enter a string?'
-          }
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'Can you enter a string?',
+                         },
+                       })
 
       configure_with_answers(['My string'])
 
-      expect(answers).to eq({
-        string_q: 'My string'
-      })
+      expect(answers).to eq(string_q: 'My string')
     end
 
     it 'asks questions with type `integer`' do
-      define_questions({
-        test: {
-          integer_q: {
-            question: 'Can you enter an integer?',
-            type: 'integer'
-          }
-        }
-      })
+      define_questions(test: {
+                         integer_q: {
+                           question: 'Can you enter an integer?',
+                           type: 'integer',
+                         },
+                       })
 
       configure_with_answers(['7'])
 
-      expect(answers).to eq({
-        integer_q: 7
-      })
+      expect(answers).to eq(integer_q: 7)
     end
 
     it "uses confirmation for questions with type 'boolean'" do
-      define_questions({
-        test: {
-          boolean_q: {
-            question: 'Should this cluster be awesome?',
-            type: 'boolean'
-          }
-        }
-      })
+      define_questions(test: {
+                         boolean_q: {
+                           question: 'Should this cluster be awesome?',
+                           type: 'boolean',
+                         },
+                       })
 
       expect(highline).to receive(
         :agree
@@ -176,21 +165,17 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers(['yes'])
 
-      expect(answers).to eq({
-        boolean_q: true
-      })
+      expect(answers).to eq(boolean_q: true)
     end
 
     it "offers choices for question with type 'choice'" do
-      define_questions({
-        test: {
-          choice_q: {
-            question: 'What choice would you like?',
-            type: 'choice',
-            choices: ['foo', 'bar']
-          }
-        }
-      })
+      define_questions(test: {
+                         choice_q: {
+                           question: 'What choice would you like?',
+                           type: 'choice',
+                           choices: ['foo', 'bar'],
+                         },
+                       })
 
       expect(highline).to receive(
         :choose
@@ -200,142 +185,129 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers(['bar'])
 
-      expect(answers).to eq({
-        choice_q: 'bar'
-      })
+      expect(answers).to eq(choice_q: 'bar')
     end
 
     it 'asks all questions in order' do
-      define_questions({
-        test: {
-          string_q: {
-            question: 'String?',
-            type: 'string',
-          },
-          integer_q: {
-            question: 'Integer?',
-            type: 'integer',
-          },
-          boolean_q: {
-            question: 'Boolean?',
-            type: 'boolean',
-          },
-        },
-        some_other_questions: {
-          not_asked_q: {
-            question: 'Not asked?'
-          }
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'String?',
+                           type: 'string',
+                         },
+                         integer_q: {
+                           question: 'Integer?',
+                           type: 'integer',
+                         },
+                         boolean_q: {
+                           question: 'Boolean?',
+                           type: 'boolean',
+                         },
+                       },
+                       some_other_questions: {
+                         not_asked_q: {
+                           question: 'Not asked?',
+                         },
+                       })
 
       configure_with_answers(['Some string', '11', 'no'])
 
       expect(answers).to eq(
         string_q: 'Some string',
         integer_q: 11,
-        boolean_q: false,
+        boolean_q: false
       )
     end
 
     it 'fails fast for question with unknown type' do
-      define_questions({
-        test: {
-          # This question
-          string_q: {
-            question: 'String?',
-            type: 'string',
-          },
-          unknown_q: {
-            question: 'Something odd?',
-            type: 'foobar',
-          }
-        },
-      })
+      define_questions(test: {
+                         # This question
+                         string_q: {
+                           question: 'String?',
+                           type: 'string',
+                         },
+                         unknown_q: {
+                           question: 'Something odd?',
+                           type: 'foobar',
+                         },
+                       })
 
-      expect {
+      expect do
         configurator.send(:questions)
-      }.to raise_error(
+      end.to raise_error(
         Metalware::UnknownQuestionTypeError,
         /'foobar'.*test\.unknown_q.*#{configure_file_path}/
       )
     end
 
     it 'loads default values' do
-
-      str_ans = "I am a little teapot!!"
+      str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
-      define_questions({
-        test: {
-          string_q: {
-            question: 'String?',
-            type: 'string',
-            default: str_ans
-          },
-          string_erb: {
-            question: 'Erb?',
-            default: erb_ans,
-          },
-          integer_q: {
-            question: 'Integer?',
-            type: 'integer',
-            default: 10
-          },
-          true_boolean_q: {
-            question: 'Boolean?',
-            type: 'boolean',
-            default: true
-          },
-          false_boolean_q: {
-            question: 'More boolean?',
-            type: 'boolean',
-            default: false
-          },
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'String?',
+                           type: 'string',
+                           default: str_ans,
+                         },
+                         string_erb: {
+                           question: 'Erb?',
+                           default: erb_ans,
+                         },
+                         integer_q: {
+                           question: 'Integer?',
+                           type: 'integer',
+                           default: 10,
+                         },
+                         true_boolean_q: {
+                           question: 'Boolean?',
+                           type: 'boolean',
+                           default: true,
+                         },
+                         false_boolean_q: {
+                           question: 'More boolean?',
+                           type: 'boolean',
+                           default: false,
+                         },
+                       })
 
       configure_with_answers([''] * 5)
 
-      expect(answers).to eq({
-        string_q: str_ans,
-        string_erb: erb_ans,
-        integer_q: 10,
-        true_boolean_q: true,
-        false_boolean_q: false
-      })
+      expect(answers).to eq(string_q: str_ans,
+                            string_erb: erb_ans,
+                            integer_q: 10,
+                            true_boolean_q: true,
+                            false_boolean_q: false)
     end
 
     it 'loads the old answers as defaults' do
-      define_questions({
-        test: {
-          string_q: {
-            question: "String?",
-            default: "This is the wrong string"
-          },
-          integer_q: {
-            question: 'Integer?',
-            type: 'integer',
-            default: 10
-          },
-          false_saved_boolean_q: {
-            question: 'Boolean?',
-            type: 'boolean',
-            default: true
-          },
-          true_saved_boolean_q: {
-            question: 'More boolean?',
-            type: 'boolean',
-            default: false
-          },
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'String?',
+                           default: 'This is the wrong string',
+                         },
+                         integer_q: {
+                           question: 'Integer?',
+                           type: 'integer',
+                           default: 10,
+                         },
+                         false_saved_boolean_q: {
+                           question: 'Boolean?',
+                           type: 'boolean',
+                           default: true,
+                         },
+                         true_saved_boolean_q: {
+                           question: 'More boolean?',
+                           type: 'boolean',
+                           default: false,
+                         },
+                       })
 
       old_answers = {
-        string_q: "CORRECT",
+        string_q: 'CORRECT',
         integer_q: -100,
         false_saved_boolean_q: false,
         true_saved_boolean_q: true,
-        should_not_see_me: "OHHH SNAP",
+        should_not_see_me: 'OHHH SNAP',
       }
       new_answers = old_answers.dup.tap { |h| h.delete(:should_not_see_me) }
 
@@ -351,15 +323,13 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-asks the required questions if no answer is given' do
-      define_questions({
-        test: {
-          string_q: {
-            question: "I should be re-asked"
-          }
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'I should be re-asked',
+                         },
+                       })
 
-      expect{
+      expect do
         old_stderr = STDERR
         begin
           $stderr = Tempfile.new
@@ -372,7 +342,7 @@ RSpec.describe Metalware::Configurator do
         # NOTE: EOFError occurs because HighLine is reading from an array of
         # end-line-characters. However as this is not a valid input it keeps
         # re-asking until it reaches the end and throws EOFError
-      }.to raise_error(EOFError)
+      end.to raise_error(EOFError)
 
       output.rewind
       # Checks it was re-asked twice.
@@ -381,16 +351,14 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'allows optional questions to have empty answers' do
-      define_questions({
-        test: {
-          string_q: {
-            question: "I should NOT be re-asked",
-            optional: true
-          }
-        }
-      })
+      define_questions(test: {
+                         string_q: {
+                           question: 'I should NOT be re-asked',
+                           optional: true,
+                         },
+                       })
       expected = {
-        string_q: ''
+        string_q: '',
       }
 
       configure_with_answers([''])

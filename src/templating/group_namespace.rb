@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 module Metalware
   module Templating
     class GroupNamespace
@@ -16,7 +18,7 @@ module Metalware
         )
       end
 
-      def nodes(&block)
+      def nodes
         NodeattrInterface.nodes_in_group(name).each do |node_name|
           yield templating_config_for_node(node_name)
         end

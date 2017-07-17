@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -23,4 +25,4 @@
 
 require_relative '../src/cli.rb'
 
-Metalware::Cli.new.run if $0 == __FILE__
+Metalware::Cli.new.run if $PROGRAM_NAME == __FILE__

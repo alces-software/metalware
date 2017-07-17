@@ -1,29 +1,34 @@
 
-require 'data'
+# frozen_string_literal: true
 
+require 'data'
 
 RSpec.describe Metalware::Data do
   let :data_file_path { '/path/to/some_data.yaml' }
 
-  let :string_keyed_data {{
+  let :string_keyed_data do
+    {
       'a_key' => 'foo',
       'another_key' => {
         'nested' => 'bar',
       },
-  }}
-
-  let :symbol_keyed_data {{
-    a_key: 'foo',
-    another_key: {
-      nested: 'bar',
     }
-  }}
+  end
 
-  let :filesystem {
+  let :symbol_keyed_data do
+    {
+      a_key: 'foo',
+      another_key: {
+        nested: 'bar',
+      },
+    }
+  end
+
+  let :filesystem do
     FileSystem.setup do |fs|
-      fs.mkdir_p(File.dirname data_file_path)
+      fs.mkdir_p(File.dirname(data_file_path))
     end
-  }
+  end
 
   describe '#load' do
     subject { Metalware::Data.load(data_file_path) }

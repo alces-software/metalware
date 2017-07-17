@@ -1,14 +1,16 @@
 
+# frozen_string_literal: true
+
 RSpec.describe Metalware::Templating::MagicNamespace do
   # Note: many `MagicNamespace` features are tested at the `Templater` level
   # instead.
 
   describe '#groups' do
-    subject {
+    subject do
       Metalware::Templating::MagicNamespace.new(
         config: Metalware::Config.new
       )
-    }
+    end
 
     it 'calls the passed block with a group namespace for each primary group' do
       FileSystem.test do |fs|
@@ -23,6 +25,5 @@ RSpec.describe Metalware::Templating::MagicNamespace do
         expect(group_names).to eq(['some_group', 'testnodes'])
       end
     end
-
   end
 end

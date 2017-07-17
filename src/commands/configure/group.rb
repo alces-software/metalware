@@ -1,12 +1,12 @@
 
+# frozen_string_literal: true
+
 require 'command_helpers/configure_command'
 require 'constants'
-
 
 module Metalware
   module Commands
     module Configure
-
       class Group < CommandHelpers::ConfigureCommand
         def setup(args, _options)
           @group_name = args.first
@@ -46,7 +46,6 @@ module Metalware
           @groups_cache ||= Data.load(Constants::GROUPS_CACHE_PATH)
         end
       end
-
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,9 +28,7 @@ require 'minimal_repo'
 
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
 
-
 class FileSystem
-
   # Only interface to `FileSystem` is to call `FileSystem.setup` and then later
   # `test` on the resulting object, or to call `FileSystem.test` directly.
   private_class_method :new
@@ -63,7 +63,7 @@ class FileSystem
     end
   end
 
-  def self.test(configurator=FileSystemConfigurator.new, &block)
+  def self.test(configurator = FileSystemConfigurator.new)
     # Ensure the FakeFS is in a fresh state. XXX needed?
     FakeFS.deactivate!
     FakeFS.clear!

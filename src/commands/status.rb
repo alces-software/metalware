@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -32,14 +34,14 @@ module Metalware
       def setup(args, options)
         @opt = options
         if @opt.thread_limit < 1
-          raise InvalidInput, "The thread limit can not be less than 1"
+          raise InvalidInput, 'The thread limit can not be less than 1'
         elsif @opt.wait_limit < 1
-          raise InvalidInput, "The wait limit can not be less than 1s"
+          raise InvalidInput, 'The wait limit can not be less than 1s'
         end
         @cmds = [:power, :ping]
         node_identifier = args.first
         @nodes = Nodes.create(@config, node_identifier, options.group)
-        @nodes = @nodes.to_a.map { |e| e.name }
+        @nodes = @nodes.to_a.map(&:name)
       end
 
       def run
@@ -47,39 +49,37 @@ module Metalware
         collect_data
         @monitor.thread.join
       end
-      
+
       def start_monitor
-        @monitor = Metalware::Status::Monitor.new({
-            nodes: @nodes,
-            cmds: @cmds,
-            thread_limit: @opt.thread_limit,
-            wait_limit: @opt.wait_limit
-          })
+        @monitor = Metalware::Status::Monitor.new(nodes: @nodes,
+                                                  cmds: @cmds,
+                                                  thread_limit: @opt.thread_limit,
+                                                  wait_limit: @opt.wait_limit)
         @monitor.start
       end
 
       def collect_data
         data = {}
         empty_count = 0
-        while data["FINISHED"] != true
+        while data['FINISHED'] != true
           data = get_finished_data
-          
+
           if data.empty?
             empty_count += 1
             raise StatusDataIncomplete if empty_count > 100 && @monitor.thread.stop?
-          elsif data["FINISHED"] != true
+          elsif data['FINISHED'] != true
             display_data data
             empty_count = 0
           end
-          
-          sleep 1 if data.empty?# Only looks for updated data every second
+
+          sleep 1 if data.empty? # Only looks for updated data every second
         end
       end
 
       def display_data(data = {})
         print_header unless @header_been_printed
-        
-        format_str = "%-10s"
+
+        format_str = '%-10s'
         printf format_str, data[:nodename]
         @cmds.each { |cmd| printf " | #{format_str}", data[cmd] }
         puts
@@ -89,8 +89,8 @@ module Metalware
         @header_been_printed = true
         header_data = {}
         header_underline_hash = {}
-        header_underline_string = "----------"
-        header_data[:nodename] = "Node"
+        header_underline_string = '----------'
+        header_data[:nodename] = 'Node'
         header_underline_hash[:nodename] = header_underline_string
         @cmds.each do |c|
           header_data[c] = c.to_s.capitalize
@@ -102,7 +102,7 @@ module Metalware
 
       def get_finished_data
         @finished_node_index ||= 0
-        return {"FINISHED" => true} unless @finished_node_index < @nodes.length
+        return { 'FINISHED' => true } unless @finished_node_index < @nodes.length
         nodename = @nodes[@finished_node_index]
 
         current_results = Metalware::Status::Job.results.tap do |r|
@@ -112,7 +112,7 @@ module Metalware
           @cmds.each { |cmd| return {} unless r.key? cmd }
           r[:nodename] = nodename
         end
-        
+
         @finished_node_index += 1
         current_results[nodename]
       end
