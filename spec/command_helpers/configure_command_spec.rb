@@ -8,16 +8,18 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
 
   # Subclass of `ConfigureCommand` for use in tests, to test it independently
   # of any individual subclass.
-  class Domain < Metalware::CommandHelpers::ConfigureCommand
+  class TestCommand < Metalware::CommandHelpers::ConfigureCommand
     protected
 
     def setup(args, options)
     end
 
-    # Overridden as superclass method depends on this being in the
-    # `Metalware::Commands` namespace.
-    def command_name
-      :domain
+    # Overridden to be three element array with third a valid `configure.yaml`
+    # questions section; `BaseCommand` expects command classes to be namespaced
+    # by two modules, and `ConfigureCommand` determines questions section,
+    # which must be valid, from the class name.
+    def class_name_parts
+      [:some, :namespace, :domain]
     end
 
     def answers_file
@@ -43,7 +45,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
           Metalware::Constants::HOSTS_PATH
       ).ordered.and_call_original
 
-      SpecUtils.run_command(Domain)
+      SpecUtils.run_command(TestCommand)
     end
   end
 end
