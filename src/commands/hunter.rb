@@ -55,7 +55,8 @@ module Metalware
 
       def listen!
         Output.stderr \
-          'Waiting for new nodes to appear on the network, please network boot them now...',
+          'Waiting for new nodes to appear on the network, please network ' \
+          'boot them now...',
           '(Ctrl-C to terminate)'
 
         @network.each_packet do |packet|
@@ -64,8 +65,10 @@ module Metalware
       end
 
       def setup_network_connection
-        @network ||= Pcaplet.new("-s 600 -n -i #{@options.interface}").tap do |network|
-          filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
+        pcaplet_options = "-s 600 -n -i #{@options.interface}"
+        @network ||= Pcaplet.new(pcaplet_options).tap do |network|
+          filter_string = 'udp port 67 and udp port 68'
+          filter = Pcap::Filter.new(filter_string, network.capture)
           network.add_filter(filter)
         end
       end
@@ -106,7 +109,9 @@ module Metalware
         @detection_count += 1
 
         begin
-          name_node_question = "Detected a machine on the network (#{hwaddr}). Please enter the hostname:"
+          name_node_question = \
+            "Detected a machine on the network (#{hwaddr}). Please enter " \
+            'the hostname:'
           name = ask(name_node_question) do |answer|
             answer.default = default_name
           end
