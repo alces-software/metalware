@@ -113,7 +113,7 @@ module Metalware
 
         detected_macs << hwaddr
 
-        if options.ignore_duplicate_macs
+        if options.ignore_duplicate_macs && previously_hunted?(hwaddr)
           notify_user_of_ignored_mac(hwaddr)
           return
         end
@@ -121,16 +121,20 @@ module Metalware
         handle_new_detected_mac(hwaddr)
       end
 
+      def previously_hunted?(hwaddr)
+        cached_macs_to_nodes.include?(hwaddr)
+      end
+
       def notify_user_of_ignored_mac(hwaddr)
-        assigned_node_name = hunter_data.invert[hwaddr]
+        assigned_node_name = cached_macs_to_nodes[hwaddr]
         message = \
           'Detected already hunted MAC address on network ' \
           "(#{hwaddr} / #{assigned_node_name}); ignoring."
         Output.stderr message
       end
 
-      def hunter_data
-        Data.load(Constants::HUNTER_PATH)
+      def cached_macs_to_nodes
+        Data.load(Constants::HUNTER_PATH).invert
       end
 
       def handle_new_detected_mac(hwaddr)
