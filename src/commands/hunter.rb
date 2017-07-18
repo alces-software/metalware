@@ -110,10 +110,16 @@ module Metalware
 
       def detected(hwaddr)
         return if detected_macs.include?(hwaddr)
-        default_name = sequenced_name
 
         detected_macs << hwaddr
         @detection_count += 1
+
+        if options.ignore_duplicate_macs
+          notify_user_of_ignored_mac(hwaddr)
+          return
+        end
+
+        default_name = sequenced_name
 
         begin
           name_node_question = \
@@ -131,6 +137,18 @@ module Metalware
           Output.stderr "FAIL: #{e.message}"
           retry if agree('Retry? [yes/no]:')
         end
+      end
+
+      def notify_user_of_ignored_mac(hwaddr)
+        assigned_node_name = hunter_data.invert[hwaddr]
+        message = \
+          'Detected already hunted MAC address on network ' \
+          "(#{hwaddr} / #{assigned_node_name}); ignoring."
+        Output.stderr message
+      end
+
+      def hunter_data
+        Data.load(Constants::HUNTER_PATH)
       end
 
       def record_hunted_pair(node_name, mac_address)

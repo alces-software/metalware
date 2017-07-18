@@ -203,6 +203,10 @@ commands:
         default: 1
         description: >
           Start integer to use for suggested detected node names
+      - tags: [-d, --ignore-duplicate-macs]
+        description: >
+          Ignore any MAC addresses found which are already associated with a
+          node name in the hunter cache
 
   ipmi:
     syntax: metal ipmi NODE_IDENTIFIER [options]
