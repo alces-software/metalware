@@ -45,7 +45,7 @@ module Metalware
         if node.name.present?
           MissingParameterWrapper.new(node.answers, raise_on_missing: true)
         else
-          Hashie::Mash.new
+          Hashie::Mash.new(node.answers)
         end
       end
 
