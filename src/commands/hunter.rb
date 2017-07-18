@@ -38,6 +38,13 @@ module Metalware
     class Hunter < CommandHelpers::BaseCommand
       private
 
+      attr_reader \
+        :detected_macs,
+        :detection_count,
+        :hunter_log,
+        :network,
+        :options
+
       def setup(_args, options)
         @hunter_log = MetalLog.new('hunter')
 
@@ -55,70 +62,99 @@ module Metalware
 
       def listen!
         Output.stderr \
-          'Waiting for new nodes to appear on the network, please network boot them now...',
+          'Waiting for new nodes to appear on the network, please network ' \
+          'boot them now...',
           '(Ctrl-C to terminate)'
 
-        @network.each_packet do |packet|
+        network.each_packet do |packet|
           process_packet(packet.udp_data) if packet.udp?
         end
       end
 
       def setup_network_connection
-        @network ||= Pcaplet.new("-s 600 -n -i #{@options.interface}").tap do |network|
-          filter = Pcap::Filter.new('udp port 67 and udp port 68', network.capture)
+        pcaplet_options = "-s 600 -n -i #{options.interface}"
+        @network ||= Pcaplet.new(pcaplet_options).tap do |network|
+          filter_string = 'udp port 67 and udp port 68'
+          filter = Pcap::Filter.new(filter_string, network.capture)
           network.add_filter(filter)
         end
       end
 
       def process_packet(data)
-        @hunter_log.info 'Processing received UDP packet'
+        hunter_log.info 'Processing received UDP packet'
         message = DHCP::Message.from_udp_payload(data, debug: false)
         process_message(message) if message.is_a?(DHCP::Discover)
       end
 
       def process_message(message)
-        @hunter_log.info 'Processing DHCP::Discover message options'
+        hunter_log.info 'Processing DHCP::Discover message options'
         message.options.each do |o|
           detected(hwaddr_from(message)) if pxe_client?(o)
         end
       end
 
       def hwaddr_from(message)
-        @hunter_log.info 'Determining hardware address'
+        hunter_log.info 'Determining hardware address'
         message.chaddr.slice(0..(message.hlen - 1)).map do |b|
           b.to_s(16).upcase.rjust(2, '0')
         end.join(':').tap do |hwaddr|
-          @hunter_log.info "Detected hardware address: #{hwaddr}"
+          hunter_log.info "Detected hardware address: #{hwaddr}"
         end
       end
 
       def pxe_client?(o)
         o.is_a?(DHCP::VendorClassIDOption) && o.payload.pack('C*').tap do |vendor|
-          @hunter_log.info "Detected vendor: #{vendor}"
+          hunter_log.info "Detected vendor: #{vendor}"
         end =~ /^PXEClient/
       end
 
       def detected(hwaddr)
-        return if @detected_macs.include?(hwaddr)
-        default_name = sequenced_name
+        return if detected_macs.include?(hwaddr)
 
-        @detected_macs << hwaddr
+        detected_macs << hwaddr
+
+        if options.ignore_duplicate_macs && previously_hunted?(hwaddr)
+          notify_user_of_ignored_mac(hwaddr)
+          return
+        end
+
+        handle_new_detected_mac(hwaddr)
+      end
+
+      def previously_hunted?(hwaddr)
+        cached_macs_to_nodes.include?(hwaddr)
+      end
+
+      def notify_user_of_ignored_mac(hwaddr)
+        assigned_node_name = cached_macs_to_nodes[hwaddr]
+        message = \
+          'Detected already hunted MAC address on network ' \
+          "(#{hwaddr} / #{assigned_node_name}); ignoring."
+        Output.stderr message
+      end
+
+      def cached_macs_to_nodes
+        Data.load(Constants::HUNTER_PATH).invert
+      end
+
+      def handle_new_detected_mac(hwaddr)
+        default_name = sequenced_name
         @detection_count += 1
 
-        begin
-          name_node_question = "Detected a machine on the network (#{hwaddr}). Please enter the hostname:"
-          name = ask(name_node_question) do |answer|
-            answer.default = default_name
-          end
-          record_hunted_pair(name, hwaddr)
-          MetalLog.info "#{name}-#{hwaddr}"
-          @hunter_log.info "#{name}-#{hwaddr}"
-          Output.stderr 'Logged node'
-        rescue => e
-          warn e # XXX Needed?
-          Output.stderr "FAIL: #{e.message}"
-          retry if agree('Retry? [yes/no]:')
+        name_node_question = \
+          "Detected a machine on the network (#{hwaddr}). Please enter " \
+          'the hostname:'
+        name = ask(name_node_question) do |answer|
+          answer.default = default_name
         end
+        record_hunted_pair(name, hwaddr)
+        MetalLog.info "#{name}-#{hwaddr}"
+        hunter_log.info "#{name}-#{hwaddr}"
+        Output.stderr 'Logged node'
+      rescue => e
+        warn e # XXX Needed?
+        Output.stderr "FAIL: #{e.message}"
+        retry if agree('Retry? [yes/no]:')
       end
 
       def record_hunted_pair(node_name, mac_address)
@@ -130,7 +166,7 @@ module Metalware
       end
 
       def sequenced_name
-        "#{@options.prefix}#{@detection_count.to_s.rjust(@options.length, '0')}"
+        "#{options.prefix}#{detection_count.to_s.rjust(options.length, '0')}"
       end
 
       def handle_interrupt(_e)
