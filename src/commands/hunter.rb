@@ -112,31 +112,13 @@ module Metalware
         return if detected_macs.include?(hwaddr)
 
         detected_macs << hwaddr
-        @detection_count += 1
 
         if options.ignore_duplicate_macs
           notify_user_of_ignored_mac(hwaddr)
           return
         end
 
-        default_name = sequenced_name
-
-        begin
-          name_node_question = \
-            "Detected a machine on the network (#{hwaddr}). Please enter " \
-            'the hostname:'
-          name = ask(name_node_question) do |answer|
-            answer.default = default_name
-          end
-          record_hunted_pair(name, hwaddr)
-          MetalLog.info "#{name}-#{hwaddr}"
-          hunter_log.info "#{name}-#{hwaddr}"
-          Output.stderr 'Logged node'
-        rescue => e
-          warn e # XXX Needed?
-          Output.stderr "FAIL: #{e.message}"
-          retry if agree('Retry? [yes/no]:')
-        end
+        handle_new_detected_mac(hwaddr)
       end
 
       def notify_user_of_ignored_mac(hwaddr)
@@ -149,6 +131,26 @@ module Metalware
 
       def hunter_data
         Data.load(Constants::HUNTER_PATH)
+      end
+
+      def handle_new_detected_mac(hwaddr)
+        default_name = sequenced_name
+        @detection_count += 1
+
+        name_node_question = \
+          "Detected a machine on the network (#{hwaddr}). Please enter " \
+          'the hostname:'
+        name = ask(name_node_question) do |answer|
+          answer.default = default_name
+        end
+        record_hunted_pair(name, hwaddr)
+        MetalLog.info "#{name}-#{hwaddr}"
+        hunter_log.info "#{name}-#{hwaddr}"
+        Output.stderr 'Logged node'
+      rescue => e
+        warn e # XXX Needed?
+        Output.stderr "FAIL: #{e.message}"
+        retry if agree('Retry? [yes/no]:')
       end
 
       def record_hunted_pair(node_name, mac_address)
