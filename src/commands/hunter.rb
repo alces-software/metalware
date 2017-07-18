@@ -38,6 +38,13 @@ module Metalware
     class Hunter < CommandHelpers::BaseCommand
       private
 
+      attr_reader \
+        :detected_macs,
+        :detection_count,
+        :hunter_log,
+        :network,
+        :options
+
       def setup(_args, options)
         @hunter_log = MetalLog.new('hunter')
 
@@ -59,13 +66,13 @@ module Metalware
           'boot them now...',
           '(Ctrl-C to terminate)'
 
-        @network.each_packet do |packet|
+        network.each_packet do |packet|
           process_packet(packet.udp_data) if packet.udp?
         end
       end
 
       def setup_network_connection
-        pcaplet_options = "-s 600 -n -i #{@options.interface}"
+        pcaplet_options = "-s 600 -n -i #{options.interface}"
         @network ||= Pcaplet.new(pcaplet_options).tap do |network|
           filter_string = 'udp port 67 and udp port 68'
           filter = Pcap::Filter.new(filter_string, network.capture)
@@ -74,38 +81,38 @@ module Metalware
       end
 
       def process_packet(data)
-        @hunter_log.info 'Processing received UDP packet'
+        hunter_log.info 'Processing received UDP packet'
         message = DHCP::Message.from_udp_payload(data, debug: false)
         process_message(message) if message.is_a?(DHCP::Discover)
       end
 
       def process_message(message)
-        @hunter_log.info 'Processing DHCP::Discover message options'
+        hunter_log.info 'Processing DHCP::Discover message options'
         message.options.each do |o|
           detected(hwaddr_from(message)) if pxe_client?(o)
         end
       end
 
       def hwaddr_from(message)
-        @hunter_log.info 'Determining hardware address'
+        hunter_log.info 'Determining hardware address'
         message.chaddr.slice(0..(message.hlen - 1)).map do |b|
           b.to_s(16).upcase.rjust(2, '0')
         end.join(':').tap do |hwaddr|
-          @hunter_log.info "Detected hardware address: #{hwaddr}"
+          hunter_log.info "Detected hardware address: #{hwaddr}"
         end
       end
 
       def pxe_client?(o)
         o.is_a?(DHCP::VendorClassIDOption) && o.payload.pack('C*').tap do |vendor|
-          @hunter_log.info "Detected vendor: #{vendor}"
+          hunter_log.info "Detected vendor: #{vendor}"
         end =~ /^PXEClient/
       end
 
       def detected(hwaddr)
-        return if @detected_macs.include?(hwaddr)
+        return if detected_macs.include?(hwaddr)
         default_name = sequenced_name
 
-        @detected_macs << hwaddr
+        detected_macs << hwaddr
         @detection_count += 1
 
         begin
@@ -117,7 +124,7 @@ module Metalware
           end
           record_hunted_pair(name, hwaddr)
           MetalLog.info "#{name}-#{hwaddr}"
-          @hunter_log.info "#{name}-#{hwaddr}"
+          hunter_log.info "#{name}-#{hwaddr}"
           Output.stderr 'Logged node'
         rescue => e
           warn e # XXX Needed?
@@ -135,7 +142,7 @@ module Metalware
       end
 
       def sequenced_name
-        "#{@options.prefix}#{@detection_count.to_s.rjust(@options.length, '0')}"
+        "#{options.prefix}#{detection_count.to_s.rjust(options.length, '0')}"
       end
 
       def handle_interrupt(_e)
