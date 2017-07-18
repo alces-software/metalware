@@ -158,9 +158,9 @@ RSpec.describe Metalware::Configurator do
       expect(highline).to receive(
         :agree
       ).with(
-        # Note that an indication of what the input should be has been appended
-        # to the asked question.
-        'Should this cluster be awesome? [yes/no]'
+        # Note that progress and an indication of what the input should be has
+        # been appended to the asked question.
+        'Should this cluster be awesome? (1/1) [yes/no]'
       ).and_call_original
 
       configure_with_answers(['yes'])
@@ -363,6 +363,35 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers([''])
       expect(answers).to eq(expected)
+    end
+
+    it 'indicates how far through questions you are' do
+      define_questions(test: {
+                         question_1: {
+                           question: 'String question',
+                         },
+                         question_2: {
+                           question: 'Integer question',
+                           type: 'integer',
+                         },
+                         question_3: {
+                           # This question has trailing spaces to test these are stripped.
+                           question: '  Boolean question  ',
+                           type: 'boolean',
+                         },
+                       })
+
+      configure_with_answers(['foo', 1, true])
+
+      output.rewind
+      output_lines = output.read.split("\n")
+      [
+        'String question (1/3)',
+        'Integer question (2/3)',
+        'Boolean question (3/3) [yes/no]',
+      ].map do |question|
+        expect(output_lines).to include(question)
+      end
     end
   end
 end

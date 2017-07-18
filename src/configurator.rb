@@ -58,8 +58,15 @@ module Metalware
                 :use_readline
 
     def questions
-      @questions ||= Data.load(configure_file)[questions_section]
-                         .map { |identifier, properties| create_question(identifier, properties) }
+      @questions ||= questions_in_section
+                     .map.with_index do |question, index|
+        identifier, properties = question
+        create_question(identifier, properties, index + 1)
+      end
+    end
+
+    def questions_in_section
+      Data.load(configure_file)[questions_section]
     end
 
     def old_answers
@@ -77,15 +84,25 @@ module Metalware
       Data.dump(answers_file, answers)
     end
 
-    def create_question(identifier, properties)
+    def create_question(identifier, properties, index)
       Question.new(
         identifier: identifier,
         properties: properties,
         configure_file: configure_file,
         questions_section: questions_section,
         old_answer: old_answers[identifier],
-        use_readline: use_readline
+        use_readline: use_readline,
+        question: question_text(properties, index)
       )
+    end
+
+    def question_text(properties, index)
+      progress_indicator = "(#{index}/#{total_questions})"
+      "#{properties[:question].strip} #{progress_indicator}"
+    end
+
+    def total_questions
+      questions_in_section.length
     end
 
     class Question
@@ -101,6 +118,7 @@ module Metalware
 
       def initialize(
         identifier:,
+        question:,
         properties:,
         configure_file:,
         questions_section:,
@@ -108,7 +126,7 @@ module Metalware
         use_readline:
       )
         @identifier = identifier
-        @question = properties[:question]
+        @question = question
         @choices = properties[:choices]
         @required = !properties[:optional]
         @use_readline = use_readline
