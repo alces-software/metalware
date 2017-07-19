@@ -70,4 +70,40 @@ RSpec.describe Metalware::NodeattrInterface do
       end
     end
   end
+
+  describe '#validate_genders_file' do
+    let :genders_file { Tempfile.new }
+    let :genders_path { genders_file.path }
+
+    subject do
+      Metalware::NodeattrInterface.validate_genders_file(genders_path)
+    end
+
+    it 'returns true and no error when given a valid genders file' do
+      File.write(genders_path, "node01 nodes,other,groups\n")
+
+      expect(subject).to eq [true, '']
+    end
+
+    it 'returns false and the error when given an invalid genders file' do
+      # This genders file is invalid as `node01` is given `nodes` group twice.
+      File.write(genders_path, "node01 nodes,other,groups\nnode01 nodes\n")
+
+      expect(subject.length).to be 2 # Sanity check.
+      expect(subject.first).to be false
+      expect(subject.last).to match(/duplicate attribute/)
+    end
+
+    it 'raises if given file does not exist' do
+      # Get path to the test genders file and then delete it, so we have a path
+      # to a file which almost certainly won't exist (barring some very
+      # improbable race condition).
+      path = genders_path
+      genders_file.delete
+
+      expect do
+        Metalware::NodeattrInterface.validate_genders_file(path)
+      end.to raise_error(Metalware::FileDoesNotExistError)
+    end
+  end
 end
