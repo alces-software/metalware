@@ -31,9 +31,27 @@ RSpec.describe Metalware::SystemCommand do
     ).to eq "something\n"
   end
 
-  it 'raises if the command fails' do
-    expect do
-      Metalware::SystemCommand.run('false')
-    end.to raise_error Metalware::SystemCommandError
+  context 'when command fails' do
+    it 'raises' do
+      expect do
+        Metalware::SystemCommand.run('false')
+      end.to raise_error Metalware::SystemCommandError
+    end
+
+    it 'formats the error for displaying to users when `format_error` is true' do
+      begin
+        Metalware::SystemCommand.run('false', format_error: true)
+      rescue Metalware::SystemCommandError => e
+        expect(e.message).to match(/produced error/)
+      end
+    end
+
+    it 'does not format the error when `format_error` is false' do
+      begin
+        Metalware::SystemCommand.run('false', format_error: false)
+      rescue Metalware::SystemCommandError => e
+        expect(e.message).not_to match(/produced error/)
+      end
+    end
   end
 end

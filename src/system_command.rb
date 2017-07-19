@@ -30,14 +30,28 @@ module Metalware
       # This is just a slightly more robust version of Kernel.`, so we get an
       # exception that must be handled or be displayed if the command run
       # fails.
-      def run(command)
+      #
+      # `format_error` option specifies whether any error produced should be
+      # formatted suitably for displaying to a user.
+      def run(command, format_error: true)
         stdout, stderr, status = Open3.capture3(command)
         if status.exitstatus != 0
-          raise SystemCommandError,
-                "'#{command}' produced error '#{stderr.strip}'"
+          handle_error(command, stderr, format_error: format_error)
         else
           stdout
         end
+      end
+
+      private
+
+      def handle_error(command, stderr, format_error:)
+        stderr = stderr.strip
+        error = if format_error
+                  "'#{command}' produced error '#{stderr}'"
+                else
+                  stderr
+                end
+        raise SystemCommandError, error
       end
     end
   end
