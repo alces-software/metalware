@@ -191,6 +191,24 @@ RSpec.describe Metalware::Templater do
     end
   end
 
+  describe '#render_to_file' do
+    let :template { "simple template without ERB\n" }
+    let :output_path { '/output' }
+    let :output { File.read(output_path) }
+
+    it 'renders the template to the file' do
+      filesystem.test do
+        Metalware::Templater.render_to_file(
+          config,
+          template_path,
+          output_path
+        )
+
+        expect(output).to eq(template)
+      end
+    end
+  end
+
   # XXX These tests test `Templating::MagicNamespace` via the `Templater`; this
   # is useful to check they work together but we may want to test some things
   # directly on the `MagicNamespace`.
