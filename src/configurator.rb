@@ -146,7 +146,7 @@ module Metalware
       def ask(highline)
         ask_method = "ask_#{type}_question"
         send(ask_method, highline) do |highline_question|
-          highline_question.readline = true if use_readline
+          highline_question.readline = true if use_readline?
 
           if default.present?
             highline_question.default = default
@@ -157,6 +157,13 @@ module Metalware
       end
 
       private
+
+      def use_readline?
+        # Dont't provide readline bindings for boolean questions, in this case
+        # they cause an issue where the question is repeated twice if no/bad
+        # input is entered, and they are not really necessary in this case.
+        use_readline && type != :boolean
+      end
 
       def ask_boolean_question(highline)
         highline.agree(question + ' [yes/no]') { |q| yield q }
