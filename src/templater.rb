@@ -52,12 +52,13 @@ module Metalware
         # If a block is given, pass it the rendered template and it should
         # return whether this is valid and should be written to the file.
         rendered_template_invalid = block_given? && !yield(rendered_template)
-        return if rendered_template_invalid
+        return false if rendered_template_invalid
 
         File.open(save_file.chomp, 'w') do |f|
           f.puts rendered_template
         end
         MetalLog.info "Template Saved: #{save_file}"
+        true
       end
 
       def render_and_append_to_file(config, template, append_file, template_parameters = {})

@@ -207,25 +207,28 @@ RSpec.describe Metalware::Templater do
 
     it 'renders the template to the file by default' do
       filesystem.test do
-        render_to_file_with_block
+        template_rendered = render_to_file_with_block
 
         expect(output).to eq(template)
+        expect(template_rendered).to be true
       end
     end
 
     it 'renders template to the file if passed a block with truthy output' do
       filesystem.test do
-        render_to_file_with_block(&:present?)
+        template_rendered = render_to_file_with_block(&:present?)
 
         expect(output).to eq(template)
+        expect(template_rendered).to be true
       end
     end
 
     it 'does not render template to the file if passed a block with falsy output' do
       filesystem.test do
-        render_to_file_with_block(&:empty?)
+        template_rendered = render_to_file_with_block(&:empty?)
 
         expect(File.exist?(output_path)).to be false
+        expect(template_rendered).to be false
       end
     end
   end
