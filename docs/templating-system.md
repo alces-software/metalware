@@ -223,7 +223,8 @@ metalware-default
 <td>
 
 A URL from which the Metalware deployment server `genders` file
-(`/opt/metalware/etc/genders`) can be retrieved via a HTTP GET request.
+(`/var/lib/metalware/rendered/system/genders`) can be retrieved via a HTTP GET
+request.
 
 </td>
 
