@@ -28,5 +28,5 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
     end
   end
 
-  include_examples :render_domain_templates
+  include_examples :render_domain_templates, TestCommand
 end

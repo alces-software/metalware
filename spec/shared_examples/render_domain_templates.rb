@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-RSpec.shared_examples :render_domain_templates do
+RSpec.shared_examples :render_domain_templates do |test_command|
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
@@ -33,7 +33,7 @@ RSpec.shared_examples :render_domain_templates do
         Metalware::Constants::HOSTS_PATH
       ).ordered.and_call_original
 
-      SpecUtils.run_command(TestCommand)
+      SpecUtils.run_command(test_command)
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.shared_examples :render_domain_templates do
           expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
         end
 
-        SpecUtils.run_command(TestCommand)
+        SpecUtils.run_command(test_command)
 
         # `hosts` not rendered as `genders` invalid.
         expect(File.exist?('/etc/hosts')).to be false
