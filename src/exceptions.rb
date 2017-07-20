@@ -118,3 +118,6 @@ end
 # Alias for Exception to use to indicate we want to catch everything, and to
 # also tell Rubocop to be quiet about this.
 IntentionallyCatchAnyException = Exception
+
+class AbortInTestError < StandardError
+end

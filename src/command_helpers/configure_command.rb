@@ -4,6 +4,7 @@
 require 'command_helpers/base_command'
 require 'configurator'
 require 'constants'
+require 'io'
 
 module Metalware
   module CommandHelpers
@@ -56,7 +57,11 @@ module Metalware
       def render_domain_templates
         # `hosts` file is typically rendered using info from `genders`, so if
         # the rendered `genders` is invalid we should not render it.
-        render_hosts if render_genders
+        if render_genders
+          render_hosts
+        else
+          Io.abort
+        end
       end
 
       def render_genders

@@ -40,14 +40,8 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   # This uses an ERB tag so can test the invalid rendered template is saved.
   let :genders_template { 'some genders template <%= alces.index %>' }
 
-  def stub_validate_genders(valid, error)
-    allow(Metalware::NodeattrInterface).to receive(
-      :validate_genders_file
-    ).and_return([valid, error])
-  end
-
   it 'renders the hosts and genders files' do
-    stub_validate_genders(true, '')
+    SpecUtils.mock_validate_genders_success(self)
 
     filesystem.test do
       # Genders file needs to be rendered first, as how this is rendered will
@@ -71,11 +65,12 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   context 'when invalid genders file rendered' do
     let :nodeattr_error { 'oh no genders' }
     before :each do
-      stub_validate_genders(false, nodeattr_error)
+      SpecUtils.mock_validate_genders_failure(self, nodeattr_error)
     end
 
     it 'does not render hosts file and gives error' do
       filesystem.test do
+        expect(Metalware::Io).to receive(:abort)
 
         # Error should be shown including the `nodeattr` error message and
         # where to find the invalid genders file.

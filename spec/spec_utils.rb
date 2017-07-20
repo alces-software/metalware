@@ -32,6 +32,14 @@ module SpecUtils
   class << self
     # Mocks.
 
+    def mock_validate_genders_success(example_group)
+      mock_validate_genders(example_group, true, '')
+    end
+
+    def mock_validate_genders_failure(example_group, nodeattr_error)
+      mock_validate_genders(example_group, false, nodeattr_error)
+    end
+
     def use_mock_genders(example_group, genders_file: 'genders/default')
       genders_path = File.join(FIXTURES_PATH, genders_file)
 
@@ -102,6 +110,16 @@ module SpecUtils
 
     def fixtures_config(config_file)
       File.join(FIXTURES_PATH, 'configs', config_file)
+    end
+
+    private
+
+    def mock_validate_genders(example_group, valid, error)
+      example_group.instance_exec do
+        allow(Metalware::NodeattrInterface).to receive(
+          :validate_genders_file
+        ).and_return([valid, error])
+      end
     end
   end
 end
