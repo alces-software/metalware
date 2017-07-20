@@ -119,6 +119,7 @@ class FileSystem
   # install.
   def create_initial_directory_hierarchy
     [
+      '/tmp',
       '/etc',
       '/var/log/metalware',
       '/var/lib/metalware/rendered/kickstart',

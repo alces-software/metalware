@@ -27,10 +27,29 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
     end
   end
 
-  it 'renders the hosts and genders files' do
-    FileSystem.test do |fs|
+  let :filesystem do
+    FileSystem.setup do |fs|
       fs.with_minimal_repo
+      fs.write(Metalware::Constants::GENDERS_PATH, existing_genders_contents)
+      fs.write('/var/lib/metalware/repo/genders/default', genders_template)
+    end
+  end
 
+  let :existing_genders_contents { "node01 nodes,other,groups\n" }
+
+  # This uses an ERB tag so can test the invalid rendered template is saved.
+  let :genders_template { 'some genders template <%= alces.index %>' }
+
+  def stub_validate_genders(valid, error)
+    allow(Metalware::NodeattrInterface).to receive(
+      :validate_genders_file
+    ).and_return([valid, error])
+  end
+
+  it 'renders the hosts and genders files' do
+    stub_validate_genders(true, '')
+
+    filesystem.test do
       # Genders file needs to be rendered first, as how this is rendered will
       # effect the groups and nodes used when rendering the hosts file.
       expect(Metalware::Templater).to receive(:render_to_file).with(
@@ -46,6 +65,44 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
       ).ordered.and_call_original
 
       SpecUtils.run_command(TestCommand)
+    end
+  end
+
+  context 'when invalid genders file rendered' do
+    let :nodeattr_error { 'oh no genders' }
+    before :each do
+      stub_validate_genders(false, nodeattr_error)
+    end
+
+    it 'does not render hosts file and gives error' do
+      filesystem.test do
+
+        # Error should be shown including the `nodeattr` error message and
+        # where to find the invalid genders file.
+        error_parts = [
+          /invalid/,
+          /#{nodeattr_error}/,
+          /#{Metalware::Constants::INVALID_RENDERED_GENDERS_PATH}/,
+        ]
+        error_parts.each do |fragment|
+          expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
+        end
+
+        SpecUtils.run_command(TestCommand)
+
+        # `hosts` not rendered as `genders` invalid.
+        expect(File.exist?('/etc/hosts')).to be false
+
+        # Original `genders` content remains.
+        expect(
+          File.read(Metalware::Constants::GENDERS_PATH)
+        ).to eq(existing_genders_contents)
+
+        # Invalid rendered genders available for inspection.
+        expect(
+          File.read(Metalware::Constants::INVALID_RENDERED_GENDERS_PATH)
+        ).to eq('some genders template 0')
+      end
     end
   end
 end
