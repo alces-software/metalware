@@ -34,18 +34,22 @@ module Metalware
     end
 
     def validate_rendered_genders(rendered_genders)
-      genders_valid, nodeattr_error = Tempfile.open do |tempfile|
+      genders_valid, nodeattr_error = validate_genders_using_nodeattr(rendered_genders)
+      handle_invalid_genders(rendered_genders, nodeattr_error) unless genders_valid
+      genders_valid
+    end
+
+    def validate_genders_using_nodeattr(rendered_genders)
+      Tempfile.open do |tempfile|
         tempfile.write(rendered_genders)
         tempfile.flush
         NodeattrInterface.validate_genders_file(tempfile.path)
       end
+    end
 
-      unless genders_valid
-        cache_invalid_genders(rendered_genders)
-        display_genders_error(nodeattr_error)
-      end
-
-      genders_valid
+    def handle_invalid_genders(rendered_genders, nodeattr_error)
+      cache_invalid_genders(rendered_genders)
+      display_genders_error(nodeattr_error)
     end
 
     def cache_invalid_genders(rendered_genders)
