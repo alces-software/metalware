@@ -46,10 +46,26 @@ module Metalware
         raise NodeNotInGendersError, "Could not find node in genders: #{node}"
       end
 
+      # Returns whether the given file is a valid genders file, along with any
+      # validation error.
+      def validate_genders_file(genders_path)
+        unless File.exist?(genders_path)
+          raise FileDoesNotExistError, "File does not exist: #{genders_path}"
+        end
+
+        nodeattr("-f #{genders_path} --parse-check", format_error: false)
+        [true, '']
+      rescue SystemCommandError => e
+        [false, e.message]
+      end
+
       private
 
-      def nodeattr(command)
-        SystemCommand.run("#{Constants::NODEATTR_COMMAND} #{command}")
+      def nodeattr(command, format_error: true)
+        SystemCommand.run(
+          "#{Constants::NODEATTR_COMMAND} #{command}",
+          format_error: format_error
+        )
       end
     end
   end

@@ -108,9 +108,16 @@ module Metalware
 
   class UnconfiguredGroupError < MetalwareError
   end
+
+  # Error to be used when a file that should exist doesn't.
+  class FileDoesNotExistError < MetalwareError
+  end
 end
 
 
 # Alias for Exception to use to indicate we want to catch everything, and to
 # also tell Rubocop to be quiet about this.
 IntentionallyCatchAnyException = Exception
+
+class AbortInTestError < StandardError
+end

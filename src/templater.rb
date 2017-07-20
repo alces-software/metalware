@@ -47,10 +47,18 @@ module Metalware
       end
 
       def render_to_file(config, template, save_file, template_parameters = {})
+        rendered_template = render(config, template, template_parameters)
+
+        # If a block is given, pass it the rendered template and it should
+        # return whether this is valid and should be written to the file.
+        rendered_template_invalid = block_given? && !yield(rendered_template)
+        return false if rendered_template_invalid
+
         File.open(save_file.chomp, 'w') do |f|
-          f.puts render(config, template, template_parameters)
+          f.puts rendered_template
         end
         MetalLog.info "Template Saved: #{save_file}"
+        true
       end
 
       def render_and_append_to_file(config, template, append_file, template_parameters = {})

@@ -33,6 +33,7 @@ module Metalware
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
     HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
     GROUPS_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
+    INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 

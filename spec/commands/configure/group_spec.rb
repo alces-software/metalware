@@ -44,6 +44,10 @@ RSpec.describe Metalware::Commands::Configure::Group do
     FileSystem.setup(&:with_minimal_repo)
   end
 
+  before :each do
+    SpecUtils.mock_validate_genders_success(self)
+  end
+
   describe 'recording groups' do
     context 'when `cache/groups.yaml` does not exist' do
       it 'creates it and inserts new primary group' do
