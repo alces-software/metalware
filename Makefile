@@ -48,3 +48,9 @@ rubocop:
 .PHONY: rubocop-fix
 rubocop-fix:
 	bundle exec rubocop --display-cop-names --display-style-guide --color --auto-correct
+
+# Start Pry console, loading main CLI entry point (so all CLI files should be
+# loaded) and all files in `spec` dir.
+.PHONY: console
+console:
+	bundle exec pry --exec 'require_relative "src/cli"; require "rspec"; $$LOAD_PATH.unshift "spec"; Dir["#{File.dirname(__FILE__)}/spec/**/*.rb"].map { |f| require(f) }; nil'

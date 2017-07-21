@@ -24,6 +24,7 @@ group :test do
   gem 'simplecov'
 end
 
-group :development, :test do
+group :development do
+  gem 'pry'
   gem 'rubocop', require: false
 end
