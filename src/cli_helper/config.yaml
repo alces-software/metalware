@@ -300,3 +300,10 @@ commands:
         default: 50
         description: >
           Sets the maximum number of network operations
+
+  view-config:
+    syntax: metal view-config [NODE] [options]
+    summary: View domain templating config, optionally in context for given node
+    description: >
+      TODO
+    action: Commands::ViewConfig
