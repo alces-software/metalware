@@ -11,13 +11,20 @@ module Metalware
       end
 
       def run
-        templater = Metalware::Templater.new(Metalware::Config.new, nodename: node_name)
-        puts JSON.pretty_generate(templater.config.to_h)
+        puts templating_config_json
       end
 
       private
 
       attr_reader :node_name
+
+      def templating_config_json
+        JSON.pretty_generate(templater.config.to_h)
+      end
+
+      def templater
+        Metalware::Templater.new(config, nodename: node_name)
+      end
     end
   end
 end
