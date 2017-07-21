@@ -11,7 +11,7 @@ module Metalware
       end
 
       def run
-        puts templating_config_json
+        pretty_print_json(templating_config_json)
       end
 
       private
@@ -19,11 +19,20 @@ module Metalware
       attr_reader :node_name
 
       def templating_config_json
-        JSON.pretty_generate(templater.config.to_h)
+        templater.config.to_h.to_json
       end
 
       def templater
         Metalware::Templater.new(config, nodename: node_name)
+      end
+
+      def pretty_print_json(json)
+        # Delegate pretty printing with colours to `jq`.
+        Open3.popen2('jq . --color-output') do |stdin, stdout|
+          stdin.write(json)
+          stdin.close
+          puts stdout.read
+        end
       end
     end
   end
