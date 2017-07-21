@@ -7,6 +7,8 @@ require 'templating/iterable_recursive_open_struct'
 module Metalware
   module Templating
     class MissingParameterWrapper
+      delegate :to_json, to: :@wrapped_obj
+
       def initialize(wrapped_obj, raise_on_missing: false)
         @raise_on_missing = raise_on_missing
         @missing_tags = []

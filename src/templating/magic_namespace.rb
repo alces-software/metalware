@@ -14,6 +14,26 @@ require 'templating/group_namespace'
 module Metalware
   module Templating
     class MagicNamespace
+      # Every time a new property is added to this namespace it should be added
+      # to this array (so it shows in the `view-config` output), as well as to
+      # the docs in `docs/templating-system.md`.
+      FIELDS = [
+        :answers,
+        :build_complete_url,
+        :files,
+        :firstboot,
+        :genders,
+        :genders_url,
+        :group_index,
+        # :groups, # XXX `groups` is trickier as it takes a block.
+        :hostip,
+        :hosts_url,
+        :hunter,
+        :index,
+        :kickstart_url,
+        :nodename,
+      ].freeze
+
       def initialize(config:, node: nil, firstboot: nil, files: nil)
         @metalware_config = config
         @node = node
@@ -23,6 +43,13 @@ module Metalware
 
       attr_reader :firstboot, :files
       delegate :index, to: :node
+      delegate :to_json, to: :to_h
+
+      def to_h
+        FIELDS.map do |field|
+          [field, send(field)]
+        end.to_h
+      end
 
       def group_index
         node.group_index
