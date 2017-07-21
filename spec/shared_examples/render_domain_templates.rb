@@ -43,6 +43,14 @@ RSpec.shared_examples :render_domain_templates do |test_command|
       SpecUtils.mock_validate_genders_failure(self, nodeattr_error)
     end
 
+    let :genders_invalid_message do
+      # A slightly hacky way to check that we include a note to use the
+      # `configure rerender` command if this command is a `ConfigureCommand`.
+      if test_command.ancestors.include?(Metalware::CommandHelpers::ConfigureCommand)
+        /configure rerender/
+      end
+    end
+
     it 'does not render hosts file and gives error' do
       filesystem.test do
         expect(Metalware::Io).to receive(:abort)
@@ -53,7 +61,9 @@ RSpec.shared_examples :render_domain_templates do |test_command|
           /invalid/,
           /#{nodeattr_error}/,
           /#{Metalware::Constants::INVALID_RENDERED_GENDERS_PATH}/,
-        ]
+        ].tap do |parts|
+          parts << genders_invalid_message if genders_invalid_message
+        end
         error_parts.each do |fragment|
           expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
         end

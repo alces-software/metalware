@@ -6,8 +6,9 @@ require 'io'
 
 module Metalware
   class DomainTemplatesRenderer
-    def initialize(config)
+    def initialize(config, genders_invalid_message: nil)
       @config = config
+      @genders_invalid_message = genders_invalid_message
     end
 
     def render
@@ -22,7 +23,7 @@ module Metalware
 
     private
 
-    attr_reader :config
+    attr_reader :config, :genders_invalid_message
 
     def render_genders
       render_template(
@@ -57,13 +58,12 @@ module Metalware
     end
 
     def display_genders_error(nodeattr_error)
-      # XXX add note here about how to re-render templates once this is
-      # directly supported.
       Output.stderr "\nAborting rendering domain templates; " \
         'the rendered genders file is invalid:'
       Output.stderr_indented_error_message(nodeattr_error)
       Output.stderr \
         "The rendered file can be found at #{Constants::INVALID_RENDERED_GENDERS_PATH}"
+      Output.stderr "\n" + genders_invalid_message if genders_invalid_message
     end
 
     def render_hosts

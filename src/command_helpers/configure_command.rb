@@ -31,6 +31,13 @@ module Metalware
 
       private
 
+      GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
+        You should be able to fix this error by re-running the `configure`
+        command and correcting the invalid input, or by manually editing the
+        appropriate answers file or template and using the `configure rerender`
+        command to re-render the templates.
+      EOF
+
       def dependency_hash
         {
           repo: ['configure.yaml'],
@@ -54,7 +61,10 @@ module Metalware
       # are re-rendered at the end of every configure command as the data used
       # in the templates could change with each command.
       def render_domain_templates
-        DomainTemplatesRenderer.new(config).render
+        DomainTemplatesRenderer.new(
+          config,
+          genders_invalid_message: GENDERS_INVALID_MESSAGE
+        ).render
       end
     end
   end
