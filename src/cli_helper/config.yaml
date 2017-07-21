@@ -46,6 +46,16 @@ subcommands:
       answers will then be used when rendering templates.
     action: Commands::Configure::Node
 
+  configure_rerender: &configure_rerender
+    syntax: metal configure rerender [options]
+    summary: Re-render the Metalware domain templates
+    description: >
+      Re-render the Metalware domain templates, in particular the genders and
+      hosts file templates. This is useful after manually editing files
+      involved in rendering these templates, such as answer files or the
+      templates themselves.
+    action: Commands::Configure::Rerender
+
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
     summary: Clone a new template git repo
@@ -112,6 +122,7 @@ commands:
       domain: *configure_domain
       group: *configure_group
       node: *configure_node
+      rerender: *configure_rerender
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]

@@ -3,8 +3,7 @@
 
 require 'command_helpers/base_command'
 require 'configurator'
-require 'constants'
-require 'io'
+require 'domain_templates_renderer'
 
 module Metalware
   module CommandHelpers
@@ -32,6 +31,13 @@ module Metalware
 
       private
 
+      GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
+        You should be able to fix this error by re-running the `configure`
+        command and correcting the invalid input, or by manually editing the
+        appropriate answers file or template and using the `configure rerender`
+        command to re-render the templates.
+      EOF
+
       def dependency_hash
         {
           repo: ['configure.yaml'],
@@ -55,72 +61,10 @@ module Metalware
       # are re-rendered at the end of every configure command as the data used
       # in the templates could change with each command.
       def render_domain_templates
-        # `hosts` file is typically rendered using info from `genders`, so if
-        # the rendered `genders` is invalid we should not render it.
-        if render_genders
-          render_hosts
-        else
-          Io.abort
-        end
-      end
-
-      def render_genders
-        render_template(
-          genders_template,
-          to: Constants::GENDERS_PATH
-        ) do |rendered_genders|
-          validate_rendered_genders(rendered_genders)
-        end
-      end
-
-      def validate_rendered_genders(rendered_genders)
-        genders_valid, nodeattr_error = Tempfile.open do |tempfile|
-          tempfile.write(rendered_genders)
-          tempfile.flush
-          NodeattrInterface.validate_genders_file(tempfile.path)
-        end
-
-        unless genders_valid
-          cache_invalid_genders(rendered_genders)
-          display_genders_error(nodeattr_error)
-        end
-
-        genders_valid
-      end
-
-      def cache_invalid_genders(rendered_genders)
-        File.write(Constants::INVALID_RENDERED_GENDERS_PATH, rendered_genders)
-      end
-
-      def display_genders_error(nodeattr_error)
-        # XXX add note here about how to re-render templates once this is
-        # directly supported.
-        Output.stderr "\nAborting rendering domain templates; " \
-          'the rendered genders file is invalid:'
-        Output.stderr_indented_error_message(nodeattr_error)
-        Output.stderr \
-          "The rendered file can be found at #{Constants::INVALID_RENDERED_GENDERS_PATH}"
-      end
-
-      def render_hosts
-        render_template(hosts_template, to: Constants::HOSTS_PATH)
-      end
-
-      def render_template(template, to:, &block)
-        Templater.render_to_file(config, template, to, &block)
-      end
-
-      def genders_template
-        template_path('genders')
-      end
-
-      def hosts_template
-        template_path('hosts')
-      end
-
-      def template_path(template_type)
-        # We currently always/only render the 'default' templates.
-        File.join(config.repo_path, template_type, 'default')
+        DomainTemplatesRenderer.new(
+          config,
+          genders_invalid_message: GENDERS_INVALID_MESSAGE
+        ).render
       end
     end
   end
