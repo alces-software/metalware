@@ -11,11 +11,17 @@ module Metalware
       class << self
         # XXX get rid of handling `additional_parameters`? And just take what
         # we need.
-        def parse_for_node(node_name:, config:, additional_parameters: {})
+        def parse_for_node(
+          node_name:,
+          config:,
+          additional_parameters: {},
+          include_groups: true
+        )
           new(
             node_name: node_name,
             config: config,
-            additional_parameters: additional_parameters
+            additional_parameters: additional_parameters,
+            include_groups: include_groups
           ).parse
         end
       end
@@ -45,12 +51,17 @@ module Metalware
 
       private
 
-      attr_reader :node_name, :metalware_config, :additional_parameters
+      attr_reader \
+        :additional_parameters,
+        :include_groups,
+        :metalware_config,
+        :node_name
 
-      def initialize(node_name:, config:, additional_parameters:)
+      def initialize(node_name:, config:, additional_parameters:, include_groups:)
         @node_name = node_name
         @metalware_config = config
         @additional_parameters = additional_parameters
+        @include_groups = include_groups
       end
 
       def node
@@ -74,6 +85,7 @@ module Metalware
         MissingParameterWrapper.new(MagicNamespace.new(
                                       config: metalware_config,
                                       node: node,
+                                      include_groups: include_groups,
                                       **magic_parameters
         ))
       end

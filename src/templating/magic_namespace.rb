@@ -25,7 +25,7 @@ module Metalware
         :genders,
         :genders_url,
         :group_index,
-        # :groups, # XXX `groups` is trickier as it takes a block.
+        :groups,
         :hostip,
         :hosts_url,
         :hunter,
@@ -34,11 +34,20 @@ module Metalware
         :nodename,
       ].freeze
 
-      def initialize(config:, node: nil, firstboot: nil, files: nil)
+      # `include_groups` = whether to include the group namespaces when
+      # converting this `MagicNamespace` instance to a hash.
+      def initialize(
+        config:,
+        node: nil,
+        firstboot: nil,
+        files: nil,
+        include_groups: true
+      )
         @metalware_config = config
         @node = node
         @firstboot = firstboot
         @files = Hashie::Mash.new(files) if files
+        @include_groups = include_groups
       end
 
       attr_reader :firstboot, :files
@@ -47,7 +56,8 @@ module Metalware
 
       def to_h
         FIELDS.map do |field|
-          [field, send(field)]
+          value = field == :groups ? groups_data : send(field)
+          [field, value]
         end.to_h
       end
 
@@ -84,7 +94,7 @@ module Metalware
       end
 
       def groups
-        PrimaryGroup.each do |group|
+        PrimaryGroup.map do |group|
           yield group_namespace_for(group.name)
         end
       end
@@ -123,10 +133,15 @@ module Metalware
 
       private
 
-      attr_reader :metalware_config, :node
+      attr_reader :metalware_config, :node, :include_groups
 
       def group_namespace_for(group_name)
         GroupNamespace.new(metalware_config, group_name)
+      end
+
+      def groups_data
+        return unless include_groups
+        groups { |group| group }
       end
 
       module GenderGroupProxy
