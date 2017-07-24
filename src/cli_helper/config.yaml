@@ -305,7 +305,16 @@ commands:
     syntax: metal view-config [NODE] [options]
     summary: View domain templating config, optionally in context for given node
     description: >
-      TODO
+      View the exact standard templating config for the domain which will be
+      used when rendering templates. This can optionally be the config in the
+      context of a particular given node, in which case this will be the config
+      used when rendering a template for that node.
+
+      Note that templating parameters which are only sometimes available when
+      rendering templates are not included, such as the 'alces.files'
+      parameter, which is only available when rendering 'build' templates. Also
+      note that groups and the nodes within them are not included by default,
+      but this can be done using the '--include-groups' option.
     action: Commands::ViewConfig
     options:
       - tags: [-i, --include-groups]
