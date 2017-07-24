@@ -19,11 +19,10 @@ module Metalware
       attr_reader :node_name
 
       def templating_config_json
-        templater.config.to_h.to_json
-      end
-
-      def templater
-        Metalware::Templater.new(config, nodename: node_name)
+        Metalware::Templating::RepoConfigParser.parse_for_node(
+          node_name: node_name,
+          config: config
+        ).to_json
       end
 
       def pretty_print_json(json)
