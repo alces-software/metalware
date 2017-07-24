@@ -314,3 +314,7 @@ commands:
           not done by default as it can be very slow to gather the
           configuration for all nodes, and displaying this can also be very
           verbose.
+      - tags: [--color-output]
+        description: >
+          Force the output to be coloured even if not outputting to a terminal;
+          useful e.g. for piping to `less -R`.

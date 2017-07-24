@@ -37,9 +37,13 @@ module Metalware
       end
 
       def jq_command
-        # Do not colourize the output if we're not outputting to a terminal, so
-        # don't get escape sequences piped to next command.
-        "jq . #{STDOUT.isatty ? '--color-output' : ''}"
+        "jq . #{colourize_output? ? '--color-output' : ''}"
+      end
+
+      def colourize_output?
+        # Should colourize the output if we have been forced to do so or we are
+        # outputting to a terminal.
+        options.color_output || STDOUT.isatty
       end
     end
   end
