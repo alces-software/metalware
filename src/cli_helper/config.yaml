@@ -307,3 +307,10 @@ commands:
     description: >
       TODO
     action: Commands::ViewConfig
+    options:
+      - tags: [-i, --include-groups]
+        description: >
+          Include the groups and nodes within these in the JSON output; this is
+          not done by default as it can be very slow to gather the
+          configuration for all nodes, and displaying this can also be very
+          verbose.
