@@ -118,6 +118,10 @@ module Metalware
       end
     end
 
+    def primary_group
+      groups.first
+    end
+
     private
 
     attr_reader :metalware_config
@@ -133,10 +137,6 @@ module Metalware
 
     def primary_group_index
       PrimaryGroup.index(primary_group)
-    end
-
-    def primary_group
-      groups.first
     end
 
     def merge_in_files!(existing_files, new_files)
