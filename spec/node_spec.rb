@@ -68,6 +68,18 @@ RSpec.describe Metalware::Node do
       end
     end
 
+    describe '#groups' do
+      it 'returns ordered groups for node, highest precedence first' do
+        expect(testnode01.groups).to eq(['testnodes', 'nodes', 'cluster'])
+      end
+
+      it 'returns [] for node not in genders' do
+        name = 'not_in_genders_node01'
+        node = node(name)
+        expect(node.groups).to eq([])
+      end
+    end
+
     describe '#build_files' do
       it 'returns merged hash of files' do
         expect(testnode01.build_files).to eq(namespace01: [
