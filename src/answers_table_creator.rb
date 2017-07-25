@@ -68,21 +68,19 @@ module Metalware
     end
 
     def group_answer(question:, group_name:)
-      if group_name
-        format_answer(
-          question: question,
-          file: config.group_answers_file(group_name)
-        )
-      end
+      return nil unless group_name
+      format_answer(
+        question: question,
+        file: config.group_answers_file(group_name)
+      )
     end
 
     def node_answer(question:, node_name:)
-      if node_name
-        format_answer(
-          question: question,
-          file: config.node_answers_file(node_name)
-        )
-      end
+      return nil unless node_name
+      format_answer(
+        question: question,
+        file: config.node_answers_file(node_name)
+      )
     end
 
     def format_answer(question:, file:)
