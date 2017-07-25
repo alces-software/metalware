@@ -44,6 +44,8 @@ module Metalware
       log_severity: 'INFO',
     }.freeze
 
+    attr_reader :cli
+
     def initialize(file = nil, options = {})
       file ||= Constants::DEFAULT_CONFIG_PATH
       unless File.file?(file)
@@ -70,6 +72,5 @@ module Metalware
       File.join(repo_path, 'configure.yaml')
     end
 
-    attr_reader :cli
   end
 end
