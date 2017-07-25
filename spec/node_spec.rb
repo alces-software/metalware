@@ -51,7 +51,7 @@ RSpec.describe Metalware::Node do
     end
 
     describe '#configs' do
-      it 'returns possible configs for node in precedence order' do
+      it 'returns ordered configs for node, lowest precedence first' do
         expect(testnode01.configs).to eq(['domain', 'cluster', 'nodes', 'testnodes', 'testnode01'])
       end
 
