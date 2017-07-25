@@ -33,8 +33,10 @@ require 'filesystem'
 
 RSpec.describe Metalware::Node do
   def node(name)
-    Metalware::Node.new(Metalware::Config.new, name)
+    Metalware::Node.new(Metalware::Config.new, name, **node_args)
   end
+
+  let :node_args { {} }
 
   let :testnode01 { node('testnode01') }
   let :testnode02 { node('testnode02') }
@@ -77,6 +79,21 @@ RSpec.describe Metalware::Node do
         name = 'not_in_genders_node01'
         node = node(name)
         expect(node.groups).to eq([])
+      end
+
+      context 'when node created with `should_be_configured` option' do
+        let :node_args { { should_be_configured: true } }
+
+        # TODO: same as test outside this context.
+        it 'returns ordered groups for node, highest precedence first' do
+          expect(testnode01.groups).to eq(['testnodes', 'nodes', 'cluster'])
+        end
+
+        it 'raises for node not in genders' do
+          name = 'not_in_genders_node01'
+          node = node(name)
+          expect { node.groups }.to raise_error Metalware::NodeNotInGendersError
+        end
       end
     end
 

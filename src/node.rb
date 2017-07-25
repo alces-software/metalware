@@ -41,9 +41,14 @@ module Metalware
              :configs,
              to: :templating_configuration
 
-    def initialize(metalware_config, name)
+    def initialize(metalware_config, name, should_be_configured: false)
       @metalware_config = metalware_config
       @name = name
+
+      # Node configured <=> is part of a group which has been configured; this
+      # means we should be stricter when checking the node is in the genders
+      # file etc.
+      @should_be_configured = should_be_configured
     end
 
     # Two nodes are equal <=> their names are equal; everything else is derived
@@ -68,8 +73,14 @@ module Metalware
     def groups
       NodeattrInterface.groups_for_node(name)
     rescue NodeNotInGendersError
-      # It's OK for a node to not be in the genders file, it just means it's
-      # not part of any groups.
+      # Re-raise if we're expecting the node to be configured, as it should be
+      # in the genders file.
+      raise if should_be_configured
+
+      # The node doesn't need to be in the genders file if it's not expected to
+      # be configured, it's just part of no groups yet (XXX not sure if this is
+      # still true, maybe we should be stricter now and always require a node
+      # to be in the genders file).
       []
     end
 
@@ -124,7 +135,7 @@ module Metalware
 
     private
 
-    attr_reader :metalware_config
+    attr_reader :metalware_config, :should_be_configured
 
     def templating_configuration
       @templating_configuration ||=
