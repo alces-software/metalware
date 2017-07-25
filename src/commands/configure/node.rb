@@ -15,8 +15,7 @@ module Metalware
         protected
 
         def answers_file
-          file_name = "#{node_name}.yaml"
-          File.join(config.answer_files_path, 'nodes', file_name)
+          config.node_answers_file(node_name)
         end
 
         private

@@ -64,14 +64,14 @@ module Metalware
     end
 
     def domain_answer(question:)
-      format_answer(question: question, file: domain_answers_file)
+      format_answer(question: question, file: config.domain_answers_file)
     end
 
     def group_answer(question:, group_name:)
       if group_name
         format_answer(
           question: question,
-          file: primary_group_answers_file(group_name)
+          file: config.group_answers_file(group_name)
         )
       end
     end
@@ -80,7 +80,7 @@ module Metalware
       if node_name
         format_answer(
           question: question,
-          file: node_answers_file(node_name)
+          file: config.node_answers_file(node_name)
         )
       end
     end
@@ -89,21 +89,6 @@ module Metalware
       # `inspect` the answer to get it with an indication of its type, so e.g.
       # strings are wrapped in quotes, and can distinguish from integers etc.
       Data.load(file)[question].inspect
-    end
-
-    # XXX Duplicated from `configure domain`.
-    def domain_answers_file
-      File.join(config.answer_files_path, 'domain.yaml')
-    end
-
-    # XXX Duplicated from `configure group`.
-    def primary_group_answers_file(group_name)
-      File.join(config.answer_files_path, 'groups', "#{group_name}.yaml")
-    end
-
-    # XXX Duplicated from `configure node`.
-    def node_answers_file(node_name)
-      File.join(config.answer_files_path, 'nodes', "#{node_name}.yaml")
     end
   end
 end
