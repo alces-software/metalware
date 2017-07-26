@@ -95,6 +95,9 @@ module Metalware
   class MissingParameterError < MetalwareError
   end
 
+  class ValidationInternalError < MetalwareError
+  end
+
   # Use this error as the general catch all in Dependencies
   # The dependency can't be checked as the logic doesn't make sense
   # NOTE: We should try and prevent these errors from appearing in production
