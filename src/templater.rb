@@ -58,23 +58,17 @@ module Metalware
         template,
         save_file,
         prepend_managed_file_message: false,
-        **template_parameters
+        **template_parameters,
+        &validation_block
       )
         rendered_template = render(config, template, template_parameters)
         if prepend_managed_file_message
           rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
         end
 
-        # If a block is given, pass it the rendered template and it should
-        # return whether this is valid and should be written to the file.
-        rendered_template_invalid = block_given? && !yield(rendered_template)
-        return false if rendered_template_invalid
-
-        File.open(save_file.chomp, 'w') do |f|
-          f.puts rendered_template
+        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
+          write_rendered_template(rendered_template, save_file: save_file) if valid
         end
-        MetalLog.info "Template Saved: #{save_file}"
-        true
       end
 
       def render_and_append_to_file(config, template, append_file, **template_parameters)
@@ -82,6 +76,21 @@ module Metalware
           f.puts render(config, template, template_parameters)
         end
         MetalLog.info "Template Appended: #{append_file}"
+      end
+
+      private
+
+      def rendered_template_valid?(rendered_template)
+        # A rendered template is automatically valid, unless we're passed a
+        # block which evaluates as falsy when given the rendered template.
+        !block_given? || yield(rendered_template)
+      end
+
+      def write_rendered_template(rendered_template, save_file:)
+        File.open(save_file.chomp, 'w') do |f|
+          f.puts rendered_template
+        end
+        MetalLog.info "Template Saved: #{save_file}"
       end
     end
 
