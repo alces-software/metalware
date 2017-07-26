@@ -26,6 +26,7 @@ require 'metal_log'
 require 'config'
 require 'dependency'
 require 'exceptions'
+require 'dependency_specifications'
 
 module Metalware
   module CommandHelpers
@@ -60,6 +61,10 @@ module Metalware
           quiet: !!options.quiet,
         }
         @config = Config.new(options.config, cli_options)
+      end
+
+      def dependency_specifications
+        DependencySpecifications.new(config)
       end
 
       def dependency_hash

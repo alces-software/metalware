@@ -16,23 +16,12 @@ module Metalware
         end
 
         def dependency_hash
-          {
-            repo: ['configure.yaml'],
-            configure: ['domain.yaml', "groups/#{group_name}.yaml"],
-          }
+          dependency_specifications.for_node_in_configured_group(node_name)
         end
 
         private
 
         attr_reader :node_name
-
-        def group_name
-          node.primary_group
-        end
-
-        def node
-          Metalware::Node.new(config, node_name, should_be_configured: true)
-        end
       end
     end
   end
