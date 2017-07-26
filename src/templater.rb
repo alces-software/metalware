@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'erb'
+require 'active_support/core_ext/string/strip'
 
 require 'constants'
 require 'metal_log'
@@ -35,6 +36,12 @@ require 'templating/repo_config_parser'
 
 module Metalware
   class Templater
+    MANAGED_FILE_MESSAGE = <<-EOF.strip_heredoc
+    # This file is managed by Alces Metalware; any changes made to it directly
+    # will be lost. You can change the data used to render it using the
+    # `metal configure` commands.
+    EOF
+
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
@@ -46,8 +53,17 @@ module Metalware
         puts render(config, template, template_parameters)
       end
 
-      def render_to_file(config, template, save_file, template_parameters = {})
+      def render_to_file(
+        config,
+        template,
+        save_file,
+        prepend_managed_file_message: false,
+        **template_parameters
+      )
         rendered_template = render(config, template, template_parameters)
+        if prepend_managed_file_message
+          rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
+        end
 
         # If a block is given, pass it the rendered template and it should
         # return whether this is valid and should be written to the file.
