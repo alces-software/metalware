@@ -71,7 +71,13 @@ module Metalware
     end
 
     def render_template(template, to:, &block)
-      Templater.render_to_file(config, template, to, &block)
+      Templater.render_to_file(
+        config,
+        template,
+        to,
+        prepend_managed_file_message: true,
+        &block
+      )
     end
 
     def genders_template
