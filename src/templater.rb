@@ -45,11 +45,11 @@ module Metalware
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
-      def render(config, template, template_parameters = {})
+      def render(config, template, **template_parameters)
         Templater.new(config, template_parameters).render(template)
       end
 
-      def render_to_stdout(config, template, template_parameters = {})
+      def render_to_stdout(config, template, **template_parameters)
         puts render(config, template, template_parameters)
       end
 
@@ -77,7 +77,7 @@ module Metalware
         true
       end
 
-      def render_and_append_to_file(config, template, append_file, template_parameters = {})
+      def render_and_append_to_file(config, template, append_file, **template_parameters)
         File.open(append_file.chomp, 'a') do |f|
           f.puts render(config, template, template_parameters)
         end
