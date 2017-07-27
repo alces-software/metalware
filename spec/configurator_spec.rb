@@ -239,7 +239,7 @@ RSpec.describe Metalware::Configurator do
       )
     end
 
-    it 'loads default values' do
+    it 'saves nothing if default available and no input given' do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
@@ -272,14 +272,10 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers([''] * 5)
 
-      expect(answers).to eq(string_q: str_ans,
-                            string_erb: erb_ans,
-                            integer_q: 10,
-                            true_boolean_q: true,
-                            false_boolean_q: false)
+      expect(answers).to eq({})
     end
 
-    it 'loads the old answers as defaults' do
+    it 're-saves the old answers if new answers not provided' do
       define_questions(test: {
                          string_q: {
                            question: 'String?',
