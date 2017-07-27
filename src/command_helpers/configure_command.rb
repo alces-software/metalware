@@ -25,6 +25,10 @@ module Metalware
         # should be performed in this method in subclasses.
       end
 
+      def relative_answer_file
+        answers_file.sub("#{config.answer_files_path}/", "")
+      end
+
       def answers_file
         raise NotImplementedError
       end
@@ -42,7 +46,9 @@ module Metalware
         {
           repo: ['configure.yaml'],
           configure: [],
-        }
+        }.tap do |h|
+          h.merge(configure: [relative_answer_file]) if File.file?(answers_file)
+        end
       end
 
       def configurator
