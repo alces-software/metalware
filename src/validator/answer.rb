@@ -32,8 +32,8 @@ module Metalware
 
       def initialize(metalware_config, answer_file)
         @config = metalware_config
-        self.section= answer_file
-        self.answers= answer_file
+        self.section = answer_file
+        self.answers = answer_file
         set_questions
       end
 
@@ -45,7 +45,6 @@ module Metalware
         ]
         tests.each do |t|
           result = t.call
-          result.results
           return result unless result.success?
           @last_test_ran = result
         end
@@ -57,16 +56,18 @@ module Metalware
       attr_reader :section, :config, :answers, :questions
 
       def section=(answer_file)
-        @section = if answer_file == 'domain.yaml'
-                     :domain
-                   elsif /^groups\/.+/.match?(answer_file)
-                     :group
-                   elsif /^nodes\/.+/.match?(answer_file)
-                     :nodes
-                   else
-                     msg = "Can not determine question section for #{answer_file}"
-                     raise ValidationInternalError, msg
-                   end
+        @section = begin
+          if answer_file == 'domain.yaml'
+            :domain
+          elsif /^groups\/.+/.match?(answer_file)
+            :group
+          elsif /^nodes\/.+/.match?(answer_file)
+            :nodes
+          else
+            msg = "Can not determine question section for #{answer_file}"
+            raise ValidationInternalError, msg
+          end
+        end
       end
 
       def answers=(answer_file)
@@ -125,10 +126,14 @@ module Metalware
 
           def answer_type?(value)
             case value[:type]
+            when nil || 'string'
+              value[:answer].is_a? String
             when 'integer'
               value[:answer].is_a? Integer
+            when 'boolean'
+              [true, false].include?(value[:answer])
             else
-              true # TODO: THIS MUST EVENTUALLY RETURN FALSE
+              false
             end
           end
         end

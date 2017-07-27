@@ -98,13 +98,33 @@ RSpec.describe Metalware::Validator::Answer do
       expect(errors.keys).to include(:missing_questions)
     end
 
-    it 'detects a question with the wrong type' do
-      test_hash = correct_hash.tap do |h|
-        h[:answer][:integer_question] = 'I should not be a string'
+    context 'with type mismatch questions' do
+      it 'detects string question' do
+        test_hash = correct_hash.tap do |h|
+          h[:answer][:string_question] = 100
+        end
+        results = run_answer_validation(test_hash)
+        error_question = get_question_with_an_incorrect_type(results)
+        expect(error_question[:question]).to eq(:string_question)
       end
-      results = run_answer_validation(test_hash)
-      error_question = get_question_with_an_incorrect_type(results)
-      expect(error_question[:question]).to eq(:integer_question)
+
+      it 'detects integer question' do
+        test_hash = correct_hash.tap do |h|
+          h[:answer][:integer_question] = 'I should not be a string'
+        end
+        results = run_answer_validation(test_hash)
+        error_question = get_question_with_an_incorrect_type(results)
+        expect(error_question[:question]).to eq(:integer_question)
+      end
+
+      it 'detects boolean question' do
+        test_hash = correct_hash.tap do |h|
+          h[:answer][:bool_question] = 'I should not be a string'
+        end
+        results = run_answer_validation(test_hash)
+        error_question = get_question_with_an_incorrect_type(results)
+        expect(error_question[:question]).to eq(:bool_question)
+      end
     end
   end
 end
