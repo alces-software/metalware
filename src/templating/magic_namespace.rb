@@ -14,15 +14,52 @@ require 'templating/group_namespace'
 module Metalware
   module Templating
     class MagicNamespace
-      def initialize(config:, node: nil, firstboot: nil, files: nil)
+      # Every time a new property is added to this namespace it should be added
+      # to this array (so it shows in the `view-config` output), as well as to
+      # the docs in `docs/templating-system.md`.
+      FIELDS = [
+        :answers,
+        :build_complete_url,
+        :files,
+        :firstboot,
+        :genders,
+        :genders_url,
+        :group_index,
+        :groups,
+        :hostip,
+        :hosts_url,
+        :hunter,
+        :index,
+        :kickstart_url,
+        :nodename,
+      ].freeze
+
+      # `include_groups` = whether to include the group namespaces when
+      # converting this `MagicNamespace` instance to a hash.
+      def initialize(
+        config:,
+        node: nil,
+        firstboot: nil,
+        files: nil,
+        include_groups: true
+      )
         @metalware_config = config
         @node = node
         @firstboot = firstboot
         @files = Hashie::Mash.new(files) if files
+        @include_groups = include_groups
       end
 
       attr_reader :firstboot, :files
       delegate :index, to: :node
+      delegate :to_json, to: :to_h
+
+      def to_h
+        FIELDS.map do |field|
+          value = field == :groups ? groups_data : send(field)
+          [field, value]
+        end.to_h
+      end
 
       def group_index
         node.group_index
@@ -57,7 +94,7 @@ module Metalware
       end
 
       def groups
-        PrimaryGroup.each do |group|
+        PrimaryGroup.map do |group|
           yield group_namespace_for(group.name)
         end
       end
@@ -96,10 +133,15 @@ module Metalware
 
       private
 
-      attr_reader :metalware_config, :node
+      attr_reader :metalware_config, :node, :include_groups
 
       def group_namespace_for(group_name)
         GroupNamespace.new(metalware_config, group_name)
+      end
+
+      def groups_data
+        return unless include_groups
+        groups { |group| group }
       end
 
       module GenderGroupProxy

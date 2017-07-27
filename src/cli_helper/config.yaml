@@ -300,3 +300,30 @@ commands:
         default: 50
         description: >
           Sets the maximum number of network operations
+
+  view-config:
+    syntax: metal view-config [NODE] [options]
+    summary: View domain templating config, optionally in context for given node
+    description: >
+      View the exact standard templating config for the domain which will be
+      used when rendering templates. This can optionally be the config in the
+      context of a particular given node, in which case this will be the config
+      used when rendering a template for that node.
+
+      Note that templating parameters which are only sometimes available when
+      rendering templates are not included, such as the 'alces.files'
+      parameter, which is only available when rendering 'build' templates. Also
+      note that groups and the nodes within them are not included by default,
+      but this can be done using the '--include-groups' option.
+    action: Commands::ViewConfig
+    options:
+      - tags: [-i, --include-groups]
+        description: >
+          Include the groups and nodes within these in the JSON output; this is
+          not done by default as it can be very slow to gather the
+          configuration for all nodes, and displaying this can also be very
+          verbose.
+      - tags: [--color-output]
+        description: >
+          Force the output to be coloured even if not outputting to a terminal;
+          useful e.g. for piping to `less -R`.

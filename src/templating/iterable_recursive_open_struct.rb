@@ -22,10 +22,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'recursive-open-struct'
+require 'active_support/core_ext/module/delegation'
 
 module Metalware
   module Templating
     class IterableRecursiveOpenStruct < RecursiveOpenStruct
+      delegate :to_json, to: :to_h
+
       def each(&block)
         convert_hash_values_to_own_class.each(&block)
       end
