@@ -35,12 +35,14 @@ module Metalware
       configure_file:,
       questions_section:,
       answers_file:,
+      higher_level_answer_files:,
       use_readline: true
     )
       @highline = highline
       @configure_file = configure_file
       @questions_section = questions_section
       @answers_file = answers_file
+      @higher_level_answer_files = higher_level_answer_files
       @use_readline = use_readline
     end
 
@@ -55,6 +57,7 @@ module Metalware
                 :configure_file,
                 :questions_section,
                 :answers_file,
+                :higher_level_answer_files,
                 :use_readline
 
     def questions
@@ -99,7 +102,12 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
+      default = higher_level_answer_files.map do |file|
+        Data.load(file)[identifier]
+      end.reject(&:nil?).last || properties[:default]
+
       Question.new(
+        default: default,
         identifier: identifier,
         properties: properties,
         configure_file: configure_file,
@@ -134,6 +142,7 @@ module Metalware
 
       def initialize(
         configure_file:,
+        default:,
         identifier:,
         old_answer: nil,
         properties:,
@@ -142,7 +151,7 @@ module Metalware
         use_readline:
       )
         @choices = properties[:choices]
-        @default = properties[:default]
+        @default = default
         @identifier = identifier
         @old_answer = old_answer
         @question = question

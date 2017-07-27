@@ -49,7 +49,8 @@ module Metalware
         Configurator.new(
           configure_file: config.configure_file,
           questions_section: questions_section,
-          answers_file: answers_file
+          answers_file: answers_file,
+          higher_level_answer_files: []
         )
       end
 
