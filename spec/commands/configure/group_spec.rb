@@ -24,7 +24,6 @@
 
 require 'spec_utils'
 require 'filesystem'
-require 'validator/configure'
 
 RSpec.describe Metalware::Commands::Configure::Group do
   def run_configure_group(group)
