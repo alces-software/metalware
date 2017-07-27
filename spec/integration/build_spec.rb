@@ -59,11 +59,11 @@ RSpec.describe '`metal build`' do
   def wait_longer_than_build_poll
     # Hopefully longer enough than the `build_poll_sleep` that build process
     # notices whatever it needs to.
-    sleep 0.6
+    sleep 2
   end
 
   def run_command(command)
-    Timeout.timeout 10 do
+    Timeout::timeout 20 do
       Open3.popen3 command do |stdin, stdout, stderr, thread|
         begin
           pid = thread.pid
