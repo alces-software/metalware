@@ -108,26 +108,27 @@ module Metalware
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string].freeze
 
-      attr_reader :identifier,
-                  :question,
-                  :type,
-                  :choices,
-                  :default,
-                  :required,
-                  :use_readline
+      attr_reader \
+        :choices,
+        :default,
+        :identifier,
+        :question,
+        :required,
+        :type,
+        :use_readline
 
       def initialize(
-        identifier:,
-        question:,
-        properties:,
         configure_file:,
-        questions_section:,
+        identifier:,
         old_answer: nil,
+        properties:,
+        question:,
+        questions_section:,
         use_readline:
       )
+        @choices = properties[:choices]
         @identifier = identifier
         @question = question
-        @choices = properties[:choices]
         @required = !properties[:optional]
         @use_readline = use_readline
 
