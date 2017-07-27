@@ -40,15 +40,15 @@ module Metalware
 
       def validate
         tests = [
-          [:AnswerBasicSchema, proc {
+          [:AnswerBasicSchema, proc do
             AnswerBasicSchema.call(answers: @answers)
-          }],
-          [:MissingSchema, proc {
+          end],
+          [:MissingSchema, proc do
             MissingSchema.call(validation_hash)
-          }],
-          [:AnswerTypeSchema, proc {
+          end],
+          [:AnswerTypeSchema, proc do
             AnswerTypeSchema.call(validation_hash)
-          }],
+          end],
         ]
         tests.each do |(test_name, test_proc)|
           @validation_result = test_proc.call
