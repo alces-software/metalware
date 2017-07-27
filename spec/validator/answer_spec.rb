@@ -61,20 +61,20 @@ RSpec.describe Metalware::Validator::Answer do
       {}, my_hash[:answer], correct_hash[:configure]
     )
     validator = Metalware::Validator::Answer.new(config, 'domain.yaml')
-    validator.validate
+    [validator.validate, validator]
   end
 
   def get_question_with_an_incorrect_type(results)
     expect(results.errors).not_to be_empty
-    # ONLY supports results with a single error question
-    expect(results.errors[:answers].keys.length).to eq(1)
-    error_question_index = results.errors[:answers].keys[0]
-    results.output[:answers][error_question_index]
+    expect(results.errors[:answers].keys.length).to be >= 1
+    results.errors[:answers].keys.map do |error_index|
+      results.output[:answers][error_index]
+    end
   end
 
   context 'with a valid answer hash' do
     it 'returns successfully' do
-      errors = run_answer_validation(correct_hash).errors
+      errors = run_answer_validation(correct_hash)[0].errors
       expect(errors.keys).to be_empty
     end
   end
@@ -84,18 +84,20 @@ RSpec.describe Metalware::Validator::Answer do
       h = {
         answer: ['I', 'Am', 'Not', 'A', 'Hash'],
       }
-      errors = run_answer_validation(h).errors
-      expect(errors).to eq(answers: ['must be a hash'])
+      results, validator = run_answer_validation(h)
+      expect(results.errors).to eq(answers: ['must be a hash'])
+      expect(validator.error_message).to include('valid yaml hash')
     end
 
     it 'contains an answer to a missing question' do
       h = {
         answer: {
-          missing_question: 'I do not appear in configure.yaml',
+          a_missing_question: 'I do not appear in configure.yaml',
         },
       }
-      errors = run_answer_validation(h).errors
-      expect(errors.keys).to include(:missing_questions)
+      results, validator = run_answer_validation(h)
+      expect(results.errors.keys).to include(:missing_questions)
+      expect(validator.error_message).to include('a_missing_question')
     end
 
     context 'with type mismatch questions' do
@@ -103,8 +105,8 @@ RSpec.describe Metalware::Validator::Answer do
         test_hash = correct_hash.tap do |h|
           h[:answer][:string_question] = 100
         end
-        results = run_answer_validation(test_hash)
-        error_question = get_question_with_an_incorrect_type(results)
+        results = run_answer_validation(test_hash)[0]
+        error_question = get_question_with_an_incorrect_type(results)[0]
         expect(error_question[:question]).to eq(:string_question)
       end
 
@@ -112,8 +114,8 @@ RSpec.describe Metalware::Validator::Answer do
         test_hash = correct_hash.tap do |h|
           h[:answer][:integer_question] = 'I should not be a string'
         end
-        results = run_answer_validation(test_hash)
-        error_question = get_question_with_an_incorrect_type(results)
+        results = run_answer_validation(test_hash)[0]
+        error_question = get_question_with_an_incorrect_type(results)[0]
         expect(error_question[:question]).to eq(:integer_question)
       end
 
@@ -121,9 +123,21 @@ RSpec.describe Metalware::Validator::Answer do
         test_hash = correct_hash.tap do |h|
           h[:answer][:bool_question] = 'I should not be a string'
         end
-        results = run_answer_validation(test_hash)
-        error_question = get_question_with_an_incorrect_type(results)
+        results = run_answer_validation(test_hash)[0]
+        error_question = get_question_with_an_incorrect_type(results)[0]
         expect(error_question[:question]).to eq(:bool_question)
+      end
+
+      it 'detects multiple errors' do
+        test_hash = correct_hash.tap do |h|
+          h[:answer][:string_question] = false
+          h[:answer][:integer_question] = true
+          h[:answer][:bool_question] = true # Intentionally correct
+        end
+        _results, validator = run_answer_validation(test_hash)
+        msg = validator.error_message
+        expect(msg).to include('string_question', 'integer_question')
+        expect(msg).not_to include('bool_question')
       end
     end
   end

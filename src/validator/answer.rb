@@ -32,6 +32,7 @@ module Metalware
 
       def initialize(metalware_config, answer_file)
         @config = metalware_config
+        @answer_file_name = answer_file
         self.section = answer_file
         self.answers = answer_file
         set_questions
@@ -39,21 +40,46 @@ module Metalware
 
       def validate
         tests = [
-          proc { AnswerBasicSchema.call(answers: @answers) },
-          proc { MissingSchema.call(validation_hash) },
-          proc { AnswerTypeSchema.call(validation_hash) },
+          [:AnswerBasicSchema, proc {
+            AnswerBasicSchema.call(answers: @answers)
+          }],
+          [:MissingSchema, proc {
+            MissingSchema.call(validation_hash)
+          }],
+          [:AnswerTypeSchema, proc {
+            AnswerTypeSchema.call(validation_hash)
+          }],
         ]
-        tests.each do |t|
-          result = t.call
-          return result unless result.success?
-          @last_test_ran = result
+        tests.each do |(test_name, test_proc)|
+          @validation_result = test_proc.call
+          @last_ran_test = test_name
+          return @validation_result unless @validation_result.success?
         end
-        @last_test_ran
+        @validation_result
+      end
+
+      def error_message
+        validate if @validation_result.nil?
+        return '' if @validation_result.success?
+        msg_header = "Failed to validate answers: #{answer_file_name}\n"
+        case @last_ran_test
+        when :AnswerBasicSchema
+          "#{msg_header}" \
+          'The answer file must be a valid yaml hash'
+        when :MissingSchema
+          "#{msg_header}" \
+          "#{@validation_result.messages[:missing_questions][0].chomp} " \
+          "#{@validation_result.output[:missing_questions].join(', ')}"
+        when :AnswerTypeSchema
+          "#{msg_header}" \
+          "A type mismatch has been detected in the following question(s):\n" \
+          "#{convert_type_errors(@validation_result).join("\n")}\n"
+        end
       end
 
       private
 
-      attr_reader :section, :config, :answers, :questions
+      attr_reader :section, :config, :answers, :questions, :answer_file_name
 
       def section=(answer_file)
         @section = begin
@@ -71,7 +97,7 @@ module Metalware
       end
 
       def answers=(answer_file)
-        file = File.join(config.answer_files_path, "#{answer_file}.yaml")
+        file = File.join(config.answer_files_path, answer_file.to_s)
         @answers = Data.load(file)
       end
 
@@ -99,6 +125,17 @@ module Metalware
               pay[:missing_questions].push(question)
             end
           end
+        end
+      end
+
+      ##
+      # When Dry Validation detects a type mismatch, the error message contains
+      # the index where the error occurred. This method converts that index to
+      # the type-error question(s)
+      #
+      def convert_type_errors(validation_results)
+        validation_results.errors[:answers].keys.map do |error_index|
+          validation_results.output[:answers][error_index]
         end
       end
 

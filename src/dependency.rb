@@ -24,6 +24,7 @@
 require 'exceptions'
 require 'constants'
 require 'validator/configure'
+require 'validator/answer'
 
 module Metalware
   class Dependency
@@ -65,6 +66,14 @@ module Metalware
           return
         else
           raise DependencyFailure, get_value_failure_message(dep, value)
+        end
+      end
+
+      case dep
+      when :configure
+        validator = Validator::Answer.new(config, value)
+        unless validator.validate.success?
+          raise DependencyFailure, validator.error_message
         end
       end
     end

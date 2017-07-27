@@ -17,7 +17,7 @@ en:
 
       answer:
         missing_questions?: >
-          An answer to a question missing from your 'configure.yaml' has been
-          detected. Please remove this answer and try again.
+          The following question(s) where detected in the answer file but do not
+          appear in configure.yaml:
         answer_type?: >
           Their is a mismatch between the type of a question and its answer
