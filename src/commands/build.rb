@@ -54,9 +54,7 @@ module Metalware
         {
           repo: ["pxelinux/#{@options.pxelinux}",
                  "kickstart/#{@options.kickstart}"],
-          configure: ['domain.yaml'].tap do |arr|
-            arr.push("groups/#{@node_identifier}.yaml") if @options.group
-          end,
+          configure: ['domain.yaml'],
         }
       end
 
