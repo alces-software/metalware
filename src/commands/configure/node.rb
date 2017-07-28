@@ -21,7 +21,7 @@ module Metalware
         def higher_level_answer_files
           [
             config.domain_answers_file,
-            config.group_answers_file(node.primary_group)
+            config.group_answers_file(node.primary_group),
           ]
         end
 

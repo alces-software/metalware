@@ -34,7 +34,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
         answers_file: config.node_answers_file('testnode01'),
         higher_level_answer_files: [
           config.domain_answers_file,
-          config.group_answers_file('testnodes')
+          config.group_answers_file('testnodes'),
         ]
       ).and_call_original
 

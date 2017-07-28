@@ -33,7 +33,7 @@ RSpec.describe Metalware::Repo do
         expect(subject.configure_questions).to eq(
           foo: { question: 'foo' },
           bar: { question: 'bar' },
-          baz: { question: 'baz' },
+          baz: { question: 'baz' }
         )
       end
     end
