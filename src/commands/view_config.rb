@@ -15,6 +15,16 @@ module Metalware
         pretty_print_json(templating_config_json)
       end
 
+      def dependency_hash
+        # If we want to view templating config for particular node,
+        # then that node must be part of a configured group.
+        if node_name
+          dependency_specifications.for_node_in_configured_group(node_name)
+        else
+          {}
+        end
+      end
+
       private
 
       attr_reader :node_name, :options
