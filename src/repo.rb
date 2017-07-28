@@ -10,15 +10,21 @@ module Metalware
     end
 
     def configure_questions
-      CONFIGURE_SECTIONS.flat_map do |section|
-        configure_data[section].keys
-      end.sort.uniq
+      configure_data_sections.reduce(:merge)
+    end
+
+    def configure_question_identifiers
+      configure_questions.keys.sort.uniq
     end
 
     private
 
     def configure_data
       @configure_data ||= Data.load(config.configure_file)
+    end
+
+    def configure_data_sections
+      CONFIGURE_SECTIONS.map { |section| configure_data[section] }
     end
 
     attr_reader :config
