@@ -47,6 +47,19 @@ RSpec.describe Metalware::Commands::Configure::Group do
     SpecUtils.mock_validate_genders_success(self)
   end
 
+  it 'creates correct configurator' do
+    filesystem.test do
+      expect(Metalware::Configurator).to receive(:new).with(
+        configure_file: config.configure_file,
+        questions_section: :group,
+        answers_file: config.group_answers_file('testnodes'),
+        higher_level_answer_files: []
+      ).and_call_original
+
+      run_configure_group 'testnodes'
+    end
+  end
+
   describe 'recording groups' do
     context 'when `cache/groups.yaml` does not exist' do
       it 'creates it and inserts new primary group' do
