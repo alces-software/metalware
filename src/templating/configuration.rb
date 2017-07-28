@@ -71,7 +71,8 @@ module Metalware
 
       def combine_answers
         config_answers = configs.map { |c| Data.load(answers_path_for(c)) }
-        combine_hashes(config_answers)
+        answer_hashes = [default_answers] + config_answers
+        combine_hashes(answer_hashes)
       end
 
       def answers_path_for(config_name)
@@ -95,6 +96,16 @@ module Metalware
         else
           'groups'
         end
+      end
+
+      def default_answers
+        repo.configure_questions.transform_values do |question|
+          question[:default]
+        end
+      end
+
+      def repo
+        @repo ||= Repo.new(metalware_config)
       end
 
       def combine_hashes(hashes)

@@ -212,11 +212,26 @@ RSpec.describe Metalware::Node do
     let :filesystem do
       FileSystem.setup do |fs|
         fs.with_answer_fixtures('answers/node-test-set1')
+
+        questions = {
+          value_left_as_default: { default: 'default' },
+          value_set_by_domain: { default: 'default' },
+          value_set_by_ag1: { default: 'default' },
+          value_set_by_ag2: { default: 'default' },
+          value_set_by_answer1: { default: 'default' },
+        }
+        configure = {
+          domain: questions,
+          group: questions,
+          node: questions,
+        }
+        fs.dump(config.configure_file, configure)
       end
     end
 
-    it 'performs a deep merge of answer files' do
+    it 'performs a deep merge of defaults and answer files' do
       expected_answers = {
+        value_left_as_default: 'default',
         value_set_by_domain: 'domain',
         value_set_by_ag1: 'ag1',
         value_set_by_ag2: 'ag2',
@@ -229,10 +244,11 @@ RSpec.describe Metalware::Node do
       end
     end
 
-    it 'just includes domain answers for nil node name' do
+    it 'just includes default or domain answers for nil node name' do
       # A nil node uses no configs but the 'domain' config, so all answers will
       # be loaded from the 'domain' answers file.
       expected_answers = {
+        value_left_as_default: 'default',
         value_set_by_domain: 'domain',
         value_set_by_ag1: 'domain',
         value_set_by_ag2: 'domain',
