@@ -118,5 +118,32 @@ RSpec.describe Metalware::Dependency do
         end.not_to raise_error
       end
     end
+
+    context 'with optional dependencies' do
+      before :each do
+        filesystem.with_minimal_repo
+        filesystem.with_answer_fixtures('answers/basic_structure')
+      end
+
+      it 'skips a single missing file' do
+        expect do
+          enforce_dependencies(
+            optional: {
+              configure: ['not_found.yaml'],
+            }
+          )
+        end.not_to raise_error
+      end
+
+      it 'validates a correct answer file' do
+        expect do
+          enforce_dependencies(
+            optional: {
+              configure: ['domain.yaml', 'not_found.yaml'],
+            }
+          )
+        end.not_to raise_error
+      end
+    end
   end
 end

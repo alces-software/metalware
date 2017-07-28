@@ -24,6 +24,8 @@ rsync:
 		--exclude tmp/ \
 		--exclude .git/ \
 		--exclude coverage/ \
+		--exclude vendor/ \
+		--exclude .bundle/ \
 		--perms \
 		. dev@${IP}:${REMOTE_DIR}
 

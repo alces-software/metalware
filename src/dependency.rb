@@ -30,27 +30,42 @@ module Metalware
     def initialize(metal_config, command_input, dependency_hash = {})
       @config = metal_config
       @dependency_hash = dependency_hash
+      @optional_dependency_hash = @dependency_hash.delete(:optional)
+      @optional_dependency_hash ||= {}
       @command = command_input
     end
 
     def enforce
-      @dependency_hash.each do |dep, values|
-        unless values.is_a?(Array)
-          msg = "Dependency values must be an array, check: #{dep}"
-          raise DependencyInternalError, msg
-        end
-        send(:"validate_#{dep}")
-        values.each { |value| validate_dependency_value(dep, value) }
-      end
+      run_dependencies(@dependency_hash)
+      run_dependencies(@optional_dependency_hash, true)
     end
 
     private
 
     attr_reader :config, :command
 
-    def validate_dependency_value(dep, value)
+    def run_dependencies(dep_hash, optional = false)
+      dep_hash.each do |dep, values|
+        unless values.is_a?(Array)
+          msg = "Dependency values must be an array, check: #{dep}"
+          raise DependencyInternalError, msg
+        end
+        send(:"validate_#{dep}")
+        values.each { |value| validate_dependency_value(dep, value, optional) }
+      end
+    end
+
+    def validate_dependency_value(dep, value, optional = false)
+      # TODO: Currently passing the optional flag into this method is redundant
+      # However when Answer validation is merged in, this method gets expanded
+      # and the optional flag becomes required
+      return if optional
       unless valid_file?(dep, value)
-        raise DependencyFailure, get_value_failure_message(dep, value)
+        if optional
+          return
+        else
+          raise DependencyFailure, get_value_failure_message(dep, value)
+        end
       end
     end
 
