@@ -53,7 +53,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
         configure_file: config.configure_file,
         questions_section: :group,
         answers_file: config.group_answers_file('testnodes'),
-        higher_level_answer_files: []
+        higher_level_answer_files: [config.domain_answers_file]
       ).and_call_original
 
       run_configure_group 'testnodes'

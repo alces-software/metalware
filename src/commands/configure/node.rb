@@ -18,9 +18,20 @@ module Metalware
           config.node_answers_file(node_name)
         end
 
+        def higher_level_answer_files
+          [
+            config.domain_answers_file,
+            config.group_answers_file(node.primary_group)
+          ]
+        end
+
         private
 
         attr_reader :node_name
+
+        def node
+          Metalware::Node.new(config, node_name)
+        end
 
         def dependency_hash
           dependency_specifications.for_node_in_configured_group(node_name)
