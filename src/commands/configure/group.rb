@@ -19,8 +19,7 @@ module Metalware
         end
 
         def answers_file
-          file_name = "#{group_name}.yaml"
-          File.join(config.answer_files_path, 'groups', file_name)
+          config.group_answers_file(group_name)
         end
 
         private

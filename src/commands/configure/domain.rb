@@ -13,7 +13,7 @@ module Metalware
         protected
 
         def answers_file
-          File.join(config.answer_files_path, 'domain.yaml')
+          config.domain_answers_file
         end
       end
     end

@@ -85,6 +85,33 @@ subcommands:
         description: >
           Force update even if local changes have been made to the repo
 
+  view-answers_domain: &view-answers_domain
+    syntax: metal view-answers domain [options]
+    summary: View configured answers for the overall domain
+    description: >
+      View configuration questions along with configured answers for the
+      overall Metalware domain
+    action:
+      Commands::ViewAnswers::Domain
+
+  view-answers_group: &view-answers_group
+    syntax: metal view-answers group GROUP_NAME [options]
+    summary: View configured answers for a group
+    description: >
+      View configuration questions along with configured answers for given
+      group and the overall Metalware domain
+    action:
+      Commands::ViewAnswers::Group
+
+  view-answers_node: &view-answers_node
+    syntax: metal view-answers node NODE_NAME [options]
+    summary: View configured answers for a node
+    description: >
+      View configuration questions along with configured answers for given
+      node, its primary group, and the overall Metalware domain
+    action:
+      Commands::ViewAnswers::Node
+
 commands:
   build:
     syntax: metal build NODE_IDENTIFIER [options]
@@ -300,6 +327,14 @@ commands:
         default: 50
         description: >
           Sets the maximum number of network operations
+
+  view-answers:
+    syntax: metal view-answers [options]
+    summary: View configured answers
+    subcommands:
+      domain: *view-answers_domain
+      group: *view-answers_group
+      node: *view-answers_node
 
   view-config:
     syntax: metal view-config [NODE] [options]
