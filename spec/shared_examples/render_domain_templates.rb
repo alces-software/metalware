@@ -24,13 +24,15 @@ RSpec.shared_examples :render_domain_templates do |test_command|
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/genders/default',
-        Metalware::Constants::GENDERS_PATH
+        Metalware::Constants::GENDERS_PATH,
+        prepend_managed_file_message: true
       ).ordered.and_call_original
 
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/hosts/default',
-        Metalware::Constants::HOSTS_PATH
+        Metalware::Constants::HOSTS_PATH,
+        prepend_managed_file_message: true
       ).ordered.and_call_original
 
       SpecUtils.run_command(test_command)
@@ -79,9 +81,11 @@ RSpec.shared_examples :render_domain_templates do |test_command|
         ).to eq(existing_genders_contents)
 
         # Invalid rendered genders available for inspection.
+        expected_invalid_rendered_genders = \
+          "#{Metalware::Templater::MANAGED_FILE_MESSAGE}\nsome genders template 0"
         expect(
           File.read(Metalware::Constants::INVALID_RENDERED_GENDERS_PATH)
-        ).to eq('some genders template 0')
+        ).to eq(expected_invalid_rendered_genders)
       end
     end
   end
