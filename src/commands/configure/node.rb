@@ -21,6 +21,10 @@ module Metalware
         private
 
         attr_reader :node_name
+
+        def dependency_hash
+          dependency_specifications.for_node_in_configured_group(node_name)
+        end
       end
     end
   end
