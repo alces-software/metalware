@@ -209,6 +209,12 @@ RSpec.describe Metalware::Node do
   describe '#answers' do
     let :config { Metalware::Config.new }
 
+    let :filesystem do
+      FileSystem.setup do |fs|
+        fs.with_answer_fixtures('answers/node-test-set1')
+      end
+    end
+
     it 'performs a deep merge of answer files' do
       expected_answers = {
         value_set_by_domain: 'domain',
@@ -217,8 +223,7 @@ RSpec.describe Metalware::Node do
         value_set_by_answer1: 'answer1',
       }
 
-      FileSystem.test do |fs|
-        fs.with_answer_fixtures('answers/node-test-set1')
+      filesystem.test do
         answers = node('answer1').answers
         expect(answers).to eq(expected_answers)
       end
@@ -234,8 +239,7 @@ RSpec.describe Metalware::Node do
         value_set_by_answer1: 'domain',
       }
 
-      FileSystem.test do |fs|
-        fs.with_fixtures('answers/node-test-set1', at: config.answer_files_path)
+      filesystem.test do
         answers = node(nil).answers
         expect(answers).to eq(expected_answers)
       end
