@@ -24,44 +24,46 @@
 require 'validator/answer'
 require 'data'
 require 'config'
+require 'filesystem'
 
 RSpec.describe Metalware::Validator::Answer do
   let :config do
     Metalware::Config.new
   end
 
-  let :correct_hash do
+  let :configure_data do
     {
-      answer: {
-        string_question: 'string',
-        integer_question: 100,
-        bool_question: true,
-      },
-
-      configure: {
-        domain: {
-          string_question: {
-            question: 'Am I a string?',
-          },
-          integer_question: {
-            question: 'Am I a integer',
-            type: 'integer',
-          },
-          bool_question: {
-            question: 'Am I a boolean',
-            type: 'boolean',
-          },
+      domain: {
+        string_question: {
+          question: 'Am I a string?',
+        },
+        integer_question: {
+          question: 'Am I a integer',
+          type: 'integer',
+        },
+        bool_question: {
+          question: 'Am I a boolean',
+          type: 'boolean',
         },
       },
     }
   end
 
-  def run_answer_validation(my_hash = {})
-    allow(Metalware::Data).to receive(:load).and_return(
-      {}, my_hash[:answer], correct_hash[:configure]
-    )
-    validator = Metalware::Validator::Answer.new(config, 'domain.yaml')
-    [validator.validate, validator]
+  let :valid_answers do
+    {
+      string_question: 'string',
+      integer_question: 100,
+      bool_question: true,
+    }
+  end
+
+  def run_answer_validation(answers)
+    FileSystem.test do
+      Metalware::Data.dump(config.domain_answers_file, answers)
+      Metalware::Data.dump(config.configure_file, configure_data)
+      validator = Metalware::Validator::Answer.new(config, 'domain.yaml')
+      [validator.validate, validator]
+    end
   end
 
   def get_question_with_an_incorrect_type(results)
@@ -74,58 +76,56 @@ RSpec.describe Metalware::Validator::Answer do
 
   context 'with a valid answer hash' do
     it 'returns successfully' do
-      errors = run_answer_validation(correct_hash)[0].errors
+      errors = run_answer_validation(valid_answers)[0].errors
       expect(errors.keys).to be_empty
     end
   end
 
   context 'with an invalid answer hash' do
     it 'contains an answer to a missing question' do
-      h = {
-        answer: {
-          a_missing_question: 'I do not appear in configure.yaml',
-        },
+      answers = {
+        a_missing_question: 'I do not appear in configure.yaml',
       }
-      results, validator = run_answer_validation(h)
+      results, validator = run_answer_validation(answers)
       expect(results.errors.keys).to include(:missing_questions)
       expect(validator.error_message).to include('a_missing_question')
     end
 
     context 'with type mismatch questions' do
       it 'detects string question' do
-        test_hash = correct_hash.tap do |h|
-          h[:answer][:string_question] = 100
+        answers = valid_answers.tap do |a|
+          a[:string_question] = 100
         end
-        results = run_answer_validation(test_hash)[0]
+        results = run_answer_validation(answers)[0]
         error_question = get_question_with_an_incorrect_type(results)[0]
         expect(error_question[:question]).to eq(:string_question)
       end
 
       it 'detects integer question' do
-        test_hash = correct_hash.tap do |h|
-          h[:answer][:integer_question] = 'I should not be a string'
+        answers = valid_answers.tap do |a|
+          a[:integer_question] = 'I should not be a string'
         end
-        results = run_answer_validation(test_hash)[0]
+        results = run_answer_validation(answers)[0]
         error_question = get_question_with_an_incorrect_type(results)[0]
         expect(error_question[:question]).to eq(:integer_question)
       end
 
       it 'detects boolean question' do
-        test_hash = correct_hash.tap do |h|
-          h[:answer][:bool_question] = 'I should not be a string'
+        answers = valid_answers.tap do |a|
+          a[:bool_question] = 'I should not be a string'
         end
-        results = run_answer_validation(test_hash)[0]
+        results = run_answer_validation(answers)[0]
         error_question = get_question_with_an_incorrect_type(results)[0]
         expect(error_question[:question]).to eq(:bool_question)
       end
 
       it 'detects multiple errors' do
-        test_hash = correct_hash.tap do |h|
-          h[:answer][:string_question] = false
-          h[:answer][:integer_question] = true
-          h[:answer][:bool_question] = true # Intentionally correct
+        answers = valid_answers.tap do |a|
+          a[:string_question] = false
+          a[:integer_question] = true
+          a[:bool_question] = true # Intentionally correct
         end
-        _results, validator = run_answer_validation(test_hash)
+        _results, validator = run_answer_validation(answers)
         msg = validator.error_message
         expect(msg).to include('string_question', 'integer_question')
         expect(msg).not_to include('bool_question')
