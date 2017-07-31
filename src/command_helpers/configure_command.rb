@@ -26,7 +26,7 @@ module Metalware
       end
 
       def relative_answer_file
-        answers_file.sub("#{config.answer_files_path}/", "")
+        answers_file.sub("#{config.answer_files_path}/", '')
       end
 
       def answers_file
@@ -46,8 +46,8 @@ module Metalware
         {
           repo: ['configure.yaml'],
           optional: {
-            configure: [relative_answer_file]
-          }
+            configure: [relative_answer_file],
+          },
         }
       end
 
