@@ -80,15 +80,6 @@ RSpec.describe Metalware::Validator::Answer do
   end
 
   context 'with an invalid answer hash' do
-    it 'validates basic answer structure' do
-      h = {
-        answer: ['I', 'Am', 'Not', 'A', 'Hash'],
-      }
-      results, validator = run_answer_validation(h)
-      expect(results.errors).to eq(answers: ['must be a hash'])
-      expect(validator.error_message).to include('valid yaml hash')
-    end
-
     it 'contains an answer to a missing question' do
       h = {
         answer: {

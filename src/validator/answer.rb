@@ -40,9 +40,6 @@ module Metalware
 
       def validate
         tests = [
-          [:AnswerBasicSchema, proc do
-            AnswerBasicSchema.call(answers: @answers)
-          end],
           [:MissingSchema, proc do
             MissingSchema.call(validation_hash)
           end],
@@ -63,9 +60,6 @@ module Metalware
         return '' if @validation_result.success?
         msg_header = "Failed to validate answers: #{answer_file_name}\n"
         case @last_ran_test
-        when :AnswerBasicSchema
-          "#{msg_header}" \
-          'The answer file must be a valid yaml hash'
         when :MissingSchema
           "#{msg_header}" \
           "#{@validation_result.messages[:missing_questions][0].chomp} " \
@@ -137,10 +131,6 @@ module Metalware
         validation_results.errors[:answers].keys.map do |error_index|
           validation_results.output[:answers][error_index]
         end
-      end
-
-      AnswerBasicSchema = Dry::Validation.Schema do
-        required(:answers).value(:hash?)
       end
 
       MissingSchema = Dry::Validation.Schema do
