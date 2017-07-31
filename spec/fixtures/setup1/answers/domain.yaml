@@ -1,0 +1,17 @@
+---
+cluster_name: test-1
+domain: "<%= cluster %>.cluster.local"
+root_password: root-password
+root_ssh_key: I-Am-A-Little_Teapot
+pri_network_domain: pri
+pri_network_ip: 10.10.<%= alces.group_index %>.<%= alces.index + 1 %>
+pri_network_netmask: 255.255.255.0
+pri_network_interface: eth0
+mgt_network_domain: mgt
+mgt_network_ip: 10.11.<%= alces.group_index %>.<%= alces.index + 1 %>
+mgt_network_netmask: 255.255.255.0
+mgt_network_interface: eth1
+ib_network_domain: ib
+ib_network_ip: 10.12.<%= alces.group_index %>.<%= alces.index + 1 %>
+ib_network_netmask: 255.255.255.0
+ib_network_interface: eth2

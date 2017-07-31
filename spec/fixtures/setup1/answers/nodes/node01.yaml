@@ -1,0 +1,11 @@
+---
+root_password: Rooty-McRoot-Face
+pri_network_defined: false
+pri_network_ip: 10.10.<%= alces.group_index %>.<%= alces.index + 1 %>
+pri_network_interface: eth0
+mgt_network_defined: true
+mgt_network_ip: 10.11.<%= alces.group_index %>.<%= alces.index + 1 %>
+mgt_network_interface: eth1
+ib_network_defined: false
+ib_network_ip: 10.12.<%= alces.group_index %>.<%= alces.index + 1 %>
+ib_network_interface: eth2
