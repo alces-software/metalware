@@ -33,9 +33,6 @@ module Metalware
       def initialize(metalware_config, answer_file)
         @config = metalware_config
         @answer_file_name = answer_file
-        self.section = answer_file
-        self.answers = answer_file
-        set_questions
       end
 
       def validate
@@ -73,31 +70,37 @@ module Metalware
 
       private
 
-      attr_reader :section, :config, :answers, :questions, :answer_file_name
+      attr_reader :config, :answer_file_name
 
-      def section=(answer_file)
-        @section = begin
-          if answer_file == 'domain.yaml'
-            :domain
-          elsif /^groups\/.+/.match?(answer_file)
-            :group
-          elsif /^nodes\/.+/.match?(answer_file)
-            :nodes
-          else
-            msg = "Can not determine question section for #{answer_file}"
-            raise ValidationInternalError, msg
-          end
-        end
+      def questions_in_section
+        questions[section]
       end
 
-      def answers=(answer_file)
-        file = File.join(config.answer_files_path, answer_file.to_s)
-        @answers = Data.load(file)
+      def questions
+        @questions ||= Data.load(config.configure_file)
       end
 
-      def set_questions
-        file = File.join(config.repo_path, 'configure.yaml')
-        @questions = Data.load(file)
+      def section
+        @section ||= begin
+                       if answer_file_name == 'domain.yaml'
+                         :domain
+                       elsif /^groups\/.+/.match?(answer_file_name)
+                         :group
+                       elsif /^nodes\/.+/.match?(answer_file_name)
+                         :nodes
+                       else
+                         msg = "Can not determine question section for #{answer_file_name}"
+                         raise ValidationInternalError, msg
+                       end
+                     end
+      end
+
+      def answers
+        @answers ||= Data.load(answer_file_path)
+      end
+
+      def answer_file_path
+        File.join(config.answer_files_path, answer_file_name.to_s)
       end
 
       def validation_hash
@@ -107,12 +110,12 @@ module Metalware
             missing_questions: [],
           }
           answers.each_with_object(payload) do |(question, answer), pay|
-            if questions[section].key?(question)
+            if questions_in_section.key?(question)
               pay[:answers].push(
                 {
                   question: question,
                   answer: answer,
-                  type: questions[section][question][:type],
+                  type: questions_in_section[question][:type],
                 }.tap { |h| h[:type] = 'string' if h[:type].nil? }
               )
             else
