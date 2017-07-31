@@ -186,25 +186,6 @@ commands:
     options:
       - *group_option
 
-  hosts:
-    syntax: metal hosts NODE_IDENTIFIER [options]
-    summary: Adds a node(s) to the hosts file
-    description: >
-      Renders the hosts template for the node (or group) and appends it to
-      /etc/hosts. Note that it does not check if the node already exists in the
-      file.
-    action: Commands::Hosts
-    options:
-      - *group_option
-      - tags: [-t TEMPLATE, --template TEMPLATE]
-        type: String
-        default: default
-        description: >
-          Specify hosts template to use
-      - tags: [-x, --dry-run]
-        description: >
-          Do not modify hosts file, just output additions that would be made
-
   hunter:
     syntax: metal hunter [options]
     summary: Detects and caches DHCP discover messages
