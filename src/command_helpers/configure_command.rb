@@ -45,10 +45,10 @@ module Metalware
       def dependency_hash
         {
           repo: ['configure.yaml'],
-          configure: [],
-        }.tap do |h|
-          h.merge(configure: [relative_answer_file]) if File.file?(answers_file)
-        end
+          optional: {
+            configure: [relative_answer_file]
+          }
+        }
       end
 
       def configurator

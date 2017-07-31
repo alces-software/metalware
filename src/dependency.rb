@@ -56,11 +56,7 @@ module Metalware
       end
     end
 
-    def validate_dependency_value(dep, value, optional = false)
-      # TODO: Currently passing the optional flag into this method is redundant
-      # However when Answer validation is merged in, this method gets expanded
-      # and the optional flag becomes required
-      return if optional
+    def validate_dependency_value(dep, value, optional)
       unless valid_file?(dep, value)
         if optional
           return
