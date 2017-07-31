@@ -10,30 +10,11 @@ require 'nodeattr_interface'
 require 'primary_group'
 require 'templating/missing_parameter_wrapper'
 require 'templating/group_namespace'
+require 'object_fields_hasher'
 
 module Metalware
   module Templating
     class MagicNamespace
-      # Every time a new property is added to this namespace it should be added
-      # to this array (so it shows in the `view-config` output), as well as to
-      # the docs in `docs/templating-system.md`.
-      FIELDS = [
-        :answers,
-        :build_complete_url,
-        :files,
-        :firstboot,
-        :genders,
-        :genders_url,
-        :group_index,
-        :groups,
-        :hostip,
-        :hosts_url,
-        :hunter,
-        :index,
-        :kickstart_url,
-        :nodename,
-      ].freeze
-
       # `include_groups` = whether to include the group namespaces when
       # converting this `MagicNamespace` instance to a hash.
       def initialize(
@@ -55,10 +36,7 @@ module Metalware
       delegate :to_json, to: :to_h
 
       def to_h
-        FIELDS.map do |field|
-          value = field == :groups ? groups_data : send(field)
-          [field, value]
-        end.to_h
+        ObjectFieldsHasher.hash_object(self, groups: :groups_data)
       end
 
       def group_index

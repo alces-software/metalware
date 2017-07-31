@@ -8,14 +8,6 @@ module Metalware
 
       delegate :to_json, to: :to_h
 
-      # Every time a new property is added to this namespace it should be added
-      # to this array (so it shows in the `view-config` output).
-      FIELDS = [
-        :name,
-        :answers,
-        :nodes,
-      ].freeze
-
       def initialize(metalware_config, group_name)
         @metalware_config = metalware_config
         @name = group_name
@@ -35,13 +27,7 @@ module Metalware
       end
 
       def to_h
-        # Note: this is very similar to `MagicNamespace#to_h`, but
-        # de-duplicating them may not be worth the obfuscation that would
-        # involve.
-        FIELDS.map do |field|
-          value = field == :nodes ? nodes_data : send(field)
-          [field, value]
-        end.to_h
+        ObjectFieldsHasher.hash_object(self, nodes: :nodes_data)
       end
 
       private
