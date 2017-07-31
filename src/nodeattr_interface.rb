@@ -24,10 +24,19 @@
 
 require 'constants'
 require 'exceptions'
+require 'system_command'
 
 module Metalware
   module NodeattrInterface
     class << self
+      def nodes_in_primary_group(primary_group)
+        nodeattr('--expand')
+          .split("\n") # Splits the single string output to 1 line per node
+          .map { |node| node.split(/[\s,]/) } # Splits nodename and group string
+          .select { |node| node[1] == primary_group } # Match the primary group
+          .map { |node| node[0] } # Only return the nodename (instead of groups)
+      end
+
       def nodes_in_group(group)
         stdout = nodeattr("-c #{group}")
         if stdout.empty?
