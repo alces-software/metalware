@@ -329,8 +329,8 @@ commands:
       Note that templating parameters which are only sometimes available when
       rendering templates are not included, such as the 'alces.files'
       parameter, which is only available when rendering 'build' templates. Also
-      note that 'alces.groups' namespace and the nodes within the same primary
-      genders group are not included by default, but this can be done using the
+      note that the 'alces.groups' namespace and the nodes within the same primary
+      genders group are not included by default; this can be done using the
       '--include-groups' option.
     action: Commands::ViewConfig
     options:
