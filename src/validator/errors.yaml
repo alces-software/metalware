@@ -17,7 +17,7 @@ en:
 
       answer:
         missing_questions?: >
-          The following question(s) where detected in the answer file but do not
-          appear in configure.yaml:
+          The following question(s) were detected in the answer file but do not
+          appear in 'configure.yaml':
         answer_type?: >
-          Their is a mismatch between the type of a question and its answer
+          There is a mismatch between the type of a question and its answer
