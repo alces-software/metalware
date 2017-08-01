@@ -41,5 +41,23 @@ RSpec.describe Metalware::CliHelper::Parser do
 
       subject.parse_commands
     end
+
+    it 'uses DynamicDefaults module to determine dynamic default values' do
+      define_config_with_default('dynamic' => 'build_interface')
+
+      stubbed_dynamic_default = 'eth3'
+      expect(
+        Metalware::CliHelper::DynamicDefaults
+      ).to receive(:build_interface).and_return(stubbed_dynamic_default)
+
+      expect_any_instance_of(Commander::Command).to receive(:option).with(
+        '-f', '--foo', # tags
+        nil, # type
+        { default: stubbed_dynamic_default }, # default
+        '' # description
+      )
+
+      subject.parse_commands
+    end
   end
 end

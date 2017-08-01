@@ -22,7 +22,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'yaml'
+
 require 'commands'
+require 'cli_helper/dynamic_defaults'
 
 module Metalware
   module CliHelper
@@ -65,7 +67,7 @@ module Metalware
                 end
                 c.option(*opt['tags'],
                          eval(opt['type'].to_s),
-                         { default: opt['default'] },
+                         { default: parse_default(opt) },
                          (opt['description']).to_s.chomp)
               end
             when 'subcommands'
@@ -79,6 +81,16 @@ module Metalware
               c.send("#{a}=", v.respond_to?(:chomp) ? v.chomp : v)
             end
           end
+        end
+      end
+
+      def parse_default(opt)
+        default_value = opt['default']
+        if default_value.is_a? Hash
+          dynamic_default_method = default_value['dynamic']
+          DynamicDefaults.send(dynamic_default_method)
+        else
+          default_value
         end
       end
     end

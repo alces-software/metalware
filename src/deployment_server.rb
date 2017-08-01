@@ -49,13 +49,6 @@ module Metalware
         url path
       end
 
-      private
-
-      def url(url_path)
-        full_path = File.join('metalware', url_path)
-        URI.join("http://#{ip}", full_path).to_s
-      end
-
       def build_interface
         # Default to 'eth0' if `build_interface` is not set yet. In practise
         # this _should_ only occur prior to first render of server config, but
@@ -64,6 +57,13 @@ module Metalware
         # dependent on the `build_interface`, but if it's unspecified the
         # `alces` namespace will fail to be created).
         server_config[:build_interface] || 'eth0'
+      end
+
+      private
+
+      def url(url_path)
+        full_path = File.join('metalware', url_path)
+        URI.join("http://#{ip}", full_path).to_s
       end
 
       def server_config
