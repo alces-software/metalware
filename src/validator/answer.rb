@@ -30,9 +30,10 @@ module Metalware
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(metalware_config, answer_file)
+      def initialize(metalware_config, answer_file, loader: nil)
         @config = metalware_config
         @answer_file_name = answer_file
+        @validation_loader = loader
       end
 
       def validate
@@ -68,16 +69,34 @@ module Metalware
         end
       end
 
+      def success?
+        validate if @validation_result.nil?
+        @validation_result.success?
+      end
+
+      def load
+        success? ? answers : ( raise ValidationFailure, error_message )
+      end
+
       private
 
-      attr_reader :config, :answer_file_name
+      attr_reader :config, :answer_file_name, :validation_loader
 
       def questions_in_section
         questions[section]
       end
 
+      # XXXX, ideally questions will always be loaded through Validator::Loader
+      # However at the moment it needs to maintain backwards compatibility
+      # This should be removed in the future
       def questions
-        @questions ||= Data.load(config.configure_file)
+        @questions ||= begin
+          if validation_loader.nil?
+            Data.load(config.configure_file)
+          else
+            validation_loader.load.configure
+          end
+        end
       end
 
       def section

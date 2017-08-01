@@ -98,6 +98,14 @@ module Metalware
   class ValidationInternalError < MetalwareError
   end
 
+  class ValidationFailure < MetalwareError
+  end
+
+  # XXXX, we need think about the future of the DependencyFailure,
+  # It maybe completely replaced with Validator::Loader and a file cache.
+  # If this is the case Dependency Failure/ InternalError will be replaced
+  # with Validation Failure/ InternalError
+
   # Use this error as the general catch all in Dependencies
   # The dependency can't be checked as the logic doesn't make sense
   # NOTE: We should try and prevent these errors from appearing in production
