@@ -204,9 +204,11 @@ commands:
     options:
       - tags: [-i INTERFACE, --interface INTERFACE]
         type: String
-        default: eth0
+        default:
+          dynamic: build_interface
         description: >
-          Local interface to hunt on
+          Local interface to hunt on; defaults to standard build interface if
+          unspecified
       - tags: [-p PREFIX, --prefix PREFIX]
         type: String
         default: node
