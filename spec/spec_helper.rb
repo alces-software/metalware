@@ -52,6 +52,8 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../src')
 # simplecov, even entirely untested ones.
 require 'cli'
 
+require 'filesystem'
+
 FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 
 RSpec.configure do |config|
@@ -143,7 +145,7 @@ RSpec.configure do |config|
     if example.metadata[:real_fs]
       example.run
     else
-      FakeFS do
+      FileSystem.test do
         example.run
       end
     end
