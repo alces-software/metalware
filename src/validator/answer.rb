@@ -30,10 +30,11 @@ module Metalware
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(metalware_config, answer_file, loader: nil)
+      def initialize(metalware_config, answer_file, loader: nil, input_section: nil)
         @config = metalware_config
         @answer_file_name = answer_file
         @validation_loader = loader
+        @inputted_section = input_section
       end
 
       def validate
@@ -86,7 +87,7 @@ module Metalware
         questions[section]
       end
 
-      # XXXX, ideally questions will always be loaded through Validator::Loader
+      # TODO, ideally questions will always be loaded through Validator::Loader
       # However at the moment it needs to maintain backwards compatibility
       # This should be removed in the future
       def questions
@@ -99,7 +100,13 @@ module Metalware
         end
       end
 
+      # TODO: The section was previously determined dynamically from the relative
+      # path, however this isn't required with the file loader as the section is
+      # known in advanced. However the original code needs to be maintained for
+      # backwards compatibility. Once this has been fixed, this whole method can
+      # be removed and the section set in initialize
       def section
+        return @inputted_section unless @inputted_section.nil?
         @section ||= begin
                        if answer_file_name == 'domain.yaml'
                          :domain
@@ -118,8 +125,18 @@ module Metalware
         @answers ||= Data.load(answer_file_path)
       end
 
+      # TODO: Previously the validator took a relative path and then converted
+      # it to the absolute. Ideally with the Validator::Loader, all validators
+      # will be given an absolute path
+      # This method however needs to keep backwards compatibility for now this
+      # should be removed in the future
+      # NOTE: The config should be removed as well as an input
       def answer_file_path
-        File.join(config.answer_files_path, answer_file_name.to_s)
+        if validation_loader.nil?
+          File.join(config.answer_files_path, answer_file_name.to_s)
+        else
+          answer_file_name
+        end
       end
 
       def validation_hash

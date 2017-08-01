@@ -24,6 +24,8 @@
 
 require 'validator/answer'
 require 'validator/configure'
+require 'data'
+require 'constants'
 
 module Metalware
   module Validator
@@ -33,11 +35,14 @@ module Metalware
         @save = ValidatorSaveFile.new(metalware_config, self)
       end
 
-      private
+      attr_reader :load
 
-      attr_reader :load, :save
+      def save(data)
+        ValidatorSaveHelper.new(@save, data)
+      end
     end
 
+    # Contains the code for finding the paths to each file type
     class ValidatorFileBase
       def initialize(metalware_config, validator_loader_input)
         @config = metalware_config
@@ -46,25 +51,72 @@ module Metalware
 
       private
 
+      def find_path(key, *arguments)
+        PATH_PROCS[key].call(*arguments)
+      end
+
+      PATH_PROCS = {
+        group_cache: Proc.new { Constants::GROUPS_CACHE_PATH },
+        configure_file: Proc.new { config.configure_file },
+        domain_answers: Proc.new { config.domain_answers_file },
+        group_answers: Proc.new { |group| config.group_answers_file(group) },
+        node_answers: Proc.new { |node| config.node_answers_file(node) }
+      }
+
       attr_reader :config, :validator_loader
     end
 
+    # Loads and validates the file
     class ValidatorLoadFile < ValidatorFileBase
       def configure
-        Validator::Configure.new(config.configure_file).load
+        Validator::Configure.new(find_path(:configure_file)).load
+      end      
+
+      def group_cache
+        Data.load(find_path(:group_cache))
       end
 
-      def answer(file)
-        Validator::Answer.new(config, file, validator_loader).load
+      def domian_answers
+        answer(find_path(:domain_answers), :domain)
+      end
+
+      def group_answers(file)
+        answer(find_path(:group_answers, file), :groups)
+      end
+
+      def node_answers(file)
+        answer(find_path(:node_answers, file), :nodes)
+      end
+
+      private
+
+      def answer(absolute_path, section)
+        validator = Validator::Answer.new(config,
+                                          absolute_path,
+                                          loader: validator_loader,
+                                          input_section: section)
+        validator.load
       end
     end
 
-    # It might be a wise idea to do all the file loading and saving through the
-    # single Validator::Data class. This is included for future expansion.
-    # Open to comments
-    # I was thinking that the absolute paths could be set in here so only the
-    # the relative bit changes
+    # Saves data to a file
     class ValidatorSaveFile < ValidatorFileBase
+      def group_cache(data)
+        Data.dump(find_path(:group_cache), data)
+      end
+    end
+
+    # Used to change the save syntax to:
+    # file_loader.save(data_to_be_saved).<file_saving_method>
+    class ValidatorSaveHelper
+      def initialize(validator_save_file, data)
+        @data = data
+        @validator_save_file = validator_save_file
+      end
+
+      def method_missing(s, *_a, &_b)
+        @validator_save_file.send(s, @data)
+      end
     end
 
     # I was thinking that we could use an explicit file cache, that way if we

@@ -76,7 +76,7 @@ module Metalware
         Dependency.new(config, command_name, dependency_hash).enforce
       end
 
-      def validated_file
+      def file_loader
         Validator::Loader.new(config)
       end
 
