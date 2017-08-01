@@ -56,7 +56,7 @@ module Metalware
     end
 
     def configure_questions
-      repo.configure_questions
+      repo.configure_question_identifiers
     end
 
     def repo

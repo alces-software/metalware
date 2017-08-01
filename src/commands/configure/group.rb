@@ -22,6 +22,10 @@ module Metalware
           config.group_answers_file(group_name)
         end
 
+        def higher_level_answer_files
+          [config.domain_answers_file]
+        end
+
         private
 
         attr_reader :group_name

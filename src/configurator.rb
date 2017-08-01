@@ -35,12 +35,14 @@ module Metalware
       configure_file:,
       questions_section:,
       answers_file:,
+      higher_level_answer_files:,
       use_readline: true
     )
       @highline = highline
       @configure_file = configure_file
       @questions_section = questions_section
       @answers_file = answers_file
+      @higher_level_answer_files = higher_level_answer_files
       @use_readline = use_readline
     end
 
@@ -55,6 +57,7 @@ module Metalware
                 :configure_file,
                 :questions_section,
                 :answers_file,
+                :higher_level_answer_files,
                 :use_readline
 
     def questions
@@ -76,8 +79,22 @@ module Metalware
     def ask_questions
       questions.map do |question|
         answer = question.ask(highline)
+        answer_pair_to_save(question, answer)
+      end.reject(&:nil?).to_h
+    end
+
+    def answer_pair_to_save(question, answer)
+      if answer == question.default
+        # If a question is answered with the default answer, we do not want to
+        # save it so that the default answer is always used, whatever that
+        # might later be changed to. Note: this means we save nothing if the
+        # default is manually re-entered; ideally we would save the input in
+        # this case but I can't see a way to tell if input has been entered
+        # with HighLine, and this isn't a big issue.
+        nil
+      else
         [question.identifier, answer]
-      end.to_h
+      end
     end
 
     def save_answers(answers)
@@ -85,7 +102,12 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
+      default = higher_level_answer_files.map do |file|
+        Data.load(file)[identifier]
+      end.reject(&:nil?).last || properties[:default]
+
       Question.new(
+        default: default,
         identifier: identifier,
         properties: properties,
         configure_file: configure_file,
@@ -108,26 +130,31 @@ module Metalware
     class Question
       VALID_TYPES = [:boolean, :choice, :integer, :string].freeze
 
-      attr_reader :identifier,
-                  :question,
-                  :type,
-                  :choices,
-                  :default,
-                  :required,
-                  :use_readline
+      attr_reader \
+        :choices,
+        :default,
+        :identifier,
+        :old_answer,
+        :question,
+        :required,
+        :type,
+        :use_readline
 
       def initialize(
-        identifier:,
-        question:,
-        properties:,
         configure_file:,
-        questions_section:,
+        default:,
+        identifier:,
         old_answer: nil,
+        properties:,
+        question:,
+        questions_section:,
         use_readline:
       )
-        @identifier = identifier
-        @question = question
         @choices = properties[:choices]
+        @default = default
+        @identifier = identifier
+        @old_answer = old_answer
+        @question = question
         @required = !properties[:optional]
         @use_readline = use_readline
 
@@ -136,11 +163,6 @@ module Metalware
           configure_file: configure_file,
           questions_section: questions_section
         )
-
-        @default = determine_default(
-          question_default: properties[:default],
-          old_answer: old_answer
-        )
       end
 
       def ask(highline)
@@ -148,8 +170,8 @@ module Metalware
         send(ask_method, highline) do |highline_question|
           highline_question.readline = true if use_readline?
 
-          if default.present?
-            highline_question.default = default
+          if default_input
+            highline_question.default = default_input
           elsif required
             highline_question.validate = ensure_answer_given
           end
@@ -163,6 +185,17 @@ module Metalware
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
         use_readline && type != :boolean
+      end
+
+      def default_input
+        default_input = old_answer.nil? ? default : old_answer
+        if !default_input.nil? && type == :boolean
+          # Default for a boolean question needs to be set to the input
+          # HighLine's `agree` expects, i.e. 'yes' or 'no'.
+          default_input ? 'yes' : 'no'
+        else
+          default_input
+        end
       end
 
       def ask_boolean_question(highline)
@@ -200,27 +233,6 @@ module Metalware
 
       def valid_type?(value)
         VALID_TYPES.include?(value)
-      end
-
-      def determine_default(question_default:, old_answer:)
-        # XXX Remove validation/conversion here and do in earlier step for
-        # validating `configure.yaml`? Similarly in `type_for` etc.
-        raw_default = old_answer.nil? ? question_default : old_answer
-        unless raw_default.nil?
-          case type
-          when :string
-            raw_default.to_s
-          when :integer
-            raw_default.to_i
-          when :boolean
-            # Default for a boolean question needs to be set to the input
-            # HighLine's `agree` expects, i.e. 'yes' or 'no'.
-            raw_default ? 'yes' : 'no'
-          else
-            msg = "Unrecognized data type (#{type}) as a default"
-            raise UnknownDataTypeError, msg
-          end
-        end
       end
 
       def ensure_answer_given

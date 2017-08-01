@@ -57,6 +57,8 @@ RSpec.describe Metalware::Configurator do
     Metalware::Data.load(answers_file_path)
   end
 
+  let :higher_level_answer_files { [] }
+
   let :configurator do
     make_configurator
   end
@@ -67,6 +69,7 @@ RSpec.describe Metalware::Configurator do
       configure_file: configure_file_path,
       questions_section: :test,
       answers_file: answers_file_path,
+      higher_level_answer_files: higher_level_answer_files,
       # Do not want to use readline to get input in tests as tests will then
       # hang waiting for input.
       use_readline: false
@@ -239,7 +242,7 @@ RSpec.describe Metalware::Configurator do
       )
     end
 
-    it 'loads default values' do
+    it 'saves nothing if default available and no input given' do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
@@ -272,14 +275,10 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers([''] * 5)
 
-      expect(answers).to eq(string_q: str_ans,
-                            string_erb: erb_ans,
-                            integer_q: 10,
-                            true_boolean_q: true,
-                            false_boolean_q: false)
+      expect(answers).to eq({})
     end
 
-    it 'loads the old answers as defaults' do
+    it 're-saves the old answers if new answers not provided' do
       define_questions(test: {
                          string_q: {
                            question: 'String?',
@@ -320,6 +319,65 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers([''] * 4)
       expect(answers).to eq(new_answers)
+    end
+
+    context 'when higher level answer files provided' do
+      let :higher_level_answer_files do
+        [
+          {
+            top_level_q: 'top_level_q_answer',
+            both_higher_levels_q: 'both_higher_levels_q_top_level_answer',
+          },
+          {
+            overridden_default_q: 'higher_level_q_overriding_answer',
+            both_higher_levels_q: 'both_higher_levels_q_higher_answer',
+            higher_level_q: 'higher_level_q_answer',
+          },
+        ].map do |answers|
+          Tempfile.new.path.tap { |path| Metalware::Data.dump(path, answers) }
+        end
+      end
+
+      before do
+        define_questions(test: {
+                           default_q: {
+                             question: 'default_q',
+                             default: 'default_answer',
+                           },
+                           overridden_default_q: {
+                             question: 'overridden_default_q',
+                             default: 'default_answer',
+                           },
+                           top_level_q: { question: 'top_level_q' },
+                           both_higher_levels_q: { question: 'both_higher_levels_q' },
+                           higher_level_q: { question: 'higher_level_q' },
+                         })
+      end
+
+      it 'saves nothing if no input given' do
+        configure_with_answers([''] * 5)
+
+        expect(answers).to eq({})
+      end
+
+      it 'uses the highest precedence answer for each question as the default' do
+        configure_with_answers([''] * 5)
+
+        output.rewind
+        output_lines = output.read.split("\n")
+
+        expected_defaults = [
+          'default_answer',
+          'higher_level_q_overriding_answer',
+          'top_level_q_answer',
+          'both_higher_levels_q_higher_answer',
+          'higher_level_q_answer',
+        ]
+
+        output_lines.zip(expected_defaults).each do |output_line, expected_default|
+          expect(output_line).to include("|#{expected_default}|")
+        end
+      end
     end
 
     it 're-asks the required questions if no answer is given' do

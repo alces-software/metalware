@@ -24,7 +24,6 @@
 
 require 'spec_utils'
 require 'filesystem'
-require 'validator/configure'
 
 RSpec.describe Metalware::Commands::Configure::Group do
   def run_configure_group(group)
@@ -46,6 +45,19 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
   before :each do
     SpecUtils.mock_validate_genders_success(self)
+  end
+
+  it 'creates correct configurator' do
+    filesystem.test do
+      expect(Metalware::Configurator).to receive(:new).with(
+        configure_file: config.configure_file,
+        questions_section: :group,
+        answers_file: config.group_answers_file('testnodes'),
+        higher_level_answer_files: [config.domain_answers_file]
+      ).and_call_original
+
+      run_configure_group 'testnodes'
+    end
   end
 
   describe 'recording groups' do
