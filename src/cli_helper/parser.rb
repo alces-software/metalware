@@ -48,6 +48,8 @@ module Metalware
         end
       end
 
+      private
+
       # TODO: Currently the parser does not support the example option
       def parse_command_attributes(command, attributes)
         @calling_obj.command command do |c|
