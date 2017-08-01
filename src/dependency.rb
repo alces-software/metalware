@@ -24,6 +24,7 @@
 require 'exceptions'
 require 'constants'
 require 'validator/configure'
+require 'validator/answer'
 
 module Metalware
   class Dependency
@@ -55,16 +56,20 @@ module Metalware
       end
     end
 
-    def validate_dependency_value(dep, value, optional = false)
-      # TODO: Currently passing the optional flag into this method is redundant
-      # However when Answer validation is merged in, this method gets expanded
-      # and the optional flag becomes required
-      return if optional
+    def validate_dependency_value(dep, value, optional)
       unless valid_file?(dep, value)
         if optional
           return
         else
           raise DependencyFailure, get_value_failure_message(dep, value)
+        end
+      end
+
+      case dep
+      when :configure
+        validator = Validator::Answer.new(config, value)
+        unless validator.validate.success?
+          raise DependencyFailure, validator.error_message
         end
       end
     end

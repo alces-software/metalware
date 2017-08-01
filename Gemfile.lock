@@ -4,6 +4,10 @@ GIT
   specs:
     commander (4.5.3)
       highline (~> 1.7.2)
+      rake
+      rspec (~> 3.2)
+      rubocop (~> 0.46)
+      simplecov
 
 GIT
   remote: https://github.com/alces-software/ruby-pcap.git
@@ -131,4 +135,4 @@ RUBY VERSION
    ruby 2.4.1p111
 
 BUNDLED WITH
-   1.15.1
+   1.15.3

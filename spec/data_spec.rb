@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'data'
+require 'filesystem'
 
 RSpec.describe Metalware::Data do
   let :data_file_path { '/path/to/some_data.yaml' }
@@ -62,6 +63,15 @@ RSpec.describe Metalware::Data do
         expect { subject }.to raise_error Psych::SyntaxError
       end
     end
+
+    it 'raises if loaded file does not contain hash' do
+      filesystem.test do
+        array = ['foo', 'bar']
+        File.write(data_file_path, YAML.dump(array))
+
+        expect { subject }.to raise_error(Metalware::DataError)
+      end
+    end
   end
 
   describe '#dump' do
@@ -72,6 +82,14 @@ RSpec.describe Metalware::Data do
         expect(
           YAML.load_file(data_file_path)
         ).to eq(string_keyed_data)
+      end
+    end
+
+    it 'raises if attempt to dump non-hash data' do
+      filesystem.test do
+        expect do
+          Metalware::Data.dump(data_file_path, ['foo', 'bar'])
+        end.to raise_error(Metalware::DataError)
       end
     end
   end

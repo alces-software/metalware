@@ -27,16 +27,37 @@ module Metalware
   module Data
     class << self
       def load(data_file)
+        data = raw_load(data_file)
+        raise load_error(data_file) unless valid_data?(data)
+        data.deep_transform_keys(&:to_sym)
+      end
+
+      def dump(data_file, data)
+        raise dump_error(data) unless valid_data?(data)
+        yaml = data.deep_transform_keys(&:to_s).to_yaml
+        File.write(data_file, yaml)
+      end
+
+      private
+
+      def raw_load(data_file)
         if File.file? data_file
           YAML.load_file(data_file) || {}
         else
           {}
-        end.deep_transform_keys(&:to_sym)
+        end
       end
 
-      def dump(data_file, data)
-        yaml = data.deep_transform_keys(&:to_s).to_yaml
-        File.write(data_file, yaml)
+      def valid_data?(data)
+        data.respond_to? :deep_transform_keys
+      end
+
+      def load_error(data_file)
+        raise DataError, "Attempted to load invalid data from #{data_file}; should contain a hash"
+      end
+
+      def dump_error(data)
+        raise DataError, "Attempted to dump invalid data (#{data}); should be a hash"
       end
     end
   end

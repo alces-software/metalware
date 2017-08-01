@@ -95,6 +95,9 @@ module Metalware
   class MissingParameterError < MetalwareError
   end
 
+  class ValidationInternalError < MetalwareError
+  end
+
   # Use this error as the general catch all in Dependencies
   # The dependency can't be checked as the logic doesn't make sense
   # NOTE: We should try and prevent these errors from appearing in production
@@ -111,6 +114,11 @@ module Metalware
 
   # Error to be used when a file that should exist doesn't.
   class FileDoesNotExistError < MetalwareError
+  end
+
+  # Error to be raised by Data class when invalid data loaded/attempted to be
+  # dumped.
+  class DataError < MetalwareError
   end
 end
 

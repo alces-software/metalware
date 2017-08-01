@@ -25,6 +25,10 @@ module Metalware
         # should be performed in this method in subclasses.
       end
 
+      def relative_answer_file
+        answers_file.sub("#{config.answer_files_path}/", '')
+      end
+
       def answers_file
         raise NotImplementedError
       end
@@ -41,7 +45,9 @@ module Metalware
       def dependency_hash
         {
           repo: ['configure.yaml'],
-          configure: [],
+          optional: {
+            configure: [relative_answer_file],
+          },
         }
       end
 

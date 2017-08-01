@@ -14,3 +14,10 @@ en:
           'default' 'choice', 'optional'
         default_type?: >
           Type mismatch between question 'type' and 'default' value
+
+      answer:
+        missing_questions?: >
+          The following question(s) were detected in the answer file but do not
+          appear in 'configure.yaml':
+        answer_type?: >
+          There is a mismatch between the type of a question and its answer
