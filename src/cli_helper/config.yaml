@@ -56,15 +56,15 @@ subcommands:
       templates themselves.
     action: Commands::Configure::Rerender
 
-  remove_group: &remove_group
-    syntax: metal remove group GROUP_NAME [options]
+  remove_primary_group: &remove_primary_group
+    syntax: metal remove primary_group GROUP_NAME [options]
     summary: Removes a previously configured group
     description: >
       Removes the configuration answer file for the group and updates the
       primary group cache. Will also delete all nodes within the primary group
       to prevent them becoming orphans. This is done by deleting the answer
       files associated with the nodes.
-    action: Commands::Remove::Group
+    action: Commands::Remove::PrimaryGroup
 
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
@@ -288,7 +288,7 @@ commands:
     summary: Remove metalware controlled files/ objects
     # Description can be added for subcommand
     subcommands:
-      group: *remove_group
+      primary_group: *remove_primary_group
 
   render:
     syntax: metal render TEMPLATE [NODE] [options]

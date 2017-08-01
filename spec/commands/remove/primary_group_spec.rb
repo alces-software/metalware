@@ -22,16 +22,18 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'filesystem'
-require 'commands/remove/group'
+require 'commands/remove/primary_group'
 require 'nodeattr_interface'
 require 'config'
 require 'ostruct'
+require 'validator/loader'
 
-RSpec.describe Metalware::Commands::Remove::Group do
+RSpec.describe Metalware::Commands::Remove::PrimaryGroup do
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.with_answer_fixtures('setup1/answers')
+      fs.with_groups_cache_fixture('setup1/cache/groups.yaml')
     end
   end
 
@@ -48,7 +50,8 @@ RSpec.describe Metalware::Commands::Remove::Group do
     filesystem.test do |_fs|
       answer_check = RSpecRemoveGroup::AnswerFileChecker
                        .new(self, config, primary_group, primary_nodes)
-      Metalware::Commands::Remove::Group.new(primary_group, OpenStruct.new)
+      Metalware::Commands::Remove::PrimaryGroup
+        .new([primary_group], OpenStruct.new)
       answer_check.check
     end
   end
@@ -77,9 +80,11 @@ module RSpecRemoveGroup
   class AnswerFileChecker
     def initialize(rspec_input, metal_config, group_input, nodes_input)
       @config = metal_config
+      @loader = Metalware::Validator::Loader.new(config)
       @primary_group = group_input
       @primary_nodes = nodes_input
       @initial_files = answer_files
+      @initial_group_cache = loader.load.group_cache[:primary_groups]
       @rspec = rspec_input
     end
 
@@ -91,9 +96,17 @@ module RSpecRemoveGroup
         msg = "Expected file to be deleted: #{deleted_file}"
         rspec.expect(File.file?(deleted_file)).to rspec.be(false), msg
       end
+      rspec.expect(groups_removed_from_cache).to rspec.eq([primary_group])
     end
 
     private
+
+    attr_reader :config,
+                :initial_files,
+                :primary_group,
+                :primary_nodes,
+                :rspec,
+                :loader
 
     def deleted_files
       answer_files - initial_files
@@ -107,10 +120,12 @@ module RSpecRemoveGroup
       end
     end
 
+    def groups_removed_from_cache
+      @initial_group_cache - loader.load.group_cache[:primary_groups]
+    end
+
     def answer_files
       Dir[File.join(config.answer_files_path, "**/*.yaml")]
     end
-
-    attr_reader :config, :initial_files, :primary_group, :primary_nodes, :rspec
   end
 end
