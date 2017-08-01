@@ -26,17 +26,7 @@ module Metalware
   module DeploymentServer
     class << self
       def ip
-        SystemCommand.run(determine_hostip_script).chomp
-      rescue SystemCommandError
-        # If script failed for any reason fall back to using `hostname -i`,
-        # which may or may not give the IP on the interface we actually want to
-        # use (note: the dance with pipes is so we only get the last word in
-        # the output, as I've had the IPv6 IP included first before, which
-        # breaks all the things).
-        log_hostip_fallback_message
-        SystemCommand.run(
-          "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
-        ).chomp
+        ip_on_interface(build_interface)
       end
 
       def system_file_url(system_file)
@@ -66,20 +56,17 @@ module Metalware
         URI.join("http://#{ip}", full_path).to_s
       end
 
-      def log_hostip_fallback_message
-        # Only log this once per run, as if it occurs once it will probably
-        # occur many times for the same reason. We don't cache the IP itself
-        # however as it could change.
-        unless @hostip_fallback_logged
-          MetalLog.info(
-            <<-EOF.strip_heredoc
-              Could not robustly determine deployment server IP on build interface; falling back to use 'hostname -i'.
-              This is expected if Metalware is not running on a Controller appliance.'
+      def build_interface
+        server_config[:build_interface]
+      end
 
-            EOF
-          )
-        end
-        @hostip_fallback_logged = true
+      def server_config
+        Data.load(Constants::SERVER_CONFIG_PATH)
+      end
+
+      def ip_on_interface(interface)
+        command = "#{determine_hostip_script} #{interface}"
+        SystemCommand.run(command).chomp
       end
 
       def determine_hostip_script

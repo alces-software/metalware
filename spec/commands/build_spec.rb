@@ -166,6 +166,13 @@ RSpec.describe Metalware::Commands::Build do
           FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
           FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 
+          # Need to define valid build interface so `DeploymentServer` does not
+          # fail to get the IP on this interface.
+          Metalware::Data.dump(
+            Metalware::Constants::SERVER_CONFIG_PATH,
+            build_interface: 'eth0'
+          )
+
           expect(Metalware::Templater).to receive(:render_to_file).with(
             instance_of(Metalware::Config),
             "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
