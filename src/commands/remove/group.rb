@@ -40,7 +40,9 @@ module Metalware
 
         def delete_answer_files; end
 
-        def list_of_answer_files; end
+        def list_of_answer_files
+          
+        end
       end
     end
   end

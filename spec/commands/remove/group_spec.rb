@@ -22,12 +22,95 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'filesystem'
+require 'commands/remove/group'
+require 'nodeattr_interface'
+require 'config'
+require 'ostruct'
 
 RSpec.describe Metalware::Commands::Remove::Group do
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
-      fs.with_answer_fixtures('answers/set1')
+      fs.with_answer_fixtures('setup1/answers')
     end
+  end
+
+  let :config { Metalware::Config.new }
+
+  def generate_node_list(prefix, max_index: 10)
+    [*1..max_index].map { |idx| "#{prefix}#{ "0" if idx < 10 }#{idx}" }
+  end
+
+  def run_remove_group(primary_group, primary_nodes)
+    allow(Metalware::NodeattrInterface).to \
+      receive(:nodes_in_primary_group).and_return(primary_nodes)
+
+    filesystem.test do |_fs|
+      answer_check = RSpecRemoveGroup::AnswerFileChecker
+                       .new(self, config, primary_group, primary_nodes)
+      Metalware::Commands::Remove::Group.new(primary_group, OpenStruct.new)
+      answer_check.check
+    end
+  end
+
+  context 'with no other groups' do
+    it 'removes group and node answer files' do
+      run_remove_group("nodes", generate_node_list("node"))
+    end
+  end
+
+  context 'with a primary group that is used as an additional group' do
+    it "remove the primary group without altering the other nodes" do |variable|
+      run_remove_group("group1", generate_node_list("nodeA"))
+    end
+  end
+
+  context 'with a nodes in an additional group (that is also primary)' do |variable|
+    it 'does not remove the other additional group' do
+      run_remove_group("group2", generate_node_list("nodeB"))
+    end
+  end
+end
+
+# Can only be ran inside RSpec AND FileSystem
+module RSpecRemoveGroup
+  class AnswerFileChecker
+    def initialize(rspec_input, metal_config, group_input, nodes_input)
+      @config = metal_config
+      @primary_group = group_input
+      @primary_nodes = nodes_input
+      @initial_files = answer_files
+      @rspec = rspec_input
+    end
+
+    def check
+      # Checks that we haven't deleted the wrong file
+      rspec.expect(deleted_files - expected_deleted_files).to rspec.be_empty
+      # Checks that all files that should be deleted have been
+      expected_deleted_files.each do |deleted_file|
+        msg = "Expected file to be deleted: #{deleted_file}"
+        rspec.expect(File.file?(deleted_file)).to rspec.be(false), msg
+      end
+    end
+
+    private
+
+    def deleted_files
+      answer_files - initial_files
+    end
+
+    def expected_deleted_files
+      @expected_deleted_files ||= begin
+        primary_nodes.map { |node| "nodes/#{node}.yaml" }
+                     .unshift(["groups/#{primary_group}.yaml"])
+                     .map { |f| File.join(config.answer_files_path, f) }
+      end
+    end
+
+    def answer_files
+      Dir[File.join(config.answer_files_path, "**/*.yaml")]
+    end
+
+    attr_reader :config, :initial_files, :primary_group, :primary_nodes, :rspec
   end
 end
