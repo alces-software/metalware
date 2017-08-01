@@ -30,7 +30,7 @@ require 'config'
 require 'nodes'
 require 'timeout'
 
-RSpec.describe Metalware::Status::Monitor do
+RSpec.describe Metalware::Status::Monitor, real_fs: true do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)

@@ -135,4 +135,17 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+
+  config.around :each do |example|
+    # Run every test using `FakeFS` unless a truthy `real_fs` metadata value is
+    # passed; this prevents us polluting the real file system unless explicitly
+    # requested.
+    if example.metadata[:real_fs]
+      example.run
+    else
+      FakeFS do
+        example.run
+      end
+    end
+  end
 end

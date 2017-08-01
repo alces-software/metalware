@@ -71,7 +71,7 @@ RSpec.describe Metalware::NodeattrInterface do
     end
   end
 
-  describe '#validate_genders_file' do
+  describe '#validate_genders_file', real_fs: true do
     let :genders_file { Tempfile.new }
     let :genders_path { genders_file.path }
 
