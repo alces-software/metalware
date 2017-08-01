@@ -329,16 +329,17 @@ commands:
       Note that templating parameters which are only sometimes available when
       rendering templates are not included, such as the 'alces.files'
       parameter, which is only available when rendering 'build' templates. Also
-      note that groups and the nodes within them are not included by default,
-      but this can be done using the '--include-groups' option.
+      note that the 'alces.groups' namespace and the nodes within the same primary
+      genders group are not included by default; this can be done using the
+      '--include-groups' option.
     action: Commands::ViewConfig
     options:
       - tags: [-i, --include-groups]
         description: >
-          Include the groups and nodes within these in the JSON output; this is
-          not done by default as it can be very slow to gather the
-          configuration for all nodes, and displaying this can also be very
-          verbose.
+          Include the 'alces.groups' namespace and nodes within the same primary
+          gender group in the JSON output; this is not done by default as it can
+          be very slow to gather the configuration for all nodes, and displaying
+          this can also be very verbose.
       - tags: [--color-output]
         description: >
           Force the output to be coloured even if not outputting to a terminal;
