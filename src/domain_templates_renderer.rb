@@ -12,6 +12,9 @@ module Metalware
     end
 
     def render
+      # XXX Could validate this has required keys?
+      render_metalware_server_config
+
       # `hosts` file is typically rendered using info from `genders`, so if
       # the rendered `genders` is invalid we should not render it.
       if render_genders
@@ -24,6 +27,13 @@ module Metalware
     private
 
     attr_reader :config, :genders_invalid_message
+
+    def render_metalware_server_config
+      render_template(
+        server_config_template,
+        to: Constants::SERVER_CONFIG_PATH
+      )
+    end
 
     def render_genders
       render_template(
@@ -78,6 +88,10 @@ module Metalware
         prepend_managed_file_message: true,
         &block
       )
+    end
+
+    def server_config_template
+      File.join(config.repo_path, 'server.yaml')
     end
 
     def genders_template

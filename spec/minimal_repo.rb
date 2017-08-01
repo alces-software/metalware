@@ -25,6 +25,7 @@ module MinimalRepo
                                   domain: {},
                                   group: {},
                                   node: {}),
+      'server.yaml': YAML.dump(build_interface: ''),
     }.freeze
 
     def create_at(path)
