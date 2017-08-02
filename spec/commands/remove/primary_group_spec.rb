@@ -24,9 +24,11 @@
 require 'filesystem'
 require 'commands/remove/primary_group'
 require 'nodeattr_interface'
+require 'node'
 require 'config'
 require 'ostruct'
 require 'validator/loader'
+require 'spec_utils'
 
 RSpec.describe Metalware::Commands::Remove::PrimaryGroup do
   let :filesystem do
@@ -39,38 +41,49 @@ RSpec.describe Metalware::Commands::Remove::PrimaryGroup do
 
   let :config { Metalware::Config.new }
 
-  def generate_node_list(prefix, max_index: 10)
-    [*1..max_index].map { |idx| "#{prefix}#{ "0" if idx < 10 }#{idx}" }
+  before :each do
+    SpecUtils.use_mock_genders(self, genders_file: 'setup1/genders')
   end
 
-  def run_remove_group(primary_group, primary_nodes)
-    allow(Metalware::NodeattrInterface).to \
-      receive(:nodes_in_primary_group).and_return(primary_nodes)
+  def generate_node_list(prefix, max_index: 10)
+    [*1..max_index].map { |idx| "#{prefix}#{'0' if idx < 10}#{idx}" }
+  end
 
+  def run_remove_group(primary_group, primary_nodes, &test_block)
     filesystem.test do |_fs|
       answer_check = RSpecRemoveGroup::AnswerFileChecker
-                       .new(self, config, primary_group, primary_nodes)
+                     .new(self, config, primary_group, primary_nodes)
       Metalware::Commands::Remove::PrimaryGroup
         .new([primary_group], OpenStruct.new)
       answer_check.check
+      yield if test_block
     end
   end
 
   context 'with no other groups' do
     it 'removes group and node answer files' do
-      run_remove_group("nodes", generate_node_list("node"))
+      run_remove_group('nodes', generate_node_list('node')) do |_variable|
+        other_node_groups = Metalware::Node.new(config, 'nodeB01').groups
+        expect(other_node_groups).to include('group1', 'group2')
+      end
     end
   end
 
   context 'with a primary group that is used as an additional group' do
-    it "remove the primary group without altering the other nodes" do |variable|
-      run_remove_group("group1", generate_node_list("nodeA"))
+    it 'remove the primary group without altering the other nodes' do
+      run_remove_group('group1', generate_node_list('nodeA')) do
+        other_node_groups = Metalware::Node.new(config, 'nodeB01').groups
+        expect(other_node_groups).to include('group1')
+      end
     end
   end
 
-  context 'with a nodes in an additional group (that is also primary)' do |variable|
-    it 'does not remove the other additional group' do
-      run_remove_group("group2", generate_node_list("nodeB"))
+  context 'with a nodes in an additional group (that is also primary)' do
+    it 'does not remove the other additional(/primary) group' do
+      run_remove_group('group2', generate_node_list('nodeB')) do
+        other_node_groups = Metalware::Node.new(config, 'nodeA01').groups
+        expect(other_node_groups).to include('group1')
+      end
     end
   end
 end
@@ -125,7 +138,7 @@ module RSpecRemoveGroup
     end
 
     def answer_files
-      Dir[File.join(config.answer_files_path, "**/*.yaml")]
+      Dir[File.join(config.answer_files_path, '**/*.yaml')]
     end
   end
 end

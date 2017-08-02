@@ -32,7 +32,7 @@ module Metalware
       def nodes_in_primary_group(primary_group)
         nodeattr('--expand')
           .split("\n") # Splits the single string output to 1 line per node
-          .map { |node| node.split(/[\s,]/) } # Splits nodename and group string
+          .map { |node| node.gsub(/\s+/, ' ').split(/[\s,]/) } # Split node data
           .select { |node| node[1] == primary_group } # Match the primary group
           .map { |node| node[0] } # Only return the nodename (instead of groups)
       end
