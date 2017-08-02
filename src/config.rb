@@ -29,10 +29,12 @@ require 'constants'
 require 'exceptions'
 require 'ostruct'
 require 'metal_log'
+require 'validator/loader'
 
 module Metalware
   class Config
     # XXX DRY these paths up.
+    # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
@@ -61,6 +63,10 @@ module Metalware
       define_method :"#{key}" do
         @config[key] || default
       end
+    end
+
+    def file_loader
+      Validator::Loader.new(self)
     end
 
     def repo_config_path(config_name)
