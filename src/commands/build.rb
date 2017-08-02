@@ -55,6 +55,9 @@ module Metalware
           repo: ["pxelinux/#{@options.pxelinux}",
                  "kickstart/#{@options.kickstart}"],
           configure: ['domain.yaml'],
+          optional: {
+            configure: ["groups/#{@node_identifier}.yaml"],
+          },
         }
       end
 
