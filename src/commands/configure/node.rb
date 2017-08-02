@@ -8,11 +8,13 @@ module Metalware
   module Commands
     module Configure
       class Node < CommandHelpers::ConfigureCommand
+        private
+
+        attr_reader :node_name
+
         def setup(args, _options)
           @node_name = args.first
         end
-
-        protected
 
         def answers_file
           config.node_answers_file(node_name)
@@ -24,8 +26,6 @@ module Metalware
             config.group_answers_file(node.primary_group),
           ]
         end
-
-        private
 
         attr_reader :node_name
 

@@ -42,9 +42,9 @@ module Metalware
         handle_fatal_exception(e)
       end
 
-      attr_reader :config
-
       private
+
+      attr_reader :config
 
       def pre_setup(_args, options)
         setup_config(options)

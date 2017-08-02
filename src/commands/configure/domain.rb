@@ -8,9 +8,9 @@ module Metalware
   module Commands
     module Configure
       class Domain < CommandHelpers::ConfigureCommand
-        def setup(_args, _options); end
+        private
 
-        protected
+        def setup(_args, _options); end
 
         def answers_file
           config.domain_answers_file

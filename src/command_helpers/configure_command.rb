@@ -8,6 +8,15 @@ require 'domain_templates_renderer'
 module Metalware
   module CommandHelpers
     class ConfigureCommand < BaseCommand
+      private
+
+      GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
+        You should be able to fix this error by re-running the `configure`
+        command and correcting the invalid input, or by manually editing the
+        appropriate answers file or template and using the `configure rerender`
+        command to re-render the templates.
+      EOF
+
       def run
         configurator.configure
         custom_configuration
@@ -17,8 +26,6 @@ module Metalware
       def handle_interrupt(_e)
         abort 'Exiting without saving...'
       end
-
-      protected
 
       def custom_configuration
         # Custom additional configuration for a `configure` command, if any,
@@ -36,15 +43,6 @@ module Metalware
       def higher_level_answer_files
         []
       end
-
-      private
-
-      GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
-        You should be able to fix this error by re-running the `configure`
-        command and correcting the invalid input, or by manually editing the
-        appropriate answers file or template and using the `configure rerender`
-        command to re-render the templates.
-      EOF
 
       def dependency_hash
         {

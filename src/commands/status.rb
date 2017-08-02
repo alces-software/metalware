@@ -31,6 +31,8 @@ require 'exceptions'
 module Metalware
   module Commands
     class Status < CommandHelpers::BaseCommand
+      private
+
       def setup(args, options)
         @opt = options
         if @opt.thread_limit < 1

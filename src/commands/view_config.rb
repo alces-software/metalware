@@ -6,6 +6,10 @@ require 'json'
 module Metalware
   module Commands
     class ViewConfig < CommandHelpers::BaseCommand
+      private
+
+      attr_reader :node_name, :options
+
       def setup(args, options)
         @node_name = args.first
         @options = options
@@ -24,10 +28,6 @@ module Metalware
           {}
         end
       end
-
-      private
-
-      attr_reader :node_name, :options
 
       def templating_config_json
         Metalware::Templating::RepoConfigParser.parse_for_node(

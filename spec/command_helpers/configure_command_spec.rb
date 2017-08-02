@@ -11,7 +11,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   # Subclass of `ConfigureCommand` for use in tests, to test it independently
   # of any individual subclass.
   class TestCommand < Metalware::CommandHelpers::ConfigureCommand
-    protected
+    private
 
     def setup(args, options); end
 

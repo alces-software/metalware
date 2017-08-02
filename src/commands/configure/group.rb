@@ -8,11 +8,13 @@ module Metalware
   module Commands
     module Configure
       class Group < CommandHelpers::ConfigureCommand
+        private
+
+        attr_reader :group_name
+
         def setup(args, _options)
           @group_name = args.first
         end
-
-        protected
 
         def custom_configuration
           record_primary_group
@@ -22,13 +24,11 @@ module Metalware
           config.group_answers_file(group_name)
         end
 
+        attr_reader :group_name
+
         def higher_level_answer_files
           [config.domain_answers_file]
         end
-
-        private
-
-        attr_reader :group_name
 
         def record_primary_group
           unless primary_group_recorded?

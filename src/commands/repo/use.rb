@@ -32,6 +32,8 @@ module Metalware
   module Commands
     module Repo
       class Use < CommandHelpers::BaseCommand
+        private
+
         def setup(args, options)
           @repo_url = args.first
           @options = options

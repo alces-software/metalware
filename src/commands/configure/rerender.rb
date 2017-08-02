@@ -7,6 +7,8 @@ module Metalware
   module Commands
     module Configure
       class Rerender < CommandHelpers::BaseCommand
+        private
+
         def setup(_args, _options); end
 
         def run

@@ -7,6 +7,10 @@ module Metalware
   module Commands
     module ViewAnswers
       class Node < CommandHelpers::BaseCommand
+        private
+
+        attr_reader :node_name
+
         def setup(args, _options)
           @node_name = args.first
         end
@@ -18,10 +22,6 @@ module Metalware
         def dependency_hash
           dependency_specifications.for_node_in_configured_group(node_name)
         end
-
-        private
-
-        attr_reader :node_name
       end
     end
   end
