@@ -25,6 +25,6 @@
 require 'command_helpers/bash_command'
 
 # Dynamically requires all ruby files in commands directory
-Dir[File.join(File.dirname(__FILE__), "commands", "**/*.rb")].map do |file|
-  require file.sub("#{File.dirname(__FILE__)}/", "").chomp(".rb")
+Dir[File.join(File.dirname(__FILE__), 'commands', '**/*.rb')].map do |file|
+  require file.sub("#{File.dirname(__FILE__)}/", '').chomp('.rb')
 end

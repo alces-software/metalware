@@ -76,7 +76,7 @@ module Metalware
       end
 
       def load
-        success? ? answers : ( raise ValidationFailure, error_message )
+        success? ? answers : (raise ValidationFailure, error_message)
       end
 
       private

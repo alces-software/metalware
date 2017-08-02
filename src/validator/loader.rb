@@ -56,12 +56,12 @@ module Metalware
       end
 
       PATH_PROCS = {
-        group_cache: Proc.new { Constants::GROUPS_CACHE_PATH },
-        configure_file: Proc.new { config.configure_file },
-        domain_answers: Proc.new { config.domain_answers_file },
-        group_answers: Proc.new { |group| config.group_answers_file(group) },
-        node_answers: Proc.new { |node| config.node_answers_file(node) }
-      }
+        group_cache: proc { Constants::GROUPS_CACHE_PATH },
+        configure_file: proc { config.configure_file },
+        domain_answers: proc { config.domain_answers_file },
+        group_answers: proc { |group| config.group_answers_file(group) },
+        node_answers: proc { |node| config.node_answers_file(node) },
+      }.freeze
 
       attr_reader :config, :validator_loader
     end
@@ -70,7 +70,7 @@ module Metalware
     class ValidatorLoadFile < ValidatorFileBase
       def configure
         Validator::Configure.new(find_path(:configure_file)).load
-      end      
+      end
 
       def group_cache
         Data.load(find_path(:group_cache))
@@ -123,12 +123,10 @@ module Metalware
     # know we are going to use a file, it can be cached at the start and then
     # the load methods can load the cached file
 
-=begin
-    class ValidatorCache < ValidatorFileBase
-      def method_missing(s, *a)
-        cache_file(s, *a) if validator_data_input.load.responds_to? s
-      end
-    end
-=end
+    #     class ValidatorCache < ValidatorFileBase
+    #       def method_missing(s, *a)
+    #         cache_file(s, *a) if validator_data_input.load.responds_to? s
+    #       end
+    #     end
   end
 end
