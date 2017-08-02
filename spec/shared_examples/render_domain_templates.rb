@@ -50,6 +50,51 @@ RSpec.shared_examples :render_domain_templates do |test_command|
     end
   end
 
+  context 'when invalid server config rendered' do
+    let :server_config_template_path do
+      File.join(Metalware::Config.new.repo_path, 'server.yaml')
+    end
+
+    let :build_interface { 'eth2' }
+
+    before :each do
+      filesystem.dump(
+        server_config_template_path,
+        build_interface: build_interface
+      )
+
+      expect(
+        Metalware::Network
+      ).to receive(:valid_interface?).with(build_interface).and_return(false)
+    end
+
+    it 'does not render hosts and genders files and gives error' do
+      filesystem.test do
+        expect(Metalware::Io).to receive(:abort)
+
+        # Note: this is similar to the error message testing below.
+        error_parts = [
+          /invalid/,
+          /#{build_interface}.*not.*valid/,
+        ]
+        error_parts.each do |fragment|
+          expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
+        end
+
+        SpecUtils.run_command(test_command)
+
+        # `server.yaml` and `hosts` not rendered.
+        expect(File.exist?(Metalware::Constants::SERVER_CONFIG_PATH)).to be false
+        expect(File.exist?('/etc/hosts')).to be false
+
+        # Original `genders` content remains.
+        expect(
+          File.read(Metalware::Constants::GENDERS_PATH)
+        ).to eq(existing_genders_contents)
+      end
+    end
+  end
+
   context 'when invalid genders file rendered' do
     let :nodeattr_error { 'oh no genders' }
     before :each do
