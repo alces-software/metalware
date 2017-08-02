@@ -42,6 +42,7 @@ RSpec.describe Metalware::Commands::Remove::PrimaryGroup do
   let :config { Metalware::Config.new }
 
   before :each do
+    SpecUtils.mock_validate_genders_success(self)
     SpecUtils.use_mock_genders(self, genders_file: 'setup1/genders')
   end
 

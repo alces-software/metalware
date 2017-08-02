@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'nodeattr_interface'
+require 'domain_templates_renderer'
 
 module Metalware
   module Commands
@@ -35,11 +36,19 @@ module Metalware
         def run
           delete_answer_files
           update_cache
+          update_domain_templates
         end
 
         private
 
         attr_reader :primary_group
+
+        # Deleting a group should not break the genders file, so this error is
+        # not expected to run
+        BAD_GENDERS_FILE = <<-EOF.strip_heredoc
+          An unexpected error has occured whilst trying to generate the genders
+          file. Rerun the `configure` commands should fix this error.
+        EOF
 
         def delete_answer_files
           list_of_answer_files.each do |file|
@@ -57,6 +66,11 @@ module Metalware
           old_cache = file_loader.load.group_cache[:primary_groups]
           new_cache = old_cache.reject { |group| group == primary_group }
           file_loader.save(primary_groups: new_cache).group_cache
+        end
+
+        def update_domain_templates
+          DomainTemplatesRenderer
+            .new(config, genders_invalid_message: BAD_GENDERS_FILE).render
         end
       end
     end
