@@ -100,6 +100,7 @@ module Metalware
     end
 
     # Saves data to a file
+    # The first input to all methods must be 'data'
     class ValidatorSaveFile < ValidatorFileBase
       def group_cache(data)
         Data.dump(find_path(:group_cache), data)
@@ -114,8 +115,16 @@ module Metalware
         @validator_save_file = validator_save_file
       end
 
-      def method_missing(s, *_a, &_b)
-        @validator_save_file.send(s, @data)
+      def valid_method?(method)
+        @validator_save_file.respond_to?(method)
+      end
+
+      def respond_to_missing?(s, *_a)
+        valid_method?(s) || super
+      end
+
+      def method_missing(s, *a, &_b)
+        valid_method?(s) ? @validator_save_file.send(s, @data, *a) : super
       end
     end
 
