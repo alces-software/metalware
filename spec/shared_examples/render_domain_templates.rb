@@ -1,6 +1,8 @@
 
 # frozen_string_literal: true
 
+require 'spec_utils'
+
 RSpec.shared_examples :render_domain_templates do |test_command|
   let :filesystem do
     FileSystem.setup do |fs|
