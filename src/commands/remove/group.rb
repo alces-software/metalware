@@ -24,6 +24,7 @@
 
 require 'nodeattr_interface'
 require 'domain_templates_renderer'
+require 'active_support/core_ext/string/strip'
 
 module Metalware
   module Commands
