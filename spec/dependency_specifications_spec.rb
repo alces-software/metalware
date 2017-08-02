@@ -4,7 +4,7 @@
 require 'spec_utils'
 require 'dependency_specifications'
 
-RSpec.describe Metalware::DependencySpecifications do
+RSpec.describe Metalware::DependencySpecifications, real_fs: true do
   subject do
     Metalware::DependencySpecifications.new(Metalware::Config.new)
   end

@@ -73,7 +73,7 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render' do
-    context 'without a repo' do
+    context 'without a repo', real_fs: true do
       before :each do
         @config = Metalware::Config.new(EMPTY_REPO_PATH)
       end

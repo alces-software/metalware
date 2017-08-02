@@ -26,7 +26,7 @@ require 'commands/each'
 require 'spec_utils'
 require 'ostruct'
 
-RSpec.describe Metalware::Commands::Each do
+RSpec.describe Metalware::Commands::Each, real_fs: true do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)

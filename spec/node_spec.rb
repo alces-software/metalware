@@ -47,7 +47,7 @@ RSpec.describe Metalware::Node do
   end
 
   # XXX adapt these to use FakeFS and make dependencies explicit?
-  context 'without using FakeFS' do
+  context 'without using FakeFS', real_fs: true do
     before do
       SpecUtils.use_unit_test_config(self)
     end

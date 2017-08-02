@@ -52,6 +52,8 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../src')
 # simplecov, even entirely untested ones.
 require 'cli'
 
+require 'filesystem'
+
 FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 
 RSpec.configure do |config|
@@ -135,4 +137,17 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+
+  config.around :each do |example|
+    # Run every test using `FakeFS` unless a truthy `real_fs` metadata value is
+    # passed; this prevents us polluting the real file system unless explicitly
+    # requested.
+    if example.metadata[:real_fs]
+      example.run
+    else
+      FileSystem.test do
+        example.run
+      end
+    end
+  end
 end
