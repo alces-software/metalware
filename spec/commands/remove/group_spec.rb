@@ -22,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'filesystem'
-require 'commands/remove/primary_group'
+require 'commands/remove/group'
 require 'nodeattr_interface'
 require 'node'
 require 'config'
@@ -30,7 +30,7 @@ require 'ostruct'
 require 'validator/loader'
 require 'spec_utils'
 
-RSpec.describe Metalware::Commands::Remove::PrimaryGroup do
+RSpec.describe Metalware::Commands::Remove::Group do
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
@@ -54,8 +54,7 @@ RSpec.describe Metalware::Commands::Remove::PrimaryGroup do
     filesystem.test do |_fs|
       answer_check = RSpecRemoveGroup::AnswerFileChecker
                      .new(self, config, primary_group, primary_nodes)
-      Metalware::Commands::Remove::PrimaryGroup
-        .new([primary_group], OpenStruct.new)
+      Metalware::Commands::Remove::Group.new([primary_group], OpenStruct.new)
       answer_check.check
       yield if test_block
     end

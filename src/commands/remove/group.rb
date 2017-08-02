@@ -28,7 +28,7 @@ require 'domain_templates_renderer'
 module Metalware
   module Commands
     module Remove
-      class PrimaryGroup < CommandHelpers::BaseCommand
+      class Group < CommandHelpers::BaseCommand
         def setup(args, _options)
           @primary_group = args[0]
         end
