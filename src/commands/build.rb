@@ -38,10 +38,12 @@ module Metalware
     class Build < CommandHelpers::BaseCommand
       private
 
+      attr_reader :options, :node_identifier, :nodes
+
       def setup(args, options)
         @options = options
         @node_identifier = args.first
-        @nodes = Nodes.create(config, @node_identifier, options.group)
+        @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
@@ -52,17 +54,17 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["pxelinux/#{@options.pxelinux}",
-                 "kickstart/#{@options.kickstart}"],
+          repo: ["pxelinux/#{options.pxelinux}",
+                 "kickstart/#{options.kickstart}"],
           configure: ['domain.yaml'],
           optional: {
-            configure: ["groups/#{@node_identifier}.yaml"],
+            configure: ["groups/#{node_identifier}.yaml"],
           },
         }
       end
 
       def render_build_templates
-        @nodes.template_each firstboot: true do |parameters, node|
+        nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
           render_kickstart(parameters, node)
@@ -141,7 +143,7 @@ module Metalware
       end
 
       def passed_template(template_type)
-        @options.__send__(template_type)
+        options.__send__(template_type)
       end
 
       def repo_template(template_type, node:)
@@ -156,7 +158,7 @@ module Metalware
 
         rerendered_nodes = []
         loop do
-          @nodes.select do |node|
+          nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
           end
                 .tap do |nodes|
@@ -167,7 +169,7 @@ module Metalware
             Output.stderr "Node #{node.name} built."
           end
 
-          all_nodes_reported_built = rerendered_nodes.length == @nodes.length
+          all_nodes_reported_built = rerendered_nodes.length == nodes.length
           break if all_nodes_reported_built
 
           sleep config.build_poll_sleep
@@ -175,7 +177,7 @@ module Metalware
       end
 
       def render_all_permanent_pxelinux_configs
-        render_permanent_pxelinux_configs(@nodes)
+        render_permanent_pxelinux_configs(nodes)
       end
 
       def render_permanent_pxelinux_configs(nodes)
