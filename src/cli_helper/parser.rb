@@ -22,21 +22,24 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'yaml'
+
 require 'commands'
+require 'cli_helper/dynamic_defaults'
 
 module Metalware
   module CliHelper
+    CONFIG_PATH = File.join(File.dirname(__FILE__), 'config.yaml')
+
     class Parser
       def initialize(calling_obj = nil)
         @calling_obj = calling_obj
-        config = File.join(File.dirname(__FILE__), 'config.yaml')
 
         # NOTE: Now that Metalware has a `Data` module the majority of yaml
         # handling occurs through that.
         # CliHelper and autocomplete are exceptions as they should only ever be
         # altered by developers and need to load the file as is, instead of
         # Metalware altering it to what it thinks it needs to be.
-        @yaml = YAML.load_file(config)
+        @yaml = YAML.load_file(CONFIG_PATH)
       end
 
       def parse_commands
@@ -47,6 +50,8 @@ module Metalware
           @calling_obj.global_option(*opt['tags'], opt['description'].chomp)
         end
       end
+
+      private
 
       # TODO: Currently the parser does not support the example option
       def parse_command_attributes(command, attributes)
@@ -62,7 +67,7 @@ module Metalware
                 end
                 c.option(*opt['tags'],
                          eval(opt['type'].to_s),
-                         { default: opt['default'] },
+                         { default: parse_default(opt) },
                          (opt['description']).to_s.chomp)
               end
             when 'subcommands'
@@ -76,6 +81,16 @@ module Metalware
               c.send("#{a}=", v.respond_to?(:chomp) ? v.chomp : v)
             end
           end
+        end
+      end
+
+      def parse_default(opt)
+        default_value = opt['default']
+        if default_value.is_a? Hash
+          dynamic_default_method = default_value['dynamic']
+          DynamicDefaults.send(dynamic_default_method)
+        else
+          default_value
         end
       end
     end
