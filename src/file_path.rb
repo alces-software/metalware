@@ -49,7 +49,7 @@ module Metalware
 
     # Allows the constant paths to be queried easily
     def method_missing(path_name, *_a, &_b)
-      if valid_constant(path_name)
+      if valid_constant?(path_name)
         Constants.const_get(:"#{constant_name(path_name)}")
       else
         super

@@ -39,8 +39,8 @@ module Metalware
         Validator::Configure.new(path.configure_file).load
       end
 
-      def group_cache
-        Data.load(path.group_cache)
+      def groups_cache
+        Data.load(path.groups_cache)
       end
 
       def domian_answers

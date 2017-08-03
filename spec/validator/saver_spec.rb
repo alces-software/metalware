@@ -22,34 +22,31 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'file_path'
-require 'data'
+require 'filesystem'
+require 'config'
 
-module Metalware
-  module Validator
-    class Saver
-      def initialize(metalware_config)
-        @config = metalware_config
-        @path = config.file_path
-      end
-
-      def groups_cache
-        SaveHelper.new { |data| Data.dump(path.groups_cache, data) }
-      end
-
-      private
-
-      attr_reader :config, :path, :helper
+RSpec.describe Metalware::Validator::Saver do
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_groups_cache_fixture('cache/groups.yaml')
     end
+  end
 
-    class SaveHelper
-      def initialize(&save_block)
-        @save_block = save_block
-      end
+  let :config do
+    Metalware::Config.new
+  end
 
-      def save(data)
-        @save_block.call(data)
-      end
+  def save_data(method, data, &test_block)
+    filesystem.test do |_fs|
+      config.saver.send(method).save(data)
+      yield
+    end
+  end
+
+  it 'saves an updated group cache' do
+    data = { primary_group: 'new_group' }
+    save_data(:groups_cache, data) do
+      expect(config.loader.groups_cache).to eq(data)
     end
   end
 end
