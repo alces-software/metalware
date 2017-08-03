@@ -28,6 +28,8 @@ require 'templater'
 module Metalware
   module Commands
     class Render < CommandHelpers::BaseCommand
+      private
+
       def setup(args, _options)
         @args = args
       end

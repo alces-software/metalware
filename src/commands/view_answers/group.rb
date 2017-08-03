@@ -7,6 +7,10 @@ module Metalware
   module Commands
     module ViewAnswers
       class Group < CommandHelpers::BaseCommand
+        private
+
+        attr_reader :group_name
+
         def setup(args, _options)
           @group_name = args.first
         end
@@ -21,10 +25,6 @@ module Metalware
             configure: ['domain.yaml', "groups/#{group_name}.yaml"],
           }
         end
-
-        private
-
-        attr_reader :group_name
       end
     end
   end
