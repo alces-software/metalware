@@ -62,8 +62,7 @@ module Metalware
       def answer(absolute_path, section)
         validator = Validator::Answer.new(config,
                                           absolute_path,
-                                          loader: validator_loader,
-                                          input_section: section)
+                                          answer_section: section)
         validator.load
       end
     end
