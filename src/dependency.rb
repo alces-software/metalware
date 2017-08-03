@@ -74,10 +74,10 @@ module Metalware
       when 'domain.yaml'
         config.loader.domian_answers
       when /^groups\/.+/
-        filename = relative_path.sub("groups/", "")
+        filename = relative_path.sub('groups/', '')
         config.loader.group_answers(filename)
       when /^nodes\/.+/
-        filename = relative_path.sub("nodes/", "")
+        filename = relative_path.sub('nodes/', '')
         config.loader.node_answers(filename)
       else
         msg = "Can not determine question section for #{relative_path}"

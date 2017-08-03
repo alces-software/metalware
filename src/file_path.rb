@@ -63,7 +63,7 @@ module Metalware
     private
 
     def constant_name(path_name)
-      "#{name.upcase}_PATH"
+      "#{path_name.upcase}_PATH"
     end
 
     def valid_constant?(path_name)
