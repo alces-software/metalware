@@ -69,7 +69,7 @@ RSpec.describe Metalware::Commands::Build do
   before :each do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
-    SpecUtils.use_mock_genders(self)
+    SpecUtils.use_mock_genders(self, genders_file: 'genders/simple_cluster')
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependency(self)
   end
