@@ -38,11 +38,12 @@ module Metalware
     class Build < CommandHelpers::BaseCommand
       private
 
-      attr_reader :options, :node_identifier, :nodes
+      attr_reader :options, :group_name, :nodes
 
       def setup(args, options)
         @options = options
-        @node_identifier = args.first
+        node_identifier = args.first
+        @group_name = node_identifier if options.group
         @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
@@ -58,7 +59,7 @@ module Metalware
                  "kickstart/#{options.kickstart}"],
           configure: ['domain.yaml'],
           optional: {
-            configure: ["groups/#{node_identifier}.yaml"],
+            configure: ["groups/#{group_name}.yaml"],
           },
         }
       end
