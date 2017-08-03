@@ -102,25 +102,43 @@ RSpec.describe Metalware::Commands::Build do
       run_build('testnode01')
     end
 
-    it 'uses different standard templates if template options passed' do
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/kickstart/my_kickstart",
-        '/var/lib/metalware/rendered/kickstart/testnode01',
-        expected_template_parameters
-      )
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/pxelinux/my_pxelinux",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters
-      ).at_least(:once)
+    context 'when templates specified in repo config' do
+      let :filesystem do
+        FileSystem.setup do |fs|
+          fs.with_minimal_repo
 
-      run_build(
-        'testnode01',
-        kickstart: 'my_kickstart',
-        pxelinux: 'my_pxelinux'
-      )
+          testnodes_config_path = metal_config.repo_config_path('testnodes')
+          fs.dump(testnodes_config_path, {
+            templates: {
+              pxelinux: 'repo_pxelinux',
+              kickstart: 'repo_kickstart',
+            }
+          })
+        end
+      end
+
+      it 'uses different standard templates if template options passed' do
+        filesystem.test do
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            instance_of(Metalware::Config),
+            "#{metal_config.repo_path}/kickstart/my_kickstart",
+            '/var/lib/metalware/rendered/kickstart/testnode01',
+            expected_template_parameters
+          )
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            instance_of(Metalware::Config),
+            "#{metal_config.repo_path}/pxelinux/my_pxelinux",
+            '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
+            expected_template_parameters
+          ).at_least(:once)
+
+          run_build(
+            'testnode01',
+            kickstart: 'my_kickstart',
+            pxelinux: 'my_pxelinux'
+          )
+        end
+      end
     end
 
     it 'renders pxelinux once with firstboot true if node does not build' do
