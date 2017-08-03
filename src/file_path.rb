@@ -22,50 +22,54 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'file_path'
-require 'validator/answer'
-require 'validator/configure'
-require 'data'
+require 'constants'
+require 'config'
 
 module Metalware
-  module Validator
-    class Loader
-      def initialize(metalware_config)
-        @config = metalware_config
-        @path = FilePath.new(config)
-      end
+  class FilePath
+    def initialize(metalware_config)
+      @config = metalware_config
+    end
 
-      def configure
-        Validator::Configure.new(path.configure_file).load
-      end
+    def configure_file
+      config.configure_file
+    end
 
-      def group_cache
-        Data.load(path.group_cache)
-      end
+    def domain_answers
+      config.domain_answers_file
+    end
 
-      def domian_answers
-        answer(path.domain_answers, :domain)
-      end
+    def group_answers(group)
+      config.group_answers_file(group)
+    end
 
-      def group_answers(file)
-        answer(path.group_answers(file), :groups)
-      end
+    def node_answers(node)
+      config.node_answers_file(node)
+    end
 
-      def node_answers(file)
-        answer(path.node_answers(file), :nodes)
-      end
-
-      private
-
-      attr_reader :path
-
-      def answer(absolute_path, section)
-        validator = Validator::Answer.new(config,
-                                          absolute_path,
-                                          loader: validator_loader,
-                                          input_section: section)
-        validator.load
+    # Allows the constant paths to be queried easily
+    def method_missing(path_name, *_a, &_b)
+      if valid_constant(path_name)
+        Constants.const_get(:"#{constant_name(path_name)}")
+      else
+        super
       end
     end
+
+    def respond_to_missing?(path_name, *_a)
+      valid_constant?(path_name) || super
+    end
+
+    private
+
+    def constant_name(path_name)
+      "#{name.upcase}_PATH"
+    end
+
+    def valid_constant?(path_name)
+      Constants.const_defined?(constant_name(path_name))
+    end
+
+    attr_reader :config
   end
 end

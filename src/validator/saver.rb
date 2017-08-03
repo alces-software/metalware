@@ -23,48 +23,37 @@
 #==============================================================================
 
 require 'file_path'
-require 'validator/answer'
-require 'validator/configure'
 require 'data'
 
 module Metalware
   module Validator
-    class Loader
+    class Saver
       def initialize(metalware_config)
         @config = metalware_config
         @path = FilePath.new(config)
-      end
-
-      def configure
-        Validator::Configure.new(path.configure_file).load
+        @helper = SaveHelper.new(metalware_config)
       end
 
       def group_cache
-        Data.load(path.group_cache)
-      end
-
-      def domian_answers
-        answer(path.domain_answers, :domain)
-      end
-
-      def group_answers(file)
-        answer(path.group_answers(file), :groups)
-      end
-
-      def node_answers(file)
-        answer(path.node_answers(file), :nodes)
+        make_save_helper { |data| Data.dump(path.group_cache, data) }
       end
 
       private
 
-      attr_reader :path
+      attr_reader :config, :path, :helper
 
-      def answer(absolute_path, section)
-        validator = Validator::Answer.new(config,
-                                          absolute_path,
-                                          loader: validator_loader,
-                                          input_section: section)
-        validator.load
+      def make_save_helper(&save_block)
+        SaveHelper.new(&save_block)
+      end
+    end
+
+    class SaveHelper
+      def initialize(&save_block)
+        @save_block = save_block
+      end
+
+      def save(data)
+        @save_block.call(data)
       end
     end
   end
