@@ -143,12 +143,10 @@ commands:
       - *group_option
       - tags: [-k KICKSTART_TEMPLATE, --kickstart KICKSTART_TEMPLATE]
         type: String
-        default: default
         description: >
           Specify kickstart template to use
       - tags: [-p PXELINUX_TEMPLATE, --pxelinux PXELINUX_TEMPLATE]
         type: String
-        default: default
         description: >
           Specify pxelinux template to use
 

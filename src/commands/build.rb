@@ -127,10 +127,12 @@ module Metalware
       end
 
       def template_path(template_type)
+        passed_template = @options.__send__(template_type)
+        template_file_name = passed_template || 'default'
         File.join(
           config.repo_path,
           template_type.to_s,
-          @options.__send__(template_type)
+          template_file_name
         )
       end
 
