@@ -30,7 +30,7 @@ module Metalware
     class Saver
       def initialize(metalware_config)
         @config = metalware_config
-        @path = FilePath.new(config)
+        @path = config.file_path
         @helper = SaveHelper.new(metalware_config)
       end
 

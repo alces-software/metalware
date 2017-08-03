@@ -32,7 +32,7 @@ module Metalware
     class Loader
       def initialize(metalware_config)
         @config = metalware_config
-        @path = FilePath.new(config)
+        @path = config.file_path
       end
 
       def configure
