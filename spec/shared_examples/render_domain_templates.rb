@@ -1,6 +1,8 @@
 
 # frozen_string_literal: true
 
+require 'spec_utils'
+
 RSpec.shared_examples :render_domain_templates do |test_command|
   let :filesystem do
     FileSystem.setup do |fs|
@@ -15,12 +17,21 @@ RSpec.shared_examples :render_domain_templates do |test_command|
   # This uses an ERB tag so can test the invalid rendered template is saved.
   let :genders_template { 'some genders template <%= alces.index %>' }
 
-  it 'renders the hosts and genders files' do
+  it 'renders the server config, hosts, and genders files' do
     SpecUtils.mock_validate_genders_success(self)
 
     filesystem.test do
-      # Genders file needs to be rendered first, as how this is rendered will
-      # effect the groups and nodes used when rendering the hosts file.
+      # Render this first, as many parts of the `alces` namespace could change
+      # based on this.
+      expect(Metalware::Templater).to receive(:render_to_file).with(
+        instance_of(Metalware::Config),
+        '/var/lib/metalware/repo/server.yaml',
+        Metalware::Constants::SERVER_CONFIG_PATH,
+        prepend_managed_file_message: true
+      ).ordered.and_call_original
+
+      # Genders file needs to be rendered before hosts, as how this is rendered
+      # will effect the groups and nodes used when rendering the hosts file.
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
         '/var/lib/metalware/repo/genders/default',
@@ -36,6 +47,51 @@ RSpec.shared_examples :render_domain_templates do |test_command|
       ).ordered.and_call_original
 
       SpecUtils.run_command(test_command)
+    end
+  end
+
+  context 'when invalid server config rendered' do
+    let :server_config_template_path do
+      File.join(Metalware::Config.new.repo_path, 'server.yaml')
+    end
+
+    let :build_interface { 'eth2' }
+
+    before :each do
+      filesystem.dump(
+        server_config_template_path,
+        build_interface: build_interface
+      )
+
+      expect(
+        Metalware::Network
+      ).to receive(:valid_interface?).with(build_interface).and_return(false)
+    end
+
+    it 'does not render hosts and genders files and gives error' do
+      filesystem.test do
+        expect(Metalware::Io).to receive(:abort)
+
+        # Note: this is similar to the error message testing below.
+        error_parts = [
+          /invalid/,
+          /#{build_interface}.*not.*valid/,
+        ]
+        error_parts.each do |fragment|
+          expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
+        end
+
+        SpecUtils.run_command(test_command)
+
+        # `server.yaml` and `hosts` not rendered.
+        expect(File.exist?(Metalware::Constants::SERVER_CONFIG_PATH)).to be false
+        expect(File.exist?('/etc/hosts')).to be false
+
+        # Original `genders` content remains.
+        expect(
+          File.read(Metalware::Constants::GENDERS_PATH)
+        ).to eq(existing_genders_contents)
+      end
     end
   end
 

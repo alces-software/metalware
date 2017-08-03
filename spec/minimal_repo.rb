@@ -25,6 +25,9 @@ module MinimalRepo
                                   domain: {},
                                   group: {},
                                   node: {}),
+      # Define the build interface to be whatever the first interface is; this
+      # should always be sufficient for testing purposes.
+      'server.yaml': YAML.dump(build_interface: NetworkInterface.interfaces.first),
     }.freeze
 
     def create_at(path)

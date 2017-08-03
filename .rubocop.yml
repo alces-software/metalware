@@ -29,3 +29,8 @@ Style/Documentation:
 # Do not limit block length - fails for any significant RSpec test file.
 Metrics/BlockLength:
   Enabled: false
+
+# We trust the YAML we're loading, so don't warn if we don't use
+# `YAML.safe_load` instead of `YAML.load`.
+Security/YAMLLoad:
+  Enabled: false

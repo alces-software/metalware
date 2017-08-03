@@ -28,8 +28,12 @@ module Metalware
     class << self
       def load(data_file)
         data = raw_load(data_file)
-        raise load_error(data_file) unless valid_data?(data)
-        data.deep_transform_keys(&:to_sym)
+        process_loaded_data(data, source: data_file)
+      end
+
+      def load_string(data_string)
+        data = YAML.load(data_string) || {}
+        process_loaded_data(data, source: data_string)
       end
 
       def dump(data_file, data)
@@ -46,6 +50,11 @@ module Metalware
         else
           {}
         end
+      end
+
+      def process_loaded_data(data, source:)
+        raise load_error(source) unless valid_data?(data)
+        data.deep_transform_keys(&:to_sym)
       end
 
       def valid_data?(data)
