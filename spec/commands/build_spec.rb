@@ -117,6 +117,25 @@ RSpec.describe Metalware::Commands::Build do
         end
       end
 
+      it 'uses specified templates' do
+        filesystem.test do
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            instance_of(Metalware::Config),
+            "#{metal_config.repo_path}/kickstart/repo_kickstart",
+            '/var/lib/metalware/rendered/kickstart/testnode01',
+            expected_template_parameters
+          )
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            instance_of(Metalware::Config),
+            "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
+            '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
+            expected_template_parameters
+          ).at_least(:once)
+
+          run_build('testnode01')
+        end
+      end
+
       it 'uses different standard templates if template options passed' do
         filesystem.test do
           expect(Metalware::Templater).to receive(:render_to_file).with(

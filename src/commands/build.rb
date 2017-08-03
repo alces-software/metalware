@@ -109,7 +109,7 @@ module Metalware
       end
 
       def render_kickstart(parameters, node)
-        kickstart_template_path = template_path :kickstart
+        kickstart_template_path = template_path :kickstart, node: node
         kickstart_save_path = File.join(
           config.rendered_files_path, 'kickstart', node.name
         )
@@ -119,21 +119,35 @@ module Metalware
       def render_pxelinux(parameters, node)
         # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
         # file yet - best place to do this may be when creating `Node` objects?
-        pxelinux_template_path = template_path :pxelinux
+        pxelinux_template_path = template_path :pxelinux, node: node
         pxelinux_save_path = File.join(
           config.pxelinux_cfg_path, node.hexadecimal_ip
         )
         Templater.render_to_file(config, pxelinux_template_path, pxelinux_save_path, parameters)
       end
 
-      def template_path(template_type)
-        passed_template = @options.__send__(template_type)
-        template_file_name = passed_template || 'default'
+      def template_path(template_type, node:)
         File.join(
           config.repo_path,
           template_type.to_s,
-          template_file_name
+          template_file_name(template_type, node: node)
         )
+      end
+
+      def template_file_name(template_type, node:)
+        passed_template(template_type) ||
+          repo_template(template_type, node: node) ||
+          'default'
+      end
+
+      def passed_template(template_type)
+        @options.__send__(template_type)
+      end
+
+      def repo_template(template_type, node:)
+        repo_config = Templater.new(config, nodename: node.name).config
+        repo_specified_templates = repo_config[:templates] || {}
+        repo_specified_templates[template_type]
       end
 
       def wait_for_nodes_to_build
