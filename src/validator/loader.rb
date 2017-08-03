@@ -57,7 +57,7 @@ module Metalware
 
       private
 
-      attr_reader :path
+      attr_reader :path, :config
 
       def answer(absolute_path, section)
         validator = Validator::Answer.new(config,
