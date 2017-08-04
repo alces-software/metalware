@@ -29,6 +29,7 @@ module Metalware
   class FilePath
     def initialize(metalware_config)
       @config = metalware_config
+      define_constant_paths
     end
 
     def configure_file
@@ -47,29 +48,19 @@ module Metalware
       config.node_answers_file(node)
     end
 
-    # Allows the constant paths to be queried easily
-    def method_missing(path_name, *_a, &_b)
-      if valid_constant?(path_name)
-        Constants.const_get(:"#{constant_name(path_name)}")
-      else
-        super
-      end
-    end
-
-    def respond_to_missing?(path_name, *_a)
-      valid_constant?(path_name) || super
-    end
-
     private
 
-    def constant_name(path_name)
-      "#{path_name.upcase}_PATH"
-    end
-
-    def valid_constant?(path_name)
-      Constants.const_defined?(constant_name(path_name))
-    end
-
     attr_reader :config
+
+    def define_constant_paths
+      Constants.constants
+               .map { |const| const.to_s }
+               .select { |const| /\A.+_PATH\Z/ }
+               .each do |const|
+                 define_singleton_method :"#{const.chomp("_PATH").downcase}" do
+                   Constants.const_get(const)
+                 end
+               end
+    end
   end
 end
