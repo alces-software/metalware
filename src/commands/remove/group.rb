@@ -52,6 +52,12 @@ module Metalware
           file. Rerun the `configure` commands should fix this error.
         EOF
 
+        def dependency_hash
+          {
+            configure: ["groups/#{primary_group}.yaml"],
+          }
+        end
+
         def delete_answer_files
           list_of_answer_files.each do |file|
             File.delete(file) if File.file?(file)
