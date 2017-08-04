@@ -97,7 +97,7 @@ module RSpecRemoveGroup
       @primary_group = group_input
       @primary_nodes = nodes_input
       @initial_files = answer_files
-      @initial_group_cache = loader.load.group_cache[:primary_groups]
+      @initial_group_cache = loader.groups_cache[:primary_groups]
       @rspec = rspec_input
     end
 
@@ -134,7 +134,7 @@ module RSpecRemoveGroup
     end
 
     def groups_removed_from_cache
-      @initial_group_cache - loader.load.group_cache[:primary_groups]
+      @initial_group_cache - loader.groups_cache[:primary_groups]
     end
 
     def answer_files

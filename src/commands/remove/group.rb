@@ -25,6 +25,7 @@
 require 'nodeattr_interface'
 require 'domain_templates_renderer'
 require 'active_support/core_ext/string/strip'
+require 'data'
 
 module Metalware
   module Commands
@@ -64,9 +65,9 @@ module Metalware
         end
 
         def update_cache
-          old_cache = file_loader.load.group_cache[:primary_groups]
+          old_cache = loader.groups_cache[:primary_groups]
           new_cache = old_cache.reject { |group| group == primary_group }
-          file_loader.save(primary_groups: new_cache).group_cache
+          Data.dump(file_path.groups_cache, primary_groups: new_cache)
         end
 
         def update_domain_templates
