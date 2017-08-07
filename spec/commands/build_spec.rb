@@ -139,29 +139,6 @@ RSpec.describe Metalware::Commands::Build do
         end
       end
 
-      it 'uses different standard templates if template options passed' do
-        filesystem.test do
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            instance_of(Metalware::Config),
-            "#{metal_config.repo_path}/kickstart/my_kickstart",
-            '/var/lib/metalware/rendered/kickstart/testnode01',
-            expected_template_parameters
-          )
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            instance_of(Metalware::Config),
-            "#{metal_config.repo_path}/pxelinux/my_pxelinux",
-            '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-            expected_template_parameters
-          ).at_least(:once)
-
-          run_build(
-            'testnode01',
-            kickstart: 'my_kickstart',
-            pxelinux: 'my_pxelinux'
-          )
-        end
-      end
-
       it 'specifies correct template dependencies' do
         filesystem.test do
           build_command = run_build('cluster', group: true)
@@ -254,35 +231,30 @@ RSpec.describe Metalware::Commands::Build do
     it 'renders standard templates for each node' do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/kickstart/my_kickstart",
+        "#{metal_config.repo_path}/kickstart/default",
         '/var/lib/metalware/rendered/kickstart/testnode01',
         hash_including(nodename: 'testnode01')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/pxelinux/my_pxelinux",
+        "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
         hash_including(nodename: 'testnode01')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/kickstart/my_kickstart",
+        "#{metal_config.repo_path}/kickstart/default",
         '/var/lib/metalware/rendered/kickstart/testnode02',
         hash_including(nodename: 'testnode02')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/pxelinux/my_pxelinux",
+        "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
         hash_including(nodename: 'testnode02')
       )
 
-      run_build(
-        'testnodes',
-        group: true,
-        kickstart: 'my_kickstart',
-        pxelinux: 'my_pxelinux'
-      )
+      run_build('testnodes', group: true)
     end
   end
 end

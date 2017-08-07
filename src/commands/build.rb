@@ -151,13 +151,8 @@ module Metalware
       end
 
       def template_file_name(template_type, node:)
-        passed_template(template_type) ||
-          repo_template(template_type, node: node) ||
+        repo_template(template_type, node: node) ||
           'default'
-      end
-
-      def passed_template(template_type)
-        options.__send__(template_type)
       end
 
       def repo_template(template_type, node:)
