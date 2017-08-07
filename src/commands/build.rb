@@ -175,11 +175,11 @@ module Metalware
           nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
           end
-                .tap do |nodes|
+               .tap do |nodes|
             render_permanent_pxelinux_configs(nodes)
             rerendered_nodes.push(*nodes)
           end
-                .each do |node|
+               .each do |node|
             Output.stderr "Node #{node.name} built."
           end
 

@@ -108,19 +108,15 @@ RSpec.describe Metalware::Commands::Build do
           fs.with_minimal_repo
 
           testnodes_config_path = metal_config.repo_config_path('testnodes')
-          fs.dump(testnodes_config_path, {
-            templates: {
-              pxelinux: 'repo_pxelinux',
-              kickstart: 'repo_kickstart',
-            }
-          })
+          fs.dump(testnodes_config_path,                     templates: {
+                    pxelinux: 'repo_pxelinux',
+                    kickstart: 'repo_kickstart',
+                  })
 
           testnode02_config_path = metal_config.repo_config_path('testnode02')
-          fs.dump(testnode02_config_path, {
-            templates: {
-              pxelinux: 'testnode02_repo_pxelinux',
-            }
-          })
+          fs.dump(testnode02_config_path,                     templates: {
+                    pxelinux: 'testnode02_repo_pxelinux',
+                  })
         end
       end
 
