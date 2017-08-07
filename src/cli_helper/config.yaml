@@ -127,28 +127,42 @@ commands:
     syntax: metal build NODE_IDENTIFIER [options]
     summary: Renders the templates used to build the nodes
     description: >
-      Build is used to rendered template files before waiting for the compute
-      nodes to pxe-boot and build. Build by default will render the pxelinux and
-      kickstart templates. In additional, build renders the "files" list in
-      [config].yaml for the gender group and node.
+      Build handles the build process for a given node or group. This consists
+      of retrieving and rendering the specified 'files' for each node,
+      rendering the 'pxelinux' and 'kickstart' templates for each node, and
+      then waiting for each node to report itself as built and re-rendering its
+      'pxelinux' template for permanent booting. The build command will keep
+      running until all nodes have reported as built, or until it is
+      interrupted.
 
 
-      Build will then wait for the nodes to build. Once a node has finished
-      building, it needs to curl "alces.build_complete_url" which notifies build
-      that the node is complete. This will trigger the pxelinux file to be
-      re-rendered with "firstboot" set to false. Build will exit once all the
-      nodes have finished building.
+      The 'files' for each node are specified under the 'files' key in the repo
+      config for that node, while the 'pxelinux' and 'kickstart' templates are
+      specified by the corresponding key in the 'templates' section of the
+      config (unless overridden).
+
+
+      In order to have a node report itself as built it must make a request to
+      the 'alces.build_complete_url' when it has finished building.
+
+
+      The 'pxelinux' template rendering can be modified using the
+      'alces.firstboot' parameter within the template, which will be set to
+      'true' the first time this is rendered and 'false' the second.
+
     action: Commands::Build
     options:
       - *group_option
       - tags: [-k KICKSTART_TEMPLATE, --kickstart KICKSTART_TEMPLATE]
         type: String
         description: >
-          Specify kickstart template to use
+          Specify 'kickstart' template to use; overrides configured 'kickstart'
+          template to use for every node to be built
       - tags: [-p PXELINUX_TEMPLATE, --pxelinux PXELINUX_TEMPLATE]
         type: String
         description: >
-          Specify pxelinux template to use
+          Specify 'pxelinux' template to use; overrides configured 'pxelinux'
+          template to use for every node to be built
 
   configure:
     syntax: metal configure [options]
