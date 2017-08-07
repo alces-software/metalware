@@ -20,7 +20,7 @@ project adheres to [Semantic Versioning](http://semver.org/).
 
 - Saved `metal configure` answers are available when templating under the `alces.answers` namespace.
 
-## [2.0.0] - 2017-06-29
+## [2.0.0] - 2017-08-07
 
 - Rewrote and restructured much of Metalware to be more consistent and
   flexible.
