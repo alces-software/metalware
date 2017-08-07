@@ -124,6 +124,9 @@ module Metalware
   class RuggedError < MetalwareError
   end
 
+  class RuggedCloneError < RuggedError
+  end
+
   class LocalAheadOfRemote < RuggedError
     def initialize(num)
       msg = "The local repo is #{num} commits ahead of remote. -f will " \

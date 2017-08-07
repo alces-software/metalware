@@ -47,8 +47,10 @@ module Metalware
 
           Rugged::Repository.clone_at(@repo_url, config.repo_path)
           MetalLog.info "Cloned repo from #{@repo_url}"
+        rescue Rugged::NetworkError
+          raise RuggedCloneError, "Could not find repo: #{@repo_url}"
         rescue Rugged::InvalidError
-          raise $ERROR_INFO, 'Repository already exists. Use -f to force clone a new one'
+          raise RuggedCloneError, 'Repository already exists. Use -f to force clone a new one'
         end
       end
     end
