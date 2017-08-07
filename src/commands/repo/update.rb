@@ -25,6 +25,7 @@
 require 'command_helpers/base_command'
 require 'metal_log'
 require 'rugged'
+require 'exceptions'
 
 require 'constants'
 
@@ -75,8 +76,7 @@ module Metalware
             puts str
             MetalLog.info str
           else
-            MetalLog.fatal 'Internal error. An impossible condition has been reached!'
-            raise 'Internal error. Check metal log'
+            raise UnexpectedError
           end
         end
 
@@ -84,23 +84,6 @@ module Metalware
           {
             repo: [],
           }
-        end
-      end
-
-      # TODO: Moves these errors into Exceptions class
-      class LocalAheadOfRemote < StandardError
-        def initialize(num)
-          msg = "The local repo is #{num} commits ahead of remote. -f will " \
-            'override local commits'
-          super msg
-        end
-      end
-
-      class UncommitedChanges < StandardError
-        def initialize(num)
-          msg = "The local repo has #{num} uncommitted changes. -f will " \
-            'delete these changes. (untracked unaffected)'
-          super msg
         end
       end
     end
