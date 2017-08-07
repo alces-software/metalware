@@ -114,6 +114,13 @@ RSpec.describe Metalware::Commands::Build do
               kickstart: 'repo_kickstart',
             }
           })
+
+          testnode02_config_path = metal_config.repo_config_path('testnode02')
+          fs.dump(testnode02_config_path, {
+            templates: {
+              pxelinux: 'testnode02_repo_pxelinux',
+            }
+          })
         end
       end
 
@@ -156,6 +163,28 @@ RSpec.describe Metalware::Commands::Build do
             kickstart: 'my_kickstart',
             pxelinux: 'my_pxelinux'
           )
+        end
+      end
+
+      it 'specifies correct template dependencies' do
+        filesystem.test do
+          build_command = run_build('cluster', group: true)
+
+          # Not ideal to test private method, but seems best way in this case.
+          dependency_hash = build_command.send(:dependency_hash)
+
+          expect(dependency_hash[:repo].sort).to eq([
+            # `default` templates used for node `login1`.
+            'pxelinux/default',
+            'kickstart/default',
+
+            # Repo templates specified for all nodes in `testnodes` group.
+            'pxelinux/repo_pxelinux',
+            'kickstart/repo_kickstart',
+
+            # PXELINUX template overridden for `testnode02`
+            'pxelinux/testnode02_repo_pxelinux',
+          ].sort)
         end
       end
     end
