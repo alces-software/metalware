@@ -22,55 +22,48 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/configure_command'
-require 'constants'
-require 'group_cache'
+require 'config'
+require 'validator/loader'
+require 'data'
 
 module Metalware
-  module Commands
-    module Configure
-      class Group < CommandHelpers::ConfigureCommand
-        private
+  class GroupCache
+    def initialize(metalware_config)
+      @config = metalware_config
+    end
 
-        attr_reader :group_name
+    def is_group?(group)
+      primary_groups.include? group
+    end
 
-        def setup(args, _options)
-          @group_name = args.first
-        end
+    def add_group(group)
+      primary_groups << group
+      Data.dump(file_path.groups_cache, primary_groups: primary_groups)
+      force_data_reload
+    end
 
-        def custom_configuration
-          record_primary_group
-        end
+    private
 
-        def answers_file
-          config.group_answers_file(group_name)
-        end
+    attr_reader :config
+  
+    def loader
+      @loader ||= Validator::Loader.new(config)
+    end
 
-        attr_reader :group_name
+    def file_path
+      @file_path ||= FilePath.new(config)
+    end
 
-        def higher_level_answer_files
-          [config.domain_answers_file]
-        end
+    def data
+      @data ||= loader.groups_cache
+    end
 
-        def record_primary_group
-          unless primary_group_recorded?
-            primary_groups << group_name
-            Data.dump(Constants::GROUPS_CACHE_PATH, groups_cache)
-          end
-        end
+    def force_data_reload
+      @data = nil
+    end
 
-        def primary_group_recorded?
-          primary_groups.include? group_name
-        end
-
-        def primary_groups
-          groups_cache[:primary_groups] ||= []
-        end
-
-        def groups_cache
-          @groups_cache ||= Data.load(Constants::GROUPS_CACHE_PATH)
-        end
-      end
+    def primary_groups
+      data[:primary_groups]
     end
   end
 end

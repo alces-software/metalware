@@ -22,55 +22,32 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/configure_command'
-require 'constants'
+require 'config'
 require 'group_cache'
+require 'filesystem'
 
-module Metalware
-  module Commands
-    module Configure
-      class Group < CommandHelpers::ConfigureCommand
-        private
+RSpec.describe Metalware::GroupCache do
+  let :config { Metalware::Config.new }
+  let :cache { Metalware::GroupCache.new(config) }
 
-        attr_reader :group_name
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_groups_cache_fixture('cache/groups.yaml')
+    end
+  end
 
-        def setup(args, _options)
-          @group_name = args.first
-        end
+  it 'checks if a group has been configured' do
+    filesystem.test do
+      expect(cache.is_group?('testnodes')).to eq(true)
+      expect(cache.is_group?('missing_group')).to eq(false)
+    end
+  end
 
-        def custom_configuration
-          record_primary_group
-        end
-
-        def answers_file
-          config.group_answers_file(group_name)
-        end
-
-        attr_reader :group_name
-
-        def higher_level_answer_files
-          [config.domain_answers_file]
-        end
-
-        def record_primary_group
-          unless primary_group_recorded?
-            primary_groups << group_name
-            Data.dump(Constants::GROUPS_CACHE_PATH, groups_cache)
-          end
-        end
-
-        def primary_group_recorded?
-          primary_groups.include? group_name
-        end
-
-        def primary_groups
-          groups_cache[:primary_groups] ||= []
-        end
-
-        def groups_cache
-          @groups_cache ||= Data.load(Constants::GROUPS_CACHE_PATH)
-        end
-      end
+  it 'adds a new group' do
+    filesystem.test do
+      expect(cache.is_group?('new_group')).to eq(false)
+      cache.add_group('new_group')
+      expect(cache.is_group?('new_group')).to eq(true)
     end
   end
 end
