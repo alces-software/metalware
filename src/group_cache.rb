@@ -37,8 +37,8 @@ module Metalware
     end
 
     def add_group(group)
-      primary_groups << group
-      Data.dump(file_path.groups_cache, primary_groups: primary_groups)
+      new_groups = primary_groups << group
+      Data.dump(file_path.groups_cache, primary_groups: new_groups)
       force_data_reload
     end
 
@@ -63,7 +63,7 @@ module Metalware
     end
 
     def primary_groups
-      data[:primary_groups]
+      data[:primary_groups] || []
     end
   end
 end

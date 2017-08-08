@@ -32,10 +32,11 @@ module Metalware
       class Group < CommandHelpers::ConfigureCommand
         private
 
-        attr_reader :group_name
+        attr_reader :group_name, :cache
 
         def setup(args, _options)
           @group_name = args.first
+          @cache = GroupCache.new(config)
         end
 
         def custom_configuration
@@ -46,29 +47,14 @@ module Metalware
           config.group_answers_file(group_name)
         end
 
-        attr_reader :group_name
-
         def higher_level_answer_files
           [config.domain_answers_file]
         end
 
         def record_primary_group
-          unless primary_group_recorded?
-            primary_groups << group_name
-            Data.dump(Constants::GROUPS_CACHE_PATH, groups_cache)
+          unless cache.is_group?(group_name)
+            cache.add_group(group_name)
           end
-        end
-
-        def primary_group_recorded?
-          primary_groups.include? group_name
-        end
-
-        def primary_groups
-          groups_cache[:primary_groups] ||= []
-        end
-
-        def groups_cache
-          @groups_cache ||= Data.load(Constants::GROUPS_CACHE_PATH)
         end
       end
     end
