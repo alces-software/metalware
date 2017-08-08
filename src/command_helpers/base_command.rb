@@ -28,7 +28,6 @@ require 'dependency'
 require 'exceptions'
 require 'dependency_specifications'
 require 'validator/loader'
-require 'validator/saver'
 require 'file_path'
 
 module Metalware
@@ -80,10 +79,6 @@ module Metalware
 
       def loader
         @loader ||= Validator::Loader.new(config)
-      end
-
-      def saver
-        @saver ||= Validator::Saver.new(config)
       end
 
       def file_path
