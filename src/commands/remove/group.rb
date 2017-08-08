@@ -47,9 +47,9 @@ module Metalware
 
         # Deleting a group should not break the genders file, so this error is
         # not expected to run
-        BAD_GENDERS_FILE = <<-EOF.strip_heredoc
-          An unexpected error has occured whilst trying to generate the genders
-          file. Rerun the `configure` commands should fix this error.
+        GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
+          This error is most likely an issue with the Metalware repo you are
+          using.
         EOF
 
         def dependency_hash
@@ -78,7 +78,7 @@ module Metalware
 
         def update_domain_templates
           DomainTemplatesRenderer
-            .new(config, genders_invalid_message: BAD_GENDERS_FILE).render
+            .new(config, genders_invalid_message: GENDERS_INVALID_MESSAGE).render
         end
       end
     end
