@@ -22,45 +22,22 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'constants'
 require 'config'
+require 'constants'
+require 'file_path'
 
-module Metalware
-  class FilePath
-    def initialize(metalware_config)
-      @config = metalware_config
-      define_constant_paths
+RSpec.describe Metalware::Network do
+  let :config { Metalware::Config.new }
+
+  describe 'dynamic constant paths' do
+    let :file_path { Metalware::FilePath.new(config) }
+
+    it 'defines a constant file path' do
+      expect(file_path.metalware_data).to eq(Metalware::Constants::METALWARE_DATA_PATH)
     end
 
-    def configure_file
-      config.configure_file
-    end
-
-    def domain_answers
-      config.domain_answers_file
-    end
-
-    def group_answers(group)
-      config.group_answers_file(group)
-    end
-
-    def node_answers(node)
-      config.node_answers_file(node)
-    end
-
-    private
-
-    attr_reader :config
-
-    def define_constant_paths
-      Constants.constants
-               .map(& :to_s)
-               .select { |const| /\A.+_PATH\Z/.match?(const) }
-               .each do |const|
-                 define_singleton_method :"#{const.chomp('_PATH').downcase}" do
-                   Constants.const_get(const)
-                 end
-               end
+    it 'does not define non-paths' do
+      expect(file_path.respond_to?(:nodeattr_command)).to eq(false)
     end
   end
 end
