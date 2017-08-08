@@ -50,4 +50,12 @@ RSpec.describe Metalware::GroupCache do
       expect(cache.is_group?('new_group')).to eq(true)
     end
   end
+
+  it 'removes a group' do
+    filesystem.test do
+      expect(cache.is_group?('testnodes')).to eq(true)
+      cache.remove_group('testnodes')
+      expect(cache.is_group?('testnodes')).to eq(false)
+    end
+  end
 end
