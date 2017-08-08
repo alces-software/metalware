@@ -29,6 +29,39 @@ require 'node'
 require 'spec_utils'
 require 'config'
 
+RSpec.shared_examples 'files rendering' do
+  it 'renders only files which could be retrieved' do
+    FileSystem.test do |fs|
+      # Create needed repo files.
+      fs.with_repo_fixtures('repo')
+      FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
+      FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
+
+      # Need to define valid build interface so `DeploymentServer` does not
+      # fail to get the IP on this interface.
+      Metalware::Data.dump(
+        Metalware::Constants::SERVER_CONFIG_PATH,
+        build_interface: 'eth0'
+      )
+
+      expect(Metalware::Templater).to receive(:render_to_file).with(
+        instance_of(Metalware::Config),
+        "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
+        '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
+        expected_template_parameters
+      )
+
+      # Should not try to render any other build files for this node.
+      node_rendered_path = '/var/lib/metalware/rendered/testnode01'
+      expect(Metalware::Templater).not_to receive(:render_to_file).with(
+        anything, /^#{node_rendered_path}/, anything
+      )
+
+      run_build('testnode01')
+    end
+  end
+end
+
 RSpec.describe Metalware::Commands::Build do
   let :metal_config { Metalware::Config.new }
 
@@ -84,6 +117,8 @@ RSpec.describe Metalware::Commands::Build do
         files: files,
       }
     end
+
+    include_examples 'files rendering'
 
     it 'renders default standard templates for given node' do
       expect(Metalware::Templater).to receive(:render_to_file).with(
@@ -191,39 +226,6 @@ RSpec.describe Metalware::Commands::Build do
       ).once.ordered
 
       run_build('testnode01')
-    end
-
-    describe 'files rendering' do
-      it 'renders only files which could be retrieved' do
-        FileSystem.test do |fs|
-          # Create needed repo files.
-          fs.with_repo_fixtures('repo')
-          FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
-          FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
-
-          # Need to define valid build interface so `DeploymentServer` does not
-          # fail to get the IP on this interface.
-          Metalware::Data.dump(
-            Metalware::Constants::SERVER_CONFIG_PATH,
-            build_interface: 'eth0'
-          )
-
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            instance_of(Metalware::Config),
-            "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
-            '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
-            expected_template_parameters
-          )
-
-          # Should not try to render any other build files for this node.
-          node_rendered_path = '/var/lib/metalware/rendered/testnode01'
-          expect(Metalware::Templater).not_to receive(:render_to_file).with(
-            anything, /^#{node_rendered_path}/, anything
-          )
-
-          run_build('testnode01')
-        end
-      end
     end
   end
 
