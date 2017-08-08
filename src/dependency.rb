@@ -23,6 +23,7 @@
 #==============================================================================
 require 'exceptions'
 require 'constants'
+require 'validator/loader'
 
 module Metalware
   class Dependency
@@ -72,13 +73,13 @@ module Metalware
     def validate_answer_file(relative_path)
       case relative_path
       when 'domain.yaml'
-        config.loader.domian_answers
+        loader.domian_answers
       when /^groups\/.+/
         filename = relative_path.sub('groups/', '')
-        config.loader.group_answers(filename)
+        loader.group_answers(filename)
       when /^nodes\/.+/
         filename = relative_path.sub('nodes/', '')
-        config.loader.node_answers(filename)
+        loader.node_answers(filename)
       else
         msg = "Can not determine question section for #{relative_path}"
         raise DependencyInternalError, msg
@@ -96,7 +97,7 @@ module Metalware
     def validate_configure
       @validate_configure ||= begin
         validate_repo
-        config.loader.configure
+        loader.configure
         unless valid_file?(:configure, '', true)
           msg = "Could not locate answer files: #{config.answer_files_path}"
           raise DependencyFailure, msg
@@ -139,6 +140,10 @@ module Metalware
               "'metal configure #{cmd}'"
       end
       msg
+    end
+
+    def loader
+      @loader ||= Validator::Loader.new(config)
     end
   end
 end

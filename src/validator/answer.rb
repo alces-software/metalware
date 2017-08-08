@@ -82,12 +82,16 @@ module Metalware
 
       attr_reader :config, :answer_file_path, :section
 
+      def loader
+        @loader ||= Validator::Loader.new(config)
+      end
+
       def questions_in_section
         questions[section]
       end
 
       def questions
-        config.loader.configure
+        loader.configure
       end
 
       def answers

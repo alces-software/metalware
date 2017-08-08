@@ -29,9 +29,6 @@ require 'constants'
 require 'exceptions'
 require 'ostruct'
 require 'metal_log'
-require 'validator/loader'
-require 'validator/saver'
-require 'file_path'
 
 module Metalware
   class Config
@@ -65,18 +62,6 @@ module Metalware
       define_method :"#{key}" do
         @config[key] || default
       end
-    end
-
-    def loader
-      @loader ||= Validator::Loader.new(self)
-    end
-
-    def saver
-      @saver ||= Validator::Saver.new(self)
-    end
-
-    def file_path
-      @file_path ||= FilePath.new(self)
     end
 
     def repo_config_path(config_name)

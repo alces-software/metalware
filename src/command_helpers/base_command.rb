@@ -27,6 +27,9 @@ require 'config'
 require 'dependency'
 require 'exceptions'
 require 'dependency_specifications'
+require 'validator/loader'
+require 'validator/saver'
+require 'file_path'
 
 module Metalware
   module CommandHelpers
@@ -75,8 +78,16 @@ module Metalware
         Dependency.new(config, command_name, dependency_hash).enforce
       end
 
-      def file_loader
-        config.file_loader
+      def loader
+        @loader ||= Validator::Loader.new(config)
+      end
+
+      def saver
+        @saver ||= Validator::Saver.new(config)
+      end
+
+      def file_path
+        @file_path ||= FilePath.new(config)
       end
 
       def command_name

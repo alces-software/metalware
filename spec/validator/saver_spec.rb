@@ -24,6 +24,8 @@
 
 require 'filesystem'
 require 'config'
+require 'validator/saver'
+require 'validator/loader'
 
 RSpec.describe Metalware::Validator::Saver do
   let :filesystem do
@@ -36,9 +38,12 @@ RSpec.describe Metalware::Validator::Saver do
     Metalware::Config.new
   end
 
+  let :saver { Metalware::Validator::Saver.new(config) }
+  let :loader { Metalware::Validator::Loader.new(config) }
+
   def save_data(method, data, &test_block)
     filesystem.test do |_fs|
-      config.saver.send(method).save(data)
+      saver.send(method).save(data)
       yield
     end
   end
@@ -46,7 +51,7 @@ RSpec.describe Metalware::Validator::Saver do
   it 'saves an updated group cache' do
     data = { primary_group: 'new_group' }
     save_data(:groups_cache, data) do
-      expect(config.loader.groups_cache).to eq(data)
+      expect(loader.groups_cache).to eq(data)
     end
   end
 end

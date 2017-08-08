@@ -25,6 +25,7 @@ require 'validator/answer'
 require 'data'
 require 'config'
 require 'filesystem'
+require 'file_path'
 
 RSpec.describe Metalware::Validator::Answer do
   let :config do
@@ -32,7 +33,7 @@ RSpec.describe Metalware::Validator::Answer do
   end
 
   let :file_path do
-    config.file_path
+    Metalware::FilePath.new(config)
   end
 
   let :configure_data do

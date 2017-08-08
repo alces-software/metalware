@@ -30,7 +30,7 @@ module Metalware
     class Saver
       def initialize(metalware_config)
         @config = metalware_config
-        @path = config.file_path
+        @path = FilePath.new(config)
       end
 
       def groups_cache
