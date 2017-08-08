@@ -128,6 +128,28 @@ module Metalware
   # dumped.
   class DataError < MetalwareError
   end
+
+  class RuggedError < MetalwareError
+  end
+
+  class RuggedCloneError < RuggedError
+  end
+
+  class LocalAheadOfRemote < RuggedError
+    def initialize(num)
+      msg = "The local repo is #{num} commits ahead of remote. -f will " \
+        'override local commits'
+      super msg
+    end
+  end
+
+  class UncommitedChanges < RuggedError
+    def initialize(num)
+      msg = "The local repo has #{num} uncommitted changes. -f will " \
+        'delete these changes. (untracked unaffected)'
+      super msg
+    end
+  end
 end
 
 
