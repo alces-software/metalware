@@ -27,13 +27,7 @@ module MinimalRepo
   class << self
     DIRECTORIES = [
       '.git',
-      'config',
-      'hosts',
-      'genders',
-      'dhcp',
       'files',
-      'pxelinux',
-      'kickstart',
     ].freeze
 
     FILES = {
@@ -69,6 +63,8 @@ module MinimalRepo
     def create_files_at(path)
       FILES.each do |file, content|
         file_path = File.join(path, file.to_s)
+        dir_path = File.dirname(file_path)
+        FileUtils.mkdir_p(dir_path)
         File.write(file_path, content)
       end
     end
