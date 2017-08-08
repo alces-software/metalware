@@ -30,11 +30,9 @@ module Metalware
   module NodeattrInterface
     class << self
       def nodes_in_primary_group(primary_group)
-        nodeattr('--expand')
-          .split("\n") # Splits the single string output to 1 line per node
-          .map { |node| node.gsub(/\s+/, ' ').split(/[\s,]/) } # Split node data
-          .select { |node| node[1] == primary_group } # Match the primary group
-          .map { |node| node[0] } # Only return the nodename (instead of groups)
+        nodes_to_groups.select do |_node, groups|
+          groups.first == primary_group
+        end.keys
       end
 
       def nodes_in_group(group)
@@ -75,6 +73,14 @@ module Metalware
           "#{Constants::NODEATTR_COMMAND} #{command}",
           format_error: format_error
         )
+      end
+
+      def nodes_to_groups
+        nodeattr('--expand')
+          .split("\n")
+          .map(&:split)
+          .to_h
+          .transform_values { |groups| groups.split(',') }
       end
     end
   end
