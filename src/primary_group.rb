@@ -23,11 +23,11 @@ module Metalware
       private
 
       def cached_primary_groups
-        groups_cache[:primary_groups] || []
+        group_cache[:primary_groups] || []
       end
 
-      def groups_cache
-        Data.load(Constants::GROUPS_CACHE_PATH)
+      def group_cache
+        Data.load(Constants::GROUP_CACHE_PATH)
       end
     end
 

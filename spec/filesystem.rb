@@ -101,10 +101,10 @@ class FileSystem
     with_fixtures(answer_fixtures_dir, at: '/var/lib/metalware/answers')
   end
 
-  def with_groups_cache_fixture(groups_cache_file)
+  def with_group_cache_fixture(group_cache_file)
     with_fixtures(
-      groups_cache_file,
-      at: Metalware::Constants::GROUPS_CACHE_PATH
+      group_cache_file,
+      at: Metalware::Constants::GROUP_CACHE_PATH
     )
   end
 

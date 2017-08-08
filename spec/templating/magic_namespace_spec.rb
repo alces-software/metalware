@@ -36,7 +36,7 @@ RSpec.describe Metalware::Templating::MagicNamespace do
 
     it 'calls the passed block with a group namespace for each primary group' do
       FileSystem.test do |fs|
-        fs.with_groups_cache_fixture('cache/groups.yaml')
+        fs.with_group_cache_fixture('cache/groups.yaml')
 
         group_names = []
         subject.groups do |group|

@@ -42,8 +42,8 @@ module Metalware
       # TODO: Rename configure methods to configure_data
       alias configure configure_data
 
-      def groups_cache
-        Data.load(path.groups_cache)
+      def group_cache
+        Data.load(path.group_cache)
       end
 
       def domain_answers

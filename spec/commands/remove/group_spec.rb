@@ -35,13 +35,13 @@ RSpec.describe Metalware::Commands::Remove::Group do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.with_answer_fixtures('setup1/answers')
-      fs.with_groups_cache_fixture('setup1/cache/groups.yaml')
+      fs.with_group_cache_fixture('setup1/cache/groups.yaml')
     end
   end
 
   let :config { Metalware::Config.new }
   let :loader { Metalware::Validator::Loader.new(config) }
-  let :cache { loader.groups_cache[:primary_groups] }
+  let :cache { loader.group_cache[:primary_groups] }
 
   let :initial_files { answer_files }
   let :deleted_files { initial_files - answer_files }

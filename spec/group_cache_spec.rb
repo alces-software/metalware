@@ -32,7 +32,7 @@ RSpec.describe Metalware::GroupCache do
 
   let :filesystem do
     FileSystem.setup do |fs|
-      fs.with_groups_cache_fixture('cache/groups.yaml')
+      fs.with_group_cache_fixture('cache/groups.yaml')
     end
   end
 

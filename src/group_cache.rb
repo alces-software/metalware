@@ -38,13 +38,13 @@ module Metalware
 
     def add_group(group)
       new_groups = primary_groups << group
-      Data.dump(file_path.groups_cache, primary_groups: new_groups)
+      Data.dump(file_path.group_cache, primary_groups: new_groups)
       force_reload_cache_data
     end
 
     def remove_group(delete_group)
       new_cache = primary_groups.reject { |group| group == delete_group }
-      Data.dump(file_path.groups_cache, primary_groups: new_cache)
+      Data.dump(file_path.group_cache, primary_groups: new_cache)
       force_reload_cache_data
     end
 
@@ -61,7 +61,7 @@ module Metalware
     end
 
     def data
-      @data ||= loader.groups_cache
+      @data ||= loader.group_cache
     end
 
     def force_reload_cache_data
