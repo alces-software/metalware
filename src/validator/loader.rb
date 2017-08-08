@@ -35,9 +35,12 @@ module Metalware
         @path = FilePath.new(config)
       end
 
-      def configure
+      def configure_data
         Validator::Configure.new(path.configure_file).load
       end
+
+      # TODO: Rename configure methods to configure_data
+      alias_method :configure, :configure_data
 
       def groups_cache
         Data.load(path.groups_cache)
