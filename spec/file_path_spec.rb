@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 #==============================================================================
@@ -23,29 +22,22 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-RSpec.describe Metalware::Templating::MagicNamespace do
-  # Note: many `MagicNamespace` features are tested at the `Templater` level
-  # instead.
+require 'config'
+require 'constants'
+require 'file_path'
 
-  describe '#groups' do
-    subject do
-      Metalware::Templating::MagicNamespace.new(
-        config: Metalware::Config.new
-      )
+RSpec.describe Metalware::Network do
+  let :config { Metalware::Config.new }
+
+  describe 'dynamic constant paths' do
+    let :file_path { Metalware::FilePath.new(config) }
+
+    it 'defines a constant file path' do
+      expect(file_path.metalware_data).to eq(Metalware::Constants::METALWARE_DATA_PATH)
     end
 
-    it 'calls the passed block with a group namespace for each primary group' do
-      FileSystem.test do |fs|
-        fs.with_groups_cache_fixture('cache/groups.yaml')
-
-        group_names = []
-        subject.groups do |group|
-          expect(group).to be_a(Metalware::Templating::GroupNamespace)
-          group_names << group.name
-        end
-
-        expect(group_names).to eq(['some_group', 'testnodes'])
-      end
+    it 'does not define non-paths' do
+      expect(file_path.respond_to?(:nodeattr_command)).to eq(false)
     end
   end
 end

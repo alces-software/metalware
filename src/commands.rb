@@ -22,20 +22,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'commands/repo/use'
-require 'commands/repo/update'
-require 'commands/render'
-require 'commands/hunter'
-require 'commands/dhcp'
-require 'commands/build'
-require 'commands/status'
-require 'commands/each'
-require 'commands/configure/domain'
-require 'commands/configure/group'
-require 'commands/configure/node'
-require 'commands/configure/rerender'
-require 'commands/view_answers/domain'
-require 'commands/view_answers/group'
-require 'commands/view_answers/node'
-require 'commands/view_config'
 require 'command_helpers/bash_command'
+
+# Dynamically requires all ruby files in commands directory
+Dir[File.join(File.dirname(__FILE__), 'commands', '**/*.rb')].map do |file|
+  require file.sub("#{File.dirname(__FILE__)}/", '').chomp('.rb')
+end

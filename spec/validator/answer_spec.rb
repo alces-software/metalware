@@ -25,10 +25,15 @@ require 'validator/answer'
 require 'data'
 require 'config'
 require 'filesystem'
+require 'file_path'
 
 RSpec.describe Metalware::Validator::Answer do
   let :config do
     Metalware::Config.new
+  end
+
+  let :file_path do
+    Metalware::FilePath.new(config)
   end
 
   let :configure_data do
@@ -46,6 +51,9 @@ RSpec.describe Metalware::Validator::Answer do
           type: 'boolean',
         },
       },
+
+      group: {},
+      node: {},
     }
   end
 
@@ -61,7 +69,10 @@ RSpec.describe Metalware::Validator::Answer do
     FileSystem.test do
       Metalware::Data.dump(config.domain_answers_file, answers)
       Metalware::Data.dump(config.configure_file, configure_data)
-      validator = Metalware::Validator::Answer.new(config, 'domain.yaml')
+      domain_file = file_path.domain_answers
+      validator = Metalware::Validator::Answer.new(config,
+                                                   domain_file,
+                                                   answer_section: :domain)
       [validator.validate, validator]
     end
   end

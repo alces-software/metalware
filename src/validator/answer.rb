@@ -30,9 +30,10 @@ module Metalware
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(metalware_config, answer_file)
+      def initialize(metalware_config, answer_file, answer_section: nil)
         @config = metalware_config
-        @answer_file_name = answer_file
+        @answer_file_path = answer_file
+        @section = answer_section
       end
 
       def validate
@@ -55,7 +56,7 @@ module Metalware
       def error_message
         validate if @validation_result.nil?
         return '' if @validation_result.success?
-        msg_header = "Failed to validate answers: #{answer_file_name}\n"
+        msg_header = "Failed to validate answers: #{answer_file_path}\n"
         case @last_ran_test
         when :MissingSchema
           "#{msg_header}" \
@@ -68,39 +69,33 @@ module Metalware
         end
       end
 
+      def success?
+        validate if @validation_result.nil?
+        @validation_result.success?
+      end
+
+      def load
+        success? ? answers : (raise ValidationFailure, error_message)
+      end
+
       private
 
-      attr_reader :config, :answer_file_name
+      attr_reader :config, :answer_file_path, :section
+
+      def loader
+        @loader ||= Validator::Loader.new(config)
+      end
 
       def questions_in_section
         questions[section]
       end
 
       def questions
-        @questions ||= Data.load(config.configure_file)
-      end
-
-      def section
-        @section ||= begin
-                       if answer_file_name == 'domain.yaml'
-                         :domain
-                       elsif /^groups\/.+/.match?(answer_file_name)
-                         :group
-                       elsif /^nodes\/.+/.match?(answer_file_name)
-                         :nodes
-                       else
-                         msg = "Can not determine question section for #{answer_file_name}"
-                         raise ValidationInternalError, msg
-                       end
-                     end
+        loader.configure
       end
 
       def answers
         @answers ||= Data.load(answer_file_path)
-      end
-
-      def answer_file_path
-        File.join(config.answer_files_path, answer_file_name.to_s)
       end
 
       def validation_hash

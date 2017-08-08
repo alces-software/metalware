@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 #==============================================================================
@@ -23,28 +22,51 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-RSpec.describe Metalware::Templating::MagicNamespace do
-  # Note: many `MagicNamespace` features are tested at the `Templater` level
-  # instead.
+require 'file_path'
+require 'validator/answer'
+require 'validator/configure'
+require 'data'
 
-  describe '#groups' do
-    subject do
-      Metalware::Templating::MagicNamespace.new(
-        config: Metalware::Config.new
-      )
-    end
+module Metalware
+  module Validator
+    class Loader
+      def initialize(metalware_config)
+        @config = metalware_config
+        @path = FilePath.new(config)
+      end
 
-    it 'calls the passed block with a group namespace for each primary group' do
-      FileSystem.test do |fs|
-        fs.with_groups_cache_fixture('cache/groups.yaml')
+      def configure_data
+        Validator::Configure.new(path.configure_file).load
+      end
 
-        group_names = []
-        subject.groups do |group|
-          expect(group).to be_a(Metalware::Templating::GroupNamespace)
-          group_names << group.name
-        end
+      # TODO: Rename configure methods to configure_data
+      alias configure configure_data
 
-        expect(group_names).to eq(['some_group', 'testnodes'])
+      def groups_cache
+        Data.load(path.groups_cache)
+      end
+
+      def domain_answers
+        answer(path.domain_answers, :domain)
+      end
+
+      def group_answers(file)
+        answer(path.group_answers(file), :groups)
+      end
+
+      def node_answers(file)
+        answer(path.node_answers(file), :nodes)
+      end
+
+      private
+
+      attr_reader :path, :config
+
+      def answer(absolute_path, section)
+        validator = Validator::Answer.new(config,
+                                          absolute_path,
+                                          answer_section: section)
+        validator.load
       end
     end
   end

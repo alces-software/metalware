@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 #==============================================================================
@@ -23,29 +22,45 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-RSpec.describe Metalware::Templating::MagicNamespace do
-  # Note: many `MagicNamespace` features are tested at the `Templater` level
-  # instead.
+require 'constants'
+require 'config'
 
-  describe '#groups' do
-    subject do
-      Metalware::Templating::MagicNamespace.new(
-        config: Metalware::Config.new
-      )
+module Metalware
+  class FilePath
+    def initialize(metalware_config)
+      @config = metalware_config
+      define_constant_paths
     end
 
-    it 'calls the passed block with a group namespace for each primary group' do
-      FileSystem.test do |fs|
-        fs.with_groups_cache_fixture('cache/groups.yaml')
+    def configure_file
+      config.configure_file
+    end
 
-        group_names = []
-        subject.groups do |group|
-          expect(group).to be_a(Metalware::Templating::GroupNamespace)
-          group_names << group.name
-        end
+    def domain_answers
+      config.domain_answers_file
+    end
 
-        expect(group_names).to eq(['some_group', 'testnodes'])
-      end
+    def group_answers(group)
+      config.group_answers_file(group)
+    end
+
+    def node_answers(node)
+      config.node_answers_file(node)
+    end
+
+    private
+
+    attr_reader :config
+
+    def define_constant_paths
+      Constants.constants
+               .map(& :to_s)
+               .select { |const| /\A.+_PATH\Z/.match?(const) }
+               .each do |const|
+                 define_singleton_method :"#{const.chomp('_PATH').downcase}" do
+                   Constants.const_get(const)
+                 end
+               end
     end
   end
 end

@@ -33,6 +33,7 @@ require 'metal_log'
 module Metalware
   class Config
     # XXX DRY these paths up.
+    # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
@@ -68,6 +69,9 @@ module Metalware
       File.join(repo_path, 'config', config_file)
     end
 
+    # TODO: Remove these methods as answer files should always be loaded through
+    # the Loader so they can be validated. If for some reason the path is
+    # required, then the path can be accessed from the FilePath class
     def configure_file
       File.join(repo_path, 'configure.yaml')
     end
