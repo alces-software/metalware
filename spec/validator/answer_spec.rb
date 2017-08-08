@@ -69,9 +69,9 @@ RSpec.describe Metalware::Validator::Answer do
     FileSystem.test do
       Metalware::Data.dump(config.domain_answers_file, answers)
       Metalware::Data.dump(config.configure_file, configure_data)
-      domian_file = file_path.domain_answers
+      domain_file = file_path.domain_answers
       validator = Metalware::Validator::Answer.new(config,
-                                                   domian_file,
+                                                   domain_file,
                                                    answer_section: :domain)
       [validator.validate, validator]
     end

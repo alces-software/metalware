@@ -54,10 +54,10 @@ module Metalware
 
     def define_constant_paths
       Constants.constants
-               .map { |const| const.to_s }
-               .select { |const| /\A.+_PATH\Z/ }
+               .map(& :to_s)
+               .select { |_const| /\A.+_PATH\Z/ }
                .each do |const|
-                 define_singleton_method :"#{const.chomp("_PATH").downcase}" do
+                 define_singleton_method :"#{const.chomp('_PATH').downcase}" do
                    Constants.const_get(const)
                  end
                end

@@ -40,13 +40,13 @@ module Metalware
       end
 
       # TODO: Rename configure methods to configure_data
-      alias_method :configure, :configure_data
+      alias configure configure_data
 
       def groups_cache
         Data.load(path.groups_cache)
       end
 
-      def domian_answers
+      def domain_answers
         answer(path.domain_answers, :domain)
       end
 

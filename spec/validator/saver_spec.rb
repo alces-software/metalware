@@ -41,7 +41,7 @@ RSpec.describe Metalware::Validator::Saver do
   let :saver { Metalware::Validator::Saver.new(config) }
   let :loader { Metalware::Validator::Loader.new(config) }
 
-  def save_data(method, data, &test_block)
+  def save_data(method, data)
     filesystem.test do |_fs|
       saver.send(method).save(data)
       yield
