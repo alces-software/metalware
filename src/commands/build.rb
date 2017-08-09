@@ -114,29 +114,35 @@ module Metalware
       end
 
       def render_basic(parameters, node)
-        basic_template_path = template_path :basic, node: node
-        basic_save_path = File.join(
-          config.rendered_files_path, 'basic', node.name
+        render_build_method_template(
+          :basic, parameters: parameters, node: node
         )
-        Templater.render_to_file(config, basic_template_path, basic_save_path, parameters)
       end
 
       def render_kickstart(parameters, node)
-        kickstart_template_path = template_path :kickstart, node: node
-        kickstart_save_path = File.join(
-          config.rendered_files_path, 'kickstart', node.name
+        render_build_method_template(
+          :kickstart, parameters: parameters, node: node
         )
-        Templater.render_to_file(config, kickstart_template_path, kickstart_save_path, parameters)
       end
 
       def render_pxelinux(parameters, node)
         # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
         # file yet - best place to do this may be when creating `Node` objects?
-        pxelinux_template_path = template_path :pxelinux, node: node
-        pxelinux_save_path = File.join(
-          config.pxelinux_cfg_path, node.hexadecimal_ip
+        save_path = File.join(config.pxelinux_cfg_path, node.hexadecimal_ip)
+        render_build_method_template(
+          :pxelinux,
+          parameters: parameters,
+          node: node,
+          save_path: save_path
         )
-        Templater.render_to_file(config, pxelinux_template_path, pxelinux_save_path, parameters)
+      end
+
+      def render_build_method_template(template_type, parameters:, node:, save_path: nil)
+        template_type_path = template_path template_type, node: node
+        save_path ||= File.join(
+          config.rendered_files_path, template_type.to_s, node.name
+        )
+        Templater.render_to_file(config, template_type_path, save_path, parameters)
       end
 
       def template_path(template_type, node:)
