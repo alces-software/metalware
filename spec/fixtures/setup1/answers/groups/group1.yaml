@@ -1,5 +1,5 @@
 ---
-genders_host_range: nodeA[01-10]
+genders_host_range: nodeA[01-02]
 genders_additional_groups: additional_group1
 pri_network_defined: true
 pri_network_ip: 10.10.<%= alces.group_index %>.<%= alces.index + 1 %>
