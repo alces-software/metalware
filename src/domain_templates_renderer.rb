@@ -58,7 +58,7 @@ module Metalware
     end
 
     def render_metalware_server_config
-      render_template(
+      render_fully_managed_template(
         server_config_template,
         to: Constants::SERVER_CONFIG_PATH
       ) do |rendered_config|
@@ -83,7 +83,7 @@ module Metalware
     end
 
     def render_genders
-      render_template(
+      render_managed_section_template(
         genders_template,
         to: Constants::GENDERS_PATH
       ) do |rendered_genders|
@@ -124,10 +124,14 @@ module Metalware
     end
 
     def render_hosts
-      render_template(hosts_template, to: Constants::HOSTS_PATH)
+      render_managed_section_template(hosts_template, to: Constants::HOSTS_PATH)
     end
 
-    def render_template(template, to:, &block)
+    def render_managed_section_template(template, to:, &block)
+      Templater.render_managed_file(config, template, to, &block)
+    end
+
+    def render_fully_managed_template(template, to:, &block)
       Templater.render_to_file(
         config,
         template,
