@@ -28,6 +28,8 @@ require 'data'
 
 module Metalware
   class GroupCache
+    include Enumerable
+
     def initialize(metalware_config)
       @config = metalware_config
     end
@@ -42,10 +44,27 @@ module Metalware
       force_reload_cache_data
     end
 
-    def remove(delete_group)
-      new_cache = primary_groups.reject { |group| group == delete_group }
+    def remove(group)
+      new_cache = primary_groups.reject { |g| g == group }
       Data.dump(file_path.group_cache, primary_groups: new_cache)
       force_reload_cache_data
+    end
+
+    def each
+      primary_groups.each do |group_name|
+        yield group_name
+      end
+    end
+
+    # Has to be overridden to prevent ruby using the array indexing
+    def each_with_index
+      each do |group_name|
+        yield(group_name, index(group_name))
+      end
+    end
+
+    def index(group)
+      primary_groups.index { |g| g == group }
     end
 
     private
