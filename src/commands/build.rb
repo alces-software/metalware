@@ -76,12 +76,7 @@ module Metalware
         nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
-          if basic_build_node?(node)
-            render_basic(parameters, node)
-          else
-            render_kickstart(parameters, node)
-            render_pxelinux(parameters, node)
-          end
+          render_build_method_templates(parameters, node)
         end
       end
 
@@ -106,6 +101,15 @@ module Metalware
             FileUtils.mkdir_p(File.dirname(render_path))
             Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
+        end
+      end
+
+      def render_build_method_templates(parameters, node)
+        if basic_build_node?(node)
+          render_basic(parameters, node)
+        else
+          render_kickstart(parameters, node)
+          render_pxelinux(parameters, node)
         end
       end
 
