@@ -90,13 +90,11 @@ module Metalware
       # appended to the bottom of the current file;
       # - if it exists with a managed section, this section will be replaced
       # with the new managed section.
-      def render_managed_file(config, template, managed_file)
+      def render_managed_file(config, template, managed_file, &validation_block)
         rendered_template = render(config, template)
-        pre, post = split_on_managed_section(
-          current_file_contents(managed_file)
-        )
-        new_managed_file = [pre, managed_section(rendered_template), post].join
-        write_rendered_template(new_managed_file, save_file: managed_file)
+        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
+          update_managed_file(managed_file, rendered_template) if valid
+        end
       end
 
       private
@@ -105,6 +103,14 @@ module Metalware
         # A rendered template is automatically valid, unless we're passed a
         # block which evaluates as falsy when given the rendered template.
         !block_given? || yield(rendered_template)
+      end
+
+      def update_managed_file(managed_file, rendered_template)
+        pre, post = split_on_managed_section(
+          current_file_contents(managed_file)
+        )
+        new_managed_file = [pre, managed_section(rendered_template), post].join
+        write_rendered_template(new_managed_file, save_file: managed_file)
       end
 
       def current_file_contents(file)

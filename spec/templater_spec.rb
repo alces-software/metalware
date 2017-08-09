@@ -273,11 +273,39 @@ RSpec.describe Metalware::Templater do
       )
     end
 
+    def render_managed_file_with_block(&block)
+      Metalware::Templater.render_managed_file(
+        config,
+        template_path,
+        output_path,
+        &block
+      )
+    end
+
     context 'when file does not exist already' do
       it 'renders template within markers' do
         filesystem.test do
           render_managed_file
           expect(output).to match(rendered_file_section_regex)
+        end
+      end
+
+      # XXX Following two tests similar to those for `render_to_file` above.
+      it 'renders template if passed a block with truthy output' do
+        filesystem.test do
+          template_rendered = render_managed_file_with_block(&:present?)
+
+          expect(output).to match(rendered_file_section_regex)
+          expect(template_rendered).to be true
+        end
+      end
+
+      it 'does not render template if passed a block with falsy output' do
+        filesystem.test do
+          template_rendered = render_managed_file_with_block(&:empty?)
+
+          expect(File.exist?(output_path)).to be false
+          expect(template_rendered).to be false
         end
       end
     end
