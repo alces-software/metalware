@@ -76,8 +76,12 @@ module Metalware
         nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
-          render_kickstart(parameters, node)
-          render_pxelinux(parameters, node)
+          if basic_build_node?(node)
+            render_basic(parameters, node)
+          else
+            render_kickstart(parameters, node)
+            render_pxelinux(parameters, node)
+          end
         end
       end
 
@@ -103,6 +107,14 @@ module Metalware
             Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
         end
+      end
+
+      def render_basic(parameters, node)
+        basic_template_path = template_path :basic, node: node
+        basic_save_path = File.join(
+          config.rendered_files_path, 'basic', node.name
+        )
+        Templater.render_to_file(config, basic_template_path, basic_save_path, parameters)
       end
 
       def render_kickstart(parameters, node)
@@ -142,6 +154,11 @@ module Metalware
         repo_specified_templates[template_type]
       end
 
+      def basic_build_node?(node)
+        build_method = repo_config_for_node(node)[:build_method]
+        build_method == 'basic'
+      end
+
       def repo_config_for_node(node)
         Templater.new(config, nodename: node.name).config
       end
@@ -176,8 +193,12 @@ module Metalware
 
       def render_permanent_pxelinux_configs(nodes)
         nodes.template_each firstboot: false do |parameters, node|
-          parameters[:files] = build_files(node)
-          render_pxelinux(parameters, node)
+          # Only nodes with a 'kickstart' build method (the default) must have
+          # PXELINUX templates re-rendered.
+          unless basic_build_node?(node)
+            parameters[:files] = build_files(node)
+            render_pxelinux(parameters, node)
+          end
         end
       end
 

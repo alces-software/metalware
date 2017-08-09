@@ -228,6 +228,43 @@ RSpec.describe Metalware::Commands::Build do
 
       run_build('testnode01')
     end
+
+    context "when 'basic' build method used" do
+      before :each do
+        # This convoluted dance is because we want to update the fixtures
+        # `testnodes` config, not replace it entirely, but we can't do this
+        # directly as we are in a FakeFS but not the one we'll be in when we
+        # get to the tests themselves. This could be improved if we improve our
+        # FakeFS handling.
+        fixtures_testnodes_config_path = \
+          File.join(FIXTURES_PATH, 'repo/config/testnodes.yaml')
+        FakeFS.deactivate!
+        fixtures_testnodes_config = \
+          Metalware::Data.load(fixtures_testnodes_config_path)
+        FakeFS.activate!
+
+        testnodes_config_path = metal_config.repo_config_path('testnodes')
+        testnodes_config = fixtures_testnodes_config.merge(build_method: 'basic')
+        filesystem.dump(testnodes_config_path, testnodes_config)
+      end
+
+      include_examples 'files rendering'
+
+      it 'renders only basic template' do
+        filesystem.test do
+          # When using the 'basic' build method, the only templates to be
+          # rendered for a node are the `files` which can be retrieved, and the
+          # `basic` template once at the beginning of the build process.
+          allow(Metalware::Templater).to receive(:render_to_file).once
+          expect_renders(
+            "#{metal_config.repo_path}/basic/default",
+            to: '/var/lib/metalware/rendered/basic/testnode01'
+          )
+
+          run_build('testnode01')
+        end
+      end
+    end
   end
 
   context 'when called for group' do
