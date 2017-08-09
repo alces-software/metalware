@@ -115,6 +115,10 @@ RSpec.describe Metalware::Commands::Build do
     }
   end
 
+  let :testnodes_config_path do
+    metal_config.repo_config_path('testnodes')
+  end
+
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_repo_fixtures('repo')
@@ -147,7 +151,6 @@ RSpec.describe Metalware::Commands::Build do
 
     context 'when templates specified in repo config' do
       before :each do
-        testnodes_config_path = metal_config.repo_config_path('testnodes')
         testnodes_config = {
           templates: {
             pxelinux: 'repo_pxelinux',
@@ -243,7 +246,6 @@ RSpec.describe Metalware::Commands::Build do
           Metalware::Data.load(fixtures_testnodes_config_path)
         FakeFS.activate!
 
-        testnodes_config_path = metal_config.repo_config_path('testnodes')
         testnodes_config = fixtures_testnodes_config.merge(build_method: 'basic')
         filesystem.dump(testnodes_config_path, testnodes_config)
       end
