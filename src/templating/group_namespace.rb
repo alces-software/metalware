@@ -21,7 +21,7 @@ module Metalware
       end
 
       def nodes
-        NodeattrInterface.nodes_in_group(name).map do |node_name|
+        NodeattrInterface.nodes_in_primary_group(name).map do |node_name|
           yield templating_config_for_node(node_name)
         end
       end
