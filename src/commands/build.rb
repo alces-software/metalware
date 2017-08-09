@@ -137,9 +137,13 @@ module Metalware
       end
 
       def repo_template(template_type, node:)
-        repo_config = Templater.new(config, nodename: node.name).config
+        repo_config = repo_config_for_node(node)
         repo_specified_templates = repo_config[:templates] || {}
         repo_specified_templates[template_type]
+      end
+
+      def repo_config_for_node(node)
+        Templater.new(config, nodename: node.name).config
       end
 
       def wait_for_nodes_to_build
