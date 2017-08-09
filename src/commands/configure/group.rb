@@ -53,7 +53,7 @@ module Metalware
 
         def record_primary_group
           unless cache.is_group?(group_name)
-            cache.add_group(group_name)
+            cache.add(group_name)
           end
         end
       end

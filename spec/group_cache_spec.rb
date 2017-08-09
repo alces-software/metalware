@@ -46,7 +46,7 @@ RSpec.describe Metalware::GroupCache do
   it 'adds a new group' do
     filesystem.test do
       expect(cache.is_group?('new_group')).to eq(false)
-      cache.add_group('new_group')
+      cache.add('new_group')
       expect(cache.is_group?('new_group')).to eq(true)
     end
   end
@@ -54,7 +54,7 @@ RSpec.describe Metalware::GroupCache do
   it 'removes a group' do
     filesystem.test do
       expect(cache.is_group?('testnodes')).to eq(true)
-      cache.remove_group('testnodes')
+      cache.remove('testnodes')
       expect(cache.is_group?('testnodes')).to eq(false)
     end
   end

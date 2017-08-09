@@ -38,7 +38,7 @@ module Metalware
 
         def run
           delete_answer_files
-          cache.remove_group(primary_group)
+          cache.remove(primary_group)
           update_domain_templates
         end
 
