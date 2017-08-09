@@ -27,6 +27,19 @@ require 'spec_utils'
 require 'exceptions'
 
 RSpec.describe Metalware::NodeattrInterface do
+  context 'with setup1 genders' do
+    before do
+      SpecUtils.use_mock_genders(self, genders_file: 'setup1/genders')
+    end
+
+    describe '#nodes_in_primary_group' do
+      it 'returns only the nodes in the primary group' do
+        nodes = Metalware::NodeattrInterface.nodes_in_primary_group('group1')
+        expect(nodes).to contain_exactly('nodeA01', 'nodeA02')
+      end
+    end
+  end
+
   context 'using mock genders' do
     before do
       SpecUtils.use_mock_genders(self)

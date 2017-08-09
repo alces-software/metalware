@@ -24,10 +24,17 @@
 
 require 'constants'
 require 'exceptions'
+require 'system_command'
 
 module Metalware
   module NodeattrInterface
     class << self
+      def nodes_in_primary_group(primary_group)
+        nodes_to_groups.select do |_node, groups|
+          groups.first == primary_group
+        end.keys
+      end
+
       def nodes_in_group(group)
         stdout = nodeattr("-c #{group}")
         if stdout.empty?
@@ -66,6 +73,14 @@ module Metalware
           "#{Constants::NODEATTR_COMMAND} #{command}",
           format_error: format_error
         )
+      end
+
+      def nodes_to_groups
+        nodeattr('--expand')
+          .split("\n")
+          .map(&:split)
+          .to_h
+          .transform_values { |groups| groups.split(',') }
       end
     end
   end

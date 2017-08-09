@@ -1,0 +1,9 @@
+# This file is managed by Alces Metalware; any changes made to it directly
+# will be lost. You can change the data used to render it using the
+# `metal configure` commands.
+
+
+nodeA[01-02]    group1,additional_group1
+nodeB[01-02]    group2,group1
+node[01-10]    nodes
+
