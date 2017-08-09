@@ -35,36 +35,34 @@ module Metalware
     end
 
     def is_group?(group)
-      primary_groups.include? group
+      primary_groups_as_str.include? group
     end
 
     def add(group)
-      new_groups = primary_groups << group
-      Data.dump(file_path.group_cache, primary_groups: new_groups)
-      force_reload_cache_data
+      new_groups = primary_groups_hash.merge({
+        group.to_sym => next_available_index
+      })
+      save(next_available_index + 1, new_groups)
     end
 
     def remove(group)
-      new_cache = primary_groups.reject { |g| g == group }
-      Data.dump(file_path.group_cache, primary_groups: new_cache)
-      force_reload_cache_data
+      primary_groups_hash.delete(group.to_sym)
+      save(next_available_index, primary_groups_hash)
     end
 
     def each
-      primary_groups.each do |group_name|
+      primary_groups_as_str.each do |group_name|
         yield group_name
       end
     end
 
-    # Has to be overridden to prevent ruby using the array indexing
+    # Has been overridden so the hash behaves as if it was an array
     def each_with_index
-      each do |group_name|
-        yield(group_name, index(group_name))
-      end
+      primary_groups_hash.each { |group, idx| yield(group.to_s, idx) }
     end
 
     def index(group)
-      primary_groups.index { |g| g == group }
+      primary_groups_hash[group.to_sym]
     end
 
     private
@@ -80,16 +78,36 @@ module Metalware
     end
 
     def data
-      @data ||= loader.group_cache
+      @data ||= loader.group_cache.tap do |d|
+        if d.empty?
+          d = {
+            next_index: 0,
+            primary_groups: {}
+          }
+        end
+      end
     end
 
-    def force_reload_cache_data
-      @data = nil
+    def primary_groups_hash
+      data[:primary_groups]
+    end
+
+    def primary_groups_as_str
+      primary_groups_hash.keys.map(&:to_s)
+    end
+
+    def next_available_index
+      data[:next_index]
+    end
+
+    def save(next_index, group_hash)
+      payload = {
+        next_index: next_index,
+        primary_groups: group_hash
+      }
+      Data.dump(file_path.group_cache, payload)
+      @data = nil # Reloads the cached file
       data
-    end
-
-    def primary_groups
-      data[:primary_groups] || []
     end
   end
 end
