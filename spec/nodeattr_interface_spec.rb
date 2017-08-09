@@ -35,11 +35,8 @@ RSpec.describe Metalware::NodeattrInterface do
     describe '#nodes_in_primary_group' do
       it 'returns only the nodes in the primary group' do
         nodes = Metalware::NodeattrInterface.nodes_in_primary_group('group1')
-        nodes_not_in_primary_group = nodes.select do |node|
-          node.match(/\AnodeA\d\d\Z/).nil?
-        end
         expect(nodes.length).to eq(10)
-        expect(nodes_not_in_primary_group.length).to eq(0)
+        nodes.each { |node| expect(node).to match(/\AnodeA\d\d\Z/) }
       end
     end
   end
