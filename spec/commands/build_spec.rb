@@ -31,9 +31,8 @@ require 'config'
 
 RSpec.shared_examples 'files rendering' do
   it 'renders only files which could be retrieved' do
-    FileSystem.test do |fs|
+    filesystem.test do
       # Create needed repo files.
-      fs.with_repo_fixtures('repo')
       FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
       FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
 
@@ -116,6 +115,12 @@ RSpec.describe Metalware::Commands::Build do
     }
   end
 
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_repo_fixtures('repo')
+    end
+  end
+
   before :each do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
@@ -141,27 +146,23 @@ RSpec.describe Metalware::Commands::Build do
     end
 
     context 'when templates specified in repo config' do
-      let :filesystem do
-        FileSystem.setup do |fs|
-          fs.with_minimal_repo
+      before :each do
+        testnodes_config_path = metal_config.repo_config_path('testnodes')
+        testnodes_config = {
+          templates: {
+            pxelinux: 'repo_pxelinux',
+            kickstart: 'repo_kickstart',
+          },
+        }
+        filesystem.dump(testnodes_config_path, testnodes_config)
 
-          testnodes_config_path = metal_config.repo_config_path('testnodes')
-          testnodes_config = {
-            templates: {
-              pxelinux: 'repo_pxelinux',
-              kickstart: 'repo_kickstart',
-            },
-          }
-          fs.dump(testnodes_config_path, testnodes_config)
-
-          testnode02_config_path = metal_config.repo_config_path('testnode02')
-          testnode02_config = {
-            templates: {
-              pxelinux: 'testnode02_repo_pxelinux',
-            },
-          }
-          fs.dump(testnode02_config_path, testnode02_config)
-        end
+        testnode02_config_path = metal_config.repo_config_path('testnode02')
+        testnode02_config = {
+          templates: {
+            pxelinux: 'testnode02_repo_pxelinux',
+          },
+        }
+        filesystem.dump(testnode02_config_path, testnode02_config)
       end
 
       it 'uses specified templates' do
