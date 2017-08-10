@@ -67,14 +67,9 @@ module Metalware
         nodes.map do |node|
           [:pxelinux, :kickstart].map do |template_type|
             full_template_path = template_path(template_type, node: node)
-            repo_relative_path_to(full_template_path)
+            file_path.repo_relative_path_to(full_template_path)
           end
         end.flatten.uniq
-      end
-
-      def repo_relative_path_to(path)
-        repo_path = Pathname.new(config.repo_path)
-        Pathname.new(path).relative_path_from(repo_path).to_s
       end
 
       def render_build_templates

@@ -48,6 +48,11 @@ module Metalware
       config.node_answers_file(node)
     end
 
+    def repo_relative_path_to(path)
+      repo_path = Pathname.new(config.repo_path)
+      Pathname.new(path).relative_path_from(repo_path).to_s
+    end
+
     private
 
     attr_reader :config
