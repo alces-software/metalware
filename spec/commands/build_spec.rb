@@ -29,6 +29,36 @@ require 'node'
 require 'spec_utils'
 require 'config'
 
+RSpec.shared_examples 'files rendering' do
+  it 'renders only files which could be retrieved' do
+    filesystem.test do
+      # Create needed repo files.
+      FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
+      FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
+
+      # Need to define valid build interface so `DeploymentServer` does not
+      # fail to get the IP on this interface.
+      Metalware::Data.dump(
+        Metalware::Constants::SERVER_CONFIG_PATH,
+        build_interface: 'eth0'
+      )
+
+      expect_renders(
+        "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
+        to: '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo'
+      )
+
+      # Should not try to render any other build files for this node.
+      node_rendered_path = '/var/lib/metalware/rendered/testnode01'
+      expect(Metalware::Templater).not_to receive(:render_to_file).with(
+        anything, /^#{node_rendered_path}/, anything
+      )
+
+      run_build('testnode01')
+    end
+  end
+end
+
 RSpec.describe Metalware::Commands::Build do
   let :metal_config { Metalware::Config.new }
 
@@ -66,6 +96,31 @@ RSpec.describe Metalware::Commands::Build do
     end.to raise_error Timeout::Error
   end
 
+  def expect_renders(template_path, to:, parameters: expected_template_parameters)
+    expect(Metalware::Templater).to receive(:render_to_file).with(
+      instance_of(Metalware::Config),
+      template_path,
+      to,
+      parameters
+    )
+  end
+
+  def expected_template_parameters
+    config = Metalware::Config.new
+    files = SpecUtils.create_mock_build_files_hash(self, config: config, node_name: 'testnode01')
+    {
+      nodename: 'testnode01',
+      firstboot: true,
+      files: files,
+    }
+  end
+
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_repo_fixtures('repo')
+    end
+  end
+
   before :each do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
@@ -75,64 +130,50 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called without group argument' do
-    def expected_template_parameters
-      config = Metalware::Config.new
-      files = SpecUtils.create_mock_build_files_hash(self, config: config, node_name: 'testnode01')
-      {
-        nodename: 'testnode01',
-        firstboot: true,
-        files: files,
-      }
-    end
+    include_examples 'files rendering'
 
     it 'renders default standard templates for given node' do
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        '/var/lib/metalware/rendered/kickstart/testnode01',
-        expected_template_parameters
+        to: '/var/lib/metalware/rendered/kickstart/testnode01'
       )
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).at_least(:once)
 
       run_build('testnode01')
     end
 
     context 'when templates specified in repo config' do
-      let :filesystem do
-        FileSystem.setup do |fs|
-          fs.with_minimal_repo
+      before :each do
+        testnodes_config_path = metal_config.repo_config_path('testnodes')
+        testnodes_config = {
+          templates: {
+            pxelinux: 'repo_pxelinux',
+            kickstart: 'repo_kickstart',
+          },
+        }
+        filesystem.dump(testnodes_config_path, testnodes_config)
 
-          testnodes_config_path = metal_config.repo_config_path('testnodes')
-          fs.dump(testnodes_config_path,                     templates: {
-                    pxelinux: 'repo_pxelinux',
-                    kickstart: 'repo_kickstart',
-                  })
-
-          testnode02_config_path = metal_config.repo_config_path('testnode02')
-          fs.dump(testnode02_config_path,                     templates: {
-                    pxelinux: 'testnode02_repo_pxelinux',
-                  })
-        end
+        testnode02_config_path = metal_config.repo_config_path('testnode02')
+        testnode02_config = {
+          templates: {
+            pxelinux: 'testnode02_repo_pxelinux',
+          },
+        }
+        filesystem.dump(testnode02_config_path, testnode02_config)
       end
 
       it 'uses specified templates' do
         filesystem.test do
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            instance_of(Metalware::Config),
+          expect_renders(
             "#{metal_config.repo_path}/kickstart/repo_kickstart",
-            '/var/lib/metalware/rendered/kickstart/testnode01',
-            expected_template_parameters
+            to: '/var/lib/metalware/rendered/kickstart/testnode01'
           )
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            instance_of(Metalware::Config),
+          expect_renders(
             "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
-            '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-            expected_template_parameters
+            to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
           ).at_least(:once)
 
           run_build('testnode01')
@@ -166,92 +207,53 @@ RSpec.describe Metalware::Commands::Build do
       time_to_wait = 0.2
       use_mock_nodes(not_built_nodes: 'testnode01')
 
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once
 
       expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
     end
 
     it 'renders pxelinux twice with firstboot switched if node builds' do
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once.ordered
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters.merge(firstboot: false)
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
+        parameters: expected_template_parameters.merge(firstboot: false)
       ).once.ordered
 
       run_build('testnode01')
-    end
-
-    describe 'files rendering' do
-      it 'renders only files which could be retrieved' do
-        FileSystem.test do |fs|
-          # Create needed repo files.
-          fs.with_repo_fixtures('repo')
-          FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
-          FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
-
-          # Need to define valid build interface so `DeploymentServer` does not
-          # fail to get the IP on this interface.
-          Metalware::Data.dump(
-            Metalware::Constants::SERVER_CONFIG_PATH,
-            build_interface: 'eth0'
-          )
-
-          expect(Metalware::Templater).to receive(:render_to_file).with(
-            instance_of(Metalware::Config),
-            "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
-            '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo',
-            expected_template_parameters
-          )
-
-          # Should not try to render any other build files for this node.
-          node_rendered_path = '/var/lib/metalware/rendered/testnode01'
-          expect(Metalware::Templater).not_to receive(:render_to_file).with(
-            anything, /^#{node_rendered_path}/, anything
-          )
-
-          run_build('testnode01')
-        end
-      end
     end
   end
 
   context 'when called for group' do
     it 'renders standard templates for each node' do
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      testnode01_params = hash_including(nodename: 'testnode01')
+      expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        '/var/lib/metalware/rendered/kickstart/testnode01',
-        hash_including(nodename: 'testnode01')
+        to: '/var/lib/metalware/rendered/kickstart/testnode01',
+        parameters: testnode01_params
       )
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        hash_including(nodename: 'testnode01')
+        to:        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
+        parameters: testnode01_params
       )
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+
+      testnode02_params = hash_including(nodename: 'testnode02')
+      expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        '/var/lib/metalware/rendered/kickstart/testnode02',
-        hash_including(nodename: 'testnode02')
+        to: '/var/lib/metalware/rendered/kickstart/testnode02',
+        parameters: testnode02_params
       )
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
+      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
-        hash_including(nodename: 'testnode02')
+        to:        '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
+        parameters: testnode02_params
       )
 
       run_build('testnodes', group: true)

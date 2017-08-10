@@ -105,20 +105,6 @@ module Metalware
         end
       end
 
-      def retrieve_and_render_files(parameters, node)
-        retriever = BuildFilesRetriever.new(node.name, config)
-        build_files_hash = retriever.retrieve(node.build_files)
-
-        build_files_hash.each do |namespace, files|
-          files.each do |file|
-            unless file[:error]
-              render_path = node.rendered_build_file_path(namespace, file[:name])
-              Templater.render_to_file(config, file[:template_path], render_path, parameters)
-            end
-          end
-        end
-      end
-
       def render_kickstart(parameters, node)
         kickstart_template_path = template_path :kickstart, node: node
         kickstart_save_path = File.join(
@@ -151,9 +137,13 @@ module Metalware
       end
 
       def repo_template(template_type, node:)
-        repo_config = Templater.new(config, nodename: node.name).config
+        repo_config = repo_config_for_node(node)
         repo_specified_templates = repo_config[:templates] || {}
         repo_specified_templates[template_type]
+      end
+
+      def repo_config_for_node(node)
+        Templater.new(config, nodename: node.name).config
       end
 
       def wait_for_nodes_to_build
