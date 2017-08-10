@@ -53,6 +53,14 @@ module Metalware
       Pathname.new(path).relative_path_from(repo_path).to_s
     end
 
+    def template_path(template_type, node:)
+      File.join(
+        config.repo_path,
+        template_type.to_s,
+        template_file_name(template_type, node: node)
+      )
+    end
+
     private
 
     attr_reader :config
@@ -66,6 +74,15 @@ module Metalware
                    Constants.const_get(const)
                  end
                end
+    end
+
+    def template_file_name(template_type, node:)
+      repo_template(template_type, node: node) || 'default'
+    end
+
+    def repo_template(template_type, node:)
+      repo_specified_templates = node.repo_config[:templates] || {}
+      repo_specified_templates[template_type]
     end
   end
 end

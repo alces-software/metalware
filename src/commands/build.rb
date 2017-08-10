@@ -40,6 +40,8 @@ module Metalware
 
       attr_reader :options, :group_name, :nodes
 
+      delegate :template_path, to: :file_path
+
       def setup(args, options)
         @options = options
         node_identifier = args.first
@@ -143,24 +145,6 @@ module Metalware
           config.rendered_files_path, template_type.to_s, node.name
         )
         Templater.render_to_file(config, template_type_path, save_path, parameters)
-      end
-
-      def template_path(template_type, node:)
-        File.join(
-          config.repo_path,
-          template_type.to_s,
-          template_file_name(template_type, node: node)
-        )
-      end
-
-      def template_file_name(template_type, node:)
-        repo_template(template_type, node: node) ||
-          'default'
-      end
-
-      def repo_template(template_type, node:)
-        repo_specified_templates = node.repo_config[:templates] || {}
-        repo_specified_templates[template_type]
       end
 
       def basic_build_node?(node)
