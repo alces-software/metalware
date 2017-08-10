@@ -134,7 +134,7 @@ module Metalware
     end
 
     def repo_config
-      Templater.new(metalware_config, nodename: name).config
+      @repo_config ||= Templater.new(metalware_config, nodename: name).config
     end
 
     private
