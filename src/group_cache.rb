@@ -30,12 +30,13 @@ module Metalware
   class GroupCache
     include Enumerable
 
-    def initialize(metalware_config)
+    def initialize(metalware_config, force_reload_file: false)
+      @force_reload = force_reload_file
       @config = metalware_config
     end
 
     def is_group?(group)
-      primary_groups_as_str.include? group
+      primary_groups.include? group
     end
 
     def add(group)
@@ -51,7 +52,7 @@ module Metalware
     end
 
     def each
-      primary_groups_as_str.each do |group_name|
+      primary_groups.each do |group_name|
         yield group_name
       end
     end
@@ -65,9 +66,13 @@ module Metalware
       primary_groups_hash[group&.to_sym]
     end
 
+    def primary_groups
+      primary_groups_hash.keys.map(&:to_s)
+    end
+
     private
 
-    attr_reader :config
+    attr_reader :config, :force_reload
   
     def loader
       @loader ||= Validator::Loader.new(config)
@@ -77,8 +82,8 @@ module Metalware
       @file_path ||= FilePath.new(config)
     end
 
-    def data
-      @data ||= loader.group_cache.tap do |d|
+    def load
+      loader.group_cache.tap do |d|
         if d.empty?
           d.merge!({
             next_index: 0,
@@ -88,12 +93,12 @@ module Metalware
       end
     end
 
-    def primary_groups_hash
-      data[:primary_groups]
+    def data
+      force_reload ? load : @data ||= load
     end
 
-    def primary_groups_as_str
-      primary_groups_hash.keys.map(&:to_s)
+    def primary_groups_hash
+      data[:primary_groups]
     end
 
     def next_available_index
