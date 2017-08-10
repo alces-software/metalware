@@ -62,7 +62,7 @@ module Metalware
     end
 
     def index(group)
-      primary_groups_hash[group.to_sym]
+      primary_groups_hash[group&.to_sym]
     end
 
     private
@@ -80,10 +80,10 @@ module Metalware
     def data
       @data ||= loader.group_cache.tap do |d|
         if d.empty?
-          d = {
+          d.merge!({
             next_index: 0,
             primary_groups: {}
-          }
+          })
         end
       end
     end
