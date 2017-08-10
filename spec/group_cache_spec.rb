@@ -48,10 +48,20 @@ RSpec.describe Metalware::GroupCache do
   describe '#add' do
     it 'adds a new group' do
       filesystem.test do
+        allow(cache).to receive(:next_available_index).and_return(10)
         expect(cache.group?('new_group')).to eq(false)
         cache.add('new_group')
         expect(cache.group?('new_group')).to eq(true)
+        expect(cache.index('new_group')).to eq(10)
       end
+    end
+
+    it 'increments the group index' do
+      expect(cache.group?('new_group1')).to eq(false)
+      expect(cache.group?('new_group2')).to eq(false)
+      cache.add('new_group1')
+      cache.add('new_group2')
+      expect(cache.index('new_group1') + 1).to eq(cache.index('new_group2'))
     end
 
     it 'ignores groups that have already been added' do
@@ -68,8 +78,13 @@ RSpec.describe Metalware::GroupCache do
     it 'removes a group' do
       filesystem.test do
         expect(cache.group?('testnodes')).to eq(true)
-        cache.remove('testnodes')
-        expect(cache.group?('testnodes')).to eq(false)
+        static_index_of_other_group = cache.index('testnodes')
+
+        expect(cache.group?('some_group')).to eq(true)
+        cache.remove('some_group')
+        expect(cache.group?('some_group')).to eq(false)
+
+        expect(cache.index('testnodes')).to eq(static_index_of_other_group)
       end
     end
   end
