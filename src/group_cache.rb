@@ -35,7 +35,7 @@ module Metalware
       @config = metalware_config
     end
 
-    def is_group?(group)
+    def group?(group)
       primary_groups.include? group
     end
 

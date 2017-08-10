@@ -38,24 +38,24 @@ RSpec.describe Metalware::GroupCache do
 
   it 'checks if a group has been configured' do
     filesystem.test do
-      expect(cache.is_group?('testnodes')).to eq(true)
-      expect(cache.is_group?('missing_group')).to eq(false)
+      expect(cache.group?('testnodes')).to eq(true)
+      expect(cache.group?('missing_group')).to eq(false)
     end
   end
 
   it 'adds a new group' do
     filesystem.test do
-      expect(cache.is_group?('new_group')).to eq(false)
+      expect(cache.group?('new_group')).to eq(false)
       cache.add('new_group')
-      expect(cache.is_group?('new_group')).to eq(true)
+      expect(cache.group?('new_group')).to eq(true)
     end
   end
 
   it 'removes a group' do
     filesystem.test do
-      expect(cache.is_group?('testnodes')).to eq(true)
+      expect(cache.group?('testnodes')).to eq(true)
       cache.remove('testnodes')
-      expect(cache.is_group?('testnodes')).to eq(false)
+      expect(cache.group?('testnodes')).to eq(false)
     end
   end
 end
