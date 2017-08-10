@@ -27,7 +27,7 @@ require 'nodeattr_interface'
 require 'node'
 require 'config'
 require 'ostruct'
-require 'validator/loader'
+require 'validation/loader'
 require 'spec_utils'
 
 RSpec.describe Metalware::Commands::Remove::Group do

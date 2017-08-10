@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'config'
-require 'validator/loader'
+require 'validation/loader'
 require 'data'
 
 module Metalware

@@ -21,7 +21,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'validator/answer'
+require 'validation/answer'
 require 'data'
 require 'config'
 require 'filesystem'

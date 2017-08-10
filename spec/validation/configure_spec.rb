@@ -21,7 +21,7 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'validator/configure'
+require 'validation/configure'
 require 'data'
 
 RSpec.describe Metalware::Validation::Configure do

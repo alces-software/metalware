@@ -23,8 +23,8 @@
 #==============================================================================
 
 require 'file_path'
-require 'validator/answer'
-require 'validator/configure'
+require 'validation/answer'
+require 'validation/configure'
 require 'data'
 
 module Metalware

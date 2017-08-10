@@ -27,7 +27,7 @@ require 'config'
 require 'dependency'
 require 'exceptions'
 require 'dependency_specifications'
-require 'validator/loader'
+require 'validation/loader'
 require 'file_path'
 
 module Metalware

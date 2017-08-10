@@ -23,7 +23,7 @@
 #==============================================================================
 require 'exceptions'
 require 'constants'
-require 'validator/loader'
+require 'validation/loader'
 
 module Metalware
   class Dependency
