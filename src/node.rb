@@ -30,6 +30,7 @@ require 'nodeattr_interface'
 require 'exceptions'
 require 'primary_group'
 require 'templating/configuration'
+require 'build_methods'
 
 module Metalware
   class Node
@@ -40,6 +41,10 @@ module Metalware
              # in the `Node` tests
              :configs,
              to: :templating_configuration
+
+    delegate :render_build_started_templates,
+             :render_build_complete_templates,
+             to: :build_method
 
     def initialize(metalware_config, name, should_be_configured: false)
       @metalware_config = metalware_config
@@ -170,6 +175,19 @@ module Metalware
 
     def same_basename?(path1, path2)
       File.basename(path1) == File.basename(path2)
+    end
+
+    def build_method
+      @build_method ||= build_method_class.new(metalware_config, self)
+    end
+
+    def build_method_class
+      case repo_config[:build_method]&.to_sym
+      when :basic
+        BuildMethods::Basic
+      else
+        BuildMethods::Kickstart
+      end
     end
   end
 end

@@ -78,7 +78,7 @@ module Metalware
         nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
-          render_build_method_templates(parameters, node)
+          node.render_build_started_templates(parameters)
         end
       end
 
@@ -104,52 +104,6 @@ module Metalware
             Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
         end
-      end
-
-      def render_build_method_templates(parameters, node)
-        if basic_build_node?(node)
-          render_basic(parameters, node)
-        else
-          render_kickstart(parameters, node)
-          render_pxelinux(parameters, node)
-        end
-      end
-
-      def render_basic(parameters, node)
-        render_build_method_template(
-          :basic, parameters: parameters, node: node
-        )
-      end
-
-      def render_kickstart(parameters, node)
-        render_build_method_template(
-          :kickstart, parameters: parameters, node: node
-        )
-      end
-
-      def render_pxelinux(parameters, node)
-        # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
-        # file yet - best place to do this may be when creating `Node` objects?
-        save_path = File.join(config.pxelinux_cfg_path, node.hexadecimal_ip)
-        render_build_method_template(
-          :pxelinux,
-          parameters: parameters,
-          node: node,
-          save_path: save_path
-        )
-      end
-
-      def render_build_method_template(template_type, parameters:, node:, save_path: nil)
-        template_type_path = template_path template_type, node: node
-        save_path ||= File.join(
-          config.rendered_files_path, template_type.to_s, node.name
-        )
-        Templater.render_to_file(config, template_type_path, save_path, parameters)
-      end
-
-      def basic_build_node?(node)
-        build_method = node.repo_config[:build_method]
-        build_method == 'basic'
       end
 
       def wait_for_nodes_to_build
@@ -182,12 +136,8 @@ module Metalware
 
       def render_permanent_pxelinux_configs(nodes)
         nodes.template_each firstboot: false do |parameters, node|
-          # Only nodes with a 'kickstart' build method (the default) must have
-          # PXELINUX templates re-rendered.
-          unless basic_build_node?(node)
-            parameters[:files] = build_files(node)
-            render_pxelinux(parameters, node)
-          end
+          parameters[:files] = build_files(node)
+          node.render_build_complete_templates(parameters)
         end
       end
 
