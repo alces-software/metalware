@@ -39,9 +39,6 @@ module Metalware
         Validation::Configure.new(path.configure_file).load
       end
 
-      # TODO: Rename configure methods to configure_data
-      alias configure configure_data
-
       def group_cache
         Data.load(path.group_cache)
       end

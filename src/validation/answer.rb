@@ -91,7 +91,7 @@ module Metalware
       end
 
       def questions
-        loader.configure
+        loader.configure_data
       end
 
       def answers

@@ -97,7 +97,7 @@ module Metalware
     def validate_configure
       @validate_configure ||= begin
         validate_repo
-        loader.configure
+        loader.configure_data
         unless valid_file?(:configure, '', true)
           msg = "Could not locate answer files: #{config.answer_files_path}"
           raise DependencyFailure, msg
