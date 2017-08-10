@@ -27,7 +27,7 @@ require 'config'
 require 'filesystem'
 require 'file_path'
 
-RSpec.describe Metalware::Validator::Answer do
+RSpec.describe Metalware::Validation::Answer do
   let :config do
     Metalware::Config.new
   end
@@ -70,9 +70,9 @@ RSpec.describe Metalware::Validator::Answer do
       Metalware::Data.dump(config.domain_answers_file, answers)
       Metalware::Data.dump(config.configure_file, configure_data)
       domain_file = file_path.domain_answers
-      validator = Metalware::Validator::Answer.new(config,
-                                                   domain_file,
-                                                   answer_section: :domain)
+      validator = Metalware::Validation::Answer.new(config,
+                                                    domain_file,
+                                                    answer_section: :domain)
       [validator.validate, validator]
     end
   end

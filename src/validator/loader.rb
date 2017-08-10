@@ -28,7 +28,7 @@ require 'validator/configure'
 require 'data'
 
 module Metalware
-  module Validator
+  module Validation
     class Loader
       def initialize(metalware_config)
         @config = metalware_config
@@ -36,7 +36,7 @@ module Metalware
       end
 
       def configure_data
-        Validator::Configure.new(path.configure_file).load
+        Validation::Configure.new(path.configure_file).load
       end
 
       # TODO: Rename configure methods to configure_data
@@ -63,9 +63,9 @@ module Metalware
       attr_reader :path, :config
 
       def answer(absolute_path, section)
-        validator = Validator::Answer.new(config,
-                                          absolute_path,
-                                          answer_section: section)
+        validator = Validation::Answer.new(config,
+                                           absolute_path,
+                                           answer_section: section)
         validator.load
       end
     end

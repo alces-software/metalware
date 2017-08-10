@@ -26,7 +26,7 @@ require 'data'
 require 'dry-validation'
 
 module Metalware
-  module Validator
+  module Validation
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
@@ -83,7 +83,7 @@ module Metalware
       attr_reader :config, :answer_file_path, :section
 
       def loader
-        @loader ||= Validator::Loader.new(config)
+        @loader ||= Validation::Loader.new(config)
       end
 
       def questions_in_section
