@@ -33,10 +33,6 @@ RSpec.describe Metalware::Commands::Build do
   let :metal_config { Metalware::Config.new }
 
   def run_build(node_identifier, **options_hash)
-    # Adds the default values if they do not exist
-    options_hash[:kickstart] = 'default' unless options_hash.key?(:kickstart)
-    options_hash[:pxelinux] = 'default' unless options_hash.key?(:pxelinux)
-
     # Run command in timeout as `build` will wait indefinitely, but want to
     # abort tests if it looks like this is happening.
     Timeout.timeout 0.5 do
@@ -73,7 +69,7 @@ RSpec.describe Metalware::Commands::Build do
   before :each do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
-    SpecUtils.use_mock_genders(self)
+    SpecUtils.use_mock_genders(self, genders_file: 'genders/simple_cluster')
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependency(self)
   end
@@ -106,25 +102,64 @@ RSpec.describe Metalware::Commands::Build do
       run_build('testnode01')
     end
 
-    it 'uses different standard templates if template options passed' do
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/kickstart/my_kickstart",
-        '/var/lib/metalware/rendered/kickstart/testnode01',
-        expected_template_parameters
-      )
-      expect(Metalware::Templater).to receive(:render_to_file).with(
-        instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/pxelinux/my_pxelinux",
-        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        expected_template_parameters
-      ).at_least(:once)
+    context 'when templates specified in repo config' do
+      let :filesystem do
+        FileSystem.setup do |fs|
+          fs.with_minimal_repo
 
-      run_build(
-        'testnode01',
-        kickstart: 'my_kickstart',
-        pxelinux: 'my_pxelinux'
-      )
+          testnodes_config_path = metal_config.repo_config_path('testnodes')
+          fs.dump(testnodes_config_path,                     templates: {
+                    pxelinux: 'repo_pxelinux',
+                    kickstart: 'repo_kickstart',
+                  })
+
+          testnode02_config_path = metal_config.repo_config_path('testnode02')
+          fs.dump(testnode02_config_path,                     templates: {
+                    pxelinux: 'testnode02_repo_pxelinux',
+                  })
+        end
+      end
+
+      it 'uses specified templates' do
+        filesystem.test do
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            instance_of(Metalware::Config),
+            "#{metal_config.repo_path}/kickstart/repo_kickstart",
+            '/var/lib/metalware/rendered/kickstart/testnode01',
+            expected_template_parameters
+          )
+          expect(Metalware::Templater).to receive(:render_to_file).with(
+            instance_of(Metalware::Config),
+            "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
+            '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
+            expected_template_parameters
+          ).at_least(:once)
+
+          run_build('testnode01')
+        end
+      end
+
+      it 'specifies correct template dependencies' do
+        filesystem.test do
+          build_command = run_build('cluster', group: true)
+
+          # Not ideal to test private method, but seems best way in this case.
+          dependency_hash = build_command.send(:dependency_hash)
+
+          expect(dependency_hash[:repo].sort).to eq([
+            # `default` templates used for node `login1`.
+            'pxelinux/default',
+            'kickstart/default',
+
+            # Repo templates specified for all nodes in `testnodes` group.
+            'pxelinux/repo_pxelinux',
+            'kickstart/repo_kickstart',
+
+            # PXELINUX template overridden for `testnode02`
+            'pxelinux/testnode02_repo_pxelinux',
+          ].sort)
+        end
+      end
     end
 
     it 'renders pxelinux once with firstboot true if node does not build' do
@@ -196,35 +231,30 @@ RSpec.describe Metalware::Commands::Build do
     it 'renders standard templates for each node' do
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/kickstart/my_kickstart",
+        "#{metal_config.repo_path}/kickstart/default",
         '/var/lib/metalware/rendered/kickstart/testnode01',
         hash_including(nodename: 'testnode01')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/pxelinux/my_pxelinux",
+        "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
         hash_including(nodename: 'testnode01')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/kickstart/my_kickstart",
+        "#{metal_config.repo_path}/kickstart/default",
         '/var/lib/metalware/rendered/kickstart/testnode02',
         hash_including(nodename: 'testnode02')
       )
       expect(Metalware::Templater).to receive(:render_to_file).with(
         instance_of(Metalware::Config),
-        "#{metal_config.repo_path}/pxelinux/my_pxelinux",
+        "#{metal_config.repo_path}/pxelinux/default",
         '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
         hash_including(nodename: 'testnode02')
       )
 
-      run_build(
-        'testnodes',
-        group: true,
-        kickstart: 'my_kickstart',
-        pxelinux: 'my_pxelinux'
-      )
+      run_build('testnodes', group: true)
     end
   end
 end

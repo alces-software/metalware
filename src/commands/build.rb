@@ -38,10 +38,13 @@ module Metalware
     class Build < CommandHelpers::BaseCommand
       private
 
+      attr_reader :options, :group_name, :nodes
+
       def setup(args, options)
         @options = options
-        @node_identifier = args.first
-        @nodes = Nodes.create(config, @node_identifier, options.group)
+        node_identifier = args.first
+        @group_name = node_identifier if options.group
+        @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
@@ -52,17 +55,25 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["pxelinux/#{@options.pxelinux}",
-                 "kickstart/#{@options.kickstart}"],
+          repo: repo_dependencies,
           configure: ['domain.yaml'],
           optional: {
-            configure: ["groups/#{@node_identifier}.yaml"],
+            configure: ["groups/#{group_name}.yaml"],
           },
         }
       end
 
+      def repo_dependencies
+        nodes.map do |node|
+          [:pxelinux, :kickstart].map do |template_type|
+            full_template_path = template_path(template_type, node: node)
+            file_path.repo_relative_path_to(full_template_path)
+          end
+        end.flatten.uniq
+      end
+
       def render_build_templates
-        @nodes.template_each firstboot: true do |parameters, node|
+        nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
           render_kickstart(parameters, node)
@@ -109,7 +120,7 @@ module Metalware
       end
 
       def render_kickstart(parameters, node)
-        kickstart_template_path = template_path :kickstart
+        kickstart_template_path = template_path :kickstart, node: node
         kickstart_save_path = File.join(
           config.rendered_files_path, 'kickstart', node.name
         )
@@ -119,19 +130,30 @@ module Metalware
       def render_pxelinux(parameters, node)
         # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
         # file yet - best place to do this may be when creating `Node` objects?
-        pxelinux_template_path = template_path :pxelinux
+        pxelinux_template_path = template_path :pxelinux, node: node
         pxelinux_save_path = File.join(
           config.pxelinux_cfg_path, node.hexadecimal_ip
         )
         Templater.render_to_file(config, pxelinux_template_path, pxelinux_save_path, parameters)
       end
 
-      def template_path(template_type)
+      def template_path(template_type, node:)
         File.join(
           config.repo_path,
           template_type.to_s,
-          @options.__send__(template_type)
+          template_file_name(template_type, node: node)
         )
+      end
+
+      def template_file_name(template_type, node:)
+        repo_template(template_type, node: node) ||
+          'default'
+      end
+
+      def repo_template(template_type, node:)
+        repo_config = Templater.new(config, nodename: node.name).config
+        repo_specified_templates = repo_config[:templates] || {}
+        repo_specified_templates[template_type]
       end
 
       def wait_for_nodes_to_build
@@ -140,18 +162,18 @@ module Metalware
 
         rerendered_nodes = []
         loop do
-          @nodes.select do |node|
+          nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
           end
-                .tap do |nodes|
+               .tap do |nodes|
             render_permanent_pxelinux_configs(nodes)
             rerendered_nodes.push(*nodes)
           end
-                .each do |node|
+               .each do |node|
             Output.stderr "Node #{node.name} built."
           end
 
-          all_nodes_reported_built = rerendered_nodes.length == @nodes.length
+          all_nodes_reported_built = rerendered_nodes.length == nodes.length
           break if all_nodes_reported_built
 
           sleep config.build_poll_sleep
@@ -159,7 +181,7 @@ module Metalware
       end
 
       def render_all_permanent_pxelinux_configs
-        render_permanent_pxelinux_configs(@nodes)
+        render_permanent_pxelinux_configs(nodes)
       end
 
       def render_permanent_pxelinux_configs(nodes)
