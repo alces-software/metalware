@@ -133,6 +133,10 @@ module Metalware
       groups.first
     end
 
+    def repo_config
+      Templater.new(metalware_config, nodename: name).config
+    end
+
     private
 
     attr_reader :metalware_config, :should_be_configured

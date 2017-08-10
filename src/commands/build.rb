@@ -159,18 +159,13 @@ module Metalware
       end
 
       def repo_template(template_type, node:)
-        repo_config = repo_config_for_node(node)
-        repo_specified_templates = repo_config[:templates] || {}
+        repo_specified_templates = node.repo_config[:templates] || {}
         repo_specified_templates[template_type]
       end
 
       def basic_build_node?(node)
-        build_method = repo_config_for_node(node)[:build_method]
+        build_method = node.repo_config[:build_method]
         build_method == 'basic'
-      end
-
-      def repo_config_for_node(node)
-        Templater.new(config, nodename: node.name).config
       end
 
       def wait_for_nodes_to_build
