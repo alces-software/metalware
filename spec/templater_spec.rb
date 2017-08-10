@@ -257,12 +257,12 @@ RSpec.describe Metalware::Templater do
     let :output { File.read(output_path) }
 
     let :rendered_file_section_regex do
-      <<-EOF.strip_heredoc
-      # #{Metalware::Templater::MANAGED_START}
-      # #{Metalware::Templater::MANAGED_COMMENT.truncate(30)}.*
-      #{template}
-      # #{Metalware::Templater::MANAGED_END}
-      EOF
+      [
+        Metalware::Templater::MANAGED_START_COMMENT,
+        Metalware::Templater::MANAGED_COMMENT,
+        template,
+        Metalware::Templater::MANAGED_END_COMMENT,
+      ].join("\n") + "\n"
     end
 
     def render_managed_file

@@ -28,6 +28,7 @@ require 'active_support/core_ext/string/strip'
 require 'constants'
 require 'metal_log'
 require 'exceptions'
+require 'utils'
 require 'templating/iterable_recursive_open_struct'
 require 'templating/missing_parameter_wrapper'
 require 'templating/magic_namespace'
@@ -46,12 +47,14 @@ module Metalware
     MANAGED_END = 'METALWARE_END'
     MANAGED_START_COMMENT = "# #{MANAGED_START}"
     MANAGED_END_COMMENT = "# #{MANAGED_END}"
-    MANAGED_COMMENT = <<-EOF.squish
-    This section of this file is managed by Alces Metalware. Any changes made
-    to this file between the #{MANAGED_START} and
-    #{MANAGED_END} markers may be lost; you should make any changes
-    you want to persist outside of this section or to the template directly.
+    MANAGED_COMMENT = Utils.commentify(
+      <<-EOF.squish
+      This section of this file is managed by Alces Metalware. Any changes made
+      to this file between the #{MANAGED_START} and #{MANAGED_END} markers may
+      be lost; you should make any changes you want to persist outside of this
+      section or to the template directly.
     EOF
+    )
 
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
@@ -134,7 +137,7 @@ module Metalware
       def managed_section(rendered_template)
         [
           MANAGED_START_COMMENT,
-          "# #{MANAGED_COMMENT}",
+          MANAGED_COMMENT,
           rendered_template,
           MANAGED_END_COMMENT,
         ].join("\n") + "\n"
