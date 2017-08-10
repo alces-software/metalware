@@ -252,7 +252,7 @@ RSpec.describe Metalware::Templater do
 
   describe '#render_managed_file' do
     # XXX Similar to above.
-    let :template { "simple template without ERB\n" }
+    let :template { "simple template without ERB" }
     let :output_path { '/output' }
     let :output { File.read(output_path) }
 
@@ -314,7 +314,7 @@ RSpec.describe Metalware::Templater do
       let :existing_contents { "existing file contents\n" }
 
       let :rendered_file_regex do
-        existing_contents + rendered_file_section_regex
+        [existing_contents, "\n", rendered_file_section_regex].join
       end
 
       before :each do

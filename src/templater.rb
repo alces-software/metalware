@@ -112,7 +112,7 @@ module Metalware
         pre, post = split_on_managed_section(
           current_file_contents(managed_file)
         )
-        new_managed_file = [pre, managed_section(rendered_template), post].join
+        new_managed_file = [pre, managed_section(rendered_template.strip), post].join
         write_rendered_template(new_managed_file, save_file: managed_file)
       end
 
@@ -130,7 +130,7 @@ module Metalware
           _, post = rest.split(MANAGED_END_COMMENT)
           [pre, post]
         else
-          [file_contents + "\n", nil]
+          [file_contents + "\n\n", nil]
         end
       end
 
