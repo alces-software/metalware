@@ -40,6 +40,7 @@ module Metalware
     end
 
     def add(group)
+      return if group?(group)
       new_groups = primary_groups_hash.merge(group.to_sym => next_available_index)
       save(next_available_index + 1, new_groups)
     end
