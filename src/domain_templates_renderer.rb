@@ -37,7 +37,7 @@ module Metalware
       render_methods.each do |method|
         rendered_file_invalid = !send(method)
         if rendered_file_invalid
-          msg = "An error occurred rendering: #{method.to_s.sub("render_", "")}"
+          msg = "An error occurred rendering: #{method.to_s.sub('render_', '')}"
           raise DomainTemplatesInternalError, msg
         end
       end

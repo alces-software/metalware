@@ -92,10 +92,10 @@ RSpec.shared_examples :render_domain_templates do |test_command|
 
     it 'does not render hosts and genders files and gives error' do
       filesystem.test do
-        expect {
+        expect do
           SpecUtils.run_command(test_command)
-        }.to raise_error(Metalware::DomainTemplatesInternalError)
-        
+        end.to raise_error(Metalware::DomainTemplatesInternalError)
+
         # `server.yaml` and `hosts` not rendered.
         expect(File.exist?(Metalware::Constants::SERVER_CONFIG_PATH)).to be false
         expect(File.exist?('/etc/hosts')).to be false
@@ -124,10 +124,10 @@ RSpec.shared_examples :render_domain_templates do |test_command|
 
     it 'does not render hosts file and gives error' do
       filesystem.test do
-        expect {
+        expect do
           SpecUtils.run_command(test_command)
-        }.to raise_error(Metalware::DomainTemplatesInternalError)
-        
+        end.to raise_error(Metalware::DomainTemplatesInternalError)
+
         # `hosts` not rendered as `genders` invalid.
         expect(File.exist?('/etc/hosts')).to be false
 
