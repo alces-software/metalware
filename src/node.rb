@@ -142,6 +142,10 @@ module Metalware
       @repo_config ||= Templater.new(metalware_config, nodename: name).config
     end
 
+    def build_template_paths
+      build_method.template_paths
+    end
+
     private
 
     attr_reader :metalware_config, :should_be_configured

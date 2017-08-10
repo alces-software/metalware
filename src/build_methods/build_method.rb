@@ -17,6 +17,10 @@ module Metalware
         raise NotImplementedError
       end
 
+      def template_paths
+        raise NotImplementedError
+      end
+
       private
 
       attr_reader :config, :node

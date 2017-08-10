@@ -10,6 +10,10 @@ module Metalware
 
       def render_build_complete_templates(_parameters); end
 
+      def template_paths
+        # XXX Specify template paths here
+      end
+
       private
 
       def render_basic(parameters)
