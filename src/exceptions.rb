@@ -150,6 +150,9 @@ module Metalware
       super msg
     end
   end
+
+  class DomainTemplatesInternalError < MetalwareError
+  end
 end
 
 

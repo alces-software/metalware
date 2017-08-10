@@ -24,7 +24,6 @@
 #==============================================================================
 
 require 'constants'
-require 'io'
 require 'network'
 
 module Metalware
@@ -37,11 +36,10 @@ module Metalware
     def render
       render_methods.each do |method|
         rendered_file_invalid = !send(method)
-        next unless rendered_file_invalid
-        Io.abort
-        # Should never be reached in production due to `abort`, but needed
-        # for tests where this may be stubbed.
-        break
+        if rendered_file_invalid
+          msg = "An error occurred rendering: #{method.to_s.sub("render_", "")}"
+          raise DomainTemplatesInternalError, msg
+        end
       end
     end
 
