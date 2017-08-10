@@ -78,7 +78,7 @@ module Metalware
       end
 
       def group_cache
-        @group_cache ||= GroupCache.new(metalware_config) 
+        @group_cache ||= GroupCache.new(metalware_config)
       end
 
       def hunter

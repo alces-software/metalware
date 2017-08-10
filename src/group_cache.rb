@@ -40,9 +40,7 @@ module Metalware
     end
 
     def add(group)
-      new_groups = primary_groups_hash.merge({
-        group.to_sym => next_available_index
-      })
+      new_groups = primary_groups_hash.merge(group.to_sym => next_available_index)
       save(next_available_index + 1, new_groups)
     end
 
@@ -73,7 +71,7 @@ module Metalware
     private
 
     attr_reader :config, :force_reload
-  
+
     def loader
       @loader ||= Validator::Loader.new(config)
     end
@@ -85,10 +83,8 @@ module Metalware
     def load
       loader.group_cache.tap do |d|
         if d.empty?
-          d.merge!({
-            next_index: 0,
-            primary_groups: {}
-          })
+          d.merge!(next_index: 0,
+                   primary_groups: {})
         end
       end
     end
@@ -108,7 +104,7 @@ module Metalware
     def save(next_index, group_hash)
       payload = {
         next_index: next_index,
-        primary_groups: group_hash
+        primary_groups: group_hash,
       }
       Data.dump(file_path.group_cache, payload)
       @data = nil # Reloads the cached file
