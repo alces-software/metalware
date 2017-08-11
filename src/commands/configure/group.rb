@@ -1,8 +1,30 @@
-
 # frozen_string_literal: true
+
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
 
 require 'command_helpers/configure_command'
 require 'constants'
+require 'group_cache'
 
 module Metalware
   module Commands
@@ -10,10 +32,11 @@ module Metalware
       class Group < CommandHelpers::ConfigureCommand
         private
 
-        attr_reader :group_name
+        attr_reader :group_name, :cache
 
         def setup(args, _options)
           @group_name = args.first
+          @cache = GroupCache.new(config)
         end
 
         def custom_configuration
@@ -24,29 +47,12 @@ module Metalware
           config.group_answers_file(group_name)
         end
 
-        attr_reader :group_name
-
         def higher_level_answer_files
           [config.domain_answers_file]
         end
 
         def record_primary_group
-          unless primary_group_recorded?
-            primary_groups << group_name
-            Data.dump(Constants::GROUPS_CACHE_PATH, groups_cache)
-          end
-        end
-
-        def primary_group_recorded?
-          primary_groups.include? group_name
-        end
-
-        def primary_groups
-          groups_cache[:primary_groups] ||= []
-        end
-
-        def groups_cache
-          @groups_cache ||= Data.load(Constants::GROUPS_CACHE_PATH)
+          cache.add(group_name)
         end
       end
     end

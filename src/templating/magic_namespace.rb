@@ -7,7 +7,7 @@ require 'active_support/core_ext/hash'
 require 'constants'
 require 'deployment_server'
 require 'nodeattr_interface'
-require 'primary_group'
+require 'group_cache'
 require 'templating/missing_parameter_wrapper'
 require 'templating/group_namespace'
 require 'object_fields_hasher'
@@ -72,9 +72,13 @@ module Metalware
       end
 
       def groups
-        PrimaryGroup.map do |group|
-          yield group_namespace_for(group.name)
+        group_cache.map do |group|
+          yield group_namespace_for(group)
         end
+      end
+
+      def group_cache
+        @group_cache ||= GroupCache.new(metalware_config)
       end
 
       def hunter

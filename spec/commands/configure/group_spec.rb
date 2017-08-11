@@ -24,6 +24,7 @@
 
 require 'spec_utils'
 require 'filesystem'
+require 'group_cache'
 
 RSpec.describe Metalware::Commands::Configure::Group do
   def run_configure_group(group)
@@ -33,11 +34,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
   end
 
   let :config { Metalware::Config.new }
-  let :groups_file do
-    File.join(Metalware::Constants::CACHE_PATH, 'groups.yaml')
-  end
-  let :groups_yaml { Metalware::Data.load(groups_file) }
-  let :primary_groups { groups_yaml[:primary_groups] }
+  let :cache { Metalware::GroupCache.new(config, force_reload_file: true) }
 
   let :filesystem do
     FileSystem.setup(&:with_minimal_repo)
@@ -66,7 +63,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
         filesystem.test do
           run_configure_group 'testnodes'
 
-          expect(primary_groups).to eq [
+          expect(cache.primary_groups).to eq [
             'testnodes',
           ]
         end
@@ -76,13 +73,11 @@ RSpec.describe Metalware::Commands::Configure::Group do
     context 'when `cache/groups.yaml` exists' do
       it 'inserts primary group if new' do
         filesystem.test do
-          Metalware::Data.dump(groups_file, primary_groups: [
-                                 'first_group',
-                               ])
+          cache.add('first_group')
 
           run_configure_group 'second_group'
 
-          expect(primary_groups).to eq [
+          expect(cache.primary_groups).to eq [
             'first_group',
             'second_group',
           ]
@@ -91,14 +86,11 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
       it 'does nothing if primary group already presnt' do
         filesystem.test do
-          Metalware::Data.dump(groups_file, primary_groups: [
-                                 'first_group',
-                                 'second_group',
-                               ])
+          ['first_group', 'second_group'].each { |g| cache.add(g) }
 
           run_configure_group 'second_group'
 
-          expect(primary_groups).to eq [
+          expect(cache.primary_groups).to eq [
             'first_group',
             'second_group',
           ]

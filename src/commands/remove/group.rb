@@ -33,17 +33,18 @@ module Metalware
       class Group < CommandHelpers::BaseCommand
         def setup(args, _options)
           @primary_group = args[0]
+          @cache = GroupCache.new(config)
         end
 
         def run
           delete_answer_files
-          update_cache
+          cache.remove(primary_group)
           update_domain_templates
         end
 
         private
 
-        attr_reader :primary_group
+        attr_reader :primary_group, :cache
 
         # Deleting a group should not break the genders file, so this error is
         # not expected to run
@@ -68,12 +69,6 @@ module Metalware
           NodeattrInterface.nodes_in_primary_group(primary_group)
                            .map { |node| config.node_answers_file(node) }
                            .unshift(config.group_answers_file(primary_group))
-        end
-
-        def update_cache
-          old_cache = loader.groups_cache[:primary_groups]
-          new_cache = old_cache.reject { |group| group == primary_group }
-          Data.dump(file_path.groups_cache, primary_groups: new_cache)
         end
 
         def update_domain_templates

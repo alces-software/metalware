@@ -28,7 +28,7 @@ require 'constants'
 require 'system_command'
 require 'nodeattr_interface'
 require 'exceptions'
-require 'primary_group'
+require 'group_cache'
 require 'templating/configuration'
 
 module Metalware
@@ -147,7 +147,11 @@ module Metalware
     end
 
     def primary_group_index
-      PrimaryGroup.index(primary_group)
+      group_cache.index(primary_group)
+    end
+
+    def group_cache
+      GroupCache.new(metalware_config)
     end
 
     def merge_in_files!(existing_files, new_files)

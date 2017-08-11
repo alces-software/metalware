@@ -1,5 +1,6 @@
 ---
+next_index: 3
 primary_groups:
-- group1
-- group2
-- nodes
+  group1: 0
+  group2: 1
+  nodes: 2

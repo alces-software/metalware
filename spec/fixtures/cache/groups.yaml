@@ -1,4 +1,4 @@
-
+next_index: 2
 primary_groups:
-  - some_group
-  - testnodes
+  some_group: 0
+  testnodes: 1
