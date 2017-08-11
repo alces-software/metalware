@@ -258,10 +258,10 @@ RSpec.describe Metalware::Templater do
 
     let :rendered_file_section_regex do
       [
-        Metalware::Templater::MANAGED_START_COMMENT,
+        Metalware::Templater::MANAGED_START,
         Metalware::Templater::MANAGED_COMMENT,
         template,
-        Metalware::Templater::MANAGED_END_COMMENT,
+        Metalware::Templater::MANAGED_END,
       ].join("\n") + "\n"
     end
 
@@ -334,9 +334,9 @@ RSpec.describe Metalware::Templater do
         <<-EOF.strip_heredoc
         BEFORE
 
-        # #{Metalware::Templater::MANAGED_START}
+        #{Metalware::Templater::MANAGED_START}
         previous rendered template
-        # #{Metalware::Templater::MANAGED_END}
+        #{Metalware::Templater::MANAGED_END}
 
         AFTER
         EOF
