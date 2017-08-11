@@ -92,18 +92,9 @@ RSpec.shared_examples :render_domain_templates do |test_command|
 
     it 'does not render hosts and genders files and gives error' do
       filesystem.test do
-        expect(Metalware::Io).to receive(:abort)
-
-        # Note: this is similar to the error message testing below.
-        error_parts = [
-          /invalid/,
-          /#{build_interface}.*not.*valid/,
-        ]
-        error_parts.each do |fragment|
-          expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
-        end
-
-        SpecUtils.run_command(test_command)
+        expect do
+          SpecUtils.run_command(test_command)
+        end.to raise_error(Metalware::DomainTemplatesInternalError)
 
         # `server.yaml` and `hosts` not rendered.
         expect(File.exist?(Metalware::Constants::SERVER_CONFIG_PATH)).to be false
@@ -133,22 +124,9 @@ RSpec.shared_examples :render_domain_templates do |test_command|
 
     it 'does not render hosts file and gives error' do
       filesystem.test do
-        expect(Metalware::Io).to receive(:abort)
-
-        # Error should be shown including the `nodeattr` error message and
-        # where to find the invalid genders file.
-        error_parts = [
-          /invalid/,
-          /#{nodeattr_error}/,
-          /#{Metalware::Constants::INVALID_RENDERED_GENDERS_PATH}/,
-        ].tap do |parts|
-          parts << genders_invalid_message if genders_invalid_message
-        end
-        error_parts.each do |fragment|
-          expect(Metalware::Output).to receive(:stderr).with(fragment).ordered
-        end
-
-        SpecUtils.run_command(test_command)
+        expect do
+          SpecUtils.run_command(test_command)
+        end.to raise_error(Metalware::DomainTemplatesInternalError)
 
         # `hosts` not rendered as `genders` invalid.
         expect(File.exist?('/etc/hosts')).to be false
