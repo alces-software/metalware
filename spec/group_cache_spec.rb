@@ -48,11 +48,12 @@ RSpec.describe Metalware::GroupCache do
   describe '#add' do
     it 'adds a new group' do
       filesystem.test do
-        allow(cache).to receive(:next_available_index).and_return(10)
         expect(cache.group?('new_group')).to eq(false)
         cache.add('new_group')
         expect(cache.group?('new_group')).to eq(true)
-        expect(cache.index('new_group')).to eq(10)
+
+        next_available_index = 2
+        expect(cache.index('new_group')).to eq(next_available_index)
       end
     end
 
