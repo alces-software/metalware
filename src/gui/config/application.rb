@@ -31,5 +31,7 @@ module Gui
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.x.metalware_config = Metalware::Config.new
   end
 end
