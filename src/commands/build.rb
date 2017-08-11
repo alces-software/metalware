@@ -40,6 +40,8 @@ module Metalware
 
       attr_reader :options, :group_name, :nodes
 
+      delegate :template_path, to: :file_path
+
       def setup(args, options)
         @options = options
         node_identifier = args.first
@@ -64,20 +66,14 @@ module Metalware
       end
 
       def repo_dependencies
-        nodes.map do |node|
-          [:pxelinux, :kickstart].map do |template_type|
-            full_template_path = template_path(template_type, node: node)
-            file_path.repo_relative_path_to(full_template_path)
-          end
-        end.flatten.uniq
+        nodes.map(&:build_template_paths).flatten.uniq
       end
 
       def render_build_templates
         nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
-          render_kickstart(parameters, node)
-          render_pxelinux(parameters, node)
+          node.render_build_started_templates(parameters)
         end
       end
 
@@ -105,47 +101,6 @@ module Metalware
         end
       end
 
-      def render_kickstart(parameters, node)
-        kickstart_template_path = template_path :kickstart, node: node
-        kickstart_save_path = File.join(
-          config.rendered_files_path, 'kickstart', node.name
-        )
-        Templater.render_to_file(config, kickstart_template_path, kickstart_save_path, parameters)
-      end
-
-      def render_pxelinux(parameters, node)
-        # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
-        # file yet - best place to do this may be when creating `Node` objects?
-        pxelinux_template_path = template_path :pxelinux, node: node
-        pxelinux_save_path = File.join(
-          config.pxelinux_cfg_path, node.hexadecimal_ip
-        )
-        Templater.render_to_file(config, pxelinux_template_path, pxelinux_save_path, parameters)
-      end
-
-      def template_path(template_type, node:)
-        File.join(
-          config.repo_path,
-          template_type.to_s,
-          template_file_name(template_type, node: node)
-        )
-      end
-
-      def template_file_name(template_type, node:)
-        repo_template(template_type, node: node) ||
-          'default'
-      end
-
-      def repo_template(template_type, node:)
-        repo_config = repo_config_for_node(node)
-        repo_specified_templates = repo_config[:templates] || {}
-        repo_specified_templates[template_type]
-      end
-
-      def repo_config_for_node(node)
-        Templater.new(config, nodename: node.name).config
-      end
-
       def wait_for_nodes_to_build
         Output.stderr 'Waiting for nodes to report as built...',
                       '(Ctrl-C to terminate)'
@@ -156,7 +111,7 @@ module Metalware
             !rerendered_nodes.include?(node) && node.built?
           end
                .tap do |nodes|
-            render_permanent_pxelinux_configs(nodes)
+            render_build_complete_templates(nodes)
             rerendered_nodes.push(*nodes)
           end
                .each do |node|
@@ -170,14 +125,14 @@ module Metalware
         end
       end
 
-      def render_all_permanent_pxelinux_configs
-        render_permanent_pxelinux_configs(nodes)
+      def render_all_build_complete_templates
+        render_build_complete_templates(nodes)
       end
 
-      def render_permanent_pxelinux_configs(nodes)
+      def render_build_complete_templates(nodes)
         nodes.template_each firstboot: false do |parameters, node|
           parameters[:files] = build_files(node)
-          render_pxelinux(parameters, node)
+          node.render_build_complete_templates(parameters)
         end
       end
 
@@ -194,20 +149,20 @@ module Metalware
 
       def handle_interrupt(_e)
         Output.stderr 'Exiting...'
-        ask_if_should_rerender_pxelinux_configs
+        ask_if_should_rerender
         teardown
       rescue Interrupt
-        Output.stderr 'Re-rendering all permanent PXELINUX templates anyway...'
-        render_all_permanent_pxelinux_configs
+        Output.stderr 'Re-rendering templates anyway...'
+        render_all_build_complete_templates
         teardown
       end
 
-      def ask_if_should_rerender_pxelinux_configs
+      def ask_if_should_rerender
         should_rerender = <<-EOF.strip_heredoc
-          Re-render permanent PXELINUX templates for all nodes as if build succeeded?
+          Re-render appropriate templates for nodes as if build succeeded?
           [yes/no]
         EOF
-        render_all_permanent_pxelinux_configs if agree(should_rerender)
+        render_all_build_complete_templates if agree(should_rerender)
       end
     end
   end
