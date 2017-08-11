@@ -89,4 +89,20 @@ RSpec.describe Metalware::GroupCache do
       end
     end
   end
+
+  describe '#index' do
+    it 'preserves incrementing index as groups are added/removed' do
+      filesystem.test do
+        group1 = 'group1'
+        cache.add(group1)
+        expect(cache.index(group1)).to eq 2
+
+        cache.remove(group1)
+
+        group2 = 'group2'
+        cache.add(group2)
+        expect(cache.index(group2)).to eq 3
+      end
+    end
+  end
 end
