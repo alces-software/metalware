@@ -1,0 +1,11 @@
+
+<%= form_tag do %>
+  <% @questions.each do |identifier, question| %>
+    <fieldset>
+      <%= label_tag(identifier, question[:question]) %>
+      <%= text_field_tag(identifier) %>
+    </fieldset>
+  <% end %>
+
+  <%= submit_tag('Save') %>
+<% end %>

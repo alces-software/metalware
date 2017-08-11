@@ -5,4 +5,12 @@ Rails.application.routes.draw do
 
   resource :cluster, only: :show, controller: :cluster
   resource :hunter, only: :show, controller: :hunter
+
+  namespace :configure do
+    get '/', to: redirect('')
+
+    resource :domain,
+             controller: :domain,
+             only: [:show, :update, :destroy]
+  end
 end
