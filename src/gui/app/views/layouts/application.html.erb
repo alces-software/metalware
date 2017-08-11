@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Gui</title>
+    <title>Metalware</title>
     <%= csrf_meta_tags %>
 
     <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
@@ -9,6 +9,10 @@
   </head>
 
   <body>
+    <div>
+      <%= link_to 'Hunter', :hunter %>
+      <%= link_to 'Cluster', :root %>
+    </div>
     <%= yield %>
   </body>
 </html>
