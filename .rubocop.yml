@@ -34,3 +34,7 @@ Metrics/BlockLength:
 # `YAML.safe_load` instead of `YAML.load`.
 Security/YAMLLoad:
   Enabled: false
+
+# I don't care if we use the compact way of declaring classes and modules.
+Style/ClassAndModuleChildren:
+  Enabled: false
