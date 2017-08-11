@@ -28,6 +28,7 @@ require 'active_support/core_ext/string/strip'
 require 'constants'
 require 'metal_log'
 require 'exceptions'
+require 'utils'
 require 'templating/iterable_recursive_open_struct'
 require 'templating/missing_parameter_wrapper'
 require 'templating/magic_namespace'
@@ -41,6 +42,19 @@ module Metalware
     # will be lost. You can change the data used to render it using the
     # `metal configure` commands.
     EOF
+
+    MANAGED_START_MARKER = 'METALWARE_START'
+    MANAGED_START = "########## #{MANAGED_START_MARKER} ##########"
+    MANAGED_END_MARKER = 'METALWARE_END'
+    MANAGED_END = "########## #{MANAGED_END_MARKER} ##########"
+    MANAGED_COMMENT = Utils.commentify(
+      <<-EOF.squish
+      This section of this file is managed by Alces Metalware. Any changes made
+      to this file between the #{MANAGED_START_MARKER} and
+      #{MANAGED_END_MARKER} markers may be lost; you should make any changes
+      you want to persist outside of this section or to the template directly.
+    EOF
+    )
 
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
@@ -71,12 +85,62 @@ module Metalware
         end
       end
 
+      # Render template to a file where only part of the file is managed by
+      # Metalware:
+      # - if the file does not exist yet, it will be created with a new managed
+      # section;
+      # - if it exists without a managed section, the new section will be
+      # appended to the bottom of the current file;
+      # - if it exists with a managed section, this section will be replaced
+      # with the new managed section.
+      def render_managed_file(config, template, managed_file, &validation_block)
+        rendered_template = render(config, template)
+        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
+          update_managed_file(managed_file, rendered_template) if valid
+        end
+      end
+
       private
 
       def rendered_template_valid?(rendered_template)
         # A rendered template is automatically valid, unless we're passed a
         # block which evaluates as falsy when given the rendered template.
         !block_given? || yield(rendered_template)
+      end
+
+      def update_managed_file(managed_file, rendered_template)
+        pre, post = split_on_managed_section(
+          current_file_contents(managed_file)
+        )
+        new_managed_file = [pre, managed_section(rendered_template.strip), post].join
+        write_rendered_template(new_managed_file, save_file: managed_file)
+      end
+
+      def current_file_contents(file)
+        if File.exist?(file)
+          File.read(file).strip
+        else
+          ''
+        end
+      end
+
+      def split_on_managed_section(file_contents)
+        if file_contents.include? MANAGED_START
+          pre, rest = file_contents.split(MANAGED_START)
+          _, post = rest.split(MANAGED_END)
+          [pre, post]
+        else
+          [file_contents + "\n\n", nil]
+        end
+      end
+
+      def managed_section(rendered_template)
+        [
+          MANAGED_START,
+          MANAGED_COMMENT,
+          rendered_template,
+          MANAGED_END,
+        ].join("\n") + "\n"
       end
 
       def write_rendered_template(rendered_template, save_file:)
