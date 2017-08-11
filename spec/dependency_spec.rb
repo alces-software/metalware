@@ -25,7 +25,7 @@ require 'exceptions'
 require 'dependency'
 require 'config'
 require 'constants'
-require 'validator/configure'
+require 'validation/configure'
 require 'ostruct'
 
 require 'spec_helper'

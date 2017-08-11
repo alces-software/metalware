@@ -27,7 +27,7 @@ require 'nodeattr_interface'
 require 'node'
 require 'config'
 require 'ostruct'
-require 'validator/loader'
+require 'validation/loader'
 require 'spec_utils'
 
 RSpec.describe Metalware::Commands::Remove::Group do
@@ -40,7 +40,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   end
 
   let :config { Metalware::Config.new }
-  let :loader { Metalware::Validator::Loader.new(config) }
+  let :loader { Metalware::Validation::Loader.new(config) }
   let :cache { loader.group_cache[:primary_groups] }
 
   let :initial_files { answer_files }

@@ -26,7 +26,7 @@ require 'data'
 require 'dry-validation'
 
 module Metalware
-  module Validator
+  module Validation
     class Configure
       # TODO: 'choice' is going to be removed as a valid type. Instead the type
       # will that of the data contained. Whether their is any choices will be

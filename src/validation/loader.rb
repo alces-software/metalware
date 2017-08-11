@@ -23,12 +23,12 @@
 #==============================================================================
 
 require 'file_path'
-require 'validator/answer'
-require 'validator/configure'
+require 'validation/answer'
+require 'validation/configure'
 require 'data'
 
 module Metalware
-  module Validator
+  module Validation
     class Loader
       def initialize(metalware_config)
         @config = metalware_config
@@ -36,11 +36,8 @@ module Metalware
       end
 
       def configure_data
-        Validator::Configure.new(path.configure_file).load
+        Validation::Configure.new(path.configure_file).load
       end
-
-      # TODO: Rename configure methods to configure_data
-      alias configure configure_data
 
       def group_cache
         Data.load(path.group_cache)
@@ -63,9 +60,9 @@ module Metalware
       attr_reader :path, :config
 
       def answer(absolute_path, section)
-        validator = Validator::Answer.new(config,
-                                          absolute_path,
-                                          answer_section: section)
+        validator = Validation::Answer.new(config,
+                                           absolute_path,
+                                           answer_section: section)
         validator.load
       end
     end

@@ -21,10 +21,10 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require 'validator/configure'
+require 'validation/configure'
 require 'data'
 
-RSpec.describe Metalware::Validator::Configure do
+RSpec.describe Metalware::Validation::Configure do
   let :correct_hash do
     {
       questions: {
@@ -68,7 +68,7 @@ RSpec.describe Metalware::Validator::Configure do
 
   def run_configure_validation(my_hash = {})
     allow(Metalware::Data).to receive(:load).and_return(my_hash)
-    validator = Metalware::Validator::Configure.new('path/has/been/mocked')
+    validator = Metalware::Validation::Configure.new('path/has/been/mocked')
     validator.validate.messages
   end
 

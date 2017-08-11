@@ -102,7 +102,7 @@ module Metalware
   end
 
   # XXXX, we need think about the future of the DependencyFailure,
-  # It maybe completely replaced with Validator::Loader and a file cache.
+  # It maybe completely replaced with Validation::Loader and a file cache.
   # If this is the case Dependency Failure/ InternalError will be replaced
   # with Validation Failure/ InternalError
 
