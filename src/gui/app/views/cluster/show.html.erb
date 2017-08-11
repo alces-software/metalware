@@ -5,3 +5,23 @@
 <div>
   <button>Configure new group</button>
 </div>
+
+<% @groups.each do |group| %>
+  <h2>
+    <%= group.name %>
+    <button>Configure</button>
+    <button>Build</button>
+  </h2>
+
+  <table>
+    <% group.nodes.each do |node| %>
+      <tr>
+        <th><%= node.name %></th>
+        <td><%= node.groups.join(',') %></td>
+        <td><button>Configure</button></td>
+        <td><button>Build</button></td>
+        <td><button>Power reset</button></td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
