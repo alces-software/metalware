@@ -111,7 +111,7 @@ module Metalware
             !rerendered_nodes.include?(node) && node.built?
           end
                .tap do |nodes|
-            render_permanent_pxelinux_configs(nodes)
+            render_build_complete_templates(nodes)
             rerendered_nodes.push(*nodes)
           end
                .each do |node|
@@ -125,11 +125,11 @@ module Metalware
         end
       end
 
-      def render_all_permanent_pxelinux_configs
-        render_permanent_pxelinux_configs(nodes)
+      def render_all_build_complete_templates
+        render_build_complete_templates(nodes)
       end
 
-      def render_permanent_pxelinux_configs(nodes)
+      def render_build_complete_templates(nodes)
         nodes.template_each firstboot: false do |parameters, node|
           parameters[:files] = build_files(node)
           node.render_build_complete_templates(parameters)
@@ -149,20 +149,20 @@ module Metalware
 
       def handle_interrupt(_e)
         Output.stderr 'Exiting...'
-        ask_if_should_rerender_pxelinux_configs
+        ask_if_should_rerender
         teardown
       rescue Interrupt
-        Output.stderr 'Re-rendering all permanent PXELINUX templates anyway...'
-        render_all_permanent_pxelinux_configs
+        Output.stderr 'Re-rendering templates anyway...'
+        render_all_build_complete_templates
         teardown
       end
 
-      def ask_if_should_rerender_pxelinux_configs
+      def ask_if_should_rerender
         should_rerender = <<-EOF.strip_heredoc
-          Re-render permanent PXELINUX templates for all nodes as if build succeeded?
+          Re-render appropriate templates for nodes as if build succeeded?
           [yes/no]
         EOF
-        render_all_permanent_pxelinux_configs if agree(should_rerender)
+        render_all_build_complete_templates if agree(should_rerender)
       end
     end
   end
