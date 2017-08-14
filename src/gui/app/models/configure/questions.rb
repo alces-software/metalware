@@ -7,6 +7,10 @@ class Configure::Questions < ApplicationModel
       configure_data[:domain]
     end
 
+    def for_group
+      configure_data[:group]
+    end
+
     private
 
     def configure_data

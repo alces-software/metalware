@@ -9,7 +9,7 @@
 <% @groups.each do |group| %>
   <h2>
     <%= group.name %>
-    <button>Configure</button>
+    <%= link_to 'Configure', "configure/groups/#{group.name}" %>
     <button>Build</button>
   </h2>
 
