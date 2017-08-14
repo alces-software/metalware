@@ -48,7 +48,11 @@ RSpec.describe Metalware::DNS::Named do
   end
 
   context 'without a setup named server' do
-    before :each { allow(named).to receive(:setup?).and_return(false) }
+    before :each do
+      allow(named).to receive(:setup?).and_return(false)
+      # Prevents restart_named from running, DANGEROUS
+      allow(named).to receive(:restart_named)
+    end
 
     it "errors if external dns isn't set" do
       expect do
@@ -58,14 +62,20 @@ RSpec.describe Metalware::DNS::Named do
 
     it 'sets up the named server' do
       filesystem.test do
+        expect(named).to receive(:restart_named)
         named.update
-        expect(File.read(file_path.base_named).chomp).to eq(correct_base_named_conf)
+        rendered_named_conf = File.read(file_path.base_named).chomp
+        expect(rendered_named_conf).to eq(correct_base_named_conf)
       end
     end
   end
 
   context 'with a setup named server' do
-    before :each { allow(named).to receive(:setup?).and_return(true) }
+    before :each do
+      allow(named).to receive(:setup?).and_return(true)
+      # Prevents restart_named from accidentally running, DANGEROUS
+      expect(named).not_to receive(:restart_named)
+    end
 
     it 'skips setting up the named server' do
       expect(named).not_to receive(:setup)
