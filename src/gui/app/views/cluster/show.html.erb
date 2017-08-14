@@ -3,7 +3,10 @@
   <%= link_to 'Configure domain', 'configure/domain' %>
 </div>
 <div>
-  <button>Configure new group</button>
+  <%= form_tag(controller: 'configure/groups', action: 'create') do %>
+    <%= submit_tag('Configure new group') %>
+    <%= text_field_tag(:group_name, nil, required: true) %>
+  <% end %>
 </div>
 
 <% @groups.each do |group| %>

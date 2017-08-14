@@ -13,7 +13,7 @@ Rails.application.routes.draw do
 
     configure_actions = [:show, :update, :destroy]
     resource :domain, controller: :domain, only: configure_actions
-    resources :groups, only: configure_actions
+    resources :groups, only: configure_actions + [:create]
     resources :nodes, only: configure_actions
   end
 end
