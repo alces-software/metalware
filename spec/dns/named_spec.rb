@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 #==============================================================================
@@ -22,47 +23,43 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'dns/named'
+require 'config'
+require 'filesystem'
 require 'exceptions'
-require 'open3'
 
-module Metalware
-  module SystemCommand
-    class << self
-      # This is just a slightly more robust version of Kernel.`, so we get an
-      # exception that must be handled or be displayed if the command run
-      # fails.
-      #
-      # `format_error` option specifies whether any error produced should be
-      # formatted suitably for displaying to a user.
-      def run(command, format_error: true)
-        stdout, stderr, status = Open3.capture3(command)
-        if status.exitstatus != 0
-          handle_error(command, stderr, format_error: format_error)
-        else
-          stdout
-        end
+RSpec.describe Metalware::DNS::Named do
+  let :config { Metalware::Config.new }
+  let :named { Metalware::DNS::Named.new(config) }
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_minimal_repo
+      fs.with_config_fixture('configs/unit-test.yaml', 'domain.yaml')
+    end
+  end
+
+  context 'without a setup named server' do
+    before :each { allow(named).to receive(:setup?).and_return(false) }
+
+    it "errors if external dns isn't set" do
+      expect do
+        named.update
+      end.to raise_error(Metalware::MissingExternalDNS)
+    end
+
+    it 'sets up the named server' do
+      filesystem.test do
+        named.update
       end
+    end
+  end
 
-      def run_raw(command)
-        stdout, stderr, status = Open3.capture3(command)
-        {
-          stdout: stdout,
-          stderr: stderr,
-          status: status,
-        }
-      end
+  context 'with a setup named server' do
+    before :each { allow(named).to receive(:setup?).and_return(true) }
 
-      private
-
-      def handle_error(command, stderr, format_error:)
-        stderr = stderr.strip
-        error = if format_error
-                  "'#{command}' produced error '#{stderr}'"
-                else
-                  stderr
-                end
-        raise SystemCommandError, error
-      end
+    it 'skips setting up the named server' do
+      expect(named).not_to receive(:setup)
+      named.update
     end
   end
 end

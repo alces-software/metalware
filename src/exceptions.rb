@@ -153,6 +153,9 @@ module Metalware
 
   class EditModeError < MetalwareError
   end
+
+  class MissingExternalDNS < MetalwareError
+  end
 end
 
 

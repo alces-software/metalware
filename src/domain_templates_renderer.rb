@@ -29,6 +29,7 @@ require 'network'
 require 'templating/repo_config_parser'
 require 'metal_log'
 require 'active_support/core_ext/string/strip'
+require 'dns/named'
 
 module Metalware
   class DomainTemplatesRenderer
@@ -141,7 +142,7 @@ module Metalware
       when 'hosts'
         render_hosts
       when 'named'
-        raise NotImplementedError, 'Have not implemented named'
+        update_named
       else
         raise InvalidInput, "Invalid DNS type: #{repo_config.dns_type}"
       end
@@ -165,6 +166,10 @@ module Metalware
       )
     end
 
+    def update_named
+      DNS::Named.new(config).update
+    end
+
     def server_config_template
       File.join(config.repo_path, 'server.yaml')
     end
@@ -183,7 +188,8 @@ module Metalware
     end
 
     def repo_config
-      Templating::RepoConfigParser.parse_for_domain(config: config).inspect
+      Templating::RepoConfigParser
+        .parse_for_domain(config: config, include_groups: false).inspect
     end
   end
 end

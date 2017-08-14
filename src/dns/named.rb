@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 #==============================================================================
@@ -22,46 +23,51 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'validation/loader'
+require 'pathname'
+require 'system_command'
+require 'templating/repo_config_parser'
 require 'exceptions'
-require 'open3'
 
 module Metalware
-  module SystemCommand
-    class << self
-      # This is just a slightly more robust version of Kernel.`, so we get an
-      # exception that must be handled or be displayed if the command run
-      # fails.
-      #
-      # `format_error` option specifies whether any error produced should be
-      # formatted suitably for displaying to a user.
-      def run(command, format_error: true)
-        stdout, stderr, status = Open3.capture3(command)
-        if status.exitstatus != 0
-          handle_error(command, stderr, format_error: format_error)
-        else
-          stdout
-        end
+  module DNS
+    class Named
+      def initialize(metalware_config)
+        @config = metalware_config
       end
 
-      def run_raw(command)
-        stdout, stderr, status = Open3.capture3(command)
-        {
-          stdout: stdout,
-          stderr: stderr,
-          status: status,
-        }
+      def update
+        setup unless setup?
       end
 
       private
 
-      def handle_error(command, stderr, format_error:)
-        stderr = stderr.strip
-        error = if format_error
-                  "'#{command}' produced error '#{stderr}'"
-                else
-                  stderr
-                end
-        raise SystemCommandError, error
+      attr_reader :config
+
+      def file_path
+        @file_path ||= FilePath.new(config)
+      end
+
+      def setup
+        check_external_dns_set
+      end
+
+      def setup?
+        SystemCommand.run_raw('systemctl status named')[:status] == 0
+      end
+
+      EXTERNAL_DNS_MSG = <<~EOF.strip_heredoc
+        Can not setup named as `externaldns` has not been set in the domain.yaml
+        repo config.
+      EOF
+
+      def check_external_dns_set
+        raise MissingExternalDNS, EXTERNAL_DNS_MSG unless repo_config[:externaldns]
+      end
+
+      def repo_config
+        Templating::RepoConfigParser
+          .parse_for_domain(config: config, include_groups: false).inspect
       end
     end
   end

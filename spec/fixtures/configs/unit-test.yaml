@@ -3,3 +3,4 @@ build_poll_sleep: 0
 log_path: 'tmp/unit-test/log'
 log_severity: "DEBUG"
 repo_path: 'spec/fixtures/repo'
+externaldns: '10.101.0.1'
