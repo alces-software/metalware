@@ -1,9 +1,9 @@
 
 <div>
-  <%= link_to 'Configure domain', 'configure/domain' %>
+  <%= link_to 'Configure domain', domain_configure_path %>
 </div>
 <div>
-  <%= form_tag(controller: 'configure/groups', action: 'create') do %>
+  <%= form_tag(groups_start_configure_path, method: 'get') do %>
     <%= submit_tag('Configure new group') %>
     <%= text_field_tag(:group_name, nil, required: true) %>
   <% end %>
@@ -12,7 +12,7 @@
 <% @groups.each do |group| %>
   <h2>
     <%= group.name %>
-    <%= link_to 'Configure', "configure/groups/#{group.name}" %>
+    <%= link_to 'Configure', group_configure_path(group.name) %>
     <button>Build</button>
   </h2>
 
@@ -22,7 +22,7 @@
         <th><%= node.name %></th>
         <td><%= node.groups.join(',') %></td>
         <td>
-          <%= link_to 'Configure', "configure/nodes/#{node.name}" %>
+          <%= link_to 'Configure', node_configure_path(node.name) %>
         </td>
         <td><button>Build</button></td>
         <td><button>Power reset</button></td>

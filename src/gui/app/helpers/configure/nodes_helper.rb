@@ -1,2 +1,0 @@
-module Configure::NodesHelper
-end
