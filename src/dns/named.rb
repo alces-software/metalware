@@ -27,6 +27,7 @@ require 'validation/loader'
 require 'pathname'
 require 'system_command'
 require 'templating/repo_config_parser'
+require 'templater'
 require 'exceptions'
 
 module Metalware
@@ -49,7 +50,8 @@ module Metalware
       end
 
       def setup
-        check_external_dns_set
+        check_external_dns_is_set
+        render_base_named_conf
       end
 
       def setup?
@@ -57,17 +59,21 @@ module Metalware
       end
 
       EXTERNAL_DNS_MSG = <<~EOF.strip_heredoc
-        Can not setup named as `externaldns` has not been set in the domain.yaml
+        Can not setup `named` as `externaldns` has not been set in the domain.yaml
         repo config.
       EOF
 
-      def check_external_dns_set
+      def check_external_dns_is_set
         raise MissingExternalDNS, EXTERNAL_DNS_MSG unless repo_config[:externaldns]
       end
 
       def repo_config
         Templating::RepoConfigParser
           .parse_for_domain(config: config, include_groups: false).inspect
+      end
+
+      def render_base_named_conf
+        Templater.render_to_file(config, file_path.named_template, file_path.base_named)
       end
     end
   end

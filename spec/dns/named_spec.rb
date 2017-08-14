@@ -27,15 +27,24 @@ require 'dns/named'
 require 'config'
 require 'filesystem'
 require 'exceptions'
+require 'file_path'
 
 RSpec.describe Metalware::DNS::Named do
   let :config { Metalware::Config.new }
   let :named { Metalware::DNS::Named.new(config) }
+  let :file_path { Metalware::FilePath.new(config) }
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
+      named = 'named.conf.erb'
+      fs.with_scripts_templates_fixtures("templates/#{named}", named)
       fs.with_config_fixture('configs/unit-test.yaml', 'domain.yaml')
     end
+  end
+
+  let :correct_base_named_conf do
+    externaldns = named.send(:repo_config)[:externaldns]
+    "DNS: #{externaldns}"
   end
 
   context 'without a setup named server' do
@@ -50,6 +59,7 @@ RSpec.describe Metalware::DNS::Named do
     it 'sets up the named server' do
       filesystem.test do
         named.update
+        expect(File.read(file_path.base_named).chomp).to eq(correct_base_named_conf)
       end
     end
   end

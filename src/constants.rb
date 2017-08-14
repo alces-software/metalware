@@ -42,5 +42,8 @@ module Metalware
     SERVER_CONFIG_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/server.yaml')
     GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
     HOSTS_PATH = '/etc/hosts'
+
+    NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'scripts/templates/named.conf.erb')
+    BASE_NAMED_PATH = '/etc/named.conf'
   end
 end
