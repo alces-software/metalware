@@ -11,6 +11,17 @@ module Metalware
       class << self
         # XXX get rid of handling `additional_parameters`? And just take what
         # we need.
+        def parse_for_domain(
+          config:,
+          additional_parameters: {},
+          include_groups: true
+        )
+          parse_for_node(node_name: nil,
+                         config: config,
+                         additional_parameters: additional_parameters,
+                         include_groups: include_groups)
+        end
+
         def parse_for_node(
           node_name:,
           config:,
