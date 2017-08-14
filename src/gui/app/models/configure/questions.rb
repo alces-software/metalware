@@ -11,6 +11,10 @@ class Configure::Questions < ApplicationModel
       configure_data[:group]
     end
 
+    def for_node
+      configure_data[:node]
+    end
+
     private
 
     def configure_data
