@@ -151,16 +151,10 @@ RSpec.describe Metalware::Node do
   describe '#group_index' do
     let :filesystem { FileSystem.setup }
 
-    def expect_group_index_raises_for_node(node)
-      filesystem.test do
-        expect { node.group_index }.to raise_error(
-          Metalware::UnconfiguredGroupError
-        )
-      end
-    end
-
-    it 'raises when groups.yaml does not exist' do
-      expect_group_index_raises_for_node(testnode01)
+    it 'returns 0 when groups.yaml does not exist' do
+      # This should never happen now as a node should always have a primary
+      # group, which should be in the cache.
+      expect(testnode01.group_index).to eq 0
     end
 
     context 'when some primary groups have been cached' do
@@ -175,11 +169,13 @@ RSpec.describe Metalware::Node do
       end
 
       it "raises when the node's primary group is not in the cache" do
-        expect_group_index_raises_for_node(testnode02)
+        # This should never happen now as a node should always have a primary
+        # group.
+        expect(testnode02.group_index).to eq 0
       end
 
-      it 'raises for the null object node' do
-        expect_group_index_raises_for_node(node(nil))
+      it 'returns 0 for the null object node' do
+        expect(node(nil).group_index).to eq 0
       end
     end
   end

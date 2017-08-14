@@ -117,9 +117,6 @@ module Metalware
   class DependencyFailure < MetalwareError
   end
 
-  class UnconfiguredGroupError < MetalwareError
-  end
-
   # Error to be used when a file that should exist doesn't.
   class FileDoesNotExistError < MetalwareError
   end

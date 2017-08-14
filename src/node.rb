@@ -125,13 +125,7 @@ module Metalware
     end
 
     def group_index
-      if primary_group_index
-        primary_group_index
-      else
-        error = "Cannot get 'group_index', the primary group " \
-                "'#{primary_group}' for this node (#{name}) has not been configured"
-        raise UnconfiguredGroupError, error
-      end
+      primary_group_index || 0
     end
 
     def primary_group

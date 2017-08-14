@@ -455,7 +455,7 @@ RSpec.describe Metalware::Templater do
           magic_namespace = templater.config.alces
 
           expect(magic_namespace.index).to eq(0)
-          expect(magic_namespace.group_index).to eq(nil)
+          expect(magic_namespace.group_index).to eq(0)
           expect(magic_namespace.nodename).to eq(nil)
           expect(magic_namespace.firstboot).to eq(nil)
           expect(magic_namespace.files).to eq(nil)
