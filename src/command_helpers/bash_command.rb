@@ -32,7 +32,7 @@ module Metalware
     class BashCommand < BaseCommand
       private
 
-      def setup(_args, _options)
+      def setup
         @command = ARGV[0]
         @cli_input = ARGV[1..(ARGV.length - 1)]
       end

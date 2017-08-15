@@ -31,7 +31,7 @@ module Metalware
     class Each < CommandHelpers::BaseCommand
       private
 
-      def setup(args, options)
+      def setup
         node_identifier = args[0]
         @nodes = Nodes.create(config, node_identifier, options.group)
         @command = args[1]

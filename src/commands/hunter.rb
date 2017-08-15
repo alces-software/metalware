@@ -42,13 +42,10 @@ module Metalware
         :detected_macs,
         :detection_count,
         :hunter_log,
-        :network,
-        :options
+        :network
 
-      def setup(_args, options)
+      def setup
         @hunter_log = MetalLog.new('hunter')
-
-        @options = options
 
         @detection_count = options.start
         @detected_macs = []

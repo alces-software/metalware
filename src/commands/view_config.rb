@@ -8,11 +8,10 @@ module Metalware
     class ViewConfig < CommandHelpers::BaseCommand
       private
 
-      attr_reader :node_name, :options
+      attr_reader :node_name
 
-      def setup(args, options)
+      def setup
         @node_name = args.first
-        @options = options
       end
 
       def run

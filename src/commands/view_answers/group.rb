@@ -11,7 +11,7 @@ module Metalware
 
         attr_reader :group_name
 
-        def setup(args, _options)
+        def setup
           @group_name = args.first
         end
 

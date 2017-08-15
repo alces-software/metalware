@@ -12,7 +12,7 @@ module Metalware
 
         attr_reader :node_name
 
-        def setup(args, _options)
+        def setup
           @node_name = args.first
         end
 
@@ -26,8 +26,6 @@ module Metalware
             config.group_answers_file(node.primary_group),
           ]
         end
-
-        attr_reader :node_name
 
         def node
           Metalware::Node.new(config, node_name)

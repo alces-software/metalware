@@ -34,13 +34,12 @@ module Metalware
       class Use < CommandHelpers::BaseCommand
         private
 
-        def setup(args, options)
+        def setup
           @repo_url = args.first
-          @options = options
         end
 
         def run
-          if @options.force
+          if options.force
             FileUtils.rm_rf config.repo_path
             MetalLog.info 'Force deleted old repo'
           end

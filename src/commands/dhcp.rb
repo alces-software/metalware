@@ -39,9 +39,7 @@ module Metalware
 
       private
 
-      def setup(_args, options)
-        @options = options
-      end
+      def setup; end
 
       def run
         render_template
@@ -51,7 +49,7 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["dhcp/#{@options.template}"],
+          repo: ["dhcp/#{options.template}"],
         }
       end
 
@@ -62,7 +60,7 @@ module Metalware
       end
 
       def template_path
-        File.join(config.repo_path, 'dhcp', @options.template)
+        File.join(config.repo_path, 'dhcp', options.template)
       end
 
       def validate_rendered_template!

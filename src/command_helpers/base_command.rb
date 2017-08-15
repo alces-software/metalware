@@ -35,7 +35,7 @@ module Metalware
     class BaseCommand
       def initialize(args, options)
         pre_setup(args, options)
-        setup(args, options)
+        setup
         post_setup
         run
       rescue Interrupt => e
@@ -46,11 +46,13 @@ module Metalware
 
       private
 
-      attr_reader :config
+      attr_reader :config, :args, :options
 
-      def pre_setup(_args, options)
+      def pre_setup(args, options)
         setup_config(options)
         log_command
+        @args = args
+        @options = options
       end
 
       def post_setup
@@ -99,7 +101,7 @@ module Metalware
         MetalLog.info "metal #{ARGV.join(' ')}"
       end
 
-      def setup(_args, _options)
+      def setup
         raise NotImplementedError
       end
 

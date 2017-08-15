@@ -35,7 +35,7 @@ module Metalware
       class Update < CommandHelpers::BaseCommand
         private
 
-        def setup(_args, options)
+        def setup
           @force = !!options.force
         end
 
