@@ -164,7 +164,7 @@ RSpec.describe Metalware::Node do
 
       it "returns the index of the node's primary group" do
         filesystem.test do
-          expect(testnode01.group_index).to eq(1)
+          expect(testnode01.group_index).to eq(2)
         end
       end
 

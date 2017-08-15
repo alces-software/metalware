@@ -52,7 +52,7 @@ RSpec.describe Metalware::GroupCache do
         cache.add('new_group')
         expect(cache.group?('new_group')).to eq(true)
 
-        next_available_index = 2
+        next_available_index = 3
         expect(cache.index('new_group')).to eq(next_available_index)
       end
     end
@@ -95,13 +95,13 @@ RSpec.describe Metalware::GroupCache do
       filesystem.test do
         group1 = 'group1'
         cache.add(group1)
-        expect(cache.index(group1)).to eq 2
+        expect(cache.index(group1)).to eq 3
 
         cache.remove(group1)
 
         group2 = 'group2'
         cache.add(group2)
-        expect(cache.index(group2)).to eq 3
+        expect(cache.index(group2)).to eq 4
       end
     end
   end
