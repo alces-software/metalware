@@ -35,7 +35,7 @@ module Metalware
       end
 
       def run
-        template_path, maybe_node = @args
+        template_path, maybe_node = args
 
         template_parameters = {
           nodename: maybe_node,

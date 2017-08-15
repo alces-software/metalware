@@ -51,7 +51,7 @@ module Metalware
 
       def dependency_hash
         {
-          repo: ["dhcp/#{@options.template}"],
+          repo: ["dhcp/#{options.template}"],
         }
       end
 
@@ -62,7 +62,7 @@ module Metalware
       end
 
       def template_path
-        File.join(config.repo_path, 'dhcp', @options.template)
+        File.join(config.repo_path, 'dhcp', options.template)
       end
 
       def validate_rendered_template!

@@ -40,7 +40,7 @@ module Metalware
         end
 
         def run
-          if @options.force
+          if options.force
             FileUtils.rm_rf config.repo_path
             MetalLog.info 'Force deleted old repo'
           end
