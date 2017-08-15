@@ -84,7 +84,7 @@ module Metalware
     def load
       loader.group_cache.tap do |d|
         if d.empty?
-          d.merge!(next_index: 0,
+          d.merge!(next_index: 1,
                    primary_groups: {})
         end
       end
