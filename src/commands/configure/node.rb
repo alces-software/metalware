@@ -27,8 +27,6 @@ module Metalware
           ]
         end
 
-        attr_reader :node_name
-
         def node
           Metalware::Node.new(config, node_name)
         end
