@@ -30,9 +30,7 @@ module Metalware
     class Render < CommandHelpers::BaseCommand
       private
 
-      def setup(args, _options)
-        @args = args
-      end
+      def setup(_args, _options); end
 
       def run
         template_path, maybe_node = args

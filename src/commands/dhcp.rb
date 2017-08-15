@@ -39,9 +39,7 @@ module Metalware
 
       private
 
-      def setup(_args, options)
-        @options = options
-      end
+      def setup(_args, _options); end
 
       def run
         render_template

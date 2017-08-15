@@ -34,9 +34,8 @@ module Metalware
       class Use < CommandHelpers::BaseCommand
         private
 
-        def setup(args, options)
+        def setup(args, _options)
           @repo_url = args.first
-          @options = options
         end
 
         def run

@@ -38,12 +38,11 @@ module Metalware
     class Build < CommandHelpers::BaseCommand
       private
 
-      attr_reader :options, :group_name, :nodes
+      attr_reader :group_name, :nodes
 
       delegate :template_path, to: :file_path
 
       def setup(args, options)
-        @options = options
         node_identifier = args.first
         @group_name = node_identifier if options.group
         @nodes = Nodes.create(config, node_identifier, options.group)
