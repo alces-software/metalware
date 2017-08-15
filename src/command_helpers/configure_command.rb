@@ -40,9 +40,13 @@ module Metalware
       EOF
 
       def run
-        configurator.configure
+        configurator.configure(answers)
         custom_configuration
         render_domain_templates
+      end
+
+      def answers
+        JSON.parse(options.answers) if options.answers
       end
 
       def handle_interrupt(_e)

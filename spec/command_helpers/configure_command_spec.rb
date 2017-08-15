@@ -29,4 +29,22 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   end
 
   include_examples :render_domain_templates, TestCommand
+
+  describe 'option handling' do
+    before :each do
+      SpecUtils.use_mock_genders(self)
+      SpecUtils.mock_validate_genders_success(self)
+    end
+
+    it 'passes answers through to configurator as hash' do
+      FileSystem.test do |fs|
+        fs.with_minimal_repo
+
+        answers = { 'question_1' => 'answer_1' }
+        expect_any_instance_of(Metalware::Configurator).to receive(:configure).with(answers)
+
+        SpecUtils.run_command(TestCommand, answers: answers.to_json)
+      end
+    end
+  end
 end
