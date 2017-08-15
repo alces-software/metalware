@@ -32,19 +32,11 @@ module Metalware
       end
 
       attr_reader :firstboot, :files
-      delegate :index, to: :node
+      delegate :index, :group_index, to: :node
       delegate :to_json, to: :to_h
 
       def to_h
         ObjectFieldsHasher.hash_object(self, groups: :groups_data)
-      end
-
-      def group_index
-        node.group_index
-      rescue UnconfiguredGroupError
-        # If the node's primary group is not configured yet, return nil rather
-        # than blow up.
-        nil
       end
 
       def nodename

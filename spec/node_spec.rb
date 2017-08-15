@@ -124,15 +124,15 @@ RSpec.describe Metalware::Node do
         # We define the 'primary' group for a node as the first group it is
         # associated with in the genders file. This means for `testnode01` and
         # `testnode03` this is `testnodes`, but for `testnode02` it is
-        # `pregroup`, in which it is the first node and so has index 0.
+        # `pregroup`, in which it is the first node and so has index 1.
         #
         # This has the potential to cause confusion but I see no better way to
         # handle this currently, as a node can always have multiple groups and we
         # have to choose one to be the primary group. Later we may add more
         # structure and validation around handling this.
-        expect(testnode01.index).to eq(0)
-        expect(testnode02.index).to eq(0)
-        expect(testnode03.index).to eq(2)
+        expect(testnode01.index).to eq(1)
+        expect(testnode02.index).to eq(1)
+        expect(testnode03.index).to eq(3)
       end
 
       it 'returns 0 for node not in genders' do
@@ -151,16 +151,10 @@ RSpec.describe Metalware::Node do
   describe '#group_index' do
     let :filesystem { FileSystem.setup }
 
-    def expect_group_index_raises_for_node(node)
-      filesystem.test do
-        expect { node.group_index }.to raise_error(
-          Metalware::UnconfiguredGroupError
-        )
-      end
-    end
-
-    it 'raises when groups.yaml does not exist' do
-      expect_group_index_raises_for_node(testnode01)
+    it 'returns 0 when groups.yaml does not exist' do
+      # This should never happen now as a node should always have a primary
+      # group, which should be in the cache.
+      expect(testnode01.group_index).to eq 0
     end
 
     context 'when some primary groups have been cached' do
@@ -170,16 +164,18 @@ RSpec.describe Metalware::Node do
 
       it "returns the index of the node's primary group" do
         filesystem.test do
-          expect(testnode01.group_index).to eq(1)
+          expect(testnode01.group_index).to eq(2)
         end
       end
 
       it "raises when the node's primary group is not in the cache" do
-        expect_group_index_raises_for_node(testnode02)
+        # This should never happen now as a node should always have a primary
+        # group.
+        expect(testnode02.group_index).to eq 0
       end
 
-      it 'raises for the null object node' do
-        expect_group_index_raises_for_node(node(nil))
+      it 'returns 0 for the null object node' do
+        expect(node(nil).group_index).to eq 0
       end
     end
   end

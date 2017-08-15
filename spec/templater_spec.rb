@@ -455,7 +455,7 @@ RSpec.describe Metalware::Templater do
           magic_namespace = templater.config.alces
 
           expect(magic_namespace.index).to eq(0)
-          expect(magic_namespace.group_index).to eq(nil)
+          expect(magic_namespace.group_index).to eq(0)
           expect(magic_namespace.nodename).to eq(nil)
           expect(magic_namespace.firstboot).to eq(nil)
           expect(magic_namespace.files).to eq(nil)
@@ -476,8 +476,8 @@ RSpec.describe Metalware::Templater do
                                                        files: build_files)
           magic_namespace = templater.config.alces
 
-          expect(magic_namespace.index).to eq(2)
-          expect(magic_namespace.group_index).to eq(1)
+          expect(magic_namespace.index).to eq(3)
+          expect(magic_namespace.group_index).to eq(2)
           expect(magic_namespace.nodename).to eq('testnode03')
           expect(magic_namespace.firstboot).to eq(true)
           expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')
