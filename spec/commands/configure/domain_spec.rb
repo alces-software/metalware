@@ -6,7 +6,7 @@ require 'filesystem'
 
 RSpec.describe Metalware::Commands::Configure::Domain do
   def run_configure_domain
-    SpecUtils.run_command(
+    Metalware::Utils.run_command(
       Metalware::Commands::Configure::Domain
     )
   end

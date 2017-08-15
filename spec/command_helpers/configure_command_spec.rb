@@ -43,7 +43,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
         answers = { 'question_1' => 'answer_1' }
         expect_any_instance_of(Metalware::Configurator).to receive(:configure).with(answers)
 
-        SpecUtils.run_command(TestCommand, answers: answers.to_json)
+        Metalware::Utils.run_command(TestCommand, answers: answers.to_json)
       end
     end
   end
