@@ -46,11 +46,13 @@ module Metalware
 
       private
 
-      attr_reader :config
+      attr_reader :config, :args, :options
 
-      def pre_setup(_args, options)
+      def pre_setup(args, options)
         setup_config(options)
         log_command
+        @args = args
+        @options = options
       end
 
       def post_setup
