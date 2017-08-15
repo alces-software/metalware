@@ -79,12 +79,16 @@ RSpec.describe Metalware::DNS::Named do
 
     it 'skips setup but updates named server' do
       filesystem.test do
+        template_path = File.join(file_path.repo, "named/forward/default")
+        File.write(template_path, "<%= alces_named.zone %>")
+
         expect(named).not_to receive(:setup)
         named.update
 
         expect(File.file?(file_path.metalware_named)).to eq(true)
         expect(File.file?(file_path.named_zone("fwd_named_zone"))).to eq(true)
         expect(File.file?(file_path.named_zone("rev_named_zone"))).to eq(true)
+        expect(File.read(file_path.named_zone("fwd_named_zone"))).to eq("pri\n")
       end
     end
   end
