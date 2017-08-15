@@ -44,7 +44,7 @@ module Metalware
         :hunter_log,
         :network
 
-      def setup(_args, options)
+      def setup
         @hunter_log = MetalLog.new('hunter')
 
         @detection_count = options.start

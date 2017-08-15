@@ -10,7 +10,7 @@ module Metalware
 
       attr_reader :node_name
 
-      def setup(args, _options)
+      def setup
         @node_name = args.first
       end
 

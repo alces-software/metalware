@@ -34,7 +34,7 @@ module Metalware
 
         attr_reader :group_name, :cache
 
-        def setup(args, _options)
+        def setup
           @group_name = args.first
           @cache = GroupCache.new(config)
         end

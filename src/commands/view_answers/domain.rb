@@ -9,7 +9,7 @@ module Metalware
       class Domain < CommandHelpers::BaseCommand
         private
 
-        def setup(_args, _options); end
+        def setup; end
 
         def run
           puts AnswersTableCreator.new(config).domain_table

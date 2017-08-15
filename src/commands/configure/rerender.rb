@@ -9,7 +9,7 @@ module Metalware
       class Rerender < CommandHelpers::BaseCommand
         private
 
-        def setup(_args, _options); end
+        def setup; end
 
         def run
           DomainTemplatesRenderer.new(config).render

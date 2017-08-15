@@ -42,7 +42,7 @@ module Metalware
 
       delegate :template_path, to: :file_path
 
-      def setup(args, options)
+      def setup
         node_identifier = args.first
         @group_name = node_identifier if options.group
         @nodes = Nodes.create(config, node_identifier, options.group)

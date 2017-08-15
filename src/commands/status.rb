@@ -33,7 +33,7 @@ module Metalware
     class Status < CommandHelpers::BaseCommand
       private
 
-      def setup(args, options)
+      def setup
         @opt = options
         if @opt.thread_limit < 1
           raise InvalidInput, 'The thread limit can not be less than 1'

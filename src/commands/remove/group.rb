@@ -31,7 +31,7 @@ module Metalware
   module Commands
     module Remove
       class Group < CommandHelpers::BaseCommand
-        def setup(args, _options)
+        def setup
           @primary_group = args[0]
           @cache = GroupCache.new(config)
         end

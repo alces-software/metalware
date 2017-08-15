@@ -10,7 +10,7 @@ module Metalware
       class Domain < CommandHelpers::ConfigureCommand
         private
 
-        def setup(_args, _options); end
+        def setup; end
 
         def answers_file
           config.domain_answers_file
