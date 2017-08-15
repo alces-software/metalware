@@ -476,7 +476,7 @@ RSpec.describe Metalware::Templater do
                                                        files: build_files)
           magic_namespace = templater.config.alces
 
-          expect(magic_namespace.index).to eq(2)
+          expect(magic_namespace.index).to eq(3)
           expect(magic_namespace.group_index).to eq(1)
           expect(magic_namespace.nodename).to eq('testnode03')
           expect(magic_namespace.firstboot).to eq(true)

@@ -124,15 +124,15 @@ RSpec.describe Metalware::Node do
         # We define the 'primary' group for a node as the first group it is
         # associated with in the genders file. This means for `testnode01` and
         # `testnode03` this is `testnodes`, but for `testnode02` it is
-        # `pregroup`, in which it is the first node and so has index 0.
+        # `pregroup`, in which it is the first node and so has index 1.
         #
         # This has the potential to cause confusion but I see no better way to
         # handle this currently, as a node can always have multiple groups and we
         # have to choose one to be the primary group. Later we may add more
         # structure and validation around handling this.
-        expect(testnode01.index).to eq(0)
-        expect(testnode02.index).to eq(0)
-        expect(testnode03.index).to eq(2)
+        expect(testnode01.index).to eq(1)
+        expect(testnode02.index).to eq(1)
+        expect(testnode03.index).to eq(3)
       end
 
       it 'returns 0 for node not in genders' do

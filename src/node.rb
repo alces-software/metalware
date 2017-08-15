@@ -118,7 +118,7 @@ module Metalware
 
     def index
       if primary_group
-        Nodes.create(metalware_config, primary_group, true).index(self)
+        Nodes.create(metalware_config, primary_group, true).index(self) + 1
       else
         0
       end
