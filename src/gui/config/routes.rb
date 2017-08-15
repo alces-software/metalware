@@ -15,9 +15,11 @@ Rails.application.routes.draw do
   get 'groups/start-configure' => 'groups/configure#start'
   resources :groups, only: [] do
     resource :configure, controller:  'groups/configure', only: configure_actions
+    resource :build, controller:  'groups/build', only: :show
   end
 
   resources :nodes, only: [] do
     resource :configure, controller:  'nodes/configure', only: configure_actions
+    resource :build, controller:  'nodes/build', only: :show
   end
 end

@@ -13,7 +13,7 @@
   <h2>
     <%= group.name %>
     <%= link_to 'Configure', group_configure_path(group.name) %>
-    <button>Build</button>
+    <%= link_to 'Build', group_build_path(group.name) %>
   </h2>
 
   <table>
@@ -24,7 +24,9 @@
         <td>
           <%= link_to 'Configure', node_configure_path(node.name) %>
         </td>
-        <td><button>Build</button></td>
+        <td>
+          <%= link_to 'Build', node_build_path(node.name) %>
+        </td>
         <td><button>Power reset</button></td>
       </tr>
     <% end %>
