@@ -43,7 +43,7 @@ module Metalware
     GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
     HOSTS_PATH = '/etc/hosts'
 
-    NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'scripts/templates/named.conf.erb')
+    NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'templates/named.conf.erb')
     BASE_NAMED_PATH = '/etc/named.conf'
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
