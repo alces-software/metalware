@@ -64,7 +64,7 @@ module Metalware
       def setup?
         exit_code = SystemCommand.run_raw('systemctl status named')[:status]
         MetalLog.info "systemctl status named, exit code: #{exit_code}"
-        exit_code == 0
+        exit_code.zero?
       end
 
       EXTERNAL_DNS_MSG = <<~EOF.strip_heredoc
@@ -78,9 +78,9 @@ module Metalware
 
       def repo_config
         @repo_config ||= Templating::RepoConfigParser
-                           .parse_for_domain(config: config,
-                                             include_groups: false)
-                           .inspect
+                         .parse_for_domain(config: config,
+                                           include_groups: false)
+                         .inspect
       end
 
       def render_base_named_conf
@@ -105,7 +105,7 @@ module Metalware
 
       # DO NOT RENAME, DANGEROUS FOR TESTS
       def restart_named
-        MetalLog.info "Restarting named"
+        MetalLog.info 'Restarting named'
         SystemCommand.run(RESTART_NAMED_CMDS)
       end
 
@@ -117,8 +117,8 @@ module Metalware
         {
           alces_named: {
             zone: zone,
-            net: net
-          }
+            net: net,
+          },
         }
       end
 
@@ -130,12 +130,11 @@ module Metalware
                       net[:named_rev_zone]
                     end
         zone_hash = named_zone_hash(zone, net)
-        if zone_name
-          Templater.render_to_file(config,
-                                   file_path.template_path("named/#{direction}"),
-                                   file_path.named_zone(zone_name),
-                                   zone_hash)
-        end
+        return unless zone_name
+        Templater.render_to_file(config,
+                                 file_path.template_path("named/#{direction}"),
+                                 file_path.named_zone(zone_name),
+                                 zone_hash)
       end
     end
   end
