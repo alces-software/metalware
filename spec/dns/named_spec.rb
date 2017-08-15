@@ -77,9 +77,15 @@ RSpec.describe Metalware::DNS::Named do
       expect(named).not_to receive(:restart_named)
     end
 
-    it 'skips setting up the named server' do
-      expect(named).not_to receive(:setup)
-      named.update
+    it 'skips setup but updates named server' do
+      filesystem.test do
+        expect(named).not_to receive(:setup)
+        named.update
+
+        expect(File.file?(file_path.metalware_named)).to eq(true)
+        expect(File.file?(file_path.named_zone("fwd_named_zone"))).to eq(true)
+        expect(File.file?(file_path.named_zone("rev_named_zone"))).to eq(true)
+      end
     end
   end
 end

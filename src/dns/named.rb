@@ -29,7 +29,7 @@ require 'system_command'
 require 'templating/repo_config_parser'
 require 'templater'
 require 'exceptions'
-require 'metallog'
+require 'metal_log'
 
 module Metalware
   module DNS
@@ -40,6 +40,11 @@ module Metalware
 
       def update
         setup unless setup?
+        render_repo_named_conf
+        each_network do |zone, net|
+          render_zone_template('forward', zone, net)
+          render_zone_template('reverse', zone, net)
+        end
       end
 
       private
@@ -72,14 +77,25 @@ module Metalware
       end
 
       def repo_config
-        Templating::RepoConfigParser
-          .parse_for_domain(config: config, include_groups: false).inspect
+        @repo_config ||= Templating::RepoConfigParser
+                           .parse_for_domain(config: config,
+                                             include_groups: false)
+                           .inspect
       end
 
       def render_base_named_conf
         Templater.render_to_file(config, file_path.named_template, file_path.base_named)
       end
 
+      def render_repo_named_conf
+        FileUtils.mkdir_p(File.dirname(file_path.metalware_named))
+        Templater.render_to_file(config,
+                                 file_path.template_path('named'),
+                                 file_path.metalware_named)
+      end
+
+      # TODO: These commands will break hosts DNS. Might be a good idea to run
+      # similar commands for hosts
       RESTART_NAMED_CMDS = <<~EOF.strip_heredoc
         systemctl disable dnsmasq
         systemctl stop dnsmasq
@@ -91,6 +107,35 @@ module Metalware
       def restart_named
         MetalLog.info "Restarting named"
         SystemCommand.run(RESTART_NAMED_CMDS)
+      end
+
+      def each_network
+        repo_config[:networks]&.each { |data| yield data }
+      end
+
+      def named_zone_hash(zone, net)
+        {
+          alces_named: {
+            zone: zone,
+            net: net
+          }
+        }
+      end
+
+      def render_zone_template(direction, zone, net)
+        zone_name = case direction
+                    when 'forward'
+                      net[:named_fwd_zone]
+                    when 'reverse'
+                      net[:named_rev_zone]
+                    end
+        zone_hash = named_zone_hash(zone, net)
+        if zone_name
+          Templater.render_to_file(config,
+                                   file_path.template_path("named/#{direction}"),
+                                   file_path.named_zone(zone_name),
+                                   zone_hash)
+        end
       end
     end
   end
