@@ -33,7 +33,7 @@ module Metalware
 
       def self.build(config, node = nil)
         alces_binding = new(metal_config: config, node_name: node)
-        BindingWrapper.new(alces_binding)
+        BindingWrapper.new(alces_binding).get_binding
       end
 
       def initialize(metal_config:, node_name:)
@@ -88,7 +88,11 @@ module Metalware
       end
 
       def method_missing(s, *a, &b)
-        return_with_wrapper(alces_get_value(s, *a, &b), s, a, b)
+        alces_return_wrapper(alces_get_value(s, *a, &b), s, a, b)
+      end
+
+      def get_binding
+        binding
       end
 
       private
@@ -103,10 +107,10 @@ module Metalware
         end
       end
 
-      # TODO make it error if trying to return a nil
-      def return_with_wrapper(result, s, a, b)
+      # TODO: make it error if trying to return a nil
+      def alces_return_wrapper(result, s, a, b)
         return result if [TrueClass, FalseClass].include?(result.class)
-        return result if s == :to_s
+        return result if /to_.*/.match?(s)
         idx = alces_call_stack.keys.length
         new_callstack = alces_call_stack.merge(idx => {
                                                  method: s,
