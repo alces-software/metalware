@@ -13,6 +13,11 @@
       <%= link_to 'Hunter', :hunter %>
       <%= link_to 'Cluster', :root %>
     </div>
+      <% if flash[:error] %>
+        <div>
+          <%= flash[:error] %>
+        </div>
+      <% end %>
     <%= yield %>
   </body>
 </html>

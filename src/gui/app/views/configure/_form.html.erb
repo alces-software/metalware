@@ -1,9 +1,10 @@
 
 <%= form_tag do %>
   <% @questions.each do |identifier, question| %>
+    <% namespaced_identifier = "answers[#{identifier}]" %>
     <fieldset>
-      <%= label_tag(identifier, question[:question]) %>
-      <%= text_field_tag(identifier) %>
+      <%= label_tag(namespaced_identifier, question[:question]) %>
+      <%= text_field_tag(namespaced_identifier) %>
     </fieldset>
   <% end %>
 

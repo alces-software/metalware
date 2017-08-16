@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   resource :cluster, only: :show, controller: :cluster
   resource :hunter, only: :show, controller: :hunter
 
-  configure_actions = [:show, :update, :destroy]
+  configure_actions = [:show, :create, :destroy]
 
   resource :domain, only: [] do
     resource :configure, controller: 'domain/configure', only: configure_actions
