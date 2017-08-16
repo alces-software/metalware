@@ -23,6 +23,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'templating/configuration'
+require 'templating/iterable_recursive_open_struct'
+
 module Metalware
   module Templating
     class Binding
@@ -30,6 +33,7 @@ module Metalware
 
       def self.build(config, node = nil)
         alces_binding = new(metal_config: config, node_name: node)
+        BindingWrapper.new(alces_binding)
       end
 
       def initialize(metal_config:, node_name:)
@@ -37,13 +41,79 @@ module Metalware
         @node = node_name
       end
 
+      def retrieve_value(call_stack, s, *a, &b)
+        if call_stack[1] == :alces
+          raise NotImplementedError
+        else
+          retrieve_config_value(call_stack, s, *a, &b)
+        end
+      end
 
+      def retrieve_config_value(call_stack, s, *a, &b)
+        h = loop_through_call_stack(call_stack) || raw_config
+        result = h.send(s, *a, &b)
+        result.is_a?(IterableRecursiveOpenStruct) ? self : result
+      end
+
+      private
+
+      attr_reader :config, :node
+
+      def raw_config
+        @raw_config ||= IterableRecursiveOpenStruct.new(template_configuration.raw_config)
+      end
+
+      def loop_through_call_stack(call_stack)
+        call_stack.keys.sort.reduce(raw_config) do |cur_config, key|
+          cur_method = call_stack[key]
+          cur_config.send(cur_method[:method],
+                          *cur_method[:args],
+                          &cur_method[:block])
+        end
+      end
+
+      def template_configuration
+        @template_configuration ||= Configuration.for_node(node, config: config)
+      end
     end
 
+    # All methods must be prefaced with 'alces' to prevent them from being
+    # accidentally overridden
     class BindingWrapper
       include Blank
 
-      def initialize
+      def initialize(binding_obj, call_stack = {})
+        @alces_binding = binding_obj
+        @alces_call_stack = call_stack
+      end
+
+      def method_missing(s, *a, &b)
+        return_with_wrapper(alces_get_value(s, *a, &b), s, a, b)
+      end
+
+      private
+
+      attr_reader :alces_binding, :alces_call_stack
+
+      def alces_get_value(s, *a, &b)
+        if alces_binding.is_a?(Metalware::Templating::Binding)
+          alces_binding.retrieve_value(alces_call_stack, s, *a)
+        else
+          alces_binding.send(s, *a, &b)
+        end
+      end
+
+      # TODO make it error if trying to return a nil
+      def return_with_wrapper(result, s, a, b)
+        return result if [TrueClass, FalseClass].include?(result.class)
+        return result if s == :to_s
+        idx = alces_call_stack.keys.length
+        new_callstack = alces_call_stack.merge(idx => {
+                                                 method: s,
+                                                 args: a,
+                                                 block: b,
+                                               })
+        BindingWrapper.new(result, new_callstack)
       end
     end
   end

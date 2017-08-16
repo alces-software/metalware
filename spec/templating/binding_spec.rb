@@ -25,7 +25,33 @@
 
 require 'templating/binding'
 require 'filesystem'
+require 'config'
 
 RSpec.describe Metalware::Templating::Binding do
-  
+  let :config { Metalware::Config.new }
+  let :domain_binding { Metalware::Templating::Binding.build(config) }
+
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_minimal_repo
+      fs.with_repo_fixtures('repo')
+    end
+  end
+
+  context 'with a domain level Binding' do
+    it 'Can retrieve a non-erb value from the config' do
+      filesystem.test do
+        expect(domain_binding.some_repo_value).to eq('repo_value')
+      end
+    end
+
+    it 'Can retrieve a non-erb nested config value' do
+      filesystem.test do
+        expect(domain_binding.nested.more_nesting.repo_value).to eq('even_more_nesting')
+      end
+    end
+
+    it 'Can replace erb config values' do
+    end
+  end
 end

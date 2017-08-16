@@ -14,6 +14,8 @@ recursive_false_repo_value: <%= false_repo_value %>
 
 nested:
   repo_value: nested_repo_value
+  more_nesting:
+    repo_value: even_more_nesting
 
 files:
   namespace01:
