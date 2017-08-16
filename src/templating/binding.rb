@@ -45,13 +45,13 @@ module Metalware
         if call_stack[1] == :alces
           raise NotImplementedError
         else
-          retrieve_config_value(call_stack, s, *a, &b)
+          retrieve_config_value(call_stack, s)
         end
       end
 
-      def retrieve_config_value(call_stack, s, *a, &b)
+      def retrieve_config_value(call_stack, s)
         h = loop_through_call_stack(call_stack) || raw_config
-        result = h.send(s, *a, &b)
+        result = h.send(s)
         result.is_a?(IterableRecursiveOpenStruct) ? self : result
       end
 
@@ -66,9 +66,7 @@ module Metalware
       def loop_through_call_stack(call_stack)
         call_stack.keys.sort.reduce(raw_config) do |cur_config, key|
           cur_method = call_stack[key]
-          cur_config.send(cur_method[:method],
-                          *cur_method[:args],
-                          &cur_method[:block])
+          cur_config.send(cur_method[:method])
         end
       end
 
