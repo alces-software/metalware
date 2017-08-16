@@ -25,6 +25,7 @@
 
 require 'templating/configuration'
 require 'templating/iterable_recursive_open_struct'
+require 'templating/renderer'
 
 module Metalware
   module Templating
@@ -32,12 +33,12 @@ module Metalware
       private_class_method :new
 
       def self.build(config, node = nil)
-        alces_binding = new(metal_config: config, node_name: node)
+        alces_binding = new(config: config, node_name: node)
         BindingWrapper.new(alces_binding).get_binding
       end
 
-      def initialize(metal_config:, node_name:)
-        @config = metal_config
+      def initialize(config:, node_name:)
+        @metware_config = config
         @node = node_name
       end
 
@@ -50,28 +51,38 @@ module Metalware
       end
 
       def retrieve_config_value(call_stack, s)
-        h = loop_through_call_stack(call_stack) || raw_config
-        result = h.send(s)
-        result.is_a?(IterableRecursiveOpenStruct) ? self : result
+        config_struct = loop_through_call_stack(call_stack)
+        result = config_struct.send(s)
+        if result.is_a?(IterableRecursiveOpenStruct)
+          self
+        else
+          result_replaced_erb = Renderer.replace_erb(result, new_binding)
+          config_struct.send(:"#{s}=", result_replaced_erb)
+          config_struct.send(s)
+        end
       end
 
       private
 
-      attr_reader :config, :node
+      attr_reader :metware_config, :node, :cache_config
 
-      def raw_config
-        @raw_config ||= IterableRecursiveOpenStruct.new(template_configuration.raw_config)
+      def config
+        @config ||= IterableRecursiveOpenStruct.new(template_configuration.raw_config)
       end
 
       def loop_through_call_stack(call_stack)
-        call_stack.keys.sort.reduce(raw_config) do |cur_config, key|
+        call_stack.keys.sort.reduce(config) do |cur_config, key|
           cur_method = call_stack[key]
           cur_config.send(cur_method[:method])
         end
       end
 
       def template_configuration
-        @template_configuration ||= Configuration.for_node(node, config: config)
+        @template_configuration ||= Configuration.for_node(node, config: metware_config)
+      end
+
+      def new_binding
+        BindingWrapper.new(self).get_binding
       end
     end
 

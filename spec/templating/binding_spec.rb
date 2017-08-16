@@ -56,5 +56,12 @@ RSpec.describe Metalware::Templating::Binding do
         expect(result).to eq('even_more_nesting')
       end
     end
+
+    it 'Replaces erb template values' do
+      filesystem.test do
+        result = evaluate('domain', 'first_level_erb_repo_value')
+        expect(result).to eq('repo_value')
+      end
+    end
   end
 end
