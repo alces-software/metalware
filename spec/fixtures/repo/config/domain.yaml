@@ -12,6 +12,9 @@ false_repo_value: false
 recursive_true_repo_value: <%= true_repo_value %>
 recursive_false_repo_value: <%= false_repo_value %>
 
+test_infinite_recursion1: <%= test_infinite_recursion2 %>
+test_infinite_recursion2: <%= test_infinite_recursion1 %>
+
 nested:
   repo_value: nested_repo_value
   more_nesting:

@@ -26,6 +26,8 @@
 require 'templating/configuration'
 require 'templating/iterable_recursive_open_struct'
 require 'templating/renderer'
+require 'constants'
+require 'exceptions'
 
 module Metalware
   module Templating
@@ -38,25 +40,25 @@ module Metalware
       end
 
       def initialize(config:, node_name:)
-        @metware_config = config
+        @metalware_config = config
         @node = node_name
       end
 
-      def retrieve_value(call_stack, s, *a, &b)
+      def retrieve_value(loop_count, call_stack, s, *a, &b)
         if call_stack[1] == :alces
           raise NotImplementedError
         else
-          retrieve_config_value(call_stack, s)
+          retrieve_config_value(loop_count, call_stack, s)
         end
       end
 
-      def retrieve_config_value(call_stack, s)
+      def retrieve_config_value(loop_count, call_stack, s)
         config_struct = loop_through_call_stack(call_stack)
         result = config_struct.send(s)
         if result.is_a?(IterableRecursiveOpenStruct)
           self
         else
-          result_replaced_erb = Renderer.replace_erb(result, new_binding)
+          result_replaced_erb = Renderer.replace_erb(result, new_binding(loop_count))
           config_struct.send(:"#{s}=", result_replaced_erb)
           config_struct.send(s)
         end
@@ -64,7 +66,7 @@ module Metalware
 
       private
 
-      attr_reader :metware_config, :node, :cache_config
+      attr_reader :metalware_config, :node, :cache_config
 
       def config
         @config ||= IterableRecursiveOpenStruct.new(template_configuration.raw_config)
@@ -78,11 +80,12 @@ module Metalware
       end
 
       def template_configuration
-        @template_configuration ||= Configuration.for_node(node, config: metware_config)
+        @template_configuration ||= Configuration.for_node(node, config: metalware_config)
       end
 
-      def new_binding
-        BindingWrapper.new(self).get_binding
+      def new_binding(loop_count)
+        raise LoopErbError if loop_count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
+        BindingWrapper.new(self, loop_count + 1).get_binding
       end
     end
 
@@ -91,9 +94,10 @@ module Metalware
     class BindingWrapper
       include Blank
 
-      def initialize(binding_obj, call_stack = {})
+      def initialize(binding_obj, loop_count = 0, call_stack: {})
         @alces_binding = binding_obj
         @alces_call_stack = call_stack
+        @count = loop_count
       end
 
       def method_missing(s, *a, &b)
@@ -106,11 +110,11 @@ module Metalware
 
       private
 
-      attr_reader :alces_binding, :alces_call_stack
+      attr_reader :alces_binding, :alces_call_stack, :count
 
       def alces_get_value(s, *a, &b)
         if alces_binding.is_a?(Metalware::Templating::Binding)
-          alces_binding.retrieve_value(alces_call_stack, s, *a)
+          alces_binding.retrieve_value(count, alces_call_stack, s, *a)
         else
           alces_binding.send(s, *a, &b)
         end
@@ -126,7 +130,7 @@ module Metalware
                                                  args: a,
                                                  block: b,
                                                })
-        BindingWrapper.new(result, new_callstack)
+        BindingWrapper.new(result, call_stack: new_callstack)
       end
     end
   end
