@@ -79,5 +79,12 @@ RSpec.describe Metalware::Templating::Binding do
         end.to raise_error(Metalware::LoopErbError)
       end
     end
+
+    it 'adds values stored in two erb tags' do
+      filesystem.test do
+        result = evaluate(domain, 'sum_value')
+        expect(result).to eq('3')
+      end
+    end
   end
 end

@@ -58,8 +58,8 @@ module Metalware
         if result.is_a?(IterableRecursiveOpenStruct)
           self
         else
-          result_replaced_erb = Renderer.replace_erb(result, new_binding(loop_count))
-          config_struct.send(:"#{s}=", result_replaced_erb)
+          result = replace_erb(result, loop_count) if result.is_a?(String)
+          config_struct.send(:"#{s}=", result)
           config_struct.send(s)
         end
       end
@@ -81,6 +81,10 @@ module Metalware
 
       def template_configuration
         @template_configuration ||= Configuration.for_node(node, config: metalware_config)
+      end
+
+      def replace_erb(result, loop_count)
+        Renderer.replace_erb(result, new_binding(loop_count))
       end
 
       def new_binding(loop_count)
@@ -106,6 +110,10 @@ module Metalware
 
       def get_binding
         binding
+      end
+
+      def coerce(other)
+        [other, alces_binding]
       end
 
       private

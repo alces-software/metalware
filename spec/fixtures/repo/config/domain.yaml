@@ -15,6 +15,10 @@ recursive_false_repo_value: <%= false_repo_value %>
 test_infinite_recursion1: <%= test_infinite_recursion2 %>
 test_infinite_recursion2: <%= test_infinite_recursion1 %>
 
+sum_value: <%= integer_value1 + integer_value2 %>
+integer_value1: 1
+integer_value2: 2
+
 nested:
   repo_value: nested_repo_value
   more_nesting:
