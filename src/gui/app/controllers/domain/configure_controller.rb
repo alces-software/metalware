@@ -2,23 +2,24 @@
 
 class Domain::ConfigureController < ApplicationController
   def show
-    load_questions
+    assign_form_variables
   end
 
   def create
-    answers = params[:answers]
+    answers = params[:answers].permit!.to_h
     if configure_with_answers(answers)
       redirect_to '/'
     else
-      load_questions
+      assign_form_variables(entered_answers: answers)
       render 'show'
     end
   end
 
   private
 
-  def load_questions
+  def assign_form_variables(entered_answers: {})
     @questions = Configure::Questions.for_domain
+    @answers = entered_answers
   end
 
   def configure_with_answers(answers)

@@ -9,5 +9,6 @@ class Groups::ConfigureController < ApplicationController
   def show
     @name = params[:group_id]
     @questions = Configure::Questions.for_group
+    @answers = {}
   end
 end

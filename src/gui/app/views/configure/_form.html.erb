@@ -4,7 +4,7 @@
     <% namespaced_identifier = "answers[#{identifier}]" %>
     <fieldset>
       <%= label_tag(namespaced_identifier, question[:question]) %>
-      <%= text_field_tag(namespaced_identifier) %>
+      <%= text_field_tag(namespaced_identifier, @answers[identifier]) %>
     </fieldset>
   <% end %>
 
