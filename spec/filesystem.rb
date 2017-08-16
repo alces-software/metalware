@@ -122,10 +122,10 @@ class FileSystem
     )
   end
 
-  def with_scripts_templates_fixtures(template_path, target)
+  def with_templates_fixtures(template_path, target)
     with_fixtures(
       template_path,
-      at: File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'scripts/templates', target)
+      at: File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target)
     )
   end
 
@@ -144,7 +144,7 @@ class FileSystem
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
       '/var/named',
-      File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'scripts/templates'),
+      File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)
     end

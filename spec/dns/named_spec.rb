@@ -37,7 +37,7 @@ RSpec.describe Metalware::DNS::Named do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       named = 'named.conf.erb'
-      fs.with_scripts_templates_fixtures("templates/#{named}", named)
+      fs.with_templates_fixtures("templates/#{named}", named)
       fs.with_config_fixture('configs/unit-test.yaml', 'domain.yaml')
     end
   end
