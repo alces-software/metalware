@@ -29,7 +29,7 @@ require 'config'
 
 RSpec.describe Metalware::Templating::Binding do
   let :config { Metalware::Config.new }
-  let :domain_binding { Metalware::Templating::Binding.build(config) }
+  let :domain { Metalware::Templating::Binding.build(config) }
   let :testnode1_binding {}
 
   let :filesystem do
@@ -39,35 +39,35 @@ RSpec.describe Metalware::Templating::Binding do
     end
   end
 
-  def evaluate(section, cmd)
-    result = send("#{section}_binding").eval(cmd)
+  def evaluate(bind, cmd)
+    result = bind.eval(cmd)
     result.to_s
   end
 
   context 'with a domain level Binding' do
     it 'retrieve a non-erb, non-nested value from the config' do
       filesystem.test do
-        expect(evaluate('domain', 'some_repo_value')).to eq('repo_value')
+        expect(evaluate(domain, 'some_repo_value')).to eq('repo_value')
       end
     end
 
     it 'retrieve a non-erb nested config value' do
       filesystem.test do
-        result = evaluate('domain', 'nested.more_nesting.repo_value')
+        result = evaluate(domain, 'nested.more_nesting.repo_value')
         expect(result).to eq('even_more_nesting')
       end
     end
 
     it 'replaces a non-nested erb template values' do
       filesystem.test do
-        result = evaluate('domain', 'first_level_erb_repo_value')
+        result = evaluate(domain, 'first_level_erb_repo_value')
         expect(result).to eq('repo_value')
       end
     end
 
     it 'replaces a nested erb template value' do
       filesystem.test do
-        result = evaluate('domain', 'very_recursive_erb_repo_value')
+        result = evaluate(domain, 'very_recursive_erb_repo_value')
         expect(result).to eq('repo_value')
       end
     end
@@ -75,7 +75,7 @@ RSpec.describe Metalware::Templating::Binding do
     it 'errors if an infinite recursion is detected' do
       filesystem.test do
         expect do
-          evaluate('domain', 'test_infinite_recursion1')
+          evaluate(domain, 'test_infinite_recursion1')
         end.to raise_error(Metalware::LoopErbError)
       end
     end
