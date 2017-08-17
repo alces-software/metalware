@@ -35,6 +35,8 @@ require 'templating/magic_namespace'
 require 'templating/renderer'
 require 'templating/repo_config_parser'
 require 'binding'
+require 'templating/magic_namespace'
+require 'node'
 
 module Metalware
   class Templater
@@ -158,20 +160,52 @@ module Metalware
     # - nodename
     # - index
     # - what else?
-    def initialize(metalware_config, parameters = {})
-      @binding = Binding.build(metalware_config, parameters[:nodename])
+    def initialize(metalware_config, parameters_input = {})
+      @config = metalware_config
+      @parameters = parameters_input
     end
 
     def render(template)
       File.open(template.chomp, 'r') do |f|
-        replace_erb(f.read, @binding)
+        replace_erb(f.read, binding)
       end
     end
 
     def render_from_string(str)
-      replace_erb(str, @binding)
+      replace_erb(str, binding)
     end
 
     delegate :replace_erb, to: Templating::Renderer
+
+    private
+
+    attr_reader :config, :parameters
+
+    def binding
+      Binding.build(config, node_name, namespace: magic_namespace)
+    end
+
+    def magic_namespace
+      Templating::MagicNamespace.new(
+        config: config,
+        node: node,
+        include_groups: true,
+        **magic_parameters
+      )
+    end
+
+    def magic_parameters
+      parameters.select do |k, v|
+        [:firstboot, :files].include?(k) && !v.nil?
+      end
+    end
+
+    def node_name
+      parameters[:nodename]
+    end
+
+    def node
+      Node.new(config, node_name)
+    end
   end
 end

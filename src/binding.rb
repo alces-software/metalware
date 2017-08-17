@@ -29,8 +29,8 @@ end
 
 module Metalware
   module Binding
-    def self.build(config, node = nil)
-      alces_binding = Parameter.new(config: config, node_name: node)
+    def self.build(config, node = nil, namespace: nil)
+      alces_binding = Parameter.new(config: config, node_name: node, namespace: namespace)
       Wrapper.new(alces_binding).get_binding
     end
   end

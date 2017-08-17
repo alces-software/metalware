@@ -33,15 +33,15 @@ require 'binding'
 module Metalware
   module Binding
     class Parameter
-      def initialize(config:, node_name:, magic_namespace: nil)
+      def initialize(config:, node_name:, namespace:)
         @metalware_config = config
         @node = node_name
-        @alces_namespace = magic_namespace
+        @alces_namespace = namespace
       end
 
       def retrieve_value(loop_count, call_stack, s, *a, &b)
         if call_stack.empty? && s == :alces
-          alces_namespace.send(s, *a, &b)
+          alces_namespace
         else
           retrieve_config_value(loop_count, call_stack, s)
         end

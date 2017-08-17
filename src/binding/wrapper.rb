@@ -30,6 +30,7 @@ require 'constants'
 require 'exceptions'
 require 'binding'
 require 'metal_log'
+require 'English'
 
 module Metalware
   module Binding
@@ -69,7 +70,7 @@ module Metalware
       rescue
         callstack = new_callstack(s, *a, &b)
         call_str = call_stack_to_s(callstack)
-        raise $!, "#{$!}\nWhen calling: #{call_str}", $!.backtrace
+        raise $ERROR_INFO, "#{$ERROR_INFO}\nWhen calling: #{call_str}", $ERROR_INFO.backtrace
       end
 
       def alces_return_wrapper(result, updated_callstack)
