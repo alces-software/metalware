@@ -1,12 +1,12 @@
 
 <%= form_tag do %>
-  <% @questions.each do |identifier, question| %>
-    <% namespaced_identifier = "answers[#{identifier}]" %>
+  <% @questions.each do |question| %>
+    <% namespaced_identifier = "answers[#{question.identifier}]" %>
     <div class='form-group'>
-      <%= label_tag(namespaced_identifier, question[:question]) %>
+      <%= label_tag(namespaced_identifier, question.question) %>
       <%= text_field_tag(
         namespaced_identifier,
-        @answers[identifier],
+        @answers[question.identifier],
         class: ['form-control', 'form-control-sm']
       ) %>
     </div>

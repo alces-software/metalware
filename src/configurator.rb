@@ -91,14 +91,6 @@ module Metalware
       save_answers(answers)
     end
 
-    private
-
-    attr_reader :highline,
-                :configure_file,
-                :questions_section,
-                :higher_level_answer_files,
-                :use_readline
-
     def questions
       @questions ||= questions_in_section
                      .map.with_index do |question, index|
@@ -106,6 +98,14 @@ module Metalware
         create_question(identifier, properties, index + 1)
       end
     end
+
+    private
+
+    attr_reader :highline,
+                :configure_file,
+                :questions_section,
+                :higher_level_answer_files,
+                :use_readline
 
     def questions_in_section
       Data.load(configure_file)[questions_section]

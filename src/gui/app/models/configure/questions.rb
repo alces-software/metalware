@@ -4,7 +4,7 @@
 class Configure::Questions < ApplicationModel
   class << self
     def for_domain
-      configure_data[:domain]
+      Metalware::Configurator.for_domain(file_path: file_path).questions
     end
 
     def for_group
