@@ -18,6 +18,7 @@ class Domain::ConfigureController < ApplicationController
   private
 
   def assign_form_variables(entered_answers: {})
+    @title = 'Configure Domain'
     @questions = Configure::Questions.for_domain
     @answers = entered_answers
   end

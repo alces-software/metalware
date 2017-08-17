@@ -11,15 +11,63 @@
   </head>
 
   <body>
-    <div>
-      <%= link_to 'Hunter', :hunter %>
-      <%= link_to 'Cluster', :root %>
-    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Metalware</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <%= link_to 'Hunter', :hunter, class: 'nav-link' %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Cluster', :root, class: 'nav-link' %>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <% if @title %>
+      <div class="jumbotron">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col"></div>
+            <div class="col-6">
+              <h1 class="display-4"><%= @title %></h1>
+            </div>
+            <div class="col"></div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="container-fluid page-container">
       <% if flash[:error] %>
-        <div>
-          <%= flash[:error] %>
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-6">
+            <div class="alert alert-danger" role="alert">
+              <%= flash[:error] %>
+            </div>
+          </div>
+          <div class="col"></div>
         </div>
       <% end %>
-    <%= yield %>
+      <div class="row">
+        <div class="col"></div>
+        <div class="col-6">
+          <%= yield %>
+        </div>
+        <div class="col"></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container">
+        <span class="text-muted">© Alces Software Ltd 2017</span>
+      </div>
+    </footer>
   </body>
 </html>

@@ -2,11 +2,15 @@
 <%= form_tag do %>
   <% @questions.each do |identifier, question| %>
     <% namespaced_identifier = "answers[#{identifier}]" %>
-    <fieldset>
+    <div class='form-group'>
       <%= label_tag(namespaced_identifier, question[:question]) %>
-      <%= text_field_tag(namespaced_identifier, @answers[identifier]) %>
-    </fieldset>
+      <%= text_field_tag(
+        namespaced_identifier,
+        @answers[identifier],
+        class: ['form-control', 'form-control-sm']
+      ) %>
+    </div>
   <% end %>
 
-  <%= submit_tag('Save') %>
+  <%= submit_tag('Configure', class: ['btn', 'btn-dark', 'btn-block']) %>
 <% end %>

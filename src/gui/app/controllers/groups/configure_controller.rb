@@ -7,7 +7,8 @@ class Groups::ConfigureController < ApplicationController
   end
 
   def show
-    @name = params[:group_id]
+    name = params[:group_id]
+    @title = "Configure Group #{name}"
     @questions = Configure::Questions.for_group
     @answers = {}
   end
