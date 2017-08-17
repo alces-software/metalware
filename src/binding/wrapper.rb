@@ -28,74 +28,11 @@ require 'templating/iterable_recursive_open_struct'
 require 'templating/renderer'
 require 'constants'
 require 'exceptions'
+require 'binding'
 
 module Metalware
-  module Templating
-    class Binding
-      private_class_method :new
-
-      def self.build(config, node = nil)
-        alces_binding = new(config: config, node_name: node)
-        BindingWrapper.new(alces_binding).get_binding
-      end
-
-      def initialize(config:, node_name:)
-        @metalware_config = config
-        @node = node_name
-      end
-
-      def retrieve_value(loop_count, call_stack, s, *a, &b)
-        if call_stack[1] == :alces
-          raise NotImplementedError
-        else
-          retrieve_config_value(loop_count, call_stack, s)
-        end
-      end
-
-      def retrieve_config_value(loop_count, call_stack, s)
-        config_struct = loop_through_call_stack(call_stack)
-        result = config_struct.send(s)
-        if result.is_a?(IterableRecursiveOpenStruct)
-          self
-        else
-          result = replace_erb(result, loop_count) if result.is_a?(String)
-          config_struct.send(:"#{s}=", result)
-          config_struct.send(s)
-        end
-      end
-
-      private
-
-      attr_reader :metalware_config, :node, :cache_config
-
-      def config
-        @config ||= IterableRecursiveOpenStruct.new(template_configuration.raw_config)
-      end
-
-      def loop_through_call_stack(call_stack)
-        call_stack.keys.sort.reduce(config) do |cur_config, key|
-          cur_method = call_stack[key]
-          cur_config.send(cur_method[:method])
-        end
-      end
-
-      def template_configuration
-        @template_configuration ||= Configuration.for_node(node, config: metalware_config)
-      end
-
-      def replace_erb(result, loop_count)
-        Renderer.replace_erb(result, new_binding(loop_count))
-      end
-
-      def new_binding(loop_count)
-        raise LoopErbError if loop_count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
-        BindingWrapper.new(self, loop_count + 1).get_binding
-      end
-    end
-
-    # All methods must be prefaced with 'alces' to prevent them from being
-    # accidentally overridden
-    class BindingWrapper
+  module Binding
+    class Wrapper
       include Blank
 
       def initialize(binding_obj, loop_count = 0, call_stack: {})
@@ -121,7 +58,7 @@ module Metalware
       attr_reader :alces_binding, :alces_call_stack, :count
 
       def alces_get_value(s, *a, &b)
-        if alces_binding.is_a?(Metalware::Templating::Binding)
+        if alces_binding.is_a?(Metalware::Binding::Parameter)
           alces_binding.retrieve_value(count, alces_call_stack, s, *a)
         else
           alces_binding.send(s, *a, &b)
@@ -138,7 +75,7 @@ module Metalware
                                                  args: a,
                                                  block: b,
                                                })
-        BindingWrapper.new(result, call_stack: new_callstack)
+        Wrapper.new(result, call_stack: new_callstack)
       end
     end
   end

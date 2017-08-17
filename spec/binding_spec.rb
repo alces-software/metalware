@@ -23,13 +23,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'templating/binding'
+require 'binding'
 require 'filesystem'
 require 'config'
 
-RSpec.describe Metalware::Templating::Binding do
+RSpec.describe Metalware::Binding do
   let :config { Metalware::Config.new }
-  let :domain { Metalware::Templating::Binding.build(config) }
+  let :domain { Metalware::Binding.build(config) }
   let :testnode1_binding {}
 
   let :filesystem do
