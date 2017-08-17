@@ -91,23 +91,6 @@ RSpec.describe Metalware::Templater do
 
         expect_renders({}, expected)
       end
-
-      it 'renders template with extra passed parameters' do
-        template_parameters = {
-          some_passed_value: 'my_value',
-        }
-        expected = <<-EOF
-        This is a test template
-        some_passed_value: my_value
-        some_repo_value:
-        erb_repo_value:
-        very_recursive_erb_repo_value:
-        nested.repo_value:
-        alces.index: 0
-        EOF
-
-        expect_renders(template_parameters, expected)
-      end
     end
 
     context 'with repo' do
@@ -400,7 +383,7 @@ RSpec.describe Metalware::Templater do
                         some_question: 'some_answer'
       end
 
-      let :answers { templater.config.alces.answers }
+      let :answers { templater.send(:magic_namespace).answers }
 
       context 'when node passed' do
         let :templater do
@@ -464,7 +447,7 @@ RSpec.describe Metalware::Templater do
           templater = Metalware::Templater.new(config, nodename: 'testnode03',
                                                        firstboot: true,
                                                        files: build_files)
-          magic_namespace = templater.config.alces
+          magic_namespace = templater.send(:magic_namespace)
 
           expect(magic_namespace.index).to eq(3)
           expect(magic_namespace.group_index).to eq(2)
@@ -490,7 +473,7 @@ RSpec.describe Metalware::Templater do
       it 'loads the hunter parameter as an empty Hashie' do
         filesystem.test do
           templater = Metalware::Templater.new(config)
-          magic_namespace = templater.config.alces
+          magic_namespace = templater.send(:magic_namespace)
           expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
         end
       end
