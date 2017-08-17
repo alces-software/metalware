@@ -43,8 +43,8 @@ module Metalware
       end
 
       def method_missing(s, *a, &b)
-        updated_callstack = new_callstack(s, *a, &b)
         result = alces_get_value(s, *a, &b)
+        updated_callstack = new_callstack(s, *a, &b)
         alces_return_wrapper(result, updated_callstack)
       end
 
@@ -62,14 +62,14 @@ module Metalware
 
       def alces_get_value(s, *a, &b)
         if alces_binding.is_a?(Metalware::Binding::Parameter)
-          alces_binding.retrieve_value(count, alces_call_stack, s, *a)
+          alces_binding.retrieve_value(count, alces_call_stack, s, *a, &b)
         else
           alces_binding.send(s, *a, &b)
         end
       rescue
         callstack = new_callstack(s, *a, &b)
         call_str = call_stack_to_s(callstack)
-        raise $ERROR_INFO, "#{$ERROR_INFO}\nWhen calling: #{call_str}", $ERROR_INFO.backtrace
+        raise $!, "#{$!}\nWhen calling: #{call_str}", $!.backtrace
       end
 
       def alces_return_wrapper(result, updated_callstack)

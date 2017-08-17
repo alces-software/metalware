@@ -33,14 +33,15 @@ require 'binding'
 module Metalware
   module Binding
     class Parameter
-      def initialize(config:, node_name:)
+      def initialize(config:, node_name:, magic_namespace: nil)
         @metalware_config = config
         @node = node_name
+        @alces_namespace = magic_namespace
       end
 
-      def retrieve_value(loop_count, call_stack, s, *_a)
-        if call_stack[1] == :alces
-          raise NotImplementedError
+      def retrieve_value(loop_count, call_stack, s, *a, &b)
+        if call_stack.empty? && s == :alces
+          alces_namespace.send(s, *a, &b)
         else
           retrieve_config_value(loop_count, call_stack, s)
         end
@@ -48,7 +49,7 @@ module Metalware
 
       private
 
-      attr_reader :metalware_config, :node, :cache_config
+      attr_reader :metalware_config, :node, :cache_config, :alces_namespace
 
       def retrieve_config_value(loop_count, call_stack, s)
         config_struct = loop_through_call_stack(call_stack)
