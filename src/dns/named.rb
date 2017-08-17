@@ -64,7 +64,7 @@ module Metalware
       def setup?
         exit_code = SystemCommand.run_raw('systemctl status named')[:status]
         MetalLog.info "systemctl status named, exit code: #{exit_code}"
-        exit_code.zero?
+        exit_code.success?
       end
 
       EXTERNAL_DNS_MSG = <<~EOF.strip_heredoc
@@ -103,7 +103,6 @@ module Metalware
         systemctl restart named
       EOF
 
-      # DO NOT RENAME, DANGEROUS FOR TESTS
       def restart_named
         MetalLog.info 'Restarting named'
         SystemCommand.run(RESTART_NAMED_CMDS)

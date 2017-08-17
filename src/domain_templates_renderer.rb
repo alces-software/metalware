@@ -144,7 +144,7 @@ module Metalware
       when 'named'
         update_named
       else
-        raise InvalidInput, "Invalid DNS type: #{repo_config.dns_type}"
+        raise InvalidConfigParameter, "Invalid DNS type: #{repo_config.dns_type}"
       end
     end
 

@@ -50,7 +50,7 @@ RSpec.describe Metalware::DNS::Named do
   context 'without a setup named server' do
     before :each do
       allow(named).to receive(:setup?).and_return(false)
-      # Prevents restart_named from running, DANGEROUS
+      # Prevents restart_named from running as the bash commands can't be mocked
       allow(named).to receive(:restart_named)
     end
 

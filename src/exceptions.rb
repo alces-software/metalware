@@ -71,6 +71,9 @@ module Metalware
   class InvalidInput < MetalwareError
   end
 
+  class InvalidConfigParameter < MetalwareError
+  end
+
   class IterableRecursiveOpenStructPropertyError < MetalwareError
   end
 
