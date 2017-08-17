@@ -31,6 +31,7 @@ require 'exceptions'
 require 'group_cache'
 require 'templating/configuration'
 require 'build_methods'
+require 'binding'
 
 module Metalware
   class Node
@@ -132,12 +133,12 @@ module Metalware
       groups.first
     end
 
-    def repo_config
-      @repo_config ||= Templater.new(metalware_config, nodename: name).config
-    end
-
     def build_template_paths
       build_method.template_paths
+    end
+
+    def query_repo(value)
+      parameter_binding.query(value)
     end
 
     private
@@ -183,8 +184,14 @@ module Metalware
       @build_method ||= build_method_class.new(metalware_config, self)
     end
 
+    def parameter_binding
+      @parameter_binding ||= begin
+        Metalware::Binding.build_no_wrapper(metalware_config, name)
+      end
+    end
+
     def build_method_class
-      case repo_config[:build_method]&.to_sym
+      case query_repo(:build_method)&.to_sym
       when :basic
         BuildMethods::Basic
       else
