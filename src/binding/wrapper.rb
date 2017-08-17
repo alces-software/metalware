@@ -63,7 +63,7 @@ module Metalware
 
       def alces_get_value(s, *a, &b)
         if alces_binding.is_a?(Metalware::Binding::Parameter)
-          alces_binding.retrieve_value(count, alces_call_stack, s, *a, &b)
+          alces_binding.retrieve_value(count, alces_call_stack, s)
         else
           alces_binding.send(s, *a, &b)
         end

@@ -39,11 +39,11 @@ module Metalware
         @alces_namespace = namespace
       end
 
-      def retrieve_value(loop_count, call_stack, s, *a, &b)
-        if call_stack.empty? && s == :alces
+      def retrieve_value(loop_count, call_stack, next_method)
+        if call_stack.empty? && next_method == :alces
           alces_namespace
         else
-          retrieve_config_value(loop_count, call_stack, s)
+          retrieve_config_value(loop_count, call_stack, next_method)
         end
       end
 
@@ -51,15 +51,15 @@ module Metalware
 
       attr_reader :metalware_config, :node, :cache_config, :alces_namespace
 
-      def retrieve_config_value(loop_count, call_stack, s)
+      def retrieve_config_value(loop_count, call_stack, next_method)
         config_struct = loop_through_call_stack(call_stack)
-        result = config_struct.send(s)
+        result = config_struct.send(next_method)
         if result.is_a?(Templating::IterableRecursiveOpenStruct)
           self
         else
           result = replace_erb(result, loop_count) if result.is_a?(String)
-          config_struct.send(:"#{s}=", result)
-          config_struct.send(s)
+          config_struct.send(:"#{next_method}=", result)
+          config_struct.send(next_method)
         end
       end
 
