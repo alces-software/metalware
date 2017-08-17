@@ -16,15 +16,9 @@ module Metalware
           @node_name = args.first
         end
 
-        def answers_file
-          config.node_answers_file(node_name)
-        end
-
-        def higher_level_answer_files
-          [
-            config.domain_answers_file,
-            config.group_answers_file(node.primary_group),
-          ]
+        def configurator
+          @configurator ||=
+            Configurator.for_node(node, file_path: file_path)
         end
 
         def node

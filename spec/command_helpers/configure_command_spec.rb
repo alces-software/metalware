@@ -17,14 +17,18 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
 
     # Overridden to be three element array with third a valid `configure.yaml`
     # questions section; `BaseCommand` expects command classes to be namespaced
-    # by two modules, and `ConfigureCommand` determines questions section,
-    # which must be valid, from the class name.
+    # by two modules.
     def class_name_parts
-      [:some, :namespace, :domain]
+      [:some, :namespace, :test]
     end
 
-    def answers_file
-      '/var/lib/metalware/answers/some_file.yaml'
+    def configurator
+      Metalware::Configurator.new(
+        configure_file: config.configure_file,
+        questions_section: :domain,
+        answers_file: '/var/lib/metalware/answers/some_file.yaml',
+        higher_level_answer_files: []
+      )
     end
   end
 

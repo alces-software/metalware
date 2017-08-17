@@ -30,6 +30,43 @@ HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
 module Metalware
   class Configurator
+    class << self
+      def for_domain(file_path:)
+        new(
+          configure_file: file_path.configure_file,
+          questions_section: :domain,
+          answers_file: file_path.domain_answers,
+          higher_level_answer_files: []
+        )
+      end
+
+      def for_group(group_name, file_path:)
+        new(
+          configure_file: file_path.configure_file,
+          questions_section: :group,
+          answers_file: file_path.group_answers(group_name),
+          higher_level_answer_files: [file_path.domain_answers]
+        )
+      end
+
+      # Note: This is slightly inconsistent with `for_group`, as that just
+      # takes a group name and this takes a Node object (as we need to be able
+      # to access the Node's primary group).
+      def for_node(node, file_path:)
+        new(
+          configure_file: file_path.configure_file,
+          questions_section: :node,
+          answers_file: file_path.node_answers(node.name),
+          higher_level_answer_files: [
+            file_path.domain_answers,
+            file_path.group_answers(node.primary_group),
+          ]
+        )
+      end
+    end
+
+    attr_reader :answers_file
+
     def initialize(
       highline: HighLine.new,
       configure_file:,
@@ -56,7 +93,6 @@ module Metalware
     attr_reader :highline,
                 :configure_file,
                 :questions_section,
-                :answers_file,
                 :higher_level_answer_files,
                 :use_readline
 
