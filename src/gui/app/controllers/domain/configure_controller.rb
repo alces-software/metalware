@@ -6,11 +6,10 @@ class Domain::ConfigureController < ApplicationController
   end
 
   def create
-    answers = params[:answers].permit!.to_h
-    if configure_with_answers(answers)
+    if configure_with_answers(entered_answers)
       redirect_to '/'
     else
-      assign_form_variables(entered_answers: answers)
+      assign_form_variables(entered_answers: entered_answers)
       render 'show'
     end
   end
@@ -21,6 +20,13 @@ class Domain::ConfigureController < ApplicationController
     @title = 'Configure Domain'
     @questions = Configure::Questions.for_domain
     @answers = entered_answers
+  end
+
+  def entered_answers
+    @entered_answers ||=
+      params[:answers].permit!.to_h.select do |_identifier, answer|
+        answer.present?
+      end
   end
 
   def configure_with_answers(answers)
