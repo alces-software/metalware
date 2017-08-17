@@ -121,7 +121,7 @@ RSpec.describe Metalware::Templater do
           filesystem.test do
             expect do
               Metalware::Templater.render(config, template_path, {})
-            end.to raise_error Metalware::UnsetParameterAccessError
+            end.to raise_error NoMethodError
           end
         end
       end
