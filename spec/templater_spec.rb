@@ -129,16 +129,6 @@ RSpec.describe Metalware::Templater do
         expect_renders({}, expected)
       end
 
-      it 'raises if maximum recursive config depth exceeded' do
-        stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
-
-        filesystem.test do
-          expect do
-            Metalware::Templater.new(config)
-          end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
-        end
-      end
-
       context 'when template uses property of unset parameter' do
         let :template do
           'unset.parameter: <%= unset.parameter %>'
@@ -452,7 +442,7 @@ RSpec.describe Metalware::Templater do
       it 'is created with default values when no parameters passed' do
         filesystem.test do
           templater = Metalware::Templater.new(config)
-          magic_namespace = templater.config.alces
+          magic_namespace = templater.send(:magic_namespace)
 
           expect(magic_namespace.index).to eq(0)
           expect(magic_namespace.group_index).to eq(0)
