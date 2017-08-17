@@ -57,8 +57,8 @@ module Metalware
         if result.is_a?(Templating::IterableRecursiveOpenStruct)
           self
         else
-          result = replace_erb(result, loop_count) if result.is_a?(String)
-          config_struct.send(:"#{next_method}=", result)
+          erb_result = replace_erb(result, loop_count)
+          config_struct.send(:"#{next_method}=", erb_result)
           config_struct.send(next_method)
         end
       end
@@ -82,7 +82,15 @@ module Metalware
       end
 
       def replace_erb(result, loop_count)
-        Templating::Renderer.replace_erb(result, new_binding(loop_count))
+        return result unless result.is_a? String
+        raw_str = Templating::Renderer.replace_erb(result, new_binding(loop_count))
+        # Converts the string to Boolean, Float and Integer if it can
+        case raw_str
+        when 'true', 'false', /\A\d+\.?\d*\Z/
+          eval(raw_str)
+        else
+          raw_str
+        end
       end
 
       def new_binding(loop_count)
