@@ -30,6 +30,7 @@ require 'config'
 RSpec.describe Metalware::Binding do
   let :config { Metalware::Config.new }
   let :domain { Metalware::Binding.build(config) }
+  let :node05 { Metalware::Binding.build(config, 'node05') }
   let :testnode1_binding {}
 
   let :filesystem do
@@ -41,7 +42,7 @@ RSpec.describe Metalware::Binding do
 
   def evaluate(bind, cmd)
     result = bind.eval(cmd)
-    result.to_s
+    result.nil? ? result : result.to_s
   end
 
   context 'with a domain level Binding' do
@@ -84,6 +85,22 @@ RSpec.describe Metalware::Binding do
       filesystem.test do
         result = evaluate(domain, 'sum_value')
         expect(result).to eq('3')
+      end
+    end
+
+    it 'returns nil if a config value is not found' do
+      filesystem.test do
+        result = evaluate(domain, 'nested.not_found')
+        expect(result).to eq(nil)
+      end
+    end
+  end
+
+  context 'with node05 binding' do
+    it 'pulls node05 config value' do
+      filesystem.test do
+        result = evaluate(node05, 'some_repo_value')
+        expect(result).to eq('value_just_for_node05')
       end
     end
   end

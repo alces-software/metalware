@@ -29,6 +29,7 @@ require 'templating/renderer'
 require 'constants'
 require 'exceptions'
 require 'binding'
+require 'metal_log'
 
 module Metalware
   module Binding
@@ -42,7 +43,9 @@ module Metalware
       end
 
       def method_missing(s, *a, &b)
-        alces_return_wrapper(alces_get_value(s, *a, &b), s, a, b)
+        updated_callstack = new_callstack(s, *a, &b)
+        result = alces_get_value(s, *a, &b)
+        alces_return_wrapper(result, updated_callstack)
       end
 
       def get_binding
@@ -63,19 +66,47 @@ module Metalware
         else
           alces_binding.send(s, *a, &b)
         end
+      rescue
+        callstack = new_callstack(s, *a, &b)
+        call_str = call_stack_to_s(callstack)
+        raise $ERROR_INFO, "#{$ERROR_INFO}\nWhen calling: #{call_str}", $ERROR_INFO.backtrace
       end
 
-      # TODO: make it error if trying to return a nil
-      def alces_return_wrapper(result, s, a, b)
-        return result if [TrueClass, FalseClass].include?(result.class)
-        return result if /to_.*/.match?(s)
+      def alces_return_wrapper(result, updated_callstack)
+        last_index = updated_callstack.keys.length - 1
+        last_called_method = updated_callstack[last_index][:method]
+        if result.nil?
+          nil_call_stack = call_stack_to_s(updated_callstack)
+          MetalLog.warn('The following call returned nil: ' + nil_call_stack)
+          return nil
+        elsif [TrueClass, FalseClass].include?(result.class)
+          return result
+        elsif /to_.*/.match?(last_called_method)
+          return result
+        else
+          Wrapper.new(result, call_stack: updated_callstack)
+        end
+      end
+
+      def call_stack_to_s(updated_callstack)
+        updated_callstack.keys.sort.reduce('') do |msg, idx|
+          method_call = updated_callstack[idx]
+          msg_period = (msg.empty? ? '' : '.')
+          msg_method = method_call[:method].to_s
+          args = method_call[:args]
+          msg_args = (args.empty? ? '' : "(#{args.join(',')})")
+          msg_block = (method_call[:block].nil? ? '' : '{ ... }')
+          msg + msg_period + msg_method + msg_args + msg_block
+        end
+      end
+
+      def new_callstack(s, *a, &b)
         idx = alces_call_stack.keys.length
-        new_callstack = alces_call_stack.merge(idx => {
-                                                 method: s,
-                                                 args: a,
-                                                 block: b,
-                                               })
-        Wrapper.new(result, call_stack: new_callstack)
+        alces_call_stack.merge(idx => {
+                                 method: s,
+                                 args: a,
+                                 block: b,
+                               })
       end
     end
   end

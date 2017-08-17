@@ -9,7 +9,7 @@ module Metalware
         # the given parameters.
         def replace_erb(template, parameter_binding)
           render_erb_template(template, parameter_binding)
-        
+
           # TODO: Move NoMethodError into BindingWrapper
         rescue NoMethodError => e
           # May be useful to include the name of the unset parameter in this error,

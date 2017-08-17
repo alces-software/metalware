@@ -38,13 +38,17 @@ module Metalware
         @node = node_name
       end
 
-      def retrieve_value(loop_count, call_stack, s, *a, &b)
+      def retrieve_value(loop_count, call_stack, s, *_a)
         if call_stack[1] == :alces
           raise NotImplementedError
         else
           retrieve_config_value(loop_count, call_stack, s)
         end
       end
+
+      private
+
+      attr_reader :metalware_config, :node, :cache_config
 
       def retrieve_config_value(loop_count, call_stack, s)
         config_struct = loop_through_call_stack(call_stack)
@@ -58,12 +62,11 @@ module Metalware
         end
       end
 
-      private
-
-      attr_reader :metalware_config, :node, :cache_config
-
       def config
-        @config ||= Templating::IterableRecursiveOpenStruct.new(template_configuration.raw_config)
+        @config ||= begin
+          raw_hash = template_configuration.raw_config
+          Templating::IterableRecursiveOpenStruct.new(raw_hash)
+        end
       end
 
       def loop_through_call_stack(call_stack)
