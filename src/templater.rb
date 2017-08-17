@@ -34,6 +34,7 @@ require 'templating/missing_parameter_wrapper'
 require 'templating/magic_namespace'
 require 'templating/renderer'
 require 'templating/repo_config_parser'
+require 'binding'
 
 module Metalware
   class Templater
@@ -158,21 +159,17 @@ module Metalware
     # - index
     # - what else?
     def initialize(metalware_config, parameters = {})
-      @config = Templating::RepoConfigParser.parse_for_node(
-        node_name: parameters[:nodename],
-        config: metalware_config,
-        additional_parameters: parameters
-      )
+      @binding = Binding.build(metalware_config, parameters[:nodename])
     end
 
     def render(template)
       File.open(template.chomp, 'r') do |f|
-        replace_erb(f.read, @config)
+        replace_erb(f.read, @binding)
       end
     end
 
     def render_from_string(str)
-      replace_erb(str, @config)
+      replace_erb(str, @binding)
     end
 
     delegate :replace_erb, to: Templating::Renderer
