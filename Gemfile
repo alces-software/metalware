@@ -30,6 +30,10 @@ group :development do
   gem 'rubocop', require: false
 end
 
+# Gems added for GUI app.
+gem 'bootstrap', '~> 4.0.0.beta'
+gem 'jquery-rails' # Required for Bootstrap.
+
 # Copied from Rails-generated Gemfile below this point.
 
 git_source(:github) do |repo_name|
