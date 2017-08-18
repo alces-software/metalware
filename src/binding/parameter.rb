@@ -29,14 +29,15 @@ require 'templating/renderer'
 require 'constants'
 require 'exceptions'
 require 'binding'
+require 'templating/magic_namespace'
 
 module Metalware
   module Binding
     class Parameter
-      def initialize(config:, node_name:, namespace:)
+      def initialize(config:, node_name:, magic_parameter:)
         @metalware_config = config
         @node = node_name
-        @alces_namespace = namespace
+        @magic_parameter = magic_parameter
       end
 
       # Parameter is highly coupled to how the wrapper works
@@ -73,7 +74,7 @@ module Metalware
 
       private
 
-      attr_reader :metalware_config, :node, :cache_config, :alces_namespace
+      attr_reader :metalware_config, :node, :cache_config, :magic_parameter
 
       def retrieve_config_value(loop_count, call_stack, next_method)
         config_struct = loop_through_call_stack(call_stack)
@@ -113,6 +114,17 @@ module Metalware
       def new_binding(loop_count)
         raise LoopErbError if loop_count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
         Wrapper.new(self, loop_count + 1).get_binding
+      end
+
+      def alces_namespace
+        @alces_namespace ||= begin
+          Templating::MagicNamespace.new(
+            config: metalware_config,
+            node: node,
+            include_groups: true,
+            **magic_parameter
+          )          
+        end
       end
     end
   end

@@ -35,8 +35,6 @@ require 'templating/magic_namespace'
 require 'templating/renderer'
 require 'templating/configuration'
 require 'binding'
-require 'templating/magic_namespace'
-require 'node'
 
 module Metalware
   class Templater
@@ -186,16 +184,7 @@ module Metalware
     attr_reader :config, :parameters
 
     def binding
-      Binding.build(config, node_name, namespace: magic_namespace)
-    end
-
-    def magic_namespace
-      Templating::MagicNamespace.new(
-        config: config,
-        node: node,
-        include_groups: true,
-        **magic_parameters
-      )
+      Binding.build(config, node_name, magic_parameter: magic_parameters)
     end
 
     def magic_parameters
@@ -208,14 +197,16 @@ module Metalware
       parameters[:nodename]
     end
 
-    def node
-      Node.new(config, node_name)
-    end
-
     def raw_repo_config_str
       Templating::Configuration.for_node(node_name, config: config)
                                .raw_config
                                .to_s
+    end
+
+    # Used in testing
+    def magic_namespace
+      Binding.build_no_wrapper(config, node_name, magic_parameter: magic_parameters)
+             .send(:alces_namespace)
     end
   end
 end

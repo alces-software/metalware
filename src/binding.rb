@@ -34,8 +34,8 @@ module Metalware
       Wrapper.new(alces_binding).get_binding
     end
 
-    def self.build_no_wrapper(config, node = nil, namespace: nil)
-      Parameter.new(config: config, node_name: node, namespace: namespace)
+    def self.build_no_wrapper(config, node = nil, magic_parameter: nil)
+      Parameter.new(config: config, node_name: node, magic_parameter: magic_parameter)
     end
   end
 end
