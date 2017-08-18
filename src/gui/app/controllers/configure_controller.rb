@@ -18,8 +18,8 @@ class ConfigureController < ApplicationController
   private
 
   def assign_form_variables
-    @title = 'Configure Domain'
-    @questions = Configure::Questions.for_domain
+    @title = title
+    @questions = questions
 
     # If we've been sent some `answers` in the request then these will be
     # re-shown in the form, otherwise we will show the old saved answers.
@@ -35,8 +35,20 @@ class ConfigureController < ApplicationController
 
   def configure_with_answers(answers)
     run_command(
-      Metalware::Commands::Configure::Domain,
+      configure_command,
       answers: answers.to_json
     )
+  end
+
+  def title
+    raise NotImplementedError
+  end
+
+  def configure_command
+    raise NotImplementedError
+  end
+
+  def questions
+    raise NotImplementedError
   end
 end
