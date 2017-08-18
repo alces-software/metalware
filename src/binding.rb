@@ -30,11 +30,15 @@ end
 module Metalware
   module Binding
     def self.build(*a)
-      alces_binding = build_no_wrapper(*a)
-      Wrapper.new(alces_binding).get_binding
+      build_wrapper(*a).get_binding
     end
 
-    def self.build_no_wrapper(config, node = nil, magic_parameter: nil)
+    def self.build_wrapper(*a)
+      alces_binding = build_no_wrapper(*a)
+      Wrapper.new(alces_binding)
+    end
+
+    def self.build_no_wrapper(config, node = nil, magic_parameter: {})
       Parameter.new(config: config, node_name: node, magic_parameter: magic_parameter)
     end
   end

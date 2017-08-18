@@ -1,6 +1,31 @@
 
 # frozen_string_literal: true
 
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+
+require 'node'
+require 'binding'
+
 module Metalware
   module Templating
     class GroupNamespace
@@ -20,7 +45,7 @@ module Metalware
         )
       end
 
-      def nodes
+      def nodes(&b)
         NodeattrInterface.nodes_in_primary_group(name).map do |node_name|
           yield templating_config_for_node(node_name)
         end
@@ -41,11 +66,7 @@ module Metalware
       # raw configuration files applicable to this group. This should be
       # improved.
       def templating_config_for_node(node_name)
-        RepoConfigParser.parse_for_node(
-          node_name: node_name,
-          config: metalware_config,
-          include_groups: false
-        )
+        Binding.build_wrapper(metalware_config, node_name)
       end
 
       def templating_configuration
