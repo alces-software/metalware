@@ -33,7 +33,7 @@ require 'templating/iterable_recursive_open_struct'
 require 'templating/missing_parameter_wrapper'
 require 'templating/magic_namespace'
 require 'templating/renderer'
-require 'templating/repo_config_parser'
+require 'templating/configuration'
 require 'binding'
 require 'templating/magic_namespace'
 require 'node'
@@ -154,8 +154,6 @@ module Metalware
       end
     end
 
-    attr_reader :config
-
     # XXX Have this just take allowed keyword parameters:
     # - nodename
     # - index
@@ -173,6 +171,12 @@ module Metalware
 
     def render_from_string(str)
       replace_erb(str, binding)
+    end
+
+    # Only use this for the view method, otherwise it is slow
+    # If you need a value, query the Binding::Parameter directly
+    def repo_config
+      eval(render_from_string(raw_repo_config_str))
     end
 
     delegate :replace_erb, to: Templating::Renderer
@@ -206,6 +210,12 @@ module Metalware
 
     def node
       Node.new(config, node_name)
+    end
+
+    def raw_repo_config_str
+      Templating::Configuration.for_node(node_name, config: config)
+                               .raw_config
+                               .to_s
     end
   end
 end

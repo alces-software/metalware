@@ -64,6 +64,13 @@ module Metalware
         end
       end
 
+      def config
+        @config ||= begin
+          raw_hash = template_configuration.raw_config
+          Templating::IterableRecursiveOpenStruct.new(raw_hash)
+        end
+      end
+
       private
 
       attr_reader :metalware_config, :node, :cache_config, :alces_namespace
@@ -77,13 +84,6 @@ module Metalware
           erb_result = replace_erb(result, loop_count)
           config_struct.send(:"#{next_method}=", erb_result)
           config_struct.send(next_method)
-        end
-      end
-
-      def config
-        @config ||= begin
-          raw_hash = template_configuration.raw_config
-          Templating::IterableRecursiveOpenStruct.new(raw_hash)
         end
       end
 

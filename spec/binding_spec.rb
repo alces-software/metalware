@@ -31,7 +31,6 @@ RSpec.describe Metalware::Binding do
   let :config { Metalware::Config.new }
   let :domain { Metalware::Binding.build(config) }
   let :node05 { Metalware::Binding.build(config, 'node05') }
-  let :testnode1_binding {}
 
   let :filesystem do
     FileSystem.setup do |fs|
