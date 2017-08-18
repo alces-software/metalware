@@ -30,7 +30,23 @@ class ConfigureController < ApplicationController
     @entered_answers ||=
       params[:answers].permit!.to_h.select do |_identifier, answer|
         answer.present?
-      end
+      end.map do |identifier, answer|
+        question = find_question(identifier)
+        [identifier, coerce_answer(answer, question.type)]
+      end.to_h
+  end
+
+  def find_question(identifier)
+    questions.find {|q| q.identifier == identifier.to_sym}
+  end
+
+  def coerce_answer(answer, type)
+    case type
+    when :boolean
+      answer == 'true' ? true : false
+    else
+      answer
+    end
   end
 
   def configure_with_answers(answers)

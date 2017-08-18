@@ -1,19 +1,39 @@
 
 <%= form_tag do %>
   <% @questions.each do |question| %>
+
     <% namespaced_identifier = "answers[#{question.identifier}]" %>
+    <% current_answer = @entered_answers ? @entered_answers[question.identifier] : question.old_answer %>
+
     <div class='form-group'>
       <%= label_tag(namespaced_identifier, question.question) %>
-      <% if question.answer_required? %>
-        <span class="badge badge-info">Required</span>
+      <% case question.type
+         when :boolean %>
+
+       <div class='form-check'>
+         <%# XXX Could make boolean answers default to next level answer when
+           no current answer. %>
+         <%= label_tag("#{namespaced_identifier}_true", 'Yes', class: 'form-check-label') %>
+         <%= radio_button_tag(namespaced_identifier, 'true', checked=current_answer) %>
+         <%= label_tag("#{namespaced_identifier}_false", 'No', class: 'form-check-label') %>
+         <%= radio_button_tag(namespaced_identifier, 'false', checked=!current_answer) %>
+       </div>
+
+      <% else %>
+
+        <% if question.answer_required? %>
+          <span class="badge badge-info">Required</span>
+        <% end %>
+        <%= text_field_tag(
+          namespaced_identifier,
+          current_answer,
+          class: ['form-control', 'form-control-sm'],
+          placeholder: question.default,
+          required: question.answer_required?
+        ) %>
+
       <% end %>
-      <%= text_field_tag(
-        namespaced_identifier,
-        @entered_answers ? @entered_answers[question.identifier] : question.old_answer,
-        class: ['form-control', 'form-control-sm'],
-        placeholder: question.default,
-        required: question.answer_required?
-      ) %>
+
     </div>
   <% end %>
 
