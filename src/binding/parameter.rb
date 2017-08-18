@@ -104,7 +104,6 @@ module Metalware
           Templating::MagicNamespace.new(
             config: metalware_config,
             node: node,
-            include_groups: true,
             **magic_parameter
           )
         end

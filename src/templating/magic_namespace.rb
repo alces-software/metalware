@@ -38,20 +38,16 @@ require 'node'
 module Metalware
   module Templating
     class MagicNamespace
-      # `include_groups` = whether to include the group namespaces when
-      # converting this `MagicNamespace` instance to a hash.
       def initialize(
         config:,
         node: nil,
         firstboot: nil,
-        files: nil,
-        include_groups: true
+        files: nil
       )
         @metalware_config = config
         @node = Node.new(metalware_config, node)
         @firstboot = firstboot
         @files = Hashie::Mash.new(files) if files
-        @include_groups = include_groups
       end
 
       attr_reader :firstboot, :files
@@ -130,14 +126,13 @@ module Metalware
 
       private
 
-      attr_reader :metalware_config, :node, :include_groups
+      attr_reader :metalware_config, :node
 
       def group_namespace_for(group_name)
         GroupNamespace.new(metalware_config, group_name)
       end
 
       def groups_data
-        return unless include_groups
         groups { |group| group }
       end
 
