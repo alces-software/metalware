@@ -36,6 +36,7 @@ module Metalware
     INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
+    MAXIMUM_RERENDER = 10
 
     NODEATTR_COMMAND = 'nodeattr'
 

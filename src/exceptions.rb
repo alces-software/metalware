@@ -147,6 +147,9 @@ module Metalware
 
   class DomainTemplatesInternalError < MetalwareError
   end
+
+  class InfiniteAnswerRecursion < MetalwareError
+  end
 end
 
 

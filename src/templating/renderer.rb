@@ -22,6 +22,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'exceptions'
+require 'constants'
+
 module Metalware
   module Templating
     module Renderer
@@ -32,10 +35,15 @@ module Metalware
           trim_mode = '-'
 
           safe_level = 0
-          erb = ERB.new(template, safe_level, trim_mode)
 
           begin
-            erb.result(binding)
+            count = 0
+            while template.include?('<%')
+              raise InfiniteAnswerRecursion, 'Their is an infinite recursion in your answers' if count > Constants::MAXIMUM_RERENDER
+              erb = ERB.new(template, safe_level, trim_mode)
+              template = erb.result(binding)
+            end
+            template
           rescue SyntaxError => error
             handle_error_rendering_erb(template, error)
           end
