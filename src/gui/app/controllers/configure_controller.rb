@@ -10,7 +10,7 @@ class ConfigureController < ApplicationController
     if configure_with_answers(entered_answers)
       redirect_to '/'
     else
-      assign_form_variables(entered_answers: entered_answers)
+      assign_form_variables
       render 'show'
     end
   end
