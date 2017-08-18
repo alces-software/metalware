@@ -92,9 +92,6 @@ module Metalware
     end
   end
 
-  class MissingParameterError < MetalwareError
-  end
-
   class ValidationInternalError < MetalwareError
   end
 

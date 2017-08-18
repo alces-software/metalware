@@ -25,6 +25,7 @@
 
 require 'node'
 require 'binding'
+require 'templating/iterable_recursive_open_struct'
 
 module Metalware
   module Templating
@@ -39,10 +40,7 @@ module Metalware
       end
 
       def answers
-        MissingParameterWrapper.new(
-          templating_configuration.answers,
-          raise_on_missing: true
-        )
+        IterableRecursiveOpenStruct.new(templating_configuration.answers)
       end
 
       def nodes

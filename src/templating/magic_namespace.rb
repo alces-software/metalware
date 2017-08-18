@@ -30,8 +30,8 @@ require 'constants'
 require 'deployment_server'
 require 'nodeattr_interface'
 require 'group_cache'
-require 'templating/missing_parameter_wrapper'
 require 'templating/group_namespace'
+require 'templating/iterable_recursive_open_struct'
 require 'object_fields_hasher'
 require 'node'
 
@@ -73,7 +73,7 @@ module Metalware
         # templates) we should not be strict, to avoid erroring as many answers
         # may be unset.
         if node.name.present?
-          MissingParameterWrapper.new(node.answers, raise_on_missing: true)
+          IterableRecursiveOpenStruct.new(node.answers)
         else
           Hashie::Mash.new(node.answers)
         end

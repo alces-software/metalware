@@ -395,12 +395,6 @@ RSpec.describe Metalware::Templater do
             expect(answers.some_question).to eq('some_answer')
           end
         end
-
-        it "raises if attempt to access an answer which isn't present" do
-          filesystem.test do
-            expect { answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
-          end
-        end
       end
 
       context 'when no node passed' do
