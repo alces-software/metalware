@@ -4,10 +4,15 @@
     <% namespaced_identifier = "answers[#{question.identifier}]" %>
     <div class='form-group'>
       <%= label_tag(namespaced_identifier, question.question) %>
+      <% if question.answer_required? %>
+        <span class="badge badge-info">Required</span>
+      <% end %>
       <%= text_field_tag(
         namespaced_identifier,
-        @answers[question.identifier],
-        class: ['form-control', 'form-control-sm']
+        @entered_answers ? @entered_answers[question.identifier] : question.old_answer,
+        class: ['form-control', 'form-control-sm'],
+        placeholder: question.default,
+        required: question.answer_required?
       ) %>
     </div>
   <% end %>

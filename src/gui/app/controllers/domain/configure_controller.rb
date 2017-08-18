@@ -16,10 +16,13 @@ class Domain::ConfigureController < ApplicationController
 
   private
 
-  def assign_form_variables(entered_answers: {})
+  def assign_form_variables
     @title = 'Configure Domain'
     @questions = Configure::Questions.for_domain
-    @answers = entered_answers
+
+    # If we've been sent some `answers` in the request then these will be
+    # re-shown in the form, otherwise we will show the old saved answers.
+    entered_answers if params[:answers]
   end
 
   def entered_answers
