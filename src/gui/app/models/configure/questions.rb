@@ -7,12 +7,17 @@ class Configure::Questions < ApplicationModel
       Metalware::Configurator.for_domain(file_path: file_path).questions
     end
 
-    def for_group
-      configure_data[:group]
+    def for_group(group_name)
+      Metalware::Configurator.for_group(
+        group_name, file_path: file_path
+      ).questions
     end
 
-    def for_node
-      configure_data[:node]
+    def for_node(node_name)
+      node = Metalware::Node.new(config, node_name)
+      Metalware::Configurator.for_node(
+        node, file_path: file_path
+      ).questions
     end
 
     private

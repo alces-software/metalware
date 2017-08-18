@@ -36,6 +36,7 @@ class ConfigureController < ApplicationController
   def configure_with_answers(answers)
     run_command(
       configure_command,
+      *configure_command_args,
       answers: answers.to_json
     )
   end
@@ -46,6 +47,10 @@ class ConfigureController < ApplicationController
 
   def configure_command
     raise NotImplementedError
+  end
+
+  def configure_command_args
+    []
   end
 
   def questions

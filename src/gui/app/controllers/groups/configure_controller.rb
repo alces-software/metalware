@@ -1,15 +1,30 @@
 # frozen_string_literal: true
 
-class Groups::ConfigureController < ApplicationController
+class Groups::ConfigureController < ConfigureController
   def start
     name = params[:group_name]
     redirect_to (group_configure_path name)
   end
 
-  def show
-    name = params[:group_id]
-    @title = "Configure Group #{name}"
-    @questions = Configure::Questions.for_group
-    @answers = {}
+  private
+
+  def title
+    "Configure Group #{group_name}"
+  end
+
+  def configure_command
+    Metalware::Commands::Configure::Group
+  end
+
+  def configure_command_args
+    [group_name]
+  end
+
+  def questions
+    Configure::Questions.for_group(group_name)
+  end
+
+  def group_name
+    params[:group_id]
   end
 end
