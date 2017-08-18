@@ -212,10 +212,18 @@ module Metalware
 
           if default_input
             highline_question.default = default_input
-          elsif required
+          elsif answer_required?
             highline_question.validate = ensure_answer_given
           end
         end
+      end
+
+      # Whether an answer to this question is required at this level; an answer
+      # will not be required if there is already an answer from the question
+      # default or a higher level answer file (the `default`), or if the
+      # question is not `required`.
+      def answer_required?
+        !default && required
       end
 
       private
@@ -228,14 +236,18 @@ module Metalware
       end
 
       def default_input
-        default_input = old_answer.nil? ? default : old_answer
-        if !default_input.nil? && type == :boolean
+        if !current_answer_value.nil? && type == :boolean
           # Default for a boolean question needs to be set to the input
           # HighLine's `agree` expects, i.e. 'yes' or 'no'.
-          default_input ? 'yes' : 'no'
+          current_answer_value ? 'yes' : 'no'
         else
-          default_input
+          current_answer_value
         end
+      end
+
+      # The answer value this question at this level would currently take.
+      def current_answer_value
+        old_answer.nil? ? default : old_answer
       end
 
       def ask_boolean_question(highline)
