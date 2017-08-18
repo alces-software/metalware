@@ -106,7 +106,7 @@ module Metalware
             node: node,
             include_groups: true,
             **magic_parameter
-          )          
+          )
         end
       end
     end
