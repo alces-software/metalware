@@ -40,28 +40,11 @@ module Metalware
         @magic_parameter = magic_parameter
       end
 
-      # Parameter is highly coupled to how the wrapper works
-      # Query by-parses the need to have an outer wrapper around Parameter
-      # However sub-wrappers will be created in-order to template config ERB
-      def query(value)
-        retrieve_value(0, {}, value, query: true)
-      end
-
-      def retrieve_value(loop_count, call_stack, next_method, query: false)
-        result = if call_stack.empty? && next_method == :alces
-                   alces_namespace
-                 else
-                   retrieve_config_value(loop_count, call_stack, next_method)
-                 end
-        if result.is_a?(Templating::IterableRecursiveOpenStruct)
-          # If a wrapper is bing used then it tracks the call back and thus needs
-          # to continue tracking Parameters. However if it is a query, no wrapper
-          # is being used and thus the actual result needs to be returned
-          # This should be altered in the future to reduce the coupling between
-          # Parameter and Wrapper
-          query ? result : self
+      def retrieve_value(loop_count, call_stack, next_method)
+        if call_stack.empty? && next_method == :alces
+          alces_namespace
         else
-          result
+          retrieve_config_value(loop_count, call_stack, next_method)
         end
       end
 
@@ -80,7 +63,7 @@ module Metalware
         config_struct = loop_through_call_stack(call_stack)
         result = config_struct.send(next_method)
         if result.is_a?(Templating::IterableRecursiveOpenStruct)
-          result
+          self
         else
           erb_result = replace_erb(result, loop_count)
           config_struct.send(:"#{next_method}=", erb_result)

@@ -138,7 +138,7 @@ module Metalware
     end
 
     def query_repo(value)
-      parameter_binding.query(value)
+      parameter_binding.eval(value.to_s)
     end
 
     private
@@ -186,7 +186,7 @@ module Metalware
 
     def parameter_binding
       @parameter_binding ||= begin
-        Metalware::Binding.build_no_wrapper(metalware_config, name)
+        Metalware::Binding.build(metalware_config, name)
       end
     end
 
