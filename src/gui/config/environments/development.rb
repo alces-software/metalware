@@ -4,7 +4,7 @@ Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Allow access from within same network as Controller appliance.
-  config.web_console.whitelisted_ips = '10.100.0.0/16'
+  config.web_console.whitelisted_ips = '10.0.0.0/8'
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
