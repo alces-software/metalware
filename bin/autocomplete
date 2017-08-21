@@ -45,6 +45,7 @@ class AutoComplete
   def run
     auto_complete_commands
     auto_complete_options
+    auto_complete_set
     return_values
   end
 
@@ -67,6 +68,10 @@ class AutoComplete
         add_return_values(opt['tags'])
       end
     end
+  end
+
+  def auto_complete_set
+    add_return_values(current_hash['autocomplete'].to_s) unless current_hash.empty?
   end
 
   def current_hash
