@@ -18,7 +18,10 @@ module Metalware
       end
 
       def template_paths
-        raise NotImplementedError
+        self.class::TEMPLATES.map do |template_type|
+          full_template_path = template_path(template_type, node: node)
+          file_path.repo_relative_path_to(full_template_path)
+        end
       end
 
       private

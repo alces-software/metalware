@@ -4,6 +4,8 @@
 module Metalware
   module BuildMethods
     class Kickstart < BuildMethod
+      TEMPLATES = [:kickstart, :pxelinux].freeze
+
       def render_build_started_templates(parameters)
         render_kickstart(parameters)
         render_pxelinux(parameters)
@@ -11,13 +13,6 @@ module Metalware
 
       def render_build_complete_templates(parameters)
         render_pxelinux(parameters)
-      end
-
-      def template_paths
-        [:pxelinux, :kickstart].map do |template_type|
-          full_template_path = template_path(template_type, node: node)
-          file_path.repo_relative_path_to(full_template_path)
-        end
       end
 
       private
