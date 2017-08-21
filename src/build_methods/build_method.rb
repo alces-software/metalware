@@ -10,6 +10,11 @@ module Metalware
       end
 
       def render_build_started_templates(_parameters)
+        # Note: Currently both `BuildMethod` implementations
+        # `render_#{template_type}` for each `$template_type` in `TEMPLATES`;
+        # if this trend continues we could do this dynamically here and remove
+        # this method from the implementations (at the possible expense of
+        # understandability).
         raise NotImplementedError
       end
 
