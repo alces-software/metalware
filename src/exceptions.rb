@@ -150,6 +150,9 @@ module Metalware
 
   class DomainTemplatesInternalError < MetalwareError
   end
+
+  class EditModeError < MetalwareError
+  end
 end
 
 
