@@ -11,7 +11,10 @@ module Metalware
       def render_build_complete_templates(_parameters); end
 
       def template_paths
-        # XXX Specify template paths here
+        [:basic].map do |template_type|
+          full_template_path = template_path(template_type, node: node)
+          file_path.repo_relative_path_to(full_template_path)
+        end
       end
 
       private

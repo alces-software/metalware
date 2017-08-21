@@ -266,6 +266,18 @@ RSpec.describe Metalware::Commands::Build do
           run_build('testnode01')
         end
       end
+
+      # Note: similar (but simpler) version of test for Kickstart build method.
+      it 'specifies correct template dependencies' do
+        filesystem.test do
+          build_command = run_build('testnode01')
+
+          # Not ideal to test private method, but seems best way in this case.
+          dependency_hash = build_command.send(:dependency_hash)
+
+          expect(dependency_hash[:repo]).to eq(['basic/default'])
+        end
+      end
     end
   end
 
