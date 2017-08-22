@@ -155,7 +155,7 @@ commands:
       - *group_option
       - tags: [--edit-start]
         description: >
-          Only renders the build templates to be editted. Does not wait for the
+          Only renders the build templates to be edited. Does not wait for the
           nodes to be built
       - tags: [--edit-continue]
         description: >

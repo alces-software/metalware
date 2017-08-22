@@ -52,7 +52,10 @@ module Metalware
 
       def run
         render_build_templates unless edit_continue
-        return if run_edit_start
+        if edit_start
+          puts(EDIT_START_MSG)
+          return
+        end
         wait_for_nodes_to_build
         teardown
       end
@@ -179,11 +182,6 @@ module Metalware
         The build templates have been rendered and ready to be edited with `metal edit`
         Continue the build process with the `--edit-continue` flag
       EOF
-
-      def run_edit_start
-        puts EDIT_START_MSG if @edit_start
-        @edit_start
-      end
     end
   end
 end
