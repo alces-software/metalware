@@ -40,11 +40,13 @@ module Metalware
         @magic_parameter = magic_parameter
       end
 
-      def retrieve_value(loop_count, call_stack, next_method)
+      def retrieve_value(loop_count, call_stack, next_method, &block)
         if call_stack.empty? && next_method == :alces
           alces_namespace
-        else
+        elsif block.nil?
           retrieve_config_value(loop_count, call_stack, next_method)
+        else
+          run_config_block(call_stack, next_method, &block)
         end
       end
 
@@ -69,6 +71,11 @@ module Metalware
           config_struct.send(:"#{next_method}=", erb_result)
           config_struct.send(next_method)
         end
+      end
+
+      def run_config_block(call_stack, block_method, &block)
+        config_struct = loop_through_call_stack(call_stack)
+        config_struct.send(block_method, &block)
       end
 
       def loop_through_call_stack(call_stack)

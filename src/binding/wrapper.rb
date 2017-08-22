@@ -64,7 +64,7 @@ module Metalware
       def alces_get_value(s, *a, &b)
         if alces_binding.is_a?(Metalware::Binding::Parameter)
           next_method = (s == :[] ? a[0] : s) # Converts array references to methods
-          alces_binding.retrieve_value(count, alces_call_stack, next_method)
+          alces_binding.retrieve_value(count, alces_call_stack, next_method, &b)
         else
           alces_binding.send(s, *a, &b)
         end
