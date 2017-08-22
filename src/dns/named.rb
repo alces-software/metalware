@@ -96,16 +96,18 @@ module Metalware
 
       # TODO: These commands will break hosts DNS. Might be a good idea to run
       # similar commands for hosts
-      RESTART_NAMED_CMDS = <<~EOF.strip_heredoc
-        systemctl disable dnsmasq
-        systemctl stop dnsmasq
-        systemctl enable named
-        systemctl restart named
-      EOF
+      RESTART_NAMED_CMDS = [
+        'systemctl disable dnsmasq',
+        'systemctl stop dnsmasq',
+        'systemctl enable named',
+        'systemctl restart named',
+      ].freeze
 
       def restart_named
         MetalLog.info 'Restarting named'
-        SystemCommand.run(RESTART_NAMED_CMDS)
+        RESTART_NAMED_CMDS.each do |cmd|
+          SystemCommand.run(cmd)
+        end
       end
 
       def each_network
