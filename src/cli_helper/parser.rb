@@ -78,6 +78,7 @@ module Metalware
                 parse_command_attributes(subcommand, subattributes)
               end
             when 'autocomplete'
+              # Intentionally left blank
             else
               c.send("#{a}=", v.respond_to?(:chomp) ? v.chomp : v)
             end
