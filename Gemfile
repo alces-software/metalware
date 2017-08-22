@@ -34,6 +34,9 @@ end
 gem 'bootstrap', '~> 4.0.0.beta'
 gem 'jquery-rails' # Required for Bootstrap.
 
+# Required as Rails need a JavaScript runtime.
+gem 'therubyracer'
+
 # Copied from Rails-generated Gemfile below this point.
 
 git_source(:github) do |repo_name|
