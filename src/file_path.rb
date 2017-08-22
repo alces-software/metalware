@@ -59,6 +59,7 @@ module Metalware
     end
 
     def template_path(template_type, node: nil)
+      node = Node.new(config, nil) if node.nil?
       File.join(
         config.repo_path,
         template_type.to_s,
@@ -90,13 +91,7 @@ module Metalware
     end
 
     def repo_template(template_type, node:)
-      templates = if node.nil?
-                    Templating::RepoConfigParser
-                      .parse_for_domain(config: config)[:templates]
-                  else
-                    node.repo_config[:templates]
-                  end
-      (templates || {})[template_type]
+      (node.repo_config[:templates] || {})[template_type]
     end
   end
 end
