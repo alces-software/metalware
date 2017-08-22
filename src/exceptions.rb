@@ -92,9 +92,6 @@ module Metalware
     end
   end
 
-  class MissingParameterError < MetalwareError
-  end
-
   class ValidationInternalError < MetalwareError
   end
 
@@ -149,6 +146,9 @@ module Metalware
   end
 
   class DomainTemplatesInternalError < MetalwareError
+  end
+
+  class InfiniteAnswerRecursion < MetalwareError
   end
 end
 

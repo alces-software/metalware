@@ -22,26 +22,24 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+# Dynamically requires all ruby files in binding directory
+Dir[File.join(File.dirname(__FILE__), 'binding', '**/*.rb')].map do |file|
+  require file.sub("#{File.dirname(__FILE__)}/", '').chomp('.rb')
+end
+
 module Metalware
-  module Constants
-    METALWARE_INSTALL_PATH = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+  module Binding
+    def self.build(*a)
+      build_wrapper(*a).get_binding
+    end
 
-    METALWARE_CONFIGS_PATH = File.join(METALWARE_INSTALL_PATH, 'etc')
-    DEFAULT_CONFIG_PATH = File.join(METALWARE_CONFIGS_PATH, 'config.yaml')
+    def self.build_wrapper(*a)
+      alces_binding = build_no_wrapper(*a)
+      Wrapper.new(alces_binding)
+    end
 
-    METALWARE_DATA_PATH = '/var/lib/metalware'
-    CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
-    HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
-    GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
-    INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
-
-    MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
-    MAXIMUM_RERENDER = 10
-
-    NODEATTR_COMMAND = 'nodeattr'
-
-    SERVER_CONFIG_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/server.yaml')
-    GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
-    HOSTS_PATH = '/etc/hosts'
+    def self.build_no_wrapper(config, node = nil, magic_parameter: {})
+      Parameter.new(config: config, node_name: node, magic_parameter: magic_parameter)
+    end
   end
 end

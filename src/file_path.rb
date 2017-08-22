@@ -81,7 +81,7 @@ module Metalware
     end
 
     def repo_template(template_type, node:)
-      repo_specified_templates = node.repo_config[:templates] || {}
+      repo_specified_templates = node.query_repo(:templates) || {}
       repo_specified_templates[template_type]
     end
   end

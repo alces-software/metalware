@@ -30,10 +30,10 @@ require 'metal_log'
 require 'exceptions'
 require 'utils'
 require 'templating/iterable_recursive_open_struct'
-require 'templating/missing_parameter_wrapper'
 require 'templating/magic_namespace'
 require 'templating/renderer'
-require 'templating/repo_config_parser'
+require 'templating/configuration'
+require 'binding'
 
 module Metalware
   class Templater
@@ -151,30 +151,61 @@ module Metalware
       end
     end
 
-    attr_reader :config
-
     # XXX Have this just take allowed keyword parameters:
     # - nodename
     # - index
     # - what else?
-    def initialize(metalware_config, parameters = {})
-      @config = Templating::RepoConfigParser.parse_for_node(
-        node_name: parameters[:nodename],
-        config: metalware_config,
-        additional_parameters: parameters
-      )
+    def initialize(metalware_config, parameters_input = {})
+      @config = metalware_config
+      @parameters = parameters_input
     end
 
     def render(template)
       File.open(template.chomp, 'r') do |f|
-        replace_erb(f.read, @config)
+        replace_erb(f.read, binding)
       end
     end
 
     def render_from_string(str)
-      replace_erb(str, @config)
+      replace_erb(str, binding)
+    end
+
+    # Only use this for the view method, otherwise it is slow
+    # If you need a value, query the Binding::Parameter directly
+    def repo_config
+      eval(render_from_string(raw_repo_config_str))
     end
 
     delegate :replace_erb, to: Templating::Renderer
+
+    private
+
+    attr_reader :config, :parameters
+
+    def binding
+      Binding.build(config, node_name, magic_parameter: magic_parameters)
+    end
+
+    def magic_parameters
+      parameters.select do |k, v|
+        [:firstboot, :files].include?(k) && !v.nil?
+      end
+    end
+
+    def node_name
+      parameters[:nodename]
+    end
+
+    def raw_repo_config_str
+      Templating::Configuration.for_node(node_name, config: config)
+                               .raw_config
+                               .to_s
+    end
+
+    # Used in testing
+    def magic_namespace
+      Binding.build_no_wrapper(config, node_name, magic_parameter: magic_parameters)
+             .send(:alces_namespace)
+    end
   end
 end
