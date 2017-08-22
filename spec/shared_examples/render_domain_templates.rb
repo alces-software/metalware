@@ -135,7 +135,7 @@ RSpec.shared_examples :render_domain_templates do |test_command|
         ).to eq(existing_genders_contents)
 
         # Invalid rendered genders available for inspection.
-        expected_invalid_rendered_genders = "some genders template 0"
+        expected_invalid_rendered_genders = 'some genders template 0'
         expect(
           File.read(Metalware::Constants::INVALID_RENDERED_GENDERS_PATH)
         ).to include(expected_invalid_rendered_genders)

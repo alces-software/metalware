@@ -252,7 +252,7 @@ RSpec.describe Metalware::Templater do
 
   describe '#render_managed_file' do
     # XXX Similar to above.
-    let :template { "simple template without ERB" }
+    let :template { 'simple template without ERB' }
     let :output_path { '/output' }
     let :output { File.read(output_path) }
 
