@@ -32,24 +32,30 @@ require 'node'
 require 'nodes'
 require 'output'
 require 'build_files_retriever'
+require 'exceptions'
 
 module Metalware
   module Commands
     class Build < CommandHelpers::BaseCommand
       private
 
-      attr_reader :group_name, :nodes
+      attr_reader :group_name, :nodes, :edit_start, :edit_continue
 
       delegate :template_path, to: :file_path
 
       def setup
+        setup_edit_mode
         node_identifier = args.first
         @group_name = node_identifier if options.group
         @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
-        render_build_templates
+        render_build_templates unless edit_continue
+        if edit_start
+          puts(EDIT_START_MSG)
+          return
+        end
         wait_for_nodes_to_build
         teardown
       end
@@ -163,6 +169,19 @@ module Metalware
         EOF
         render_all_build_complete_templates if agree(should_rerender)
       end
+
+      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
+
+      def setup_edit_mode
+        @edit_start = options.edit_start
+        @edit_continue = options.edit_continue
+        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
+      end
+
+      EDIT_START_MSG = <<-EOF.strip_heredoc
+        The build templates have been rendered and ready to be edited with `metal edit`
+        Continue the build process with the `--edit-continue` flag
+      EOF
     end
   end
 end

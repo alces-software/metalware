@@ -153,6 +153,14 @@ commands:
     action: Commands::Build
     options:
       - *group_option
+      - tags: [--edit-start]
+        description: >
+          Only renders the build templates to be edited. Does not wait for the
+          nodes to be built
+      - tags: [--edit-continue]
+        description: >
+          Continues the build process after the files have been editted. Skips
+          the initial template rendering step
 
   configure:
     syntax: metal configure [options]
