@@ -114,9 +114,11 @@ module Metalware
 
       def named_zone_hash(zone, net)
         {
-          alces_named: {
-            zone: zone,
-            net: net,
+          alces: {
+            named: {
+              zone: zone,
+              net: net,
+            },
           },
         }
       end

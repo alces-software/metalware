@@ -11,6 +11,7 @@ require 'group_cache'
 require 'templating/missing_parameter_wrapper'
 require 'templating/group_namespace'
 require 'object_fields_hasher'
+require 'recursive_open_struct'
 
 module Metalware
   module Templating
@@ -22,16 +23,18 @@ module Metalware
         node: nil,
         firstboot: nil,
         files: nil,
-        include_groups: true
+        include_groups: true,
+        additional_parameters: {}
       )
         @metalware_config = config
         @node = node
         @firstboot = firstboot
         @files = Hashie::Mash.new(files) if files
         @include_groups = include_groups
+        @additional_parameters = RecursiveOpenStruct.new(additional_parameters || {})
       end
 
-      attr_reader :firstboot, :files
+      attr_reader :firstboot, :files, :additional_parameters
       delegate :index, :group_index, to: :node
       delegate :to_json, to: :to_h
 
@@ -103,6 +106,14 @@ module Metalware
 
       def hostip
         DeploymentServer.ip
+      end
+
+      def method_missing(s, *_a, &_b)
+        respond_to_missing?(s) ? additional_parameters.send(s) : super
+      end
+
+      def respond_to_missing?(s)
+        !additional_parameters.send(s).nil?
       end
 
       private

@@ -71,6 +71,7 @@ module Metalware
       def initialize(node_name:, config:, additional_parameters:, include_groups:)
         @node_name = node_name
         @metalware_config = config
+        @magic_parameters = additional_parameters.delete(:alces)
         @additional_parameters = additional_parameters
         @include_groups = include_groups
       end
@@ -104,7 +105,7 @@ module Metalware
       def magic_parameters
         additional_parameters.select do |k, v|
           [:firstboot, :files].include?(k) && !v.nil?
-        end
+        end.merge(additional_parameters: @magic_parameters)
       end
 
       def perform_config_parsing_pass(current_parsed_config)
