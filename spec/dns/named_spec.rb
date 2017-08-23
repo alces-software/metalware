@@ -52,6 +52,7 @@ RSpec.describe Metalware::DNS::Named do
       allow(named).to receive(:setup?).and_return(false)
       # Prevents restart_named from running as the bash commands can't be mocked
       allow(named).to receive(:restart_named)
+      allow(named).to receive(:start_named)
     end
 
     it "errors if external dns isn't set" do
@@ -74,7 +75,8 @@ RSpec.describe Metalware::DNS::Named do
     before :each do
       allow(named).to receive(:setup?).and_return(true)
       # Prevents restart_named from accidentally running, DANGEROUS
-      expect(named).not_to receive(:restart_named)
+      expect(named).not_to receive(:start_named)
+      expect(named).to receive(:restart_named)
     end
 
     it 'skips setup but updates named server' do

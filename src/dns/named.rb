@@ -45,6 +45,7 @@ module Metalware
           render_zone_template('forward', zone, net)
           render_zone_template('reverse', zone, net)
         end
+        restart_named
       end
 
       private
@@ -58,7 +59,7 @@ module Metalware
       def setup
         check_external_dns_is_set
         render_base_named_conf
-        restart_named
+        start_named
       end
 
       def setup?
@@ -96,18 +97,22 @@ module Metalware
 
       # TODO: These commands will break hosts DNS. Might be a good idea to run
       # similar commands for hosts
-      RESTART_NAMED_CMDS = [
+      START_NAMED_CMDS = [
         'systemctl disable dnsmasq',
         'systemctl stop dnsmasq',
         'systemctl enable named',
-        'systemctl restart named',
       ].freeze
 
-      def restart_named
+      def start_named
         MetalLog.info 'Restarting named'
-        RESTART_NAMED_CMDS.each do |cmd|
+        START_NAMED_CMDS.each do |cmd|
           SystemCommand.run(cmd)
         end
+        restart_named
+      end
+
+      def restart_named
+        SystemCommand.run('systemctl restart named')
       end
 
       def each_network
