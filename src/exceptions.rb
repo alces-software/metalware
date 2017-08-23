@@ -71,6 +71,9 @@ module Metalware
   class InvalidInput < MetalwareError
   end
 
+  class InvalidConfigParameter < MetalwareError
+  end
+
   class IterableRecursiveOpenStructPropertyError < MetalwareError
   end
 
@@ -152,6 +155,9 @@ module Metalware
   end
 
   class EditModeError < MetalwareError
+  end
+
+  class MissingExternalDNS < MetalwareError
   end
 end
 

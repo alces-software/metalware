@@ -81,6 +81,8 @@ mkdir -p /var/lib/metalware/rendered/{basic,kickstart,system}
 mkdir -p /var/lib/metalware/cache/{built-nodes,templates}
 mkdir -p /var/lib/metalware/repo
 mkdir -p /var/lib/metalware/answers/{groups,nodes}
+mkdir -p /etc/named
+touch /etc/named/metalware.conf
 chmod a+rw /var/lib/metalware/cache/built-nodes
 
 # Link hosts files in to Metalware data dir; this will then be made available
@@ -88,7 +90,7 @@ chmod a+rw /var/lib/metalware/cache/built-nodes
 ln -s /etc/hosts /var/lib/metalware/rendered/system/
 
 mkdir -p "${target}"
-cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src} "${target}"
+cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src,templates} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 

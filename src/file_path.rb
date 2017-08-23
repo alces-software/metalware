@@ -24,6 +24,7 @@
 
 require 'constants'
 require 'config'
+require 'templating/repo_config_parser'
 
 module Metalware
   class FilePath
@@ -48,17 +49,26 @@ module Metalware
       config.node_answers_file(node)
     end
 
+    def repo
+      config.repo_path
+    end
+
     def repo_relative_path_to(path)
-      repo_path = Pathname.new(config.repo_path)
+      repo_path = Pathname.new(repo)
       Pathname.new(path).relative_path_from(repo_path).to_s
     end
 
-    def template_path(template_type, node:)
+    def template_path(template_type, node: nil)
+      node = Node.new(config, nil) if node.nil?
       File.join(
         config.repo_path,
         template_type.to_s,
         template_file_name(template_type, node: node)
       )
+    end
+
+    def named_zone(zone)
+      File.join(var_named, zone)
     end
 
     private
@@ -81,8 +91,7 @@ module Metalware
     end
 
     def repo_template(template_type, node:)
-      repo_specified_templates = node.repo_config[:templates] || {}
-      repo_specified_templates[template_type]
+      (node.repo_config[:templates] || {})[template_type]
     end
   end
 end

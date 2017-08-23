@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'exceptions'
+require 'open3'
 
 module Metalware
   module SystemCommand
@@ -40,6 +41,15 @@ module Metalware
         else
           stdout
         end
+      end
+
+      def run_raw(command)
+        stdout, stderr, status = Open3.capture3(command)
+        {
+          stdout: stdout,
+          stderr: stderr,
+          status: status,
+        }
       end
 
       private

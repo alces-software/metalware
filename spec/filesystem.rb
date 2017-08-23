@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'fakefs/safe'
-
+require 'constants'
 require 'minimal_repo'
 
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
@@ -115,6 +115,20 @@ class FileSystem
     )
   end
 
+  def with_config_fixture(config_fixture_file, target)
+    with_fixtures(
+      config_fixture_file,
+      at: File.join('/var/lib/metalware/repo/config', target)
+    )
+  end
+
+  def with_templates_fixtures(template_path, target)
+    with_fixtures(
+      template_path,
+      at: File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target)
+    )
+  end
+
   # Create same directory hierarchy that would be created by a Metalware
   # install.
   def create_initial_directory_hierarchy
@@ -129,6 +143,8 @@ class FileSystem
       '/var/lib/metalware/repo',
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
+      '/var/named',
+      File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)
     end

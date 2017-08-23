@@ -23,8 +23,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'exceptions'
 require 'constants'
 require 'network'
+require 'templating/repo_config_parser'
+require 'metal_log'
+require 'active_support/core_ext/string/strip'
+require 'dns/named'
 
 module Metalware
   class DomainTemplatesRenderer
@@ -53,7 +58,7 @@ module Metalware
       [
         :render_metalware_server_config,
         :render_genders,
-        :render_hosts,
+        :render_dns,
       ]
     end
 
@@ -123,6 +128,26 @@ module Metalware
       Output.stderr "\n" + genders_invalid_message if genders_invalid_message
     end
 
+    MISSING_DNS_TYPE = <<~EOF.strip_heredoc
+      The DNS type has not been set. Reverting to default DNS type: 'hosts'. To
+      prevent this message, please set "dns_type" in your repo configs, "domain.yaml"
+      file.
+    EOF
+
+    def render_dns
+      case repo_config.dns_type
+      when nil
+        MetalLog.warn(MISSING_DNS_TYPE)
+        render_hosts
+      when 'hosts'
+        render_hosts
+      when 'named'
+        update_named
+      else
+        raise InvalidConfigParameter, "Invalid DNS type: #{repo_config.dns_type}"
+      end
+    end
+
     def render_hosts
       render_managed_section_template(hosts_template, to: Constants::HOSTS_PATH)
     end
@@ -141,6 +166,10 @@ module Metalware
       )
     end
 
+    def update_named
+      DNS::Named.new(config).update
+    end
+
     def server_config_template
       File.join(config.repo_path, 'server.yaml')
     end
@@ -156,6 +185,11 @@ module Metalware
     def template_path(template_type)
       # We currently always/only render the 'default' templates.
       File.join(config.repo_path, template_type, 'default')
+    end
+
+    def repo_config
+      Templating::RepoConfigParser
+        .parse_for_domain(config: config, include_groups: false).inspect
     end
   end
 end

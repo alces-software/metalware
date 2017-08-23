@@ -11,6 +11,17 @@ module Metalware
       class << self
         # XXX get rid of handling `additional_parameters`? And just take what
         # we need.
+        def parse_for_domain(
+          config:,
+          additional_parameters: {},
+          include_groups: true
+        )
+          parse_for_node(node_name: nil,
+                         config: config,
+                         additional_parameters: additional_parameters,
+                         include_groups: include_groups)
+        end
+
         def parse_for_node(
           node_name:,
           config:,
@@ -60,6 +71,7 @@ module Metalware
       def initialize(node_name:, config:, additional_parameters:, include_groups:)
         @node_name = node_name
         @metalware_config = config
+        @magic_parameters = additional_parameters.delete(:alces)
         @additional_parameters = additional_parameters
         @include_groups = include_groups
       end
@@ -93,7 +105,7 @@ module Metalware
       def magic_parameters
         additional_parameters.select do |k, v|
           [:firstboot, :files].include?(k) && !v.nil?
-        end
+        end.merge(additional_parameters: @magic_parameters)
       end
 
       def perform_config_parsing_pass(current_parsed_config)
