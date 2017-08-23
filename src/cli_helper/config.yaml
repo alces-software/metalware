@@ -211,9 +211,9 @@ commands:
     summary: Opens a rendered file for editing
     description: >
       Opens the specified rendered file in the default system text editor.
-      Requires the absolute path to the file to be edited.
     action: Commands::Edit
-    autocomplete: COMP_FILE::/var/lib/metalware/rendered
+    autocomplete:
+      files_relative_to: /var/lib/metalware/rendered
 
   hunter:
     syntax: metal hunter [options]
