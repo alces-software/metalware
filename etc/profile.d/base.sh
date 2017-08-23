@@ -24,7 +24,6 @@ alias met=metal
 
 if [ "$BASH_VERSION" ]; then
     _metal() {
-        local _compreply=()
         local cur="$2" cmds input cur_ruby
 
         if [[ -z "$cur" ]]; then
