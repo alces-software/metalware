@@ -48,7 +48,7 @@ if [ "$BASH_VERSION" ]; then
                 cur_path="$path/$cur/"
             fi
             COMPREPLY=( $(compgen -f -- ${cur_path}/) )
-        
+
         # Completes everything else
         else
             COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
