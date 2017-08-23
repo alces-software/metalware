@@ -74,7 +74,7 @@ RSpec.describe Metalware::DNS::Named do
   context 'with a setup named server' do
     before :each do
       allow(named).to receive(:setup?).and_return(true)
-      # Prevents restart_named from accidentally running, DANGEROUS
+      # Checks the bash commands run without running them
       expect(named).not_to receive(:start_named)
       expect(named).to receive(:restart_named)
     end
