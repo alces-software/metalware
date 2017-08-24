@@ -24,16 +24,17 @@
 
 require 'system_command'
 require 'metal_log'
+require 'file_path'
 
 module Metalware
   module Commands
     class Edit < CommandHelpers::BaseCommand
       private
 
-      attr_reader :file
+      attr_reader :relative_file_path
 
       def setup
-        @file = args[0]
+        @relative_file_path = args[0]
       end
 
       def run
@@ -43,9 +44,9 @@ module Metalware
       end
 
       def editor
-        if !system_visual.empty?
+        if system_visual
           system_visual
-        elsif !system_editor.empty?
+        elsif system_editor
           system_editor
         else
           'vi'
@@ -53,11 +54,19 @@ module Metalware
       end
 
       def system_visual
-        @system_visual ||= SystemCommand.run('echo $VISUAL').chomp
+        ENV['VISUAL']
       end
 
       def system_editor
-        @system_editor ||= SystemCommand.run('echo $EDITOR').chomp
+        ENV['EDITOR']
+      end
+
+      def file
+        File.join(file_path.metalware_data, 'rendered', relative_file_path)
+      end
+
+      def file_path
+        @file_path ||= FilePath.new(config)
       end
     end
   end
