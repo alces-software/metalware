@@ -30,8 +30,7 @@ binding is only configs/domain.yaml.
 
 The biggest issue is complexity and maintainability. Currently the design is ad
 hoc which makes it next to impossible to replicated the behaviour in order to
-make a chaneg. The following is the issues that I can see with the current
-design.
+make a chaneg. The following is the issues within the current design.
 
 At the moment these issues are fairly cosmetic. The biggest problem we face is
 a lot of warning's are being issued because value's haven't been set in the
@@ -151,6 +150,51 @@ However the GroupNamespace can be accessed through:
 It will have similar methods to NodeNamespace where `name` will return the group
 name and `index` will return the group index. It will also have a `nodes` method
 which will return an array of NodeNamespace's within the primary group.
+
+## Iterator Scope
+
+This change still contains an issue with the scope of config parameters when
+using a iterator. It occurs because the config parameters may contain ERB, but
+if they are pulled from an iterator then they are not in the same scope.
+
+Example:
+`alces.nodes.each { |node| node.config.value }: <%= alces.node.config.other %>`
+
+However `node.config.value` is referring to a collection of nodes that is being
+iterated through, however `alces.node.config.other` is statically defined as the
+in-scope node. This means referencing of config parameters within an iterator
+does not work.
+
+A possible fix to this is to revisit what is meant by the `in-scope node`. When
+running an iterator, one would expect that when within the block the node in
+scope would be the current node in the iterator. After all, that is the purpose
+of the iterator.
+
+So instead of yielding the NodeNamespace to the block, `alces.node` could be
+switched instead. Something along these lines:
+```
+def each
+    node_array.each do |node_namespace|
+        AlcesNamespace.in_scope_node_stack.push(node_namespace)
+        yield
+        AlcesNamespace.in_scope_node_stack.pop
+    end
+end
+```
+Then the iterator is used by going:
+`alces.nodes.each { alces.node.config.value }`
+
+This means their shouldn't be an issue is `config.value` returns an ERB tag
+referencing the in-scope node as the iterator has changed what it for you. A
+similar process will need to be completed for the `GroupNamespace`.
+
+ONE BIG BUT!!
+
+This may not work at all. I am not sure how ERB replaces iterated values. My
+guess is it uses blocks like regular ruby. If this is the case, the above
+solution should work. However if ERB first expands the each block and then does
+the ERB substitutions in a second pass, then the `in-scope node` will not be
+set currently and the solution will fail. Will need to research this.
 
 ## Simplifying the use config and answers
 
