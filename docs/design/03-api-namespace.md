@@ -199,13 +199,8 @@ set currently and the solution will fail. Will need to research this.
 
 Instead of switching what is meant by `node` as this could be confusing, the
 idea of a `self` namespace could be introduced. It would be accessed through
-`alces.self` and would initially always be set to `nil` or `alces`.
-
-However when rendering a `config` value, `alces.self` would be set to the
-namespace that the config belongs to. So `alces.node.config.value` could
-reference `alces.self.config.other_value` and be sure that it is accessing
-it's own config.
-
+`alces.self` and would initially always be set to `nil`. It would be implemented
+along these lines:
 ```
 def render_config_value(value)
     AlcesNamespace.self_stack.push(self)
@@ -213,17 +208,19 @@ def render_config_value(value)
     AlcesNamespace.self_stack.pop
 end
 ```
-
 This `self` namespace is not designed to be used in the templates, hence why
-it should be set to nil initially.
+it should be set to nil initially. However when rendering a `config` value,
+`alces.self` would be set to the namespace that the config belongs to. So
+`alces.node.config.value` could reference `alces.self.config.other` and be sure
+that it is accessing it's own config.
 
-But makes config fall through behave nicer as a default set in `domain.yaml`
+This makes config fall through behave nicer as a default set in `domain.yaml`
 does not need to reference `alces.node`. This means that if `alces.config.value`
 returns `alces.self.config.other` it will look for `alces.config.other`.
 
 Assuming that the `node` doesn't override `value` in it's own config,
-`alces.node.config.value` will also return `alces.self.config.other`. Which will
-now be interpreted as `alces.node.config.other`.
+`alces.node.config.value` will also return `alces.self.config.other`. This will
+then be equivalent to `alces.node.config.other`.
 
 ## Simplifying the use config and answers
 
