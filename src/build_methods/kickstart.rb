@@ -22,9 +22,6 @@ module Metalware
       end
 
       def render_pxelinux(parameters)
-        # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
-        # file yet - best place to do this may be when creating `Node` objects?
-        save_path = File.join(config.pxelinux_cfg_path, node.hexadecimal_ip)
         render_template(pxelinux_repo_dir,
                         parameters: parameters,
                         save_path: save_path)
@@ -32,6 +29,12 @@ module Metalware
 
       def pxelinux_repo_dir
         :pxelinux
+      end
+
+      def save_path
+        # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
+        # file yet - best place to do this may be when creating `Node` objects?
+        File.join(config.pxelinux_cfg_path, node.hexadecimal_ip)
       end
     end
   end

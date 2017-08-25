@@ -31,7 +31,7 @@ require 'file_path'
 RSpec.describe Metalware::BuildMethods::UEFI do
   let :config { Metalware::Config.new }
   let :node do
-    node = Metalware::Node.new(config, "nodeA01")
+    node = Metalware::Node.new(config, 'nodeA01')
     allow(node).to receive(:build_method).and_return(:uefi)
     allow(node).to receive(:hexadecimal_ip).and_return('00000000')
     node
@@ -39,7 +39,7 @@ RSpec.describe Metalware::BuildMethods::UEFI do
   let :build_uefi { Metalware::BuildMethods::UEFI.new(config, node) }
   let :file_path { Metalware::FilePath.new(config) }
   let :filesystem do
-    FileSystem.setup { |fs| fs.with_minimal_repo }
+    FileSystem.setup(&:with_minimal_repo)
   end
 
   it 'determines the correct UEFI pxelinux template' do
@@ -49,9 +49,13 @@ RSpec.describe Metalware::BuildMethods::UEFI do
     end
   end
 
-  it 'requests the uefi template over standard pxelinux' do
+  it 'renders the pxelinux template with correct save_path' do
+    inputs = {
+      parameters: {},
+      save_path: File.join(file_path.uefi_save, 'grub.cfg-00000000'),
+    }
     expect(build_uefi).to receive(:render_template)
-                            .with(:'pxelinux/uefi', parameters: {})
+      .with(:'pxelinux/uefi', **inputs)
     build_uefi.send(:render_pxelinux, {})
   end
 end
