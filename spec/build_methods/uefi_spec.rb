@@ -33,6 +33,7 @@ RSpec.describe Metalware::BuildMethods::UEFI do
   let :node do
     node = Metalware::Node.new(config, "nodeA01")
     allow(node).to receive(:build_method).and_return(:uefi)
+    allow(node).to receive(:hexadecimal_ip).and_return('00000000')
     node
   end
   let :build_uefi { Metalware::BuildMethods::UEFI.new(config, node) }
@@ -43,8 +44,14 @@ RSpec.describe Metalware::BuildMethods::UEFI do
 
   it 'determines the correct UEFI pxelinux template' do
     filesystem.test do
-      path = build_uefi.send(:template_path, :pxelinux, node: node)
+      path = build_uefi.send(:template_path, :'pxelinux/uefi', node: node)
       expect(path).to eq(File.join(file_path.repo, 'pxelinux/uefi/default'))
     end
+  end
+
+  it 'requests the uefi template over standard pxelinux' do
+    expect(build_uefi).to receive(:render_template)
+                            .with(:'pxelinux/uefi', parameters: {})
+    build_uefi.send(:render_pxelinux, {})
   end
 end
