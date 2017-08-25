@@ -185,6 +185,8 @@ module Metalware
 
     def build_method_class
       case repo_config[:build_method]&.to_sym
+      when :uefi
+        BuildMethods::UEFI
       when :basic
         BuildMethods::Basic
       else

@@ -4,3 +4,4 @@
 require 'build_methods/build_method'
 require 'build_methods/kickstart'
 require 'build_methods/basic'
+require 'build_methods/uefi'
