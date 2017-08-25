@@ -195,6 +195,36 @@ solution should work. However if ERB first expands the each block and then does
 the ERB substitutions in a second pass, then the `in-scope node` will not be
 set currently and the solution will fail. Will need to research this.
 
+### Alternative
+
+Instead of switching what is meant by `node` as this could be confusing, the
+idea of a `self` namespace could be introduced. It would be accessed through
+`alces.self` and would initially always be set to `nil` or `alces`.
+
+However when rendering a `config` value, `alces.self` would be set to the
+namespace that the config belongs to. So `alces.node.config.value` could
+reference `alces.self.config.other_value` and be sure that it is accessing
+it's own config.
+
+```
+def render_config_value(value)
+    AlcesNamespace.self_stack.push(self)
+    render(config.value, AlcesNamespace)
+    AlcesNamespace.self_stack.pop
+end
+```
+
+This `self` namespace is not designed to be used in the templates, hence why
+it should be set to nil initially.
+
+But makes config fall through behave nicer as a default set in `domain.yaml`
+does not need to reference `alces.node`. This means that if `alces.config.value`
+returns `alces.self.config.other` it will look for `alces.config.other`.
+
+Assuming that the `node` doesn't override `value` in it's own config,
+`alces.node.config.value` will also return `alces.self.config.other`. Which will
+now be interpreted as `alces.node.config.other`.
+
 ## Simplifying the use config and answers
 
 Previously the config was rendered in full before substitution into the
@@ -274,6 +304,13 @@ It would require the following considerations:
 
 The following items are not critical to the design but should be reviewed before
 starting as they may impact how it is implemented.
+
+## API entry point and domain
+
+It might be a good idea to separate out the API entry point and the domain.
+Currently they are the same thing, but it could be clear to use
+`alces.domain.config` and have a DomainNamespace. This will make `alces` solely
+responsible for controlling the API calls.
 
 ## The binding wrapper
 
