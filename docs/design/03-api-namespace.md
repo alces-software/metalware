@@ -1,16 +1,16 @@
 # Intro
 
 A significant amount of work has now been down on the MagicNamespace however it
-now as numerous purposes and inconsistent behaviour. The current behaviour of
+now has numerous purposes and inconsistent behaviour. The current behaviour of
 the MagicNamespace can be summarised as follows:
 
-1. Access domain level information (hosts_url, genders_url, hostip etc)
+1. Access domain level information (`hosts_url`, `genders_url`, `hostip` etc)
 1. Access node (that is in scope) specific information
-   (nodename, kickstart_url, index and group_index)
+   (`nodename`, `kickstart_url`, `index` and `group_index`)
 1. A hacked version of the node level answers that prevents bugs
 1. Access to Group level information through another Namespace
 
-When accessing group level information (through alces.groups.each), a group
+When accessing group level information (through `alces.groups.each`), a group
 level namespace is returned for the group that is in scope. The following
 methods are available to it:
 
@@ -20,21 +20,21 @@ methods are available to it:
 On top of all this, a config is loaded into ERB's binding which can also return
 values. Currently their are two options for what this config is. Normally it is
 the config for the Node that is in scope (such as a kickstart file). In this
-case, the MagicNamespace has a node in scope as well and alces.nodename and 
+case, the MagicNamespace has a node in scope as well and `alces.nodename` and 
 alces.index will return correctly.
 
 However if a domain level config is being rendered, then the config in the ERB's
-binding is only configs/domain.yaml.
+binding is only `configs/domain.yaml`.
 
 # Issues
 
-The biggest issue is complexity and maintainability. Currently the design is ad
+The main issue is complexity and maintainability. Currently the design is ad
 hoc which makes it next to impossible to replicated the behaviour in order to
-make a chaneg. The following is the issues within the current design.
+make a change. The following is the issues within the current design.
 
-At the moment these issues are fairly cosmetic. The biggest problem we face is
-a lot of warning's are being issued because value's haven't been set in the
-config. However this is indicative of the larger problem, 'which config?'
+The most obvious bug is fairly cosmetic at this point. Their are a lot of nil 
+warning's being issued because value's haven't been set in the config. However
+this is more indicative of the larger problem, 'which config?'
 
 Currently we can always access Node level configs, ironically through the
 GroupNamespace. However we can never access group level configs (this may not be
@@ -42,7 +42,7 @@ required) and we can only access domain level config parameters if they just so
 happen to be in scope.
 
 However the bigger issue is each config can reference answers and vice versa.
-Now answers can be accessed at the node level with alces.answers but the
+Now answers can be accessed at the node level with `alces.answers` but the
 behaviour will be different depending if a node is in scope. Group level answers
 can be accessed through the group level namespace. 
 
@@ -52,19 +52,19 @@ throught the GroupNamespace) can reference a group level answer which references
 the "config". This config could either be for the domain or a random node
 depending whatever is in scope.
 
-This complexity is partly way we need to allow alces.[nodename, index and
-group_index] to fail silently (e.g. return empty string or 0) as they are
-incorrectly being accessed through the various level configs.
+This complexity is partly way we need to allow `alces.<nodename | index>`
+to fail silently (e.g. return empty string or 0) as they are incorrectly being
+accessed through the various level configs.
 
 # Proposed Change Overview
 
-The MagicNamespace is doing to much and thus has an undefined purpose. Also as
+The MagicNamespace is doing too much and thus has an undefined purpose. Also as
 answers reference the "config" they need to a rationalisation which config
 should that be. The ultimate goal is to get Metalware to render each template in
 well defined and consistent manner.
 
 The way this could be achieved is to adjust the MagicNamespace to become an API
-within the binding. This means all templating will be accessed through a `alces`
+within the binding. This means all parameters will be accessed through a `alces`
 API with an explicit path.
 
 Their are two main parts this document will look at:
@@ -73,15 +73,14 @@ Their are two main parts this document will look at:
 
 ## Creating the API
 
-The first stage of creating the API based on the existing MagicNamespace. For
+The first stage is creating the API based on the existing MagicNamespace. For
 the purpose of this document, the term API and Namespace can be used reasonable
-interchangeable. However Namespace more refer to a specific component of the
-API.
+interchangeable. However Namespace refers more specifically to a component of
+the API. This will require splitting the MagicNamespace up according to role.
 
-Currently the MagicNamespace is doing to much, so the first step is to split it
-according to role. Also as all parameters will be accessed through the API, the
-config hash will no longer be loaded into the ERB binding. Instead the config's
-will have explicitly defined paths within the API.
+As all parameters will be accessed through the API, the config hashes will no
+longer be loaded into the ERB binding. Instead the config's will have explicitly
+defined paths within the API.
 
 The three broad sections of the API are as follows:
 
@@ -96,9 +95,9 @@ distinguish between API calls and local variables defined within ERB. The
 `alces` command will also contain the domain level information for the cluster.
 
 The AlcesNamespace will be very similar to the MagicNamespace except all the
-node specific methods will be removed. This means index, nodename and 
-kickstart_url will all be removed (and be moved to NodeNamespace). It will still
-contain the domain level methods (hosts_url, hostip, etc).
+node specific methods will be removed. This means `index`, `nodename` and 
+`kickstart_url` will all be removed (and be moved to `NodeNamespace`). It will
+still contain the domain level methods (`hosts_url`, `hostip`, etc).
 
 The major additions/ changes will be the following methods:
 - `alces.config`: The config for the domain (aka just domain.yaml)
@@ -184,8 +183,8 @@ end
 Then the iterator is used by going:
 `alces.nodes.each { alces.node.config.value }`
 
-This means their shouldn't be an issue is `config.value` returns an ERB tag
-referencing the in-scope node as the iterator has changed what it for you. A
+This means their shouldn't be an issue if `config.value` returns an ERB tag
+referencing the in-scope node as the iterator has changed. A
 similar process will need to be completed for the `GroupNamespace`.
 
 ONE BIG BUT!!
