@@ -43,6 +43,10 @@ module Metalware
         Data.load(path.group_cache)
       end
 
+      def self_answers
+        answer(path.self_answers, :self)
+      end
+
       def domain_answers
         answer(path.domain_answers, :domain)
       end
