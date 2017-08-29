@@ -77,6 +77,8 @@ RSpec.describe Metalware::Validation::Configure do
           default: '',
         },
       },
+
+      self: {},
     }
   end
 
