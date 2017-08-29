@@ -7,7 +7,7 @@ module Metalware
       private
 
       def pxelinux_repo_dir
-        :'pxelinux/uefi'
+        :uefi
       end
 
       def save_path

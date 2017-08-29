@@ -55,7 +55,7 @@ RSpec.describe Metalware::BuildMethods::UEFI do
       save_path: File.join(file_path.uefi_save, 'grub.cfg-00000000'),
     }
     expect(build_uefi).to receive(:render_template)
-      .with(:'pxelinux/uefi', **inputs)
+      .with(:'uefi', **inputs)
     build_uefi.send(:render_pxelinux, {})
   end
 end
