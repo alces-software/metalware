@@ -47,7 +47,7 @@ RSpec.describe Metalware::Validation::Configure do
           question: 'Can I have a boolean true (/yes) default?',
           type: 'boolean',
           default: 'yes',
-        }
+        },
       },
 
       group: {
@@ -63,7 +63,7 @@ RSpec.describe Metalware::Validation::Configure do
           question: 'Can I have a boolean false (/no) default?',
           type: 'boolean',
           default: 'no',
-        }
+        },
       },
 
       node: {
@@ -225,14 +225,14 @@ RSpec.describe Metalware::Validation::Configure do
     end
 
     it 'returns a success? status of false' do
-       h = correct_hash.deep_merge(group: {
+      h = correct_hash.deep_merge(group: {
                                     bad_string_question: {
                                       question: "Do I fail because my default isn't a string?",
                                       type: 'string',
                                       default: 10,
                                     },
                                   })
-       expect(build_validator(h).success?).to eq(false)
+      expect(build_validator(h).success?).to eq(false)
     end
   end
 
