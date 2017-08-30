@@ -155,7 +155,8 @@ commands:
       then waiting for each node to report itself as built and re-rendering its
       'pxelinux' template for permanent booting. The build command will keep
       running until all nodes have reported as built, or until it is
-      interrupted.
+      interrupted. The 'self' build is a special case that is handled seperately
+      . See below for more details.
 
 
       The 'files' for each node are specified under the 'files' key in the repo
@@ -171,6 +172,14 @@ commands:
       The 'pxelinux' template rendering can be modified using the
       'alces.firstboot' parameter within the template, which will be set to
       'true' the first time this is rendered and 'false' the second.
+
+
+      As the 'build self' command is repsonsible for configuring the metalware
+      master node, it functions differently to the other nodes. The build self
+      command is responsible for starting the http server and thus can not curl
+      for files. Instead it must directly access the file system to obtain the
+      rendered files. Once the build has been completed, it can either curl the
+      build_complete_url or create the build_complete file directly.
 
     action: Commands::Build
     options:
