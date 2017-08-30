@@ -90,7 +90,7 @@ module Metalware
         required(:parameters).schema do
           required(:question).value(:str?, :filled?)
           optional(:type).value(:question_type?)
-          optional(:default).value(:filled?)
+          optional(:default) { filled? | str? }
           optional(:optional).value(:bool?)
 
           # NOTE: The crazy logic on the LHS of the then ('>') is because

@@ -62,6 +62,10 @@ RSpec.describe Metalware::Validation::Configure do
           type: 'string',
           default: 'yes I am a string',
         },
+        string_empty_default: {
+          question: 'My default is a empty string?',
+          default: '',
+        },
       },
     }
   end
@@ -109,7 +113,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     type: 'string',
                                     default: 'Each field will now be interpreted as a separate question',
                                   })
-      results = run_configure_validation(h)
+      results = build_validator(h).validate.errors
       expect(results.keys).to eq([:parameters])
       expect(results[:parameters][0]).to eq('must be a hash')
     end
@@ -157,17 +161,6 @@ RSpec.describe Metalware::Validation::Configure do
                                   })
       results = run_configure_validation(h)
       expect(results[:parameters].keys).to eq([:type])
-    end
-
-    it 'fails if default is empty' do
-      h = correct_hash.deep_merge(domain: {
-                                    empty_default: {
-                                      question: 'Do I have an empty default?',
-                                      default: '',
-                                    },
-                                  })
-      results = run_configure_validation(h)
-      expect(results[:parameters].keys).to eq([:default])
     end
 
     it 'fails if the optional input is not true or false' do
