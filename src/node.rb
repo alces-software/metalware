@@ -184,13 +184,25 @@ module Metalware
     end
 
     def build_method_class
-      case repo_config[:build_method]&.to_sym
-      when :uefi
-        BuildMethods::Kickstarts::UEFI
-      when :basic
-        BuildMethods::Basic
+      repo_build = repo_config[:build_method]&.to_sym
+      if name == 'self'
+        case repo_build
+        when 'self' || nil
+          BuildMethods::Self
+        else
+          raise SelfBuildMethodError, build_type: repo_build
+        end
       else
-        BuildMethods::Kickstarts::Pxelinux
+        case repo_build
+        when :uefi
+          BuildMethods::Kickstarts::UEFI
+        when :basic
+          BuildMethods::Basic
+        when :self
+          raise SelfBuildMethodError, building_self_node: false
+        else
+          BuildMethods::Kickstarts::Pxelinux
+        end
       end
     end
   end

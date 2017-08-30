@@ -296,6 +296,12 @@ RSpec.describe Metalware::Node do
         expected = Metalware::BuildMethods::Basic
         expect(build_method_class('build_node', :basic)).to eq(expected)
       end
+
+      it 'errors if the self build method is used' do
+        expect do
+          build_method_class('build_node', :self)
+        end.to raise_error(Metalware::SelfBuildMethodError)
+      end
     end
 
     context "with the 'self' node" do
@@ -310,7 +316,9 @@ RSpec.describe Metalware::Node do
       end
 
       it 'errors if the build type is not self' do
-        expect { build_method_class('self', :basic) }.to raise_error
+        expect do
+          build_method_class('self', :basic)
+        end.to raise_error(Metalware::SelfBuildMethodError)
       end
     end
   end
