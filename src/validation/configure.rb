@@ -34,6 +34,7 @@ module Metalware
 
       # NOTE: Supported types in error.yaml message must be updated manually
       SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
+      BOOLEAN_VALUE = ['yes', 'no'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def initialize(file)
@@ -80,6 +81,10 @@ module Metalware
           def question_type?(value)
             SUPPORTED_TYPES.include?(value)
           end
+
+          def boolean?(value)
+            BOOLEAN_VALUE.include?(value)
+          end
         end
 
         validate(valid_top_level_question_keys: :parameters) do |q|
@@ -104,9 +109,13 @@ module Metalware
             (default.filled? & type.eql?('integer')) > default.int?
           end
 
-          # Boolean and choice does not currently support default answers
           rule(default_boolean_type: [:default, :type]) do |default, type|
-            default.none? | type.excluded_from?(['boolean', 'choice'])
+            (default.filled? & type.eql?('boolean')) > default.boolean?
+          end
+
+          # Choice does not currently support default answers
+          rule(default_choice_type: [:default, :type]) do |default, type|
+            default.none? | type.excluded_from?(['choice'])
           end
         end
       end

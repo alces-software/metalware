@@ -43,6 +43,11 @@ RSpec.describe Metalware::Validation::Configure do
           type: 'integer',
           default: 10,
         },
+        boolean_true: {
+          question: 'Can I have a boolean true (/yes) default?',
+          type: 'boolean',
+          default: 'yes',
+        }
       },
 
       group: {
@@ -54,6 +59,11 @@ RSpec.describe Metalware::Validation::Configure do
           question: 'Am I a integer question without a default?',
           type: 'integer',
         },
+        boolean_false: {
+          question: 'Can I have a boolean false (/no) default?',
+          type: 'boolean',
+          default: 'no',
+        }
       },
 
       node: {
@@ -236,6 +246,19 @@ RSpec.describe Metalware::Validation::Configure do
                                     },
                                   })
       expect(run_configure_validation(h).keys).to eq([:default_integer_type])
+    end
+  end
+
+  context 'with invalid boolean questions' do
+    it 'fails with non-boolean default' do
+      h = correct_hash.deep_merge(node: {
+                                    bad_integer_question: {
+                                      question: 'Do I fail because my default is a string?',
+                                      type: 'boolean',
+                                      default: 'I am not valid',
+                                    },
+                                  })
+      expect(run_configure_validation(h).keys).to eq([:default_boolean_type])
     end
   end
 end

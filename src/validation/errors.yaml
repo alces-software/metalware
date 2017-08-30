@@ -14,6 +14,8 @@ en:
           'default' 'choice', 'optional'
         default_type?: >
           Type mismatch between question 'type' and 'default' value
+        boolean?: >
+          Boolean defaults must be 'yes' or 'no'
 
       answer:
         missing_questions?: >
