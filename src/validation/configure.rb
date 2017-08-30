@@ -41,31 +41,32 @@ module Metalware
       end
 
       def validate
-        @configure_results = ConfigureSchema.call(yaml: @yaml)
-        if @configure_results.success?
-          [:domain, :group, :node].each do |section|
-            @yaml[section].each do |identifier, parameters|
-              payload = {
-                section: section,
-                identifier: identifier,
-                parameters: parameters,
-              }
-              question_results = QuestionSchema.call(payload)
-              return question_results unless question_results.success?
+        @validate ||= begin
+          configure_results = ConfigureSchema.call(yaml: @yaml)
+          if configure_results.success?
+            [:domain, :group, :node].each do |section|
+              @yaml[section].each do |identifier, parameters|
+                payload = {
+                  section: section,
+                  identifier: identifier,
+                  parameters: parameters,
+                }
+                question_results = QuestionSchema.call(payload)
+                return question_results unless question_results.success?
+              end
             end
           end
+          configure_results
         end
-        @configure_results
       end
 
       def success?
-        validate if @configure_results.nil?
-        @configure_results.success?
+        validate.success?
       end
 
       # TODO: make these error messages more descriptive
       def load
-        raise ValidationFailure, @configure_results.messages unless success?
+        raise ValidationFailure, validate.messages unless success?
         @yaml
       end
 
