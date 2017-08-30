@@ -66,9 +66,13 @@ RSpec.describe Metalware::Validation::Configure do
     }
   end
 
-  def run_configure_validation(my_hash = {})
+  def build_validator(my_hash = {})
     allow(Metalware::Data).to receive(:load).and_return(my_hash)
-    validator = Metalware::Validation::Configure.new('path/has/been/mocked')
+    Metalware::Validation::Configure.new('path/has/been/mocked')
+  end
+
+  def run_configure_validation(my_hash = {})
+    validator = build_validator(my_hash)
     validator.validate.messages
   end
 
@@ -215,6 +219,17 @@ RSpec.describe Metalware::Validation::Configure do
                                     },
                                   })
       expect(run_configure_validation(h).keys).to eq([:default_string_type])
+    end
+
+    it 'returns a success? status of false' do
+       h = correct_hash.deep_merge(group: {
+                                    bad_string_question: {
+                                      question: "Do I fail because my default isn't a string?",
+                                      type: 'string',
+                                      default: 10,
+                                    },
+                                  })
+       expect(build_validator(h).success?).to eq(false)
     end
   end
 
