@@ -20,7 +20,7 @@ Rails.application.routes.draw do
 
   resources :nodes, only: [] do
     resource :configure, controller: 'nodes/configure', only: configure_actions
-    resource :build, controller: 'nodes/build', only: :show do
+    resource :build, controller: 'nodes/build', only: [:show, :destroy] do
       post :start
     end
   end

@@ -15,6 +15,12 @@ class Nodes::BuildController < ApplicationController
     redirect_to node_build_path
   end
 
+  def destroy
+    build_job = BuildNodeJob.find(node_name)
+    build_job.kill if build_job
+    redirect_to node_build_path
+  end
+
   private
 
   # XXX Same method in `Nodes::ConfigureController`.

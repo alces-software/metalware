@@ -1,5 +1,9 @@
 
-<% unless @build_ongoing %>
+<% if @build_ongoing %>
+  <%= form_tag(node_build_path, method: :delete) do %>
+    <% submit_tag("Cancel build") %>
+  <% end %>
+<% else %>
   <%= form_tag(start_node_build_path) do %>
     <% submit_tag("Build!") %>
   <% end %>
