@@ -16,6 +16,8 @@ en:
           Type mismatch between question 'type' and 'default' value
         boolean?: >
           Boolean defaults must be 'yes' or 'no'
+        empty_string?:
+          Empty string defaults must have a string type
 
       answer:
         missing_questions?: >

@@ -247,6 +247,17 @@ RSpec.describe Metalware::Validation::Configure do
                                   })
       expect(run_configure_validation(h).keys).to eq([:default_integer_type])
     end
+
+    it 'fails if the default is an empty string' do
+      h = correct_hash.deep_merge(node: {
+                                    bad_integer_question: {
+                                      question: 'Do I fail because my default is an empty string?',
+                                      type: 'integer',
+                                      default: '',
+                                    },
+                                  })
+      expect(run_configure_validation(h).keys).to eq([:default_empty_string_type])
+    end
   end
 
   context 'with invalid boolean questions' do

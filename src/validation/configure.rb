@@ -85,6 +85,10 @@ module Metalware
           def boolean?(value)
             BOOLEAN_VALUE.include?(value)
           end
+
+          def empty_string?(value)
+            value.is_a?(String) && value.empty?
+          end
         end
 
         validate(valid_top_level_question_keys: :parameters) do |q|
@@ -103,6 +107,11 @@ module Metalware
           # as simple as possible otherwise the error message will be crazy
           rule(default_string_type: [:default, :type]) do |default, type|
             (default.filled? & (type.none? | type.eql?('string'))) > default.str?
+          end
+
+          # Enforces empty string defaults have a string type
+          rule(default_empty_string_type: [:default, :type]) do |default, type|
+            default.empty_string? > (type.none? | type.eql?('string'))
           end
 
           rule(default_integer_type: [:default, :type]) do |default, type|
