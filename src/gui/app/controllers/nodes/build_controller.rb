@@ -2,7 +2,12 @@
 
 class Nodes::BuildController < ApplicationController
   def show
-    @title = "Build Node #{node_name}"
+    build_job = BuildNodeJob.find(node_name)
+
+    @build_ongoing = !!build_job
+
+    title_prefix = @build_ongoing ? 'Building' : 'Build'
+    @title = "#{title_prefix} Node #{node_name}"
   end
 
   def start
