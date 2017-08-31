@@ -456,13 +456,13 @@ RSpec.describe Metalware::Templater do
 
           expect(magic_namespace.index).to eq(0)
           expect(magic_namespace.group_index).to eq(0)
-          expect(magic_namespace.nodename).to eq("")
+          expect(magic_namespace.nodename).to eq('')
           expect(magic_namespace.firstboot).to eq(nil)
           expect(magic_namespace.files).to eq(nil)
-          # Broken as nodename is no longer a nil. Not worth fixing the
-          # behaviour however. Left code in for future reference
-          # expect(magic_namespace.kickstart_url).to eq(nil)
-          # expect(magic_namespace.build_complete_url).to eq(nil)
+          # The kickstart and build URL tests have been patched to an empty nodename
+          # Ideally in the future this should return nil
+          expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/')
+          expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=')
           expect_environment_dependent_parameters_present(magic_namespace)
         end
       end
