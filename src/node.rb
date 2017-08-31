@@ -187,7 +187,7 @@ module Metalware
       repo_build = repo_config[:build_method]&.to_sym
       if name == 'self'
         case repo_build
-        when 'self' || nil
+        when :self, nil
           BuildMethods::Self
         else
           raise SelfBuildMethodError, build_type: repo_build
