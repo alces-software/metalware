@@ -11,8 +11,6 @@ module Metalware
       end
 
       def render_build_complete_templates(_parameters); end
-
-      private
     end
   end
 end
