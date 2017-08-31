@@ -29,6 +29,12 @@ module Metalware
         end
       end
 
+      def start_build
+        # Runs after the files have been rendered but before build waits for the
+        # nodes to complete. Leave blank if the nodes build need to be started
+        # manually by powering them on.
+      end
+
       private
 
       attr_reader :config, :node

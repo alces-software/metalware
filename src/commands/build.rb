@@ -60,6 +60,7 @@ module Metalware
           puts(EDIT_START_MSG)
           return
         end
+        start_build
         wait_for_nodes_to_build
         teardown
       rescue
@@ -112,6 +113,10 @@ module Metalware
             Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
         end
+      end
+
+      def start_build
+        nodes.each(&:start_build)
       end
 
       def wait_for_nodes_to_build

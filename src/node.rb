@@ -44,6 +44,7 @@ module Metalware
 
     delegate :render_build_started_templates,
              :render_build_complete_templates,
+             :start_build,
              to: :build_method
 
     def initialize(metalware_config, name, should_be_configured: false)
