@@ -1,4 +1,6 @@
 
-<button>Hunt</button>
-
-At some point this will hunt for things
+<% unless @currently_hunting %>
+  <%= form_tag(start_hunter_path) do %>
+  <% submit_tag("Hunt!") %>
+  <% end %>
+<% end %>
