@@ -1,30 +1,22 @@
 # frozen_string_literal: true
 
-class Nodes::BuildController < ApplicationController
-  def show
-    build_job = BuildNodeJob.find(node_name)
+class Nodes::BuildController < BuildController
+  private
 
-    @build_ongoing = !!build_job
+  alias build_path node_build_path
 
-    title_prefix = @build_ongoing ? 'Building' : 'Build'
+  def define_title(build_ongoing:)
+    title_prefix = build_ongoing ? 'Building' : 'Build'
     @title = "#{title_prefix} Node #{node_name}"
   end
 
-  def start
-    BuildNodeJob.perform_now(node_name)
-    redirect_to node_build_path
+  def build_job_class
+    BuildNodeJob
   end
-
-  def destroy
-    build_job = BuildNodeJob.find(node_name)
-    build_job&.kill
-    redirect_to node_build_path
-  end
-
-  private
 
   # XXX Same method in `Nodes::ConfigureController`.
   def node_name
     params[:node_id]
   end
+  alias build_job_identifier node_name
 end
