@@ -71,6 +71,15 @@ module Metalware
       )
     end
 
+    def template_save_path(template_type, node: nil)
+      node = Node.new(config, nil) if node.nil?
+      File.join(
+        config.rendered_files_path,
+        template_type.to_s,
+        node.name
+      )
+    end
+
     def named_zone(zone)
       File.join(var_named, zone)
     end

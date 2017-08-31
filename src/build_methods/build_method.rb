@@ -41,9 +41,7 @@ module Metalware
 
       def render_template(template_type, parameters:, save_path: nil)
         template_type_path = template_path template_type, node: node
-        save_path ||= File.join(
-          config.rendered_files_path, template_type.to_s, node.name
-        )
+        save_path ||= file_path.template_save_path(template_type, node: node)
         Templater.render_to_file(config, template_type_path, save_path, parameters)
       end
     end
