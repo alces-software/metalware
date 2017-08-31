@@ -4,6 +4,8 @@
 module Metalware
   module BuildMethods
     class UEFI < Kickstart
+      TEMPLATES = [:kickstart, :uefi].freeze
+
       private
 
       def pxelinux_repo_dir
