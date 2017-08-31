@@ -23,8 +23,6 @@
 #==============================================================================
 
 require 'command_helpers/bash_command'
+require 'utils/dynamic_require'
 
-# Dynamically requires all ruby files in commands directory
-Dir[File.join(File.dirname(__FILE__), 'commands', '**/*.rb')].map do |file|
-  require file.sub("#{File.dirname(__FILE__)}/", '').chomp('.rb')
-end
+Metalware::Utils::DynamicRequire.relative('commands')

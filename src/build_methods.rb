@@ -1,7 +1,8 @@
 
 # frozen_string_literal: true
 
+require 'utils/dynamic_require'
 require 'build_methods/build_method'
-require 'build_methods/kickstart'
-require 'build_methods/basic'
-require 'build_methods/uefi'
+
+Metalware::Utils::DynamicRequire.relative('build_methods')
+
