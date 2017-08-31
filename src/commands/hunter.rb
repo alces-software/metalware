@@ -45,6 +45,21 @@ module Metalware
         :network
 
       def setup
+        if headless
+          # Hunter depends on values being set for various options when it is
+          # run; these options have defaults which will be set by Commander
+          # when running the command on the command-line, but these will not be
+          # set when running the command by creating an instance of this class
+          # directly (i.e. when running it 'headless', which in particular is
+          # done from the GUI). Hence we need to duplicate setting these
+          # options to the defaults here.
+          # TODO Do this better, without needing to duplicate the defaults.
+          options.interface ||= CliHelper::DynamicDefaults.build_interface
+          options.prefix ||= 'node'
+          options.length ||= 2
+          options.start ||= 1
+        end
+
         @hunter_log = MetalLog.new('hunter')
 
         @detection_count = options.start
