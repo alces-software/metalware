@@ -3,6 +3,24 @@
   <%= form_tag(hunter_path, method: :delete) do %>
     <% submit_tag('Stop hunting') %>
   <% end %>
+
+  <table class='table'>
+    <thead>
+      <tr>
+        <th>Detected MAC address</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @new_detected_macs.each do |mac| %>
+        <tr>
+          <td><%= mac %></td>
+          <td></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
 <% else %>
   <%= form_tag(start_hunter_path) do %>
   <% submit_tag("Hunt!") %>

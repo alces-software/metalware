@@ -26,6 +26,7 @@ require 'command_helpers/base_command'
 require 'metal_log'
 require 'net/dhcp'
 require 'pcap'
+require 'concurrent'
 
 require 'templater'
 require 'output'
@@ -36,6 +37,8 @@ require 'hunter_updater'
 module Metalware
   module Commands
     class Hunter < CommandHelpers::BaseCommand
+      NEW_DETECTED_MACS_KEY = :new_detected_macs
+
       private
 
       attr_reader \
@@ -58,6 +61,11 @@ module Metalware
           options.prefix ||= 'node'
           options.length ||= 2
           options.start ||= 1
+
+          Thread.current.thread_variable_set(
+            NEW_DETECTED_MACS_KEY,
+            Concurrent::Array.new
+          )
         end
 
         @hunter_log = MetalLog.new('hunter')
@@ -153,20 +161,31 @@ module Metalware
         default_name = sequenced_name
         @detection_count += 1
 
-        name_node_question = \
-          "Detected a machine on the network (#{hwaddr}). Please enter " \
-          'the hostname:'
-        name = ask(name_node_question) do |answer|
-          answer.default = default_name
+        if headless
+          STDERR.puts "Detected: #{hwaddr}" # XXX Remove this?
+          new_detected_macs = Thread.current.thread_variable_get(NEW_DETECTED_MACS_KEY)
+          new_detected_macs << hwaddr
+        else
+          name_node_question = \
+            "Detected a machine on the network (#{hwaddr}). Please enter " \
+            'the hostname:'
+          name = ask(name_node_question) do |answer|
+            answer.default = default_name
+          end
+          record_hunted_pair(name, hwaddr)
+          MetalLog.info "#{name}-#{hwaddr}"
+          hunter_log.info "#{name}-#{hwaddr}"
+          Output.stderr 'Logged node'
         end
-        record_hunted_pair(name, hwaddr)
-        MetalLog.info "#{name}-#{hwaddr}"
-        hunter_log.info "#{name}-#{hwaddr}"
-        Output.stderr 'Logged node'
       rescue => e
         warn e # XXX Needed?
-        Output.stderr "FAIL: #{e.message}"
-        retry if agree('Retry? [yes/no]:')
+        if headless
+          # XXX Handle this better?
+          p "Hunter error: #{e}"
+        else
+          Output.stderr "FAIL: #{e.message}"
+          retry if agree('Retry? [yes/no]:')
+        end
       end
 
       def record_hunted_pair(node_name, mac_address)

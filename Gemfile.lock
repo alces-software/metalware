@@ -264,6 +264,7 @@ DEPENDENCIES
   bootstrap (~> 4.0.0.beta)
   byebug
   commander!
+  concurrent-ruby
   dry-validation
   fakefs
   hashie

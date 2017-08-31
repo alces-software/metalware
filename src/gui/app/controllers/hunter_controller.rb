@@ -4,6 +4,10 @@ class HunterController < ApplicationController
   def show
     @currently_hunting = HunterJob.hunting?
     @title = @currently_hunting ? 'Hunting!' : 'Hunt for nodes'
+
+    new_detected_macs_key = Metalware::Commands::Hunter::NEW_DETECTED_MACS_KEY
+    @new_detected_macs = \
+      HunterJob.current_thread&.thread_variable_get(new_detected_macs_key)
   end
 
   def start
