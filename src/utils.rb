@@ -21,7 +21,7 @@ module Metalware
           options.__send__(option_setter, value)
         end
 
-        command_class.new(args, options)
+        command_class.new(args, options, headless: true)
       end
 
       private
