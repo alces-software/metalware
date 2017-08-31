@@ -1,5 +1,9 @@
 
-<% unless @currently_hunting %>
+<% if @currently_hunting %>
+  <%= form_tag(hunter_path, method: :delete) do %>
+    <% submit_tag('Stop hunting') %>
+  <% end %>
+<% else %>
   <%= form_tag(start_hunter_path) do %>
   <% submit_tag("Hunt!") %>
   <% end %>
