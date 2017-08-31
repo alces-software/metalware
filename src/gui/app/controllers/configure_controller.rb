@@ -37,7 +37,7 @@ class ConfigureController < ApplicationController
   end
 
   def find_question(identifier)
-    questions.find {|q| q.identifier == identifier.to_sym}
+    questions.find { |q| q.identifier == identifier.to_sym }
   end
 
   def coerce_answer(answer, type)

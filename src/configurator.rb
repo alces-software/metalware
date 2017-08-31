@@ -157,7 +157,7 @@ module Metalware
         questions_section: questions_section,
         old_answer: old_answers[identifier],
         use_readline: use_readline,
-        progress_indicator: progress_indicator(index),
+        progress_indicator: progress_indicator(index)
       )
     end
 
