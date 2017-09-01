@@ -7,7 +7,7 @@ class HunterController < ApplicationController
 
     new_detected_macs_key = Metalware::Commands::Hunter::NEW_DETECTED_MACS_KEY
     @new_detected_macs = \
-      HunterJob.current_thread&.thread_variable_get(new_detected_macs_key)
+      HunterJob.current_thread&.thread_variable_get(new_detected_macs_key) || []
   end
 
   def start
