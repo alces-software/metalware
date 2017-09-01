@@ -41,7 +41,13 @@
                 <% form_id = "record-node-form-#{index}" %>
                 <%= form_tag(record_node_hunter_path, method: :post, id: form_id) do %>
                   <%= hidden_field_tag(:mac_address, mac) %>
-                  <%= text_field_tag(:node_name, nil, required: true, class: ['form-control']) %>
+                  <%= text_field_tag(
+                    :node_name,
+                    nil,
+                    required: true,
+                    placeholder: @hunter_macs_to_nodes[mac],
+                    class: ['form-control']
+                  ) %>
                 <% end %>
               </td>
               <td>
