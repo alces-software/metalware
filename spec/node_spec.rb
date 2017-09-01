@@ -289,7 +289,7 @@ RSpec.describe Metalware::Node do
 
     context 'with a regular node' do
       it 'returns the default (/kickstart) build type if not specified' do
-        expected = Metalware::BuildMethods::Kickstart
+        expected = Metalware::BuildMethods::Kickstarts::Pxelinux
         expect(build_method_class('build_node', nil)).to eq(expected)
       end
 
