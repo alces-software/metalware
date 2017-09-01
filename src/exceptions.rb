@@ -156,6 +156,13 @@ module Metalware
 
   class EditModeError < MetalwareError
   end
+
+  class MissingExternalDNS < MetalwareError
+  end
+
+  class SaverNoData < MetalwareError
+    def initialize(msg = 'No data provided to Validation::Saver'); end
+  end
 end
 
 
