@@ -14,33 +14,45 @@
     ) %>
   <% end %>
 
-  <table class='table detected-nodes-table'>
-    <thead>
-      <tr>
-        <th>Detected MAC address</th>
-        <th>Name</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+  <div class='card'>
+    <div class='card-header'>
+      <ul class="nav">
+        <li class="nav-item">
+          <span class="navbar-brand">Hunter progress</span>
+        </li>
+      </ul>
+    </div>
 
-    <tbody>
-      <% @new_detected_macs.each_with_index do |mac, index| %>
-        <tr>
-          <td><code><%= mac %></code></td>
-          <td>
-            <% form_id = "record-node-form-#{index}" %>
-            <%= form_tag(record_node_hunter_path, method: :post, id: form_id) do %>
-              <%= hidden_field_tag(:mac_address, mac) %>
-              <%= text_field_tag(:node_name, nil, required: true, class: ['form-control']) %>
-            <% end %>
-          </td>
-          <td>
-            <%= submit_tag('Record', form: form_id, class: ['btn', 'btn-dark']) %>
-          </td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+    <div class='card-body'>
+      <table class='table detected-nodes-table'>
+        <thead>
+          <tr>
+            <th>Detected MAC address</th>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% @new_detected_macs.each_with_index do |mac, index| %>
+            <tr>
+              <td><code><%= mac %></code></td>
+              <td>
+                <% form_id = "record-node-form-#{index}" %>
+                <%= form_tag(record_node_hunter_path, method: :post, id: form_id) do %>
+                  <%= hidden_field_tag(:mac_address, mac) %>
+                  <%= text_field_tag(:node_name, nil, required: true, class: ['form-control']) %>
+                <% end %>
+              </td>
+              <td>
+                <%= submit_tag('Record', form: form_id, class: ['btn', 'btn-dark']) %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 <% else %>
   <%= form_tag(start_hunter_path) do %>
