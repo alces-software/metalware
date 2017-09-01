@@ -160,6 +160,13 @@ module Metalware
   class MissingExternalDNS < MetalwareError
   end
 
+  class SaverNoData < MetalwareError
+    def initialize(msg = 'No data provided to Validation::Saver'); end
+  end
+
+  class MissingExternalDNS < MetalwareError
+  end
+
   class SelfBuildMethodError < MetalwareError
     def initialize(build_method: nil, building_self_node: true)
       msg = if build_method
