@@ -25,11 +25,12 @@
 require 'file_path'
 require 'validation/answer'
 require 'validation/configure'
+require 'validation/load_save_base'
 require 'data'
 
 module Metalware
   module Validation
-    class Loader
+    class Loader < LoadSaveBase
       def initialize(metalware_config)
         @config = metalware_config
         @path = FilePath.new(config)
@@ -41,22 +42,6 @@ module Metalware
 
       def group_cache
         Data.load(path.group_cache)
-      end
-
-      def self_answers
-        answer(path.self_answers, :self)
-      end
-
-      def domain_answers
-        answer(path.domain_answers, :domain)
-      end
-
-      def group_answers(file)
-        answer(path.group_answers(file), :groups)
-      end
-
-      def node_answers(file)
-        answer(path.node_answers(file), :nodes)
       end
 
       private

@@ -22,57 +22,36 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'exceptions'
 require 'file_path'
 require 'validation/answer'
+require 'validation/configure'
 require 'data'
 
 module Metalware
   module Validation
-    class Saver
-      def initialize(metalware_config)
-        @config = metalware_config
+    class LoadSaveBase
+      def initialize(*_a)
+        raise NotImplementedError
       end
 
-      def respond_to_missing?(s, *_a)
-        Methods.instance_methods.include?(s)
+      def domain_answers
+        answer(path.domain_answers, :domain)
       end
 
-      # Enforces the first argument to always be the data
-      def method_missing(s, *a, &b)
-        data = a[0]
-        if respond_to_missing?(s)
-          raise SaverNoData unless data
-          Methods.new(config, data).send(s, *a[1..-1], &b)
-        else
-          super
-        end
+      def group_answers(file)
+        answer(path.group_answers(file), :groups)
+      end
+
+      def node_answers(file)
+        answer(path.node_answers(file), :nodes)
       end
 
       private
 
-      attr_reader :config
+      attr_reader :path, :config
 
-      def method_builder(data)
-        Methods.new(config, data)
-      end
-
-      class Methods < LoadSaveBase
-        def initialize(config, data)
-          @config = config
-          @path = FilePath.new(config)
-          @data = data
-        end
-
-        private
-
-        attr_reader :path, :config, :data
-
-        def answer(save_path, section)
-          valid = Validation::Answer.new(config, data, answer_section: section)
-                                    .data
-          Data.dump(save_path, valid)
-        end
+      def answer(absolute_path, section)
+        raise NotImplementedError
       end
     end
   end
