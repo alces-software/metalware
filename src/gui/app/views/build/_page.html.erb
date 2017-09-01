@@ -3,6 +3,13 @@
   <%= form_tag(build_path, method: :delete) do %>
     <% submit_tag("Cancel build", class: ['btn', 'btn-dark', 'btn-block']) %>
   <% end %>
+
+  <pre>
+    <% @messages.each do |message| %>
+      <span class="text-<%= message.type %>"><%= message.text %></span>
+    <% end %>
+  </pre>
+
 <% else %>
   <%= form_tag(start_build_path) do %>
     <% submit_tag("Build!", class: ['btn', 'btn-dark', 'btn-block']) %>

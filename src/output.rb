@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'concurrent'
+
 module Metalware
   module Output
     class << self
@@ -33,6 +35,37 @@ module Metalware
       def stderr_indented_error_message(text)
         stderr text.gsub(/^/, '>>> ')
       end
+
+      # Methods to output/store for displaying in GUI appropriately depending
+      # on if we are in CLI or GUI.
+
+      def warning(*lines)
+        if in_gui?
+          store_messages(:warning, lines)
+        else
+          stderr(*lines)
+        end
+      end
+
+      private
+
+      def in_gui?
+        defined? Rails
+      end
+
+      def store_messages(type, lines)
+        messages_array = Thread.current.thread_variable_get(:messages)
+        # XXX Better place to initialize this?
+        unless messages_array
+          messages_array = Concurrent::Array.new
+          Thread.current.thread_variable_set(:messages, messages_array)
+        end
+
+        new_messages = lines.map { |line| Message.new(type, line) }
+        messages_array.push(*new_messages)
+      end
     end
+
+    Message = Struct.new(:type, :text)
   end
 end
