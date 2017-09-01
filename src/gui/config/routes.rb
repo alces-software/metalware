@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
   resource :cluster, only: :show, controller: :cluster
   resource :hunter, only: [:show, :destroy], controller: :hunter do
-    post :start
+    post :start, :'record-node'
   end
 
   configure_actions = [:show, :create, :destroy]

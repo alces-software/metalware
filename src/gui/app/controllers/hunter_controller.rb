@@ -28,9 +28,22 @@ class HunterController < ApplicationController
     redirect_to hunter_path
   end
 
+  def record_node
+    # XXX This bypasses the logging done when we record pairs in the `Hunter`
+    # command - possibly we should share code between these somehow?
+    hunter_updater.add(params[:node_name], params[:mac_address])
+    # XXX Show flash message here
+    redirect_to hunter_path
+  end
+
   private
 
   def fake_hunting?
     Rails.env.development? && params[:fake_hunting]
+  end
+
+  def hunter_updater
+    @hunter_updater ||=
+      Metalware::HunterUpdater.new(Metalware::Constants::HUNTER_PATH)
   end
 end
