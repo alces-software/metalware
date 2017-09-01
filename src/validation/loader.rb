@@ -64,8 +64,9 @@ module Metalware
       attr_reader :path, :config
 
       def answer(absolute_path, section)
+        yaml = Data.load(absolute_path)
         validator = Validation::Answer.new(config,
-                                           absolute_path,
+                                           yaml,
                                            answer_section: section)
         validator.load
       end
