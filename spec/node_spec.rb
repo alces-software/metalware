@@ -221,6 +221,7 @@ RSpec.describe Metalware::Node do
           domain: questions,
           group: questions,
           node: questions,
+          self: {},
         }
         fs.dump(config.configure_file, configure)
       end

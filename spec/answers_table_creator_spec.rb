@@ -47,6 +47,7 @@ RSpec.describe Metalware::AnswersTableCreator do
         question_2: { question: 'question 2', type: 'integer' },
         question_3: { question: 'question 3' },
       },
+      self: {},
     }
   end
 

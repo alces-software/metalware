@@ -44,6 +44,7 @@ RSpec.describe Metalware::Repo do
         node: {
           baz: { question: 'baz' },
         },
+        self:{},
       }
       fs.dump('/var/lib/metalware/repo/configure.yaml', configure_data)
     end
