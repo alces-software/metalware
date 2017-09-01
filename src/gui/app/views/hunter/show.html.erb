@@ -3,7 +3,14 @@
   <%= form_tag(hunter_path, method: :delete) do %>
     <% submit_tag(
       'Stop hunting',
-      class: ['btn', 'btn-dark', 'btn-block']
+      class: ['btn', 'btn-dark', 'btn-block'],
+      data: {
+        confirm: <<-EOF.strip_heredoc
+        Any unrecorded MAC addresses will be forgotten.
+
+        Are you sure you want to stop hunting?
+        EOF
+      }
     ) %>
   <% end %>
 
