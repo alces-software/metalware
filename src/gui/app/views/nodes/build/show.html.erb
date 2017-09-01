@@ -1,10 +1,10 @@
 
 <% if @build_ongoing %>
   <%= form_tag(node_build_path, method: :delete) do %>
-    <% submit_tag("Cancel build") %>
+    <% submit_tag("Cancel build", class: ['btn', 'btn-dark', 'btn-block']) %>
   <% end %>
 <% else %>
   <%= form_tag(start_node_build_path) do %>
-    <% submit_tag("Build!") %>
+    <% submit_tag("Build!", class: ['btn', 'btn-dark', 'btn-block']) %>
   <% end %>
 <% end %>

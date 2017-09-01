@@ -1,7 +1,10 @@
 
 <% if @currently_hunting %>
   <%= form_tag(hunter_path, method: :delete) do %>
-    <% submit_tag('Stop hunting') %>
+    <% submit_tag(
+      'Stop hunting',
+      class: ['btn', 'btn-dark', 'btn-block']
+    ) %>
   <% end %>
 
   <table class='table'>
@@ -23,6 +26,6 @@
 
 <% else %>
   <%= form_tag(start_hunter_path) do %>
-  <% submit_tag("Hunt!") %>
+    <% submit_tag("Hunt!", class: ['btn', 'btn-dark', 'btn-block']) %>
   <% end %>
 <% end %>
