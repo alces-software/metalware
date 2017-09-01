@@ -71,13 +71,11 @@ RSpec.describe Metalware::Commands::Build do
   def run_build(node_identifier, **options_hash)
     # Run command in timeout as `build` will wait indefinitely, but want to
     # abort tests if it looks like this is happening.
-    result = Timeout.timeout 0.5 do
+    Timeout.timeout 0.5 do
       Metalware::Utils.run_command(
         Metalware::Commands::Build, node_identifier, **options_hash
       )
     end
-    expect(Thread.list.length).to eq(1)
-    result
   end
 
   # Makes `Node.new` return real `Node`s, but with certain methods stubbed to
