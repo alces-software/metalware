@@ -15,6 +15,8 @@ class HunterController < ApplicationController
         HunterJob.current_thread&.thread_variable_get(new_detected_macs_key) || []
     end
 
+    @hunter_macs_to_nodes = Metalware::Data.load(Metalware::Constants::HUNTER_PATH).invert
+
     @title = @currently_hunting ? 'Hunting!' : 'Hunt for nodes'
   end
 
