@@ -31,8 +31,11 @@ class HunterController < ApplicationController
   def record_node
     # XXX This bypasses the logging done when we record pairs in the `Hunter`
     # command - possibly we should share code between these somehow?
-    hunter_updater.add(params[:node_name], params[:mac_address])
-    # XXX Show flash message here
+    node_name = params[:node_name]
+    mac_address = params[:mac_address]
+    hunter_updater.add(node_name, mac_address)
+    flash.notice = \
+      "MAC address <code>#{mac_address}</code> associated with node <strong>#{node_name}</strong>."
     redirect_to hunter_path
   end
 

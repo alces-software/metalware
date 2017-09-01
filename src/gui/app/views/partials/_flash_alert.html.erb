@@ -4,7 +4,7 @@
     <div class="col"></div>
     <div class="col-6">
       <div class="alert <%= alert_class %>" role="alert">
-        <%= flash[flash_key] %>
+        <%= sanitize flash[flash_key], tags: ['code', 'strong'] %>
       </div>
     </div>
     <div class="col"></div>
