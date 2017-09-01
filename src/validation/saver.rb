@@ -64,11 +64,17 @@ module Metalware
           @data = data
         end
 
-        def domain_answers; end
+        def domain_answers
+          Data.dump(path.domain_answers, validate_answer(:domain))
+        end
 
         private
 
         attr_reader :path, :config, :data
+
+        def validate_answer(section)
+          Validation::Answer.new(config, data, answer_section: section).data
+        end
       end
     end
   end
