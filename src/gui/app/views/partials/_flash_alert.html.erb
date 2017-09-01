@@ -1,0 +1,12 @@
+
+<% if flash[flash_key] %>
+  <div class="row">
+    <div class="col"></div>
+    <div class="col-6">
+      <div class="alert <%= alert_class %>" role="alert">
+        <%= flash[flash_key] %>
+      </div>
+    </div>
+    <div class="col"></div>
+  </div>
+<% end %>
