@@ -74,7 +74,7 @@ module Metalware
         @validation_result.success?
       end
 
-      def load
+      def data
         success? ? answers : (raise ValidationFailure, error_message)
       end
 

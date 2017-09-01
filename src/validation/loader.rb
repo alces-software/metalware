@@ -68,7 +68,7 @@ module Metalware
         validator = Validation::Answer.new(config,
                                            yaml,
                                            answer_section: section)
-        validator.load
+        validator.data
       end
     end
   end

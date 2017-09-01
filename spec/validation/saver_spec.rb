@@ -23,8 +23,11 @@
 #==============================================================================
 
 require 'validation/saver'
+require 'validation/answer'
 require 'config'
 require 'filesystem'
+require 'file_path'
+require 'data'
 
 module SaverSpec
   module TestingMethods
@@ -41,13 +44,15 @@ Metalware::Validation::Saver::Methods.prepend(SaverSpec::TestingMethods)
 
 RSpec.describe Metalware::Validation::Saver do
   let :config { Metalware::Config.new }
-
+  let :path { Metalware::FilePath.new(config) }
   let :saver do
     Metalware::Validation::Saver.new(config)
   end
+  let :stubbed_answer_load { OpenStruct.new({data: data}) }
+  let :data { { key: 'data' } }
 
   let :filesystem do
-    filesystem.setup(&:with_minimal_repo)
+    FileSystem.setup(&:with_minimal_repo)
   end
 
   it 'errors if method is not defined' do
@@ -64,12 +69,21 @@ RSpec.describe Metalware::Validation::Saver do
 
   it 'passes an arguments and data to the save method' do
     inputs = ['arg1', hash: 'value']
-    data = { key: 'data' }
     expect(
       saver.input_test(data, *inputs)
     ).to eq(inputs)
     expect(
       saver.data_test(data, *inputs)
     ).to eq(data)
+  end
+
+  it 'calls the answer validator with the domain and data' do
+    filesystem.test do
+      expect(Metalware::Validation::Answer).to \
+        receive(:new).with(config, data, answer_section: :domain)
+                     .and_return(stubbed_answer_load)
+      saver.domain_answers(data)
+      expect(Metalware::Data.load(path.domain_answers)).to eq(data)
+    end
   end
 end
