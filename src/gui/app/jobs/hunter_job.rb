@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class HunterJob < ApplicationJob
   class << self
     attr_accessor :current_thread

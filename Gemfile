@@ -32,8 +32,8 @@ end
 
 # Gems added for GUI app.
 gem 'bootstrap', '~> 4.0.0.beta'
-gem 'jquery-rails' # Required for Bootstrap.
 gem 'concurrent-ruby', require: 'concurrent'
+gem 'jquery-rails' # Required for Bootstrap.
 
 # Required as Rails need a JavaScript runtime.
 gem 'therubyracer'
