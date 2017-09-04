@@ -18,8 +18,4 @@ class Nodes::ConfigureController < ConfigureController
   def questions
     Configure::Questions.for_node(node_name)
   end
-
-  def node_name
-    params[:node_id]
-  end
 end

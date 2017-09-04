@@ -23,8 +23,4 @@ class Groups::ConfigureController < ConfigureController
   def questions
     Configure::Questions.for_group(group_name)
   end
-
-  def group_name
-    params[:group_id]
-  end
 end

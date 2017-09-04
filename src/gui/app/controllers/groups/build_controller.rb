@@ -4,6 +4,7 @@ class Groups::BuildController < BuildController
   private
 
   alias build_path group_build_path
+  alias build_job_identifier group_name
 
   def define_title(build_ongoing:)
     title_prefix = build_ongoing ? 'Building' : 'Build'
@@ -13,10 +14,4 @@ class Groups::BuildController < BuildController
   def build_job_class
     BuildGroupJob
   end
-
-  # XXX Same method in `Groups::ConfigureController`.
-  def group_name
-    params[:group_id]
-  end
-  alias build_job_identifier group_name
 end

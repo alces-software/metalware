@@ -10,4 +10,15 @@ class ApplicationController < ActionController::Base
     flash.now[:error] = error.message
     false
   end
+
+  # Get the name of the associated node for a nested node controller
+  # (`Nodes::BuildController`, `Nodes::ConfigureController` etc.).
+  def node_name
+    params[:node_id]
+  end
+
+  # Similarly to `node_name` for nested group controllers.
+  def group_name
+    params[:group_id]
+  end
 end

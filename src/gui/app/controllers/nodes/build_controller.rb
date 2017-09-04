@@ -4,6 +4,7 @@ class Nodes::BuildController < BuildController
   private
 
   alias build_path node_build_path
+  alias build_job_identifier node_name
 
   def define_title(build_ongoing:)
     title_prefix = build_ongoing ? 'Building' : 'Build'
@@ -13,10 +14,4 @@ class Nodes::BuildController < BuildController
   def build_job_class
     BuildNodeJob
   end
-
-  # XXX Same method in `Nodes::ConfigureController`.
-  def node_name
-    params[:node_id]
-  end
-  alias build_job_identifier node_name
 end
