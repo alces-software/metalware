@@ -5,9 +5,8 @@ class BuildController < ApplicationController
   GRACEFULLY_SHUTDOWN_KEY = Metalware::Commands::Build::GRACEFULLY_SHUTDOWN_KEY
 
   def show
-    build_job = build_job_class.find(build_job_identifier)
-    @build_ongoing = !!build_job
-    @messages = build_job&.thread_variable_get(MESSAGES_KEY)&.reverse || []
+    @build_ongoing = !!current_build_job
+    @messages = current_build_job&.thread_variable_get(MESSAGES_KEY)&.reverse || []
     define_title(build_ongoing: @build_ongoing)
   end
 
@@ -17,12 +16,15 @@ class BuildController < ApplicationController
   end
 
   def destroy
-    build_job = build_job_class.find(build_job_identifier)
-    build_job&.thread_variable_set(GRACEFULLY_SHUTDOWN_KEY, true)
+    current_build_job&.thread_variable_set(GRACEFULLY_SHUTDOWN_KEY, true)
     redirect_to build_path
   end
 
   private
+
+  def current_build_job
+    build_job_class.find(build_job_identifier)
+  end
 
   def define_title(build_ongoing:)
     raise NotImplementedError
