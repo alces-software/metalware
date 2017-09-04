@@ -36,7 +36,7 @@ class HunterController < ApplicationController
     node_name = params[:node_name]
     mac_address = params[:mac_address]
     hunter_updater.add(node_name, mac_address)
-    flash.notice = \
+    flash[:success] = \
       "MAC address <code>#{mac_address}</code> associated with node <strong>#{node_name}</strong>."
     redirect_to hunter_path
   end
