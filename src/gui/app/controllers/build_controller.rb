@@ -4,7 +4,7 @@ class BuildController < ApplicationController
   def show
     build_job = build_job_class.find(build_job_identifier)
     @build_ongoing = !!build_job
-    @messages = build_job&.thread_variable_get(:messages) || []
+    @messages = build_job&.thread_variable_get(:messages)&.reverse || []
     define_title(build_ongoing: @build_ongoing)
   end
 
