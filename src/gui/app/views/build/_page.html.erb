@@ -4,11 +4,23 @@
     <% submit_tag("Cancel build", class: ['btn', 'btn-dark', 'btn-block']) %>
   <% end %>
 
-  <pre>
-    <% @messages.each do |message| %>
-      <span class="text-<%= message.type %>"><%= message.text %></span>
-    <% end %>
-  </pre>
+  <div class='card'>
+    <div class='card-header'>
+      <ul class="nav">
+        <li class="nav-item">
+          <span class="navbar-brand">Build progress</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class='card-body'>
+      <pre class="bg-dark">
+        <% @messages.each do |message| %>
+          <span class="text-<%= message.type %>"><%= message.text %></span>
+        <% end %>
+      </pre>
+    </div>
+  </div>
 
 <% else %>
   <%= form_tag(start_build_path) do %>
