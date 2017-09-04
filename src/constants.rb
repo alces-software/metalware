@@ -44,7 +44,6 @@ module Metalware
     HOSTS_PATH = '/etc/hosts'
 
     NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'templates/named.conf.erb')
-    BASE_NAMED_PATH = '/etc/named.conf'
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
   end

@@ -39,7 +39,6 @@ module Metalware
       end
 
       def update
-        setup unless setup?
         render_repo_named_conf
         each_network do |zone, net|
           render_zone_template('forward', zone, net)
@@ -54,27 +53,6 @@ module Metalware
 
       def file_path
         @file_path ||= FilePath.new(config)
-      end
-
-      def setup
-        check_external_dns_is_set
-        render_base_named_conf
-        start_named
-      end
-
-      def setup?
-        exit_code = SystemCommand.run_raw('systemctl status named')[:status]
-        MetalLog.info "systemctl status named, exit code: #{exit_code}"
-        exit_code.success?
-      end
-
-      EXTERNAL_DNS_MSG = <<~EOF.strip_heredoc
-        Can not setup `named` as `externaldns` has not been set in the domain.yaml
-        repo config.
-      EOF
-
-      def check_external_dns_is_set
-        raise MissingExternalDNS, EXTERNAL_DNS_MSG unless repo_config[:externaldns]
       end
 
       def repo_config
@@ -95,26 +73,9 @@ module Metalware
                                  file_path.metalware_named)
       end
 
-      # TODO: These commands will break hosts DNS. Might be a good idea to run
-      # similar commands for hosts
-      RESTART_NAMED_CMDS = [
-        'systemctl restart named',
-      ].freeze
-
-      START_NAMED_CMDS = [
-        'systemctl disable dnsmasq',
-        'systemctl stop dnsmasq',
-        'systemctl enable named',
-      ].concat(RESTART_NAMED_CMDS).freeze
-
-      def start_named
-        MetalLog.info 'Starting named'
-        loop_system_command(START_NAMED_CMDS)
-      end
-
       def restart_named
         MetalLog.info 'Restarting named'
-        loop_system_command(RESTART_NAMED_CMDS)
+        loop_system_command('systemctl restart named')
       end
 
       def loop_system_command(cmds)
