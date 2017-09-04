@@ -2,6 +2,7 @@
 
 class BuildController < ApplicationController
   MESSAGES_KEY = Metalware::Output::MESSAGES_KEY
+  GRACEFULLY_SHUTDOWN_KEY = Metalware::Commands::Build::GRACEFULLY_SHUTDOWN_KEY
 
   def show
     build_job = build_job_class.find(build_job_identifier)
@@ -17,7 +18,7 @@ class BuildController < ApplicationController
 
   def destroy
     build_job = build_job_class.find(build_job_identifier)
-    build_job&.kill
+    build_job&.thread_variable_set(GRACEFULLY_SHUTDOWN_KEY, true)
     redirect_to build_path
   end
 

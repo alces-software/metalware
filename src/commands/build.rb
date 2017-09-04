@@ -37,6 +37,8 @@ require 'exceptions'
 module Metalware
   module Commands
     class Build < CommandHelpers::BaseCommand
+      GRACEFULLY_SHUTDOWN_KEY = :gracefully_shutdown
+
       private
 
       attr_reader :group_name, :nodes, :edit_start, :edit_continue
@@ -113,6 +115,8 @@ module Metalware
 
         rerendered_nodes = []
         loop do
+          gracefully_shutdown if should_gracefully_shutdown?
+
           nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
           end
@@ -133,6 +137,22 @@ module Metalware
 
           sleep config.build_poll_sleep
         end
+      end
+
+      def should_gracefully_shutdown?
+        in_gui? && Thread.current.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)
+      end
+
+      def gracefully_shutdown
+        # XXX Somewhat similar to `handle_interrupt`; may not be easily
+        # generalizable however.
+        Output.info 'Exiting...'
+        render_all_build_complete_templates
+        teardown
+
+        # Sleep forever; current thread no longer needs to do anything, just
+        # need to keep around messages.
+        sleep
       end
 
       def render_all_build_complete_templates
