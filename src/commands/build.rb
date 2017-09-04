@@ -107,8 +107,8 @@ module Metalware
       end
 
       def wait_for_nodes_to_build
-        Output.stderr 'Waiting for nodes to report as built...',
-                      '(Ctrl-C to terminate)'
+        Output.success 'Waiting for nodes to report as built...'
+        Output.cli_only '(Ctrl-C to terminate)'
 
         rerendered_nodes = []
         loop do
@@ -120,7 +120,7 @@ module Metalware
             rerendered_nodes.push(*nodes)
           end
                .each do |node|
-            Output.stderr "Node #{node.name} built."
+            Output.success "Node #{node.name} built."
           end
 
           all_nodes_reported_built = rerendered_nodes.length == nodes.length
@@ -143,7 +143,7 @@ module Metalware
 
       def teardown
         clear_up_built_node_marker_files
-        Output.stderr 'Done.'
+        Output.info 'Done.'
       end
 
       def clear_up_built_node_marker_files
@@ -153,11 +153,11 @@ module Metalware
       end
 
       def handle_interrupt(_e)
-        Output.stderr 'Exiting...'
+        Output.info 'Exiting...'
         ask_if_should_rerender
         teardown
       rescue Interrupt
-        Output.stderr 'Re-rendering templates anyway...'
+        Output.info 'Re-rendering templates anyway...'
         render_all_build_complete_templates
         teardown
       end

@@ -39,15 +39,31 @@ module Metalware
       # Methods to output/store for displaying in GUI appropriately depending
       # on if we are in CLI or GUI.
 
+      def cli_only(*lines)
+        stderr(*lines) unless in_gui?
+      end
+
+      def info(*lines)
+        output_to_cli_or_gui(lines, type: :info)
+      end
+
+      def success(*lines)
+        output_to_cli_or_gui(lines, type: :success)
+      end
+
       def warning(*lines)
+        output_to_cli_or_gui(lines, type: :warning)
+      end
+
+      private
+
+      def output_to_cli_or_gui(lines, type:)
         if in_gui?
-          store_messages(:warning, lines)
+          store_messages(type, lines)
         else
           stderr(*lines)
         end
       end
-
-      private
 
       def in_gui?
         defined? Rails
