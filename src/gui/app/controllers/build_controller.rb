@@ -6,7 +6,7 @@ class BuildController < ApplicationController
   COMPLETE_KEY = Metalware::Commands::Build::COMPLETE_KEY
 
   def show
-    @build_ongoing = !!current_build_job
+    @build_ongoing = build_thread_running?
     @build_complete = build_command_complete?
 
     @messages = current_build_job&.thread_variable_get(MESSAGES_KEY)&.reverse || []
@@ -39,6 +39,10 @@ class BuildController < ApplicationController
 
   def current_build_job
     build_job_class.find(build_job_identifier)
+  end
+
+  def build_thread_running?
+    !!current_build_job
   end
 
   def build_command_complete?
