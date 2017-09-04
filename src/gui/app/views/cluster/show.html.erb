@@ -84,7 +84,10 @@
                 %>
               </td>
               <td>
-                <button class='btn btn-dark btn-block'>Power reset</button>
+                <%= button_to 'Power reset',
+                  node_power_reset_path(node.name),
+                  class: ['btn', 'btn-dark', 'btn-block']
+                %>
               </td>
             </tr>
           <% end %>

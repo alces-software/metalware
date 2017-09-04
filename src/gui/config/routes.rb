@@ -24,8 +24,11 @@ Rails.application.routes.draw do
 
   resources :nodes, only: [] do
     resource :configure, controller: 'nodes/configure', only: configure_actions
+
     resource :build, controller: 'nodes/build', only: [:show, :destroy] do
       post :start, :shutdown
     end
+
+    post :'power-reset'
   end
 end
