@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class BuildController < ApplicationController
+  MESSAGES_KEY = Metalware::Output::MESSAGES_KEY
+
   def show
     build_job = build_job_class.find(build_job_identifier)
     @build_ongoing = !!build_job
-    @messages = build_job&.thread_variable_get(:messages)&.reverse || []
+    @messages = build_job&.thread_variable_get(MESSAGES_KEY)&.reverse || []
     define_title(build_ongoing: @build_ongoing)
   end
 

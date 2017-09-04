@@ -29,6 +29,8 @@ require 'utils'
 
 module Metalware
   module Output
+    MESSAGES_KEY = :messages
+
     class << self
       def stderr(*lines)
         # Don't output anything in unit tests to prevent noise.
@@ -71,11 +73,11 @@ module Metalware
       end
 
       def store_messages(type, lines)
-        messages_array = Thread.current.thread_variable_get(:messages)
+        messages_array = Thread.current.thread_variable_get(MESSAGES_KEY)
         # XXX Better place to initialize this?
         unless messages_array
           messages_array = Concurrent::Array.new
-          Thread.current.thread_variable_set(:messages, messages_array)
+          Thread.current.thread_variable_set(MESSAGES_KEY, messages_array)
         end
 
         new_messages = lines.map { |line| Message.new(type, line) }
