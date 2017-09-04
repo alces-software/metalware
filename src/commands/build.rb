@@ -42,6 +42,7 @@ module Metalware
       attr_reader :group_name, :nodes, :edit_start, :edit_continue
 
       delegate :template_path, to: :file_path
+      delegate :in_gui?, to: Utils
 
       def setup
         setup_edit_mode
@@ -124,7 +125,11 @@ module Metalware
           end
 
           all_nodes_reported_built = rerendered_nodes.length == nodes.length
-          break if all_nodes_reported_built
+          if all_nodes_reported_built
+            # For now at least, keep thread alive when in GUI so can keep
+            # accessing messages. XXX Change this, this is very wasteful.
+            break unless in_gui?
+          end
 
           sleep config.build_poll_sleep
         end
