@@ -38,6 +38,7 @@ module Metalware
   module Commands
     class Build < CommandHelpers::BaseCommand
       GRACEFULLY_SHUTDOWN_KEY = :gracefully_shutdown
+      COMPLETE_KEY = :complete
 
       private
 
@@ -132,11 +133,19 @@ module Metalware
           if all_nodes_reported_built
             # For now at least, keep thread alive when in GUI so can keep
             # accessing messages. XXX Change this, this is very wasteful.
-            break unless in_gui?
+            if in_gui?
+              record_gui_build_complete
+            else
+              break
+            end
           end
 
           sleep config.build_poll_sleep
         end
+      end
+
+      def record_gui_build_complete
+        Thread.current.thread_variable_set(COMPLETE_KEY, true)
       end
 
       def should_gracefully_shutdown?
@@ -149,6 +158,7 @@ module Metalware
         Output.info 'Exiting...'
         render_all_build_complete_templates
         teardown
+        record_gui_build_complete
 
         # Sleep forever; current thread no longer needs to do anything, just
         # need to keep around messages.

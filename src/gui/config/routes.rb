@@ -18,14 +18,14 @@ Rails.application.routes.draw do
   resources :groups, only: [] do
     resource :configure, controller: 'groups/configure', only: configure_actions
     resource :build, controller: 'groups/build', only: [:show, :destroy] do
-      post :start
+      post :start, :shutdown
     end
   end
 
   resources :nodes, only: [] do
     resource :configure, controller: 'nodes/configure', only: configure_actions
     resource :build, controller: 'nodes/build', only: [:show, :destroy] do
-      post :start
+      post :start, :shutdown
     end
   end
 end
