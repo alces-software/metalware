@@ -23,6 +23,9 @@
 #==============================================================================
 
 require 'concurrent'
+require 'active_support/core_ext/module/delegation'
+
+require 'utils'
 
 module Metalware
   module Output
@@ -57,16 +60,14 @@ module Metalware
 
       private
 
+      delegate :in_gui?, to: Utils
+
       def output_to_cli_or_gui(lines, type:)
         if in_gui?
           store_messages(type, lines)
         else
           stderr(*lines)
         end
-      end
-
-      def in_gui?
-        defined? Rails
       end
 
       def store_messages(type, lines)
