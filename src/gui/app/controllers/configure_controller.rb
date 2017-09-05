@@ -8,6 +8,7 @@ class ConfigureController < ApplicationController
 
   def create
     if configure_with_answers(entered_answers)
+      flash[:success] = "#{configure_item} successfully configured."
       redirect_to '/'
     else
       assign_form_variables
