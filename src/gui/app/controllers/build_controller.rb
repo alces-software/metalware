@@ -26,6 +26,7 @@ class BuildController < ApplicationController
 
   def shutdown
     current_build_job&.thread_variable_set(GRACEFULLY_SHUTDOWN_KEY, true)
+    flash[:success] = 'Build process shutting down...'
     redirect_to build_path
   end
 
@@ -34,6 +35,7 @@ class BuildController < ApplicationController
       # Command must be complete otherwise we will not have gracefully shutdown
       # the build command and could leave things in an unexpected state.
       current_build_job.kill
+      flash[:success] = 'Build process cleaned up.'
     end
     # XXX Handle the `else` case? Could be reached if either build thread not
     # running or build command not complete.
