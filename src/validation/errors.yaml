@@ -11,6 +11,8 @@ en:
           Default's must be filled or a string
         default_type?: >
           The question type does not match the default
+        choice_with_default?: >
+          The default must appear in the choice list
 
       answer:
         missing_questions?: >

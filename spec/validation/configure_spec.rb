@@ -93,7 +93,27 @@ RSpec.describe Metalware::Validation::Configure do
         },
       ],
 
-      self: [],
+      self: [
+        {
+          identifier: 'choice question',
+          question: 'Are all my choices strings?',
+          choice: [
+            'choice1',
+            'choice2',
+            'choice3',
+          ],
+          default: 'choice1',
+        },
+        {
+          identifier: 'choice_question_no_default',
+          question: 'Are all my choices strings without a default?',
+          choice: [
+            'choice1',
+            'choice2',
+            'choice3',
+          ],
+        }
+      ],
     }
   end
 
@@ -251,6 +271,22 @@ RSpec.describe Metalware::Validation::Configure do
                                     default: 'I am not valid',
                                   }])
       expect_configure_error(h, /question type/)
+    end
+  end
+
+  context 'with invalid choice options' do
+    it 'the default is not in the choice list' do
+      h = correct_hash.deep_merge(self: [{
+                                    identifier: 'choice_question_no_bad_default',
+                                    question: 'Is my default valid?',
+                                    choice: [
+                                      'choice1',
+                                      'choice2',
+                                      'choice3',
+                                    ],
+                                    default: 'not in list',
+                                  }])
+      expect_configure_error(h, /choice list/)
     end
   end
 end
