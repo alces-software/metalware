@@ -43,6 +43,16 @@ class HunterController < ApplicationController
 
   private
 
+  def default_url_options(options = {})
+    # Have `fake_hunting` param persist across multiple requests, if set (see
+    # https://stackoverflow.com/a/12819053).
+    if fake_hunting?
+      options.merge(fake_hunting: params[:fake_hunting])
+    else
+      options
+    end
+  end
+
   def fake_hunting?
     Rails.env.development? && params[:fake_hunting]
   end
