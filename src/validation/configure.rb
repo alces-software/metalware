@@ -74,6 +74,19 @@ module Metalware
         msg_header + validate.errors[:data].to_s
       end
 
+      def self.type_check(type, value)
+        case type
+        when 'string', nil
+          value.is_a?(String)
+        when 'integer'
+          value.is_a?(Integer)
+        when 'boolean'
+          value == 'yes' || value == 'no'
+        else
+          false
+        end
+      end
+
       QuestionSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
@@ -117,16 +130,7 @@ module Metalware
                 default = value[:default]
                 type = value[:type]
                 return true if default.nil?
-                case type
-                when 'string', nil
-                  default.is_a?(String)
-                when 'integer'
-                  default.is_a?(Integer)
-                when 'boolean'
-                  default == 'yes' || default == 'no'
-                else
-                  false
-                end
+                ::Metalware::Validation::Configure.type_check(type, default)
               end
 
               def choice_with_default?(value)
@@ -136,6 +140,14 @@ module Metalware
               end
 
               def choice_type?(value)
+                return true if value[:choice].nil?
+                return false unless value[:choice].is_a?(Array)
+                value[:choice].each do |choice|
+                  type = value[:type]
+                  r = ::Metalware::Validation::Configure.type_check(type, choice)
+                  return false unless r
+                end
+                true
               end
             end
 
@@ -143,9 +155,10 @@ module Metalware
             ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
               required(section) do
                 # Loops through each question
-                array? & \
-                each { schema(QuestionSchema) } & \
-                each { default_type? & choice_with_default? }
+                array? & each do
+                  schema(QuestionSchema) & \
+                  default_type? & choice_with_default? & choice_type?
+                end
               end
             end
           end

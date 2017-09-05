@@ -275,7 +275,7 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with invalid choice options' do
-    it 'the default is not in the choice list' do
+    it 'fail when the default is not in the choice list' do
       h = correct_hash.deep_merge(self: [{
                                     identifier: 'choice_question_no_bad_default',
                                     question: 'Is my default valid?',
@@ -287,6 +287,19 @@ RSpec.describe Metalware::Validation::Configure do
                                     default: 'not in list',
                                   }])
       expect_configure_error(h, /choice list/)
+    end
+
+    it 'fails with inconsistent choice types' do
+      h = correct_hash.deep_merge(self: [{
+                                    identifier: 'choice_question_no_bad_type',
+                                    question: 'Are my choice types valid?',
+                                    choice: [
+                                      'choice1',
+                                      100,
+                                      'choice3',
+                                    ],
+                                  }])
+      expect_configure_error(h, /match the question type/)
     end
   end
 end

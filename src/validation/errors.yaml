@@ -13,6 +13,8 @@ en:
           The question type does not match the default
         choice_with_default?: >
           The default must appear in the choice list
+        choice_type?: >
+          All choices must match the question type
 
       answer:
         missing_questions?: >
