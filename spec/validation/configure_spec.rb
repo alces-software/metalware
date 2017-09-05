@@ -189,22 +189,27 @@ RSpec.describe Metalware::Validation::Configure do
     end
   end
 
-  # context 'with missing question blocks' do
-  #   it 'fails when domain is missing' do
-  #     correct_hash.delete(:domain)
-  #     expect(run_configure_validation(correct_hash)).not_to be_empty
-  #   end
+  context 'with missing question blocks' do
+    it 'fails when domain is missing' do
+      correct_hash.delete(:domain)
+      expect_configure_error(correct_hash, /is missing/)
+    end
 
-  #   it 'fails when group is missing' do
-  #     correct_hash.delete(:group)
-  #     expect(run_configure_validation(correct_hash)).not_to be_empty
-  #   end
+    it 'fails when group is missing' do
+      correct_hash.delete(:group)
+      expect_configure_error(correct_hash, /is missing/)
+    end
 
-  #   it 'fails when node is missing' do
-  #     correct_hash.delete(:node)
-  #     expect(run_configure_validation(correct_hash)).not_to be_empty
-  #   end
-  # end
+    it 'fails when node is missing' do
+      correct_hash.delete(:node)
+      expect_configure_error(correct_hash, /is missing/)
+    end
+
+    it 'fails when self is missing' do
+      correct_hash.delete(:self)
+      expect_configure_error(correct_hash, /is missing/)
+    end
+  end
 
   # context 'with invalid string questions' do
   #   it 'fails with a non-string default with no type specified' do
