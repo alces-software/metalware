@@ -37,7 +37,7 @@ module Metalware
 
       # NOTE: Supported types in error.yaml message must be updated manually
 
-      # SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
+      SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
       # BOOLEAN_VALUE = ['yes', 'no'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
@@ -70,9 +70,19 @@ module Metalware
       end
 
       QuestionSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
+
+          def supported_type?(value)
+            SUPPORTED_TYPES.include?(value)
+          end
+        end
+
         required(:identifier) { filled? & str? }
         required(:question) { filled? & str? }
         optional(:optional) { bool? }
+        optional(:type) { supported_type? }
       end
 
       ConfigureSchema = Dry::Validation.Schema do
