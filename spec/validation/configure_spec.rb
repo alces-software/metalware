@@ -41,51 +41,59 @@ RSpec.describe Metalware::Validation::Configure do
                'and node will cause an error.',
       },
 
-      domain: {
-        string_question: {
+      domain: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string question without a default and type?',
         },
-        integer_question: {
+        {
+          identifier: 'integer_question',
           question: 'Am I an integer question with a default?',
           type: 'integer',
           default: 10,
         },
-        boolean_true: {
+        {
+          identifier: 'boolean_true',
           question: 'Can I have a boolean true (/yes) default?',
           type: 'boolean',
           default: 'yes',
         },
-      },
+      ],
 
-      group: {
-        string_question: {
+      group: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string question without a type but with a default?',
           default: 'yes I am a string',
         },
-        integer_question: {
+        {
+          identifier: 'integer_question',
           question: 'Am I a integer question without a default?',
           type: 'integer',
         },
-        boolean_false: {
+        {
+          identifier: 'boolean_false',
           question: 'Can I have a boolean false (/no) default?',
           type: 'boolean',
           default: 'no',
         },
-      },
+      ],
 
-      node: {
-        string_question: {
+      node: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string question with a type and default?',
           type: 'string',
           default: 'yes I am a string',
         },
-        string_empty_default: {
+        {
+          identifier: 'string_empty_default',
           question: 'My default is a empty string?',
           default: '',
         },
-      },
+      ],
 
-      self: {},
+      self: [],
     }
   end
 
