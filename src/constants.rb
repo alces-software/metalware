@@ -52,6 +52,6 @@ module Metalware
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 
-    CONFIGURE_SECTIONS = [:domain, :group, :node, :self]
+    CONFIGURE_SECTIONS = [:domain, :group, :node, :self].freeze
   end
 end
