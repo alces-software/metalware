@@ -36,7 +36,7 @@ module Metalware
       end
 
       def configure_data
-        Validation::Configure.new(path.configure_file).load
+        Validation::Configure.new(config).data
       end
 
       def group_cache
