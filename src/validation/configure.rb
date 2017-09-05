@@ -47,7 +47,7 @@ module Metalware
       end
 
       def data
-        raise ValidationFailure, validate.errors unless validate.success?
+        raise ValidationFailure, validate.errors[:data] unless validate.success?
         raw_data.dup
       end
 
@@ -79,8 +79,19 @@ module Metalware
           end
         end
 
-        required(:data).value(:top_level_keys?)
+        required(:data) do
+          top_level_keys? & schema do
+            # Loops through each section
+            ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
+              required(section) do
+                # Loops through each question
+                array?# & each { schema(QuestionSchema) }
+              end
+            end
+          end
+        end
       end
+
 
       # QuestionSchema = Dry::Validation.Schema do
       #   configure do
