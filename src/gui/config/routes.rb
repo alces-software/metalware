@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       post :start, :shutdown
 
       # For Intercooler polling.
-      get :messages
+      get :cancel_button, :messages
     end
   end
 
@@ -36,7 +36,7 @@ Rails.application.routes.draw do
       post :start, :shutdown
 
       # For Intercooler polling.
-      get :messages
+      get :cancel_button, :messages
     end
 
     post :'power-reset'

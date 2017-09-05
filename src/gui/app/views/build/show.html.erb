@@ -1,6 +1,8 @@
 
 <% if @build_ongoing %>
-  <%= render 'cancel_button' %>
+  <div ic-poll="1s" ic-src="<%= build_cancel_button_path %>">
+    <%= render 'cancel_button' %>
+  </div>
 
   <div class='card'>
     <div class='card-header'>

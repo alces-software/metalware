@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class BuildController < ApplicationController
-  layout false, only: :messages
+  layout false, only: [:cancel_button, :messages]
 
   helper_method \
+    :build_cancel_button_path,
     :build_messages_path,
     :build_path,
     :shutdown_build_path,
@@ -15,11 +16,13 @@ class BuildController < ApplicationController
 
   def show
     @build_ongoing = build_thread_running?
-    @build_cancelling = build_command_shutting_down?
-    @build_complete = build_command_complete?
-
+    assign_build_command_status_variables
     assign_build_messages
     define_title(build_ongoing: @build_ongoing)
+  end
+
+  def cancel_button
+    assign_build_command_status_variables
   end
 
   def messages
@@ -69,6 +72,10 @@ class BuildController < ApplicationController
     send :"shutdown_#{item_type}_build_path"
   end
 
+  def build_cancel_button_path
+    send :"cancel_button_#{item_type}_build_path"
+  end
+
   def build_messages_path
     send :"messages_#{item_type}_build_path"
   end
@@ -93,6 +100,11 @@ class BuildController < ApplicationController
   # Whether the build command has completed or been gracefully shutdown.
   def build_command_complete?
     current_build_job&.thread_variable_get(COMPLETE_KEY)
+  end
+
+  def assign_build_command_status_variables
+    @build_cancelling = build_command_shutting_down?
+    @build_complete = build_command_complete?
   end
 
   def assign_build_messages
