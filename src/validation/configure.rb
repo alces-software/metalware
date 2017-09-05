@@ -94,6 +94,7 @@ module Metalware
         optional(:optional) { bool? }
         optional(:type) { supported_type? }
         optional(:default) { default? }
+        optional(:choice) { array? }
       end
 
       ConfigureSchema = Dry::Validation.Schema do
@@ -127,6 +128,15 @@ module Metalware
                   false
                 end
               end
+
+              def choice_with_default?(value)
+                return true if value[:choice].nil? || value[:default].nil?
+                return false unless value[:choice].is_a?(Array)
+                value[:choice].include?(value[:default])
+              end
+
+              def choice_type?(value)
+              end
             end
 
             # Loops through each section
@@ -135,7 +145,7 @@ module Metalware
                 # Loops through each question
                 array? & \
                 each { schema(QuestionSchema) } & \
-                each { default_type? }
+                each { default_type? & choice_with_default? }
               end
             end
           end
