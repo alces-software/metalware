@@ -158,26 +158,15 @@ RSpec.describe Metalware::Validation::Configure do
     end
 
 
-    # it 'fails if question is missing a title' do
-    #   h = correct_hash.deep_merge(domain: {
-    #                                 missing_title_question: {
-    #                                   default: 'I am missing my question!',
-    #                                 },
-    #                               })
-    #   results = run_configure_validation(h)
-    #   expect(results[:parameters][:question][0]).to eq('is missing')
-    # end
-
-    # it 'fails if question if the title is empty' do
-    #   h = correct_hash.deep_merge(node: {
-    #                                 missing_title_question: {
-    #                                   question: '',
-    #                                   default: 'I am missing my question!',
-    #                                 },
-    #                               })
-    #   results = run_configure_validation(h)
-    #   expect(results[:parameters][:question][0]).to eq('must be filled')
-    # end
+    it 'fails if question is missing or empty' do
+      h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
+      expect_configure_error(h, /is missing/)
+      h = correct_hash.deep_merge(self: [{ 
+        question: '',
+        identifier: 'no_question',
+      }])
+      expect_configure_error(h, /must be filled/)
+    end
 
     # it "fails if type isn't supported" do
     #   h = correct_hash.deep_merge(group: {
