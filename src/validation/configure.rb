@@ -116,7 +116,8 @@ module Metalware
           config.namespace = :configure
 
           def top_level_keys?(data)
-            (data.keys - Constants::CONFIGURE_SECTIONS.push(:questions)).empty?
+            section = Constants::CONFIGURE_SECTIONS.dup.push(:questions)
+            (data.keys - section).empty?
           end
         end
 
