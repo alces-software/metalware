@@ -3,6 +3,17 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
+  def self.credentials
+    @credentials ||=
+      OpenStruct.new(
+        Metalware::Data.load(
+          Metalware::Constants::GUI_CREDENTIALS_PATH
+        )
+      )
+  end
+  http_basic_authenticate_with name: credentials.username,
+                               password: credentials.password
+
   def run_command(command_class, *args, **options_hash)
     Metalware::Utils.run_command(command_class, *args, **options_hash)
     true
