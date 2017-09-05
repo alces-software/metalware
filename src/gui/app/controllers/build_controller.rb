@@ -50,6 +50,8 @@ class BuildController < ApplicationController
     build_job_class.find(build_job_identifier)
   end
 
+  # Whether a build thread is currently running; the build command itself may
+  # still have completed/been shutdown and now just be sleeping.
   def build_thread_running?
     !!current_build_job
   end
@@ -61,8 +63,8 @@ class BuildController < ApplicationController
       current_build_job&.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)
   end
 
+  # Whether the build command has completed or been gracefully shutdown.
   def build_command_complete?
-    # Whether the build command has completed or been gracefully shutdown.
     current_build_job&.thread_variable_get(COMPLETE_KEY)
   end
 
