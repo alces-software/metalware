@@ -140,73 +140,56 @@ RSpec.describe Metalware::Validation::Configure do
       expect_configure_error(h, /invalid top level key/)
     end
 
-    # it 'fails if question is not a hash' do
-    #   h = correct_hash.deep_merge(group: {
-    #                                 question: 'Am I missing my mid level question key?',
-    #                                 type: 'string',
-    #                                 default: 'Each field will now be interpreted as a separate question',
-    #                               })
-    #   results = build_validator(h).validate.errors
-    #   expect(results.keys).to eq([:parameters])
-    #   expect(results[:parameters][0]).to eq('must be a hash')
-    # end
+    it 'fails if sections are not an array' do
+      h = correct_hash.deep_merge(group: { key: 'I am not an array' })
+      expect_configure_error(h, /must be an array/)
+    end
   end
 
-  # context 'with invalid question fields' do
-  #   it 'fails if unrecognized fields in a question' do
-  #     h = correct_hash.deep_merge(domain: {
-  #                                   invalid_field_question: {
-  #                                     question: 'Do I have have an unrecognized field?',
-  #                                     default: 'I do',
-  #                                     invalid_filed: true,
-  #                                   },
-  #                                 })
-  #     expect(run_configure_validation(h).keys).to eq([:valid_top_level_question_keys])
-  #   end
+  context 'with invalid question fields' do
+    # it 'fails if question is missing a title' do
+    #   h = correct_hash.deep_merge(domain: {
+    #                                 missing_title_question: {
+    #                                   default: 'I am missing my question!',
+    #                                 },
+    #                               })
+    #   results = run_configure_validation(h)
+    #   expect(results[:parameters][:question][0]).to eq('is missing')
+    # end
 
-  #   it 'fails if question is missing a title' do
-  #     h = correct_hash.deep_merge(domain: {
-  #                                   missing_title_question: {
-  #                                     default: 'I am missing my question!',
-  #                                   },
-  #                                 })
-  #     results = run_configure_validation(h)
-  #     expect(results[:parameters][:question][0]).to eq('is missing')
-  #   end
+    # it 'fails if question if the title is empty' do
+    #   h = correct_hash.deep_merge(node: {
+    #                                 missing_title_question: {
+    #                                   question: '',
+    #                                   default: 'I am missing my question!',
+    #                                 },
+    #                               })
+    #   results = run_configure_validation(h)
+    #   expect(results[:parameters][:question][0]).to eq('must be filled')
+    # end
 
-  #   it 'fails if question if the title is empty' do
-  #     h = correct_hash.deep_merge(node: {
-  #                                   missing_title_question: {
-  #                                     question: '',
-  #                                     default: 'I am missing my question!',
-  #                                   },
-  #                                 })
-  #     results = run_configure_validation(h)
-  #     expect(results[:parameters][:question][0]).to eq('must be filled')
-  #   end
+    # it "fails if type isn't supported" do
+    #   h = correct_hash.deep_merge(group: {
+    #                                 unsupported_type: {
+    #                                   question: 'Do I have an unsupported type?',
+    #                                   type: 'Unsupported',
+    #                                 },
+    #                               })
+    #   results = run_configure_validation(h)
+    #   expect(results[:parameters].keys).to eq([:type])
+    # end
 
-  #   it "fails if type isn't supported" do
-  #     h = correct_hash.deep_merge(group: {
-  #                                   unsupported_type: {
-  #                                     question: 'Do I have an unsupported type?',
-  #                                     type: 'Unsupported',
-  #                                   },
-  #                                 })
-  #     results = run_configure_validation(h)
-  #     expect(results[:parameters].keys).to eq([:type])
-  #   end
-
-  #   it 'fails if the optional input is not true or false' do
-  #     h = correct_hash.deep_merge(group: {
-  #                                   invalid_optional_flag: {
-  #                                     question: 'Do I have a boolean optional input?',
-  #                                     optional: 'I should be true or false',
-  #                                   },
-  #                                 })
-  #     results = run_configure_validation(h)
-  #     expect(results[:parameters].keys).to eq([:optional])
-  #   end
-  # end
+    # it 'fails if the optional input is not true or false' do
+    #   h = correct_hash.deep_merge(group: {
+    #                                 invalid_optional_flag: {
+    #                                   question: 'Do I have a boolean optional input?',
+    #                                   optional: 'I should be true or false',
+    #                                 },
+    #                               })
+    #   results = run_configure_validation(h)
+    #   expect(results[:parameters].keys).to eq([:optional])
+    # end
+  end
 
   # context 'with missing question blocks' do
   #   it 'fails when domain is missing' do
