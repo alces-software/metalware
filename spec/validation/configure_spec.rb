@@ -168,16 +168,14 @@ RSpec.describe Metalware::Validation::Configure do
       expect_configure_error(h, /must be filled/)
     end
 
-    # it "fails if type isn't supported" do
-    #   h = correct_hash.deep_merge(group: {
-    #                                 unsupported_type: {
-    #                                   question: 'Do I have an unsupported type?',
-    #                                   type: 'Unsupported',
-    #                                 },
-    #                               })
-    #   results = run_configure_validation(h)
-    #   expect(results[:parameters].keys).to eq([:type])
-    # end
+    it "fails if type isn't supported" do
+      h = correct_hash.deep_merge(group: [{
+                                    identifier: 'unsupported_type',
+                                    question: 'Do I have an unsupported type?',
+                                    type: 'Unsupported',
+                                  }])
+    expect_configure_error(h, /Is an unsupported question type/)
+    end
 
     it 'fails if the optional input is not true or false' do
       h = correct_hash.deep_merge(group: [{
@@ -211,39 +209,38 @@ RSpec.describe Metalware::Validation::Configure do
     end
   end
 
-  # context 'with invalid string questions' do
-  #   it 'fails with a non-string default with no type specified' do
-  #     h = correct_hash.deep_merge(domain: {
-  #                                   bad_string_question: {
-  #                                     question: "Do I fail because my default isn't a string?",
-  #                                     default: 10,
-  #                                   },
-  #                                 })
-  #     expect(run_configure_validation(h).keys).to eq([:default_string_type])
-  #   end
+  context 'with invalid string questions' do
+    # it 'fails with a non-string default with no type specified' do
+    #   h = correct_hash.deep_merge(domain: [{
+    #                                 identifier: 'bad_string_question',
+    #                                 question: "Do I fail because my default isn't a string?",
+    #                                 default: 10,
+    #                               }])
+    #   expect(run_configure_validation(h).keys).to eq([:default_string_type])
+    # end
 
-  #   it 'fails with a non-string default with a type specified' do
-  #     h = correct_hash.deep_merge(group: {
-  #                                   bad_string_question: {
-  #                                     question: "Do I fail because my default isn't a string?",
-  #                                     type: 'string',
-  #                                     default: 10,
-  #                                   },
-  #                                 })
-  #     expect(run_configure_validation(h).keys).to eq([:default_string_type])
-  #   end
+    # it 'fails with a non-string default with a type specified' do
+    #   h = correct_hash.deep_merge(group: {
+    #                                 bad_string_question: {
+    #                                   question: "Do I fail because my default isn't a string?",
+    #                                   type: 'string',
+    #                                   default: 10,
+    #                                 },
+    #                               })
+    #   expect(run_configure_validation(h).keys).to eq([:default_string_type])
+    # end
 
-  #   it 'returns a success? status of false' do
-  #     h = correct_hash.deep_merge(group: {
-  #                                   bad_string_question: {
-  #                                     question: "Do I fail because my default isn't a string?",
-  #                                     type: 'string',
-  #                                     default: 10,
-  #                                   },
-  #                                 })
-  #     expect(build_validator(h).success?).to eq(false)
-  #   end
-  # end
+    # it 'returns a success? status of false' do
+    #   h = correct_hash.deep_merge(group: {
+    #                                 bad_string_question: {
+    #                                   question: "Do I fail because my default isn't a string?",
+    #                                   type: 'string',
+    #                                   default: 10,
+    #                                 },
+    #                               })
+    #   expect(build_validator(h).success?).to eq(false)
+    # end
+  end
 
   # context 'with invalid integer questions' do
   #   it 'fails with non-integer default' do
