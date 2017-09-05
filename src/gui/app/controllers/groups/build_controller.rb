@@ -3,7 +3,6 @@
 class Groups::BuildController < BuildController
   private
 
-  alias build_path group_build_path
   alias build_job_identifier group_name
 
   def define_title(build_ongoing:)

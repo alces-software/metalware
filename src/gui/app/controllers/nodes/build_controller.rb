@@ -3,7 +3,6 @@
 class Nodes::BuildController < BuildController
   private
 
-  alias build_path node_build_path
   alias build_job_identifier node_name
 
   def define_title(build_ongoing:)

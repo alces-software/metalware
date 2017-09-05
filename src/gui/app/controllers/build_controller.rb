@@ -3,6 +3,12 @@
 class BuildController < ApplicationController
   layout false, only: :messages
 
+  helper_method \
+    :build_messages_path,
+    :build_path,
+    :shutdown_build_path,
+    :start_build_path
+
   MESSAGES_KEY = Metalware::Output::MESSAGES_KEY
   GRACEFULLY_SHUTDOWN_KEY = Metalware::Commands::Build::GRACEFULLY_SHUTDOWN_KEY
   COMPLETE_KEY = Metalware::Commands::Build::COMPLETE_KEY
@@ -46,6 +52,27 @@ class BuildController < ApplicationController
 
   private
 
+  def item_type
+    # E.g. `node` for `Nodes::BuildController`
+    self.class.to_s.split('::').first.singularize.downcase
+  end
+
+  def build_path
+    send :"#{item_type}_build_path"
+  end
+
+  def start_build_path
+    send :"start_#{item_type}_build_path"
+  end
+
+  def shutdown_build_path
+    send :"shutdown_#{item_type}_build_path"
+  end
+
+  def build_messages_path
+    send :"messages_#{item_type}_build_path"
+  end
+
   def current_build_job
     build_job_class.find(build_job_identifier)
   end
@@ -77,10 +104,6 @@ class BuildController < ApplicationController
   end
 
   def build_job_class
-    raise NotImplementedError
-  end
-
-  def build_path
     raise NotImplementedError
   end
 
