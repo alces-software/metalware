@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class BuildController < ApplicationController
+  layout false, only: :messages
+
   MESSAGES_KEY = Metalware::Output::MESSAGES_KEY
   GRACEFULLY_SHUTDOWN_KEY = Metalware::Commands::Build::GRACEFULLY_SHUTDOWN_KEY
   COMPLETE_KEY = Metalware::Commands::Build::COMPLETE_KEY
@@ -9,8 +11,12 @@ class BuildController < ApplicationController
     @build_ongoing = build_thread_running?
     @build_complete = build_command_complete?
 
-    @messages = current_build_job&.thread_variable_get(MESSAGES_KEY)&.reverse || []
+    assign_build_messages
     define_title(build_ongoing: @build_ongoing)
+  end
+
+  def messages
+    assign_build_messages
   end
 
   def start
@@ -48,6 +54,10 @@ class BuildController < ApplicationController
   def build_command_complete?
     # Whether the build command has completed or been gracefully shutdown.
     current_build_job&.thread_variable_get(COMPLETE_KEY)
+  end
+
+  def assign_build_messages
+    @messages = current_build_job&.thread_variable_get(MESSAGES_KEY)&.reverse || []
   end
 
   def define_title(build_ongoing:)

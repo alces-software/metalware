@@ -20,8 +20,12 @@ Rails.application.routes.draw do
   get 'groups/start-configure' => 'groups/configure#start'
   resources :groups, only: [] do
     resource :configure, controller: 'groups/configure', only: configure_actions
+
     resource :build, controller: 'groups/build', only: [:show, :destroy] do
       post :start, :shutdown
+
+      # For Intercooler polling.
+      get :messages
     end
   end
 
@@ -30,6 +34,9 @@ Rails.application.routes.draw do
 
     resource :build, controller: 'nodes/build', only: [:show, :destroy] do
       post :start, :shutdown
+
+      # For Intercooler polling.
+      get :messages
     end
 
     post :'power-reset'
