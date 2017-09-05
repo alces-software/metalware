@@ -179,16 +179,14 @@ RSpec.describe Metalware::Validation::Configure do
     #   expect(results[:parameters].keys).to eq([:type])
     # end
 
-    # it 'fails if the optional input is not true or false' do
-    #   h = correct_hash.deep_merge(group: {
-    #                                 invalid_optional_flag: {
-    #                                   question: 'Do I have a boolean optional input?',
-    #                                   optional: 'I should be true or false',
-    #                                 },
-    #                               })
-    #   results = run_configure_validation(h)
-    #   expect(results[:parameters].keys).to eq([:optional])
-    # end
+    it 'fails if the optional input is not true or false' do
+      h = correct_hash.deep_merge(group: [{
+                                    identifier: 'invalid_optional_flag',
+                                    question: 'Do I have a boolean optional input?',
+                                    optional: 'I should be true or false',
+                                  }])
+      expect_configure_error(h, /must be boolean/)
+    end
   end
 
   # context 'with missing question blocks' do
