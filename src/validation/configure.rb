@@ -46,7 +46,7 @@ module Metalware
       end
 
       def data
-        raise ValidationFailure, validate.errors[:data] unless validate.success?
+        raise ValidationFailure, error_msg unless validate.success?
         raw_data.dup
       end
 
@@ -66,6 +66,12 @@ module Metalware
         @validate ||= begin
           ConfigureSchema.call(data: raw_data)
         end
+      end
+
+      def error_msg
+        msg_header = 'An error occurred validating the questions. ' \
+                     "The following error(s) have been detected: \n"
+        msg_header + validate.errors[:data].to_s
       end
 
       QuestionSchema = Dry::Validation.Schema do
@@ -127,7 +133,9 @@ module Metalware
             ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
               required(section) do
                 # Loops through each question
-                array? & each { schema(QuestionSchema) } & each { default_type? }
+                array? & \
+                each { schema(QuestionSchema) } & \
+                each { default_type? }
               end
             end
           end
