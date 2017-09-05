@@ -34,117 +34,111 @@ module Metalware
       # determined by whether they are supplied.
 
       # NOTE: Supported types in error.yaml message must be updated manually
-      SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
-      BOOLEAN_VALUE = ['yes', 'no'].freeze
-      ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(file)
-        @yaml = Data.load(file)
-      end
+      # SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
+      # BOOLEAN_VALUE = ['yes', 'no'].freeze
+      # ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def validate
-        @validate ||= begin
-          configure_results = ConfigureSchema.call(yaml: @yaml)
-          if configure_results.success?
-            [:domain, :group, :node, :self].each do |section|
-              @yaml[section].each do |identifier, parameters|
-                payload = {
-                  section: section,
-                  identifier: identifier,
-                  parameters: parameters,
-                }
-                question_results = QuestionSchema.call(payload)
-                return question_results unless question_results.success?
-              end
-            end
-          end
-          configure_results
-        end
-      end
+      # def initialize(file:, hash:)
+        
+      # end
 
-      delegate :success?, to: :validate
+      # def validate
+      #   @validate ||= begin
+      #     configure_results = ConfigureSchema.call(yaml: @yaml)
+      #     if configure_results.success?
+      #       [:domain, :group, :node, :self].each do |section|
+      #         @yaml[section].each do |identifier, parameters|
+      #           payload = {
+      #             section: section,
+      #             identifier: identifier,
+      #             parameters: parameters,
+      #           }
+      #           question_results = QuestionSchema.call(payload)
+      #           return question_results unless question_results.success?
+      #         end
+      #       end
+      #     end
+      #     configure_results
+      #   end
+      # end
 
-      # TODO: make these error messages more descriptive
-      def load
-        raise ValidationFailure, validate.messages unless success?
-        @yaml
-      end
+      # def success?
+      #   validate.success?
+      # end
 
-      private
+      # # TODO: make these error messages more descriptive
+      # def load
+      #   raise ValidationFailure, validate.messages unless success?
+      #   @yaml
+      # end
 
-      QuestionSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure_question
+      # private
 
-          def question_type?(value)
-            SUPPORTED_TYPES.include?(value)
-          end
+      # QuestionSchema = Dry::Validation.Schema do
+      #   configure do
+      #     config.messages_file = ERROR_FILE
+      #     config.namespace = :configure_question
 
-          def boolean?(value)
-            BOOLEAN_VALUE.include?(value)
-          end
+      #     def question_type?(value)
+      #       SUPPORTED_TYPES.include?(value)
+      #     end
 
-          def empty_string?(value)
-            value.is_a?(String) && value.empty?
-          end
-        end
+      #     def boolean?(value)
+      #       BOOLEAN_VALUE.include?(value)
+      #     end
+      #   end
 
-        validate(valid_top_level_question_keys: :parameters) do |q|
-          (q.keys - [:question, :type, :default, :choice, :optional]).empty?
-        end
+      #   validate(valid_top_level_question_keys: :parameters) do |q|
+      #     (q.keys - [:question, :type, :default, :choice, :optional]).empty?
+      #   end
 
-        required(:parameters).value(:hash?)
-        required(:parameters).schema do
-          required(:question).value(:str?, :filled?)
-          optional(:type).value(:question_type?)
-          optional(:default) { filled? | str? }
-          optional(:optional).value(:bool?)
+      #   required(:parameters).value(:hash?)
+      #   required(:parameters).schema do
+      #     required(:question).value(:str?, :filled?)
+      #     optional(:type).value(:question_type?)
+      #     optional(:default) { filled? | str? }
+      #     optional(:optional).value(:bool?)
 
-          # NOTE: The crazy logic on the LHS of the then ('>') is because
-          # the RHS determines the error message. Hence the RHS needs to be
-          # as simple as possible otherwise the error message will be crazy
-          rule(default_string_type: [:default, :type]) do |default, type|
-            (default.filled? & (type.none? | type.eql?('string'))) > default.str?
-          end
+      #     # NOTE: The crazy logic on the LHS of the then ('>') is because
+      #     # the RHS determines the error message. Hence the RHS needs to be
+      #     # as simple as possible otherwise the error message will be crazy
+      #     rule(default_string_type: [:default, :type]) do |default, type|
+      #       (default.filled? & (type.none? | type.eql?('string'))) > default.str?
+      #     end
 
-          # Enforces empty string defaults have a string type
-          rule(default_empty_string_type: [:default, :type]) do |default, type|
-            default.empty_string? > (type.none? | type.eql?('string'))
-          end
+      #     rule(default_integer_type: [:default, :type]) do |default, type|
+      #       (default.filled? & type.eql?('integer')) > default.int?
+      #     end
 
-          rule(default_integer_type: [:default, :type]) do |default, type|
-            (default.filled? & type.eql?('integer')) > default.int?
-          end
+      #     rule(default_boolean_type: [:default, :type]) do |default, type|
+      #       (default.filled? & type.eql?('boolean')) > default.boolean?
+      #     end
 
-          rule(default_boolean_type: [:default, :type]) do |default, type|
-            (default.filled? & type.eql?('boolean')) > default.boolean?
-          end
+      #     # Choice does not currently support default answers
+      #     rule(default_choice_type: [:default, :type]) do |default, type|
+      #       default.none? | type.excluded_from?(['choice'])
+      #     end
+      #   end
+      # end
 
-          # Choice does not currently support default answers
-          rule(default_choice_type: [:default, :type]) do |default, type|
-            default.none? | type.excluded_from?(['choice'])
-          end
-        end
-      end
+      # ConfigureSchema = Dry::Validation.Schema do
+      #   configure do
+      #     config.messages_file = ERROR_FILE
+      #     config.namespace = :configure
+      #   end
 
-      ConfigureSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure
-        end
+      #   # White-lists the keys allowed in the configure.yaml file
+      #   validate(valid_top_level_keys: :yaml) do |yaml|
+      #     (yaml.keys - [:domain, :self, :group, :node, :questions]).empty?
+      #   end
 
-        # White-lists the keys allowed in the configure.yaml file
-        validate(valid_top_level_keys: :yaml) do |yaml|
-          (yaml.keys - [:domain, :self, :group, :node, :questions]).empty?
-        end
-
-        required(:yaml).schema do
-          required(:domain).value(:hash?)
-          required(:group).value(:hash?)
-          required(:node).value(:hash?)
-        end
-      end
+      #   required(:yaml).schema do
+      #     required(:domain).value(:hash?)
+      #     required(:group).value(:hash?)
+      #     required(:node).value(:hash?)
+      #   end
+      # end
     end
   end
 end
