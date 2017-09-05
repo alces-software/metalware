@@ -3,8 +3,8 @@
 class Nodes::ConfigureController < ConfigureController
   private
 
-  def title
-    "Configure Node #{node_name}"
+  def configure_item
+    "Node #{node_name}"
   end
 
   def configure_command

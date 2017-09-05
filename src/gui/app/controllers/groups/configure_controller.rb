@@ -8,8 +8,8 @@ class Groups::ConfigureController < ConfigureController
 
   private
 
-  def title
-    "Configure Group #{group_name}"
+  def configure_item
+    "Group #{group_name}"
   end
 
   def configure_command

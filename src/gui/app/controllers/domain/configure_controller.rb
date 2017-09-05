@@ -4,8 +4,8 @@
 class Domain::ConfigureController < ConfigureController
   private
 
-  def title
-    'Configure Domain'
+  def configure_item
+    'Domain'
   end
 
   def configure_command

@@ -58,6 +58,10 @@ class ConfigureController < ApplicationController
   end
 
   def title
+    "Configure #{configure_item}"
+  end
+
+  def configure_item
     raise NotImplementedError
   end
 
