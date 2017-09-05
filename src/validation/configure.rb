@@ -47,6 +47,11 @@ module Metalware
         @raw_data = (data_hash || load_configure_file).freeze
       end
 
+      def data
+        validate
+        raw_data.dup
+      end
+
       private
 
       attr_reader :config, :raw_data
@@ -59,25 +64,8 @@ module Metalware
         Data.load(file_path.configure_file)
       end
 
-      # def validate
-      #   @validate ||= begin
-      #     configure_results = ConfigureSchema.call(yaml: @yaml)
-      #     if configure_results.success?
-      #       [:domain, :group, :node, :self].each do |section|
-      #         @yaml[section].each do |identifier, parameters|
-      #           payload = {
-      #             section: section,
-      #             identifier: identifier,
-      #             parameters: parameters,
-      #           }
-      #           question_results = QuestionSchema.call(payload)
-      #           return question_results unless question_results.success?
-      #         end
-      #       end
-      #     end
-      #     configure_results
-      #   end
-      # end
+      def validate
+      end
 
       # def success?
       #   validate.success?
