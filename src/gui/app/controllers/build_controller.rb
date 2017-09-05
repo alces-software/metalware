@@ -9,6 +9,7 @@ class BuildController < ApplicationController
 
   def show
     @build_ongoing = build_thread_running?
+    @build_cancelling = build_command_shutting_down?
     @build_complete = build_command_complete?
 
     assign_build_messages
@@ -51,6 +52,13 @@ class BuildController < ApplicationController
 
   def build_thread_running?
     !!current_build_job
+  end
+
+  # Whether the build command is currently being shutdown, but this has not yet
+  # completed.
+  def build_command_shutting_down?
+    !build_command_complete? &&
+      current_build_job&.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)
   end
 
   def build_command_complete?

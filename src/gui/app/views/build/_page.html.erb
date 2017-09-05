@@ -7,7 +7,10 @@
     <% end %>
   <% else %>
     <%= form_tag(shutdown_build_path) do %>
-      <% submit_tag("Cancel build", class: ['btn', 'btn-dark', 'btn-block']) %>
+      <% submit_tag("Cancel build",
+                    disabled: @build_cancelling,
+                    class: ['btn', 'btn-dark', 'btn-block']
+                   ) %>
     <% end %>
   <% end %>
 
