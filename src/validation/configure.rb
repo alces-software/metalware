@@ -40,6 +40,19 @@ module Metalware
       SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
+      def self.type_check(type, value)
+        case type
+        when 'string', nil
+          value.is_a?(String)
+        when 'integer'
+          value.is_a?(Integer)
+        when 'boolean'
+          value == 'yes' || value == 'no'
+        else
+          false
+        end
+      end
+
       def initialize(config, data_hash = nil)
         @config = config
         @raw_data = (data_hash || load_configure_file).freeze
@@ -72,19 +85,6 @@ module Metalware
         msg_header = 'An error occurred validating the questions. ' \
                      "The following error(s) have been detected: \n"
         msg_header + validate.errors[:data].to_s
-      end
-
-      def self.type_check(type, value)
-        case type
-        when 'string', nil
-          value.is_a?(String)
-        when 'integer'
-          value.is_a?(Integer)
-        when 'boolean'
-          value == 'yes' || value == 'no'
-        else
-          false
-        end
       end
 
       QuestionSchema = Dry::Validation.Schema do
@@ -157,7 +157,7 @@ module Metalware
                 # Loops through each question
                 array? & each do
                   schema(QuestionSchema) & \
-                  default_type? & choice_with_default? & choice_type?
+                    default_type? & choice_with_default? & choice_type?
                 end
               end
             end

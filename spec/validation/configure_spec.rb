@@ -112,7 +112,7 @@ RSpec.describe Metalware::Validation::Configure do
             'choice2',
             'choice3',
           ],
-        }
+        },
       ],
     }
   end
@@ -138,9 +138,9 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   def expect_configure_error(my_hash, msg_regex)
-    expect{
+    expect do
       run_configure_validation(my_hash)
-    }.to raise_error(Metalware::ValidationFailure, msg_regex)
+    end.to raise_error(Metalware::ValidationFailure, msg_regex)
   end
 
   context 'with a valid input' do
@@ -170,21 +170,20 @@ RSpec.describe Metalware::Validation::Configure do
     it 'fails if the question is missing or empty identifier' do
       h = correct_hash.deep_merge(self: [{ question: 'I have no identifier' }])
       expect_configure_error(h, /is missing/)
-      h = correct_hash.deep_merge(self: [{ 
-        question: 'I have no identifier',
-        identifier: '',
-      }])
+      h = correct_hash.deep_merge(self: [{
+                                    question: 'I have no identifier',
+                                    identifier: '',
+                                  }])
       expect_configure_error(h, /must be filled/)
     end
-
 
     it 'fails if question is missing or empty' do
       h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
       expect_configure_error(h, /is missing/)
-      h = correct_hash.deep_merge(self: [{ 
-        question: '',
-        identifier: 'no_question',
-      }])
+      h = correct_hash.deep_merge(self: [{
+                                    question: '',
+                                    identifier: 'no_question',
+                                  }])
       expect_configure_error(h, /must be filled/)
     end
 
@@ -194,7 +193,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     question: 'Do I have an unsupported type?',
                                     type: 'Unsupported',
                                   }])
-    expect_configure_error(h, /Is an unsupported question type/)
+      expect_configure_error(h, /Is an unsupported question type/)
     end
 
     it 'fails if the optional input is not true or false' do
