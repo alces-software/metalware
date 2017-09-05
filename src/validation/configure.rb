@@ -47,7 +47,7 @@ module Metalware
       end
 
       def data
-        raise ValidationFailure, validate.errors[:data] unless validate.success?
+        raise ValidationFailure, validate.errors unless validate.success?
         raw_data.dup
       end
 
@@ -77,12 +77,18 @@ module Metalware
           def supported_type?(value)
             SUPPORTED_TYPES.include?(value)
           end
+
+          def default?(value)
+            return true if value.is_a?(String)
+            value.respond_to?(:empty?) ? value.empty? : true
+          end
         end
 
         required(:identifier) { filled? & str? }
         required(:question) { filled? & str? }
         optional(:optional) { bool? }
         optional(:type) { supported_type? }
+        optional(:default) { default? }
       end
 
       ConfigureSchema = Dry::Validation.Schema do
@@ -97,81 +103,35 @@ module Metalware
 
         required(:data) do
           top_level_keys? & schema do
+            configure do
+              config.messages_file = ERROR_FILE
+              config.namespace = :configure
+
+              def default_type?(value)
+                default = value[:default]
+                type = value[:type]
+                return true if default.nil?
+                case type
+                when 'string', nil
+                  default.is_a?(String)
+                else
+                  true
+                  # TODO: This needs to be uncommented to replace the true
+                  #raise NotImplementedError
+                end
+              end
+            end
+
             # Loops through each section
             ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
               required(section) do
                 # Loops through each question
-                array? & each { schema(QuestionSchema) }
+                array? & each { schema(QuestionSchema) } & each { default_type? }
               end
             end
           end
         end
       end
-
-      # QuestionSchema = Dry::Validation.Schema do
-      #   configure do
-      #     
-      #     
-
-      #     def question_type?(value)
-      #       SUPPORTED_TYPES.include?(value)
-      #     end
-
-      #     def boolean?(value)
-      #       BOOLEAN_VALUE.include?(value)
-      #     end
-      #   end
-
-      #   validate(valid_top_level_question_keys: :parameters) do |q|
-      #     (q.keys - [:question, :type, :default, :choice, :optional]).empty?
-      #   end
-
-      #   required(:parameters).value(:hash?)
-      #   required(:parameters).schema do
-      #     required(:question).value(:str?, :filled?)
-      #     optional(:type).value(:question_type?)
-      #     optional(:default) { filled? | str? }
-      #     optional(:optional).value(:bool?)
-
-      #     # NOTE: The crazy logic on the LHS of the then ('>') is because
-      #     # the RHS determines the error message. Hence the RHS needs to be
-      #     # as simple as possible otherwise the error message will be crazy
-      #     rule(default_string_type: [:default, :type]) do |default, type|
-      #       (default.filled? & (type.none? | type.eql?('string'))) > default.str?
-      #     end
-
-      #     rule(default_integer_type: [:default, :type]) do |default, type|
-      #       (default.filled? & type.eql?('integer')) > default.int?
-      #     end
-
-      #     rule(default_boolean_type: [:default, :type]) do |default, type|
-      #       (default.filled? & type.eql?('boolean')) > default.boolean?
-      #     end
-
-      #     # Choice does not currently support default answers
-      #     rule(default_choice_type: [:default, :type]) do |default, type|
-      #       default.none? | type.excluded_from?(['choice'])
-      #     end
-      #   end
-      # end
-
-      # ConfigureSchema = Dry::Validation.Schema do
-      #   configure do
-      #     config.messages_file = ERROR_FILE
-      #     config.namespace = :configure
-      #   end
-
-      #   # White-lists the keys allowed in the configure.yaml file
-      #   validate(valid_top_level_keys: :yaml) do |yaml|
-      #     (yaml.keys - [:domain, :self, :group, :node, :questions]).empty?
-      #   end
-
-      #   required(:yaml).schema do
-      #     required(:domain).value(:hash?)
-      #     required(:group).value(:hash?)
-      #     required(:node).value(:hash?)
-      #   end
-      # end
     end
   end
 end

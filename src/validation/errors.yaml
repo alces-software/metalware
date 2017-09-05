@@ -7,6 +7,8 @@ en:
           , 'node', and 'self' are allowed
         supported_type?: >
           Is an unsupported question type
+        default?: >
+          Default's must be filled or a string
         default_type?: >
           The question type does not match the default
 
