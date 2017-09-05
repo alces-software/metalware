@@ -38,7 +38,6 @@ module Metalware
       # NOTE: Supported types in error.yaml message must be updated manually
 
       SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
-      # BOOLEAN_VALUE = ['yes', 'no'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def initialize(config, data_hash = nil)
@@ -47,7 +46,7 @@ module Metalware
       end
 
       def data
-        raise ValidationFailure, validate.errors unless validate.success?
+        raise ValidationFailure, validate.errors[:data] unless validate.success?
         raw_data.dup
       end
 
@@ -114,10 +113,12 @@ module Metalware
                 case type
                 when 'string', nil
                   default.is_a?(String)
+                when 'integer'
+                  default.is_a?(Integer)
+                when 'boolean'
+                  default == 'yes' || default == 'no'
                 else
-                  true
-                  # TODO: This needs to be uncommented to replace the true
-                  #raise NotImplementedError
+                  false
                 end
               end
             end
