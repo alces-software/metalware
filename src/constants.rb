@@ -51,5 +51,7 @@ module Metalware
     NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'templates/named.conf.erb')
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
+
+    CONFIGURE_SECTIONS = [:domain, :group, :node, :self]
   end
 end
