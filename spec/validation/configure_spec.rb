@@ -230,29 +230,27 @@ RSpec.describe Metalware::Validation::Configure do
     end
   end
 
-  # context 'with invalid integer questions' do
-  #   it 'fails with non-integer default' do
-  #     h = correct_hash.deep_merge(node: {
-  #                                   bad_integer_question: {
-  #                                     question: 'Do I fail because my default is a string?',
-  #                                     type: 'integer',
-  #                                     default: '10',
-  #                                   },
-  #                                 })
-  #     expect(run_configure_validation(h).keys).to eq([:default_integer_type])
-  #   end
-  # end
+  context 'with invalid integer questions' do
+    it 'fails with non-integer default' do
+      h = correct_hash.deep_merge(node: [{
+                                    identifier: 'bad_integer_question',
+                                    question: 'Do I fail because my default is a string?',
+                                    type: 'integer',
+                                    default: '10',
+                                  }])
+      expect_configure_error(h, /question type/)
+    end
+  end
 
-  # context 'with invalid boolean questions' do
-  #   it 'fails with non-boolean default' do
-  #     h = correct_hash.deep_merge(node: {
-  #                                   bad_integer_question: {
-  #                                     question: 'Do I fail because my default is a string?',
-  #                                     type: 'boolean',
-  #                                     default: 'I am not valid',
-  #                                   },
-  #                                 })
-  #     expect(run_configure_validation(h).keys).to eq([:default_boolean_type])
-  #   end
-  # end
+  context 'with invalid boolean questions' do
+    it 'fails with non-boolean default' do
+      h = correct_hash.deep_merge(node: [{
+                                    identifier: 'bad_integer_question',
+                                    question: 'Do I fail because my default is a string?',
+                                    type: 'boolean',
+                                    default: 'I am not valid',
+                                  }])
+      expect_configure_error(h, /question type/)
+    end
+  end
 end
