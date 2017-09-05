@@ -71,6 +71,7 @@ module Metalware
 
       QuestionSchema = Dry::Validation.Schema do
         required(:identifier) { filled? & str? }
+        required(:question) { filled? & str? }
       end
 
       ConfigureSchema = Dry::Validation.Schema do
