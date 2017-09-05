@@ -21,66 +21,89 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+
+require 'config'
 require 'validation/configure'
+require 'file_path'
 require 'data'
+require 'filesystem'
 
 RSpec.describe Metalware::Validation::Configure do
-  # let :correct_hash do
-  #   {
-  #     questions: {
-  #       questions: 'Are not part of the specification of a correct file.',
-  #       note: 'However they are very commonly associated with configure files',
-  #       note2: 'All other top level keys apart from questions, domain, group' \
-  #              'and node will cause an error.',
-  #     },
+  let :config { Metalware::Config.new }
+  let :file_path { Metalware::FilePath.new(config) }
 
-  #     domain: {
-  #       string_question: {
-  #         question: 'Am I a string question without a default and type?',
-  #       },
-  #       integer_question: {
-  #         question: 'Am I an integer question with a default?',
-  #         type: 'integer',
-  #         default: 10,
-  #       },
-  #       boolean_true: {
-  #         question: 'Can I have a boolean true (/yes) default?',
-  #         type: 'boolean',
-  #         default: 'yes',
-  #       },
-  #     },
+  let :correct_hash do
+    {
+      questions: {
+        questions: 'Are not part of the specification of a correct file.',
+        note: 'However they are very commonly associated with configure files',
+        note2: 'All other top level keys apart from questions, domain, group' \
+               'and node will cause an error.',
+      },
 
-  #     group: {
-  #       string_question: {
-  #         question: 'Am I a string question without a type but with a default?',
-  #         default: 'yes I am a string',
-  #       },
-  #       integer_question: {
-  #         question: 'Am I a integer question without a default?',
-  #         type: 'integer',
-  #       },
-  #       boolean_false: {
-  #         question: 'Can I have a boolean false (/no) default?',
-  #         type: 'boolean',
-  #         default: 'no',
-  #       },
-  #     },
+      domain: {
+        string_question: {
+          question: 'Am I a string question without a default and type?',
+        },
+        integer_question: {
+          question: 'Am I an integer question with a default?',
+          type: 'integer',
+          default: 10,
+        },
+        boolean_true: {
+          question: 'Can I have a boolean true (/yes) default?',
+          type: 'boolean',
+          default: 'yes',
+        },
+      },
 
-  #     node: {
-  #       string_question: {
-  #         question: 'Am I a string question with a type and default?',
-  #         type: 'string',
-  #         default: 'yes I am a string',
-  #       },
-  #       string_empty_default: {
-  #         question: 'My default is a empty string?',
-  #         default: '',
-  #       },
-  #     },
+      group: {
+        string_question: {
+          question: 'Am I a string question without a type but with a default?',
+          default: 'yes I am a string',
+        },
+        integer_question: {
+          question: 'Am I a integer question without a default?',
+          type: 'integer',
+        },
+        boolean_false: {
+          question: 'Can I have a boolean false (/no) default?',
+          type: 'boolean',
+          default: 'no',
+        },
+      },
 
-  #     self: {},
-  #   }
-  # end
+      node: {
+        string_question: {
+          question: 'Am I a string question with a type and default?',
+          type: 'string',
+          default: 'yes I am a string',
+        },
+        string_empty_default: {
+          question: 'My default is a empty string?',
+          default: '',
+        },
+      },
+
+      self: {},
+    }
+  end
+
+  context 'without a hash input' do
+    it 'loads configure file from the repo' do
+      data = { data: 'I am the configure data' }
+      Metalware::Data.dump(file_path.configure_file, data)
+      v = Metalware::Validation::Configure.new(config)
+      expect(v.send(:raw_data)).to eq(data)
+    end
+  end
+
+  context 'with a hash input' do
+    it 'uses the has as the data input' do
+      v = Metalware::Validation::Configure.new(config, correct_hash)
+      expect(v.send(:raw_data)).to eq(correct_hash)
+    end
+  end
 
   # def build_validator(my_hash = {})
   #   allow(Metalware::Data).to receive(:load).and_return(my_hash)

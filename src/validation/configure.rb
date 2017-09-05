@@ -21,7 +21,9 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+
 require 'exceptions'
+require 'file_path'
 require 'data'
 require 'dry-validation'
 require 'active_support/core_ext/module/delegation'
@@ -39,9 +41,22 @@ module Metalware
       # BOOLEAN_VALUE = ['yes', 'no'].freeze
       # ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      # def initialize(file:, hash:)
-        
-      # end
+      def initialize(config, data_hash = nil)
+        @config = config
+        @raw_data = (data_hash || load_configure_file).freeze
+      end
+
+      private
+
+      attr_reader :config, :raw_data
+
+      def file_path
+        @file_path ||= FilePath.new(config)
+      end
+
+      def load_configure_file
+        Data.load(file_path.configure_file)
+      end
 
       # def validate
       #   @validate ||= begin
