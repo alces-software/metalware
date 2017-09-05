@@ -69,6 +69,10 @@ module Metalware
         end
       end
 
+      QuestionSchema = Dry::Validation.Schema do
+        required(:identifier) { filled? & str? }
+      end
+
       ConfigureSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
@@ -85,13 +89,12 @@ module Metalware
             ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
               required(section) do
                 # Loops through each question
-                array?# & each { schema(QuestionSchema) }
+                array? & each { schema(QuestionSchema) }
               end
             end
           end
         end
       end
-
 
       # QuestionSchema = Dry::Validation.Schema do
       #   configure do
