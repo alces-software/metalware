@@ -117,6 +117,12 @@ RSpec.describe Metalware::Validation::Configure do
     Metalware::Validation::Configure.new(config, my_hash).data
   end
 
+  def expect_configure_error(my_hash, msg_regex)
+    expect{
+      run_configure_validation(my_hash)
+    }.to raise_error(Metalware::ValidationFailure, msg_regex)
+  end
+
   context 'with a valid input' do
     it 'passes with questions key' do
       expect(run_configure_validation(correct_hash)).to eq(correct_hash)
@@ -128,23 +134,23 @@ RSpec.describe Metalware::Validation::Configure do
     end
   end
 
-  # context 'with general invalid inputs' do
-  #   it 'fails with invalid top level keys' do
-  #     h = correct_hash.deep_merge(invalid_key: true)
-  #     expect(run_configure_validation(h).keys).to eq([:valid_top_level_keys])
-  #   end
+  context 'with general invalid inputs' do
+    it 'fails with invalid top level keys' do
+      h = correct_hash.deep_merge(invalid_key: true)
+      expect_configure_error(h, /invalid top level key/)
+    end
 
-  #   it 'fails if question is not a hash' do
-  #     h = correct_hash.deep_merge(group: {
-  #                                   question: 'Am I missing my mid level question key?',
-  #                                   type: 'string',
-  #                                   default: 'Each field will now be interpreted as a separate question',
-  #                                 })
-  #     results = build_validator(h).validate.errors
-  #     expect(results.keys).to eq([:parameters])
-  #     expect(results[:parameters][0]).to eq('must be a hash')
-  #   end
-  # end
+    # it 'fails if question is not a hash' do
+    #   h = correct_hash.deep_merge(group: {
+    #                                 question: 'Am I missing my mid level question key?',
+    #                                 type: 'string',
+    #                                 default: 'Each field will now be interpreted as a separate question',
+    #                               })
+    #   results = build_validator(h).validate.errors
+    #   expect(results.keys).to eq([:parameters])
+    #   expect(results[:parameters][0]).to eq('must be a hash')
+    # end
+  end
 
   # context 'with invalid question fields' do
   #   it 'fails if unrecognized fields in a question' do

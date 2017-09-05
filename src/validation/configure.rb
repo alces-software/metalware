@@ -26,7 +26,6 @@ require 'exceptions'
 require 'file_path'
 require 'data'
 require 'dry-validation'
-require 'active_support/core_ext/module/delegation'
 require 'constants'
 
 module Metalware
@@ -40,7 +39,7 @@ module Metalware
 
       # SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
       # BOOLEAN_VALUE = ['yes', 'no'].freeze
-      # ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
+      ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def initialize(config, data_hash = nil)
         @config = config
@@ -48,7 +47,7 @@ module Metalware
       end
 
       def data
-        validate
+        raise ValidationFailure, validate.errors unless validate.success?
         raw_data.dup
       end
 
@@ -65,24 +64,28 @@ module Metalware
       end
 
       def validate
+        @validate ||= begin
+          ConfigureSchema.call(data: raw_data)
+        end
       end
 
-      # def success?
-      #   validate.success?
-      # end
+      ConfigureSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
 
-      # # TODO: make these error messages more descriptive
-      # def load
-      #   raise ValidationFailure, validate.messages unless success?
-      #   @yaml
-      # end
+          def top_level_keys?(data)
+            (data.keys - Constants::CONFIGURE_SECTIONS.push(:questions)).empty?
+          end
+        end
 
-      # private
+        required(:data).value(:top_level_keys?)
+      end
 
       # QuestionSchema = Dry::Validation.Schema do
       #   configure do
-      #     config.messages_file = ERROR_FILE
-      #     config.namespace = :configure_question
+      #     
+      #     
 
       #     def question_type?(value)
       #       SUPPORTED_TYPES.include?(value)
