@@ -113,36 +113,20 @@ RSpec.describe Metalware::Validation::Configure do
     end
   end
 
-  # def build_validator(my_hash = {})
-  #   allow(Metalware::Data).to receive(:load).and_return(my_hash)
-  #   Metalware::Validation::Configure.new('path/has/been/mocked')
-  # end
+  def run_configure_validation(my_hash = {})
+    Metalware::Validation::Configure.new(config, my_hash).data
+  end
 
-  # def run_configure_validation(my_hash = {})
-  #   validator = build_validator(my_hash)
-  #   validator.validate.messages
-  # end
+  context 'with a valid input' do
+    it 'passes with questions key' do
+      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
+    end
 
-  # context 'with a valid input' do
-  #   it 'passes with questions key' do
-  #     expect(run_configure_validation(correct_hash)).to be_empty
-  #   end
-
-  #   it 'passes without questions key' do
-  #     correct_hash.delete(:questions)
-  #     expect(run_configure_validation(correct_hash)).to be_empty
-  #   end
-
-  #   it 'checks that deep merged hashes pass (tests the testing)' do
-  #     h = correct_hash.deep_merge(domain: {
-  #                                   check_string_question: {
-  #                                     question: 'Am I deep merged into the domain?',
-  #                                     default: 'I sure hope so',
-  #                                   },
-  #                                 })
-  #     expect(run_configure_validation(h)).to be_empty
-  #   end
-  # end
+    it 'passes without questions key' do
+      correct_hash.delete(:questions)
+      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
+    end
+  end
 
   # context 'with general invalid inputs' do
   #   it 'fails with invalid top level keys' do
