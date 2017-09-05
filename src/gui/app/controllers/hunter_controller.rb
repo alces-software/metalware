@@ -1,23 +1,12 @@
 # frozen_string_literal: true
 
 class HunterController < ApplicationController
+  layout false, only: :new_detected_node_rows
+
   def show
-    # XXX This conditional only exists to allow easier development of hunter
-    # page, by using fake hunter data when the `fake_hunting` parameter is set
-    # in development - remove/improve this?
-    if fake_hunting?
-      @currently_hunting = true
-      @new_detected_macs = ['fake-mac-1', 'fake-mac-2']
-    else
-      @currently_hunting = HunterJob.hunting?
-      new_detected_macs_key = Metalware::Commands::Hunter::NEW_DETECTED_MACS_KEY
-      @new_detected_macs = \
-        HunterJob.current_thread&.thread_variable_get(new_detected_macs_key) || []
-    end
-
-    @hunter_macs_to_nodes = Metalware::Data.load(Metalware::Constants::HUNTER_PATH).invert
-
+    @currently_hunting = fake_hunting? ? true : HunterJob.hunting?
     @title = @currently_hunting ? 'Hunting!' : 'Hunt for nodes'
+    assign_mac_address_variables
   end
 
   def start
@@ -41,6 +30,11 @@ class HunterController < ApplicationController
     redirect_to hunter_path
   end
 
+  def new_detected_node_rows
+    assign_mac_address_variables
+    @known_macs = params[:known_mac_addresses] || []
+  end
+
   private
 
   def default_url_options(options = {})
@@ -53,8 +47,23 @@ class HunterController < ApplicationController
     end
   end
 
+  # XXX This method only exists to allow easier development of hunter page, by
+  # using fake hunter data when the `fake_hunting` parameter is set in
+  # development - remove/improve usage of this?
   def fake_hunting?
     Rails.env.development? && params[:fake_hunting]
+  end
+
+  def assign_mac_address_variables
+    if fake_hunting?
+      @new_detected_macs = ['fake-mac-1', 'fake-mac-2']
+    else
+      new_detected_macs_key = Metalware::Commands::Hunter::NEW_DETECTED_MACS_KEY
+      @new_detected_macs = \
+        HunterJob.current_thread&.thread_variable_get(new_detected_macs_key) || []
+    end
+
+    @hunter_macs_to_nodes = Metalware::Data.load(Metalware::Constants::HUNTER_PATH).invert
   end
 
   def hunter_updater

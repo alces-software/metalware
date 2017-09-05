@@ -6,6 +6,9 @@ Rails.application.routes.draw do
   resource :cluster, only: :show, controller: :cluster
   resource :hunter, only: [:show, :destroy], controller: :hunter do
     post :start, :'record-node'
+
+    # For Intercooler polling.
+    get :'new-detected-node-rows'
   end
 
   configure_actions = [:show, :create, :destroy]
