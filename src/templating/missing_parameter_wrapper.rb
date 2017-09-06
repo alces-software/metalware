@@ -7,6 +7,7 @@ require 'templating/iterable_recursive_open_struct'
 module Metalware
   module Templating
     class MissingParameterWrapper
+      include Blank
       delegate :to_json, to: :@wrapped_obj
 
       def initialize(wrapped_obj, raise_on_missing: false)
@@ -29,6 +30,10 @@ module Metalware
         send(a)
       end
 
+      def wrapper_binding
+        binding
+      end
+
       def method_missing(method, *args, &block)
         value = @wrapped_obj.send(method, *args, &block)
         if value.nil? && !@missing_tags.include?(method)
@@ -37,7 +42,15 @@ module Metalware
           @missing_tags.push(method)
           MetalLog.warn msg
         end
-        value
+        if /to_/.match?(method) || (method == :send && /to_/.match(args[0]))
+          return value
+        end
+        case value
+        when true, false, nil
+          value
+        else
+          MissingParameterWrapper.new(value)
+        end
       end
     end
   end
