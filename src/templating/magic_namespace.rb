@@ -43,7 +43,7 @@ module Metalware
       end
 
       def nodename
-        node.name
+        node.name || ''
       end
 
       def answers
