@@ -14,13 +14,14 @@ When accessing group level information (through `alces.groups.each`), a group
 level namespace is returned for the group that is in scope. The following
 methods are available to it:
 
+1. Access to the group name
 1. Access to the group level answers
 1. Loop through configs for the nodes in the group
 
 On top of all this, a config is loaded into ERB's binding which can also return
 values. Currently their are two options for what this config is. Normally it is
 the config for the Node that is in scope (such as a kickstart file). In this
-case, the MagicNamespace has a node in scope as well and `alces.nodename` and 
+case, the MagicNamespace has a node in scope as well and `alces.nodename` and
 alces.index will return correctly.
 
 However if a domain level config is being rendered, then the config in the ERB's
@@ -32,7 +33,7 @@ The main issue is complexity and maintainability. Currently the design is ad
 hoc which makes it next to impossible to replicated the behaviour in order to
 make a change. The following is the issues within the current design.
 
-The most obvious bug is fairly cosmetic at this point. Their are a lot of nil 
+The most obvious bug is fairly cosmetic at this point. Their are a lot of nil
 warning's being issued because value's haven't been set in the config. However
 this is more indicative of the larger problem, 'which config?'
 
@@ -44,7 +45,7 @@ happen to be in scope.
 However the bigger issue is each config can reference answers and vice versa.
 Now answers can be accessed at the node level with `alces.answers` but the
 behaviour will be different depending if a node is in scope. Group level answers
-can be accessed through the group level namespace. 
+can be accessed through the group level namespace.
 
 The config loaded into the ERB binding will be which ever happens to
 be in scope (aka domain or node level). This means a node level config (accessed
@@ -95,7 +96,7 @@ distinguish between API calls and local variables defined within ERB. The
 `alces` command will also contain the domain level information for the cluster.
 
 The AlcesNamespace will be very similar to the MagicNamespace except all the
-node specific methods will be removed. This means `index`, `nodename` and 
+node specific methods will be removed. This means `index`, `nodename` and
 `kickstart_url` will all be removed (and be moved to `NodeNamespace`). It will
 still contain the domain level methods (`hosts_url`, `hostip`, etc).
 
@@ -129,7 +130,7 @@ different ways but typically through:
 1. The in scope node (if applicable): `alces.node`
 1. An iterator: `alces.nodes.each { |node_namespace| ... }`
 
-The NodeNamespace will have a node level information such as: name (previously 
+The NodeNamespace will have a node level information such as: name (previously
 nodename) and index. It will also access the node level config through `.config`
 method similar to AlcesNamespace.
 
@@ -159,10 +160,10 @@ if they are pulled from an iterator then they are not in the same scope.
 Example:
 `alces.nodes.each { |node| node.config.value }: <%= alces.node.config.other %>`
 
-However `node.config.value` is referring to a collection of nodes that is being
-iterated through, however `alces.node.config.other` is statically defined as the
-in-scope node. This means referencing of config parameters within an iterator
-does not work.
+`node.config.value` is referring to a value for a node in a collection of nodes
+that is being iterated through, however `alces.node.config.other` is statically
+defined for the in-scope node. This means referencing of config parameters
+within an iterator does not work.
 
 A possible fix to this is to revisit what is meant by the `in-scope node`. When
 running an iterator, one would expect that when within the block the node in
@@ -171,7 +172,8 @@ of the iterator.
 
 So instead of yielding the NodeNamespace to the block, `alces.node` could be
 switched instead. Something along these lines:
-```
+
+```ruby
 def each
     node_array.each do |node_namespace|
         AlcesNamespace.in_scope_node_stack.push(node_namespace)
@@ -180,6 +182,7 @@ def each
     end
 end
 ```
+
 Then the iterator is used by going:
 `alces.nodes.each { alces.node.config.value }`
 
@@ -199,20 +202,22 @@ set currently and the solution will fail. Will need to research this.
 
 Instead of switching what is meant by `node` as this could be confusing, the
 idea of a `scope` namespace could be introduced. It would be accessed through
-`alces.scope` and would initially always be set to `nil`.
-It would be implemented along these lines:
-```
+`alces.scope` and would initially always be set to `nil`. It would be
+implemented along these lines:
+
+```ruby
 def render_config_value(value)
     AlcesNamespace.scope_stack.push(self) # NOTE: this is the inbuilt ruby self
     render(config.value, AlcesNamespace)  # aka the current scope
     AlcesNamespace.scope_stack.pop
 end
 ```
+
 This `scope` namespace is not designed to be used in the templates, hence why
 it should be set to nil initially. However when rendering a `config` value,
 `alces.scope` would be set to the namespace that the config belongs to. So
-`alces.node.config.value` could reference `alces.scope.config.other` and be sure
-that it is accessing it's own config.
+`alces.node.config.value` could reference `alces.scope.config.other` and be
+sure that it is accessing it's own config.
 
 This makes config fall through behave nicer as a default set in `domain.yaml`
 does not need to reference `alces.node`. This means that if `alces.config.value`
@@ -225,25 +230,26 @@ then be equivalent to `alces.node.config.other`.
 ## Simplifying the use config and answers
 
 Previously the config was rendered in full before substitution into the
-template. If the config then had an answer, the answer was substituted into the
-config pre rendering. Through this process of recursive substitution all the
-ERB tags where removed. 
+template. If the config used an answer, then the answer was substituted into
+the config pre-rendering. Through this process of recursive substitution all
+the ERB tags where removed.
 
 However at this point this process this occurs in is not well understood making
 the code difficult to maintain. Also now multiple config and answer files are
 being loaded into API, it is not practical to render them all up front.
 
-Instead each value been returned from a config or answer should be rendered on
-an as need basis. This failed before hand as it needed to match the old usage
-and context. This however it will be rendered against the same API object using
-explicit paths to all parameters. This should simplify the task of as needed
-rendering.
+Instead, each value returned from a config or answer should be rendered on an
+as-needed basis. The [previous attempt to make this
+change](https://github.com/alces-software/metalware/pull/166) failed as it
+needed to match the old usage and context, however this change should be much
+simpler when made along with the other changes described in this document as we
+will then have explicit static paths defined for all templating parameters.
 
-A RenderParameter object should handle the access to both the config and
+A `RenderParameter` object should handle the access to both the config and
 answers. Once a value has been rendered it can be cached as it was created with
 explicit paths that should not return a different result if reran. The API MUST
-BE stateless in that regard. Initially however, caching is not required as it is
-only a performance update as opposed to core functionality.
+BE stateless in that regard. Initially however, caching is not required as it
+is only a performance update as opposed to core functionality.
 
 Also when rendering config and answers, it must be rendered against the same
 API object. This insures the config parameters are rendered in the exact same
@@ -251,7 +257,7 @@ way as the template and can take advantage of the cached rendered parameters.
 
 How answers are accessed might also be needlessly complex. The concept of an
 answer is separate to the concept of a config. This makes the two referencing
-each other tricky as they are not rendered currently in the same way. 
+each other tricky as they are not rendered currently in the same way.
 
 Their are a few fixes on how this can be overcame:
 
@@ -279,12 +285,12 @@ This change would make config's and answer's two sides of the same coin. Instead
 of treating the answers as a separate concept, they will be merged directly over
 config value. Their is some distinct advantages to doing this. The first is the
 user doesn't need to remember if value is stored as `alces.config` or
-`alces.answer` and risk getting it wrong, their is only one value. 
+`alces.answer` and risk getting it wrong, their is only one value.
 
 This would also make setting defaults for answers more logical as they do not
 need to be set in `configure.yaml`. Instead the default to the answer is saved
 in the config. That way if the answer is not set, it reverts to the config
-values as that is the default. 
+values as that is the default.
 
 It will still be possible to explicitly reference an answer over a config values
 by using separate keys. Doing so would require smart repo design instead of
@@ -331,10 +337,10 @@ stateless and thus the returned object should not use the call stack. The
 returned object should be ready to directly accept the next method call.
 
 The following values should not be wrapped: true, false and nil. It also needs
-to be able to coerce values to be the wrapped object. Refer to the `dev/binding`
-branch for an example wrapper that means most of the requirements. Note that the
-binding is NOTE stateless and is based on the config being loaded into the
-binding (which is now obsolete).
+to be able to coerce values to be the wrapped object. Refer to the
+`dev/binding` branch for an example wrapper that means most of the
+requirements. Note that the binding is NOT stateless and is based on the config
+being loaded into the binding (which is now obsolete).
 
 ## Remove the concept of a no-node Node
 
