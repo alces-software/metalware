@@ -190,7 +190,7 @@ module Metalware
       when :basic
         BuildMethods::Basic
       else
-        BuildMethods::Kickstarts::Legacy
+        BuildMethods::Kickstarts::Pxelinux
       end
     end
   end

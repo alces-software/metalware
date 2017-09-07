@@ -5,7 +5,7 @@ require 'build_methods'
 module Metalware
   module BuildMethods
     module Kickstarts
-      class Legacy < Kickstart
+      class Pxelinux < Kickstart
         REPO_DIR = :pxelinux.freeze
 
         private
