@@ -1,9 +1,11 @@
 
 # frozen_string_literal: true
 
+require 'build_methods/kickstart_base'
+
 module Metalware
   module BuildMethods
-    class UEFI < Kickstart
+    class UEFI < KickstartBase
       TEMPLATES = [:kickstart, :uefi].freeze
 
       private

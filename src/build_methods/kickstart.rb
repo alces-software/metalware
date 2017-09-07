@@ -1,31 +1,14 @@
 
 # frozen_string_literal: true
 
+require 'build_methods/kickstart_base'
+
 module Metalware
   module BuildMethods
-    class Kickstart < BuildMethod
+    class Kickstart < KickstartBase
       TEMPLATES = [:kickstart, :pxelinux].freeze
 
-      def render_build_started_templates(parameters)
-        render_kickstart(parameters)
-        render_pxelinux(parameters)
-      end
-
-      def render_build_complete_templates(parameters)
-        render_pxelinux(parameters)
-      end
-
       private
-
-      def render_kickstart(parameters)
-        render_template(:kickstart, parameters: parameters)
-      end
-
-      def render_pxelinux(parameters)
-        render_template(pxelinux_repo_dir,
-                        parameters: parameters,
-                        save_path: save_path)
-      end
 
       def pxelinux_repo_dir
         :pxelinux
