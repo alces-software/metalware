@@ -1,5 +1,6 @@
 
 # frozen_string_literal: true
+
 require 'build_methods'
 
 module Metalware
@@ -10,7 +11,7 @@ module Metalware
         def initialize(*a)
           unless self.class.const_defined?('TEMPLATES')
             templates = [:kickstart, self.class::REPO_DIR].freeze
-            self.class.const_set("TEMPLATES", templates)
+            self.class.const_set('TEMPLATES', templates)
           end
           super
         end

@@ -1,12 +1,13 @@
 
 # frozen_string_literal: true
+
 require 'build_methods'
 
 module Metalware
   module BuildMethods
     module Kickstarts
       class Pxelinux < Kickstart
-        REPO_DIR = :pxelinux.freeze
+        REPO_DIR = :pxelinux
 
         private
 

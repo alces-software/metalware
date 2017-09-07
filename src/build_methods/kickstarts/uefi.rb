@@ -1,12 +1,13 @@
 
 # frozen_string_literal: true
+
 require 'build_methods'
 
 module Metalware
   module BuildMethods
     module Kickstarts
       class UEFI < Kickstart
-        REPO_DIR = :'uefi-kickstart'.freeze
+        REPO_DIR = :'uefi-kickstart'
 
         private
 
