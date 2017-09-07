@@ -62,6 +62,10 @@ module Metalware
         end
         wait_for_nodes_to_build
         teardown
+      rescue
+        # Ensure command is recorded as complete when in GUI.
+        record_gui_build_complete if in_gui?
+        raise
       end
 
       def dependency_hash
