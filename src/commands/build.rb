@@ -159,10 +159,6 @@ module Metalware
         render_all_build_complete_templates
         teardown
         record_gui_build_complete
-
-        # Sleep forever; current thread no longer needs to do anything, just
-        # need to keep around messages.
-        sleep
       end
 
       def render_all_build_complete_templates

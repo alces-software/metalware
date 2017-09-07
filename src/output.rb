@@ -60,6 +60,10 @@ module Metalware
         output_to_cli_or_gui(lines, type: :warning)
       end
 
+      def error(*lines)
+        output_to_cli_or_gui(lines, type: :danger)
+      end
+
       private
 
       delegate :in_gui?, to: Utils

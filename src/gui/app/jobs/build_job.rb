@@ -22,9 +22,12 @@ class BuildJob < ApplicationJob
         )
         run_build_command(identifier_value)
       rescue Exception => e
-        # XXX Better error handling
-        p 'ERROR', e
+        Metalware::Output.error(e.message)
       end
+
+      # Sleep forever (until thread is killed); current thread no longer needs
+      # to do anything, just need to keep around messages.
+      sleep
     end
 
     THREADS.add(build_thread)
