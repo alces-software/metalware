@@ -22,13 +22,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'build_methods/uefi'
+require 'build_methods/kickstarts/uefi'
 require 'node'
 require 'config'
 require 'filesystem'
 require 'file_path'
 
-RSpec.describe Metalware::BuildMethods::UEFI do
+RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
   let :config { Metalware::Config.new }
   let :node do
     node = Metalware::Node.new(config, 'nodeA01')
@@ -36,7 +36,7 @@ RSpec.describe Metalware::BuildMethods::UEFI do
     allow(node).to receive(:hexadecimal_ip).and_return('00000000')
     node
   end
-  let :build_uefi { Metalware::BuildMethods::UEFI.new(config, node) }
+  let :build_uefi { Metalware::BuildMethods::Kickstarts::UEFI.new(config, node) }
   let :file_path { Metalware::FilePath.new(config) }
   let :filesystem do
     FileSystem.setup(&:with_minimal_repo)
