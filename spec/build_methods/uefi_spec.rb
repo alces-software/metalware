@@ -42,13 +42,6 @@ RSpec.describe Metalware::BuildMethods::UEFI do
     FileSystem.setup(&:with_minimal_repo)
   end
 
-  it 'determines the correct UEFI pxelinux template' do
-    filesystem.test do
-      path = build_uefi.send(:template_path, :'pxelinux/uefi', node: node)
-      expect(path).to eq(File.join(file_path.repo, 'pxelinux/uefi/default'))
-    end
-  end
-
   it 'renders the pxelinux template with correct save_path' do
     inputs = {
       parameters: {},
