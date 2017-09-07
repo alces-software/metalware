@@ -51,11 +51,15 @@ class ConfigureController < ApplicationController
   end
 
   def configure_with_answers(answers)
-    run_command(
+    Metalware::Utils.run_command(
       configure_command,
       *configure_command_args,
       answers: answers.to_json
     )
+    true
+  rescue Metalware::MetalwareError => error
+    flash.now[:error] = error.message
+    false
   end
 
   def title
