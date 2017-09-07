@@ -386,6 +386,30 @@ RSpec.describe Metalware::Configurator do
       end
     end
 
+    context 'with boolean question answered at higher level' do
+      let :higher_level_answer_files do
+        define_higher_level_answer_files(
+          [
+            { false_boolean_q: false },
+          ]
+        )
+      end
+
+      it 'correctly inherits false default' do
+        define_questions(test: {
+          false_boolean_q: {
+            question: 'Boolean?',
+            type: 'boolean',
+          },
+        })
+
+        configure_with_answers([''])
+
+        output.rewind
+        expect(output.read).to include('|no|')
+      end
+    end
+
     it 're-asks the required questions if no answer is given' do
       define_questions(test: {
                          string_q: {
