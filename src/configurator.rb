@@ -102,9 +102,13 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
-      default = higher_level_answer_files.map do |file|
+      higher_level_answer = higher_level_answer_files.map do |file|
         Data.load(file)[identifier]
-      end.reject(&:nil?).last || properties[:default]
+      end.reject(&:nil?).last
+
+      # If no answer saved at any higher level, fall back to the default
+      # defined for the question in `configure.yaml`, if any.
+      default = higher_level_answer.nil? ? properties[:default] : higher_level_answer
 
       Question.new(
         default: default,
