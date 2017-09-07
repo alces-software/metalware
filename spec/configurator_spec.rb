@@ -59,6 +59,12 @@ RSpec.describe Metalware::Configurator do
 
   let :higher_level_answer_files { [] }
 
+  def define_higher_level_answer_files(answer_file_hashes)
+    answer_file_hashes.map do |answers|
+      Tempfile.new.path.tap { |path| Metalware::Data.dump(path, answers) }
+    end
+  end
+
   let :configurator do
     make_configurator
   end
@@ -323,19 +329,19 @@ RSpec.describe Metalware::Configurator do
 
     context 'when higher level answer files provided' do
       let :higher_level_answer_files do
-        [
-          {
-            top_level_q: 'top_level_q_answer',
-            both_higher_levels_q: 'both_higher_levels_q_top_level_answer',
-          },
-          {
-            overridden_default_q: 'higher_level_q_overriding_answer',
-            both_higher_levels_q: 'both_higher_levels_q_higher_answer',
-            higher_level_q: 'higher_level_q_answer',
-          },
-        ].map do |answers|
-          Tempfile.new.path.tap { |path| Metalware::Data.dump(path, answers) }
-        end
+        define_higher_level_answer_files(
+          [
+            {
+              top_level_q: 'top_level_q_answer',
+              both_higher_levels_q: 'both_higher_levels_q_top_level_answer',
+            },
+            {
+              overridden_default_q: 'higher_level_q_overriding_answer',
+              both_higher_levels_q: 'both_higher_levels_q_higher_answer',
+              higher_level_q: 'higher_level_q_answer',
+            },
+          ]
+        )
       end
 
       before do
