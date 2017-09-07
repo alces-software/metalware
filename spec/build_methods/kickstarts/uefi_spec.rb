@@ -42,13 +42,20 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
     FileSystem.setup(&:with_minimal_repo)
   end
 
+  it 'contains the correct TEMPLATES list' do
+    # The constant is set on initialize
+    Metalware::BuildMethods::Kickstarts::UEFI.new(nil, nil)
+    expect(Metalware::BuildMethods::Kickstarts::UEFI::TEMPLATES).to \
+      eq([:kickstart, :'uefi-kickstart'])
+  end
+
   it 'renders the pxelinux template with correct save_path' do
     inputs = {
       parameters: {},
       save_path: File.join(file_path.uefi_save, 'grub.cfg-00000000'),
     }
     expect(build_uefi).to receive(:render_template)
-      .with(:'uefi', **inputs)
+      .with(:'uefi-kickstart', **inputs)
     build_uefi.send(:render_pxelinux, {})
   end
 end

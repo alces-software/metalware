@@ -6,13 +6,9 @@ module Metalware
   module BuildMethods
     module Kickstarts
       class UEFI < Kickstart
-        TEMPLATES = [:kickstart, :uefi].freeze
+        REPO_DIR = :'uefi-kickstart'.freeze
 
         private
-
-        def pxelinux_repo_dir
-          :uefi
-        end
 
         def save_path
           File.join(file_path.uefi_save, "grub.cfg-#{node.hexadecimal_ip}")

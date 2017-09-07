@@ -6,13 +6,9 @@ module Metalware
   module BuildMethods
     module Kickstarts
       class Legacy < Kickstart
-        TEMPLATES = [:kickstart, :pxelinux].freeze
+        REPO_DIR = :pxelinux.freeze
 
         private
-
-        def pxelinux_repo_dir
-          :pxelinux
-        end
 
         def save_path
           # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
