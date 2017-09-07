@@ -84,6 +84,8 @@ module Metalware
           Thread.current.thread_variable_set(MESSAGES_KEY, messages_array)
         end
 
+        # Note: message type will be used to form class used when displaying
+        # message; "text-#{type}" should be a CSS class defined for GUI.
         new_messages = lines.map { |line| Message.new(type, line) }
         messages_array.push(*new_messages)
       end
