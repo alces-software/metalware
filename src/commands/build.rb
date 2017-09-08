@@ -60,6 +60,7 @@ module Metalware
           puts(EDIT_START_MSG)
           return
         end
+        start_build
         wait_for_nodes_to_build
         teardown
       rescue
@@ -112,6 +113,20 @@ module Metalware
             Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
         end
+      end
+
+      def start_build
+        nodes.each do |node|
+          build_threads.add(Thread.new { node.start_build })
+        end
+      end
+
+      def build_threads
+        @build_threads ||= ThreadGroup.new
+      end
+
+      def clear_up_build_threads
+        build_threads.list.map(&:kill)
       end
 
       def wait_for_nodes_to_build
@@ -178,6 +193,7 @@ module Metalware
 
       def teardown
         clear_up_built_node_marker_files
+        clear_up_build_threads
         Output.info 'Done.'
       end
 

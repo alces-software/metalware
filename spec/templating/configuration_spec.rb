@@ -23,50 +23,32 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'repo'
-require 'filesystem'
+require 'templating/configuration'
+require 'config'
+require 'node'
 
-RSpec.describe Metalware::Repo do
-  subject do
-    Metalware::Repo.new(Metalware::Config.new)
+RSpec.describe Metalware::Templating::Configuration do
+  let :config { Metalware::Config.new }
+  let :testnode do
+    double('Metalware::Node',
+           groups: ['group1', 'group2'],
+           name: 'testnode')
   end
 
-  let :filesystem do
-    FileSystem.setup do |fs|
-      configure_data = {
-        domain: {
-          foo: { question: 'foo' },
-          bar: { question: 'bar' },
-        },
-        group: {
-          bar: { question: 'bar' },
-        },
-        node: {
-          baz: { question: 'baz' },
-        },
-        self:{},
-      }
-      fs.dump('/var/lib/metalware/repo/configure.yaml', configure_data)
+  def node_config(node_name)
+    Metalware::Templating::Configuration.for_node(node_name, config: config)
+                                        .configs
+  end
+
+  describe '#configs' do
+    it 'returns domain and self for the metalware master node' do
+      expect(node_config('self')).to eq(['domain', 'self'])
     end
-  end
 
-  describe '#configure_questions' do
-    it 'returns de-duplicated configure.yaml questions' do
-      filesystem.test do
-        expect(subject.configure_questions).to eq(
-          foo: { question: 'foo' },
-          bar: { question: 'bar' },
-          baz: { question: 'baz' }
-        )
-      end
-    end
-  end
-
-  describe '#configure_question_identifiers' do
-    it 'returns ordered unique identifiers of all configure.yaml questions' do
-      filesystem.test do
-        expect(subject.configure_question_identifiers).to eq([:bar, :baz, :foo])
-      end
+    it 'returns the configs for a regular node' do
+      allow(Metalware::Node).to receive(:new).and_return(testnode)
+      expected_configs = ['domain', 'group2', 'group1', testnode.name]
+      expect(node_config(testnode.name)).to eq(expected_configs)
     end
   end
 end

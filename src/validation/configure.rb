@@ -25,6 +25,7 @@ require 'exceptions'
 require 'data'
 require 'dry-validation'
 require 'active_support/core_ext/module/delegation'
+require 'constants'
 
 module Metalware
   module Validation
@@ -46,7 +47,7 @@ module Metalware
         @validate ||= begin
           configure_results = ConfigureSchema.call(yaml: @yaml)
           if configure_results.success?
-            [:domain, :group, :node, :self].each do |section|
+            Constants::CONFIGURE_SECTIONS.each do |section|
               @yaml[section].each do |identifier, parameters|
                 payload = {
                   section: section,

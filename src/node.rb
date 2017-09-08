@@ -44,6 +44,7 @@ module Metalware
 
     delegate :render_build_started_templates,
              :render_build_complete_templates,
+             :start_build,
              to: :build_method
 
     def initialize(metalware_config, name, should_be_configured: false)
@@ -184,14 +185,36 @@ module Metalware
     end
 
     def build_method_class
-      case repo_config[:build_method]&.to_sym
-      when :uefi
+      validate_build_method
+
+      case repo_build_method
+      when :'uefi-kickstart'
         BuildMethods::Kickstarts::UEFI
       when :basic
         BuildMethods::Basic
+      when :self
+        BuildMethods::Self
       else
-        BuildMethods::Kickstarts::Pxelinux
+        self_node? ? BuildMethods::Self : BuildMethods::Kickstarts::Pxelinux
       end
+    end
+
+    def validate_build_method
+      if self_node?
+        unless [:self, nil].include?(repo_build_method)
+          raise SelfBuildMethodError, build_method: repo_build_method
+        end
+      elsif repo_build_method == :self
+        raise SelfBuildMethodError, building_self_node: false
+      end
+    end
+
+    def repo_build_method
+      repo_config[:build_method]&.to_sym
+    end
+
+    def self_node?
+      name == 'self'
     end
   end
 end

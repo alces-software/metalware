@@ -156,8 +156,24 @@ module Metalware
 
   class EditModeError < MetalwareError
   end
-end
 
+  class MissingExternalDNS < MetalwareError
+  end
+
+  class SelfBuildMethodError < MetalwareError
+    def initialize(build_method: nil, building_self_node: true)
+      msg = if build_method
+              "The '#{build_method}' build method can not be used for the self " \
+              "node. The self node can only be built with the 'self' build method"
+            elsif building_self_node
+              'The self build method has had an unexpected error'
+            else
+              "The self build method can not be used for non 'self' nodes"
+            end
+      super(msg)
+    end
+  end
+end
 
 # Alias for Exception to use to indicate we want to catch everything, and to
 # also tell Rubocop to be quiet about this.

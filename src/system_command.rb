@@ -24,6 +24,7 @@
 
 require 'exceptions'
 require 'open3'
+require 'metal_log'
 
 module Metalware
   module SystemCommand
@@ -35,7 +36,7 @@ module Metalware
       # `format_error` option specifies whether any error produced should be
       # formatted suitably for displaying to a user.
       def run(command, format_error: true)
-        stdout, stderr, status = Open3.capture3(command)
+        stdout, stderr, status = capture3(command)
         if status.exitstatus != 0
           handle_error(command, stderr, format_error: format_error)
         else
@@ -44,7 +45,7 @@ module Metalware
       end
 
       def run_raw(command)
-        stdout, stderr, status = Open3.capture3(command)
+        stdout, stderr, status = capture3(command)
         {
           stdout: stdout,
           stderr: stderr,
@@ -53,6 +54,11 @@ module Metalware
       end
 
       private
+
+      def capture3(command)
+        MetalLog.info("SystemCommand: #{command}")
+        Open3.capture3(command)
+      end
 
       def handle_error(command, stderr, format_error:)
         stderr = stderr.strip

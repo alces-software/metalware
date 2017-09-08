@@ -33,7 +33,7 @@ require 'filesystem'
 
 RSpec.describe Metalware::Node do
   def node(name)
-    Metalware::Node.new(Metalware::Config.new, name, **node_args)
+    Metalware::Node.new(config, name, **node_args)
   end
 
   let :node_args { {} }
@@ -41,6 +41,7 @@ RSpec.describe Metalware::Node do
   let :testnode01 { node('testnode01') }
   let :testnode02 { node('testnode02') }
   let :testnode03 { node('testnode03') }
+  let :config { Metalware::Config.new }
 
   before do
     SpecUtils.use_mock_genders(self)
@@ -220,6 +221,7 @@ RSpec.describe Metalware::Node do
           domain: questions,
           group: questions,
           node: questions,
+          self: {},
         }
         fs.dump(config.configure_file, configure)
       end
@@ -270,6 +272,55 @@ RSpec.describe Metalware::Node do
 
     it 'defines nodes with different names as not equal' do
       expect(node('foonode')).not_to eq(node('barnode'))
+    end
+  end
+
+  # Not ideal testing the private method, however their is specific behaviour
+  # required for the self node
+  describe '#build_method_class' do
+    let :build_node { Metalware::Node.new(config, 'name_to_be_mocked') }
+
+    def build_method_class(node_name, build_method)
+      allow(build_node).to receive(:name).and_return(node_name)
+      repo_config = build_method.nil? ? {} : { build_method: build_method }
+      allow(build_node).to receive(:repo_config).and_return(repo_config)
+      build_node.send(:build_method_class)
+    end
+
+    context 'with a regular node' do
+      it 'returns the default (/kickstart) build method if not specified' do
+        expected = Metalware::BuildMethods::Kickstarts::Pxelinux
+        expect(build_method_class('build_node', nil)).to eq(expected)
+      end
+
+      it 'returns the build method if specified' do
+        expected = Metalware::BuildMethods::Basic
+        expect(build_method_class('build_node', :basic)).to eq(expected)
+      end
+
+      it 'errors if the self build method is used' do
+        expect do
+          build_method_class('build_node', :self)
+        end.to raise_error(Metalware::SelfBuildMethodError)
+      end
+    end
+
+    context "with the 'self' node" do
+      it 'returns the self build method if not specified' do
+        expected = Metalware::BuildMethods::Self
+        expect(build_method_class('self', nil)).to eq(expected)
+      end
+
+      it 'returns the self build method if specified' do
+        expected = Metalware::BuildMethods::Self
+        expect(build_method_class('self', :self)).to eq(expected)
+      end
+
+      it 'errors if the build method is not self' do
+        expect do
+          build_method_class('self', :basic)
+        end.to raise_error(Metalware::SelfBuildMethodError)
+      end
     end
   end
 end
