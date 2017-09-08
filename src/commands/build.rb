@@ -37,11 +37,15 @@ require 'exceptions'
 module Metalware
   module Commands
     class Build < CommandHelpers::BaseCommand
+      GRACEFULLY_SHUTDOWN_KEY = :gracefully_shutdown
+      COMPLETE_KEY = :complete
+
       private
 
       attr_reader :group_name, :nodes, :edit_start, :edit_continue
 
       delegate :template_path, to: :file_path
+      delegate :in_gui?, to: Utils
 
       def setup
         setup_edit_mode
@@ -58,6 +62,10 @@ module Metalware
         end
         wait_for_nodes_to_build
         teardown
+      rescue
+        # Ensure command is recorded as complete when in GUI.
+        record_gui_build_complete if in_gui?
+        raise
       end
 
       def dependency_hash
@@ -107,11 +115,13 @@ module Metalware
       end
 
       def wait_for_nodes_to_build
-        Output.stderr 'Waiting for nodes to report as built...',
-                      '(Ctrl-C to terminate)'
+        Output.success 'Waiting for nodes to report as built...'
+        Output.cli_only '(Ctrl-C to terminate)'
 
         rerendered_nodes = []
         loop do
+          gracefully_shutdown if should_gracefully_shutdown?
+
           nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
           end
@@ -120,14 +130,39 @@ module Metalware
             rerendered_nodes.push(*nodes)
           end
                .each do |node|
-            Output.stderr "Node #{node.name} built."
+            Output.success "Node #{node.name} built."
           end
 
           all_nodes_reported_built = rerendered_nodes.length == nodes.length
-          break if all_nodes_reported_built
+          if all_nodes_reported_built
+            # For now at least, keep thread alive when in GUI so can keep
+            # accessing messages. XXX Change this, this is very wasteful.
+            if in_gui?
+              record_gui_build_complete
+            else
+              break
+            end
+          end
 
           sleep config.build_poll_sleep
         end
+      end
+
+      def record_gui_build_complete
+        Thread.current.thread_variable_set(COMPLETE_KEY, true)
+      end
+
+      def should_gracefully_shutdown?
+        in_gui? && Thread.current.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)
+      end
+
+      def gracefully_shutdown
+        # XXX Somewhat similar to `handle_interrupt`; may not be easily
+        # generalizable however.
+        Output.info 'Exiting...'
+        render_all_build_complete_templates
+        teardown
+        record_gui_build_complete
       end
 
       def render_all_build_complete_templates
@@ -143,7 +178,7 @@ module Metalware
 
       def teardown
         clear_up_built_node_marker_files
-        Output.stderr 'Done.'
+        Output.info 'Done.'
       end
 
       def clear_up_built_node_marker_files
@@ -153,11 +188,11 @@ module Metalware
       end
 
       def handle_interrupt(_e)
-        Output.stderr 'Exiting...'
+        Output.info 'Exiting...'
         ask_if_should_rerender
         teardown
       rescue Interrupt
-        Output.stderr 'Re-rendering templates anyway...'
+        Output.info 'Re-rendering templates anyway...'
         render_all_build_complete_templates
         teardown
       end

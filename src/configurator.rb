@@ -91,14 +91,6 @@ module Metalware
       save_answers(answers)
     end
 
-    private
-
-    attr_reader :highline,
-                :configure_file,
-                :questions_section,
-                :higher_level_answer_files,
-                :use_readline
-
     def questions
       @questions ||= questions_in_section
                      .map.with_index do |question, index|
@@ -106,6 +98,14 @@ module Metalware
         create_question(identifier, properties, index + 1)
       end
     end
+
+    private
+
+    attr_reader :highline,
+                :configure_file,
+                :questions_section,
+                :higher_level_answer_files,
+                :use_readline
 
     def questions_in_section
       Data.load(configure_file)[questions_section]
@@ -157,13 +157,12 @@ module Metalware
         questions_section: questions_section,
         old_answer: old_answers[identifier],
         use_readline: use_readline,
-        question: question_text(properties, index)
+        progress_indicator: progress_indicator(index)
       )
     end
 
-    def question_text(properties, index)
-      progress_indicator = "(#{index}/#{total_questions})"
-      "#{properties[:question].strip} #{progress_indicator}"
+    def progress_indicator(index)
+      "(#{index}/#{total_questions})"
     end
 
     def total_questions
@@ -178,6 +177,7 @@ module Metalware
         :default,
         :identifier,
         :old_answer,
+        :progress_indicator,
         :question,
         :required,
         :type,
@@ -188,8 +188,8 @@ module Metalware
         default:,
         identifier:,
         old_answer: nil,
+        progress_indicator:,
         properties:,
-        question:,
         questions_section:,
         use_readline:
       )
@@ -197,7 +197,8 @@ module Metalware
         @default = default
         @identifier = identifier
         @old_answer = old_answer
-        @question = question
+        @progress_indicator = progress_indicator
+        @question = properties[:question]
         @required = !properties[:optional]
         @use_readline = use_readline
 
@@ -254,22 +255,26 @@ module Metalware
       end
 
       def ask_boolean_question(highline)
-        highline.agree(question + ' [yes/no]') { |q| yield q }
+        highline.agree(question_text + ' [yes/no]') { |q| yield q }
       end
 
       def ask_choice_question(highline)
         highline.choose(*choices) do |menu|
-          menu.prompt = question
+          menu.prompt = question_text
           yield menu
         end
       end
 
       def ask_integer_question(highline)
-        highline.ask(question, Integer) { |q| yield q }
+        highline.ask(question_text, Integer) { |q| yield q }
       end
 
       def ask_string_question(highline)
-        highline.ask(question) { |q| yield q }
+        highline.ask(question_text) { |q| yield q }
+      end
+
+      def question_text
+        "#{question.strip} #{progress_indicator}"
       end
 
       def type_for(value, configure_file:, questions_section:)

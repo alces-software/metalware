@@ -34,3 +34,13 @@ Metrics/BlockLength:
 # `YAML.safe_load` instead of `YAML.load`.
 Security/YAMLLoad:
   Enabled: false
+
+# I don't care if we use the compact way of declaring classes and modules.
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+# If we need a boolean value, having it actually be a boolean rather than
+# checking if it is nil or not is clearer IMO, and `!!value` is a standard way
+# to get this.
+Style/DoubleNegation:
+  Enabled: false

@@ -22,8 +22,15 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'concurrent'
+require 'active_support/core_ext/module/delegation'
+
+require 'utils'
+
 module Metalware
   module Output
+    MESSAGES_KEY = :messages
+
     class << self
       def stderr(*lines)
         # Don't output anything in unit tests to prevent noise.
@@ -33,6 +40,57 @@ module Metalware
       def stderr_indented_error_message(text)
         stderr text.gsub(/^/, '>>> ')
       end
+
+      # Methods to output/store for displaying in GUI appropriately depending
+      # on if we are in CLI or GUI.
+
+      def cli_only(*lines)
+        stderr(*lines) unless in_gui?
+      end
+
+      def info(*lines)
+        output_to_cli_or_gui(lines, type: :info)
+      end
+
+      def success(*lines)
+        output_to_cli_or_gui(lines, type: :success)
+      end
+
+      def warning(*lines)
+        output_to_cli_or_gui(lines, type: :warning)
+      end
+
+      def error(*lines)
+        output_to_cli_or_gui(lines, type: :danger)
+      end
+
+      private
+
+      delegate :in_gui?, to: Utils
+
+      def output_to_cli_or_gui(lines, type:)
+        if in_gui?
+          store_messages(type, lines)
+        else
+          stderr(*lines)
+        end
+      end
+
+      def store_messages(type, lines)
+        messages_array = Thread.current.thread_variable_get(MESSAGES_KEY)
+        # XXX Better place to initialize this?
+        unless messages_array
+          messages_array = Concurrent::Array.new
+          Thread.current.thread_variable_set(MESSAGES_KEY, messages_array)
+        end
+
+        # Note: message type will be used to form class used when displaying
+        # message; "text-#{type}" should be a CSS class defined for GUI.
+        new_messages = lines.map { |line| Message.new(type, line) }
+        messages_array.push(*new_messages)
+      end
     end
+
+    Message = Struct.new(:type, :text)
   end
 end

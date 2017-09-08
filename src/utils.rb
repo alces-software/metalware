@@ -24,6 +24,10 @@ module Metalware
         command_class.new(args, options)
       end
 
+      def in_gui?
+        defined? Rails
+      end
+
       private
 
       # From

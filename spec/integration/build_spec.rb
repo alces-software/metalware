@@ -32,7 +32,7 @@ require 'minimal_repo'
 # unit tests.
 
 RSpec.describe '`metal build`', real_fs: true do
-  METAL = File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'bin/metal')
+  METAL = Metalware::Constants::METAL_EXECUTABLE_PATH
   TEST_DIR = 'tmp/integration-test'
   CONFIG_FILE = SpecUtils.fixtures_config('integration-test.yaml')
   TEST_CONFIG = Metalware::Config.new(CONFIG_FILE)
