@@ -5,6 +5,13 @@ anchor_options:
     description: >
           Switch NODE_IDENTIFIER to specify a gender group rather than a single
           node
+  configure_answers_option: &configure_answers_option
+    tags: [-a ANSWERS_MAPPING, --answers ANSWERS_MAPPING]
+    type: String
+    description: >
+      Given a JSON mapping of question identifiers to answer values, the given
+      answers will be saved instead of asking the configure questions and
+      saving user input.
 
 global_options:
   - tags: [-c FILE, --config FILE]
@@ -27,6 +34,8 @@ subcommands:
       configure the domain for this Metalware installation. The configuration
       answers will then be used when rendering templates.
     action: Commands::Configure::Domain
+    options:
+      - *configure_answers_option
 
   configure_group: &configure_group
     syntax: metal configure group GROUP_NAME [options]
@@ -36,6 +45,8 @@ subcommands:
       configure a group for this Metalware installation. The configuration
       answers will then be used when rendering templates.
     action: Commands::Configure::Group
+    options:
+      - *configure_answers_option
 
   configure_node: &configure_node
     syntax: metal configure node NODE_NAME [options]
@@ -45,6 +56,8 @@ subcommands:
       configure a node for this Metalware installation. The configuration
       answers will then be used when rendering templates.
     action: Commands::Configure::Node
+    options:
+      - *configure_answers_option
 
   configure_rerender: &configure_rerender
     syntax: metal configure rerender [options]

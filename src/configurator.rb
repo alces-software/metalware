@@ -46,8 +46,8 @@ module Metalware
       @use_readline = use_readline
     end
 
-    def configure
-      answers = ask_questions
+    def configure(answers = nil)
+      answers ||= ask_questions
       save_answers(answers)
     end
 

@@ -481,5 +481,20 @@ RSpec.describe Metalware::Configurator do
         expect(output_lines).to include(question)
       end
     end
+
+    context 'when answers passed to configure' do
+      it 'uses given answers instead of asking questions' do
+        define_questions(test: {
+                           question_q: 'Some question',
+                         })
+        passed_answers = {
+          question_1: 'answer_1',
+        }
+
+        configurator.configure(passed_answers)
+
+        expect(answers).to eq(passed_answers)
+      end
+    end
   end
 end
