@@ -35,19 +35,20 @@ RSpec.describe Metalware::Templating::Configuration do
            name: 'testnode')
   end
 
-  def configuration_node(node_name)
+  def node_config(node_name)
     Metalware::Templating::Configuration.for_node(node_name, config: config)
+                                        .configs
   end
 
   describe '#configs' do
     it 'returns domain and self for the metalware master node' do
-      expect(configuration_node('self').configs).to eq(['domain', 'self'])
+      expect(node_config('self')).to eq(['domain', 'self'])
     end
 
     it 'returns the configs for a regular node' do
       allow(Metalware::Node).to receive(:new).and_return(testnode)
       expected_configs = ['domain', 'group2', 'group1', testnode.name]
-      expect(configuration_node(testnode.name).configs).to eq(expected_configs)
+      expect(node_config(testnode.name)).to eq(expected_configs)
     end
   end
 end
