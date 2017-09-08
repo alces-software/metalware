@@ -37,7 +37,7 @@ module Metalware
 
       # NOTE: Supported types in error.yaml message must be updated manually
 
-      SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
+      SUPPORTED_TYPES = ['string', 'integer', 'boolean'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def self.type_check(type, value)
