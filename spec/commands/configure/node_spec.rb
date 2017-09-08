@@ -6,7 +6,7 @@ require 'filesystem'
 
 RSpec.describe Metalware::Commands::Configure::Node do
   def run_configure_node(node)
-    SpecUtils.run_command(
+    Metalware::Utils.run_command(
       Metalware::Commands::Configure::Node, node
     )
   end

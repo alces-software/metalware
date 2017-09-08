@@ -66,7 +66,7 @@ RSpec.describe Metalware::Commands::Build do
     # Run command in timeout as `build` will wait indefinitely, but want to
     # abort tests if it looks like this is happening.
     Timeout.timeout 0.5 do
-      SpecUtils.run_command(
+      Metalware::Utils.run_command(
         Metalware::Commands::Build, node_identifier, **options_hash
       )
     end

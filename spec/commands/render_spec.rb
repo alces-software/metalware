@@ -39,7 +39,7 @@ RSpec.describe Metalware::Commands::Render do
       config = Metalware::Config.new(nil)
       path = File.join(config.repo_path, 'dhcp/default')
       expect do
-        SpecUtils.run_command(
+        Metalware::Utils.run_command(
           Metalware::Commands::Render, path, strict: true
         )
       end.to raise_error(Metalware::StrictWarningError)

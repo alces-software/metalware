@@ -39,16 +39,13 @@ module Metalware
           @cache = GroupCache.new(config)
         end
 
+        def configurator
+          @configurator ||=
+            Configurator.for_group(group_name, config: config)
+        end
+
         def custom_configuration
           record_primary_group
-        end
-
-        def answers_file
-          config.group_answers_file(group_name)
-        end
-
-        def higher_level_answer_files
-          [config.domain_answers_file]
         end
 
         def record_primary_group

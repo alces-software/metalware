@@ -28,7 +28,7 @@ require 'group_cache'
 
 RSpec.describe Metalware::Commands::Configure::Group do
   def run_configure_group(group)
-    SpecUtils.run_command(
+    Metalware::Utils.run_command(
       Metalware::Commands::Configure::Group, group
     )
   end

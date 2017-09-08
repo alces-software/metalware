@@ -66,7 +66,7 @@ RSpec.shared_examples :render_domain_templates do |test_command|
         Metalware::Constants::HOSTS_PATH
       ).ordered.and_call_original
 
-      SpecUtils.run_command(test_command)
+      Metalware::Utils.run_command(test_command)
     end
   end
 
@@ -91,7 +91,7 @@ RSpec.shared_examples :render_domain_templates do |test_command|
     it 'does not render hosts and genders files and gives error' do
       filesystem.test do
         expect do
-          SpecUtils.run_command(test_command)
+          Metalware::Utils.run_command(test_command)
         end.to raise_error(Metalware::DomainTemplatesInternalError)
 
         # `server.yaml` and `hosts` not rendered.
@@ -123,7 +123,7 @@ RSpec.shared_examples :render_domain_templates do |test_command|
     it 'does not render hosts file and gives error' do
       filesystem.test do
         expect do
-          SpecUtils.run_command(test_command)
+          Metalware::Utils.run_command(test_command)
         end.to raise_error(Metalware::DomainTemplatesInternalError)
 
         # `hosts` not rendered as `genders` invalid.

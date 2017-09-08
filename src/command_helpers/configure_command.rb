@@ -32,6 +32,8 @@ module Metalware
     class ConfigureCommand < BaseCommand
       private
 
+      delegate :answers_file, to: :configurator
+
       GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
         You should be able to fix this error by re-running the `configure`
         command and correcting the invalid input, or by manually editing the
@@ -69,14 +71,6 @@ module Metalware
         answers_file.sub("#{config.answer_files_path}/", '')
       end
 
-      def answers_file
-        raise NotImplementedError
-      end
-
-      def higher_level_answer_files
-        []
-      end
-
       def dependency_hash
         {
           repo: ['configure.yaml'],
@@ -87,16 +81,7 @@ module Metalware
       end
 
       def configurator
-        Configurator.new(
-          configure_file: config.configure_file,
-          questions_section: questions_section,
-          answers_file: answers_file,
-          higher_level_answer_files: higher_level_answer_files
-        )
-      end
-
-      def questions_section
-        class_name_parts.last
+        raise NotImplementedError
       end
 
       # Render the templates which are relevant across the whole domain; these

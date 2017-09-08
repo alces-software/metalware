@@ -14,6 +14,16 @@ module Metalware
           .join("\n")
       end
 
+      def run_command(command_class, *args, **options_hash)
+        options = Commander::Command::Options.new
+        options_hash.map do |option, value|
+          option_setter = (option.to_s + '=').to_sym
+          options.__send__(option_setter, value)
+        end
+
+        command_class.new(args, options)
+      end
+
       private
 
       # From
