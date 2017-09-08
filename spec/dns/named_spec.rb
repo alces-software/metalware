@@ -47,51 +47,18 @@ RSpec.describe Metalware::DNS::Named do
     "DNS: #{externaldns}"
   end
 
-  context 'without a setup named server' do
-    before :each do
-      allow(named).to receive(:setup?).and_return(false)
-      # Prevents restart_named from running as the bash commands can't be mocked
-      allow(named).to receive(:restart_named)
-      allow(named).to receive(:start_named)
-    end
-
-    it "errors if external dns isn't set" do
-      expect do
-        named.update
-      end.to raise_error(Metalware::MissingExternalDNS)
-    end
-
-    it 'sets up the named server' do
-      filesystem.test do
-        expect(named).to receive(:restart_named)
-        named.update
-        rendered_named_conf = File.read(file_path.base_named).chomp
-        expect(rendered_named_conf).to eq(correct_base_named_conf)
-      end
-    end
-  end
-
-  context 'with a setup named server' do
-    before :each do
-      allow(named).to receive(:setup?).and_return(true)
-      # Checks the bash commands run without running them
-      expect(named).not_to receive(:start_named)
+  it 'updates named server' do
+    filesystem.test do
+      template_path = File.join(file_path.repo, 'named/forward/default')
+      File.write(template_path, '<%= alces.named.zone %>')
       expect(named).to receive(:restart_named)
-    end
 
-    it 'skips setup but updates named server' do
-      filesystem.test do
-        template_path = File.join(file_path.repo, 'named/forward/default')
-        File.write(template_path, '<%= alces.named.zone %>')
+      named.update
 
-        expect(named).not_to receive(:setup)
-        named.update
-
-        expect(File.file?(file_path.metalware_named)).to eq(true)
-        expect(File.file?(file_path.named_zone('fwd_named_zone'))).to eq(true)
-        expect(File.file?(file_path.named_zone('rev_named_zone'))).to eq(true)
-        expect(File.read(file_path.named_zone('fwd_named_zone'))).to eq("pri\n")
-      end
+      expect(File.file?(file_path.metalware_named)).to eq(true)
+      expect(File.file?(file_path.named_zone('fwd_named_zone'))).to eq(true)
+      expect(File.file?(file_path.named_zone('rev_named_zone'))).to eq(true)
+      expect(File.read(file_path.named_zone('fwd_named_zone'))).to eq("pri\n")
     end
   end
 end
