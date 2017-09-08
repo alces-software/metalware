@@ -503,7 +503,7 @@ RSpec.describe Metalware::Templater do
         filesystem.test do
           templater = Metalware::Templater.new(config)
           magic_namespace = templater.config.alces
-          expect(magic_namespace.hunter).to eq(Hashie::Mash.new)
+          expect(magic_namespace.hunter.to_h).to eq(Hashie::Mash.new)
         end
       end
     end

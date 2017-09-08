@@ -7,11 +7,13 @@ require 'templating/iterable_recursive_open_struct'
 module Metalware
   module Templating
     class MissingParameterWrapper
+      include Blank
       delegate :to_json, to: :@wrapped_obj
 
-      def initialize(wrapped_obj, raise_on_missing: false)
+      def initialize(wrapped_obj, raise_on_missing: false, callstack: [])
         @raise_on_missing = raise_on_missing
         @missing_tags = []
+        @callstack = callstack
         @wrapped_obj = if wrapped_obj.is_a?(Hash)
                          IterableRecursiveOpenStruct.new(wrapped_obj)
                        else
@@ -29,15 +31,45 @@ module Metalware
         send(a)
       end
 
+      def wrapper_binding
+        binding
+      end
+
+      def updated_callstack(method, *args, &block)
+        str = method.to_s
+        str << "(#{args.join(',')})" unless args.empty?
+        str << '{ ... }' if block
+        @callstack + [str]
+      end
+
+      def callstack_string(callstack)
+        callstack.join('.')
+      end
+
       def method_missing(method, *args, &block)
+        if method.is_a?(Integer)
+          args.unshift(method)
+          method = :[]
+        elsif method == :send && args[0].is_a?(Integer)
+          args.unshift(:[])
+        end
+        new_callstack = updated_callstack(method, *args, &block)
         value = @wrapped_obj.send(method, *args, &block)
         if value.nil? && !@missing_tags.include?(method)
-          msg = "Unset template parameter: #{method}"
+          msg = "Unset template parameter: #{callstack_string(new_callstack)}"
           raise MissingParameterError, msg if @raise_on_missing
           @missing_tags.push(method)
           MetalLog.warn msg
         end
-        value
+        if /to_/.match?(method) || (method == :send && /to_/.match(args[0]))
+          return value
+        end
+        case value
+        when true, false, nil
+          value
+        else
+          MissingParameterWrapper.new(value, callstack: new_callstack)
+        end
       end
     end
   end
