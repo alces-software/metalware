@@ -288,12 +288,12 @@ RSpec.describe Metalware::Node do
     end
 
     context 'with a regular node' do
-      it 'returns the default (/kickstart) build type if not specified' do
+      it 'returns the default (/kickstart) build method if not specified' do
         expected = Metalware::BuildMethods::Kickstarts::Pxelinux
         expect(build_method_class('build_node', nil)).to eq(expected)
       end
 
-      it 'returns the build type if specified' do
+      it 'returns the build method if specified' do
         expected = Metalware::BuildMethods::Basic
         expect(build_method_class('build_node', :basic)).to eq(expected)
       end
@@ -306,17 +306,17 @@ RSpec.describe Metalware::Node do
     end
 
     context "with the 'self' node" do
-      it 'returns the self build type if not specified' do
+      it 'returns the self build method if not specified' do
         expected = Metalware::BuildMethods::Self
         expect(build_method_class('self', nil)).to eq(expected)
       end
 
-      it 'returns the self build type if specified' do
+      it 'returns the self build method if specified' do
         expected = Metalware::BuildMethods::Self
         expect(build_method_class('self', :self)).to eq(expected)
       end
 
-      it 'errors if the build type is not self' do
+      it 'errors if the build method is not self' do
         expect do
           build_method_class('self', :basic)
         end.to raise_error(Metalware::SelfBuildMethodError)

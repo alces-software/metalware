@@ -191,7 +191,7 @@ module Metalware
         when :self, nil
           BuildMethods::Self
         else
-          raise SelfBuildMethodError, build_type: repo_build
+          raise SelfBuildMethodError, build_method: repo_build
         end
       else
         case repo_build
