@@ -155,8 +155,8 @@ commands:
       then waiting for each node to report itself as built and re-rendering its
       'pxelinux' template for permanent booting. The build command will keep
       running until all nodes have reported as built, or until it is
-      interrupted. The 'self' build is a special case that is handled seperately
-      . See below for more details.
+      interrupted. The 'self' build is a special case that is handled separately.
+      See below for more details.
 
 
       The 'files' for each node are specified under the 'files' key in the repo
