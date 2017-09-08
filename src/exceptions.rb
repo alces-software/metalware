@@ -163,8 +163,8 @@ module Metalware
   class SelfBuildMethodError < MetalwareError
     def initialize(build_method: nil, building_self_node: true)
       msg = if build_method
-              "The '#{build_method}' build method can not be used for the self" \
-              "node. The self node can only be built with the 'self' build type"
+              "The '#{build_method}' build method can not be used for the self " \
+              "node. The self node can only be built with the 'self' build method"
             elsif building_self_node
               'The self build method has had an unexpected error'
             else
