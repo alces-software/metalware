@@ -21,7 +21,7 @@ class BuildJob < ApplicationJob
           identifier_value
         )
         run_build_command(identifier_value)
-      rescue Exception => e
+      rescue IntentionallyCatchAnyException => e
         Metalware::Output.error(e.message)
       end
 

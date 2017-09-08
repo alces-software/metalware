@@ -17,7 +17,7 @@ class HunterJob < ApplicationJob
     self.class.current_thread = Thread.new do
       begin
         run_hunter_command
-      rescue Exception => e
+      rescue IntentionallyCatchAnyException => e
         # XXX Better error handling
         p 'ERROR', e
       end

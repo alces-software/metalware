@@ -3,7 +3,7 @@
 class Groups::ConfigureController < ConfigureController
   def start
     name = params[:group_name]
-    redirect_to (group_configure_path name)
+    redirect_to group_configure_path(name)
   end
 
   private
