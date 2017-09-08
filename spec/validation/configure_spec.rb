@@ -56,7 +56,7 @@ RSpec.describe Metalware::Validation::Configure do
           identifier: 'boolean_true',
           question: 'Can I have a boolean true (/yes) default?',
           type: 'boolean',
-          default: 'yes',
+          default: true,
         },
       ],
 
@@ -75,7 +75,7 @@ RSpec.describe Metalware::Validation::Configure do
           identifier: 'boolean_false',
           question: 'Can I have a boolean false (/no) default?',
           type: 'boolean',
-          default: 'no',
+          default: false,
         },
       ],
 
