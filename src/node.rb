@@ -188,7 +188,7 @@ module Metalware
       validate_build_method
 
       case repo_build_method
-      when :uefi
+      when :'uefi-kickstart'
         BuildMethods::Kickstarts::UEFI
       when :basic
         BuildMethods::Basic
