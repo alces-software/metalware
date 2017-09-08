@@ -41,7 +41,7 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_group(group_name, file_path: file_path)
+            Configurator.for_group(group_name, config: config)
         end
 
         def custom_configuration

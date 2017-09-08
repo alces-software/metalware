@@ -14,7 +14,7 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_domain(file_path: file_path)
+            Configurator.for_domain(config: config)
         end
       end
     end

@@ -31,7 +31,8 @@ HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 module Metalware
   class Configurator
     class << self
-      def for_domain(file_path:)
+      def for_domain(config:)
+        file_path = FilePath.new(config)
         new(
           configure_file: file_path.configure_file,
           questions_section: :domain,
@@ -40,7 +41,8 @@ module Metalware
         )
       end
 
-      def for_group(group_name, file_path:)
+      def for_group(group_name, config:)
+        file_path = FilePath.new(config)
         new(
           configure_file: file_path.configure_file,
           questions_section: :group,
@@ -52,7 +54,8 @@ module Metalware
       # Note: This is slightly inconsistent with `for_group`, as that just
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
-      def for_node(node, file_path:)
+      def for_node(node, config:)
+        file_path = FilePath.new(config)
         new(
           configure_file: file_path.configure_file,
           questions_section: :node,

@@ -18,7 +18,7 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_node(node, file_path: file_path)
+            Configurator.for_node(node, config: config)
         end
 
         def node
