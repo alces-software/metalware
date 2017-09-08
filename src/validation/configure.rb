@@ -47,7 +47,7 @@ module Metalware
         when 'integer'
           value.is_a?(Integer)
         when 'boolean'
-          value == 'yes' || value == 'no'
+          [true, false].include?(value)
         else
           false
         end
