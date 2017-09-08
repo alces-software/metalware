@@ -24,6 +24,7 @@
 require 'exceptions'
 require 'data'
 require 'dry-validation'
+require 'active_support/core_ext/module/delegation'
 
 module Metalware
   module Validation
@@ -61,9 +62,7 @@ module Metalware
         end
       end
 
-      def success?
-        validate.success?
-      end
+      delegate :success?, to: :validate
 
       # TODO: make these error messages more descriptive
       def load
