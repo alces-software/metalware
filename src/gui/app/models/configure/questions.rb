@@ -4,19 +4,19 @@
 class Configure::Questions < ApplicationModel
   class << self
     def for_domain
-      Metalware::Configurator.for_domain(file_path: file_path).questions
+      Metalware::Configurator.for_domain(config: config).questions
     end
 
     def for_group(group_name)
       Metalware::Configurator.for_group(
-        group_name, file_path: file_path
+        group_name, config: config
       ).questions
     end
 
     def for_node(node_name)
       node = Metalware::Node.new(config, node_name)
       Metalware::Configurator.for_node(
-        node, file_path: file_path
+        node, config: config
       ).questions
     end
 
