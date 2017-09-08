@@ -43,6 +43,11 @@ RSpec.describe Metalware::Validation::Configure do
           type: 'integer',
           default: 10,
         },
+        boolean_true: {
+          question: 'Can I have a boolean true (/yes) default?',
+          type: 'boolean',
+          default: 'yes',
+        },
       },
 
       group: {
@@ -54,6 +59,11 @@ RSpec.describe Metalware::Validation::Configure do
           question: 'Am I a integer question without a default?',
           type: 'integer',
         },
+        boolean_false: {
+          question: 'Can I have a boolean false (/no) default?',
+          type: 'boolean',
+          default: 'no',
+        },
       },
 
       node: {
@@ -62,13 +72,21 @@ RSpec.describe Metalware::Validation::Configure do
           type: 'string',
           default: 'yes I am a string',
         },
+        string_empty_default: {
+          question: 'My default is a empty string?',
+          default: '',
+        },
       },
     }
   end
 
-  def run_configure_validation(my_hash = {})
+  def build_validator(my_hash = {})
     allow(Metalware::Data).to receive(:load).and_return(my_hash)
-    validator = Metalware::Validation::Configure.new('path/has/been/mocked')
+    Metalware::Validation::Configure.new('path/has/been/mocked')
+  end
+
+  def run_configure_validation(my_hash = {})
+    validator = build_validator(my_hash)
     validator.validate.messages
   end
 
@@ -105,7 +123,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     type: 'string',
                                     default: 'Each field will now be interpreted as a separate question',
                                   })
-      results = run_configure_validation(h)
+      results = build_validator(h).validate.errors
       expect(results.keys).to eq([:parameters])
       expect(results[:parameters][0]).to eq('must be a hash')
     end
@@ -153,17 +171,6 @@ RSpec.describe Metalware::Validation::Configure do
                                   })
       results = run_configure_validation(h)
       expect(results[:parameters].keys).to eq([:type])
-    end
-
-    it 'fails if default is empty' do
-      h = correct_hash.deep_merge(domain: {
-                                    empty_default: {
-                                      question: 'Do I have an empty default?',
-                                      default: '',
-                                    },
-                                  })
-      results = run_configure_validation(h)
-      expect(results[:parameters].keys).to eq([:default])
     end
 
     it 'fails if the optional input is not true or false' do
@@ -216,6 +223,17 @@ RSpec.describe Metalware::Validation::Configure do
                                   })
       expect(run_configure_validation(h).keys).to eq([:default_string_type])
     end
+
+    it 'returns a success? status of false' do
+      h = correct_hash.deep_merge(group: {
+                                    bad_string_question: {
+                                      question: "Do I fail because my default isn't a string?",
+                                      type: 'string',
+                                      default: 10,
+                                    },
+                                  })
+      expect(build_validator(h).success?).to eq(false)
+    end
   end
 
   context 'with invalid integer questions' do
@@ -228,6 +246,30 @@ RSpec.describe Metalware::Validation::Configure do
                                     },
                                   })
       expect(run_configure_validation(h).keys).to eq([:default_integer_type])
+    end
+
+    it 'fails if the default is an empty string' do
+      h = correct_hash.deep_merge(node: {
+                                    bad_integer_question: {
+                                      question: 'Do I fail because my default is an empty string?',
+                                      type: 'integer',
+                                      default: '',
+                                    },
+                                  })
+      expect(run_configure_validation(h).keys).to eq([:default_empty_string_type])
+    end
+  end
+
+  context 'with invalid boolean questions' do
+    it 'fails with non-boolean default' do
+      h = correct_hash.deep_merge(node: {
+                                    bad_integer_question: {
+                                      question: 'Do I fail because my default is a string?',
+                                      type: 'boolean',
+                                      default: 'I am not valid',
+                                    },
+                                  })
+      expect(run_configure_validation(h).keys).to eq([:default_boolean_type])
     end
   end
 end

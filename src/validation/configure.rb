@@ -24,6 +24,7 @@
 require 'exceptions'
 require 'data'
 require 'dry-validation'
+require 'active_support/core_ext/module/delegation'
 
 module Metalware
   module Validation
@@ -34,6 +35,7 @@ module Metalware
 
       # NOTE: Supported types in error.yaml message must be updated manually
       SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
+      BOOLEAN_VALUE = ['yes', 'no'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def initialize(file)
@@ -41,31 +43,30 @@ module Metalware
       end
 
       def validate
-        @configure_results = ConfigureSchema.call(yaml: @yaml)
-        if @configure_results.success?
-          [:domain, :group, :node].each do |section|
-            @yaml[section].each do |identifier, parameters|
-              payload = {
-                section: section,
-                identifier: identifier,
-                parameters: parameters,
-              }
-              question_results = QuestionSchema.call(payload)
-              return question_results unless question_results.success?
+        @validate ||= begin
+          configure_results = ConfigureSchema.call(yaml: @yaml)
+          if configure_results.success?
+            [:domain, :group, :node].each do |section|
+              @yaml[section].each do |identifier, parameters|
+                payload = {
+                  section: section,
+                  identifier: identifier,
+                  parameters: parameters,
+                }
+                question_results = QuestionSchema.call(payload)
+                return question_results unless question_results.success?
+              end
             end
           end
+          configure_results
         end
-        @configure_results
       end
 
-      def success?
-        validate if @configure_results.nil?
-        @configure_results.success?
-      end
+      delegate :success?, to: :validate
 
       # TODO: make these error messages more descriptive
       def load
-        raise ValidationFailure, @configure_results.messages unless success?
+        raise ValidationFailure, validate.messages unless success?
         @yaml
       end
 
@@ -79,6 +80,14 @@ module Metalware
           def question_type?(value)
             SUPPORTED_TYPES.include?(value)
           end
+
+          def boolean?(value)
+            BOOLEAN_VALUE.include?(value)
+          end
+
+          def empty_string?(value)
+            value.is_a?(String) && value.empty?
+          end
         end
 
         validate(valid_top_level_question_keys: :parameters) do |q|
@@ -89,7 +98,7 @@ module Metalware
         required(:parameters).schema do
           required(:question).value(:str?, :filled?)
           optional(:type).value(:question_type?)
-          optional(:default).value(:filled?)
+          optional(:default) { filled? | str? }
           optional(:optional).value(:bool?)
 
           # NOTE: The crazy logic on the LHS of the then ('>') is because
@@ -99,13 +108,22 @@ module Metalware
             (default.filled? & (type.none? | type.eql?('string'))) > default.str?
           end
 
+          # Enforces empty string defaults have a string type
+          rule(default_empty_string_type: [:default, :type]) do |default, type|
+            default.empty_string? > (type.none? | type.eql?('string'))
+          end
+
           rule(default_integer_type: [:default, :type]) do |default, type|
             (default.filled? & type.eql?('integer')) > default.int?
           end
 
-          # Boolean and choice does not currently support default answers
           rule(default_boolean_type: [:default, :type]) do |default, type|
-            default.none? | type.excluded_from?(['boolean', 'choice'])
+            (default.filled? & type.eql?('boolean')) > default.boolean?
+          end
+
+          # Choice does not currently support default answers
+          rule(default_choice_type: [:default, :type]) do |default, type|
+            default.none? | type.excluded_from?(['choice'])
           end
         end
       end
