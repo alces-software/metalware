@@ -49,6 +49,10 @@ module Metalware
       config.node_answers_file(node)
     end
 
+    def self_answers
+      File.join(answer_files, 'nodes/self.yaml')
+    end
+
     def repo
       config.repo_path
     end
@@ -92,6 +96,10 @@ module Metalware
 
     def repo_template(template_type, node:)
       (node.repo_config[:templates] || {})[template_type]
+    end
+
+    def answer_files
+      config.answer_files_path
     end
   end
 end

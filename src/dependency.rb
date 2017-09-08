@@ -72,6 +72,8 @@ module Metalware
 
     def validate_answer_file(relative_path)
       case relative_path
+      when 'self.yaml'
+        loader.self_answers
       when 'domain.yaml'
         loader.domain_answers
       when /^groups\/.+/

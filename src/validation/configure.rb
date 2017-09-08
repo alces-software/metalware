@@ -46,7 +46,7 @@ module Metalware
         @validate ||= begin
           configure_results = ConfigureSchema.call(yaml: @yaml)
           if configure_results.success?
-            [:domain, :group, :node].each do |section|
+            [:domain, :group, :node, :self].each do |section|
               @yaml[section].each do |identifier, parameters|
                 payload = {
                   section: section,
@@ -136,7 +136,7 @@ module Metalware
 
         # White-lists the keys allowed in the configure.yaml file
         validate(valid_top_level_keys: :yaml) do |yaml|
-          (yaml.keys - [:domain, :group, :node, :questions]).empty?
+          (yaml.keys - [:domain, :self, :group, :node, :questions]).empty?
         end
 
         required(:yaml).schema do
