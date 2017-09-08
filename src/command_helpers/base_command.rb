@@ -33,15 +33,8 @@ require 'file_path'
 module Metalware
   module CommandHelpers
     class BaseCommand
-      # `headless` = option to set when creating an instance of command class
-      # directly (e.g. when running a command from GUI), rather than having
-      # Commander create the instance when running a command from the CLI; this
-      # indicates to the command (where this has been implemented at least)
-      # that it shouldn't attempt to get input from stdin/ produce output to
-      # stdout or stderr, and rather should handle this in some other
-      # appropriate way.
-      def initialize(args, options, headless: false)
-        pre_setup(args, options, headless)
+      def initialize(args, options)
+        pre_setup(args, options)
         setup
         post_setup
         run
@@ -53,14 +46,13 @@ module Metalware
 
       private
 
-      attr_reader :config, :args, :options, :headless
+      attr_reader :config, :args, :options
 
-      def pre_setup(args, options, headless)
+      def pre_setup(args, options)
         setup_config(options)
         log_command
         @args = args
         @options = options
-        @headless = headless
       end
 
       def post_setup
