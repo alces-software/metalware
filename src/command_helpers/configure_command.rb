@@ -46,7 +46,14 @@ module Metalware
       end
 
       def answers
-        JSON.parse(options.answers) if options.answers
+        if options.answers
+          JSON.parse(options.answers)
+        else
+          # The `--answers` option has not been passed; the Configurator will
+          # ask the questions on the command line to get the answers to be
+          # saved.
+          nil
+        end
       end
 
       def handle_interrupt(_e)
