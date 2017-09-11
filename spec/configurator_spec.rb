@@ -276,8 +276,8 @@ RSpec.describe Metalware::Configurator do
                            default: false,
                          },
                          should_keep_old_answer: {
-                          question: 'Did I keep my old answer?'
-                         }
+                           question: 'Did I keep my old answer?',
+                         },
                        })
 
       original_answers = {
@@ -369,11 +369,11 @@ RSpec.describe Metalware::Configurator do
 
       it 'correctly inherits false default' do
         define_questions(domain: {
-          false_boolean_q: {
-            question: 'Boolean?',
-            type: 'boolean',
-          },
-        })
+                           false_boolean_q: {
+                             question: 'Boolean?',
+                             type: 'boolean',
+                           },
+                         })
 
         configure_with_answers([''])
 
@@ -457,7 +457,9 @@ RSpec.describe Metalware::Configurator do
     context 'when answers passed to configure' do
       it 'uses given answers instead of asking questions' do
         define_questions(domain: {
-                           question_q: 'Some question',
+                           question_1: {
+                             question: 'Some question',
+                           },
                          })
         passed_answers = {
           question_1: 'answer_1',

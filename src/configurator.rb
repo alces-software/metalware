@@ -80,7 +80,7 @@ module Metalware
       @config = config
       @questions_section = questions_section
       @name = name,
-      @higher_level_answer_files = higher_level_answer_files
+              @higher_level_answer_files = higher_level_answer_files
       @use_readline = use_readline
     end
 

@@ -50,7 +50,7 @@ module Metalware
 
       attr_reader :path, :config
 
-      def answer(absolute_path, section)
+      def answer(_absolute_path, _section)
         raise NotImplementedError
       end
     end

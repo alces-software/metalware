@@ -33,7 +33,7 @@ RSpec.describe Metalware::Validation::Answer do
 
   let :configure_data do
     {
-      domain:[
+      domain: [
         {
           identifier: 'string_question',
           question: 'Am I a string?',

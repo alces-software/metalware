@@ -48,7 +48,7 @@ RSpec.describe Metalware::Validation::Saver do
   let :saver do
     Metalware::Validation::Saver.new(config)
   end
-  let :stubbed_answer_load { OpenStruct.new({data: data}) }
+  let :stubbed_answer_load { OpenStruct.new(data: data) }
   let :data { { key: 'data' } }
 
   let :filesystem do

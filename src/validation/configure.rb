@@ -71,10 +71,9 @@ module Metalware
         array_data = raw_data.dup
         hash_data = {}
         Constants::CONFIGURE_SECTIONS.each do |section|
-          hash_data[section] = array_data[section].inject({}) do |memo, question|
+          hash_data[section] = array_data[section].each_with_object({}) do |question, memo|
             identifier = question.delete(:identifier)
             memo[identifier.to_sym] = question
-            memo
           end
         end
         hash_data
