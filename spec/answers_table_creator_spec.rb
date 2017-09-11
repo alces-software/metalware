@@ -27,12 +27,14 @@ require 'spec_utils'
 
 require 'filesystem'
 require 'answers_table_creator'
+require 'config'
+require 'validation/loader'
 
 RSpec.describe Metalware::AnswersTableCreator do
   subject do
     Metalware::AnswersTableCreator.new(Metalware::Config.new)
   end
-
+  let :config { Metalware::Config.new }
   let :configure_data do
     {
       domain: {
@@ -50,6 +52,7 @@ RSpec.describe Metalware::AnswersTableCreator do
       self: {},
     }
   end
+  let :loader { Metalware::Validation::Loader.new(config) }
 
   let :domain_answers do
     { question_1: 'domain question 1' }
@@ -73,7 +76,6 @@ RSpec.describe Metalware::AnswersTableCreator do
 
   let :filesystem do
     FileSystem.setup do |fs|
-      fs.dump('/var/lib/metalware/repo/configure.yaml', configure_data)
       fs.dump('/var/lib/metalware/answers/domain.yaml', domain_answers)
       fs.dump("/var/lib/metalware/answers/groups/#{group_name}.yaml", group_answers)
       fs.dump("/var/lib/metalware/answers/nodes/#{node_name}.yaml", node_answers)
@@ -82,6 +84,11 @@ RSpec.describe Metalware::AnswersTableCreator do
 
   before do
     SpecUtils.use_mock_genders(self)
+  end
+
+  before :each do
+    allow(loader).to receive(:configure_data).and_return(configure_data)
+    allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
   end
 
   describe '#domain_table' do
