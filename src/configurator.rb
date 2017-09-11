@@ -54,15 +54,15 @@ module Metalware
       # Note: This is slightly inconsistent with `for_group`, as that just
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
-      def for_node(node, config:)
+      def for_node(node_name, config:)
         file_path = FilePath.new(config)
         new(
           config: config,
           questions_section: :node,
-          name: node.name,
+          name: node_name,
           higher_level_answer_files: [
             file_path.domain_answers,
-            file_path.group_answers(node.primary_group),
+            file_path.group_answers(node_name.primary_group),
           ]
         )
       end
