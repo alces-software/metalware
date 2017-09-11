@@ -1,10 +1,9 @@
 
 # frozen_string_literal: true
+require 'constants'
 
 module Metalware
   class Repo
-    CONFIGURE_SECTIONS = [:domain, :group, :node].freeze
-
     def initialize(config)
       @config = config
     end
@@ -24,7 +23,7 @@ module Metalware
     end
 
     def configure_data_sections
-      CONFIGURE_SECTIONS.map { |section| configure_data[section] }
+      Constants::CONFIGURE_SECTIONS.map { |section| configure_data[section] }
     end
 
     attr_reader :config
