@@ -69,14 +69,13 @@ module Metalware
     end
 
     def initialize(
-      highline: HighLine.new,
       config:,
       questions_section:,
       name: nil,
       higher_level_answer_files:,
       use_readline: true
     )
-      @highline = highline
+      @highline = HighLine.new
       @config = config
       @questions_section = questions_section
       @name = name

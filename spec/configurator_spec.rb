@@ -62,9 +62,10 @@ RSpec.describe Metalware::Configurator do
     make_configurator
   end
 
-  def make_configurator(hl = highline)
+  def make_configurator
+    # Spoofs HighLine to always return the testing version of highline
+    allow(HighLine).to receive(:new).and_return(highline)
     Metalware::Configurator.new(
-      highline: hl,
       config: config,
       questions_section: :domain,
       higher_level_answer_files: higher_level_answer_files,
@@ -290,7 +291,7 @@ RSpec.describe Metalware::Configurator do
 
       first_run_configure = nil
       redirect_stdout do
-        first_run_configure = make_configurator(HighLine.new)
+        first_run_configure = make_configurator
         first_run_configure.send(:save_answers, original_answers)
       end
       expect(first_run_configure.send(:old_answers)).to eq(original_answers)
