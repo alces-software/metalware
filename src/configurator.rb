@@ -26,6 +26,7 @@ require 'active_support/core_ext/hash'
 require 'highline'
 require 'patches/highline'
 require 'validation/loader'
+require 'validation/saver'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
@@ -33,11 +34,9 @@ module Metalware
   class Configurator
     class << self
       def for_domain(config:)
-        file_path = FilePath.new(config)
         new(
           config: config,
           questions_section: :domain,
-          answers_file: file_path.domain_answers,
           higher_level_answer_files: []
         )
       end
@@ -47,7 +46,7 @@ module Metalware
         new(
           config: config,
           questions_section: :group,
-          answers_file: file_path.group_answers(group_name),
+          name: group_name,
           higher_level_answer_files: [file_path.domain_answers]
         )
       end
@@ -60,7 +59,7 @@ module Metalware
         new(
           config: config,
           questions_section: :node,
-          answers_file: file_path.node_answers(node.name),
+          name: node.name,
           higher_level_answer_files: [
             file_path.domain_answers,
             file_path.group_answers(node.primary_group),
@@ -69,20 +68,18 @@ module Metalware
       end
     end
 
-    attr_reader :answers_file
-
     def initialize(
       highline: HighLine.new,
       config:,
       questions_section:,
-      answers_file:,
+      name: nil,
       higher_level_answer_files:,
       use_readline: true
     )
       @highline = highline
       @config = config
       @questions_section = questions_section
-      @answers_file = answers_file
+      @name = name,
       @higher_level_answer_files = higher_level_answer_files
       @use_readline = use_readline
     end
@@ -105,11 +102,16 @@ module Metalware
     attr_reader :config,
                 :highline,
                 :questions_section,
+                :name,
                 :higher_level_answer_files,
                 :use_readline
 
     def loader
       @loader ||= Validation::Loader.new(config)
+    end
+
+    def saver
+      @saver ||= Validation::Saver.new(config)
     end
 
     def configure_data
@@ -121,7 +123,20 @@ module Metalware
     end
 
     def old_answers
-      @old_answers ||= Data.load(answers_file)
+      @old_answers ||= begin
+        case questions_section
+        when :domain
+          loader.domain_answers
+        when :group
+          raise 'Group name must be specified' if name.nil?
+          loader.group_answers(name)
+        when :node
+          raise 'Node name must be specified' if name.nil?
+          loader.node_answers(name)
+        else
+          raise InternalError, "Unrecognised question section: #{questions_section}"
+        end
+      end
     end
 
     def ask_questions
@@ -146,7 +161,18 @@ module Metalware
     end
 
     def save_answers(answers)
-      Data.dump(answers_file, answers)
+      case questions_section
+      when :domain
+        saver.domain_answers(answers)
+      when :group
+        raise 'Group name must be specified' if name.nil?
+        saver.group_answers(answers, name)
+      when :node
+        raise 'Node name must be specified' if name.nil?
+        saver.node_answers(answers, name)
+      else
+        raise InternalError, "Unrecognised question section: #{questions_section}"
+      end
     end
 
     def create_question(identifier, properties, index)

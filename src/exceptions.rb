@@ -180,6 +180,9 @@ module Metalware
       super(msg)
     end
   end
+
+  class InternalError < MetalwareError
+  end
 end
 
 # Alias for Exception to use to indicate we want to catch everything, and to

@@ -43,12 +43,8 @@ RSpec.describe Metalware::Configurator do
     HighLine.new(input, output)
   end
 
-  let :answers_file_path do
-    Tempfile.new('test.yaml').path
-  end
-
   let :answers do
-    Metalware::Data.load(answers_file_path)
+    loader.domain_answers
   end
 
   let :higher_level_answer_files { [] }
@@ -70,8 +66,7 @@ RSpec.describe Metalware::Configurator do
     Metalware::Configurator.new(
       highline: hl,
       config: config,
-      questions_section: :test,
-      answers_file: answers_file_path,
+      questions_section: :domain,
       higher_level_answer_files: higher_level_answer_files,
       # Do not want to use readline to get input in tests as tests will then
       # hang waiting for input.
@@ -116,7 +111,7 @@ RSpec.describe Metalware::Configurator do
 
   describe '#configure' do
     it 'asks questions with type `string`' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'Can you enter a string?',
                            type: 'string',
@@ -129,7 +124,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks questions with no `type` as `string`' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'Can you enter a string?',
                          },
@@ -141,7 +136,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks questions with type `integer`' do
-      define_questions(test: {
+      define_questions(domain: {
                          integer_q: {
                            question: 'Can you enter an integer?',
                            type: 'integer',
@@ -154,7 +149,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it "uses confirmation for questions with type 'boolean'" do
-      define_questions(test: {
+      define_questions(domain: {
                          boolean_q: {
                            question: 'Should this cluster be awesome?',
                            type: 'boolean',
@@ -175,7 +170,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it "offers choices for question with type 'choice'" do
-      define_questions(test: {
+      define_questions(domain: {
                          choice_q: {
                            question: 'What choice would you like?',
                            type: 'choice',
@@ -195,7 +190,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks all questions in order' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'String?',
                            type: 'string',
@@ -228,7 +223,7 @@ RSpec.describe Metalware::Configurator do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'String?',
                            type: 'string',
@@ -261,7 +256,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-saves the old answers if new answers not provided' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'String?',
                            default: 'This is the wrong string',
@@ -321,7 +316,7 @@ RSpec.describe Metalware::Configurator do
       end
 
       before do
-        define_questions(test: {
+        define_questions(domain: {
                            default_q: {
                              question: 'default_q',
                              default: 'default_answer',
@@ -372,7 +367,7 @@ RSpec.describe Metalware::Configurator do
       end
 
       it 'correctly inherits false default' do
-        define_questions(test: {
+        define_questions(domain: {
           false_boolean_q: {
             question: 'Boolean?',
             type: 'boolean',
@@ -387,7 +382,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-asks the required questions if no answer is given' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'I should be re-asked',
                          },
@@ -415,7 +410,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'allows optional questions to have empty answers' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'I should NOT be re-asked',
                            optional: true,
@@ -430,7 +425,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'indicates how far through questions you are' do
-      define_questions(test: {
+      define_questions(domain: {
                          question_1: {
                            question: 'String question',
                          },
@@ -460,7 +455,7 @@ RSpec.describe Metalware::Configurator do
 
     context 'when answers passed to configure' do
       it 'uses given answers instead of asking questions' do
-        define_questions(test: {
+        define_questions(domain: {
                            question_q: 'Some question',
                          })
         passed_answers = {
