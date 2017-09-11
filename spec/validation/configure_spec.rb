@@ -172,24 +172,34 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with invalid question fields' do
-    it 'fails if the question is missing or empty identifier' do
-      h = correct_hash.deep_merge(self: [{ question: 'I have no identifier' }])
-      expect_validation_failure(h, /is missing/)
-      h = correct_hash.deep_merge(self: [{
-                                    question: 'I have no identifier',
-                                    identifier: '',
-                                  }])
-      expect_validation_failure(h, /must be filled/)
+    context 'with invalid identifier' do
+      it 'fails when missing' do
+        h = correct_hash.deep_merge(self: [{ question: 'I have no identifier' }])
+        expect_validation_failure(h, /is missing/)
+      end
+
+      it 'fails when empty' do
+        h = correct_hash.deep_merge(self: [{
+                                      question: 'I have no identifier',
+                                      identifier: '',
+                                    }])
+        expect_validation_failure(h, /must be filled/)
+      end
     end
 
-    it 'fails if question is missing or empty' do
-      h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
-      expect_validation_failure(h, /is missing/)
-      h = correct_hash.deep_merge(self: [{
-                                    question: '',
-                                    identifier: 'no_question',
-                                  }])
-      expect_validation_failure(h, /must be filled/)
+    context 'with invalid question' do
+      it 'fails when missing' do
+        h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
+        expect_validation_failure(h, /is missing/)
+      end
+
+      it 'fails when empty' do
+        h = correct_hash.deep_merge(self: [{
+                                      question: '',
+                                      identifier: 'no_question',
+                                    }])
+        expect_validation_failure(h, /must be filled/)
+      end
     end
 
     it "fails if type isn't supported" do
