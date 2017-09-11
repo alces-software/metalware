@@ -27,6 +27,7 @@ require 'validation/configure'
 require 'file_path'
 require 'data'
 require 'filesystem'
+require 'constants'
 
 RSpec.describe Metalware::Validation::Configure do
   let :config { Metalware::Config.new }
@@ -211,24 +212,11 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with missing question blocks' do
-    it 'fails when domain is missing' do
-      correct_hash.delete(:domain)
-      expect_validation_failure(correct_hash, /is missing/)
-    end
-
-    it 'fails when group is missing' do
-      correct_hash.delete(:group)
-      expect_validation_failure(correct_hash, /is missing/)
-    end
-
-    it 'fails when node is missing' do
-      correct_hash.delete(:node)
-      expect_validation_failure(correct_hash, /is missing/)
-    end
-
-    it 'fails when self is missing' do
-      correct_hash.delete(:self)
-      expect_validation_failure(correct_hash, /is missing/)
+    Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
+      it "fails when #{section} is missing" do
+        correct_hash.delete(section)
+        expect_validation_failure(correct_hash, /is missing/)
+      end
     end
   end
 
