@@ -43,14 +43,6 @@ RSpec.describe Metalware::Configurator do
     HighLine.new(input, output)
   end
 
-  let :configure_file do
-    Tempfile.new('configure.yaml')
-  end
-
-  let :configure_file_path do
-    configure_file.path
-  end
-
   let :answers_file_path do
     Tempfile.new('test.yaml').path
   end
@@ -229,27 +221,6 @@ RSpec.describe Metalware::Configurator do
         string_q: 'Some string',
         integer_q: 11,
         boolean_q: false
-      )
-    end
-
-    it 'fails fast for question with unknown type' do
-      define_questions(test: {
-                         # This question
-                         string_q: {
-                           question: 'String?',
-                           type: 'string',
-                         },
-                         unknown_q: {
-                           question: 'Something odd?',
-                           type: 'foobar',
-                         },
-                       })
-
-      expect do
-        configurator.send(:questions)
-      end.to raise_error(
-        Metalware::UnknownQuestionTypeError,
-        /'foobar'.*test\.unknown_q.*#{configure_file_path}/
       )
     end
 
