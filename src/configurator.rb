@@ -245,7 +245,7 @@ module Metalware
       end
 
       def ask(highline)
-        ask_method = "ask_#{type}_question"
+        ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
         send(ask_method, highline) do |highline_question|
           highline_question.readline = true if use_readline?
 

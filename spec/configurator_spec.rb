@@ -173,7 +173,6 @@ RSpec.describe Metalware::Configurator do
       define_questions(domain: {
                          choice_q: {
                            question: 'What choice would you like?',
-                           type: 'choice',
                            choices: ['foo', 'bar'],
                          },
                        })
