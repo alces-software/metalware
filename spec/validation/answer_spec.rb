@@ -33,23 +33,26 @@ RSpec.describe Metalware::Validation::Answer do
 
   let :configure_data do
     {
-      domain: {
-        string_question: {
+      domain:[
+        {
+          identifier: 'string_question',
           question: 'Am I a string?',
         },
-        integer_question: {
+        {
+          identifier: 'integer_question',
           question: 'Am I a integer',
           type: 'integer',
         },
-        bool_question: {
+        {
+          identifier: 'bool_question',
           question: 'Am I a boolean',
           type: 'boolean',
         },
-      },
+      ],
 
-      group: {},
-      node: {},
-      self: {},
+      group: [],
+      node: [],
+      self: [],
     }
   end
 
