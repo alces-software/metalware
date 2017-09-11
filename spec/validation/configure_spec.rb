@@ -34,11 +34,15 @@ RSpec.describe Metalware::Validation::Configure do
 
   let :correct_hash do
     {
+      ##
+      # Questions are not part of the specification for a valid configure.yaml
+      # file. However they have been white listed as a valid top level key. This
+      # means the 'questions' block can be used to store references to questions
+      # using YAML anchors in any layout of the users choosing. (As long as the
+      # other question blocks are valid)
+      #
       questions: {
-        questions: 'Are not part of the specification of a correct file.',
-        note: 'However they are very commonly associated with configure files',
-        note2: 'All other top level keys apart from questions, domain, group' \
-               'and node will cause an error.',
+        questions: 'Not part of the specification for a valid file',
       },
 
       domain: [
