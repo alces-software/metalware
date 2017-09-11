@@ -131,7 +131,7 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with a hash input' do
-    it 'uses the has as the data input' do
+    it 'uses the hash as the data input' do
       v = Metalware::Validation::Configure.new(config, correct_hash)
       expect(v.send(:raw_data)).to eq(correct_hash)
     end
@@ -141,7 +141,7 @@ RSpec.describe Metalware::Validation::Configure do
     Metalware::Validation::Configure.new(config, my_hash).data
   end
 
-  def expect_configure_error(my_hash, msg_regex)
+  def expect_validation_failure(my_hash, msg_regex)
     expect do
       run_configure_validation(my_hash)
     end.to raise_error(Metalware::ValidationFailure, msg_regex)
@@ -161,34 +161,34 @@ RSpec.describe Metalware::Validation::Configure do
   context 'with general invalid inputs' do
     it 'fails with invalid top level keys' do
       h = correct_hash.deep_merge(invalid_key: true)
-      expect_configure_error(h, /invalid top level key/)
+      expect_validation_failure(h, /invalid top level key/)
     end
 
     it 'fails if sections are not an array' do
       h = correct_hash.deep_merge(group: { key: 'I am not an array' })
-      expect_configure_error(h, /must be an array/)
+      expect_validation_failure(h, /must be an array/)
     end
   end
 
   context 'with invalid question fields' do
     it 'fails if the question is missing or empty identifier' do
       h = correct_hash.deep_merge(self: [{ question: 'I have no identifier' }])
-      expect_configure_error(h, /is missing/)
+      expect_validation_failure(h, /is missing/)
       h = correct_hash.deep_merge(self: [{
                                     question: 'I have no identifier',
                                     identifier: '',
                                   }])
-      expect_configure_error(h, /must be filled/)
+      expect_validation_failure(h, /must be filled/)
     end
 
     it 'fails if question is missing or empty' do
       h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
-      expect_configure_error(h, /is missing/)
+      expect_validation_failure(h, /is missing/)
       h = correct_hash.deep_merge(self: [{
                                     question: '',
                                     identifier: 'no_question',
                                   }])
-      expect_configure_error(h, /must be filled/)
+      expect_validation_failure(h, /must be filled/)
     end
 
     it "fails if type isn't supported" do
@@ -197,7 +197,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     question: 'Do I have an unsupported type?',
                                     type: 'Unsupported',
                                   }])
-      expect_configure_error(h, /Is an unsupported question type/)
+      expect_validation_failure(h, /Is an unsupported question type/)
     end
 
     it 'fails if the optional input is not true or false' do
@@ -206,29 +206,29 @@ RSpec.describe Metalware::Validation::Configure do
                                     question: 'Do I have a boolean optional input?',
                                     optional: 'I should be true or false',
                                   }])
-      expect_configure_error(h, /must be boolean/)
+      expect_validation_failure(h, /must be boolean/)
     end
   end
 
   context 'with missing question blocks' do
     it 'fails when domain is missing' do
       correct_hash.delete(:domain)
-      expect_configure_error(correct_hash, /is missing/)
+      expect_validation_failure(correct_hash, /is missing/)
     end
 
     it 'fails when group is missing' do
       correct_hash.delete(:group)
-      expect_configure_error(correct_hash, /is missing/)
+      expect_validation_failure(correct_hash, /is missing/)
     end
 
     it 'fails when node is missing' do
       correct_hash.delete(:node)
-      expect_configure_error(correct_hash, /is missing/)
+      expect_validation_failure(correct_hash, /is missing/)
     end
 
     it 'fails when self is missing' do
       correct_hash.delete(:self)
-      expect_configure_error(correct_hash, /is missing/)
+      expect_validation_failure(correct_hash, /is missing/)
     end
   end
 
@@ -239,7 +239,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     question: "Do I fail because my default isn't a string?",
                                     default: 10,
                                   }])
-      expect_configure_error(h, /question type/)
+      expect_validation_failure(h, /question type/)
     end
 
     it 'fails with a non-string default with a type specified' do
@@ -249,7 +249,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     type: 'string',
                                     default: 10,
                                   }])
-      expect_configure_error(h, /question type/)
+      expect_validation_failure(h, /question type/)
     end
   end
 
@@ -261,7 +261,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     type: 'integer',
                                     default: '10',
                                   }])
-      expect_configure_error(h, /question type/)
+      expect_validation_failure(h, /question type/)
     end
   end
 
@@ -273,7 +273,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     type: 'boolean',
                                     default: 'I am not valid',
                                   }])
-      expect_configure_error(h, /question type/)
+      expect_validation_failure(h, /question type/)
     end
   end
 
@@ -289,7 +289,7 @@ RSpec.describe Metalware::Validation::Configure do
                                     ],
                                     default: 'not in list',
                                   }])
-      expect_configure_error(h, /choice list/)
+      expect_validation_failure(h, /choice list/)
     end
 
     it 'fails with inconsistent choice types' do
@@ -302,7 +302,7 @@ RSpec.describe Metalware::Validation::Configure do
                                       'choice3',
                                     ],
                                   }])
-      expect_configure_error(h, /match the question type/)
+      expect_validation_failure(h, /match the question type/)
     end
   end
 end
