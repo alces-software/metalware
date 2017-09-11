@@ -66,21 +66,24 @@ module Metalware
           ]
         )
       end
+
+      # Used by the tests to switch readline on and off
+      def use_readline
+        true
+      end
     end
 
     def initialize(
       config:,
       questions_section:,
       name: nil,
-      higher_level_answer_files:,
-      use_readline: true
+      higher_level_answer_files:
     )
       @highline = HighLine.new
       @config = config
       @questions_section = questions_section
       @name = name
       @higher_level_answer_files = higher_level_answer_files
-      @use_readline = use_readline
     end
 
     def configure(answers = nil)
@@ -102,8 +105,7 @@ module Metalware
                 :highline,
                 :questions_section,
                 :name,
-                :higher_level_answer_files,
-                :use_readline
+                :higher_level_answer_files
 
     def loader
       @loader ||= Validation::Loader.new(config)
@@ -190,7 +192,6 @@ module Metalware
         properties: properties,
         questions_section: questions_section,
         old_answer: old_answers[identifier],
-        use_readline: use_readline,
         progress_indicator: progress_indicator(index)
       )
     end
@@ -214,8 +215,7 @@ module Metalware
         :progress_indicator,
         :question,
         :required,
-        :type,
-        :use_readline
+        :type
 
       def initialize(
         config:,
@@ -224,8 +224,7 @@ module Metalware
         old_answer: nil,
         progress_indicator:,
         properties:,
-        questions_section:,
-        use_readline:
+        questions_section:
       )
         @choices = properties[:choices]
         @default = default
@@ -234,7 +233,6 @@ module Metalware
         @progress_indicator = progress_indicator
         @question = properties[:question]
         @required = !properties[:optional]
-        @use_readline = use_readline
 
         @type = type_for(
           properties[:type],
@@ -270,7 +268,7 @@ module Metalware
         # Dont't provide readline bindings for boolean questions, in this case
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
-        use_readline && type != :boolean
+        Metalware::Configurator.use_readline && type != :boolean
       end
 
       def default_input

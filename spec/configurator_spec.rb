@@ -69,9 +69,6 @@ RSpec.describe Metalware::Configurator do
       config: config,
       questions_section: :domain,
       higher_level_answer_files: higher_level_answer_files,
-      # Do not want to use readline to get input in tests as tests will then
-      # hang waiting for input.
-      use_readline: false
     )
   end
 
@@ -108,6 +105,12 @@ RSpec.describe Metalware::Configurator do
   def configure_with_answers(answers)
     # Each answer must be entered followed by a newline to terminate it.
     configure_with_input(answers.join("\n") + "\n")
+  end
+
+  # Do not want to use readline to get input in tests as tests will then
+  # hang waiting for input.
+  before :each do
+    allow(Metalware::Configurator).to receive(:use_readline).and_return(false)
   end
 
   describe '#configure' do
