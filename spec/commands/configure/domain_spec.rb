@@ -3,6 +3,7 @@
 
 require 'spec_utils'
 require 'filesystem'
+require 'config'
 
 RSpec.describe Metalware::Commands::Configure::Domain do
   def run_configure_domain
@@ -24,9 +25,8 @@ RSpec.describe Metalware::Commands::Configure::Domain do
   it 'creates correct configurator' do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
-        configure_file: config.configure_file,
+        config: instance_of(Metalware::Config),
         questions_section: :domain,
-        answers_file: config.domain_answers_file,
         higher_level_answer_files: []
       ).and_call_original
 
