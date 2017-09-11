@@ -47,9 +47,9 @@ RSpec.describe Metalware::Commands::Configure::Group do
   it 'creates correct configurator' do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
-        configure_file: config.configure_file,
+        config: instance_of(Metalware::Config),
         questions_section: :group,
-        answers_file: config.group_answers_file('testnodes'),
+        name: 'testnodes',
         higher_level_answer_files: [config.domain_answers_file]
       ).and_call_original
 
