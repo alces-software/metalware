@@ -25,6 +25,10 @@ module Metalware
           Metalware::Node.new(config, node_name)
         end
 
+        def answer_file
+          file_path.node_answers(node_name)
+        end
+
         def dependency_hash
           dependency_specifications.for_node_in_configured_group(node_name)
         end

@@ -44,6 +44,10 @@ module Metalware
             Configurator.for_group(group_name, config: config)
         end
 
+        def answer_file
+          file_path.group_answers(group_name)
+        end
+
         def custom_configuration
           record_primary_group
         end

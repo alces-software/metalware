@@ -1,6 +1,7 @@
 
 # frozen_string_literal: true
 
+require 'config'
 require 'filesystem'
 require 'spec_utils'
 require 'shared_examples/render_domain_templates'
@@ -22,11 +23,14 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
       [:some, :namespace, :test]
     end
 
+    def answer_file
+      file_path.domain_answers
+    end
+
     def configurator
       Metalware::Configurator.new(
-        configure_file: config.configure_file,
+        config: config,
         questions_section: :domain,
-        answers_file: '/var/lib/metalware/answers/some_file.yaml',
         higher_level_answer_files: []
       )
     end
