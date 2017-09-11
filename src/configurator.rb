@@ -25,6 +25,7 @@
 require 'active_support/core_ext/hash'
 require 'highline'
 require 'patches/highline'
+require 'validation/loader'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
@@ -34,7 +35,7 @@ module Metalware
       def for_domain(config:)
         file_path = FilePath.new(config)
         new(
-          configure_file: file_path.configure_file,
+          config: config,
           questions_section: :domain,
           answers_file: file_path.domain_answers,
           higher_level_answer_files: []
@@ -44,7 +45,7 @@ module Metalware
       def for_group(group_name, config:)
         file_path = FilePath.new(config)
         new(
-          configure_file: file_path.configure_file,
+          config: config,
           questions_section: :group,
           answers_file: file_path.group_answers(group_name),
           higher_level_answer_files: [file_path.domain_answers]
@@ -57,7 +58,7 @@ module Metalware
       def for_node(node, config:)
         file_path = FilePath.new(config)
         new(
-          configure_file: file_path.configure_file,
+          config: config,
           questions_section: :node,
           answers_file: file_path.node_answers(node.name),
           higher_level_answer_files: [
@@ -72,14 +73,14 @@ module Metalware
 
     def initialize(
       highline: HighLine.new,
-      configure_file:,
+      config:,
       questions_section:,
       answers_file:,
       higher_level_answer_files:,
       use_readline: true
     )
       @highline = highline
-      @configure_file = configure_file
+      @config = config
       @questions_section = questions_section
       @answers_file = answers_file
       @higher_level_answer_files = higher_level_answer_files
@@ -101,14 +102,22 @@ module Metalware
 
     private
 
-    attr_reader :highline,
-                :configure_file,
+    attr_reader :config,
+                :highline,
                 :questions_section,
                 :higher_level_answer_files,
                 :use_readline
 
+    def loader
+      @loader ||= Validation::Loader.new(config)
+    end
+
+    def configure_data
+      @configure_data ||= loader.configure_data
+    end
+
     def questions_in_section
-      Data.load(configure_file)[questions_section]
+      configure_data[questions_section]
     end
 
     def old_answers
@@ -150,10 +159,10 @@ module Metalware
       default = higher_level_answer.nil? ? properties[:default] : higher_level_answer
 
       Question.new(
+        config: config,
         default: default,
         identifier: identifier,
         properties: properties,
-        configure_file: configure_file,
         questions_section: questions_section,
         old_answer: old_answers[identifier],
         use_readline: use_readline,
@@ -184,7 +193,7 @@ module Metalware
         :use_readline
 
       def initialize(
-        configure_file:,
+        config:,
         default:,
         identifier:,
         old_answer: nil,
@@ -204,7 +213,7 @@ module Metalware
 
         @type = type_for(
           properties[:type],
-          configure_file: configure_file,
+          configure_file: config.configure_file,
           questions_section: questions_section
         )
       end

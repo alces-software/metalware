@@ -26,7 +26,9 @@ require 'tempfile'
 require 'yaml'
 require 'highline'
 
+require 'config'
 require 'configurator'
+require 'validation/loader'
 
 RSpec.describe Metalware::Configurator do
   let :input do
@@ -59,6 +61,9 @@ RSpec.describe Metalware::Configurator do
 
   let :higher_level_answer_files { [] }
 
+  let :config { Metalware::Config.new }
+  let :loader { Metalware::Validation::Loader.new(config) }
+
   def define_higher_level_answer_files(answer_file_hashes)
     answer_file_hashes.map do |answers|
       Tempfile.new.path.tap { |path| Metalware::Data.dump(path, answers) }
@@ -72,7 +77,7 @@ RSpec.describe Metalware::Configurator do
   def make_configurator(hl = highline)
     Metalware::Configurator.new(
       highline: hl,
-      configure_file: configure_file_path,
+      config: config,
       questions_section: :test,
       answers_file: answers_file_path,
       higher_level_answer_files: higher_level_answer_files,
@@ -83,8 +88,8 @@ RSpec.describe Metalware::Configurator do
   end
 
   def define_questions(questions_hash)
-    configure_file.write(questions_hash.to_yaml)
-    configure_file.rewind
+    allow(loader).to receive(:configure_data).and_return(questions_hash)
+    allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
   end
 
   def redirect_stdout
