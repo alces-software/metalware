@@ -139,7 +139,7 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   def run_configure_validation(my_hash = {})
-    Metalware::Validation::Configure.new(config, my_hash).data
+    Metalware::Validation::Configure.new(config, my_hash).data(raw: true)
   end
 
   def expect_validation_failure(my_hash, msg_regex)

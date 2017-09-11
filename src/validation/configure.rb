@@ -58,14 +58,27 @@ module Metalware
         @raw_data = (data_hash || load_configure_file).freeze
       end
 
-      def data
+      def data(raw: false)
         raise ValidationFailure, error_msg unless validate.success?
-        raw_data.dup
+        raw ? raw_data : transform_array_to_hash
       end
 
       private
 
       attr_reader :config, :raw_data
+
+      def transform_array_to_hash
+        array_data = raw_data.dup
+        hash_data = {}
+        Constants::CONFIGURE_SECTIONS.each do |section|
+          hash_data[section] = array_data[section].inject({}) do |memo, question|
+            identifier = question.delete(:identifier)
+            memo[identifier.to_sym] = question
+            memo
+          end
+        end
+        hash_data
+      end
 
       def file_path
         @file_path ||= FilePath.new(config)
