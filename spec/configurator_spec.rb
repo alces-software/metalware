@@ -275,26 +275,28 @@ RSpec.describe Metalware::Configurator do
                            type: 'boolean',
                            default: false,
                          },
+                         should_keep_old_answer: {
+                          question: 'Did I keep my old answer?'
+                         }
                        })
 
-      old_answers = {
+      original_answers = {
         string_q: 'CORRECT',
         integer_q: -100,
         false_saved_boolean_q: false,
         true_saved_boolean_q: true,
-        should_not_see_me: 'OHHH SNAP',
+        should_keep_old_answer: 'old answer',
       }
-      new_answers = old_answers.dup.tap { |h| h.delete(:should_not_see_me) }
 
       first_run_configure = nil
       redirect_stdout do
         first_run_configure = make_configurator(HighLine.new)
-        first_run_configure.send(:save_answers, old_answers)
+        first_run_configure.send(:save_answers, original_answers)
       end
-      expect(first_run_configure.send(:old_answers)).to eq(old_answers)
+      expect(first_run_configure.send(:old_answers)).to eq(original_answers)
 
-      configure_with_answers([''] * 4)
-      expect(answers).to eq(new_answers)
+      configure_with_answers([''] * 5)
+      expect(answers).to eq(original_answers)
     end
 
     context 'when higher level answer files provided' do
