@@ -124,20 +124,7 @@ module Metalware
     end
 
     def old_answers
-      @old_answers ||= begin
-        case questions_section
-        when :domain
-          loader.domain_answers
-        when :group
-          raise 'Group name must be specified' if name.nil?
-          loader.group_answers(name)
-        when :node
-          raise 'Node name must be specified' if name.nil?
-          loader.node_answers(name)
-        else
-          raise InternalError, "Unrecognised question section: #{questions_section}"
-        end
-      end
+      @old_answers ||= loader.section_answers(questions_section, name)
     end
 
     def ask_questions
@@ -162,18 +149,7 @@ module Metalware
     end
 
     def save_answers(answers)
-      case questions_section
-      when :domain
-        saver.domain_answers(answers)
-      when :group
-        raise 'Group name must be specified' if name.nil?
-        saver.group_answers(answers, name)
-      when :node
-        raise 'Node name must be specified' if name.nil?
-        saver.node_answers(answers, name)
-      else
-        raise InternalError, "Unrecognised question section: #{questions_section}"
-      end
+      saver.section_answers(answers, questions_section, name)
     end
 
     def create_question(identifier, properties, index)

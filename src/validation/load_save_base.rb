@@ -46,6 +46,21 @@ module Metalware
         answer(path.node_answers(file), :nodes)
       end
 
+      def section_answers(section, name = nil)
+        case section
+        when :domain
+          domain_answers
+        when :group
+          raise InternalError, 'No group name given' if name.nil?
+          group_answers(name)
+        when :node
+          raise InternalError, 'No node name given' if name.nil?
+          node_answers(name)
+        else
+          raise InternalError, "Unrecognised question seciton: #{section}"
+        end
+      end
+
       private
 
       attr_reader :path, :config
