@@ -25,6 +25,7 @@
 
 require 'templating/group_namespace'
 require 'filesystem'
+require 'spec_utils'
 
 RSpec.describe Metalware::Templating::GroupNamespace do
   subject do
