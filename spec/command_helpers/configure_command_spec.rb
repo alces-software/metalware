@@ -30,8 +30,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
     def configurator
       Metalware::Configurator.new(
         config: config,
-        questions_section: :domain,
-        higher_level_answer_files: []
+        questions_section: :domain
       )
     end
   end
