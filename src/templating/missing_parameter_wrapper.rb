@@ -25,34 +25,11 @@ module Metalware
         @wrapped_obj
       end
 
-      def [](a)
-        # ERB expects to be able to index in to the binding passed; this should
-        # function the same as a method call.
-        send(a)
-      end
-
       def wrapper_binding
         binding
       end
 
-      def updated_callstack(method, *args, &block)
-        str = method.to_s
-        str << "(#{args.join(',')})" unless args.empty?
-        str << '{ ... }' if block
-        @callstack + [str]
-      end
-
-      def callstack_string(callstack)
-        callstack.join('.')
-      end
-
       def method_missing(method, *args, &block)
-        if method.is_a?(Integer)
-          args.unshift(method)
-          method = :[]
-        elsif method == :send && args[0].is_a?(Integer)
-          args.unshift(:[])
-        end
         new_callstack = updated_callstack(method, *args, &block)
         value = @wrapped_obj.send(method, *args, &block)
         if value.nil? && !@missing_tags.include?(method)
@@ -70,6 +47,19 @@ module Metalware
         else
           MissingParameterWrapper.new(value, callstack: new_callstack)
         end
+      end
+
+      private
+
+      def updated_callstack(method, *args, &block)
+        str = method.to_s
+        str << "(#{args.join(',')})" unless args.empty?
+        str << '{ ... }' if block
+        @callstack + [str]
+      end
+
+      def callstack_string(callstack)
+        callstack.join('.')
       end
     end
   end
