@@ -27,6 +27,8 @@ require 'highline'
 require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
+require 'file_path'
+require 'node'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
@@ -36,18 +38,15 @@ module Metalware
       def for_domain(config:)
         new(
           config: config,
-          questions_section: :domain,
-          higher_level_answer_files: []
+          questions_section: :domain
         )
       end
 
       def for_group(group_name, config:)
-        file_path = FilePath.new(config)
         new(
           config: config,
           questions_section: :group,
-          name: group_name,
-          higher_level_answer_files: [file_path.domain_answers]
+          name: group_name
         )
       end
 
@@ -55,15 +54,10 @@ module Metalware
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
       def for_node(node_name, config:)
-        file_path = FilePath.new(config)
         new(
           config: config,
           questions_section: :node,
-          name: node_name,
-          higher_level_answer_files: [
-            file_path.domain_answers,
-            file_path.group_answers(node_name.primary_group),
-          ]
+          name: node_name
         )
       end
 
@@ -76,14 +70,12 @@ module Metalware
     def initialize(
       config:,
       questions_section:,
-      name: nil,
-      higher_level_answer_files:
+      name: nil
     )
       @highline = HighLine.new
       @config = config
       @questions_section = questions_section
       @name = name
-      @higher_level_answer_files = higher_level_answer_files
     end
 
     def configure(answers = nil)
@@ -104,8 +96,7 @@ module Metalware
     attr_reader :config,
                 :highline,
                 :questions_section,
-                :name,
-                :higher_level_answer_files
+                :name
 
     def loader
       @loader ||= Validation::Loader.new(config)
@@ -121,6 +112,25 @@ module Metalware
 
     def questions_in_section
       configure_data[questions_section]
+    end
+
+    def higher_level_answer_data
+      @higher_level_answer_data ||= begin
+        case questions_section
+        when :domain
+          []
+        when :group
+          [loader.domain_answers]
+        when :node
+          node = Node.new(config, name)
+          [
+            loader.domain_answers,
+            loader.group_answers(node.primary_group),
+          ]
+        else
+          raise InternalError, "Unrecognised question section: #{questions_section}"
+        end
+      end
     end
 
     def old_answers
@@ -153,9 +163,9 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
-      higher_level_answer = higher_level_answer_files.map do |file|
-        Data.load(file)[identifier]
-      end.reject(&:nil?).last
+      higher_level_answer = higher_level_answer_data.map { |d| d[identifier] }
+                                                    .reject(&:nil?)
+                                                    .last
 
       # If no answer saved at any higher level, fall back to the default
       # defined for the question in `configure.yaml`, if any.

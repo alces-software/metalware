@@ -53,9 +53,8 @@ RSpec.describe Metalware::Configurator do
   let :loader { Metalware::Validation::Loader.new(config) }
 
   def define_higher_level_answer_files(answer_file_hashes)
-    answer_file_hashes.map do |answers|
-      Tempfile.new.path.tap { |path| Metalware::Data.dump(path, answers) }
-    end
+    allow(configurator).to \
+      receive(:higher_level_answer_data).and_return(answer_file_hashes)
   end
 
   let :configurator do
@@ -67,8 +66,7 @@ RSpec.describe Metalware::Configurator do
     allow(HighLine).to receive(:new).and_return(highline)
     Metalware::Configurator.new(
       config: config,
-      questions_section: :domain,
-      higher_level_answer_files: higher_level_answer_files,
+      questions_section: :domain
     )
   end
 
@@ -304,7 +302,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     context 'when higher level answer files provided' do
-      let :higher_level_answer_files do
+      before do
         define_higher_level_answer_files(
           [
             {
@@ -318,9 +316,7 @@ RSpec.describe Metalware::Configurator do
             },
           ]
         )
-      end
 
-      before do
         define_questions(domain: {
                            default_q: {
                              question: 'default_q',
@@ -363,15 +359,13 @@ RSpec.describe Metalware::Configurator do
     end
 
     context 'with boolean question answered at higher level' do
-      let :higher_level_answer_files do
+      it 'correctly inherits false default' do
         define_higher_level_answer_files(
           [
             { false_boolean_q: false },
           ]
         )
-      end
 
-      it 'correctly inherits false default' do
         define_questions(domain: {
                            false_boolean_q: {
                              question: 'Boolean?',
