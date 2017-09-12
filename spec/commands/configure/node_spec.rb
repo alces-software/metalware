@@ -29,13 +29,9 @@ RSpec.describe Metalware::Commands::Configure::Node do
   it 'creates correct configurator' do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
-        configure_file: config.configure_file,
+        config: instance_of(Metalware::Config),
         questions_section: :node,
-        answers_file: config.node_answers_file('testnode01'),
-        higher_level_answer_files: [
-          config.domain_answers_file,
-          config.group_answers_file('testnodes'),
-        ]
+        name:'testnode01'
       ).and_call_original
 
       run_configure_node 'testnode01'

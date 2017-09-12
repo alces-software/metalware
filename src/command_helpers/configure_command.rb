@@ -32,8 +32,6 @@ module Metalware
     class ConfigureCommand < BaseCommand
       private
 
-      delegate :answers_file, to: :configurator
-
       GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
         You should be able to fix this error by re-running the `configure`
         command and correcting the invalid input, or by manually editing the
@@ -48,14 +46,7 @@ module Metalware
       end
 
       def answers
-        if options.answers
-          JSON.parse(options.answers)
-        else
-          # The `--answers` option has not been passed; the Configurator will
-          # ask the questions on the command line to get the answers to be
-          # saved.
-          nil
-        end
+        JSON.parse(options.answers) if options.answers
       end
 
       def handle_interrupt(_e)
@@ -67,8 +58,12 @@ module Metalware
         # should be performed in this method in subclasses.
       end
 
+      def answer_file
+        raise NotImplementedError
+      end
+
       def relative_answer_file
-        answers_file.sub("#{config.answer_files_path}/", '')
+        answer_file.sub("#{config.answer_files_path}/", '')
       end
 
       def dependency_hash

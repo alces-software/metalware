@@ -12,6 +12,10 @@ module Metalware
 
         def setup; end
 
+        def answer_file
+          file_path.domain_answers
+        end
+
         def configurator
           @configurator ||=
             Configurator.for_domain(config: config)

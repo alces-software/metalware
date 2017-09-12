@@ -26,7 +26,9 @@ require 'tempfile'
 require 'yaml'
 require 'highline'
 
+require 'config'
 require 'configurator'
+require 'validation/loader'
 
 RSpec.describe Metalware::Configurator do
   let :input do
@@ -41,50 +43,36 @@ RSpec.describe Metalware::Configurator do
     HighLine.new(input, output)
   end
 
-  let :configure_file do
-    Tempfile.new('configure.yaml')
-  end
-
-  let :configure_file_path do
-    configure_file.path
-  end
-
-  let :answers_file_path do
-    Tempfile.new('test.yaml').path
-  end
-
   let :answers do
-    Metalware::Data.load(answers_file_path)
+    loader.domain_answers
   end
 
   let :higher_level_answer_files { [] }
 
+  let :config { Metalware::Config.new }
+  let :loader { Metalware::Validation::Loader.new(config) }
+
   def define_higher_level_answer_files(answer_file_hashes)
-    answer_file_hashes.map do |answers|
-      Tempfile.new.path.tap { |path| Metalware::Data.dump(path, answers) }
-    end
+    allow(configurator).to \
+      receive(:higher_level_answer_data).and_return(answer_file_hashes)
   end
 
   let :configurator do
     make_configurator
   end
 
-  def make_configurator(hl = highline)
+  def make_configurator
+    # Spoofs HighLine to always return the testing version of highline
+    allow(HighLine).to receive(:new).and_return(highline)
     Metalware::Configurator.new(
-      highline: hl,
-      configure_file: configure_file_path,
-      questions_section: :test,
-      answers_file: answers_file_path,
-      higher_level_answer_files: higher_level_answer_files,
-      # Do not want to use readline to get input in tests as tests will then
-      # hang waiting for input.
-      use_readline: false
+      config: config,
+      questions_section: :domain
     )
   end
 
   def define_questions(questions_hash)
-    configure_file.write(questions_hash.to_yaml)
-    configure_file.rewind
+    allow(loader).to receive(:configure_data).and_return(questions_hash)
+    allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
   end
 
   def redirect_stdout
@@ -117,9 +105,15 @@ RSpec.describe Metalware::Configurator do
     configure_with_input(answers.join("\n") + "\n")
   end
 
+  # Do not want to use readline to get input in tests as tests will then
+  # hang waiting for input.
+  before :each do
+    allow(Metalware::Configurator).to receive(:use_readline).and_return(false)
+  end
+
   describe '#configure' do
     it 'asks questions with type `string`' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'Can you enter a string?',
                            type: 'string',
@@ -132,7 +126,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks questions with no `type` as `string`' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'Can you enter a string?',
                          },
@@ -144,7 +138,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks questions with type `integer`' do
-      define_questions(test: {
+      define_questions(domain: {
                          integer_q: {
                            question: 'Can you enter an integer?',
                            type: 'integer',
@@ -157,7 +151,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it "uses confirmation for questions with type 'boolean'" do
-      define_questions(test: {
+      define_questions(domain: {
                          boolean_q: {
                            question: 'Should this cluster be awesome?',
                            type: 'boolean',
@@ -178,10 +172,9 @@ RSpec.describe Metalware::Configurator do
     end
 
     it "offers choices for question with type 'choice'" do
-      define_questions(test: {
+      define_questions(domain: {
                          choice_q: {
                            question: 'What choice would you like?',
-                           type: 'choice',
                            choices: ['foo', 'bar'],
                          },
                        })
@@ -198,7 +191,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks all questions in order' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'String?',
                            type: 'string',
@@ -227,32 +220,11 @@ RSpec.describe Metalware::Configurator do
       )
     end
 
-    it 'fails fast for question with unknown type' do
-      define_questions(test: {
-                         # This question
-                         string_q: {
-                           question: 'String?',
-                           type: 'string',
-                         },
-                         unknown_q: {
-                           question: 'Something odd?',
-                           type: 'foobar',
-                         },
-                       })
-
-      expect do
-        configurator.send(:questions)
-      end.to raise_error(
-        Metalware::UnknownQuestionTypeError,
-        /'foobar'.*test\.unknown_q.*#{configure_file_path}/
-      )
-    end
-
     it 'saves nothing if default available and no input given' do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'String?',
                            type: 'string',
@@ -285,7 +257,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-saves the old answers if new answers not provided' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'String?',
                            default: 'This is the wrong string',
@@ -305,30 +277,32 @@ RSpec.describe Metalware::Configurator do
                            type: 'boolean',
                            default: false,
                          },
+                         should_keep_old_answer: {
+                           question: 'Did I keep my old answer?',
+                         },
                        })
 
-      old_answers = {
+      original_answers = {
         string_q: 'CORRECT',
         integer_q: -100,
         false_saved_boolean_q: false,
         true_saved_boolean_q: true,
-        should_not_see_me: 'OHHH SNAP',
+        should_keep_old_answer: 'old answer',
       }
-      new_answers = old_answers.dup.tap { |h| h.delete(:should_not_see_me) }
 
       first_run_configure = nil
       redirect_stdout do
-        first_run_configure = make_configurator(HighLine.new)
-        first_run_configure.send(:save_answers, old_answers)
+        first_run_configure = make_configurator
+        first_run_configure.send(:save_answers, original_answers)
       end
-      expect(first_run_configure.send(:old_answers)).to eq(old_answers)
+      expect(first_run_configure.send(:old_answers)).to eq(original_answers)
 
-      configure_with_answers([''] * 4)
-      expect(answers).to eq(new_answers)
+      configure_with_answers([''] * 5)
+      expect(answers).to eq(original_answers)
     end
 
     context 'when higher level answer files provided' do
-      let :higher_level_answer_files do
+      before do
         define_higher_level_answer_files(
           [
             {
@@ -342,10 +316,8 @@ RSpec.describe Metalware::Configurator do
             },
           ]
         )
-      end
 
-      before do
-        define_questions(test: {
+        define_questions(domain: {
                            default_q: {
                              question: 'default_q',
                              default: 'default_answer',
@@ -387,21 +359,19 @@ RSpec.describe Metalware::Configurator do
     end
 
     context 'with boolean question answered at higher level' do
-      let :higher_level_answer_files do
+      it 'correctly inherits false default' do
         define_higher_level_answer_files(
           [
             { false_boolean_q: false },
           ]
         )
-      end
 
-      it 'correctly inherits false default' do
-        define_questions(test: {
-          false_boolean_q: {
-            question: 'Boolean?',
-            type: 'boolean',
-          },
-        })
+        define_questions(domain: {
+                           false_boolean_q: {
+                             question: 'Boolean?',
+                             type: 'boolean',
+                           },
+                         })
 
         configure_with_answers([''])
 
@@ -411,7 +381,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-asks the required questions if no answer is given' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'I should be re-asked',
                          },
@@ -439,7 +409,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'allows optional questions to have empty answers' do
-      define_questions(test: {
+      define_questions(domain: {
                          string_q: {
                            question: 'I should NOT be re-asked',
                            optional: true,
@@ -454,7 +424,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'indicates how far through questions you are' do
-      define_questions(test: {
+      define_questions(domain: {
                          question_1: {
                            question: 'String question',
                          },
@@ -484,8 +454,10 @@ RSpec.describe Metalware::Configurator do
 
     context 'when answers passed to configure' do
       it 'uses given answers instead of asking questions' do
-        define_questions(test: {
-                           question_q: 'Some question',
+        define_questions(domain: {
+                           question_1: {
+                             question: 'Some question',
+                           },
                          })
         passed_answers = {
           question_1: 'answer_1',

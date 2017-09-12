@@ -21,257 +21,286 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+
+require 'config'
 require 'validation/configure'
+require 'file_path'
 require 'data'
+require 'filesystem'
+require 'constants'
 
 RSpec.describe Metalware::Validation::Configure do
+  let :config { Metalware::Config.new }
+  let :file_path { Metalware::FilePath.new(config) }
+
   let :correct_hash do
     {
+      ##
+      # Questions are not part of the specification for a valid configure.yaml
+      # file. However they have been white listed as a valid top level key. This
+      # means the 'questions' block can be used to store references to questions
+      # using YAML anchors in any layout of the users choosing. (As long as the
+      # other question blocks are valid)
+      #
       questions: {
-        questions: 'Are not part of the specification of a correct file.',
-        note: 'However they are very commonly associated with configure files',
-        note2: 'All other top level keys apart from questions, domain, group' \
-               'and node will cause an error.',
+        questions: 'Not part of the specification for a valid file',
       },
 
-      domain: {
-        string_question: {
+      domain: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string question without a default and type?',
         },
-        integer_question: {
+        {
+          identifier: 'integer_question',
           question: 'Am I an integer question with a default?',
           type: 'integer',
           default: 10,
         },
-        boolean_true: {
+        {
+          identifier: 'boolean_true',
           question: 'Can I have a boolean true (/yes) default?',
           type: 'boolean',
-          default: 'yes',
+          default: true,
         },
-      },
+      ],
 
-      group: {
-        string_question: {
+      group: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string question without a type but with a default?',
           default: 'yes I am a string',
         },
-        integer_question: {
+        {
+          identifier: 'integer_question',
           question: 'Am I a integer question without a default?',
           type: 'integer',
         },
-        boolean_false: {
+        {
+          identifier: 'boolean_false',
           question: 'Can I have a boolean false (/no) default?',
           type: 'boolean',
-          default: 'no',
+          default: false,
         },
-      },
+      ],
 
-      node: {
-        string_question: {
+      node: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string question with a type and default?',
           type: 'string',
           default: 'yes I am a string',
         },
-        string_empty_default: {
+        {
+          identifier: 'string_empty_default',
           question: 'My default is a empty string?',
           default: '',
         },
-      },
+      ],
 
-      self: {},
+      self: [
+        {
+          identifier: 'choice question',
+          question: 'Are all my choices strings?',
+          choice: [
+            'choice1',
+            'choice2',
+            'choice3',
+          ],
+          default: 'choice1',
+        },
+        {
+          identifier: 'choice_question_no_default',
+          question: 'Are all my choices strings without a default?',
+          choice: [
+            'choice1',
+            'choice2',
+            'choice3',
+          ],
+        },
+      ],
     }
   end
 
-  def build_validator(my_hash = {})
-    allow(Metalware::Data).to receive(:load).and_return(my_hash)
-    Metalware::Validation::Configure.new('path/has/been/mocked')
+  context 'without a hash input' do
+    it 'loads configure file from the repo' do
+      data = { data: 'I am the configure data' }
+      Metalware::Data.dump(file_path.configure_file, data)
+      v = Metalware::Validation::Configure.new(config)
+      expect(v.send(:raw_data)).to eq(data)
+    end
+  end
+
+  context 'with a hash input' do
+    it 'uses the hash as the data input' do
+      v = Metalware::Validation::Configure.new(config, correct_hash)
+      expect(v.send(:raw_data)).to eq(correct_hash)
+    end
   end
 
   def run_configure_validation(my_hash = {})
-    validator = build_validator(my_hash)
-    validator.validate.messages
+    Metalware::Validation::Configure.new(config, my_hash).data(raw: true)
+  end
+
+  def expect_validation_failure(my_hash, msg_regex)
+    expect do
+      run_configure_validation(my_hash)
+    end.to raise_error(Metalware::ValidationFailure, msg_regex)
   end
 
   context 'with a valid input' do
     it 'passes with questions key' do
-      expect(run_configure_validation(correct_hash)).to be_empty
+      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
     end
 
     it 'passes without questions key' do
       correct_hash.delete(:questions)
-      expect(run_configure_validation(correct_hash)).to be_empty
-    end
-
-    it 'checks that deep merged hashes pass (tests the testing)' do
-      h = correct_hash.deep_merge(domain: {
-                                    check_string_question: {
-                                      question: 'Am I deep merged into the domain?',
-                                      default: 'I sure hope so',
-                                    },
-                                  })
-      expect(run_configure_validation(h)).to be_empty
+      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
     end
   end
 
   context 'with general invalid inputs' do
     it 'fails with invalid top level keys' do
       h = correct_hash.deep_merge(invalid_key: true)
-      expect(run_configure_validation(h).keys).to eq([:valid_top_level_keys])
+      expect_validation_failure(h, /invalid top level key/)
     end
 
-    it 'fails if question is not a hash' do
-      h = correct_hash.deep_merge(group: {
-                                    question: 'Am I missing my mid level question key?',
-                                    type: 'string',
-                                    default: 'Each field will now be interpreted as a separate question',
-                                  })
-      results = build_validator(h).validate.errors
-      expect(results.keys).to eq([:parameters])
-      expect(results[:parameters][0]).to eq('must be a hash')
+    it 'fails if sections are not an array' do
+      h = correct_hash.deep_merge(group: { key: 'I am not an array' })
+      expect_validation_failure(h, /must be an array/)
     end
   end
 
   context 'with invalid question fields' do
-    it 'fails if unrecognized fields in a question' do
-      h = correct_hash.deep_merge(domain: {
-                                    invalid_field_question: {
-                                      question: 'Do I have have an unrecognized field?',
-                                      default: 'I do',
-                                      invalid_filed: true,
-                                    },
-                                  })
-      expect(run_configure_validation(h).keys).to eq([:valid_top_level_question_keys])
+    context 'with invalid identifier' do
+      it 'fails when missing' do
+        h = correct_hash.deep_merge(self: [{ question: 'I have no identifier' }])
+        expect_validation_failure(h, /is missing/)
+      end
+
+      it 'fails when empty' do
+        h = correct_hash.deep_merge(self: [{
+                                      question: 'I have no identifier',
+                                      identifier: '',
+                                    }])
+        expect_validation_failure(h, /must be filled/)
+      end
     end
 
-    it 'fails if question is missing a title' do
-      h = correct_hash.deep_merge(domain: {
-                                    missing_title_question: {
-                                      default: 'I am missing my question!',
-                                    },
-                                  })
-      results = run_configure_validation(h)
-      expect(results[:parameters][:question][0]).to eq('is missing')
-    end
+    context 'with invalid question' do
+      it 'fails when missing' do
+        h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
+        expect_validation_failure(h, /is missing/)
+      end
 
-    it 'fails if question if the title is empty' do
-      h = correct_hash.deep_merge(node: {
-                                    missing_title_question: {
+      it 'fails when empty' do
+        h = correct_hash.deep_merge(self: [{
                                       question: '',
-                                      default: 'I am missing my question!',
-                                    },
-                                  })
-      results = run_configure_validation(h)
-      expect(results[:parameters][:question][0]).to eq('must be filled')
+                                      identifier: 'no_question',
+                                    }])
+        expect_validation_failure(h, /must be filled/)
+      end
     end
 
     it "fails if type isn't supported" do
-      h = correct_hash.deep_merge(group: {
-                                    unsupported_type: {
-                                      question: 'Do I have an unsupported type?',
-                                      type: 'Unsupported',
-                                    },
-                                  })
-      results = run_configure_validation(h)
-      expect(results[:parameters].keys).to eq([:type])
+      h = correct_hash.deep_merge(group: [{
+                                    identifier: 'unsupported_type',
+                                    question: 'Do I have an unsupported type?',
+                                    type: 'Unsupported',
+                                  }])
+      expect_validation_failure(h, /Is an unsupported question type/)
     end
 
     it 'fails if the optional input is not true or false' do
-      h = correct_hash.deep_merge(group: {
-                                    invalid_optional_flag: {
-                                      question: 'Do I have a boolean optional input?',
-                                      optional: 'I should be true or false',
-                                    },
-                                  })
-      results = run_configure_validation(h)
-      expect(results[:parameters].keys).to eq([:optional])
+      h = correct_hash.deep_merge(group: [{
+                                    identifier: 'invalid_optional_flag',
+                                    question: 'Do I have a boolean optional input?',
+                                    optional: 'I should be true or false',
+                                  }])
+      expect_validation_failure(h, /must be boolean/)
     end
   end
 
   context 'with missing question blocks' do
-    it 'fails when domain is missing' do
-      correct_hash.delete(:domain)
-      expect(run_configure_validation(correct_hash)).not_to be_empty
-    end
-
-    it 'fails when group is missing' do
-      correct_hash.delete(:group)
-      expect(run_configure_validation(correct_hash)).not_to be_empty
-    end
-
-    it 'fails when node is missing' do
-      correct_hash.delete(:node)
-      expect(run_configure_validation(correct_hash)).not_to be_empty
+    Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
+      it "fails when #{section} is missing" do
+        correct_hash.delete(section)
+        expect_validation_failure(correct_hash, /is missing/)
+      end
     end
   end
 
   context 'with invalid string questions' do
     it 'fails with a non-string default with no type specified' do
-      h = correct_hash.deep_merge(domain: {
-                                    bad_string_question: {
-                                      question: "Do I fail because my default isn't a string?",
-                                      default: 10,
-                                    },
-                                  })
-      expect(run_configure_validation(h).keys).to eq([:default_string_type])
+      h = correct_hash.deep_merge(domain: [{
+                                    identifier: 'bad_string_question',
+                                    question: "Do I fail because my default isn't a string?",
+                                    default: 10,
+                                  }])
+      expect_validation_failure(h, /question type/)
     end
 
     it 'fails with a non-string default with a type specified' do
-      h = correct_hash.deep_merge(group: {
-                                    bad_string_question: {
-                                      question: "Do I fail because my default isn't a string?",
-                                      type: 'string',
-                                      default: 10,
-                                    },
-                                  })
-      expect(run_configure_validation(h).keys).to eq([:default_string_type])
-    end
-
-    it 'returns a success? status of false' do
-      h = correct_hash.deep_merge(group: {
-                                    bad_string_question: {
-                                      question: "Do I fail because my default isn't a string?",
-                                      type: 'string',
-                                      default: 10,
-                                    },
-                                  })
-      expect(build_validator(h).success?).to eq(false)
+      h = correct_hash.deep_merge(group: [{
+                                    identifier: 'bad_string_question',
+                                    question: "Do I fail because my default isn't a string?",
+                                    type: 'string',
+                                    default: 10,
+                                  }])
+      expect_validation_failure(h, /question type/)
     end
   end
 
   context 'with invalid integer questions' do
     it 'fails with non-integer default' do
-      h = correct_hash.deep_merge(node: {
-                                    bad_integer_question: {
-                                      question: 'Do I fail because my default is a string?',
-                                      type: 'integer',
-                                      default: '10',
-                                    },
-                                  })
-      expect(run_configure_validation(h).keys).to eq([:default_integer_type])
-    end
-
-    it 'fails if the default is an empty string' do
-      h = correct_hash.deep_merge(node: {
-                                    bad_integer_question: {
-                                      question: 'Do I fail because my default is an empty string?',
-                                      type: 'integer',
-                                      default: '',
-                                    },
-                                  })
-      expect(run_configure_validation(h).keys).to eq([:default_empty_string_type])
+      h = correct_hash.deep_merge(node: [{
+                                    identifier: 'bad_integer_question',
+                                    question: 'Do I fail because my default is a string?',
+                                    type: 'integer',
+                                    default: '10',
+                                  }])
+      expect_validation_failure(h, /question type/)
     end
   end
 
   context 'with invalid boolean questions' do
     it 'fails with non-boolean default' do
-      h = correct_hash.deep_merge(node: {
-                                    bad_integer_question: {
-                                      question: 'Do I fail because my default is a string?',
-                                      type: 'boolean',
-                                      default: 'I am not valid',
-                                    },
-                                  })
-      expect(run_configure_validation(h).keys).to eq([:default_boolean_type])
+      h = correct_hash.deep_merge(node: [{
+                                    identifier: 'bad_integer_question',
+                                    question: 'Do I fail because my default is a string?',
+                                    type: 'boolean',
+                                    default: 'I am not valid',
+                                  }])
+      expect_validation_failure(h, /question type/)
+    end
+  end
+
+  context 'with invalid choice options' do
+    it 'fail when the default is not in the choice list' do
+      h = correct_hash.deep_merge(self: [{
+                                    identifier: 'choice_question_no_bad_default',
+                                    question: 'Is my default valid?',
+                                    choice: [
+                                      'choice1',
+                                      'choice2',
+                                      'choice3',
+                                    ],
+                                    default: 'not in list',
+                                  }])
+      expect_validation_failure(h, /choice list/)
+    end
+
+    it 'fails with inconsistent choice types' do
+      h = correct_hash.deep_merge(self: [{
+                                    identifier: 'choice_question_no_bad_type',
+                                    question: 'Are my choice types valid?',
+                                    choice: [
+                                      'choice1',
+                                      100,
+                                      'choice3',
+                                    ],
+                                  }])
+      expect_validation_failure(h, /match the question type/)
     end
   end
 end

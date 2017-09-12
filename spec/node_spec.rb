@@ -30,6 +30,7 @@ require 'fileutils'
 require 'config'
 require 'constants'
 require 'filesystem'
+require 'validation/loader'
 
 RSpec.describe Metalware::Node do
   def node(name)
@@ -205,26 +206,31 @@ RSpec.describe Metalware::Node do
 
   describe '#answers' do
     let :config { Metalware::Config.new }
+    let :loader { Metalware::Validation::Loader.new(config) }
+    let :configure_data do
+      questions = {
+        value_left_as_default: { default: 'default' },
+        value_set_by_domain: { default: 'default' },
+        value_set_by_ag1: { default: 'default' },
+        value_set_by_ag2: { default: 'default' },
+        value_set_by_answer1: { default: 'default' },
+      }
+
+      {
+        domain: questions,
+        group: questions,
+        node: questions,
+        self: {},
+      }
+    end
 
     let :filesystem do
-      FileSystem.setup do |fs|
-        fs.with_answer_fixtures('answers/node-test-set1')
+      FileSystem.setup { |fs| fs.with_answer_fixtures('answers/node-test-set1') }
+    end
 
-        questions = {
-          value_left_as_default: { default: 'default' },
-          value_set_by_domain: { default: 'default' },
-          value_set_by_ag1: { default: 'default' },
-          value_set_by_ag2: { default: 'default' },
-          value_set_by_answer1: { default: 'default' },
-        }
-        configure = {
-          domain: questions,
-          group: questions,
-          node: questions,
-          self: {},
-        }
-        fs.dump(config.configure_file, configure)
-      end
+    before :each do
+      allow(loader).to receive(:configure_data).and_return(configure_data)
+      allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
     end
 
     it 'performs a deep merge of defaults and answer files' do

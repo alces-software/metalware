@@ -25,36 +25,34 @@ require 'validation/answer'
 require 'data'
 require 'config'
 require 'filesystem'
-require 'file_path'
 
 RSpec.describe Metalware::Validation::Answer do
   let :config do
     Metalware::Config.new
   end
 
-  let :file_path do
-    Metalware::FilePath.new(config)
-  end
-
   let :configure_data do
     {
-      domain: {
-        string_question: {
+      domain: [
+        {
+          identifier: 'string_question',
           question: 'Am I a string?',
         },
-        integer_question: {
+        {
+          identifier: 'integer_question',
           question: 'Am I a integer',
           type: 'integer',
         },
-        bool_question: {
+        {
+          identifier: 'bool_question',
           question: 'Am I a boolean',
           type: 'boolean',
         },
-      },
+      ],
 
-      group: {},
-      node: {},
-      self: {},
+      group: [],
+      node: [],
+      self: [],
     }
   end
 
@@ -68,11 +66,9 @@ RSpec.describe Metalware::Validation::Answer do
 
   def run_answer_validation(answers)
     FileSystem.test do
-      Metalware::Data.dump(config.domain_answers_file, answers)
       Metalware::Data.dump(config.configure_file, configure_data)
-      domain_file = file_path.domain_answers
       validator = Metalware::Validation::Answer.new(config,
-                                                    domain_file,
+                                                    answers,
                                                     answer_section: :domain)
       [validator.validate, validator]
     end

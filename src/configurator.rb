@@ -25,6 +25,10 @@
 require 'active_support/core_ext/hash'
 require 'highline'
 require 'patches/highline'
+require 'validation/loader'
+require 'validation/saver'
+require 'file_path'
+require 'node'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Questions
 
@@ -32,58 +36,46 @@ module Metalware
   class Configurator
     class << self
       def for_domain(config:)
-        file_path = FilePath.new(config)
         new(
-          configure_file: file_path.configure_file,
-          questions_section: :domain,
-          answers_file: file_path.domain_answers,
-          higher_level_answer_files: []
+          config: config,
+          questions_section: :domain
         )
       end
 
       def for_group(group_name, config:)
-        file_path = FilePath.new(config)
         new(
-          configure_file: file_path.configure_file,
+          config: config,
           questions_section: :group,
-          answers_file: file_path.group_answers(group_name),
-          higher_level_answer_files: [file_path.domain_answers]
+          name: group_name
         )
       end
 
       # Note: This is slightly inconsistent with `for_group`, as that just
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
-      def for_node(node, config:)
-        file_path = FilePath.new(config)
+      def for_node(node_name, config:)
         new(
-          configure_file: file_path.configure_file,
+          config: config,
           questions_section: :node,
-          answers_file: file_path.node_answers(node.name),
-          higher_level_answer_files: [
-            file_path.domain_answers,
-            file_path.group_answers(node.primary_group),
-          ]
+          name: node_name
         )
+      end
+
+      # Used by the tests to switch readline on and off
+      def use_readline
+        true
       end
     end
 
-    attr_reader :answers_file
-
     def initialize(
-      highline: HighLine.new,
-      configure_file:,
+      config:,
       questions_section:,
-      answers_file:,
-      higher_level_answer_files:,
-      use_readline: true
+      name: nil
     )
-      @highline = highline
-      @configure_file = configure_file
+      @highline = HighLine.new
+      @config = config
       @questions_section = questions_section
-      @answers_file = answers_file
-      @higher_level_answer_files = higher_level_answer_files
-      @use_readline = use_readline
+      @name = name
     end
 
     def configure(answers = nil)
@@ -101,18 +93,48 @@ module Metalware
 
     private
 
-    attr_reader :highline,
-                :configure_file,
+    attr_reader :config,
+                :highline,
                 :questions_section,
-                :higher_level_answer_files,
-                :use_readline
+                :name
+
+    def loader
+      @loader ||= Validation::Loader.new(config)
+    end
+
+    def saver
+      @saver ||= Validation::Saver.new(config)
+    end
+
+    def configure_data
+      @configure_data ||= loader.configure_data
+    end
 
     def questions_in_section
-      Data.load(configure_file)[questions_section]
+      configure_data[questions_section]
+    end
+
+    def higher_level_answer_data
+      @higher_level_answer_data ||= begin
+        case questions_section
+        when :domain
+          []
+        when :group
+          [loader.domain_answers]
+        when :node
+          node = Node.new(config, name)
+          [
+            loader.domain_answers,
+            loader.group_answers(node.primary_group),
+          ]
+        else
+          raise InternalError, "Unrecognised question section: #{questions_section}"
+        end
+      end
     end
 
     def old_answers
-      @old_answers ||= Data.load(answers_file)
+      @old_answers ||= loader.section_answers(questions_section, name)
     end
 
     def ask_questions
@@ -137,26 +159,25 @@ module Metalware
     end
 
     def save_answers(answers)
-      Data.dump(answers_file, answers)
+      saver.section_answers(answers, questions_section, name)
     end
 
     def create_question(identifier, properties, index)
-      higher_level_answer = higher_level_answer_files.map do |file|
-        Data.load(file)[identifier]
-      end.reject(&:nil?).last
+      higher_level_answer = higher_level_answer_data.map { |d| d[identifier] }
+                                                    .reject(&:nil?)
+                                                    .last
 
       # If no answer saved at any higher level, fall back to the default
       # defined for the question in `configure.yaml`, if any.
       default = higher_level_answer.nil? ? properties[:default] : higher_level_answer
 
       Question.new(
+        config: config,
         default: default,
         identifier: identifier,
         properties: properties,
-        configure_file: configure_file,
         questions_section: questions_section,
         old_answer: old_answers[identifier],
-        use_readline: use_readline,
         progress_indicator: progress_indicator(index)
       )
     end
@@ -180,18 +201,16 @@ module Metalware
         :progress_indicator,
         :question,
         :required,
-        :type,
-        :use_readline
+        :type
 
       def initialize(
-        configure_file:,
+        config:,
         default:,
         identifier:,
         old_answer: nil,
         progress_indicator:,
         properties:,
-        questions_section:,
-        use_readline:
+        questions_section:
       )
         @choices = properties[:choices]
         @default = default
@@ -200,17 +219,16 @@ module Metalware
         @progress_indicator = progress_indicator
         @question = properties[:question]
         @required = !properties[:optional]
-        @use_readline = use_readline
 
         @type = type_for(
           properties[:type],
-          configure_file: configure_file,
+          configure_file: config.configure_file,
           questions_section: questions_section
         )
       end
 
       def ask(highline)
-        ask_method = "ask_#{type}_question"
+        ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
         send(ask_method, highline) do |highline_question|
           highline_question.readline = true if use_readline?
 
@@ -236,7 +254,7 @@ module Metalware
         # Dont't provide readline bindings for boolean questions, in this case
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
-        use_readline && type != :boolean
+        Metalware::Configurator.use_readline && type != :boolean
       end
 
       def default_input

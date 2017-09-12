@@ -22,38 +22,56 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/configure_command'
-require 'constants'
-require 'group_cache'
+require 'exceptions'
+require 'file_path'
+require 'validation/answer'
+require 'data'
 
 module Metalware
-  module Commands
-    module Configure
-      class Group < CommandHelpers::ConfigureCommand
+  module Validation
+    class Saver
+      def initialize(metalware_config)
+        @config = metalware_config
+      end
+
+      def respond_to_missing?(s, *_a)
+        Methods.instance_methods.include?(s)
+      end
+
+      # Enforces the first argument to always be the data
+      def method_missing(s, *a, &b)
+        data = a[0]
+        if respond_to_missing?(s)
+          raise SaverNoData unless data
+          Methods.new(config, data).send(s, *a[1..-1], &b)
+        else
+          super
+        end
+      end
+
+      private
+
+      attr_reader :config
+
+      def method_builder(data)
+        Methods.new(config, data)
+      end
+
+      class Methods < LoadSaveBase
+        def initialize(config, data)
+          @config = config
+          @path = FilePath.new(config)
+          @data = data
+        end
+
         private
 
-        attr_reader :group_name, :cache
+        attr_reader :path, :config, :data
 
-        def setup
-          @group_name = args.first
-          @cache = GroupCache.new(config)
-        end
-
-        def configurator
-          @configurator ||=
-            Configurator.for_group(group_name, config: config)
-        end
-
-        def answer_file
-          file_path.group_answers(group_name)
-        end
-
-        def custom_configuration
-          record_primary_group
-        end
-
-        def record_primary_group
-          cache.add(group_name)
+        def answer(save_path, section)
+          valid = Validation::Answer.new(config, data, answer_section: section)
+                                    .data
+          Data.dump(save_path, valid)
         end
       end
     end

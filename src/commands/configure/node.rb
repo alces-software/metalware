@@ -18,11 +18,11 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_node(node, config: config)
+            Configurator.for_node(node_name, config: config)
         end
 
-        def node
-          Metalware::Node.new(config, node_name)
+        def answer_file
+          file_path.node_answers(node_name)
         end
 
         def dependency_hash

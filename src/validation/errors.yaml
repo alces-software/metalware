@@ -2,22 +2,19 @@ en:
   errors:
     rules:
       configure:
-        valid_top_level_keys: >
-          'configure.yaml' must only contain 'domain', 'group', 'node', and
-          'questions'
-
-      configure_question:
-        question_type?: >
-          Type must be: 'string', 'integer', or 'boolean'
-        valid_top_level_question_keys: >
-          Questions can only have the following fields: 'question', 'type',
-          'default' 'choice', 'optional'
+        top_level_keys?: >
+          An invalid top level key has been detected. Only 'questions', 'domain'
+          , 'node', and 'self' are allowed
+        supported_type?: >
+          Is an unsupported question type
+        default?: >
+          Default's must be filled or a string
         default_type?: >
-          Type mismatch between question 'type' and 'default' value
-        boolean?: >
-          Boolean defaults must be 'yes' or 'no'
-        empty_string?:
-          Empty string defaults must have a string type
+          The question type does not match the default
+        choice_with_default?: >
+          The default must appear in the choice list
+        choice_type?: >
+          All choices must match the question type
 
       answer:
         missing_questions?: >

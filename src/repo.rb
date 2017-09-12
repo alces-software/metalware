@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'constants'
+require 'validation/loader'
 
 module Metalware
   class Repo
@@ -19,8 +20,12 @@ module Metalware
 
     private
 
+    def loader
+      @loader ||= Validation::Loader.new(config)
+    end
+
     def configure_data
-      @configure_data ||= Data.load(config.configure_file)
+      @configure_data ||= loader.configure_data
     end
 
     def configure_data_sections

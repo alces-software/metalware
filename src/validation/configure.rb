@@ -21,10 +21,11 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
+
 require 'exceptions'
+require 'file_path'
 require 'data'
 require 'dry-validation'
-require 'active_support/core_ext/module/delegation'
 require 'constants'
 
 module Metalware
@@ -35,115 +36,145 @@ module Metalware
       # determined by whether they are supplied.
 
       # NOTE: Supported types in error.yaml message must be updated manually
-      SUPPORTED_TYPES = ['string', 'integer', 'boolean', 'choice'].freeze
-      BOOLEAN_VALUE = ['yes', 'no'].freeze
+
+      SUPPORTED_TYPES = ['string', 'integer', 'boolean'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(file)
-        @yaml = Data.load(file)
-      end
-
-      def validate
-        @validate ||= begin
-          configure_results = ConfigureSchema.call(yaml: @yaml)
-          if configure_results.success?
-            Constants::CONFIGURE_SECTIONS.each do |section|
-              @yaml[section].each do |identifier, parameters|
-                payload = {
-                  section: section,
-                  identifier: identifier,
-                  parameters: parameters,
-                }
-                question_results = QuestionSchema.call(payload)
-                return question_results unless question_results.success?
-              end
-            end
-          end
-          configure_results
+      def self.type_check(type, value)
+        case type
+        when 'string', nil
+          value.is_a?(String)
+        when 'integer'
+          value.is_a?(Integer)
+        when 'boolean'
+          [true, false].include?(value)
+        else
+          false
         end
       end
 
-      delegate :success?, to: :validate
+      def initialize(config, data_hash = nil)
+        @config = config
+        @raw_data = (data_hash || load_configure_file).freeze
+      end
 
-      # TODO: make these error messages more descriptive
-      def load
-        raise ValidationFailure, validate.messages unless success?
-        @yaml
+      def data(raw: false)
+        raise ValidationFailure, error_msg unless validate.success?
+        raw ? raw_data : transform_array_to_hash
       end
 
       private
 
+      attr_reader :config, :raw_data
+
+      def transform_array_to_hash
+        array_data = raw_data.dup
+        hash_data = {}
+        Constants::CONFIGURE_SECTIONS.each do |section|
+          hash_data[section] = array_data[section].each_with_object({}) do |question, memo|
+            identifier = question.delete(:identifier)
+            memo[identifier.to_sym] = question
+          end
+        end
+        hash_data
+      end
+
+      def file_path
+        @file_path ||= FilePath.new(config)
+      end
+
+      def load_configure_file
+        Data.load(file_path.configure_file)
+      end
+
+      def validate
+        @validate ||= begin
+          ConfigureSchema.call(data: raw_data)
+        end
+      end
+
+      def error_msg
+        msg_header = 'An error occurred validating the questions. ' \
+                     "The following error(s) have been detected: \n"
+        msg_header + validate.errors[:data].to_s
+      end
+
       QuestionSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
-          config.namespace = :configure_question
+          config.namespace = :configure
 
-          def question_type?(value)
+          def supported_type?(value)
             SUPPORTED_TYPES.include?(value)
           end
 
-          def boolean?(value)
-            BOOLEAN_VALUE.include?(value)
-          end
-
-          def empty_string?(value)
-            value.is_a?(String) && value.empty?
+          def default?(value)
+            return true if value.is_a?(String)
+            value.respond_to?(:empty?) ? value.empty? : true
           end
         end
 
-        validate(valid_top_level_question_keys: :parameters) do |q|
-          (q.keys - [:question, :type, :default, :choice, :optional]).empty?
-        end
-
-        required(:parameters).value(:hash?)
-        required(:parameters).schema do
-          required(:question).value(:str?, :filled?)
-          optional(:type).value(:question_type?)
-          optional(:default) { filled? | str? }
-          optional(:optional).value(:bool?)
-
-          # NOTE: The crazy logic on the LHS of the then ('>') is because
-          # the RHS determines the error message. Hence the RHS needs to be
-          # as simple as possible otherwise the error message will be crazy
-          rule(default_string_type: [:default, :type]) do |default, type|
-            (default.filled? & (type.none? | type.eql?('string'))) > default.str?
-          end
-
-          # Enforces empty string defaults have a string type
-          rule(default_empty_string_type: [:default, :type]) do |default, type|
-            default.empty_string? > (type.none? | type.eql?('string'))
-          end
-
-          rule(default_integer_type: [:default, :type]) do |default, type|
-            (default.filled? & type.eql?('integer')) > default.int?
-          end
-
-          rule(default_boolean_type: [:default, :type]) do |default, type|
-            (default.filled? & type.eql?('boolean')) > default.boolean?
-          end
-
-          # Choice does not currently support default answers
-          rule(default_choice_type: [:default, :type]) do |default, type|
-            default.none? | type.excluded_from?(['choice'])
-          end
-        end
+        required(:identifier) { filled? & str? }
+        required(:question) { filled? & str? }
+        optional(:optional) { bool? }
+        optional(:type) { supported_type? }
+        optional(:default) { default? }
+        optional(:choice) { array? }
       end
 
       ConfigureSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
           config.namespace = :configure
+
+          def top_level_keys?(data)
+            section = Constants::CONFIGURE_SECTIONS.dup.push(:questions)
+            (data.keys - section).empty?
+          end
         end
 
-        # White-lists the keys allowed in the configure.yaml file
-        validate(valid_top_level_keys: :yaml) do |yaml|
-          (yaml.keys - [:domain, :self, :group, :node, :questions]).empty?
-        end
+        required(:data) do
+          top_level_keys? & schema do
+            configure do
+              config.messages_file = ERROR_FILE
+              config.namespace = :configure
 
-        required(:yaml).schema do
-          required(:domain).value(:hash?)
-          required(:group).value(:hash?)
-          required(:node).value(:hash?)
+              def default_type?(value)
+                default = value[:default]
+                type = value[:type]
+                return true if default.nil?
+                ::Metalware::Validation::Configure.type_check(type, default)
+              end
+
+              def choice_with_default?(value)
+                return true if value[:choice].nil? || value[:default].nil?
+                return false unless value[:choice].is_a?(Array)
+                value[:choice].include?(value[:default])
+              end
+
+              def choice_type?(value)
+                return true if value[:choice].nil?
+                return false unless value[:choice].is_a?(Array)
+                value[:choice].each do |choice|
+                  type = value[:type]
+                  r = ::Metalware::Validation::Configure.type_check(type, choice)
+                  return false unless r
+                end
+                true
+              end
+            end
+
+            # Loops through each section
+            ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
+              required(section) do
+                # Loops through each question
+                array? & each do
+                  schema(QuestionSchema) & \
+                    default_type? & choice_with_default? & choice_type?
+                end
+              end
+            end
+          end
         end
       end
     end

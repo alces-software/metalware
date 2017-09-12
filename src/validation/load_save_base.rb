@@ -22,39 +22,51 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/configure_command'
-require 'constants'
-require 'group_cache'
+require 'file_path'
+require 'validation/answer'
+require 'validation/configure'
+require 'data'
 
 module Metalware
-  module Commands
-    module Configure
-      class Group < CommandHelpers::ConfigureCommand
-        private
+  module Validation
+    class LoadSaveBase
+      def initialize(*_a)
+        raise NotImplementedError
+      end
 
-        attr_reader :group_name, :cache
+      def domain_answers
+        answer(path.domain_answers, :domain)
+      end
 
-        def setup
-          @group_name = args.first
-          @cache = GroupCache.new(config)
+      def group_answers(file)
+        answer(path.group_answers(file), :groups)
+      end
+
+      def node_answers(file)
+        answer(path.node_answers(file), :nodes)
+      end
+
+      def section_answers(section, name = nil)
+        case section
+        when :domain
+          domain_answers
+        when :group
+          raise InternalError, 'No group name given' if name.nil?
+          group_answers(name)
+        when :node
+          raise InternalError, 'No node name given' if name.nil?
+          node_answers(name)
+        else
+          raise InternalError, "Unrecognised question seciton: #{section}"
         end
+      end
 
-        def configurator
-          @configurator ||=
-            Configurator.for_group(group_name, config: config)
-        end
+      private
 
-        def answer_file
-          file_path.group_answers(group_name)
-        end
+      attr_reader :path, :config
 
-        def custom_configuration
-          record_primary_group
-        end
-
-        def record_primary_group
-          cache.add(group_name)
-        end
+      def answer(_absolute_path, _section)
+        raise NotImplementedError
       end
     end
   end

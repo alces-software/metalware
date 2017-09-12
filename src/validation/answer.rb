@@ -30,9 +30,9 @@ module Metalware
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(metalware_config, answer_file, answer_section: nil)
+      def initialize(metalware_config, answers, answer_section: nil)
         @config = metalware_config
-        @answer_file_path = answer_file
+        @answers = answers
         @section = answer_section
       end
 
@@ -56,7 +56,7 @@ module Metalware
       def error_message
         validate if @validation_result.nil?
         return '' if @validation_result.success?
-        msg_header = "Failed to validate answers: #{answer_file_path}\n"
+        msg_header = "Failed to validate answers:\n"
         case @last_ran_test
         when :MissingSchema
           "#{msg_header}" \
@@ -74,13 +74,13 @@ module Metalware
         @validation_result.success?
       end
 
-      def load
+      def data
         success? ? answers : (raise ValidationFailure, error_message)
       end
 
       private
 
-      attr_reader :config, :answer_file_path, :section
+      attr_reader :config, :section, :answers
 
       def loader
         @loader ||= Validation::Loader.new(config)
@@ -92,10 +92,6 @@ module Metalware
 
       def questions
         loader.configure_data
-      end
-
-      def answers
-        @answers ||= Data.load(answer_file_path)
       end
 
       def validation_hash
