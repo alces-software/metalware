@@ -49,8 +49,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
       expect(Metalware::Configurator).to receive(:new).with(
         config: instance_of(Metalware::Config),
         questions_section: :group,
-        name: 'testnodes',
-        higher_level_answer_files: [config.domain_answers_file]
+        name: 'testnodes'
       ).and_call_original
 
       run_configure_group 'testnodes'

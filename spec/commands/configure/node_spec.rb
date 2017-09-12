@@ -31,11 +31,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
       expect(Metalware::Configurator).to receive(:new).with(
         config: instance_of(Metalware::Config),
         questions_section: :node,
-        name:'testnode01',
-        higher_level_answer_files: [
-          config.domain_answers_file,
-          config.group_answers_file('testnodes'),
-        ]
+        name:'testnode01'
       ).and_call_original
 
       run_configure_node 'testnode01'

@@ -26,8 +26,7 @@ RSpec.describe Metalware::Commands::Configure::Domain do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
         config: instance_of(Metalware::Config),
-        questions_section: :domain,
-        higher_level_answer_files: []
+        questions_section: :domain
       ).and_call_original
 
       run_configure_domain
