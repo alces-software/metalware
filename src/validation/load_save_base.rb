@@ -63,7 +63,7 @@ module Metalware
           raise InternalError, 'No node name given' if name.nil?
           node_answers(name)
         else
-          raise InternalError, "Unrecognised question seciton: #{section}"
+          raise InternalError, "Unrecognised question section: #{section}"
         end
       end
 

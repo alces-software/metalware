@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'node'
+require 'validation/loader'
 
 # XXX Make `answers` and `raw_config` more similar; basically performing the
 # same thing.
@@ -69,32 +70,38 @@ module Metalware
         @metalware_config = config
       end
 
+      def loader
+        @loader ||= Metalware::Validation::Loader.new(metalware_config)
+      end
+
       def combine_answers
-        config_answers = configs.map { |c| Data.load(answers_path_for(c)) }
+        config_answers = configs.map do |config_name|
+          section = answer_section(config_name)
+          args = if section == :group || section == :node
+                   [config_name]
+                 else
+                   []
+                 end
+          loader.section_answers(section, *args)
+        end
         answer_hashes = [default_answers] + config_answers
         combine_hashes(answer_hashes)
       end
-
-      def answers_path_for(config_name)
-        File.join(
-          metalware_config.answer_files_path,
-          answers_directory_for(config_name),
-          "#{config_name}.yaml"
-        )
-      end
-
-      def answers_directory_for(config_name)
+      
+      def answer_section(config_name)
         # XXX Using only the config name to determine the answers directory
         # will potentially lead to answers not being picked up if a group has
         # the same name as a node, or either is 'domain'; we should probably
         # use more information when determining this.
         case config_name
         when 'domain'
-          '/'
+          :domain
+        when 'self'
+          :self
         when node_name
-          'nodes'
+          :node
         else
-          'groups'
+          :group
         end
       end
 

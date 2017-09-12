@@ -54,6 +54,10 @@ RSpec.describe Metalware::Templating::GroupNamespace do
 
   describe '#answers' do
     it 'returns the group answers merged into the domain answers' do
+      # Turns off answer file validation as they do not match the configure.yaml
+      allow_any_instance_of(Metalware::Validation::Answer).to \
+        receive(:success?).and_return(true)
+
       filesystem.test do
         expect(subject.answers.to_h).to eq(domain_value: 'domain_value',
                                            overriding_domain_value: 'testnodes_value',
