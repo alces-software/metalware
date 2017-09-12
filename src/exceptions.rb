@@ -183,6 +183,9 @@ module Metalware
 
   class InternalError < MetalwareError
   end
+
+  class AnswerJSONSyntax < MetalwareError
+  end
 end
 
 # Alias for Exception to use to indicate we want to catch everything, and to

@@ -47,6 +47,10 @@ module Metalware
 
       def answers
         JSON.parse(options.answers) if options.answers
+      rescue => e
+        err = AnswerJSONSyntax.new('An error occurred passing the --answer JSON')
+        err.set_backtrace(e.backtrace)
+        raise err
       end
 
       def handle_interrupt(_e)
