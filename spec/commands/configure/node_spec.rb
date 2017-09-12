@@ -31,7 +31,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
       expect(Metalware::Configurator).to receive(:new).with(
         config: instance_of(Metalware::Config),
         questions_section: :node,
-        name:'testnode01'
+        name: 'testnode01'
       ).and_call_original
 
       run_configure_node 'testnode01'

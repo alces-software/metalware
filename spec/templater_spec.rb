@@ -28,6 +28,7 @@ require 'templater'
 require 'spec_utils'
 require 'node'
 require 'filesystem'
+require 'validation/answer'
 
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
@@ -406,6 +407,9 @@ RSpec.describe Metalware::Templater do
     # below?
     describe 'answers' do
       before :each do
+        # Turns off answer validation as the configure.yaml has not been created
+        allow_any_instance_of(Metalware::Validation::Answer).to \
+          receive(:success?).and_return(true)
         filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml',
                         some_question: 'some_answer'
       end

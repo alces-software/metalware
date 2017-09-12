@@ -101,7 +101,7 @@ module Metalware
             missing_questions: [],
           }
           answers.each_with_object(payload) do |(question, answer), pay|
-            if questions_in_section.key?(question)
+            if questions_in_section&.key?(question)
               pay[:answers].push(
                 {
                   question: question,

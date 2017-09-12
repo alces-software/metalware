@@ -61,6 +61,13 @@ module Metalware
         )
       end
 
+      def for_self(config:)
+        new(
+          config: config,
+          questions_section: :self
+        )
+      end
+
       # Used by the tests to switch readline on and off
       def use_readline
         true
@@ -119,7 +126,7 @@ module Metalware
         case questions_section
         when :domain
           []
-        when :group
+        when :group, :self
           [loader.domain_answers]
         when :node
           node = Node.new(config, name)

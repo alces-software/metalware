@@ -22,7 +22,11 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_node(self_node, config: config)
+            Configurator.for_self(config: config)
+        end
+
+        def answer_file
+          file_path.self_answers
         end
       end
     end

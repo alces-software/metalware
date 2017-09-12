@@ -50,7 +50,7 @@ module Metalware
     end
 
     def self_answers
-      File.join(answer_files, 'nodes/self.yaml')
+      File.join(answer_files, 'self.yaml')
     end
 
     def repo

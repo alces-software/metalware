@@ -31,6 +31,7 @@ require 'config'
 require 'constants'
 require 'filesystem'
 require 'validation/loader'
+require 'validation/answer'
 
 RSpec.describe Metalware::Node do
   def node(name)
@@ -231,6 +232,9 @@ RSpec.describe Metalware::Node do
     before :each do
       allow(loader).to receive(:configure_data).and_return(configure_data)
       allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
+      # Turns off answer file validation as they do not match the configure.yaml
+      allow_any_instance_of(Metalware::Validation::Answer).to \
+        receive(:success?).and_return(true)
     end
 
     it 'performs a deep merge of defaults and answer files' do

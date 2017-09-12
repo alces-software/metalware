@@ -75,13 +75,7 @@ module Metalware
 
       def restart_named
         MetalLog.info 'Restarting named'
-        loop_system_command('systemctl restart named')
-      end
-
-      def loop_system_command(cmds)
-        cmds.each do |cmd|
-          SystemCommand.run(cmd)
-        end
+        SystemCommand.run('systemctl restart named')
       end
 
       def each_network
