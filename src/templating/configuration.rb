@@ -77,7 +77,7 @@ module Metalware
       def combine_answers
         config_answers = configs.map do |config_name|
           section = answer_section(config_name)
-          args = if section == :group || section == :node
+          args = if [:node, :group].include? section
                    [config_name]
                  else
                    []
@@ -87,7 +87,7 @@ module Metalware
         answer_hashes = [default_answers] + config_answers
         combine_hashes(answer_hashes)
       end
-      
+
       def answer_section(config_name)
         # XXX Using only the config name to determine the answers directory
         # will potentially lead to answers not being picked up if a group has
