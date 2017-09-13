@@ -39,11 +39,11 @@ module Metalware
       end
 
       def group_answers(file)
-        answer(path.group_answers(file), :groups)
+        answer(path.group_answers(file), :group)
       end
 
       def node_answers(file)
-        answer(path.node_answers(file), :nodes)
+        answer(path.node_answers(file), :node)
       end
 
       def self_answers
