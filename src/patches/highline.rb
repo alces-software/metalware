@@ -24,21 +24,32 @@
 module Metalware
   module Patches
     module HighLine
-      module Questions
+      module Question
         def sanitize_default_erb_tags
-          @sanitized_default ||= @default.gsub('<%', '<%%')
+          @sanitized_default ||= @default&.gsub('<%', '<%%')
         end
 
         def append_default
-          if @question =~ /([\t ]+)\Z/
-            @question << "|#{sanitize_default_erb_tags}|#{Regexp.last_match(1)}"
-          elsif @question == ''
-            @question << "|#{sanitize_default_erb_tags}|  "
-          elsif @question[-1, 1] == "\n"
-            @question[-2, 0] = "  |#{sanitize_default_erb_tags}|"
+          append_default_helper(@question, sanitize_default_erb_tags)
+        end
+
+        def append_default_helper(question_str, default_str)
+          return question_str if default_str.nil?
+          if question_str =~ /([\t ]+)\Z/
+            question_str << "|#{default_str}|#{Regexp.last_match(1)}"
+          elsif question_str == ''
+            question_str << "|#{default_str}|  "
+          elsif question_str[-1, 1] == "\n"
+            question_str[-2, 0] = "  |#{default_str}|"
           else
-            @question << "  |#{sanitize_default_erb_tags}|"
+            question_str << "  |#{default_str}|"
           end
+        end
+      end
+
+      module Menu
+        def prompt
+          append_default_helper(@prompt.dup, sanitize_default_erb_tags)
         end
       end
     end

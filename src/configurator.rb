@@ -30,7 +30,8 @@ require 'validation/saver'
 require 'file_path'
 require 'node'
 
-HighLine::Question.prepend Metalware::Patches::HighLine::Questions
+HighLine::Question.prepend Metalware::Patches::HighLine::Question
+HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 
 module Metalware
   class Configurator
