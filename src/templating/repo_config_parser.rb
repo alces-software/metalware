@@ -94,12 +94,12 @@ module Metalware
       end
 
       def magic_namespace
-        MissingParameterWrapper.new(MagicNamespace.new(
-                                      config: metalware_config,
-                                      node: node,
-                                      include_groups: include_groups,
-                                      **magic_parameters
-        ))
+        MagicNamespace.new(
+          config: metalware_config,
+          node: node,
+          include_groups: include_groups,
+          **magic_parameters
+        )
       end
 
       def magic_parameters
