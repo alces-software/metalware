@@ -108,6 +108,10 @@ module Metalware
         DeploymentServer.ip
       end
 
+      private
+
+      attr_reader :metalware_config, :node, :include_groups
+
       def method_missing(s, *_a, &_b)
         respond_to_missing?(s) ? additional_parameters.send(s) : super
       end
@@ -115,10 +119,6 @@ module Metalware
       def respond_to_missing?(s)
         !additional_parameters.send(s).nil?
       end
-
-      private
-
-      attr_reader :metalware_config, :node, :include_groups
 
       def group_namespace_for(group_name)
         GroupNamespace.new(metalware_config, group_name)
