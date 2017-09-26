@@ -35,6 +35,7 @@ module Metalware
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
+      validation: true,
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
       built_nodes_storage_path: '/var/lib/metalware/cache/built-nodes',
@@ -60,7 +61,7 @@ module Metalware
 
     KEYS_WITH_DEFAULTS.each do |key, default|
       define_method :"#{key}" do
-        @config[key] || default
+        @config[key].nil? ? default : @config[key]
       end
     end
 

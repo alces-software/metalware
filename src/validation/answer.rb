@@ -70,6 +70,7 @@ module Metalware
       end
 
       def success?
+        return true unless config.validation
         validate if @validation_result.nil?
         @validation_result.success?
       end

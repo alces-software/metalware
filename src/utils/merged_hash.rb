@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'file_path'
+require 'validation/loader'
 require 'data'
 require 'recursive-open-struct'
 require 'constants'
@@ -14,6 +15,7 @@ module Metalware
       def initialize(metalware_config, groups: [], node: nil)
         @metalware_config = metalware_config
         @file_path = FilePath.new(metalware_config)
+        @loader = Validation::Loader.new(metalware_config)
         @groups = groups
         @node = node
       end
@@ -22,9 +24,13 @@ module Metalware
         @config ||= build_hash_for_key(:config)
       end
 
+      def answer
+        @answer ||= build_hash_for_key(:answer)
+      end
+
       private
 
-      attr_reader :metalware_config, :file_path, :groups, :node
+      attr_reader :metalware_config, :file_path, :loader, :groups, :node
 
       def build_hash_for_key(key)
         HASH_DATA_STRUCTURE.new(combine_hashes(hash_array(key)))
@@ -43,8 +49,11 @@ module Metalware
 
       def load_yaml(key, section, section_name = nil)
         input = (section_name ? [section_name] : [])
-        if key == :config
+        case key
+        when :config
           Data.load(file_path.send("#{section}_config", *input))
+        when :answer
+          loader.section_answers(section, *input)
         end
       end
 
