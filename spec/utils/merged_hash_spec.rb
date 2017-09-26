@@ -44,9 +44,9 @@ RSpec.describe Metalware::Utils::MergedHash do
     it 'returns the merged configs' do
       filesystem.test do
         expect(merged_hash.config.to_h).not_to be_empty
-        merged_hash.config.each do |key, value|
+        merged_hash.config.to_h.each do |key, value|
           expected_value = case key
-                           when 'value0'
+                           when :value0
                              'domain'
                            else
                              'group1'
@@ -70,9 +70,9 @@ RSpec.describe Metalware::Utils::MergedHash do
         expect(merged_hash.config.to_h).not_to be_empty
         merged_hash.config.to_h.each do |key, value|
           expected_value = case key
-                           when 'value0'
+                           when :value0
                              'domain'
-                           when 'value1'
+                           when :value1
                              'group1'
                            else
                              'group2'
