@@ -46,7 +46,7 @@ module Metalware
       end
 
       def answers
-        JSON.parse(options.answers) if options.answers
+        JSON.parse(options.answers).deep_transform_keys(&:to_sym) if options.answers
       rescue => e
         err = AnswerJSONSyntax.new('An error occurred passing the --answer JSON')
         err.set_backtrace(e.backtrace)

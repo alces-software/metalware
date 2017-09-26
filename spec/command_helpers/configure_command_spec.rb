@@ -47,7 +47,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
       FileSystem.test do |fs|
         fs.with_minimal_repo
 
-        answers = { 'question_1' => 'answer_1' }
+        answers = { question_1: 'answer_1' }
         expect_any_instance_of(Metalware::Configurator).to receive(:configure).with(answers)
 
         Metalware::Utils.run_command(TestCommand, answers: answers.to_json)
