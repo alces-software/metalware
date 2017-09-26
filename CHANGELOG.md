@@ -3,7 +3,30 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.0] - 2017-06-29
+## [2017.1.0] - 2017-09-26
+
+### Added
+- Rendered the named templates when dns_type is set to named
+- Allow nodes to build using different build types including using `uefi`
+- Implement the `self` node which refers to the controller
+- The self node can be configured and built from a blank centos image
+
+### Changed
+
+- Created general combine_hash method in `Node` used by raw_config and answer methods
+- Fixed bug in tests that was caused by defining repo_path and repo_config_path independently in Config.
+- The MissingParameterWrapper automatically converts Hashes to a IterableRecursiveOpenStruct.
+- Moved auxiliary Commands (e.g. BaseCommand) into the CommandHelpers module.
+- Patched HighLine to prevent errors when the default answer to questions contains an erb tag.
+- Allow Configure questions to have predefined default answers.
+- Override the Configure default answers to be that of the previous answer of the same question.
+- Require `metal configure` commands to be ran before `metal build` if the repository contains the questions `configure.yaml`
+
+### Added
+
+- Saved `metal configure` answers are available when templating under the `alces.answers` namespace.
+
+## [2.0.0] - 2017-08-07
 
 - Rewrote and restructured much of Metalware to be more consistent and
   flexible.

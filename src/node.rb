@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -26,14 +28,44 @@ require 'constants'
 require 'system_command'
 require 'nodeattr_interface'
 require 'exceptions'
+require 'group_cache'
+require 'templating/configuration'
+require 'build_methods'
 
 module Metalware
   class Node
     attr_reader :name
+    delegate :raw_config,
+             :answers,
+             # XXX `Node#configs` does not actually need to be public, it is only used
+             # in the `Node` tests
+             :configs,
+             to: :templating_configuration
 
-    def initialize(metalware_config, name)
+    delegate :render_build_started_templates,
+             :render_build_complete_templates,
+             :start_build,
+             to: :build_method
+
+    def initialize(metalware_config, name, should_be_configured: false)
       @metalware_config = metalware_config
       @name = name
+
+      # Node configured <=> is part of a group which has been configured; this
+      # means we should be stricter when checking the node is in the genders
+      # file etc.
+      @should_be_configured = should_be_configured
+    end
+
+    # Two nodes are equal <=> their names are equal; everything else is derived
+    # from this. This does mean they will appear equal if they are initialized
+    # with different config files, but this is a bug if it occurs in practise.
+    def ==(other_node)
+      if other_node.is_a? Node
+        name == other_node.name
+      else
+        false
+      end
     end
 
     def hexadecimal_ip
@@ -44,34 +76,18 @@ module Metalware
       File.file? build_complete_marker_file
     end
 
-    # Return the raw merged config for this node, without parsing any embedded
-    # ERB (this should be done using the Templater if needed, as we won't know
-    # all the template parameters until a template is being rendered).
-    # XXX refactor this to use `load_config`, and use this from `build_files`.
-    def raw_config
-      combined_configs = {}
-      configs.each do |config_name|
-        begin
-          config_path = "#{@metalware_config.repo_path}/config/#{config_name}.yaml"
-          config = YAML.load_file(config_path)
-        rescue Errno::ENOENT # Skips missing files
-        rescue StandardError
-          raise YAMLConfigError, "Could not parse YAML config file"
-        else
-          if !config.is_a? Hash
-            raise YAMLConfigError, "Expected YAML config file to contain a hash"
-          else
-            combined_configs.deep_merge!(config)
-          end
-        end
-      end
-      combined_configs.deep_transform_keys{ |k| k.to_sym }
-    end
+    def groups
+      NodeattrInterface.groups_for_node(name)
+    rescue NodeNotInGendersError
+      # Re-raise if we're expecting the node to be configured, as it should be
+      # in the genders file.
+      raise if should_be_configured
 
-    # The repo config files for this node in order of precedence from lowest to
-    # highest.
-    def configs
-      [name, *groups, 'domain'].reverse.reject(&:nil?).uniq
+      # The node doesn't need to be in the genders file if it's not expected to
+      # be configured, it's just part of no groups yet (XXX not sure if this is
+      # still true, maybe we should be stricter now and always require a node
+      # to be in the genders file).
+      []
     end
 
     # Get the configured `files` for this node, to be rendered and used in
@@ -79,68 +95,126 @@ module Metalware
     # from all `files` namespaces within all configs for the node, with
     # identifiers in higher precedence configs replacing those with the same
     # basename in lower precendence configs.
+    # XXX this may be better living in `Templating::Configuration`? `configs`
+    # and `load_config` could then be private.
     def build_files
-      files_memo = Hash.new {|k,v| k[v] = []}
-      configs.reduce(files_memo) do |files, config_name|
-        config = load_config(config_name)
+      files_memo = Hash.new { |k, v| k[v] = [] }
+      configs.each_with_object(files_memo) do |config_name, files|
+        config = templating_configuration.load_config(config_name)
         new_files = config[:files]
         merge_in_files!(files, new_files)
-        files
-      end.symbolize_keys
+      end
     end
 
     # The path the file with given `file_name` within the given `namespace`
     # will be rendered to for this node.
     def rendered_build_file_path(namespace, file_name)
       File.join(
-        @metalware_config.rendered_files_path,
+        metalware_config.rendered_files_path,
         name,
         namespace.to_s,
         file_name
       )
     end
 
-    private
-
-    def build_complete_marker_file
-      File.join(@metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
-    end
-
-    def groups
-      NodeattrInterface.groups_for_node(name)
-    rescue NodeNotInGendersError
-      # It's OK for a node to not be in the genders file, it just means it's
-      # not part of any groups.
-      []
-    end
-
-    def load_config(config_name)
-      config_path = @metalware_config.repo_config_path(config_name)
-      if File.exist? config_path
-        YAML.load_file(config_path).symbolize_keys
+    def index
+      if primary_group
+        Nodes.create(metalware_config, primary_group, true).index(self) + 1
       else
-        {}
+        0
       end
     end
 
+    def group_index
+      primary_group_index || 0
+    end
+
+    def primary_group
+      groups.first
+    end
+
+    def repo_config
+      @repo_config ||= Templater.new(metalware_config, nodename: name).config
+    end
+
+    def build_template_paths
+      build_method.template_paths
+    end
+
+    private
+
+    attr_reader :metalware_config, :should_be_configured
+
+    def templating_configuration
+      @templating_configuration ||=
+        Templating::Configuration.for_node(name, config: metalware_config)
+    end
+
+    def build_complete_marker_file
+      File.join(metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
+    end
+
+    def primary_group_index
+      group_cache.index(primary_group)
+    end
+
+    def group_cache
+      GroupCache.new(metalware_config)
+    end
+
     def merge_in_files!(existing_files, new_files)
-      if new_files
-        new_files.each do |namespace, file_identifiers|
-          file_identifiers.each do |file_identifier|
-            replace_file_with_same_basename!(existing_files[namespace], file_identifier)
-          end
+      new_files&.each do |namespace, file_identifiers|
+        file_identifiers.each do |file_identifier|
+          replace_file_with_same_basename!(existing_files[namespace], file_identifier)
         end
       end
     end
 
     def replace_file_with_same_basename!(files_namespace, file_identifier)
-      files_namespace.reject! {|f| same_basename?(file_identifier, f)}
+      files_namespace.reject! { |f| same_basename?(file_identifier, f) }
       files_namespace << file_identifier
       files_namespace.sort! # Sort for consistent ordering.
     end
 
     def same_basename?(path1, path2)
       File.basename(path1) == File.basename(path2)
+    end
+
+    def build_method
+      @build_method ||= build_method_class.new(metalware_config, self)
+    end
+
+    def build_method_class
+      validate_build_method
+
+      case repo_build_method
+      when :'uefi-kickstart'
+        BuildMethods::Kickstarts::UEFI
+      when :basic
+        BuildMethods::Basic
+      when :self
+        BuildMethods::Self
+      else
+        self_node? ? BuildMethods::Self : BuildMethods::Kickstarts::Pxelinux
+      end
+    end
+
+    def validate_build_method
+      if self_node?
+        unless [:self, nil].include?(repo_build_method)
+          raise SelfBuildMethodError, build_method: repo_build_method
+        end
+      elsif repo_build_method == :self
+        raise SelfBuildMethodError, building_self_node: false
+      end
+    end
+
+    def repo_build_method
+      repo_config[:build_method]&.to_sym
+    end
+
+    def self_node?
+      name == 'self'
     end
   end
 end

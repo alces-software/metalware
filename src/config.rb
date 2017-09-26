@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -31,25 +33,29 @@ require 'metal_log'
 module Metalware
   class Config
     # XXX DRY these paths up.
+    # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
       build_poll_sleep: 10,
+      answer_files_path: '/var/lib/metalware/answers',
       built_nodes_storage_path: '/var/lib/metalware/cache/built-nodes',
       rendered_files_path: '/var/lib/metalware/rendered',
       pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
       repo_path: '/var/lib/metalware/repo',
       log_path: '/var/log/metalware',
-      log_severity: "INFO"
-    }
+      log_severity: 'INFO',
+    }.freeze
 
-    def initialize(file=nil, options = {})
+    attr_reader :cli
+
+    def initialize(file = nil, options = {})
       file ||= Constants::DEFAULT_CONFIG_PATH
-      @config = (
-        YAML.load_file(file) || {}
-      ).symbolize_keys
+      unless File.file?(file)
+        raise MetalwareError, "Config file '#{file}' does not exist"
+      end
+
+      @config = Data.load(file)
       @cli = OpenStruct.new(options)
       MetalLog.reset_log(self)
-    rescue Errno::ENOENT
-      raise MetalwareError, "Config file '#{file}' does not exist"
     end
 
     KEYS_WITH_DEFAULTS.each do |key, default|
@@ -60,9 +66,28 @@ module Metalware
 
     def repo_config_path(config_name)
       config_file = config_name + '.yaml'
-      File.join(repo_path, "config", config_file)
+      File.join(repo_path, 'config', config_file)
     end
 
-    attr_reader :cli
+    # TODO: Remove these methods as answer files should always be loaded through
+    # the Loader so they can be validated. If for some reason the path is
+    # required, then the path can be accessed from the FilePath class
+    def configure_file
+      File.join(repo_path, 'configure.yaml')
+    end
+
+    def domain_answers_file
+      File.join(answer_files_path, 'domain.yaml')
+    end
+
+    def group_answers_file(group_name)
+      file_name = "#{group_name}.yaml"
+      File.join(answer_files_path, 'groups', file_name)
+    end
+
+    def node_answers_file(node_name)
+      file_name = "#{node_name}.yaml"
+      File.join(answer_files_path, 'nodes', file_name)
+    end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -29,24 +31,22 @@ require 'nodes'
 require 'timeout'
 
 RSpec.describe Metalware::Commands::Status do
-
 end
 
-RSpec.describe Metalware::Status::Monitor do
+RSpec.describe Metalware::Status::Monitor, real_fs: true do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
-    @config = Metalware::Config.new()
-    @nodes = Metalware::Nodes.create(@config, "status", true).map { |e| e.name }
+    @config = Metalware::Config.new
+    @nodes = Metalware::Nodes.create(@config, 'status', true).map(&:name)
     @cmds = [:ping, :power]
-    @m_input = {nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20}
+    @m_input = { nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
     @monitor = Metalware::Status::Monitor.new(@m_input)
   end
 
   context 'after the monitor is initialized' do
     it 'contains a empty job queue and running list' do
-      
-      expect(@monitor.instance_variable_get :@running).to eq([])
+      expect(@monitor.instance_variable_get(:@running)).to eq([])
       queue = @monitor.instance_variable_get :@queue
       expect(queue).to be_a(Queue)
       expect(queue.length).to eq(0)
@@ -57,7 +57,7 @@ RSpec.describe Metalware::Status::Monitor do
     before(:each) do
       @monitor.instance_eval { @started_jobs = 0 }
       @monitor.define_singleton_method(:start_next_job,
-                                       lambda { |idx| @started_jobs += 1 })
+                                       ->(_idx) { @started_jobs += 1 })
       @monitor.create_jobs
     end
 
@@ -69,7 +69,7 @@ RSpec.describe Metalware::Status::Monitor do
     end
 
     it 'start_next_job is ran' do
-      expect(@monitor.instance_variable_get :@started_jobs).to eq(@m_input[:thread_limit])
+      expect(@monitor.instance_variable_get(:@started_jobs)).to eq(@m_input[:thread_limit])
     end
 
     it 'adds commands then nodes' do

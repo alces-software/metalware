@@ -1,0 +1,153 @@
+
+# frozen_string_literal: true
+
+#==============================================================================
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+#
+# This file/package is part of Alces Metalware.
+#
+# Alces Metalware is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License
+# as published by the Free Software Foundation, either version 3 of
+# the License, or (at your option) any later version.
+#
+# Alces Metalware is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this package.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For more information on the Alces Metalware, please visit:
+# https://github.com/alces-software/metalware
+#==============================================================================
+
+require 'spec_utils'
+
+require 'filesystem'
+require 'answers_table_creator'
+require 'config'
+require 'validation/loader'
+
+RSpec.describe Metalware::AnswersTableCreator do
+  subject do
+    Metalware::AnswersTableCreator.new(Metalware::Config.new)
+  end
+  let :config { Metalware::Config.new }
+  let :configure_data do
+    {
+      domain: {
+        question_1: { question: 'question 1' },
+      },
+      group: {
+        question_1: { question: 'question 1' },
+        question_2: { question: 'question 2', type: 'integer' },
+      },
+      node: {
+        question_1: { question: 'question 1' },
+        question_2: { question: 'question 2', type: 'integer' },
+        question_3: { question: 'question 3' },
+      },
+      self: {},
+    }
+  end
+  let :loader { Metalware::Validation::Loader.new(config) }
+
+  let :domain_answers do
+    { question_1: 'domain question 1' }
+  end
+
+  let :group_answers do
+    { question_1: 'group question 1', question_2: 11 }
+  end
+
+  let :node_answers do
+    {
+      question_1: 'node question 1',
+      question_2: 13,
+      question_3: 'node question 3',
+    }
+  end
+
+  let :group_name { 'testnodes' }
+
+  let :node_name { 'testnode01' }
+
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.dump('/var/lib/metalware/answers/domain.yaml', domain_answers)
+      fs.dump("/var/lib/metalware/answers/groups/#{group_name}.yaml", group_answers)
+      fs.dump("/var/lib/metalware/answers/nodes/#{node_name}.yaml", node_answers)
+    end
+  end
+
+  before do
+    SpecUtils.use_mock_genders(self)
+  end
+
+  before :each do
+    allow(loader).to receive(:configure_data).and_return(configure_data)
+    allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
+  end
+
+  describe '#domain_table' do
+    it 'creates table with questions and domain answers' do
+      filesystem.test do
+        expected_table = Terminal::Table.new(
+          headings: ['Question', 'Domain'],
+          rows: [
+            ['question_1', '"domain question 1"'],
+            ['question_2', 'nil'],
+            ['question_3', 'nil'],
+          ]
+        )
+
+        # In this and following tests, convert tables to strings so can compare
+        # output rather than as objects (which will never be equal as we create
+        # different `Table`s).
+        expect(
+          subject.domain_table.to_s
+        ).to eq expected_table.to_s
+      end
+    end
+  end
+
+  describe '#primary_group_table' do
+    it 'creates table with questions, and domain and primary group answers' do
+      filesystem.test do
+        expected_table = Terminal::Table.new(
+          headings: ['Question', 'Domain', "Group: #{group_name}"],
+          rows: [
+            ['question_1', '"domain question 1"', '"group question 1"'],
+            ['question_2', 'nil', '11'],
+            ['question_3', 'nil', 'nil'],
+          ]
+        )
+
+        expect(
+          subject.primary_group_table(group_name).to_s
+        ).to eq expected_table.to_s
+      end
+    end
+  end
+
+  describe '#node_table' do
+    it 'creates table with questions, and domain, primary group, and node answers' do
+      filesystem.test do
+        expected_table = Terminal::Table.new(
+          headings: ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
+          rows: [
+            ['question_1', '"domain question 1"', '"group question 1"', '"node question 1"'],
+            ['question_2', 'nil', '11', '13'],
+            ['question_3', 'nil', 'nil', '"node question 3"'],
+          ]
+        )
+
+        expect(
+          subject.node_table(node_name).to_s
+        ).to eq expected_table.to_s
+      end
+    end
+  end
+end

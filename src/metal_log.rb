@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -30,7 +32,7 @@ module Metalware
     class << self
       def method_missing(s, *a, &b)
         # Only log things outside of unit tests.
-        if $0 !~ /rspec$/
+        if $PROGRAM_NAME !~ /rspec$/
           metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
         end
       end
@@ -43,14 +45,14 @@ module Metalware
       private
 
       def metal_log
-        @metal_log ||= MetalLog.new("metal")
+        @metal_log ||= MetalLog.new('metal')
       end
     end
 
     def initialize(log_name)
       file = "#{config.log_path}/#{log_name}.log"
       FileUtils.mkdir_p File.dirname(file)
-      f = File.open(file, "a")
+      f = File.open(file, 'a')
       f.sync = true
       super(f)
       self.level = config.log_severity
@@ -58,7 +60,7 @@ module Metalware
 
     def warn(msg)
       config.cli.strict ? raise(StrictWarningError, msg) : super(msg)
-      Output.stderr "warning: #{msg}" unless config.cli.quiet
+      Output.warning "warning: #{msg}" unless config.cli.quiet
     end
 
     private

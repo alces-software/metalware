@@ -43,7 +43,7 @@ install_genders() {
 
         doing 'Configure'
         ./configure --prefix="${target}/opt/genders" \
-            --with-genders-file="${target}/etc/genders" \
+            --with-genders-file="/var/lib/metalware/rendered/system/genders" \
             --without-java-extensions \
             --without-perl-extensions \
             --without-python-extensions \

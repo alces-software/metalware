@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -46,39 +48,41 @@ module Metalware
       attr_reader :thread
 
       def start
-        @thread = Thread.new {
+        @thread = Thread.new do
           begin
             @status_log.info "Job Thread: #{Thread.current}"
             run_command
           rescue => e
             @status_log.fatal "JOB #{Thread.current}: #{e.inspect}"
           end
-        }
+        end
         self
       end
 
       # ----- THREAD METHODS BELOW THIS LINE ------
       CMD_LIBRARY = {
-        :power => :job_power_status,
-        :ping => :job_ping_node
-      }
+        power: :job_power_status,
+        ping: :job_ping_node,
+      }.freeze
 
       def run_command
-        Timeout::timeout(@time_limit) {
+        Timeout.timeout(@time_limit) do
           @data = send(CMD_LIBRARY[@cmd] ? CMD_LIBRARY[@cmd] : @cmd)
-        }
+        end
       rescue Timeout::Error
-        @data = "timeout"
+        @data = 'timeout'
       ensure
         kill_bash_process if @bash_pid
         self.class.report_data(@nodename, @cmd, @data)
       end
 
       def kill_bash_process
-        Timeout::timeout(10) { _send_signal_and_wait(2) }
+        Timeout.timeout(10) { _send_signal_and_wait(2) }
       rescue Timeout::Error
         _send_signal_and_wait(9)
       rescue Errno::ESRCH
+        # XXX Not handling this gives a Rubocop warning; should we do something
+        # here?
       end
 
       def _send_signal_and_wait(signum)
@@ -93,18 +97,18 @@ module Metalware
       end
 
       def job_power_status
-        script = File.join(Constants::METALWARE_INSTALL_PATH, "libexec/power")
+        script = File.join(Constants::METALWARE_INSTALL_PATH, 'libexec/power')
         cmd = "#{script} #{@nodename} status 2>&1"
         result = run_bash(cmd)
-                  .scan(/Chassis Power is .*\Z/)[0].to_s
-                  .scan(Regexp.union(/on/, /off/))[0]
-        result.nil? ? "error" : result
+                 .scan(/Chassis Power is .*\Z/)[0].to_s
+                 .scan(Regexp.union(/on/, /off/))[0]
+        result.nil? ? 'error' : result
       end
 
       def job_ping_node
         cmd = "ping -c 1 #{@nodename} >/dev/null 2>&1; echo $?"
         result = run_bash(cmd)
-        result.chomp == "0" ? "ok" : "error"
+        result.chomp == '0' ? 'ok' : 'error'
       end
     end
   end

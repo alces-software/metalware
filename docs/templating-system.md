@@ -63,8 +63,12 @@ Values available within this namespace are:
 <td><code>index</code></td>
 <td>
 
-The index of the current node within the group being templated, for the current
-group of nodes being templated.
+The index of the current node within its primary group. The primary group for a
+node is the first group associated with that node in the genders file, i.e. the
+first group to appear in the output of `nodeattr -l $NODE_NAME`. The
+<code>index</code> is guaranteed to be consistent between invocations of
+different commands which template for the same node, so long as the genders
+file remains consistent.
 
 </td>
 
@@ -73,7 +77,27 @@ group of nodes being templated.
 href='https://github.com/alces-software/metalware-default/blob/226cf530d4ce6bdc09a6c65ba3f4bfc553032752/config/domain.yaml#L3'>
 metalware-default
 </a>
-</td> </tr>
+</td>
+</tr>
+
+<tr>
+<td><code>group_index</code></td>
+<td>
+
+The unique index of the current node's primary group. This is guaranteed to
+remain consistent for a particular primary group; it may change for a node if
+that node's primary group is changed.
+
+</td>
+
+<td>
+<pre lang="yaml">
+
+ip: "10.10.<%= alces.group_index %>.<%= alces.index %>"
+
+</pre>
+</td>
+</tr>
 
 
 <tr>
@@ -199,7 +223,8 @@ metalware-default
 <td>
 
 A URL from which the Metalware deployment server `genders` file
-(`/opt/metalware/etc/genders`) can be retrieved via a HTTP GET request.
+(`/var/lib/metalware/rendered/system/genders`) can be retrieved via a HTTP GET
+request.
 
 </td>
 

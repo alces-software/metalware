@@ -1,38 +1,37 @@
-#==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
-#
-# This file/package is part of Alces Metalware.
-#
-# Alces Metalware is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License
-# as published by the Free Software Foundation, either version 3 of
-# the License, or (at your option) any later version.
-#
-# Alces Metalware is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this package.  If not, see <http://www.gnu.org/licenses/>.
-#
-# For more information on the Alces Metalware, please visit:
-# https://github.com/alces-software/metalware
-#==============================================================================
+
+# frozen_string_literal: true
 
 require 'constants'
-
+require 'validation/loader'
 
 module Metalware
   class Repo
-    attr_reader :path
-
-    def initialize(path)
-      @path = path
+    def initialize(config)
+      @config = config
     end
 
-    def exists?
-      Dir.exist? path
+    def configure_questions
+      configure_data_sections.reduce(:merge)
     end
+
+    def configure_question_identifiers
+      configure_questions.keys.sort.uniq
+    end
+
+    private
+
+    def loader
+      @loader ||= Validation::Loader.new(config)
+    end
+
+    def configure_data
+      @configure_data ||= loader.configure_data
+    end
+
+    def configure_data_sections
+      Constants::CONFIGURE_SECTIONS.map { |section| configure_data[section] }
+    end
+
+    attr_reader :config
   end
 end

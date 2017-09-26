@@ -27,6 +27,10 @@ install_runtime_prerequisites() {
         yum -e0 -y install libpcap && \
         yum -e0 -y install ipmitool && \
         yum -e0 -y install gettext && \
+        yum -e0 -y install epel-release && \
+        yum -e0 -y install jq && \
+        yum -e0 -y install syslinux && \
+        yum -e0 -y install bind bind-utils && \
         yum -e0 -y install git
 }
 

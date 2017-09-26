@@ -1,0 +1,24 @@
+en:
+  errors:
+    rules:
+      configure:
+        top_level_keys?: >
+          An invalid top level key has been detected. Only 'questions', 'domain'
+          , 'node', and 'self' are allowed
+        supported_type?: >
+          Is an unsupported question type
+        default?: >
+          Default's must be filled or a string
+        default_type?: >
+          The question type does not match the default
+        choice_with_default?: >
+          The default must appear in the choice list
+        choice_type?: >
+          All choices must match the question type
+
+      answer:
+        missing_questions?: >
+          The following question(s) were detected in the answer file but do not
+          appear in 'configure.yaml':
+        answer_type?: >
+          There is a mismatch between the type of a question and its answer

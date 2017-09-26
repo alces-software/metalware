@@ -1,0 +1,67 @@
+
+<% if @currently_hunting %>
+  <%= form_tag(hunter_path, method: :delete) do %>
+    <% submit_tag(
+      'Stop hunting',
+      class: ['btn', 'btn-dark', 'btn-block'],
+      data: {
+        confirm: <<-EOF.strip_heredoc
+        Any unrecorded MAC addresses will be forgotten.
+
+        Are you sure you want to stop hunting?
+        EOF
+      }
+    ) %>
+  <% end %>
+
+  <div class='card'>
+    <div class='card-header'>
+      <ul class="nav">
+        <li class="nav-item">
+          <span class="navbar-brand">Hunter progress</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class='card-body'>
+      <%= render 'hunter/detected_nodes_table' %>
+    </div>
+  </div>
+
+<% else %>
+  <%= form_tag(start_hunter_path) do %>
+    <% submit_tag("Hunt!", class: ['btn', 'btn-dark', 'btn-block']) %>
+  <% end %>
+<% end %>
+
+<div class='card'>
+  <div class='card-header'>
+    <ul class="nav">
+      <li class="nav-item">
+        <span class="navbar-brand">Current <code>hunter.yaml</code> contents</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class='card-body'>
+    <table class='table'>
+      <thead>
+        <tr>
+          <th>MAC address</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @hunter_macs_to_nodes.each do |mac_address, node_name| %>
+          <tr>
+            <td>
+              <code><%= mac_address %></code>
+            </th>
+            <td><%= node_name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

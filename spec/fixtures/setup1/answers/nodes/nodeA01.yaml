@@ -1,0 +1,11 @@
+---
+root_password: saegh
+pri_network_defined: false
+pri_network_ip: dsf
+pri_network_interface: hsdf
+mgt_network_defined: false
+mgt_network_ip: sdfh
+mgt_network_interface: dsfh
+ib_network_defined: false
+ib_network_ip: sdfh
+ib_network_interface: sdhf

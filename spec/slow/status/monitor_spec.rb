@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -28,31 +30,31 @@ require 'config'
 require 'nodes'
 require 'timeout'
 
-RSpec.describe Metalware::Status::Monitor do
+RSpec.describe Metalware::Status::Monitor, real_fs: true do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
-    @config = Metalware::Config.new()
-    @nodes = Metalware::Nodes.create(@config, "status", true).map { |e| e.name }
+    @config = Metalware::Config.new
+    @nodes = Metalware::Nodes.create(@config, 'status', true).map(&:name)
     @cmds = [:ping, :power]
-    @m_input = {nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20}
+    @m_input = { nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
     @monitor = Metalware::Status::Monitor.new(@m_input)
   end
 
   after(:each) do
-    Thread.list.each { |t|
+    Thread.list.each do |t|
       unless t == Thread.current
         t.kill
         t.join
       end
-    }
+    end
   end
 
   context 'when threading jobs' do
     before :each do
       allow_any_instance_of(Metalware::Status::Job).to receive(:start) {
         t = Thread.new { sleep }
-        t.define_singleton_method(:thread, lambda { self })
+        t.define_singleton_method(:thread, -> { self })
         t
       }
     end
@@ -98,18 +100,18 @@ RSpec.describe Metalware::Status::Monitor do
 
       monitor_thr = Thread.new { @monitor.monitor_jobs }
 
-      Timeout::timeout(10) {
-        until queue.length == 0
+      Timeout.timeout(15) do
+        until queue.empty?
           cur_len = queue.length
           running.sample.thread.kill
-          sleep (0.001) until queue.length == cur_len - 1
+          sleep 0.001 until queue.length == cur_len - 1
         end
-        until running.length == 0
+        until running.empty?
           t = running.sample
           t.thread.kill unless t.nil?
         end
         monitor_thr.join
-      }
+      end
     end
   end
 end

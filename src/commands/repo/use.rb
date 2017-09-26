@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'rugged'
 require 'fileutils'
 
@@ -29,22 +31,25 @@ require 'constants'
 module Metalware
   module Commands
     module Repo
-      class Use < BaseCommand
-        def setup(args, options)
+      class Use < CommandHelpers::BaseCommand
+        private
+
+        def setup
           @repo_url = args.first
-          @options = options
         end
 
         def run
-          if @options.force
-            FileUtils::rm_rf config.repo_path
-            MetalLog.info "Force deleted old repo"
+          if options.force
+            FileUtils.rm_rf config.repo_path
+            MetalLog.info 'Force deleted old repo'
           end
 
           Rugged::Repository.clone_at(@repo_url, config.repo_path)
           MetalLog.info "Cloned repo from #{@repo_url}"
+        rescue Rugged::NetworkError
+          raise RuggedCloneError, "Could not find repo: #{@repo_url}"
         rescue Rugged::InvalidError
-          raise $!, "Repository already exists. Use -f to force clone a new one"
+          raise RuggedCloneError, 'Repository already exists. Use -f to force clone a new one'
         end
       end
     end

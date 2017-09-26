@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -25,7 +27,6 @@ require 'active_support/core_ext/module/delegation'
 require 'nodeattr_interface'
 require 'node'
 
-
 module Metalware
   class Nodes
     include Enumerable
@@ -33,16 +34,16 @@ module Metalware
     # Private as can only get `Nodes` instance via other methods in this class.
     private_class_method :new
 
-    delegate :length, :each, to: :@nodes
+    delegate :length, :each, :index, to: :@nodes
 
     # Create instance of `Nodes` from a single node or gender group.
     def self.create(config, node_identifier, is_group)
-      if is_group
-        nodes = NodeattrInterface.nodes_in_group(node_identifier)
-          .map {|name| Node.new(config, name)}
-      else
-        nodes = [Node.new(config, node_identifier)]
-      end
+      nodes = if is_group
+                NodeattrInterface.nodes_in_group(node_identifier)
+                                 .map { |name| Node.new(config, name) }
+              else
+                [Node.new(config, node_identifier)]
+              end
 
       new(nodes)
     end
@@ -54,14 +55,13 @@ module Metalware
       self.class.send(:new, nodes)
     end
 
-    def template_each(**additional_template_parameters, &block)
-      @nodes.each_with_index do |node, index|
+    def template_each(**additional_template_parameters)
+      @nodes.each do |node|
         template_parameters = {
           nodename: node.name,
-          index: index,
         }.merge(additional_template_parameters)
 
-        block.call(template_parameters, node)
+        yield(template_parameters, node)
       end
     end
 

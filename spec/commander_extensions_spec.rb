@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -23,7 +25,6 @@
 require 'commander_extensions'
 
 # These specs inspired by those in Commander gem in `spec/runner_spec.rb`.
-
 
 RSpec.describe CommanderExtensions do
   include CommanderExtensions::Delegates
@@ -76,9 +77,9 @@ RSpec.describe CommanderExtensions do
           c.syntax = 'not_metal test [options]'
         end
 
-        expect {
+        expect do
           command(:test).call
-        }.to raise_error(CommanderExtensions::CommandDefinitionError)
+        end.to raise_error(CommanderExtensions::CommandDefinitionError)
       end
 
       it 'raises if second word is not command name' do
@@ -86,9 +87,9 @@ RSpec.describe CommanderExtensions do
           c.syntax = 'metal not_test [options]'
         end
 
-        expect {
+        expect do
           command(:test).call
-        }.to raise_error(CommanderExtensions::CommandDefinitionError)
+        end.to raise_error(CommanderExtensions::CommandDefinitionError)
       end
 
       it 'raises if last word is not [options]' do
@@ -96,9 +97,9 @@ RSpec.describe CommanderExtensions do
           c.syntax = 'metal test [not_options]'
         end
 
-        expect {
+        expect do
           command(:test).call
-        }.to raise_error(CommanderExtensions::CommandDefinitionError)
+        end.to raise_error(CommanderExtensions::CommandDefinitionError)
       end
 
       describe 'when multi-word command' do
@@ -107,9 +108,9 @@ RSpec.describe CommanderExtensions do
             c.syntax = 'metal test not_do [options]'
           end
 
-          expect {
+          expect do
             command(:'test do').call
-          }.to raise_error(
+          end.to raise_error(
             CommanderExtensions::CommandDefinitionError
           ).with_message(
             "After CLI name in syntax should come command name(s) ('test do'), got 'test not_do'"
@@ -120,15 +121,15 @@ RSpec.describe CommanderExtensions do
 
     describe 'validating passed arguments against syntax' do
       it 'raises if too many arguments given' do
-        expect {
+        expect do
           command(:test).call(['one', 'two', 'three', 'four'])
-        }.to raise_error(CommanderExtensions::CommandUsageError)
+        end.to raise_error(CommanderExtensions::CommandUsageError)
       end
 
       it 'raises if too few arguments given' do
-        expect {
+        expect do
           command(:test).call(['one'])
-        }.to raise_error(CommanderExtensions::CommandUsageError)
+        end.to raise_error(CommanderExtensions::CommandUsageError)
       end
 
       it 'proceeds as normal if valid number of arguments given' do
@@ -143,9 +144,9 @@ RSpec.describe CommanderExtensions do
         end
 
         it 'raises if too few arguments given' do
-          expect {
+          expect do
             command(:'test do').call
-          }.to raise_error(CommanderExtensions::CommandUsageError)
+          end.to raise_error(CommanderExtensions::CommandUsageError)
         end
 
         it 'proceeds as normal if valid number of arguments given' do
@@ -155,6 +156,5 @@ RSpec.describe CommanderExtensions do
         end
       end
     end
-
   end
 end

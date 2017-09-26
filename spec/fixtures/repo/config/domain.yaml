@@ -1,11 +1,16 @@
 
 some_repo_value: repo_value
-erb_repo_value: <%= alces[:index] + 1 %>
+erb_repo_value: <%= alces.index + 1 %>
 
 first_level_erb_repo_value: <%= some_repo_value %>
 second_level_erb_repo_value: <%= first_level_erb_repo_value %>
 third_level_erb_repo_value: <%= second_level_erb_repo_value %>
 very_recursive_erb_repo_value: <%= third_level_erb_repo_value %>
+
+true_repo_value: true
+false_repo_value: false
+recursive_true_repo_value: <%= true_repo_value %>
+recursive_false_repo_value: <%= false_repo_value %>
 
 nested:
   repo_value: nested_repo_value

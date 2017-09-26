@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -22,7 +24,7 @@
 
 require 'active_support/core_ext/string/strip'
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'config'
 require 'templater'
 require 'constants'
@@ -30,36 +32,62 @@ require 'node'
 require 'nodes'
 require 'output'
 require 'build_files_retriever'
-
+require 'exceptions'
 
 module Metalware
   module Commands
-    class Build < BaseCommand
+    class Build < CommandHelpers::BaseCommand
+      GRACEFULLY_SHUTDOWN_KEY = :gracefully_shutdown
+      COMPLETE_KEY = :complete
 
       private
 
-      def setup(args, options)
-        @options = options
+      attr_reader :group_name, :nodes, :edit_start, :edit_continue
+
+      delegate :template_path, to: :file_path
+      delegate :in_gui?, to: Utils
+
+      def setup
+        setup_edit_mode
         node_identifier = args.first
+        @group_name = node_identifier if options.group
         @nodes = Nodes.create(config, node_identifier, options.group)
       end
 
       def run
-        render_build_templates
+        render_build_templates unless edit_continue
+        if edit_start
+          puts(EDIT_START_MSG)
+          return
+        end
+        start_build
         wait_for_nodes_to_build
         teardown
+      rescue
+        # Ensure command is recorded as complete when in GUI.
+        record_gui_build_complete if in_gui?
+        raise
       end
 
-      def requires_repo?
-        true
+      def dependency_hash
+        {
+          repo: repo_dependencies,
+          configure: ['domain.yaml'],
+          optional: {
+            configure: ["groups/#{group_name}.yaml"],
+          },
+        }
+      end
+
+      def repo_dependencies
+        nodes.map(&:build_template_paths).flatten.uniq
       end
 
       def render_build_templates
-        @nodes.template_each firstboot: true do |parameters, node|
+        nodes.template_each firstboot: true do |parameters, node|
           parameters[:files] = build_files(node)
           render_build_files(parameters, node)
-          render_kickstart(parameters, node)
-          render_pxelinux(parameters, node)
+          node.render_build_started_templates(parameters)
         end
       end
 
@@ -79,93 +107,94 @@ module Metalware
       def render_build_files(parameters, node)
         build_files(node).each do |namespace, files|
           files.each do |file|
-            unless file[:error]
-              render_path = node.rendered_build_file_path(namespace, file[:name])
-              FileUtils.mkdir_p(File.dirname render_path)
-              Templater.render_to_file(config, file[:template_path], render_path, parameters)
-            end
+            next if file[:error]
+            render_path = node.rendered_build_file_path(namespace, file[:name])
+            FileUtils.mkdir_p(File.dirname(render_path))
+            Templater.render_to_file(config, file[:template_path], render_path, parameters)
           end
         end
       end
 
-      def retrieve_and_render_files(parameters, node)
-        retriever = BuildFilesRetriever.new(node.name, config)
-        build_files_hash = retriever.retrieve(node.build_files)
-
-        build_files_hash.each do |namespace, files|
-          files.each do |file|
-            unless file[:error]
-              render_path = node.rendered_build_file_path(namespace, file[:name])
-              Templater.render_to_file(config, file[:template_path], render_path, parameters)
-            end
-          end
+      def start_build
+        nodes.each do |node|
+          build_threads.add(Thread.new { node.start_build })
         end
       end
 
-      def render_kickstart(parameters, node)
-        kickstart_template_path = template_path :kickstart
-        kickstart_save_path = File.join(
-          config.rendered_files_path, 'kickstart', node.name
-        )
-        Templater.render_to_file(config, kickstart_template_path, kickstart_save_path, parameters)
+      def build_threads
+        @build_threads ||= ThreadGroup.new
       end
 
-      def render_pxelinux(parameters, node)
-        # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
-        # file yet - best place to do this may be when creating `Node` objects?
-        pxelinux_template_path = template_path :pxelinux
-        pxelinux_save_path = File.join(
-          config.pxelinux_cfg_path, node.hexadecimal_ip
-        )
-        Templater.render_to_file(config, pxelinux_template_path, pxelinux_save_path, parameters)
-      end
-
-      def template_path(template_type)
-        File.join(
-          config.repo_path,
-          template_type.to_s,
-          @options.__send__(template_type)
-        )
+      def clear_up_build_threads
+        build_threads.list.map(&:kill)
       end
 
       def wait_for_nodes_to_build
-        Output.stderr 'Waiting for nodes to report as built...',
-          '(Ctrl-C to terminate)'
+        Output.success 'Waiting for nodes to report as built...'
+        Output.cli_only '(Ctrl-C to terminate)'
 
         rerendered_nodes = []
         loop do
-          @nodes.select do |node|
+          gracefully_shutdown if should_gracefully_shutdown?
+
+          nodes.select do |node|
             !rerendered_nodes.include?(node) && node.built?
-          end.
-          tap do |nodes|
-            render_permanent_pxelinux_configs(nodes)
+          end
+               .tap do |nodes|
+            render_build_complete_templates(nodes)
             rerendered_nodes.push(*nodes)
-          end.
-          each do |node|
-            Output.stderr "Node #{node.name} built."
+          end
+               .each do |node|
+            Output.success "Node #{node.name} built."
           end
 
-          all_nodes_reported_built = rerendered_nodes.length == @nodes.length
-          break if all_nodes_reported_built
+          all_nodes_reported_built = rerendered_nodes.length == nodes.length
+          if all_nodes_reported_built
+            # For now at least, keep thread alive when in GUI so can keep
+            # accessing messages. XXX Change this, this is very wasteful.
+            if in_gui?
+              record_gui_build_complete
+            else
+              break
+            end
+          end
 
           sleep config.build_poll_sleep
         end
       end
 
-      def render_all_permanent_pxelinux_configs
-        render_permanent_pxelinux_configs(@nodes)
+      def record_gui_build_complete
+        Thread.current.thread_variable_set(COMPLETE_KEY, true)
       end
 
-      def render_permanent_pxelinux_configs(nodes)
+      def should_gracefully_shutdown?
+        in_gui? && Thread.current.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)
+      end
+
+      def gracefully_shutdown
+        # XXX Somewhat similar to `handle_interrupt`; may not be easily
+        # generalizable however.
+        Output.info 'Exiting...'
+        render_all_build_complete_templates
+        teardown
+        record_gui_build_complete
+      end
+
+      def render_all_build_complete_templates
+        render_build_complete_templates(nodes)
+      end
+
+      def render_build_complete_templates(nodes)
         nodes.template_each firstboot: false do |parameters, node|
           parameters[:files] = build_files(node)
-          render_pxelinux(parameters, node)
+          node.render_build_complete_templates(parameters)
         end
       end
 
       def teardown
         clear_up_built_node_marker_files
-        Output.stderr 'Done.'
+        clear_up_build_threads
+        Output.info 'Done.'
       end
 
       def clear_up_built_node_marker_files
@@ -175,24 +204,35 @@ module Metalware
       end
 
       def handle_interrupt(_e)
-        Output.stderr 'Exiting...'
-        ask_if_should_rerender_pxelinux_configs
+        Output.info 'Exiting...'
+        ask_if_should_rerender
         teardown
       rescue Interrupt
-        Output.stderr 'Re-rendering all permanent PXELINUX templates anyway...'
-        render_all_permanent_pxelinux_configs
+        Output.info 'Re-rendering templates anyway...'
+        render_all_build_complete_templates
         teardown
       end
 
-      def ask_if_should_rerender_pxelinux_configs
+      def ask_if_should_rerender
         should_rerender = <<-EOF.strip_heredoc
-          Re-render permanent PXELINUX templates for all nodes as if build succeeded?
+          Re-render appropriate templates for nodes as if build succeeded?
           [yes/no]
         EOF
-        if agree(should_rerender)
-          render_all_permanent_pxelinux_configs
-        end
+        render_all_build_complete_templates if agree(should_rerender)
       end
+
+      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
+
+      def setup_edit_mode
+        @edit_start = options.edit_start
+        @edit_continue = options.edit_continue
+        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
+      end
+
+      EDIT_START_MSG = <<-EOF.strip_heredoc
+        The build templates have been rendered and ready to be edited with `metal edit`
+        Continue the build process with the `--edit-continue` flag
+      EOF
     end
   end
 end

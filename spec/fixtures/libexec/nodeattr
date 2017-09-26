@@ -24,4 +24,4 @@ set -euo pipefail
 IFS=$'\n\t'
 
 PATH=/usr/bin/:/bin
-command nodeattr -f spec/fixtures/genders "$@"
+command nodeattr -f spec/fixtures/genders/default "$@"

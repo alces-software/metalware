@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,16 +22,15 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'constants'
 require 'output'
 require 'templater'
 require 'system_command'
 
-
 module Metalware
   module Commands
-    class Dhcp < BaseCommand
+    class Dhcp < CommandHelpers::BaseCommand
       DHCPD_HOSTS_FILE = '/etc/dhcp/dhcpd.hosts'
       RENDERED_DHCPD_HOSTS_STAGING_FILE = File.join(
         Constants::CACHE_PATH, 'last-rendered.dhcpd.hosts'
@@ -38,9 +39,7 @@ module Metalware
 
       private
 
-      def setup(args, options)
-        @options = options
-      end
+      def setup; end
 
       def run
         render_template
@@ -48,8 +47,10 @@ module Metalware
         install_rendered_template
       end
 
-      def requires_repo?
-        true
+      def dependency_hash
+        {
+          repo: ["dhcp/#{options.template}"],
+        }
       end
 
       def render_template
@@ -59,7 +60,7 @@ module Metalware
       end
 
       def template_path
-        File.join(config.repo_path, 'dhcp', @options.template)
+        File.join(config.repo_path, 'dhcp', options.template)
       end
 
       def validate_rendered_template!

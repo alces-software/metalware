@@ -1,7 +1,0 @@
-
-login1 master,masters,cluster,domain
-testnode02 pregroup
-testnode[01-03] testnodes,nodes,cluster,domain
-testnode02 postgroup
-node[01-10] status
-deepmerge deepmerge

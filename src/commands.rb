@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,13 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'commands/repo/use'
-require 'commands/repo/update'
-require 'commands/render'
-require 'commands/hosts'
-require 'commands/hunter'
-require 'commands/dhcp'
-require 'commands/build'
-require 'commands/status'
-require 'commands/each'
-require 'bash_command'
+require 'command_helpers/bash_command'
+require 'utils/dynamic_require'
+
+Metalware::Utils::DynamicRequire.relative('commands')
