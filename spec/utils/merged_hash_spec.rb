@@ -9,7 +9,7 @@ require 'data'
 RSpec.describe Metalware::Utils::MergedHash do
   let :config { Metalware::Config.new }
   let :filesystem do
-    FileSystem.setup { |fs| fs.with_repo_fixtures('repo2') }
+    FileSystem.setup { |fs| fs.with_repo_fixtures('merged_hash') }
   end
 
   def load_next_hash
@@ -21,7 +21,7 @@ RSpec.describe Metalware::Utils::MergedHash do
   end
 
   context 'with domain scope' do
-    let :merged_hash { Metalware::Utils::MergedHash.new(metalware_config: config) }
+    let :merged_hash { Metalware::Utils::MergedHash.new(config) }
 
     it 'returns the domain config' do
       filesystem.test do
@@ -36,7 +36,7 @@ RSpec.describe Metalware::Utils::MergedHash do
   context 'with single group' do
     let :merged_hash do
       Metalware::Utils::MergedHash.new(
-        metalware_config: config,
+        config,
         groups:['group1']
       )
     end
@@ -60,7 +60,7 @@ RSpec.describe Metalware::Utils::MergedHash do
   context 'with multiple groups' do
     let :merged_hash do
       Metalware::Utils::MergedHash.new(
-        metalware_config: config,
+        config,
         groups:['group1', 'group2']
       )
     end
@@ -86,7 +86,7 @@ RSpec.describe Metalware::Utils::MergedHash do
   context 'with multiple groups and a node' do
     let :merged_hash do
       Metalware::Utils::MergedHash.new(
-        metalware_config: config,
+        config,
         groups:['group1', 'group2'],
         node: 'node3'
       )

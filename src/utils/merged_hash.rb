@@ -11,7 +11,7 @@ module Metalware
     class MergedHash
       HASH_DATA_STRUCTURE = RecursiveOpenStruct
 
-      def initialize(metalware_config:, groups: [], node: nil)
+      def initialize(metalware_config, groups: [], node: nil)
         @metalware_config = metalware_config
         @file_path = FilePath.new(metalware_config)
         @groups = groups
@@ -19,7 +19,7 @@ module Metalware
       end
 
       def config
-        @config ||= HASH_DATA_STRUCTURE.new(build_hash_for_key(:config))
+        @config ||= build_hash_for_key(:config)
       end
 
       private
@@ -27,7 +27,7 @@ module Metalware
       attr_reader :metalware_config, :file_path, :groups, :node
 
       def build_hash_for_key(key)
-        combine_hashes(hash_array(key))
+        HASH_DATA_STRUCTURE.new(combine_hashes(hash_array(key)))
       end
 
       ##
