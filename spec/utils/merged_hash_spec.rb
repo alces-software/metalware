@@ -82,4 +82,33 @@ RSpec.describe Metalware::Utils::MergedHash do
       end
     end
   end
+
+  context 'with multiple groups and a node' do
+    let :merged_hash do
+      Metalware::Utils::MergedHash.new(
+        metalware_config: config,
+        groups:['group1', 'group2'],
+        node: 'node3'
+      )
+    end
+
+    it 'returns the merged configs' do
+      filesystem.test do
+        expect(merged_hash.config.to_h).not_to be_empty
+        merged_hash.config.to_h.each do |key, value|
+          expected_value = case key
+                           when :value0
+                             'domain'
+                           when :value1
+                             'group1'
+                           when :value2
+                             'group2'
+                           else
+                             'node3'
+                           end
+          expect(value).to eq(expected_value)
+        end
+      end
+    end
+  end
 end
