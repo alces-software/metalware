@@ -3,7 +3,13 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.1.0]
+## [2017.1.0] - 2017-09-26
+
+### Added
+- Rendered the named templates when dns_type is set to named
+- Allow nodes to build using different build types including using `uefi`
+- Implement the `self` node which refers to the controller
+- The self node can be configured and built from a blank centos image
 
 ### Changed
 
