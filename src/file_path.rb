@@ -53,6 +53,22 @@ module Metalware
       File.join(answer_files, 'self.yaml')
     end
 
+    def domain_config
+      File.join(repo, 'config/domain.yaml')
+    end
+
+    def group_config(group)
+      File.join(repo, 'config', "#{group}.yaml")
+    end
+
+    def node_config(node)
+      File.join(repo, 'config', "#{node}.yaml")
+    end
+
+    def self_config
+      File.join(repo, 'config/self.yaml')
+    end
+
     def repo
       config.repo_path
     end
