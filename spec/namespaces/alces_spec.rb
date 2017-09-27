@@ -7,14 +7,16 @@ require 'config'
 
 RSpec.describe Metalware::Namespaces::Alces do
   let :config { Metalware::Config.new }
+  let :unstubed_alces {  }
   let :alces do
     namespace = Metalware::Namespaces::Alces.new(config)    
-    allow(namespace).to receive(:answer).and_return(answer)
+    allow(namespace).to receive(:answer).and_return(answer(namespace))
     namespace
   end
 
-  let :answer do
+  def answer(alces)
     Metalware::HashMergers::MetalRecursiveOpenStruct.new({
+      alces: alces,
       key: 'value',
       infinite_value1: '<%= alces.answer.infinite_value2 %>',
       infinite_value2: '<%= alces.answer.infinite_value1 %>'
