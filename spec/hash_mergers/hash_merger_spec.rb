@@ -26,14 +26,12 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   def build_merged_hash(**hash_input)
-    OpenStruct.new({
-      config: Metalware::HashMergers::Config.new(config).merge(**hash_input),
-      answer: Metalware::HashMergers::Answer.new(config).merge(**hash_input)
-    })
+    OpenStruct.new(config: Metalware::HashMergers::Config.new(config).merge(**hash_input),
+                   answer: Metalware::HashMergers::Answer.new(config).merge(**hash_input))
   end
 
   context 'with domain scope' do
-    let :merged_hash { build_merged_hash() }
+    let :merged_hash { build_merged_hash }
 
     it 'returns the domain config' do
       filesystem.test do
@@ -47,7 +45,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
   context 'with single group' do
     let :merged_hash do
-      build_merged_hash( groups:['group1'] )
+      build_merged_hash(groups: ['group1'])
     end
 
     it 'returns the merged configs' do
@@ -68,7 +66,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
   context 'with multiple groups' do
     let :merged_hash do
-      build_merged_hash( groups:['group1', 'group2'] )
+      build_merged_hash(groups: ['group1', 'group2'])
     end
 
     it 'returns the merged configs' do
@@ -92,26 +90,26 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   context 'with multiple groups and a node' do
     let :merged_hash do
       build_merged_hash(
-        groups:['group1', 'group2'],
+        groups: ['group1', 'group2'],
         node: 'node3'
       )
     end
 
     def check_node_hash(my_hash = {})
       expect(my_hash).not_to be_empty
-        my_hash.each do |key, value|
-          expected_value = case key
-                           when :value0
-                             'domain'
-                           when :value1
-                             'group1'
-                           when :value2
-                             'group2'
-                           else
-                             'node3'
-                           end
-          expect(value).to eq(expected_value)
-        end
+      my_hash.each do |key, value|
+        expected_value = case key
+                         when :value0
+                           'domain'
+                         when :value1
+                           'group1'
+                         when :value2
+                           'group2'
+                         else
+                           'node3'
+                         end
+        expect(value).to eq(expected_value)
+      end
     end
 
     it 'returns the merged configs' do

@@ -32,13 +32,13 @@ module Metalware
       # responsible for how the file is loaded as that is delegated to load_yaml
       #
       def hash_array(groups:, node:)
-        [ load_yaml(:domain) ].tap do |arr|
+        [load_yaml(:domain)].tap do |arr|
           groups.each { |group| arr.push(load_yaml(:group, group)) }
           arr.push(load_yaml(:node, node)) if node
         end
       end
 
-      def load_yaml(section, section_name = nil)
+      def load_yaml(_section, _section_name = nil)
         raise NotImplementedError
       end
 
