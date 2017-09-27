@@ -27,8 +27,8 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
   def build_merged_hash(**hash_input)
     OpenStruct.new({
-      config: Metalware::HashMergers::Config.new(config, **hash_input).merge,
-      answer: Metalware::HashMergers::Answer.new(config, **hash_input).merge
+      config: Metalware::HashMergers::Config.new(config).merge(**hash_input),
+      answer: Metalware::HashMergers::Answer.new(config).merge(**hash_input)
     })
   end
 
