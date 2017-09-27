@@ -31,6 +31,10 @@ module Metalware
         # the given parameters.
         def replace_erb(template, template_parameters)
           parameters_binding = template_parameters.wrapper_binding
+          replace_erb_with_binding(template, parameters_binding)
+        end
+
+        def replace_erb_with_binding(template, parameters_binding)
           render_erb_template(template, parameters_binding)
         rescue NoMethodError => e
           # May be useful to include the name of the unset parameter in this error,
