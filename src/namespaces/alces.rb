@@ -1,5 +1,6 @@
 
 # frozen_string_literal: true
+
 require 'exceptions'
 require 'templating/renderer'
 
@@ -21,8 +22,7 @@ module Metalware
         end
       end
 
-      def answer
-      end
+      def answer; end
 
       private
 

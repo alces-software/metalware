@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'recursive-open-struct'
 
 module Metalware
@@ -11,6 +13,10 @@ module Metalware
 
       def method_missing(s, *a, &b)
         render_value(super(s, *a, &b))
+      end
+
+      def respond_to_missing?
+        super
       end
 
       def [](*a)

@@ -7,20 +7,18 @@ require 'config'
 
 RSpec.describe Metalware::Namespaces::Alces do
   let :config { Metalware::Config.new }
-  let :unstubed_alces {  }
+  let :unstubed_alces {}
   let :alces do
-    namespace = Metalware::Namespaces::Alces.new(config)    
+    namespace = Metalware::Namespaces::Alces.new(config)
     allow(namespace).to receive(:answer).and_return(answer(namespace))
     namespace
   end
 
   def answer(alces)
-    Metalware::HashMergers::MetalRecursiveOpenStruct.new({
-      alces: alces,
-      key: 'value',
-      infinite_value1: '<%= alces.answer.infinite_value2 %>',
-      infinite_value2: '<%= alces.answer.infinite_value1 %>'
-    })
+    Metalware::HashMergers::MetalRecursiveOpenStruct.new(alces: alces,
+                                                         key: 'value',
+                                                         infinite_value1: '<%= alces.answer.infinite_value2 %>',
+                                                         infinite_value2: '<%= alces.answer.infinite_value1 %>')
   end
 
   def render_template(template)
@@ -33,10 +31,10 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     it 'errors if recursion depth is exceeded' do
-      expect{
+      expect do
         output = render_template('<%= alces.answer.infinite_value1 %>')
         STDERR.puts "Template output: #{output}"
-      }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
+      end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
     end
   end
 end
