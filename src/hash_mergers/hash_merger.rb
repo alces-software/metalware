@@ -20,13 +20,8 @@ module Metalware
         @node = node
       end
 
-      # TODO: Replace with merge method
-      def config
-        @config ||= build_hash_for_key(:config)
-      end
-
-      def answer
-        @answer ||= build_hash_for_key(:answer)
+      def merge
+        build_hash_for_key(:remove_this_key_input)
       end
 
       private
@@ -48,19 +43,8 @@ module Metalware
         end
       end
 
-      # def load_yaml
-      #   raise NotImplementedError
-      # end
-
-      # TODO: Move this to inherited class
       def load_yaml(key, section, section_name = nil)
-        input = (section_name ? [section_name] : [])
-        case key
-        when :config
-          Data.load(file_path.send("#{section}_config", *input))
-        when :answer
-          loader.section_answers(section, *input)
-        end
+        raise NotImplementedError
       end
 
       def combine_hashes(hashes)

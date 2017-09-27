@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'hash_mergers/hash_merger'
+require 'hash_mergers'
 require 'config'
 require 'filesystem'
 require 'data'
@@ -27,8 +27,8 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
   def build_merged_hash(**hash_input)
     OpenStruct.new({
-      config: Metalware::HashMergers::HashMerger.new(config, **hash_input).config,
-      answer: Metalware::HashMergers::HashMerger.new(config, **hash_input).answer
+      config: Metalware::HashMergers::Config.new(config, **hash_input).merge,
+      answer: Metalware::HashMergers::Answer.new(config, **hash_input).merge
     })
   end
 
