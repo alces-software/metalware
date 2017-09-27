@@ -21,29 +21,25 @@ module Metalware
       end
 
       def merge
-        build_hash_for_key(:remove_this_key_input)
+        HASH_DATA_STRUCTURE.new(combine_hashes(hash_array))
       end
 
       private
 
       attr_reader :metalware_config, :file_path, :loader, :groups, :node
 
-      def build_hash_for_key(key)
-        HASH_DATA_STRUCTURE.new(combine_hashes(hash_array(key)))
-      end
-
       ##
       # hash_array enforces the order in which the hashes are loaded, it is not
       # responsible for how the file is loaded as that is delegated to load_yaml
       #
-      def hash_array(key)
-        [ load_yaml(key, :domain) ].tap do |arr|
-          groups.each { |group| arr.push(load_yaml(key, :group, group)) }
-          arr.push(load_yaml(key, :node, node)) if node
+      def hash_array
+        [ load_yaml(:domain) ].tap do |arr|
+          groups.each { |group| arr.push(load_yaml(:group, group)) }
+          arr.push(load_yaml(:node, node)) if node
         end
       end
 
-      def load_yaml(key, section, section_name = nil)
+      def load_yaml(section, section_name = nil)
         raise NotImplementedError
       end
 
