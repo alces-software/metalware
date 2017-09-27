@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'namespaces/alces'
+require 'hash_mergers'
 require 'config'
 
 RSpec.describe Metalware::Namespaces::Alces do
@@ -13,16 +14,27 @@ RSpec.describe Metalware::Namespaces::Alces do
   end
 
   let :answer do
-    OpenStruct.new({
+    Metalware::HashMergers::MetalRecursiveOpenStruct.new({
       key: 'value',
       infinite_value1: '<%= alces.answer.infinite_value2 %>',
       infinite_value2: '<%= alces.answer.infinite_value1 %>'
     })
   end
 
+  def render_template(template)
+    alces.render_erb_template(template)
+  end
+
   describe '#template' do
     it 'it can template a simple value' do
-      expect(alces.template('<%= alces.answer.key %>')).to eq('value')
+      expect(render_template('<%= alces.answer.key %>')).to eq('value')
+    end
+
+    it 'errors if recursion depth is exceeded' do
+      expect{
+        output = render_template('<%= alces.answer.infinite_value1 %>')
+        STDERR.puts "Template output: #{output}"
+      }.to raise_error(Metalware::RecursiveConfigDepthExceededError)
     end
   end
 end
