@@ -8,8 +8,8 @@ require 'recursive-open-struct'
 require 'constants'
 
 module Metalware
-  module Utils
-    class MergedHash
+  module HashMergers
+    class HashMerger
       HASH_DATA_STRUCTURE = RecursiveOpenStruct
 
       def initialize(metalware_config, groups: [], node: nil)
@@ -20,6 +20,7 @@ module Metalware
         @node = node
       end
 
+      # TODO: Replace with merge method
       def config
         @config ||= build_hash_for_key(:config)
       end
@@ -47,6 +48,11 @@ module Metalware
         end
       end
 
+      # def load_yaml
+      #   raise NotImplementedError
+      # end
+
+      # TODO: Move this to inherited class
       def load_yaml(key, section, section_name = nil)
         input = (section_name ? [section_name] : [])
         case key

@@ -1,13 +1,13 @@
 
 # frozen_string_literal: true
 
-require 'utils/merged_hash'
+require 'hash_mergers/hash_merger'
 require 'config'
 require 'filesystem'
 require 'data'
 require 'constants'
 
-RSpec.describe Metalware::Utils::MergedHash do
+RSpec.describe Metalware::HashMergers::HashMerger do
   let :config { Metalware::Config.new }
   let :filesystem do
     FileSystem.setup do |fs|
@@ -25,8 +25,15 @@ RSpec.describe Metalware::Utils::MergedHash do
     end
   end
 
+  def build_merged_hash(**hash_input)
+    OpenStruct.new({
+      config: Metalware::HashMergers::HashMerger.new(config, **hash_input).config,
+      answer: Metalware::HashMergers::HashMerger.new(config, **hash_input).answer
+    })
+  end
+
   context 'with domain scope' do
-    let :merged_hash { Metalware::Utils::MergedHash.new(config) }
+    let :merged_hash { build_merged_hash() }
 
     it 'returns the domain config' do
       filesystem.test do
@@ -40,10 +47,7 @@ RSpec.describe Metalware::Utils::MergedHash do
 
   context 'with single group' do
     let :merged_hash do
-      Metalware::Utils::MergedHash.new(
-        config,
-        groups:['group1']
-      )
+      build_merged_hash( groups:['group1'] )
     end
 
     it 'returns the merged configs' do
@@ -64,10 +68,7 @@ RSpec.describe Metalware::Utils::MergedHash do
 
   context 'with multiple groups' do
     let :merged_hash do
-      Metalware::Utils::MergedHash.new(
-        config,
-        groups:['group1', 'group2']
-      )
+      build_merged_hash( groups:['group1', 'group2'] )
     end
 
     it 'returns the merged configs' do
@@ -90,8 +91,7 @@ RSpec.describe Metalware::Utils::MergedHash do
 
   context 'with multiple groups and a node' do
     let :merged_hash do
-      Metalware::Utils::MergedHash.new(
-        config,
+      build_merged_hash(
         groups:['group1', 'group2'],
         node: 'node3'
       )
