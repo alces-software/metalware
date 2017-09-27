@@ -12,20 +12,21 @@ module Metalware
     class HashMerger
       HASH_DATA_STRUCTURE = RecursiveOpenStruct
 
-      def initialize(metalware_config)
+      def initialize(metalware_config, alces: nil)
         @metalware_config = metalware_config
         @file_path = FilePath.new(metalware_config)
         @loader = Validation::Loader.new(metalware_config)
+        @alces = alces
       end
 
       def merge(groups: [], node: nil)
         arr = hash_array(groups: groups, node: node)
-        HASH_DATA_STRUCTURE.new(combine_hashes(arr))
+        HASH_DATA_STRUCTURE.new(combine_hashes(arr).merge(alces: alces))
       end
 
       private
 
-      attr_reader :metalware_config, :file_path, :loader
+      attr_reader :metalware_config, :file_path, :loader, :alces
 
       ##
       # hash_array enforces the order in which the hashes are loaded, it is not

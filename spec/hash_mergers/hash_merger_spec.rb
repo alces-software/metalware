@@ -26,8 +26,11 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   def build_merged_hash(**hash_input)
-    OpenStruct.new(config: Metalware::HashMergers::Config.new(config).merge(**hash_input),
-                   answer: Metalware::HashMergers::Answer.new(config).merge(**hash_input))
+    merged_config = Metalware::HashMergers::Config.new(config).merge(**hash_input)
+    merged_config.delete_field(:alces)
+    answer = Metalware::HashMergers::Answer.new(config).merge(**hash_input)
+    answer.delete_field(:alces)
+    OpenStruct.new(config: merged_config, answer: answer)
   end
 
   context 'with domain scope' do
