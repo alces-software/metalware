@@ -4,13 +4,12 @@
 require 'file_path'
 require 'validation/loader'
 require 'data'
-require 'recursive-open-struct'
 require 'constants'
 
 module Metalware
   module HashMergers
     class HashMerger
-      HASH_DATA_STRUCTURE = RecursiveOpenStruct
+      HASH_DATA_STRUCTURE = HashMergers::MetalRecursiveOpenStruct
 
       def initialize(metalware_config, alces: nil)
         @metalware_config = metalware_config

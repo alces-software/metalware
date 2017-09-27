@@ -2,10 +2,11 @@
 require 'recursive-open-struct'
 
 module Metalware
-  module HashMerger
+  module HashMergers
     class MetalRecursiveOpenStruct < RecursiveOpenStruct
-      def initialize(alces:)
-
+      def initialize(**hash)
+        @alces = hash.delete(:alces)
+        super(hash)
       end
     end
   end
