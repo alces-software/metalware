@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2017.1.0] - 2017-09-26
+
+- Added `metal configure` commands, to answer questions for various objects
+  managed by Metalware and save the answers for use in later templating.
+- Added support for having Metalware use `named` instead of `hosts` file for
+  managing host name resolution.
+- Added full rendering of various domain templates when `metal configure`
+  commands are run, including `genders` file and `hosts`/`named` template.
+- Removed `metal hosts` command, as made obsolete by above change.
+- Changed node indexes to be consistent across different commands effecting a
+  node.
+- Made various commands be dependent on other files existing and being valid,
+  and hence other commands having been run first.
+- Added various `alces` namespace parameters including `group_index`, `groups`,
+  and `answers`.
+- Added `metal hunter` `--ignore-duplicate-macs` option to ignore already found
+  MAC addresses.
+- Added `metal view-config` command to view the complete current Metalware
+  config.
+- Added `metal view-answers` commands to view the configured answers applicable
+  to different Metalware objects.
+- Added `metal remove group` command to remove a configured group.
+- Added alternative `basic`, `self`, and `uefi-kickstart` node build methods to
+  the default `kickstart` method.
+- Added support for splitting `build` command to only perform actions before or
+  after editing, to allow editing templates in between.
+- Made full paths be displayed in warnings for missing template parameters.
+- Implemented prototype Metalware GUI; not yet publicly exposed.
+- Numerous other bug fixes and minor tweaks.
+- Switched to new year-based versioning system.
+
 ## [2.0.0] - 2017-08-07
 
 - Rewrote and restructured much of Metalware to be more consistent and

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -21,7 +23,6 @@
 #==============================================================================
 
 require 'open-uri'
-
 
 module Metalware
   module Input

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -44,15 +46,13 @@ SimpleCov.start 'metalware'
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
-$:.unshift File.join(File.dirname(__FILE__), '../src')
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../src')
 
 # Require main entry point to Metalware CLI so every file picked up by
 # simplecov, even entirely untested ones.
 require 'cli'
 
-# Require this here so can call `Debugging` functions anytime from any tests
-# without needing to add there.
-require 'debugging'
+require 'filesystem'
 
 FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 
@@ -97,7 +97,7 @@ RSpec.configure do |config|
   # Allows RSpec to persist some state between runs in order to support
   # the `--only-failures` and `--next-failure` CLI options. We recommend
   # you configure your source control system to ignore this file.
-  config.example_status_persistence_file_path = "spec/examples.txt"
+  config.example_status_persistence_file_path = 'spec/examples.txt'
 
   # Limits the available syntax to the non-monkey patched syntax that is
   # recommended. For more details, see:
@@ -119,13 +119,12 @@ RSpec.configure do |config|
     # Use the documentation formatter for detailed output,
     # unless a formatter has already been configured
     # (e.g. via a command-line flag).
-    config.default_formatter = "doc"
+    config.default_formatter = 'doc'
   end
 
-  # Print the 10 slowest examples and example groups at the
-  # end of the spec run, to help surface which specs are running
-  # particularly slow.
-  config.profile_examples = 10
+  # Print slowest examples and example groups at the end of the spec run, to
+  # help surface which specs are running particularly slow.
+  config.profile_examples = 2
 
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
@@ -138,4 +137,17 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+
+  config.around :each do |example|
+    # Run every test using `FakeFS` unless a truthy `real_fs` metadata value is
+    # passed; this prevents us polluting the real file system unless explicitly
+    # requested.
+    if example.metadata[:real_fs]
+      example.run
+    else
+      FileSystem.test do
+        example.run
+      end
+    end
+  end
 end

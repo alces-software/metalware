@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -35,12 +37,12 @@ RSpec.describe Metalware::Commands::Render do
   context 'and with --strict option' do
     xit 'raises StrictWarningError when a parameter is missing' do
       config = Metalware::Config.new(nil)
-      path = File.join(config.repo_path, "dhcp/default")
-      expect {
-        SpecUtils.run_command(
-          Metalware::Commands::Render, path, {strict: true}
+      path = File.join(config.repo_path, 'dhcp/default')
+      expect do
+        Metalware::Utils.run_command(
+          Metalware::Commands::Render, path, strict: true
         )
-      }.to raise_error(Metalware::StrictWarningError)
+      end.to raise_error(Metalware::StrictWarningError)
     end
   end
 end

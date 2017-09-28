@@ -5,6 +5,13 @@ anchor_options:
     description: >
           Switch NODE_IDENTIFIER to specify a gender group rather than a single
           node
+  configure_answers_option: &configure_answers_option
+    tags: [-a ANSWERS_MAPPING, --answers ANSWERS_MAPPING]
+    type: String
+    description: >
+      Given a JSON mapping of question identifiers to answer values, the given
+      answers will be saved instead of asking the configure questions and
+      saving user input.
 
 global_options:
   - tags: [-c FILE, --config FILE]
@@ -19,6 +26,68 @@ global_options:
       Suppress any warnings from being displayed
 
 subcommands:
+  configure_domain: &configure_domain
+    syntax: metal configure domain [options]
+    summary: Configure Metalware domain
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure the domain for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Domain
+    options:
+      - *configure_answers_option
+
+  configure_group: &configure_group
+    syntax: metal configure group GROUP_NAME [options]
+    summary: Configure a Metalware group
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure a group for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Group
+    options:
+      - *configure_answers_option
+
+  configure_node: &configure_node
+    syntax: metal configure node NODE_NAME [options]
+    summary: Configure a Metalware node
+    description: >
+      Asks a sequence of questions defined in the current repository to
+      configure a node for this Metalware installation. The configuration
+      answers will then be used when rendering templates.
+    action: Commands::Configure::Node
+    options:
+      - *configure_answers_option
+
+  configure_rerender: &configure_rerender
+    syntax: metal configure rerender [options]
+    summary: Re-render the Metalware domain templates
+    description: >
+      Re-render the Metalware domain templates, in particular the genders and
+      hosts file templates. This is useful after manually editing files
+      involved in rendering these templates, such as answer files or the
+      templates themselves.
+    action: Commands::Configure::Rerender
+
+  configure_self: &configure_self
+    syntax: metal configure self [options]
+    summary: Configure the master Metalware node
+    description: >
+      Configures the node that metalware is running on. This is treated as the
+      metalware master node. This must be ran to configure metalware to match
+      the system environment. This command is intended to only be ran once.
+    action: Commands::Configure::Self
+
+  remove_group: &remove_group
+    syntax: metal remove group GROUP_NAME [options]
+    summary: Removes a previously configured group
+    description: >
+      Removes the configuration answer file for the group and updates the
+      primary group cache. Will also delete all nodes within the primary group
+      to prevent them becoming orphans. This is done by deleting the answer
+      files associated with the nodes.
+    action: Commands::Remove::Group
+
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
     summary: Clone a new template git repo
@@ -48,35 +117,91 @@ subcommands:
         description: >
           Force update even if local changes have been made to the repo
 
+  view-answers_domain: &view-answers_domain
+    syntax: metal view-answers domain [options]
+    summary: View configured answers for the overall domain
+    description: >
+      View configuration questions along with configured answers for the
+      overall Metalware domain
+    action:
+      Commands::ViewAnswers::Domain
+
+  view-answers_group: &view-answers_group
+    syntax: metal view-answers group GROUP_NAME [options]
+    summary: View configured answers for a group
+    description: >
+      View configuration questions along with configured answers for given
+      group and the overall Metalware domain
+    action:
+      Commands::ViewAnswers::Group
+
+  view-answers_node: &view-answers_node
+    syntax: metal view-answers node NODE_NAME [options]
+    summary: View configured answers for a node
+    description: >
+      View configuration questions along with configured answers for given
+      node, its primary group, and the overall Metalware domain
+    action:
+      Commands::ViewAnswers::Node
+
 commands:
   build:
     syntax: metal build NODE_IDENTIFIER [options]
     summary: Renders the templates used to build the nodes
     description: >
-      Build is used to rendered template files before waiting for the compute
-      nodes to pxe-boot and build. Build by default will render the pxelinux and
-      kickstart templates. In additional, build renders the "files" list in 
-      [config].yaml for the gender group and node.
+      Build handles the build process for a given node or group. This consists
+      of retrieving and rendering the specified 'files' for each node,
+      rendering the 'pxelinux' and 'kickstart' templates for each node, and
+      then waiting for each node to report itself as built and re-rendering its
+      'pxelinux' template for permanent booting. The build command will keep
+      running until all nodes have reported as built, or until it is
+      interrupted. The 'self' build is a special case that is handled separately.
+      See below for more details.
 
 
-      Build will then wait for the nodes to build. Once a node has finished
-      building, it needs to curl "alces.build_complete_url" which notifies build
-      that the node is complete. This will trigger the pxelinux file to be
-      re-rendered with "firstboot" set to false. Build will exit once all the
-      nodes have finished building.
+      The 'files' for each node are specified under the 'files' key in the repo
+      config for that node, while the 'pxelinux' and 'kickstart' templates are
+      specified by the corresponding key in the 'templates' section of the
+      config.
+
+
+      In order to have a node report itself as built it must make a request to
+      the 'alces.build_complete_url' when it has finished building.
+
+
+      The 'pxelinux' template rendering can be modified using the
+      'alces.firstboot' parameter within the template, which will be set to
+      'true' the first time this is rendered and 'false' the second.
+
+
+      As the 'build self' command is repsonsible for configuring the metalware
+      master node, it functions differently to the other nodes. The build self
+      command is responsible for starting the http server and thus can not curl
+      for files. Instead it must directly access the file system to obtain the
+      rendered files. Once the build has been completed, it can either curl the
+      build_complete_url or create the build_complete file directly.
+
     action: Commands::Build
     options:
       - *group_option
-      - tags: [-k KICKSTART_TEMPLATE, --kickstart KICKSTART_TEMPLATE]
-        type: String
-        default: default
+      - tags: [--edit-start]
         description: >
-          Specify kickstart template to use
-      - tags: [-p PXELINUX_TEMPLATE, --pxelinux PXELINUX_TEMPLATE]
-        type: String
-        default: default
+          Only renders the build templates to be edited. Does not wait for the
+          nodes to be built
+      - tags: [--edit-continue]
         description: >
-          Specify pxelinux template to use
+          Continues the build process after the files have been editted. Skips
+          the initial template rendering step
+
+  configure:
+    syntax: metal configure [options]
+    summary: Configure different aspects of this Metalware installation
+    subcommands:
+      domain: *configure_domain
+      group: *configure_group
+      node: *configure_node
+      rerender: *configure_rerender
+      self: *configure_self
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
@@ -84,7 +209,7 @@ commands:
     description: >
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
-    action: BashCommand
+    action: CommandHelpers::BashCommand
 
   dhcp:
     syntax: metal dhcp [options]
@@ -113,30 +238,20 @@ commands:
     options:
       - *group_option
 
-  hosts:
-    syntax: metal hosts NODE_IDENTIFIER [options]
-    summary: Adds a node(s) to the hosts file
+  edit:
+    syntax: metal edit FILE [options]
+    summary: Opens a rendered file for editing
     description: >
-      Renders the hosts template for the node (or group) and appends it to
-      /etc/hosts. Note that it does not check if the node already exists in the
-      file.
-    action: Commands::Hosts
-    options:
-      - *group_option
-      - tags: [-t TEMPLATE, --template TEMPLATE]
-        type: String
-        default: default
-        description: >
-          Specify hosts template to use
-      - tags: [-x, --dry-run]
-        description: >
-          Do not modify hosts file, just output additions that would be made
+      Opens the specified rendered file in the default system text editor.
+    action: Commands::Edit
+    autocomplete:
+      files_relative_to: /var/lib/metalware/rendered
 
   hunter:
     syntax: metal hunter [options]
     summary: Detects and caches DHCP discover messages
     description: >
-      Hunter is used in conjunction with the dhcp command to update 
+      Hunter is used in conjunction with the dhcp command to update
       dhcp server. Hunter listens out for dhcp discovery messages from the
       booting nodes. Hunter assigns the nodes a node name based of PREFIX or
       user input. The node's name and MAC address is then cached.
@@ -150,9 +265,11 @@ commands:
     options:
       - tags: [-i INTERFACE, --interface INTERFACE]
         type: String
-        default: eth0
+        default:
+          dynamic: build_interface
         description: >
-          Local interface to hunt on
+          Local interface to hunt on; defaults to standard build interface if
+          unspecified
       - tags: [-p PREFIX, --prefix PREFIX]
         type: String
         default: node
@@ -168,6 +285,10 @@ commands:
         default: 1
         description: >
           Start integer to use for suggested detected node names
+      - tags: [-d, --ignore-duplicate-macs]
+        description: >
+          Ignore any MAC addresses found which are already associated with a
+          node name in the hunter cache
 
   ipmi:
     syntax: metal ipmi NODE_IDENTIFIER [options]
@@ -176,7 +297,7 @@ commands:
       ***VOLATILE***
 
        Perform ipmi commands on single or multiple machines
-    action: BashCommand
+    action: CommandHelpers::BashCommand
     options:
       - tags: [-g]
         description: >
@@ -209,9 +330,16 @@ commands:
       cycle     - Power cycle the node
 
       reset     - Warm reset the node
-    action: BashCommand
+    action: CommandHelpers::BashCommand
     options:
       - *group_option
+
+  remove:
+    syntax: metal remove [options]
+    summary: Remove metalware controlled files/ objects
+    # Description can be added for subcommand
+    subcommands:
+      group: *remove_group
 
   render:
     syntax: metal render TEMPLATE [NODE] [options]
@@ -226,7 +354,7 @@ commands:
     syntax: metal repo [options]
     summary: Manage template and config repository
     # description can also be used for subcommands
-    subcommands: 
+    subcommands:
       use: *repo_use
       update: *repo_update
 
@@ -250,3 +378,39 @@ commands:
         default: 50
         description: >
           Sets the maximum number of network operations
+
+  view-answers:
+    syntax: metal view-answers [options]
+    summary: View configured answers
+    subcommands:
+      domain: *view-answers_domain
+      group: *view-answers_group
+      node: *view-answers_node
+
+  view-config:
+    syntax: metal view-config [NODE] [options]
+    summary: View domain templating config, optionally in context for given node
+    description: >
+      View the exact standard templating config for the domain which will be
+      used when rendering templates. This can optionally be the config in the
+      context of a particular given node, in which case this will be the config
+      used when rendering a template for that node.
+
+      Note that templating parameters which are only sometimes available when
+      rendering templates are not included, such as the 'alces.files'
+      parameter, which is only available when rendering 'build' templates. Also
+      note that the 'alces.groups' namespace and the nodes within the same primary
+      genders group are not included by default; this can be done using the
+      '--include-groups' option.
+    action: Commands::ViewConfig
+    options:
+      - tags: [-i, --include-groups]
+        description: >
+          Include the 'alces.groups' namespace and nodes within the same primary
+          gender group in the JSON output; this is not done by default as it can
+          be very slow to gather the configuration for all nodes, and displaying
+          this can also be very verbose.
+      - tags: [--color-output]
+        description: >
+          Force the output to be coloured even if not outputting to a terminal;
+          useful e.g. for piping to `less -R`.

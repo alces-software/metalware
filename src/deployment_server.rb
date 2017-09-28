@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -23,19 +25,8 @@
 module Metalware
   module DeploymentServer
     class << self
-
       def ip
-        SystemCommand.run(determine_hostip_script).chomp
-      rescue SystemCommandError
-        # If script failed for any reason fall back to using `hostname -i`,
-        # which may or may not give the IP on the interface we actually want to
-        # use (note: the dance with pipes is so we only get the last word in
-        # the output, as I've had the IPv6 IP included first before, which
-        # breaks all the things).
-        log_hostip_fallback_message
-        SystemCommand.run(
-          "hostname -i | xargs -d' ' -n1 | tail -n 2 | head -n 1"
-        ).chomp
+        ip_on_interface(build_interface)
       end
 
       def system_file_url(system_file)
@@ -50,14 +41,22 @@ module Metalware
       end
 
       def build_complete_url(node_name)
-        if node_name
-          url "exec/kscomplete.php?name=#{node_name}"
-        end
+        url "exec/kscomplete.php?name=#{node_name}" if node_name
       end
 
       def build_file_url(node_name, namespace, file_name)
-        path = File.join(node_name , namespace.to_s , file_name)
+        path = File.join(node_name, namespace.to_s, file_name)
         url path
+      end
+
+      def build_interface
+        # Default to first network interface if `build_interface` is not set
+        # yet. In practise this _should_ only occur prior to first render of
+        # server config, but this is needed so a valid interface is used when
+        # rendering the server config itself (the template shouldn't normally
+        # depend on values dependent on the `build_interface`, but if it's
+        # unspecified the `alces` namespace will fail to be created).
+        server_config[:build_interface] || Network.interfaces.first
       end
 
       private
@@ -67,20 +66,13 @@ module Metalware
         URI.join("http://#{ip}", full_path).to_s
       end
 
-      def log_hostip_fallback_message
-        # Only log this once per run, as if it occurs once it will probably
-        # occur many times for the same reason. We don't cache the IP itself
-        # however as it could change.
-        unless @hostip_fallback_logged
-          MetalLog.info(
-            <<-EOF.strip_heredoc
-              Could not robustly determine deployment server IP on build interface; falling back to use 'hostname -i'.
-              This is expected if Metalware is not running on a Controller appliance.'
+      def server_config
+        Data.load(Constants::SERVER_CONFIG_PATH)
+      end
 
-            EOF
-          )
-        end
-        @hostip_fallback_logged = true
+      def ip_on_interface(interface)
+        command = "#{determine_hostip_script} #{interface}"
+        SystemCommand.run(command).chomp
       end
 
       def determine_hostip_script
@@ -89,7 +81,6 @@ module Metalware
           'libexec/determine-hostip'
         )
       end
-
     end
   end
 end

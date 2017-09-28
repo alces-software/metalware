@@ -46,7 +46,7 @@ questions:
       - 11
     default: 11 # Optional; default value to use when no input entered, if any.
     type: 'integer' # Optional/default `'string'`. For validation and converting; see below for details.
-    required: true # Optional/default `true`
+    optional: true # Makes the question optional. Default if missing:`false`
 
   another_example: &another_example
     question: 'Enter anything?'
@@ -243,15 +243,15 @@ commands have been run first:
   has been run) before running.
 
 - `metal build` will require that `metal configure domain` has been run first,
-  i.e. that `/var/lib/metalware/config/domain.yaml` has been generated, so any
-  necessary config has been set up before templating.
+  i.e. that `/var/lib/metalware/answers/domain.yaml` has been generated, so any
+  necessary answers have been configured before templating.
 
 - Additionally, `metal build -g $GROUP` will require that `metal configure
   group $GROUP` has been run first, i.e. that
-  `/var/lib/metalware/config/groups/$GROUP.yaml` has been generated.
+  `/var/lib/metalware/answers/groups/$GROUP.yaml` has been generated.
 
 - Note that a node config is not required, so a
-  `/var/lib/metalware/config/nodes/$NODE.yaml` file is not required to build
+  `/var/lib/metalware/answers/nodes/$NODE.yaml` file is not required to build
   `$NODE`.
 
 Note: functionality for handling commands depending on `repo` already exists in
@@ -276,7 +276,7 @@ repo configs, i.e.
 - if no `nodename` is passed, then nothing else will be loaded;
 
 - if a `nodename` is passed, all/any gender groups will be found for the node,
-  and any `groups/$GROUP.yaml` configs will be loaded for these in order of
+  and any `groups/$GROUP.yaml` files will be loaded for these in order of
   precedence;
 
 - any `nodes/$NODE.yaml` file for the specific node will be loaded.
@@ -287,7 +287,7 @@ configs/templates should appear in the merged answers, as even if a particular
 `configure.yaml` question is optional and nothing has been entered a value of
 `nil` should still be saved, in which case `nil` will be used when templating -
 however if the specified identifier is not present at all then this indicates
-the repo has an inconsistent `config` directory and `configure.yaml` file,
+the repo has an inconsistent `answers` directory and `configure.yaml` file,
 which should be addressed.
 
 

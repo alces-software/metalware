@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -22,9 +24,7 @@
 
 require 'commander'
 
-
 module CommanderExtensions
-
   # An error in the definition of a command, which we cannot recover from and
   # should be fixed in the code.
   class CommandDefinitionError < StandardError; end
@@ -32,7 +32,6 @@ module CommanderExtensions
   # An error in the usage of a command; will happen in practise and error
   # message should be shown along with command usage info.
   class CommandUsageError < StandardError; end
-
 
   module Delegates
     include Commander::Delegates
@@ -44,7 +43,6 @@ module CommanderExtensions
       Commander::Runner.instance.commands[name.to_s]
     end
   end
-
 
   class Command < Commander::Command
     def run(*args)
@@ -70,22 +68,22 @@ module CommanderExtensions
       command_syntax = command_syntax_parts.join(' ')
 
       if syntax_parts.first != cli_name
-        fail CommandDefinitionError,
-          "First word in 'syntax' should be CLI name ('#{cli_name}'), got '#{syntax_parts.first}'"
+        raise CommandDefinitionError,
+              "First word in 'syntax' should be CLI name ('#{cli_name}'), got '#{syntax_parts.first}'"
       elsif command_syntax != name
-        fail CommandDefinitionError,
-          "After CLI name in syntax should come command name(s) ('#{name}'), got '#{command_syntax}'"
+        raise CommandDefinitionError,
+              "After CLI name in syntax should come command name(s) ('#{name}'), got '#{command_syntax}'"
       elsif syntax_parts.last != '[options]'
-        fail CommandDefinitionError,
-          "Last word in 'syntax' should be '[options]', got '#{syntax_parts.last}'"
+        raise CommandDefinitionError,
+              "Last word in 'syntax' should be '[options]', got '#{syntax_parts.last}'"
       end
     end
 
     def validate_correct_number_of_args!(args)
       if too_many_args?(args)
-        fail CommandUsageError, "Too many arguments given"
+        raise CommandUsageError, 'Too many arguments given'
       elsif too_few_args?(args)
-        fail CommandUsageError, "Too few arguments given"
+        raise CommandUsageError, 'Too few arguments given'
       end
     end
 
@@ -126,5 +124,4 @@ module CommanderExtensions
       args.length < required_arguments
     end
   end
-
 end

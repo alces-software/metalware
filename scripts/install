@@ -77,18 +77,20 @@ say_done $?
 title "Creating initial directory structure"
 doing 'Create'
 mkdir -p /var/log/metalware
-mkdir -p /var/lib/metalware/rendered/{kickstart,system}
+mkdir -p /var/lib/metalware/rendered/{basic,kickstart,system}
 mkdir -p /var/lib/metalware/cache/{built-nodes,templates}
 mkdir -p /var/lib/metalware/repo
+mkdir -p /var/lib/metalware/answers/{groups,nodes}
+mkdir -p /etc/named
+touch /etc/named/metalware.conf
 chmod a+rw /var/lib/metalware/cache/built-nodes
 
-# Link certain files in to Metalware dir; these can then be retrieved by a
-# request to a `/metalware/system/$file` route on the Metalware deployment
-# server.
-ln -s /etc/hosts /opt/metalware/etc/genders /var/lib/metalware/rendered/system/
+# Link hosts files in to Metalware data dir; this will then be made available
+# on the Metalware deployment server.
+ln -s /etc/hosts /var/lib/metalware/rendered/system/
 
 mkdir -p "${target}"
-cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src} "${target}"
+cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src,templates} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 

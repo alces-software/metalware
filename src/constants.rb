@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -23,15 +25,33 @@
 module Metalware
   module Constants
     METALWARE_INSTALL_PATH = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+    METAL_EXECUTABLE_PATH = File.join(METALWARE_INSTALL_PATH, 'bin/metal')
 
-    DEFAULT_CONFIG_PATH = File.join(METALWARE_INSTALL_PATH, 'etc/config.yaml')
+    METALWARE_CONFIGS_PATH = File.join(METALWARE_INSTALL_PATH, 'etc')
+    DEFAULT_CONFIG_PATH = File.join(METALWARE_CONFIGS_PATH, 'config.yaml')
 
     METALWARE_DATA_PATH = '/var/lib/metalware'
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
     HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
+    GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
+    INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
+    # XXX Following needs to actually be created somewhere.
+    GUI_CREDENTIALS_PATH = File.join(CACHE_PATH, 'credentials.yaml')
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 
     NODEATTR_COMMAND = 'nodeattr'
+
+    SERVER_CONFIG_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/server.yaml')
+    GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
+    HOSTS_PATH = '/etc/hosts'
+
+    UEFI_SAVE_PATH = '/var/lib/tftpboot/efi'
+
+    NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'templates/named.conf.erb')
+    METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
+    VAR_NAMED_PATH = '/var/named'
+
+    CONFIGURE_SECTIONS = [:domain, :group, :node, :self].freeze
   end
 end

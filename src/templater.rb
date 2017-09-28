@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -19,87 +21,148 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-require "erb"
-require "ostruct"
-require "yaml"
-require 'active_support/core_ext/hash'
-require 'hashie'
 
-require "constants"
-require 'nodeattr_interface'
+require 'erb'
+require 'active_support/core_ext/string/strip'
+
+require 'constants'
 require 'metal_log'
-require 'deployment_server'
 require 'exceptions'
-require 'iterable_recursive_open_struct'
+require 'utils'
+require 'templating/iterable_recursive_open_struct'
+require 'templating/missing_parameter_wrapper'
+require 'templating/magic_namespace'
+require 'templating/renderer'
+require 'templating/repo_config_parser'
 
 module Metalware
-  class MissingParameterWrapper
-    def initialize(wrapped_obj)
-      @missing_tags = []
-      @wrapped_obj = wrapped_obj
-    end
-
-    def method_missing(s, *a, &b)
-      value = @wrapped_obj.send(s)
-      if value.nil? && ! @missing_tags.include?(s)
-        @missing_tags.push s
-        MetalLog.warn "Unset template parameter: #{s}"
-      end
-      value
-    end
-
-    def [](a)
-      # ERB expects to be able to index in to the binding passed; this should
-      # function the same as a method call.
-      send(a)
-    end
-  end
-
   class Templater
+    MANAGED_FILE_MESSAGE = <<-EOF.strip_heredoc
+    # This file is managed by Alces Metalware; any changes made to it directly
+    # will be lost. You can change the data used to render it using the
+    # `metal configure` commands.
+    EOF
+
+    MANAGED_START_MARKER = 'METALWARE_START'
+    MANAGED_START = "########## #{MANAGED_START_MARKER} ##########"
+    MANAGED_END_MARKER = 'METALWARE_END'
+    MANAGED_END = "########## #{MANAGED_END_MARKER} ##########"
+    MANAGED_COMMENT = Utils.commentify(
+      <<-EOF.squish
+      This section of this file is managed by Alces Metalware. Any changes made
+      to this file between the #{MANAGED_START_MARKER} and
+      #{MANAGED_END_MARKER} markers may be lost; you should make any changes
+      you want to persist outside of this section or to the template directly.
+    EOF
+    )
+
     class << self
       # XXX rename args in these methods - use `**parameters` for passing
       # template parameters?
-      def render(config, template, template_parameters={})
+      def render(config, template, **template_parameters)
         Templater.new(config, template_parameters).render(template)
       end
 
-      def render_to_stdout(config, template, template_parameters={})
+      def render_to_stdout(config, template, **template_parameters)
         puts render(config, template, template_parameters)
       end
 
-      def render_to_file(config, template, save_file, template_parameters={})
-        File.open(save_file.chomp, "w") do |f|
-          f.puts render(config, template, template_parameters)
+      def render_to_file(
+        config,
+        template,
+        save_file,
+        prepend_managed_file_message: false,
+        **template_parameters,
+        &validation_block
+      )
+        rendered_template = render(config, template, template_parameters)
+        if prepend_managed_file_message
+          rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
         end
-        MetalLog.info "Template Saved: #{save_file}"
+
+        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
+          write_rendered_template(rendered_template, save_file: save_file) if valid
+        end
       end
 
-      def render_and_append_to_file(config, template, append_file, template_parameters={})
-        File.open(append_file.chomp, 'a') do |f|
-          f.puts render(config, template, template_parameters)
+      # Render template to a file where only part of the file is managed by
+      # Metalware:
+      # - if the file does not exist yet, it will be created with a new managed
+      # section;
+      # - if it exists without a managed section, the new section will be
+      # appended to the bottom of the current file;
+      # - if it exists with a managed section, this section will be replaced
+      # with the new managed section.
+      def render_managed_file(config, template, managed_file, &validation_block)
+        rendered_template = render(config, template)
+        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
+          update_managed_file(managed_file, rendered_template) if valid
         end
-        MetalLog.info "Template Appended: #{append_file}"
+      end
+
+      private
+
+      def rendered_template_valid?(rendered_template)
+        # A rendered template is automatically valid, unless we're passed a
+        # block which evaluates as falsy when given the rendered template.
+        !block_given? || yield(rendered_template)
+      end
+
+      def update_managed_file(managed_file, rendered_template)
+        pre, post = split_on_managed_section(
+          current_file_contents(managed_file)
+        )
+        new_managed_file = [pre, managed_section(rendered_template.strip), post].join
+        write_rendered_template(new_managed_file, save_file: managed_file)
+      end
+
+      def current_file_contents(file)
+        if File.exist?(file)
+          File.read(file).strip
+        else
+          ''
+        end
+      end
+
+      def split_on_managed_section(file_contents)
+        if file_contents.include? MANAGED_START
+          pre, rest = file_contents.split(MANAGED_START)
+          _, post = rest.split(MANAGED_END)
+          [pre, post]
+        else
+          [file_contents + "\n\n", nil]
+        end
+      end
+
+      def managed_section(rendered_template)
+        [
+          MANAGED_START,
+          MANAGED_COMMENT,
+          rendered_template,
+          MANAGED_END,
+        ].join("\n") + "\n"
+      end
+
+      def write_rendered_template(rendered_template, save_file:)
+        File.open(save_file.chomp, 'w') do |f|
+          f.puts rendered_template
+        end
+        MetalLog.info "Template Saved: #{save_file}"
       end
     end
 
     attr_reader :config
-    attr_reader :nodename
 
     # XXX Have this just take allowed keyword parameters:
     # - nodename
     # - index
     # - what else?
-    def initialize(metalware_config, parameters={})
-      @metalware_config = metalware_config
-      @nodename = parameters[:nodename]
-
-      passed_magic_parameters = parameters.select do |k,v|
-        [:index, :nodename, :firstboot, :files].include?(k) && !v.nil?
-      end
-      magic_struct = MagicNamespace.new(passed_magic_parameters)
-      @magic_namespace = MissingParameterWrapper.new(magic_struct)
-      @passed_hash = parameters
-      @config = parse_config
+    def initialize(metalware_config, parameters = {})
+      @config = Templating::RepoConfigParser.parse_for_node(
+        node_name: parameters[:nodename],
+        config: metalware_config,
+        additional_parameters: parameters
+      )
     end
 
     def render(template)
@@ -112,159 +175,6 @@ module Metalware
       replace_erb(str, @config)
     end
 
-    private
-
-    def replace_erb(template, template_parameters)
-      parameters_binding = template_parameters.instance_eval {binding}
-      render_erb_template(template, parameters_binding)
-    rescue NoMethodError => e
-      # May be useful to include the name of the unset parameter in this error,
-      # however this is tricky as by the time we attempt to access a method on
-      # it the unset parameter is just `nil` as far as we can see here.
-      raise UnsetParameterAccessError,
-        "Attempted to call method `#{e.name}` of unset template parameter"
-    end
-
-    def render_erb_template(template, binding)
-      # This mode allows templates to prevent inserting a newline for a given
-      # line by ending the ERB tag on that line with `-%>`.
-      trim_mode = '-'
-
-      safe_level = 0
-      erb = ERB.new(template, safe_level, trim_mode)
-
-      begin
-        erb.result(binding)
-      rescue SyntaxError => error
-        handle_error_rendering_erb(template, error)
-      end
-    end
-
-    def handle_error_rendering_erb(template, error)
-      Output.stderr "\nRendering template failed!\n\n"
-      Output.stderr "Template:\n\n"
-      Output.stderr_indented_error_message template
-      Output.stderr "\nError message:\n\n"
-      Output.stderr_indented_error_message error.message
-      abort
-    end
-
-    # The merging of the raw combined config files, any additional passed
-    # values, and the magic `alces` namespace; this is the config prior to
-    # parsing any nested ERB values.
-    def base_config
-      @base_config ||= node.raw_config
-        .merge(@passed_hash)
-        .merge(alces: @magic_namespace)
-    end
-
-    def node
-      @node ||= Node.new(@metalware_config, nodename)
-    end
-
-    def parse_config
-      current_parsed_config = base_config
-      current_config_string = current_parsed_config.to_s
-      previous_config_string = nil
-      count = 0
-
-      # Loop through the config and recursively parse any config values which
-      # contain ERB, until the parsed config is not changing or we have
-      # exceeded the maximum number of passes to make.
-      while previous_config_string != current_config_string
-        count += 1
-        if count > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
-          raise RecursiveConfigDepthExceededError
-        end
-
-        previous_config_string = current_config_string
-        current_parsed_config = perform_config_parsing_pass(current_parsed_config)
-        current_config_string = current_parsed_config.to_s
-      end
-
-      create_template_parameters(current_parsed_config)
-    end
-
-    def perform_config_parsing_pass(current_parsed_config)
-      current_parsed_config.map do |k,v|
-        [k, parse_config_value(v, current_parsed_config)]
-      end.to_h
-    end
-
-    def parse_config_value(value, current_parsed_config)
-      case value
-      when String
-        parameters = create_template_parameters(current_parsed_config)
-        replace_erb(value, parameters)
-      when Hash
-        value.map do |k,v|
-          [k, parse_config_value(v, current_parsed_config)]
-        end.to_h
-      else
-        value
-      end
-    end
-
-    def create_template_parameters(config)
-      MissingParameterWrapper.new(IterableRecursiveOpenStruct.new(config))
-    end
-  end
-
-  module GenderGroupProxy
-    class << self
-      def method_missing(group_symbol)
-        NodeattrInterface.nodes_in_group(group_symbol)
-      rescue NoGenderGroupError => error
-        warning = "#{error}. Falling back to empty array for alces.#{group_symbol}."
-        MetalLog.warn warning
-        []
-      end
-    end
-  end
-
-  MagicNamespace = Struct.new(:index, :nodename, :firstboot, :files) do
-    def initialize(index: 0, nodename: nil, firstboot: nil, files: nil)
-      files = Hashie::Mash.new(files) if files
-      super(index, nodename, firstboot, files)
-    end
-
-    def genders
-      # XXX Do we want to make genders available as a `Hashie::Mash` too?
-      # Depends if we want to be able to iterate through genders or just get
-      # list of nodes in a specified gender
-      GenderGroupProxy
-    end
-
-    def hunter
-      if File.exist? Constants::HUNTER_PATH
-        Hashie::Mash.load(Constants::HUNTER_PATH)
-      else
-        warning = \
-          "#{Constants::HUNTER_PATH} does not exist; need to run " +
-          "'metal hunter' first. Falling back to empty hash for alces.hunter."
-        MetalLog.warn warning
-        Hashie::Mash.new
-      end
-    end
-
-    def hosts_url
-      DeploymentServer.system_file_url 'hosts'
-    end
-
-    def genders_url
-      DeploymentServer.system_file_url 'genders'
-    end
-
-    def kickstart_url
-      DeploymentServer.kickstart_url(nodename)
-    end
-
-    def build_complete_url
-      DeploymentServer.build_complete_url(nodename)
-    end
-
-    def hostip
-      DeploymentServer.ip
-    end
+    delegate :replace_erb, to: Templating::Renderer
   end
 end

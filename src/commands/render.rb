@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,22 +22,22 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'base_command'
+require 'command_helpers/base_command'
 require 'templater'
 
 module Metalware
   module Commands
-    class Render < BaseCommand
-      def setup(args, options)
-        @args = args
-      end
+    class Render < CommandHelpers::BaseCommand
+      private
+
+      def setup; end
 
       def run
-        template_path, maybe_node = @args
+        template_path, maybe_node = args
 
         template_parameters = {
           nodename: maybe_node,
-        }.reject { |param, value| value.nil? }
+        }.reject { |_param, value| value.nil? }
 
         Templater.render_to_stdout(config, template_path, template_parameters)
       end

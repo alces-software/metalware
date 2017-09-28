@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -25,32 +27,27 @@ require 'tempfile'
 require 'hunter_updater'
 require 'output'
 
-
 RSpec.describe Metalware::HunterUpdater do
   let :hunter_file { Tempfile.new.path }
   let :updater { Metalware::HunterUpdater.new(hunter_file) }
 
   def hunter_yaml
-    YAML.load_file(hunter_file)
+    Metalware::Data.load(hunter_file)
   end
 
   describe '#add' do
     it 'adds given node name and MAC address pairs to hunter file' do
       updater.add('somenode01', 'some_mac_address')
-      expect(hunter_yaml).to eq({
-        somenode01: 'some_mac_address',
-      })
+      expect(hunter_yaml).to eq(somenode01: 'some_mac_address')
 
       updater.add('somenode02', 'another_mac_address')
-      expect(hunter_yaml).to eq({
-        somenode01: 'some_mac_address',
-        somenode02: 'another_mac_address',
-      })
+      expect(hunter_yaml).to eq(somenode01: 'some_mac_address',
+                                somenode02: 'another_mac_address')
     end
 
     context 'with existing hunter content' do
       before :each do
-        File.write(hunter_file, YAML.dump({somenode01: 'some_mac_address'}))
+        Metalware::Data.dump(hunter_file, somenode01: 'some_mac_address')
       end
 
       it 'outputs info if replacing node name' do
@@ -59,9 +56,7 @@ RSpec.describe Metalware::HunterUpdater do
           /Replacing.*somenode01.*some_mac_address/
         )
         updater.add('somenode01', 'another_mac_address')
-        expect(hunter_yaml).to eq({
-          somenode01: 'another_mac_address',
-        })
+        expect(hunter_yaml).to eq(somenode01: 'another_mac_address')
 
         # Does not replace when new node name.
         expect(Metalware::Output).not_to receive(:stderr)
@@ -74,9 +69,7 @@ RSpec.describe Metalware::HunterUpdater do
           /Replacing.*some_mac_address.*somenode01/
         )
         updater.add('somenode02', 'some_mac_address')
-        expect(hunter_yaml).to eq({
-          somenode02: 'some_mac_address',
-        })
+        expect(hunter_yaml).to eq(somenode02: 'some_mac_address')
 
         # Does not replace when new MAC address.
         expect(Metalware::Output).not_to receive(:stderr)
@@ -91,11 +84,8 @@ RSpec.describe Metalware::HunterUpdater do
 
       it 'creates it first' do
         updater.add('somenode01', 'some_mac_address')
-        expect(hunter_yaml).to eq({
-          somenode01: 'some_mac_address',
-        })
+        expect(hunter_yaml).to eq(somenode01: 'some_mac_address')
       end
     end
-
   end
 end

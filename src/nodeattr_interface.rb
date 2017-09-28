@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -22,10 +24,17 @@
 
 require 'constants'
 require 'exceptions'
+require 'system_command'
 
 module Metalware
   module NodeattrInterface
     class << self
+      def nodes_in_primary_group(primary_group)
+        nodes_to_groups.select do |_node, groups|
+          groups.first == primary_group
+        end.keys
+      end
+
       def nodes_in_group(group)
         stdout = nodeattr("-c #{group}")
         if stdout.empty?
@@ -44,10 +53,34 @@ module Metalware
         raise NodeNotInGendersError, "Could not find node in genders: #{node}"
       end
 
+      # Returns whether the given file is a valid genders file, along with any
+      # validation error.
+      def validate_genders_file(genders_path)
+        unless File.exist?(genders_path)
+          raise FileDoesNotExistError, "File does not exist: #{genders_path}"
+        end
+
+        nodeattr("-f #{genders_path} --parse-check", format_error: false)
+        [true, '']
+      rescue SystemCommandError => e
+        [false, e.message]
+      end
+
       private
 
-      def nodeattr(command)
-        SystemCommand.run("#{Constants::NODEATTR_COMMAND} #{command}")
+      def nodeattr(command, format_error: true)
+        SystemCommand.run(
+          "#{Constants::NODEATTR_COMMAND} #{command}",
+          format_error: format_error
+        )
+      end
+
+      def nodes_to_groups
+        nodeattr('--expand')
+          .split("\n")
+          .map(&:split)
+          .to_h
+          .transform_values { |groups| groups.split(',') }
       end
     end
   end

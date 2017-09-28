@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -24,17 +26,16 @@ require 'commands/each'
 require 'spec_utils'
 require 'ostruct'
 
-RSpec.describe Metalware::Commands::Each do
+RSpec.describe Metalware::Commands::Each, real_fs: true do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
-    SpecUtils.mock_repo_exists(self)
   end
 
   def run_command_echo(node, group = false)
-    opt = OpenStruct.new({group: group})
-    $stdout = tmp = Tempfile.new("stdout")
-    Metalware::Commands::Each.new([node, "echo <%= alces.nodename %>"], opt)
+    opt = OpenStruct.new(group: group)
+    $stdout = tmp = Tempfile.new('stdout')
+    Metalware::Commands::Each.new([node, 'echo <%= alces.nodename %>'], opt)
     $stdout.flush
     $stdout.rewind
     $stdout.read
@@ -44,13 +45,13 @@ RSpec.describe Metalware::Commands::Each do
   end
 
   it 'runs the command on a single node' do
-    output = run_command_echo("node01")
+    output = run_command_echo('node01')
     expect(output).to eq("node01\n")
   end
 
   it 'runs the command over a group' do
-    expected = (1..3).inject("") { |str, num| "#{str}testnode0#{num}\n" }
-    output = run_command_echo("nodes", true)
+    expected = (1..3).inject('') { |str, num| "#{str}testnode0#{num}\n" }
+    output = run_command_echo('nodes', true)
     expect(output).to eq(expected)
   end
 end

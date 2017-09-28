@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,18 +22,28 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-module SpecUtils
-  GENDERS_FILE = File.join(FIXTURES_PATH, 'genders')
+require 'constants'
+require 'dependency'
 
+module SpecUtils
   # Use `instance_exec` in many functions in this module to execute blocks the
   # context of the passed RSpec example group.
   class << self
-
     # Mocks.
 
-    def use_mock_genders(example_group)
+    def mock_validate_genders_success(example_group)
+      mock_validate_genders(example_group, true, '')
+    end
+
+    def mock_validate_genders_failure(example_group, nodeattr_error)
+      mock_validate_genders(example_group, false, nodeattr_error)
+    end
+
+    def use_mock_genders(example_group, genders_file: 'genders/default')
+      genders_path = File.join(FIXTURES_PATH, genders_file)
+
       example_group.instance_exec do
-        stub_const("Metalware::Constants::NODEATTR_COMMAND", "nodeattr -f #{GENDERS_FILE}")
+        stub_const('Metalware::Constants::NODEATTR_COMMAND', "nodeattr -f #{genders_path}")
       end
     end
 
@@ -53,6 +65,14 @@ module SpecUtils
       end
     end
 
+    def use_mock_dependency(example_group)
+      example_group.instance_exec do
+        allow_any_instance_of(
+          Metalware::Dependency
+        ).to receive(:enforce)
+      end
+    end
+
     def fake_download_error(example_group)
       http_error = "418 I'm a teapot"
       example_group.instance_exec do
@@ -63,8 +83,7 @@ module SpecUtils
       http_error
     end
 
-    def create_mock_build_files_hash(example_group, node_name)
-      SpecUtils.use_unit_test_config(example_group)
+    def create_mock_build_files_hash(example_group, config:, node_name:)
       SpecUtils.fake_download_error(example_group)
 
       example_group.instance_exec do
@@ -76,28 +95,20 @@ module SpecUtils
       end
     end
 
-    def mock_repo_exists(example_group)
-      example_group.instance_exec do
-        allow_any_instance_of(
-          Metalware::Repo
-        ).to receive(:exists?).and_return(true)
-      end
-    end
-
     # Other shared utils.
-
-    def run_command(command_class, *args, **options_hash)
-      options = Commander::Command::Options.new
-      options_hash.map do |option, value|
-        option_setter = (option.to_s + '=').to_sym
-        options.__send__(option_setter, value)
-      end
-
-      command_class.new(args, options)
-    end
 
     def fixtures_config(config_file)
       File.join(FIXTURES_PATH, 'configs', config_file)
+    end
+
+    private
+
+    def mock_validate_genders(example_group, valid, error)
+      example_group.instance_exec do
+        allow(Metalware::NodeattrInterface).to receive(
+          :validate_genders_file
+        ).and_return([valid, error])
+      end
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
@@ -20,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 # See http://stackoverflow.com/questions/837123/adding-a-directory-to-load-path-ruby.
-$:.unshift File.dirname(__FILE__)
+$LOAD_PATH.unshift File.dirname(__FILE__)
 
 require 'rubygems'
 require 'bundler/setup'
@@ -28,6 +30,7 @@ require 'commander'
 
 require 'commander_extensions'
 require 'cli_helper/parser'
+require 'data'
 
 module Metalware
   class Cli
@@ -36,17 +39,17 @@ module Metalware
 
     def run
       program :name, 'metal'
-      program :version, '2.0.0'
+      program :version, '2017.1.0'
       program :description, 'Alces tools for the management and configuration of bare metal machines'
 
       CliHelper::Parser.new(self).parse_commands
 
-      def run!
-        ARGV.push "--help" if ARGV.empty?
-        super
-      end
-
       run!
+    end
+
+    def run!
+      ARGV.push '--help' if ARGV.empty?
+      super
     end
   end
 end
