@@ -77,7 +77,7 @@ module Metalware
     end
 
     def groups
-      NodeattrInterface.groups_for_node(name)
+      @groups ||= NodeattrInterface.groups_for_node(name)
     rescue NodeNotInGendersError
       # Re-raise if we're expecting the node to be configured, as it should be
       # in the genders file.
@@ -118,7 +118,7 @@ module Metalware
     end
 
     def index
-      if primary_group
+      @index ||= if primary_group
         Nodes.create(metalware_config, primary_group, true).index(self) + 1
       else
         0
