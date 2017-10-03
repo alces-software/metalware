@@ -22,7 +22,7 @@ RSpec.describe Metalware::Namespaces::Node do
   let :config_hash do
     Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       key: test_value,
-      erb_value1: '<%= alces.node.key  %>'
+      erb_value1: '<%= alces.node.config.key  %>'
     ) { |template_string| render_node_template(template_string) }
   end
 
@@ -39,5 +39,9 @@ RSpec.describe Metalware::Namespaces::Node do
 
   it 'can retreive a simple config value for the node' do
     expect(node.config.key).to eq(test_value)
+  end
+
+  it 'config parameters can reference other config parameters' do
+    expect(node.config.erb_value1).to eq(test_value)
   end
 end

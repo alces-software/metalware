@@ -33,8 +33,11 @@ module Metalware
         ) { |template_string| render_erb_template(template_string) }
       end
 
+      ##
+      # Sets itself as the node parameter in the dynamic namespace
+      #
       def render_erb_template(template)
-        alces.render_erb_template(template)
+        alces.render_erb_template(template, node: self)
       end
     end
   end
