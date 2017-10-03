@@ -8,8 +8,7 @@ require 'config'
 module Metalware
   module Namespaces
     class Alces
-      def testing
-      end
+      def testing; end
     end
   end
 end

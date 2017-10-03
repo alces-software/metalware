@@ -28,7 +28,7 @@ module Metalware
       attr_reader :alces
 
       def render_value(value)
-        value.is_a?(String) ? @templater_block.call(value) : value 
+        value.is_a?(String) ? @templater_block.call(value) : value
       end
     end
   end

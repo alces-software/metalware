@@ -9,8 +9,7 @@ require 'namespaces/alces'
 module Metalware
   module Namespaces
     class Alces
-      def testing
-      end
+      def testing; end
     end
   end
 end
@@ -25,7 +24,7 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
 
   let :struct { build_hash(alces) }
 
-  def build_hash(alces_input)
+  def build_hash(_alces_input)
     Metalware::HashMergers::MetalRecursiveOpenStruct
       .new(
         key: 'value',
@@ -34,10 +33,10 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
         erb3: '<%= alces.testing.erb2 %>',
         erb4: '<%= alces.testing.erb3 %>'
       ) do |template_string|
-        alces.render_erb_template(template_string) 
+        alces.render_erb_template(template_string)
       end
   end
-  
+
   it 'does a single ERB replacement' do
     expect(struct.erb1).to eq('value')
   end

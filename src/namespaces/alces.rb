@@ -27,10 +27,10 @@ module Metalware
 
       def nodes
         @nodes ||= NodeattrInterface
-          .all_nodes
-          .map do |node_name|
-            Namespaces::Node.new(config, self, node_name)
-          end
+                   .all_nodes
+                   .map do |node_name|
+          Namespaces::Node.new(config, self, node_name)
+        end
       end
 
       private

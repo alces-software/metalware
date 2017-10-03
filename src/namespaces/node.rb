@@ -26,7 +26,15 @@ module Metalware
       end
 
       def hash_merger
-        @hash_merger ||= HashMergers.merge(config, alces: alces)
+        @hash_merger ||= HashMergers.merge(
+          metal_config,
+          groups: genders,
+          node: name
+        ) { |template_string| render_erb_template(template_string) }
+      end
+
+      def render_erb_template(template)
+        alces.render_erb_template(template)
       end
     end
   end
