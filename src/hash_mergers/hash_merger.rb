@@ -9,8 +9,6 @@ require 'constants'
 module Metalware
   module HashMergers
     class HashMerger
-      HASH_DATA_STRUCTURE = HashMergers::MetalRecursiveOpenStruct
-
       def initialize(metalware_config, alces: nil)
         @metalware_config = metalware_config
         @file_path = FilePath.new(metalware_config)
@@ -20,7 +18,8 @@ module Metalware
 
       def merge(groups: [], node: nil)
         arr = hash_array(groups: groups, node: node)
-        HASH_DATA_STRUCTURE.new(combine_hashes(arr).merge(alces: alces))
+        Constants::HASH_MERGER_DATA_STRUCTURE
+          .new(combine_hashes(arr).merge(alces: alces))
       end
 
       private

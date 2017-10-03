@@ -3,6 +3,9 @@
 
 require 'exceptions'
 require 'templating/renderer'
+require 'nodeattr_interface'
+require 'namespaces/node'
+require 'config'
 
 module Metalware
   module Namespaces
@@ -22,7 +25,16 @@ module Metalware
         end
       end
 
+      # TODO: REMOVE THIS. IT was only used for testing however Alces shouldn't have an answer method
       def answer; end
+
+      def nodes
+        @nodes ||= NodeattrInterface
+          .all_nodes
+          .map do |node_name|
+            Namespaces::Node.new(config, self, node_name)
+          end
+      end
 
       private
 
