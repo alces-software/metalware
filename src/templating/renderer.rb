@@ -23,6 +23,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'erb'
+
 module Metalware
   module Templating
     module Renderer
@@ -54,7 +56,7 @@ module Metalware
           trim_mode = '-'
 
           safe_level = 0
-          erb = ERB.new(template, safe_level, trim_mode)
+          erb = ::ERB.new(template, safe_level, trim_mode)
 
           begin
             erb.result(binding)

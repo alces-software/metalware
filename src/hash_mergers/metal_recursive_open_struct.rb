@@ -6,9 +6,9 @@ require 'recursive-open-struct'
 module Metalware
   module HashMergers
     class MetalRecursiveOpenStruct < RecursiveOpenStruct
-      def initialize(**hash, &templater_block)
+      def initialize(*args, **hash, &templater_block)
         @templater_block = templater_block
-        super(hash)
+        super(*args, **hash)
       end
 
       def method_missing(s, *a, &b)
