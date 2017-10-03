@@ -6,13 +6,15 @@ require 'recursive-open-struct'
 module Metalware
   module HashMergers
     class MetalRecursiveOpenStruct
+      include Enumerable
+
       def initialize(table = {}, &templater_block)
         @templater_block = templater_block
         @table = table
       end
 
       def method_missing(s, *_a, &_b)
-        respond_to_missing?(s) ? self[s] : super
+        respond_to_missing?(s) ? self[s] : nil
       end
 
       def respond_to_missing?(s, *_a)
@@ -23,7 +25,7 @@ module Metalware
         render_value(table[s])
       end
 
-      def each(&block)
+      def each
         table.each { |key, value| yield(key, render_value(value)) }
       end
 

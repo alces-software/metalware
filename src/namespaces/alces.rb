@@ -10,8 +10,8 @@ require 'config'
 module Metalware
   module Namespaces
     class Alces
-      def initialize(config)
-        @config = config
+      def initialize(metal_config)
+        @metal_config = metal_config
         @dynamic_stack = []
       end
 
@@ -29,7 +29,7 @@ module Metalware
         @nodes ||= begin
           NodeattrInterface.all_nodes
                            .map do |node_name|
-                             Namespaces::Node.new(config, self, node_name)
+                             Namespaces::Node.new(metal_config, self, node_name)
                            end
         end
       end
@@ -38,7 +38,18 @@ module Metalware
       # method_missing is used to access the dynamic namespace
       #
       def method_missing(s, *_a, &_b)
-        respond_to_missing?(s) ? current_dynamic_namespace[s] :  super
+        if respond_to_missing?(s)
+          current_dynamic_namespace[s]
+
+        ##
+        # TEMPORARY: maintaining partial backwards compatability so config
+        # can be accessed directly. This should be removed when possible
+        #
+        elsif current_dynamic_namespace.key?(:config) && current_dynamic_namespace[:config].respond_to?(s)
+          current_dynamic_namespace[:config][s]
+        else
+          super
+        end
       end
 
       def respond_to_missing?(s)
@@ -47,7 +58,7 @@ module Metalware
 
       private
 
-      attr_reader :config, :recursion_count, :dynamic_stack
+      attr_reader :metal_config, :recursion_count, :dynamic_stack
 
       def run_with_dynamic(namespace)
         if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
@@ -60,7 +71,7 @@ module Metalware
       end
 
       def current_dynamic_namespace
-        dynamic_stack.last 
+        dynamic_stack.last
       end
     end
   end

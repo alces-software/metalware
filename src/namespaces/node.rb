@@ -17,9 +17,11 @@ module Metalware
 
       delegate :config, :answer, to: :hash_merger
 
+      attr_reader :name
+
       private
 
-      attr_reader :alces, :name, :metal_config
+      attr_reader :alces, :metal_config
 
       def genders
         @genders ||= NodeattrInterface.groups_for_node(name)
@@ -33,11 +35,13 @@ module Metalware
         ) { |template_string| render_erb_template(template_string) }
       end
 
-      ##
       # Sets itself as the node parameter in the dynamic namespace
       #
       def render_erb_template(template)
-        alces.render_erb_template(template, node: self)
+        alces.render_erb_template(template,
+                                  node: self,
+                                  config: config,
+                                  answer: answer)
       end
     end
   end

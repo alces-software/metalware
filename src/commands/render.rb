@@ -45,7 +45,7 @@ module Metalware
       end
 
       def new_templater
-        puts "USING NEW TEMPLATER"
+        puts 'USING NEW TEMPLATER'
         template_path, maybe_node = args
 
         template = File.read(template_path)

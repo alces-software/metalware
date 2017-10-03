@@ -33,7 +33,7 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
         erb3: '<%= alces.testing.erb2 %>',
         erb4: '<%= alces.testing.erb3 %>',
         recursive_hash1: {
-          recursive_hash2: '<%= alces.testing.key %>'
+          recursive_hash2: '<%= alces.testing.key %>',
         }
       ) do |template_string|
         alces.render_erb_template(template_string)
