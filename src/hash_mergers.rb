@@ -11,10 +11,10 @@ Metalware::Utils::DynamicRequire.relative('hash_mergers')
 module Metalware
   module HashMergers
     class << self
-      def merge(config, **inputs)
+      def merge(config, **inputs, &templater_block)
         OpenStruct.new({
-          config: Config.new(config, **inputs),
-          answer: Answer.new(config, **inputs),
+          config: Config.new(config).merge(**inputs, &templater_block),
+          answer: Answer.new(config).merge(**inputs, &templater_block),
         })
       end
     end

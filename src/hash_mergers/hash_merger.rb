@@ -9,22 +9,21 @@ require 'constants'
 module Metalware
   module HashMergers
     class HashMerger
-      def initialize(metalware_config, alces: nil)
+      def initialize(metalware_config)
         @metalware_config = metalware_config
         @file_path = FilePath.new(metalware_config)
         @loader = Validation::Loader.new(metalware_config)
-        @alces = alces
       end
 
-      def merge(groups: [], node: nil)
+      def merge(groups: [], node: nil, &templater_block)
         arr = hash_array(groups: groups, node: node)
         Constants::HASH_MERGER_DATA_STRUCTURE
-          .new(combine_hashes(arr).merge(alces: alces))
+          .new(combine_hashes(arr), &templater_block)
       end
 
       private
 
-      attr_reader :metalware_config, :file_path, :loader, :alces
+      attr_reader :metalware_config, :file_path, :loader
 
       ##
       # hash_array enforces the order in which the hashes are loaded, it is not
