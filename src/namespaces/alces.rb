@@ -25,9 +25,6 @@ module Metalware
         end
       end
 
-      # TODO: REMOVE THIS. IT was only used for testing however Alces shouldn't have an answer method
-      def answer; end
-
       def nodes
         @nodes ||= NodeattrInterface
           .all_nodes

@@ -6,8 +6,8 @@ require 'recursive-open-struct'
 module Metalware
   module HashMergers
     class MetalRecursiveOpenStruct < RecursiveOpenStruct
-      def initialize(**hash)
-        @alces = hash.delete(:alces)
+      def initialize(**hash, &templater_block)
+        @templater_block = templater_block
         super(hash)
       end
 
@@ -28,11 +28,7 @@ module Metalware
       attr_reader :alces
 
       def render_value(value)
-        if value.is_a? String
-          alces.render_erb_template(value)
-        else
-          value
-        end
+        value.is_a?(String) ? @templater_block.call(value) : value 
       end
     end
   end
