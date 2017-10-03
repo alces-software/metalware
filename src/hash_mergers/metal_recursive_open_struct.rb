@@ -23,12 +23,24 @@ module Metalware
         render_value(super(*a))
       end
 
+      def each_pair(&block)
+        super { |key, value| yield(key, render_value(value)) }
+      end
+      alias_method :each, :each_pair
+
       private
 
       attr_reader :alces
 
       def render_value(value)
-        value.is_a?(String) ? @templater_block.call(value) : value
+        case value
+        when String
+          @templater_block.call(value)
+        when Hash
+          MetalRecursiveOpenStruct.new(value, &templater_block)
+        else
+          value
+        end
       end
     end
   end

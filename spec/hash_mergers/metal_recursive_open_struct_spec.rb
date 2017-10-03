@@ -44,4 +44,12 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
   it 'can replace multiple embedded erb' do
     expect(struct.erb4).to eq('value')
   end
+
+  it 'can loop through the entire structure' do
+    struct.each do |key, value|
+      exp = struct.send(key)
+      msg = "#{key} was not rendered, expected: '#{exp}', got: '#{value}'"
+      expect(value).to eq(exp), msg
+    end
+  end
 end
