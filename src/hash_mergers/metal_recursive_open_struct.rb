@@ -5,37 +5,40 @@ require 'recursive-open-struct'
 
 module Metalware
   module HashMergers
-    class MetalRecursiveOpenStruct < RecursiveOpenStruct
-      def initialize(*args, **hash, &templater_block)
+    class MetalRecursiveOpenStruct
+      def initialize(table = {}, &templater_block)
         @templater_block = templater_block
-        super(*args, **hash)
+        @table = table
       end
 
-      def method_missing(s, *a, &b)
-        render_value(super(s, *a, &b))
+      def method_missing(s, *_a, &_b)
+        respond_to_missing?(s) ? self[s] : super
       end
 
-      def respond_to_missing?
-        super
+      def respond_to_missing?(s, *_a)
+        table.key?(s)
       end
 
-      def [](*a)
-        render_value(super(*a))
+      def [](s)
+        render_value(table[s])
       end
 
-      def each_pair(&block)
-        super { |key, value| yield(key, render_value(value)) }
+      def each(&block)
+        table.each { |key, value| yield(key, render_value(value)) }
       end
-      alias_method :each, :each_pair
+
+      def to_h
+        table
+      end
 
       private
 
-      attr_reader :alces
+      attr_reader :table, :templater_block
 
       def render_value(value)
         case value
         when String
-          @templater_block.call(value)
+          templater_block.call(value)
         when Hash
           MetalRecursiveOpenStruct.new(value, &templater_block)
         else

@@ -31,7 +31,10 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
         erb1: '<%= alces.testing.key %>',
         erb2: '<%= alces.testing.erb1 %>',
         erb3: '<%= alces.testing.erb2 %>',
-        erb4: '<%= alces.testing.erb3 %>'
+        erb4: '<%= alces.testing.erb3 %>',
+        recursive_hash1: {
+          recursive_hash2: '<%= alces.testing.key %>'
+        }
       ) do |template_string|
         alces.render_erb_template(template_string)
       end
@@ -47,9 +50,14 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
 
   it 'can loop through the entire structure' do
     struct.each do |key, value|
+      next if value.is_a? Metalware::HashMergers::MetalRecursiveOpenStruct
       exp = struct.send(key)
       msg = "#{key} was not rendered, expected: '#{exp}', got: '#{value}'"
-      expect(value).to eq(exp), msg
+      expect(exp).to eq(value), msg
     end
+  end
+
+  it 'renderes parameters in a recursive hash' do
+    expect(struct.recursive_hash1.recursive_hash2).to eq('value')
   end
 end
