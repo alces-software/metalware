@@ -4,33 +4,24 @@
 require 'exceptions'
 require 'templating/renderer'
 require 'nodeattr_interface'
-require 'namespaces/node'
 require 'config'
+require 'utils/dynamic_require'
+
+Metalware::Utils::DynamicRequire.relative('.')
 
 module Metalware
   module Namespaces
     class Alces
+      include Mixins::AlcesPermanentNamespace
+
       def initialize(metal_config)
         @metal_config = metal_config
         @dynamic_stack = []
       end
 
-      def alces
-        self
-      end
-
       def render_erb_template(template_string, dynamic_namespace = {})
         run_with_dynamic(dynamic_namespace) do
           Templating::Renderer.replace_erb_with_binding(template_string, binding)
-        end
-      end
-
-      def nodes
-        @nodes ||= begin
-          NodeattrInterface.all_nodes
-                           .map do |node_name|
-                             Namespaces::Node.new(metal_config, self, node_name)
-                           end
         end
       end
 
@@ -58,7 +49,7 @@ module Metalware
 
       private
 
-      attr_reader :metal_config, :recursion_count, :dynamic_stack
+      attr_reader :metal_config, :dynamic_stack
 
       def run_with_dynamic(namespace)
         if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
