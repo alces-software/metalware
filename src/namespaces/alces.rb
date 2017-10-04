@@ -43,7 +43,7 @@ module Metalware
         end
       end
 
-      def respond_to_missing?(s)
+      def respond_to_missing?(s, *_a)
         current_dynamic_namespace.key?(s)
       end
 

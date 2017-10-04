@@ -2,19 +2,25 @@
 
 module Metalware
   module Namespaces
-    class Nodes
-      include Enumerable
-
-      delegate :each, :inspect, to: :nodes
+    class Nodes < Array
+      def initialize(alces)
+        super()
+        create_node_namespaces(alces)
+        define_node_methods
+        self.freeze
+      end
 
       private
 
-      def nodes
-        @nodes ||= NodeattrInterface
-                     .all_nodes
-                     .map do |node_name|
-          Namespaces::Node.new(self, node_name)
+      def create_node_namespaces(alces)
+        nodes = NodeattrInterface.all_nodes.map do |node_name|
+          Namespaces::Node.new(alces, node_name)
         end
+        self.push(*nodes)
+      end
+
+      def define_node_methods
+        each { |node| define_singleton_method(node.name.to_sym) { node }  }
       end
     end
   end

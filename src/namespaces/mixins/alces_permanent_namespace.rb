@@ -9,7 +9,7 @@ module Metalware
         end
 
         def nodes
-          @nodes = Namespaces::Nodes.new
+          @nodes ||= Namespaces::Nodes.new(self)
         end
       end
     end
