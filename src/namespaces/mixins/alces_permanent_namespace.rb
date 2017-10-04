@@ -12,7 +12,7 @@ module Metalware
           @nodes ||= NodeattrInterface
                      .all_nodes
                      .map do |node_name|
-            Namespaces::Node.new(metal_config, self, node_name)
+            Namespaces::Node.new(self, node_name)
           end
         end
       end

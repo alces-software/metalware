@@ -9,8 +9,8 @@ require 'hash_mergers'
 module Metalware
   module Namespaces
     class Node
-      def initialize(metal_config, alces, name)
-        @metal_config = metal_config
+      def initialize(alces, name)
+        @metal_config = alces.send(:metal_config)
         @alces = alces
         @name = name
       end

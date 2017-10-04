@@ -32,7 +32,7 @@ RSpec.describe Metalware::Namespaces::Node do
 
   let :node do
     allow(Metalware::HashMergers).to receive(:merge).and_return(hash_merger)
-    namespace = Metalware::Namespaces::Node.new(config, alces, '_node_name')
+    namespace = Metalware::Namespaces::Node.new(alces, '_node_name')
     allow(namespace).to receive(:genders).and_return([])
     namespace
   end
