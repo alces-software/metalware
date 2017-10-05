@@ -10,6 +10,19 @@ module Metalware
         @group ||= alces.groups.send(genders.first)
       end
 
+      def index
+        @index ||= begin
+          group.nodes.each_with_index do |other_node, index|
+            return(index + 1) if other_node == self
+          end
+          raise InternalError, 'Node does not appear in its primary group'
+        end
+      end
+
+      def ==(other_node)
+        other_node.name == name
+      end
+
       private
 
       def genders

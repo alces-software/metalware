@@ -11,14 +11,31 @@ RSpec.describe Metalware::Namespaces::Node do
   let :config { Metalware::Config.new }
   let :alces do
     a = Metalware::Namespaces::Alces.new(config)
-    allow(a).to receive(:groups).and_return(RecursiveOpenStruct.new({
-      primary_group: { index: primary_group_index }
-    }))
+    allow(a).to receive(:groups).and_return(
+      Metalware::Namespaces::MetalArray.new(
+        [
+          Metalware::Namespaces::Group
+            .new(a, 'primary_group', index: primary_group_index),
+        ]
+      )
+    )
     a
+  end
+
+  def build_groups_hash(node_array)
+    node_array.each_with_object({}) do |name, memo|
+      memo[name.to_sym] = { name: name }
+    end
+  end
+
+  def return_node_at_runtime
+    node
   end
 
   let :test_value { 'test value set in namespace/node_spec.rb' }
   let :primary_group_index { 'primary_group_index' }
+  let :node_name { 'node02' }
+  let :node_array { ['some_other_node', node_name] }
 
   ##
   # Mocking the HashMerger to return a specified hash as the original
@@ -41,12 +58,23 @@ RSpec.describe Metalware::Namespaces::Node do
   let :node do
     allow(Metalware::HashMergers).to \
       receive(:merge).and_return(hash_merger)
-    Metalware::Namespaces::Node.new(alces, '_node_name')
+    Metalware::Namespaces::Node.new(alces, node_name)
   end
 
+  ##
+  # Spoofs the results of NodeattrInterface
+  #
   before :each do
     allow(Metalware::NodeattrInterface).to \
       receive(:groups_for_node).and_return(['primary_group'])
+    allow(Metalware::NodeattrInterface).to \
+      receive(:nodes_in_group).and_return(node_array)
+    allow(Metalware::NodeattrInterface).to \
+      receive(:all_nodes).and_return(node_array)
+  end
+
+  it 'can access the node name' do
+    expect(node.name).to eq(node_name)
   end
 
   it 'can retreive a simple config value for the node' do
@@ -59,5 +87,9 @@ RSpec.describe Metalware::Namespaces::Node do
 
   it 'can find its group index' do
     expect(node.group.index).to eq(primary_group_index)
+  end
+
+  it 'can determine the node index' do
+    expect(node.index).to eq(2)
   end
 end

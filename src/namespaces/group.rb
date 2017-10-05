@@ -11,6 +11,19 @@ module Metalware
 
       attr_reader :name, :index
 
+      def nodes
+        @nodes ||= begin
+          arr = NodeattrInterface.nodes_in_group(name).map do |node_name|
+            alces.nodes.send(node_name)
+          end
+          MetalArray.new(arr)
+        end
+      end
+
+      def ==(other_group)
+        other_group.name == name
+      end
+
       private
 
       def hash_merger_input
