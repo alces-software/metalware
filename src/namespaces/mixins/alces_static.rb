@@ -11,6 +11,10 @@ module Metalware
           self
         end
 
+        def domain
+          @domain ||= Namespaces::Domain.new(alces)
+        end
+
         def nodes
           @nodes ||= begin
             arr = NodeattrInterface.all_nodes.map do |node_name|
