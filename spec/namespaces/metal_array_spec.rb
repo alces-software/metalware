@@ -6,7 +6,12 @@ require 'config'
 require 'constants'
 require 'nodeattr_interface'
 
-RSpec.describe Metalware::Namespaces::Nodes do
+##
+# NOTE: alces.nodes is a MetalArray
+# However it is the behaviour of alces.nodes that needs to
+# be ensured.
+#
+RSpec.describe Metalware::Namespaces::MetalArray do
   let :config { Metalware::Config.new }
   let :alces { Metalware::Namespaces::Alces.new(config) }
 
@@ -17,11 +22,11 @@ RSpec.describe Metalware::Namespaces::Nodes do
       receive(:all_nodes).and_return(node_names)
   end
 
-  it 'has the correct number of nodes' do
+  it 'has the correct number of items' do
     expect(alces.nodes.length).to eq(node_names.length)
   end
 
-  it 'can find all the nodes' do
+  it 'can find all the items' do
     node_names.each do |node|
       found_node = alces.nodes.send(node)
       expect(found_node.name).to eq(node)

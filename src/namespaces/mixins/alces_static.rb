@@ -9,7 +9,12 @@ module Metalware
         end
 
         def nodes
-          @nodes ||= Namespaces::Nodes.new(self)
+          @nodes ||= begin
+            arr = NodeattrInterface.all_nodes.map do |node_name|
+              Namespaces::Node.new(alces, node_name)
+            end
+            Namespaces::MetalArray.new(arr)
+          end
         end
       end
     end

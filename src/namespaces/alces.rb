@@ -7,6 +7,7 @@ require 'nodeattr_interface'
 require 'config'
 require 'utils/dynamic_require'
 
+require 'namespaces/metal_array'
 require 'namespaces/hash_merger_namespace'
 Metalware::Utils::DynamicRequire.relative('.')
 
