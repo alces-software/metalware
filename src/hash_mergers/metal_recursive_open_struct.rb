@@ -14,30 +14,19 @@ module Metalware
       end
 
       def method_missing(s, *_a, &_b)
-        respond_to_missing?(s) ? self[s] : nil
+        if respond_to_missing?(s)
+          value = self[s]
+          define_singleton_method(s) { value }
+          value
+        end
       end
 
       def respond_to_missing?(s, *_a)
         table.key?(s)
       end
 
-      def [](s)
-        render_value(table[s])
-      end
-
-      def each
-        table.each { |key, value| yield(key, render_value(value)) }
-      end
-
-      def to_h
-        table
-      end
-
-      private
-
-      attr_reader :table, :templater_block
-
-      def render_value(value)
+      def [](key)
+        value = table[key]
         case value
         when String
           templater_block.call(value)
@@ -47,6 +36,18 @@ module Metalware
           value
         end
       end
+
+      def each
+        table.keys.each { |key| yield(key, send(key)) }
+      end
+
+      def to_h
+        table
+      end
+
+      private
+
+      attr_reader :table, :templater_block
     end
   end
 end
