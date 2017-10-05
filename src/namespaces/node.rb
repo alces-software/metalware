@@ -6,6 +6,10 @@ module Metalware
     class Node < HashMergerNamespace
       attr_reader :name
 
+      def group
+        @group ||= alces.groups.send(genders.first)
+      end
+
       private
 
       def genders
