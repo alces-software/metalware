@@ -3,7 +3,7 @@
 module Metalware
   module Namespaces
     module Mixins
-      module AlcesPermanentNamespace
+      module AlcesStatic
         def alces
           self
         end

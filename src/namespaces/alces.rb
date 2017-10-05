@@ -12,7 +12,7 @@ Metalware::Utils::DynamicRequire.relative('.')
 module Metalware
   module Namespaces
     class Alces
-      include Mixins::AlcesPermanentNamespace
+      include Mixins::AlcesStatic
 
       def initialize(metal_config)
         @metal_config = metal_config
