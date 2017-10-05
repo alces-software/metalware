@@ -10,7 +10,15 @@ module Metalware
 
       def load_yaml(section, section_name = nil)
         input = (section_name ? [section_name] : [])
-        loader.section_answers(section, *input)
+        defaults = configure_data[section].map do |key, value|
+          [key, value[:default]]
+        end.to_h
+        answers = loader.section_answers(section, *input)
+        defaults.merge(answers)
+      end
+
+      def configure_data
+        @configure_data ||= loader.configure_data
       end
     end
   end
