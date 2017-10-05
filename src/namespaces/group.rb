@@ -4,7 +4,12 @@
 module Metalware
   module Namespaces
     class Group < HashMergerNamespace
-      attr_reader :name
+      def initialize(alces, name, index:)
+        @index = index
+        super(alces, name)
+      end
+
+      attr_reader :name, :index
 
       private
 

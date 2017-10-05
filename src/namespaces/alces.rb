@@ -3,7 +3,6 @@
 
 require 'exceptions'
 require 'templating/renderer'
-require 'nodeattr_interface'
 require 'config'
 require 'utils/dynamic_require'
 
