@@ -7,7 +7,7 @@ module Metalware
         super()
         create_node_namespaces(alces)
         define_node_methods
-        self.freeze
+        freeze
       end
 
       private
@@ -16,11 +16,11 @@ module Metalware
         nodes = NodeattrInterface.all_nodes.map do |node_name|
           Namespaces::Node.new(alces, node_name)
         end
-        self.push(*nodes)
+        push(*nodes)
       end
 
       def define_node_methods
-        each { |node| define_singleton_method(node.name.to_sym) { node }  }
+        each { |node| define_singleton_method(node.name.to_sym) { node } }
       end
     end
   end

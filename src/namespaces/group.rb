@@ -3,21 +3,17 @@
 
 module Metalware
   module Namespaces
-    class Node < HashMergerNamespace
+    class Group < HashMergerNamespace
       attr_reader :name
 
       private
 
-      def genders
-        @genders ||= NodeattrInterface.groups_for_node(name)
-      end
-
       def hash_merger_input
-        { groups: genders, node: name }
+        { groups: [name] }
       end
 
       def additional_dynamic_namespace
-        { node: self }
+        { group: self }
       end
     end
   end
