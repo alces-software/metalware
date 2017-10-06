@@ -13,6 +13,7 @@ module Metalware
         @name = group_name
       end
 
+      # Already migrated as HashMerger
       def answers
         MissingParameterWrapper.new(
           templating_configuration.answers,
@@ -20,6 +21,7 @@ module Metalware
         )
       end
 
+      # Already migrated as a MetalArray
       def nodes
         NodeattrInterface.nodes_in_primary_group(name).map do |node_name|
           yield templating_config_for_node(node_name)

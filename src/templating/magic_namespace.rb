@@ -35,6 +35,8 @@ module Metalware
       end
 
       attr_reader :firstboot, :files, :additional_parameters
+
+      # Will not migrate
       delegate :index, :group_index, to: :node
       delegate :to_json, to: :to_h
 
@@ -61,6 +63,7 @@ module Metalware
         end
       end
 
+      # Will not migrate, this is no longer being used
       def genders
         # XXX Do we want to make genders available as a `Hashie::Mash` too?
         # Depends if we want to be able to iterate through genders or just get
@@ -80,6 +83,7 @@ module Metalware
         @group_cache ||= GroupCache.new(metalware_config)
       end
 
+      # Migrated to Alces (static) Namespace
       def hunter
         if File.exist? Constants::HUNTER_PATH
           Hashie::Mash.load(Constants::HUNTER_PATH)
@@ -92,10 +96,12 @@ module Metalware
         end
       end
 
+      # Migrated to Namespaces::Domain
       def hosts_url
         DeploymentServer.system_file_url 'hosts'
       end
 
+      # Migrated to Namespaces::Domain
       def genders_url
         DeploymentServer.system_file_url 'genders'
       end
@@ -110,6 +116,7 @@ module Metalware
         DeploymentServer.build_complete_url(nodename)
       end
 
+      # Migrated to Namespaces::Domain
       def hostip
         DeploymentServer.ip
       end

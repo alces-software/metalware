@@ -20,8 +20,8 @@ module Metalware
         end
       end
 
-      def ==(other_group)
-        other_group.name == name
+      def ==(other)
+        other.name == name
       end
 
       private

@@ -5,6 +5,7 @@ require 'exceptions'
 require 'templating/renderer'
 require 'config'
 require 'utils/dynamic_require'
+require 'deployment_server'
 
 require 'namespaces/metal_array'
 require 'namespaces/hash_merger_namespace'
