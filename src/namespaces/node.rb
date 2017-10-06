@@ -1,5 +1,6 @@
 
 # frozen_string_literal: true
+require 'deployment_server'
 
 module Metalware
   module Namespaces
@@ -21,6 +22,14 @@ module Metalware
 
       def ==(other_node)
         other_node.name == name
+      end
+
+      def kickstart_url
+        @kickstart_url ||= DeploymentServer.kickstart_url(name)
+      end
+
+      def build_complete_url
+        @build_complete_url ||= DeploymentServer.build_complete_url(name)
       end
 
       private

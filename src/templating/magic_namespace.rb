@@ -42,10 +42,12 @@ module Metalware
         ObjectFieldsHasher.hash_object(self, groups: :groups_data)
       end
 
+      # Will not migrate
       def nodename
         node.name || ''
       end
 
+      # Will not migrate
       def answers
         # If we're templating for a particular node then we should be strict
         # about accessing answers which don't exist, as this indicates a
@@ -66,12 +68,14 @@ module Metalware
         GenderGroupProxy
       end
 
+      # Will not migrate
       def groups
         group_cache.map do |group|
           yield group_namespace_for(group)
         end
       end
 
+      # Will not migrate
       def group_cache
         @group_cache ||= GroupCache.new(metalware_config)
       end
@@ -96,10 +100,12 @@ module Metalware
         DeploymentServer.system_file_url 'genders'
       end
 
+      # Migrated to Namespaces::Node
       def kickstart_url
         DeploymentServer.kickstart_url(nodename)
       end
 
+      # Migrated to Namespaces::Node
       def build_complete_url
         DeploymentServer.build_complete_url(nodename)
       end
