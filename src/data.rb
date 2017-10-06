@@ -22,13 +22,22 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'yaml'
+require 'metal_log'
 
 module Metalware
   module Data
     class << self
-      def load(data_file)
+      def log
+        @log ||= MetalLog.new('file')
+      end
+
+      def load(data_file, skip_log: false)
+        log.info "load: #{data_file}" unless skip_log
         data = raw_load(data_file)
         process_loaded_data(data, source: data_file)
+      rescue => e
+          log.error("Fail: #{e.inspect}") unless skip_log
+          raise e
       end
 
       def load_string(data_string)

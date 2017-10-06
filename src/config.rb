@@ -29,6 +29,7 @@ require 'constants'
 require 'exceptions'
 require 'ostruct'
 require 'metal_log'
+require 'data'
 
 module Metalware
   class Config
@@ -54,7 +55,7 @@ module Metalware
         raise MetalwareError, "Config file '#{file}' does not exist"
       end
 
-      @config = Data.load(file)
+      @config = Metalware::Data.load(file, skip_log: true)
       @cli = OpenStruct.new(options)
       MetalLog.reset_log(self)
     end
