@@ -36,8 +36,8 @@ module Metalware
         data = raw_load(data_file)
         process_loaded_data(data, source: data_file)
       rescue => e
-          log.error("Fail: #{e.inspect}") unless skip_log
-          raise e
+        log.error("Fail: #{e.inspect}") unless skip_log
+        raise e
       end
 
       def load_string(data_string)

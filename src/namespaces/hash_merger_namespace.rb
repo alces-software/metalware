@@ -27,7 +27,7 @@ module Metalware
       attr_reader :alces
 
       def run_hash_merger(hash_obj)
-        hash_obj.merge(**hash_merger_input, &template_block) 
+        hash_obj.merge(**hash_merger_input, &template_block)
       end
 
       def hash_merger_input
