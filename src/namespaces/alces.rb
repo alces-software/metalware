@@ -8,6 +8,8 @@ require 'utils/dynamic_require'
 
 require 'namespaces/metal_array'
 require 'namespaces/hash_merger_namespace'
+require 'hash_mergers.rb'
+require 'ostruct'
 Metalware::Utils::DynamicRequire.relative('.')
 
 module Metalware
@@ -23,6 +25,18 @@ module Metalware
       def render_erb_template(template_string, dynamic_namespace = {})
         run_with_dynamic(dynamic_namespace) do
           Templating::Renderer.replace_erb_with_binding(template_string, binding)
+        end
+      end
+
+      ##
+      # shared hash_merger object which contains a file cache
+      #
+      def hash_mergers
+        @hash_mergers ||= begin
+          OpenStruct.new({
+            config: HashMergers::Config.new(metal_config),
+            answer: HashMergers::Answer.new(metal_config),
+          })
         end
       end
 

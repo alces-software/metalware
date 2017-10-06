@@ -10,33 +10,39 @@ module Metalware
   module Namespaces
     class HashMergerNamespace
       def initialize(alces, name = nil)
-        @metal_config = alces.send(:metal_config)
         @alces = alces
         @name = name
       end
 
-      delegate :config, :answer, to: :hash_merger
+      def config
+        @config ||= run_hash_merger(alces.hash_mergers.config)
+      end
+
+      def answer
+        @answer ||= run_hash_merger(alces.hash_mergers.answer)
+      end
 
       private
 
-      attr_reader :alces, :metal_config
+      attr_reader :alces
 
-      def hash_merger
-        @hash_merger ||= HashMergers.merge(
-          metal_config,
-          **hash_merger_input
-        ) { |template_string| render_erb_template(template_string) }
+      def run_hash_merger(hash_obj)
+        hash_obj.merge(**hash_merger_input, &template_block) 
       end
 
       def hash_merger_input
         raise NotImplementedError
       end
 
-      def render_erb_template(template)
-        alces.render_erb_template(template,
-                                  config: config,
-                                  answer: answer,
-                                  **additional_dynamic_namespace)
+      def template_block
+        lambda do |template|
+          alces.render_erb_template(
+            template,
+            config: config,
+            answer: answer,
+            **additional_dynamic_namespace
+          )
+        end
       end
 
       def additional_dynamic_namespace

@@ -43,7 +43,6 @@ RSpec.describe Metalware::Namespaces::Node do
   # block that references the original render_node_template block contained
   # within Namespaces::Node
   #
-  let :hash_merger { OpenStruct.new(config: config_hash) }
   let :config_hash do
     Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       key: test_value,
@@ -52,13 +51,20 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   def render_node_template(template)
-    node.send(:render_erb_template, template)
+    template_lambda = node.send(:template_block)
+    template_lambda.call(template)
   end
 
-  let :node do
-    allow(Metalware::HashMergers).to \
-      receive(:merge).and_return(hash_merger)
-    Metalware::Namespaces::Node.new(alces, node_name)
+  let :node { Metalware::Namespaces::Node.new(alces, node_name) }
+
+  ##
+  # Mocks the HashMergers
+  #
+  before :each do
+    allow(Metalware::HashMergers::Config).to receive(:new)
+      .and_return(double('config', merge: config_hash))
+    allow(Metalware::HashMergers::Answer).to receive(:new)
+      .and_return(double('answer', merge: {}))
   end
 
   ##
