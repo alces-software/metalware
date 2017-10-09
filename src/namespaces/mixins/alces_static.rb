@@ -52,7 +52,7 @@ module Metalware
         private
 
         def group_cache
-          @group_cache ||= GroupCache.new(config)
+          @group_cache ||= GroupCache.new(metal_config)
         end
       end
     end

@@ -22,6 +22,10 @@ module Metalware
         @answer ||= run_hash_merger(alces.hash_mergers.answer)
       end
 
+      def render_erb_template(template)
+        template_block.call(template)
+      end
+
       private
 
       attr_reader :alces

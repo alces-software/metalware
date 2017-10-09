@@ -31,21 +31,29 @@ module Metalware
     class Each < CommandHelpers::BaseCommand
       private
 
+      attr_reader :node_identifier, :command
+
       def setup
-        node_identifier = args[0]
-        @nodes = Nodes.create(config, node_identifier, options.group)
+        @node_identifier = args[0]
         @command = args[1]
       end
 
       def run
-        @nodes.template_each do |parameters, _node|
-          rendered_cmd = Templater.new(config, parameters)
-                                  .render_from_string(@command)
+        namespaces.each do |namespace|
+          rendered_cmd = namespace.render_erb_template(command)
           opt = {
             out: $stdout.fileno ? $stdout.fileno : 1,
             err: $stderr.fileno ? $stderr.fileno : 2,
           }
           system(rendered_cmd, opt)
+        end
+      end
+
+      def namespaces
+        if options.group
+          alces.groups.send(node_identifier).nodes
+        else
+          [alces.nodes.send(node_identifier)]
         end
       end
     end

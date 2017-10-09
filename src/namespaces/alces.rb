@@ -50,7 +50,7 @@ module Metalware
         # TEMPORARY: maintaining partial backwards compatability so config
         # can be accessed directly. This should be removed when possible
         #
-        elsif current_dynamic_namespace.key?(:config) && current_dynamic_namespace[:config].respond_to?(s)
+        elsif current_dynamic_namespace&.key?(:config) && current_dynamic_namespace[:config].respond_to?(s)
           current_dynamic_namespace[:config][s]
         else
           super

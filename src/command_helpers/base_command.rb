@@ -29,6 +29,7 @@ require 'exceptions'
 require 'dependency_specifications'
 require 'validation/loader'
 require 'file_path'
+require 'namespaces/alces'
 
 module Metalware
   module CommandHelpers
@@ -95,6 +96,10 @@ module Metalware
 
       def class_name_parts
         self.class.name.split('::').map(&:downcase).map(&:to_sym)
+      end
+
+      def alces
+        @alces ||= Namespaces::Alces.new(config)
       end
 
       def log_command
