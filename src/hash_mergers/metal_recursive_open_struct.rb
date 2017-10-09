@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'recursive-open-struct'
+require 'active_support/core_ext/module/delegation'
 
 module Metalware
   module HashMergers
@@ -12,6 +12,8 @@ module Metalware
         @templater_block = templater_block
         @table = table
       end
+
+      delegate :key?, to: :table
 
       def method_missing(s, *_a, &_b)
         if respond_to_missing?(s)

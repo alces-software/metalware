@@ -168,7 +168,7 @@ module Metalware
     end
 
     def update_named
-      DNS::Named.new(config).update
+      DNS::Named.new(alces).update
     end
 
     def server_config_template

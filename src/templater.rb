@@ -57,10 +57,10 @@ module Metalware
     )
 
     class << self
-      def render(alces, template, **template_parameters)
+      def render(alces, template, **dynamic_namespace)
         if alces.is_a?(Namespaces::Alces)
           raw_template = File.read(template)
-          alces.render_erb_template(raw_template)
+          alces.render_erb_template(raw_template, dynamic_namespace)
         else
           #
           # The config input is going to be replaced with the alces
@@ -70,6 +70,7 @@ module Metalware
           # dynamic namespace
           #
           config = alces
+          template_parameters = dynamic_namespace
           Templater.new(config, template_parameters).render(template)
         end
       end
