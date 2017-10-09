@@ -58,7 +58,7 @@ module Metalware
       end
 
       def respond_to_missing?(s, *_a)
-        current_dynamic_namespace.key?(s)
+        current_dynamic_namespace&.key?(s)
       end
 
       private

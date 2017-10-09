@@ -26,10 +26,10 @@
 require 'exceptions'
 require 'constants'
 require 'network'
-require 'templating/repo_config_parser'
 require 'metal_log'
 require 'active_support/core_ext/string/strip'
 require 'dns/named'
+require 'namespaces/alces'
 
 module Metalware
   class DomainTemplatesRenderer
@@ -135,7 +135,7 @@ module Metalware
     EOF
 
     def render_dns
-      case repo_config.dns_type
+      case alces.domain.config.dns_type
       when nil
         MetalLog.warn(MISSING_DNS_TYPE)
         render_hosts
@@ -144,7 +144,8 @@ module Metalware
       when 'named'
         update_named
       else
-        raise InvalidConfigParameter, "Invalid DNS type: #{repo_config.dns_type}"
+        msg = "Invalid DNS type: #{alces.domain.config.dns_type}"
+        raise InvalidConfigParameter, msg
       end
     end
 
@@ -153,7 +154,7 @@ module Metalware
     end
 
     def render_managed_section_template(template, to:, &block)
-      Templater.render_managed_file(config, template, to, &block)
+      Templater.render_managed_file(alces, template, to, &block)
     end
 
     def render_fully_managed_template(template, to:, &block)
@@ -187,9 +188,8 @@ module Metalware
       File.join(config.repo_path, template_type, 'default')
     end
 
-    def repo_config
-      Templating::RepoConfigParser
-        .parse_for_domain(config: config, include_groups: false).inspect
+    def alces
+      @alces ||= Namespaces::Alces.new(config)
     end
   end
 end

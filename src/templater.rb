@@ -57,10 +57,21 @@ module Metalware
     )
 
     class << self
-      # XXX rename args in these methods - use `**parameters` for passing
-      # template parameters?
-      def render(config, template, **template_parameters)
-        Templater.new(config, template_parameters).render(template)
+      def render(alces, template, **template_parameters)
+        if alces.is_a?(Namespaces::Alces)
+          raw_template = File.read(template)
+          alces.render_erb_template(raw_template)
+        else
+          #
+          # The config input is going to be replaced with the alces
+          # namespace to template against. Once Metalware has been fully
+          # switched over, the Templater class can be removed. The
+          # template_parameters will be switched over to being the
+          # dynamic namespace
+          #
+          config = alces
+          Templater.new(config, template_parameters).render(template)
+        end
       end
 
       def render_to_stdout(config, template, **template_parameters)
@@ -153,10 +164,9 @@ module Metalware
 
     attr_reader :config
 
-    # XXX Have this just take allowed keyword parameters:
-    # - nodename
-    # - index
-    # - what else?
+    #
+    # TODO: Remove this completely as it is replaced by Alces
+    #
     def initialize(metalware_config, parameters = {})
       @config = Templating::RepoConfigParser.parse_for_node(
         node_name: parameters[:nodename],
