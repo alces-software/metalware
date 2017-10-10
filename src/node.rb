@@ -82,7 +82,6 @@ module Metalware
       # Re-raise if we're expecting the node to be configured, as it should be
       # in the genders file.
       raise if should_be_configured
-
       # The node doesn't need to be in the genders file if it's not expected to
       # be configured, it's just part of no groups yet (XXX not sure if this is
       # still true, maybe we should be stricter now and always require a node
@@ -90,6 +89,7 @@ module Metalware
       []
     end
 
+    # REMOVED, OBSOLETE
     # Get the configured `files` for this node, to be rendered and used in
     # `build`. This is the merged namespaces with arrays of file identifiers
     # from all `files` namespaces within all configs for the node, with
@@ -123,7 +123,7 @@ module Metalware
                    Nodes.create(metalware_config, primary_group, true).index(self) + 1
                  else
                    0
-      end
+                 end
     end
 
     # Will not migrate (see Group namespace)
@@ -149,6 +149,7 @@ module Metalware
 
     attr_reader :metalware_config, :should_be_configured
 
+    # WILL NOT MIGRATE, this will cause the configs to be reloaded
     def templating_configuration
       @templating_configuration ||=
         Templating::Configuration.for_node(name, config: metalware_config)
@@ -166,6 +167,7 @@ module Metalware
       GroupCache.new(metalware_config)
     end
 
+    # Migrated to HashMerger
     def merge_in_files!(existing_files, new_files)
       new_files&.each do |namespace, file_identifiers|
         file_identifiers.each do |file_identifier|
@@ -184,10 +186,12 @@ module Metalware
       File.basename(path1) == File.basename(path2)
     end
 
+    # Migrated to Node namespace
     def build_method
       @build_method ||= build_method_class.new(metalware_config, self)
     end
 
+    # Migrated to Node namespace
     def build_method_class
       validate_build_method
 
@@ -203,6 +207,7 @@ module Metalware
       end
     end
 
+    # Migrated to Node namespace
     def validate_build_method
       if self_node?
         unless [:self, nil].include?(repo_build_method)
@@ -213,6 +218,7 @@ module Metalware
       end
     end
 
+    # Will not migrate
     def repo_build_method
       repo_config[:build_method]&.to_sym
     end

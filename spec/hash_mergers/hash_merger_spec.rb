@@ -6,6 +6,7 @@ require 'config'
 require 'filesystem'
 require 'data'
 require 'constants'
+require 'spec_utils'
 
 RSpec.describe Metalware::HashMergers::HashMerger do
   let :config { Metalware::Config.new }
@@ -29,15 +30,20 @@ RSpec.describe Metalware::HashMergers::HashMerger do
     Metalware::HashMergers.merge(config, **hash_input)
   end
 
+  def expect_config_value(my_hash)
+    expect(my_hash.config.to_h).not_to be_empty
+    my_hash.config.to_h.each do |key, value|
+      next if key == :files
+      expect(value).to eq(yield key)
+    end
+  end
+
   context 'with domain scope' do
     let :merged_hash { build_merged_hash }
 
     it 'returns the domain config' do
       filesystem.test do
-        expect(merged_hash.config.to_h).not_to be_empty
-        merged_hash.config.to_h.each do |_key, value|
-          expect(value).to eq('domain')
-        end
+        expect_config_value(merged_hash) { 'domain' }
       end
     end
   end
@@ -49,15 +55,13 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
     it 'returns the merged configs' do
       filesystem.test do
-        expect(merged_hash.config.to_h).not_to be_empty
-        merged_hash.config.to_h.each do |key, value|
-          expected_value = case key
-                           when :value0
-                             'domain'
-                           else
-                             'group1'
-                           end
-          expect(value).to eq(expected_value)
+        expect_config_value(merged_hash) do |key|
+          case key
+          when :value0
+            'domain'
+          else
+            'group1'
+          end
         end
       end
     end
@@ -70,17 +74,15 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
     it 'returns the merged configs' do
       filesystem.test do
-        expect(merged_hash.config.to_h).not_to be_empty
-        merged_hash.config.to_h.each do |key, value|
-          expected_value = case key
-                           when :value0
-                             'domain'
-                           when :value1
-                             'group1'
-                           else
-                             'group2'
-                           end
-          expect(value).to eq(expected_value)
+        expect_config_value(merged_hash) do |key|
+          case key
+          when :value0
+            'domain'
+          when :value1
+            'group1'
+          else
+            'group2'
+          end
         end
       end
     end
@@ -97,6 +99,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
     def check_node_hash(my_hash = {})
       expect(my_hash).not_to be_empty
       my_hash.each do |key, value|
+        next if key == :files
         expected_value = case key
                          when :value0
                            'domain'

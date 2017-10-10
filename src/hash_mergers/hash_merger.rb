@@ -73,10 +73,33 @@ module Metalware
       end
 
       def combine_hashes(hashes)
-        hashes.each_with_object({}) do |config, combined_config|
+        hashes.each_with_object(files: {}) do |config, combined_config|
           raise CombineHashError unless config.is_a? Hash
+          files = config.delete(:files)
           combined_config.deep_merge!(config)
+          merge_in_files!(combined_config[:files], files)
         end
+      end
+
+      def merge_in_files!(existing_files, new_files)
+        new_files&.each do |namespace, file_identifiers|
+          file_identifiers.each do |file_identifier|
+            unless existing_files[namespace]
+              existing_files[namespace] = []
+            end
+            replace_file_with_same_basename!(existing_files[namespace], file_identifier)
+          end
+        end
+      end
+
+      def replace_file_with_same_basename!(files_namespace, file_identifier)
+        files_namespace.reject! { |f| same_basename?(file_identifier, f) }
+        files_namespace << file_identifier
+        files_namespace.sort! # Sort for consistent ordering.
+      end
+
+      def same_basename?(path1, path2)
+        File.basename(path1) == File.basename(path2)
       end
     end
   end

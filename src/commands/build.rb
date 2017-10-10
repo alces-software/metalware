@@ -82,14 +82,19 @@ module Metalware
       end
 
       def repo_dependencies
-        nodes.map(&:build_template_paths).flatten.uniq
+        build_methods.map(&:template_paths).flatten.uniq
+      end
+
+      def build_methods
+        @build_methods = begin
+          nodes.map { |node| node.build_method.new(config, node) }
+        end
       end
 
       def render_build_templates
-        nodes.template_each firstboot: true do |parameters, node|
-          parameters[:files] = build_files(node)
-          render_build_files(parameters, node)
-          node.render_build_started_templates(parameters)
+        nodes.each do |node|
+          render_build_files(node)
+          node.render_build_started_templates(build_files(node))
         end
       end
 
@@ -103,10 +108,10 @@ module Metalware
 
       def retrieve_build_files(node)
         retriever = BuildFilesRetriever.new(node.name, config)
-        retriever.retrieve(node.build_files)
+        retriever.retrieve(node.config.files)
       end
 
-      def render_build_files(parameters, node)
+      def render_build_files(node)
         build_files(node).each do |namespace, files|
           files.each do |file|
             next if file[:error]

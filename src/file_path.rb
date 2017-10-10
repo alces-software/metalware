@@ -120,7 +120,12 @@ module Metalware
     end
 
     def repo_template(template_type, node:)
-      (node.repo_config[:templates] || {})[template_type]
+      # TODO: Remove conditional logic once fully switched to new namespace
+      if node.respond_to?(:repo_config)
+        (node.repo_config[:templates] || {})[template_type]
+      else
+        node.config.templates&.template_type
+      end
     end
 
     def answer_files
