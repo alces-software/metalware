@@ -28,11 +28,10 @@ require 'command_helpers/base_command'
 require 'config'
 require 'templater'
 require 'constants'
-require 'node'
-require 'nodes'
 require 'output'
 require 'build_files_retriever'
 require 'exceptions'
+require 'command_helpers/node_identifier'
 
 module Metalware
   module Commands
@@ -42,16 +41,19 @@ module Metalware
 
       private
 
-      attr_reader :group_name, :nodes, :edit_start, :edit_continue
+      attr_reader :edit_start, :edit_continue
 
       delegate :template_path, to: :file_path
       delegate :in_gui?, to: Utils
 
+      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
+
+      prepend CommandHelpers::NodeIdentifier
+
       def setup
-        setup_edit_mode
-        node_identifier = args.first
-        @group_name = node_identifier if options.group
-        @nodes = Nodes.create(config, node_identifier, options.group)
+        @edit_start = options.edit_start
+        @edit_continue = options.edit_continue
+        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
       end
 
       def run
@@ -74,7 +76,7 @@ module Metalware
           repo: repo_dependencies,
           configure: ['domain.yaml'],
           optional: {
-            configure: ["groups/#{group_name}.yaml"],
+            configure: ["groups/#{group&.name}.yaml"],
           },
         }
       end
@@ -219,14 +221,6 @@ module Metalware
           [yes/no]
         EOF
         render_all_build_complete_templates if agree(should_rerender)
-      end
-
-      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
-
-      def setup_edit_mode
-        @edit_start = options.edit_start
-        @edit_continue = options.edit_continue
-        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
       end
 
       EDIT_START_MSG = <<-EOF.strip_heredoc

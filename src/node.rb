@@ -117,6 +117,7 @@ module Metalware
       )
     end
 
+    # Migrated to Node namespace
     def index
       @index ||= if primary_group
                    Nodes.create(metalware_config, primary_group, true).index(self) + 1
@@ -125,14 +126,17 @@ module Metalware
       end
     end
 
+    # Will not migrate (see Group namespace)
     def group_index
       primary_group_index || 0
     end
 
+    # Will not migrate (see Group namespace)
     def primary_group
       groups.first
     end
 
+    # Will not migrate
     def repo_config
       @repo_config ||= Templater.new(metalware_config, nodename: name).config
     end
