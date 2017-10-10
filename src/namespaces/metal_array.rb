@@ -10,6 +10,10 @@ module Metalware
         freeze
       end
 
+      def find_by_name(name)
+        find { |obj| obj.name == name }
+      end
+
       private
 
       def define_access_methods
