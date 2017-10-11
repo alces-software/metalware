@@ -2,6 +2,7 @@
 
 require 'nodeattr_interface'
 require 'group_cache'
+require 'hashie'
 
 module Metalware
   module Namespaces
