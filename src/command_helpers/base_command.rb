@@ -69,7 +69,7 @@ module Metalware
       end
 
       def dependency_specifications
-        DependencySpecifications.new(config)
+        DependencySpecifications.new(alces)
       end
 
       def dependency_hash
