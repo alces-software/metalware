@@ -33,7 +33,9 @@ module Metalware
       #
       def hash_array(groups:, node:)
         [cached_yaml(:domain)].tap do |arr|
-          groups.each { |group| arr.push(cached_yaml(:group, group)) }
+          groups.reverse.each do |group|
+            arr.push(cached_yaml(:group, group))
+          end
           arr.push(cached_yaml(:node, node)) if node
         end
       end

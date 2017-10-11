@@ -18,14 +18,6 @@ RSpec.describe Metalware::HashMergers::HashMerger do
     end
   end
 
-  def load_next_hash
-    @hash_count ||= -1
-    @hash_count += 1
-    (@hash_count..10).each_with_object({}) do |idx, my_hash|
-      my_hash["index_#{idx}": @hash_count]
-    end
-  end
-
   def build_merged_hash(**hash_input)
     Metalware::HashMergers.merge(config, **hash_input)
   end
@@ -79,9 +71,9 @@ RSpec.describe Metalware::HashMergers::HashMerger do
           when :value0
             'domain'
           when :value1
-            'group1'
-          else
             'group2'
+          else
+            'group1'
           end
         end
       end
@@ -104,9 +96,9 @@ RSpec.describe Metalware::HashMergers::HashMerger do
                          when :value0
                            'domain'
                          when :value1
-                           'group1'
-                         when :value2
                            'group2'
+                         when :value2
+                           'group1'
                          else
                            'node3'
                          end
