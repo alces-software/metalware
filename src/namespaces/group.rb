@@ -4,12 +4,14 @@
 module Metalware
   module Namespaces
     class Group < HashMergerNamespace
+      include Mixins::Name
+
       def initialize(alces, name, index:)
         @index = index
         super(alces, name)
       end
 
-      attr_reader :name, :index
+      attr_reader :index
 
       def nodes
         @nodes ||= begin
@@ -18,10 +20,6 @@ module Metalware
           end
           MetalArray.new(arr)
         end
-      end
-
-      def ==(other)
-        other.name == name
       end
 
       private

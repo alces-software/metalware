@@ -11,6 +11,7 @@ require 'namespaces/metal_array'
 require 'namespaces/hash_merger_namespace'
 require 'hash_mergers.rb'
 require 'ostruct'
+Metalware::Utils::DynamicRequire.relative('mixins')
 Metalware::Utils::DynamicRequire.relative('.')
 
 module Metalware

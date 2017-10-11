@@ -6,7 +6,7 @@ require 'build_methods'
 module Metalware
   module Namespaces
     class Node < HashMergerNamespace
-      attr_reader :name
+      include Mixins::Name
 
       def group
         @group ||= alces.groups.send(genders.first)
@@ -23,11 +23,6 @@ module Metalware
           end
           raise InternalError, 'Node does not appear in its primary group'
         end
-      end
-
-      def ==(other)
-        return false unless other.is_a?(Node)
-        other.name == name
       end
 
       def kickstart_url
