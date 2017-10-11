@@ -24,7 +24,6 @@
 
 require 'constants'
 require 'config'
-require 'templating/repo_config_parser'
 
 module Metalware
   class FilePath
@@ -132,12 +131,7 @@ module Metalware
     end
 
     def repo_template(template_type, node:)
-      # TODO: Remove conditional logic once fully switched to new namespace
-      if node.respond_to?(:repo_config)
-        (node.repo_config[:templates] || {})[template_type]
-      else
-        node.config.templates&.send(template_type)
-      end
+      node.config.templates&.send(template_type)
     end
 
     def answer_files
