@@ -2,3 +2,7 @@ value0: domain
 value1: domain
 value2: domain
 value3: domain
+files:
+  namespace:
+    - domain
+    - duplicate

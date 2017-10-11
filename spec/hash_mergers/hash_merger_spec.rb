@@ -42,7 +42,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
 
   context 'with single group' do
     let :merged_hash do
-      build_merged_hash(groups: ['group1'])
+      build_merged_hash(groups: ['group2'])
     end
 
     it 'returns the merged configs' do
@@ -52,7 +52,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
           when :value0
             'domain'
           else
-            'group1'
+            'group2'
           end
         end
       end
@@ -115,6 +115,17 @@ RSpec.describe Metalware::HashMergers::HashMerger do
     it 'returns the correct answers' do
       filesystem.test do
         check_node_hash(merged_hash.answer.to_h)
+      end
+    end
+  end
+
+  describe '#build_files' do
+    it 'appends the files lists (within the namespace)' do
+      filesystem.test do
+        merged_hash = build_merged_hash(node: 'node3')
+        files = merged_hash.config.files.namespace
+        expect(files.length).to eq(3)
+        expect(files).to include('domain', 'node3', 'duplicate')
       end
     end
   end

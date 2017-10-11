@@ -48,35 +48,6 @@ RSpec.describe do # Metalware::Node do
     SpecUtils.use_mock_genders(self)
   end
 
-  # XXX adapt these to use FakeFS and make dependencies explicit?
-  context 'without using FakeFS', real_fs: true do
-    before do
-      SpecUtils.use_unit_test_config(self)
-    end
-
-    describe '#build_files' do
-      xit 'returns merged hash of files' do
-        expect(testnode01.build_files).to eq(namespace01: [
-          'testnodes/some_file_in_repo',
-          '/some/other/path',
-          'http://example.com/some/url',
-        ].sort,
-                                             namespace02: [
-                                               'another_file_in_repo',
-                                             ].sort)
-
-        expect(testnode02.build_files).to eq(namespace01: [
-          'testnode02/some_file_in_repo',
-          '/some/other/path',
-          'http://example.com/testnode02/some/url',
-        ].sort,
-                                             namespace02: [
-                                               'testnode02/another_file_in_repo',
-                                             ].sort)
-      end
-    end
-  end
-
   # Not ideal testing the private method, however their is specific behaviour
   # required for the self node
   describe '#build_method_class' do
