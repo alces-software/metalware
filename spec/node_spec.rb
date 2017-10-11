@@ -75,34 +75,6 @@ RSpec.describe do # Metalware::Node do
                                              ].sort)
       end
     end
-
-    describe '#index' do
-      it "returns consistent index of node within its 'primary' group" do
-        # We define the 'primary' group for a node as the first group it is
-        # associated with in the genders file. This means for `testnode01` and
-        # `testnode03` this is `testnodes`, but for `testnode02` it is
-        # `pregroup`, in which it is the first node and so has index 1.
-        #
-        # This has the potential to cause confusion but I see no better way to
-        # handle this currently, as a node can always have multiple groups and we
-        # have to choose one to be the primary group. Later we may add more
-        # structure and validation around handling this.
-        expect(testnode01.index).to eq(1)
-        expect(testnode02.index).to eq(1)
-        expect(testnode03.index).to eq(3)
-      end
-
-      xit 'returns 0 for node not in genders' do
-        name = 'not_in_genders_node01'
-        node = node(name)
-        expect(node.index).to eq(0)
-      end
-
-      xit 'returns 0 for nil node name' do
-        node = node(nil)
-        expect(node.index).to eq(0)
-      end
-    end
   end
 
   # Not ideal testing the private method, however their is specific behaviour
