@@ -10,6 +10,10 @@ module Metalware
         @group ||= alces.groups.send(genders.first)
       end
 
+      def genders
+        @genders ||= NodeattrInterface.groups_for_node(name)
+      end
+
       def index
         @index ||= begin
           group.nodes.each_with_index do |other_node, index|
@@ -58,9 +62,6 @@ module Metalware
 
       private
 
-      def genders
-        @genders ||= NodeattrInterface.groups_for_node(name)
-      end
 
       def hash_merger_input
         { groups: genders, node: name }

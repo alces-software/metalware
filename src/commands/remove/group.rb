@@ -72,8 +72,10 @@ module Metalware
         end
 
         def update_domain_templates
-          DomainTemplatesRenderer
-            .new(config, genders_invalid_message: GENDERS_INVALID_MESSAGE).render
+          DomainTemplatesRenderer.new(
+            config,
+            genders_invalid_message: GENDERS_INVALID_MESSAGE
+          ).render
         end
       end
     end

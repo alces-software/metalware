@@ -33,8 +33,9 @@ require 'namespaces/alces'
 
 module Metalware
   class DomainTemplatesRenderer
-    def initialize(config, genders_invalid_message: nil)
+    def initialize(config, alces = nil, genders_invalid_message: nil)
       @config = config
+      @alces = alces
       @genders_invalid_message = genders_invalid_message
     end
 
@@ -51,6 +52,13 @@ module Metalware
     private
 
     attr_reader :config, :genders_invalid_message
+
+    def alces
+      unless @alces
+        MetalLog.warn 'Uninitialized, alces Namespace in DomainTemplateRenderer'
+      end
+      @alces ||= Metalware::Namespaces::Alces.new(config)
+    end
 
     def render_methods
       # These are order dependent, as data used in later methods may depend on
@@ -159,7 +167,7 @@ module Metalware
 
     def render_fully_managed_template(template, to:, &block)
       Templater.render_to_file(
-        config,
+        alces,
         template,
         to,
         prepend_managed_file_message: true,
@@ -186,10 +194,6 @@ module Metalware
     def template_path(template_type)
       # We currently always/only render the 'default' templates.
       File.join(config.repo_path, template_type, 'default')
-    end
-
-    def alces
-      @alces ||= Namespaces::Alces.new(config)
     end
   end
 end

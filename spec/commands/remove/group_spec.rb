@@ -24,7 +24,6 @@
 require 'filesystem'
 require 'commands/remove/group'
 require 'nodeattr_interface'
-# require 'node'
 require 'config'
 require 'ostruct'
 require 'validation/loader'
@@ -40,6 +39,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   end
 
   let :config { Metalware::Config.new }
+  let :alces { Metalware::Namespaces::Alces.new(config) }
   let :loader { Metalware::Validation::Loader.new(config) }
   let :cache { loader.group_cache[:primary_groups] }
 
@@ -77,7 +77,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   context 'with no other groups' do
     it 'removes group and node answer files' do
       test_remove_group('nodes') do
-        other_node_groups = Metalware::Node.new(config, 'nodeB01').groups
+        other_node_groups = alces.nodes.find_by_name('nodeB01').genders
         expect(other_node_groups).to include('group1', 'group2')
       end
     end
@@ -86,7 +86,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   context 'with a primary group that is used as an additional group' do
     it 'remove the primary group without altering the other nodes' do
       test_remove_group('group1') do
-        other_node_groups = Metalware::Node.new(config, 'nodeB01').groups
+        other_node_groups = alces.nodes.find_by_name('nodeB01').genders
         expect(other_node_groups).to include('group1')
       end
     end
@@ -95,7 +95,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   context 'with a nodes in an additional group (that is also primary)' do
     it 'does not remove the other additional(/primary) group' do
       test_remove_group('group2') do
-        other_node_groups = Metalware::Node.new(config, 'nodeA01').groups
+        other_node_groups = alces.nodes.find_by_name('nodeA01').genders
         expect(other_node_groups).to include('group1')
       end
     end
