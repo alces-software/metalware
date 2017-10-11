@@ -98,4 +98,22 @@ RSpec.describe Metalware::Namespaces::Node do
   it 'can determine the node index' do
     expect(node.index).to eq(2)
   end
+
+  describe '#==' do
+    let :foonode { Metalware::Namespaces::Node.new(alces, 'foonode') }
+    let :barnode { Metalware::Namespaces::Node.new(alces, 'barnode') }
+
+    it 'returns false if other object is not a Node' do
+      other_object = Struct.new(:name).new('foonode')
+      expect(foonode).not_to eq(other_object)
+    end
+
+    it 'defines nodes with the same name as equal' do
+      expect(foonode).to eq(foonode)
+    end
+
+    it 'defines nodes with different names as not equal' do
+      expect(foonode).not_to eq(barnode)
+    end
+  end
 end

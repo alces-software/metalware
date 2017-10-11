@@ -24,6 +24,7 @@ module Metalware
       end
 
       def ==(other)
+        return false unless other.is_a?(Node)
         other.name == name
       end
 

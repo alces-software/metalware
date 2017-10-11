@@ -105,21 +105,6 @@ RSpec.describe do # Metalware::Node do
     end
   end
 
-  describe '#==' do
-    xit 'returns false if other object is not a Node' do
-      other_object = Struct.new(:name).new('foonode')
-      expect(node('foonode')).not_to eq(other_object)
-    end
-
-    xit 'defines nodes with the same name as equal' do
-      expect(node('foonode')).to eq(node('foonode'))
-    end
-
-    xit 'defines nodes with different names as not equal' do
-      expect(node('foonode')).not_to eq(node('barnode'))
-    end
-  end
-
   # Not ideal testing the private method, however their is specific behaviour
   # required for the self node
   describe '#build_method_class' do
