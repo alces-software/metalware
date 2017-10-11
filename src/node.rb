@@ -42,6 +42,7 @@ module Metalware
              :configs,
              to: :templating_configuration
 
+    # Will not migrate, instead directly call the methods from Build command
     delegate :render_build_started_templates,
              :render_build_complete_templates,
              :start_build,
@@ -68,10 +69,13 @@ module Metalware
       end
     end
 
+    # Migrated to Node namespace
     def hexadecimal_ip
       SystemCommand.run "gethostip -x #{name}"
     end
 
+    # Will not migrate to namespace, As this does not give a static response
+    # It can not be cached. Instead it will be a method on build
     def built?
       File.file? build_complete_marker_file
     end
@@ -106,6 +110,7 @@ module Metalware
       end
     end
 
+    # Migrate to FilePath
     # The path the file with given `file_name` within the given `namespace`
     # will be rendered to for this node.
     def rendered_build_file_path(namespace, file_name)
@@ -141,6 +146,7 @@ module Metalware
       @repo_config ||= Templater.new(metalware_config, nodename: name).config
     end
 
+    # Will not migrate
     def build_template_paths
       build_method.template_paths
     end
@@ -155,14 +161,17 @@ module Metalware
         Templating::Configuration.for_node(name, config: metalware_config)
     end
 
+    # Migrate method to FilePath
     def build_complete_marker_file
       File.join(metalware_config.built_nodes_storage_path, "metalwarebooter.#{name}")
     end
 
+    # Already migrated to Group namespace
     def primary_group_index
       group_cache.index(primary_group)
     end
 
+    # Already migrated to Alces namespace
     def group_cache
       GroupCache.new(metalware_config)
     end
@@ -176,12 +185,14 @@ module Metalware
       end
     end
 
+    # Migrated to HashMerger
     def replace_file_with_same_basename!(files_namespace, file_identifier)
       files_namespace.reject! { |f| same_basename?(file_identifier, f) }
       files_namespace << file_identifier
       files_namespace.sort! # Sort for consistent ordering.
     end
 
+    # Migrated to HashMerger
     def same_basename?(path1, path2)
       File.basename(path1) == File.basename(path2)
     end

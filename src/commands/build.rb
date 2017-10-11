@@ -82,19 +82,24 @@ module Metalware
       end
 
       def repo_dependencies
-        build_methods.map(&:template_paths).flatten.uniq
+        build_methods.reduce([]) do |memo, (_name, build_method)|
+          memo.push(build_method.template_paths)
+        end.flatten.uniq
       end
 
       def build_methods
         @build_methods = begin
-          nodes.map { |node| node.build_method.new(config, node) }
+          nodes.reduce({}) do |memo, node|
+            memo.merge(node.name => node.build_method.new(config, node))
+          end
         end
       end
 
       def render_build_templates
         nodes.each do |node|
           render_build_files(node)
-          node.render_build_started_templates(build_files(node))
+          build_method = build_methods[node.name]
+          build_method.render_build_started_templates(build_files(node))
         end
       end
 
@@ -115,9 +120,9 @@ module Metalware
         build_files(node).each do |namespace, files|
           files.each do |file|
             next if file[:error]
-            render_path = node.rendered_build_file_path(namespace, file[:name])
+            render_path = file_path.rendered_build_file_path(node.name, namespace, file[:name])
             FileUtils.mkdir_p(File.dirname(render_path))
-            Templater.render_to_file(config, file[:template_path], render_path, parameters)
+            Templater.render_to_file(node, file[:template_path], render_path)
           end
         end
       end
@@ -145,7 +150,7 @@ module Metalware
           gracefully_shutdown if should_gracefully_shutdown?
 
           nodes.select do |node|
-            !rerendered_nodes.include?(node) && node.built?
+            !rerendered_nodes.include?(node) && built?(node)
           end
                .tap do |nodes|
             render_build_complete_templates(nodes)
@@ -159,15 +164,15 @@ module Metalware
           if all_nodes_reported_built
             # For now at least, keep thread alive when in GUI so can keep
             # accessing messages. XXX Change this, this is very wasteful.
-            if in_gui?
-              record_gui_build_complete
-            else
-              break
-            end
+            in_gui? ? record_gui_build_complete : break
           end
 
           sleep config.build_poll_sleep
         end
+      end
+
+      def built?(node)
+        File.file?(file_path.build_complete(node.name))
       end
 
       def record_gui_build_complete
@@ -192,9 +197,9 @@ module Metalware
       end
 
       def render_build_complete_templates(nodes)
-        nodes.template_each firstboot: false do |parameters, node|
-          parameters[:files] = build_files(node)
-          node.render_build_complete_templates(parameters)
+        nodes.each do |node|
+          build_method = build_methods[node.name]
+          build_method.render_build_complete_templates(firstboot: false)
         end
       end
 

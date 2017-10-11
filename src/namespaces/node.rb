@@ -35,6 +35,10 @@ module Metalware
         @genders_url ||= DeploymentServer.system_file_url('genders')
       end
 
+      def hexadecimal_ip
+        @hexadecimal_ip ||= SystemCommand.run "gethostip -x #{name}"
+      end
+
       def build_method
         validate_build_method
 

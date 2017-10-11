@@ -58,10 +58,7 @@ module Metalware
 
     class << self
       def render(alces, template, **dynamic_namespace)
-        if alces.is_a?(Namespaces::Alces)
-          raw_template = File.read(template)
-          alces.render_erb_template(raw_template, dynamic_namespace)
-        else
+        if alces.is_a?(Config)
           #
           # The config input is going to be replaced with the alces
           # namespace to template against. Once Metalware has been fully
@@ -72,6 +69,15 @@ module Metalware
           config = alces
           template_parameters = dynamic_namespace
           Templater.new(config, template_parameters).render(template)
+        else
+          raw_template = File.read(template)
+
+          # TODO: Make Node namespace support dynamic_namespace
+          begin
+            alces.render_erb_template(raw_template, dynamic_namespace)
+          rescue ArgumentError
+            alces.render_erb_template(raw_template)
+          end
         end
       end
 

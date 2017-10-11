@@ -28,12 +28,13 @@ module Metalware
         private
 
         def render_kickstart(parameters)
-          render_template(:kickstart, parameters: parameters)
+          render_template(:kickstart, parameters: {})#TODO: parameters)
         end
 
         def render_pxelinux(parameters)
           render_template(pxelinux_repo_dir,
-                          parameters: parameters,
+                          # TODO: Are the parameters still required?
+                          parameters: {},#parameters,
                           save_path: save_path)
         end
 

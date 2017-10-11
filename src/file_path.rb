@@ -100,6 +100,19 @@ module Metalware
       File.join(var_named, zone)
     end
 
+    def build_complete(name)
+      File.join(config.built_nodes_storage_path, "metalwarebooter.#{name}")
+    end
+
+    def rendered_build_file_path(node_name, namespace, file_name)
+      File.join(
+        config.rendered_files_path,
+        node_name,
+        namespace.to_s,
+        file_name
+      )
+    end
+
     private
 
     attr_reader :config
@@ -124,7 +137,7 @@ module Metalware
       if node.respond_to?(:repo_config)
         (node.repo_config[:templates] || {})[template_type]
       else
-        node.config.templates&.template_type
+        node.config.templates&.send(template_type)
       end
     end
 
