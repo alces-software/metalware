@@ -79,7 +79,6 @@ module Metalware
     end
 
     def template_path(template_type, node: nil)
-      node = Node.new(config, nil) if node.nil?
       File.join(
         config.repo_path,
         template_type.to_s,

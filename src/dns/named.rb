@@ -61,8 +61,9 @@ module Metalware
 
       def render_repo_named_conf
         FileUtils.mkdir_p(File.dirname(file_path.metalware_named))
+        template_path = file_path.template_path('named', node: alces.domain)
         Templater.render_to_file(alces,
-                                 file_path.template_path('named'),
+                                 template_path,
                                  file_path.metalware_named)
       end
 
@@ -95,7 +96,7 @@ module Metalware
         dynamic_namespace = build_dynamic_namespace(zone, net)
         Templater.render_to_file(
           alces,
-          file_path.template_path("named/#{direction}"),
+          file_path.template_path("named/#{direction}", node: alces.domain),
           file_path.named_zone(zone_name),
           dynamic_namespace
         )
