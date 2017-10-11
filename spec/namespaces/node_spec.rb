@@ -116,4 +116,47 @@ RSpec.describe Metalware::Namespaces::Node do
       expect(foonode).not_to eq(barnode)
     end
   end
+
+  describe '#build_method' do
+    let :node { Metalware::Namespaces::Node.new(alces, 'node01') }
+
+    def mock_build_method(method)
+      node.config.send(:define_singleton_method, :build_method) { method }
+    end
+
+    context 'regular node' do
+      it 'defaults to kickstart if not specified' do
+        mock_build_method(nil)
+        exp = Metalware::BuildMethods::Kickstarts::Pxelinux
+        expect(node.build_method).to eq(exp)
+      end
+
+      it 'uses the config value' do
+        mock_build_method(:basic)
+        expect(node.build_method).to eq(Metalware::BuildMethods::Basic)
+      end
+
+      # TODO: Support self
+      xit 'errors if not the self node' do
+      end
+    end
+
+    context "with the 'self' node" do
+      xit 'returns the self build method if not specified' do
+        expected = Metalware::BuildMethods::Self
+        expect(build_method_class('self', nil)).to eq(expected)
+      end
+
+      xit 'returns the self build method if specified' do
+        expected = Metalware::BuildMethods::Self
+        expect(build_method_class('self', :self)).to eq(expected)
+      end
+
+      xit 'errors if the build method is not self' do
+        expect do
+          build_method_class('self', :basic)
+        end.to raise_error(Metalware::SelfBuildMethodError)
+      end
+    end
+  end
 end

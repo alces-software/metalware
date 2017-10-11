@@ -1,6 +1,8 @@
 
 # frozen_string_literal: true
 
+require 'build_methods'
+
 module Metalware
   module Namespaces
     class Node < HashMergerNamespace
