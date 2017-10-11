@@ -48,8 +48,8 @@ module Metalware
       config.node_answers_file(node)
     end
 
-    def self_answers
-      File.join(answer_files, 'self.yaml')
+    def local_answers
+      File.join(answer_files, 'local.yaml')
     end
 
     def domain_config
@@ -64,8 +64,8 @@ module Metalware
       File.join(repo, 'config', "#{node}.yaml")
     end
 
-    def self_config
-      File.join(repo, 'config/self.yaml')
+    def local_config
+      File.join(repo, 'config/local.yaml')
     end
 
     def repo

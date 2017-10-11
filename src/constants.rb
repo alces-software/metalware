@@ -54,7 +54,7 @@ module Metalware
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 
-    CONFIGURE_SECTIONS = [:domain, :group, :node, :self].freeze
+    CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
 
     HASH_MERGER_DATA_STRUCTURE =
       Metalware::HashMergers::MetalRecursiveOpenStruct

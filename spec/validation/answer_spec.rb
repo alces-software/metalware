@@ -52,7 +52,7 @@ RSpec.describe Metalware::Validation::Answer do
 
       group: [],
       node: [],
-      self: [],
+      local: [],
     }
   end
 

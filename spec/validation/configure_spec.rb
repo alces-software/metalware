@@ -98,7 +98,7 @@ RSpec.describe Metalware::Validation::Configure do
         },
       ],
 
-      self: [
+      local: [
         {
           identifier: 'choice question',
           question: 'Are all my choices strings?',
@@ -174,12 +174,12 @@ RSpec.describe Metalware::Validation::Configure do
   context 'with invalid question fields' do
     context 'with invalid identifier' do
       it 'fails when missing' do
-        h = correct_hash.deep_merge(self: [{ question: 'I have no identifier' }])
+        h = correct_hash.deep_merge(local: [{ question: 'I have no identifier' }])
         expect_validation_failure(h, /is missing/)
       end
 
       it 'fails when empty' do
-        h = correct_hash.deep_merge(self: [{
+        h = correct_hash.deep_merge(local: [{
                                       question: 'I have no identifier',
                                       identifier: '',
                                     }])
@@ -189,12 +189,12 @@ RSpec.describe Metalware::Validation::Configure do
 
     context 'with invalid question' do
       it 'fails when missing' do
-        h = correct_hash.deep_merge(self: [{ identifier: 'missing_question' }])
+        h = correct_hash.deep_merge(local: [{ identifier: 'missing_question' }])
         expect_validation_failure(h, /is missing/)
       end
 
       it 'fails when empty' do
-        h = correct_hash.deep_merge(self: [{
+        h = correct_hash.deep_merge(local: [{
                                       question: '',
                                       identifier: 'no_question',
                                     }])
@@ -277,7 +277,7 @@ RSpec.describe Metalware::Validation::Configure do
 
   context 'with invalid choice options' do
     it 'fail when the default is not in the choice list' do
-      h = correct_hash.deep_merge(self: [{
+      h = correct_hash.deep_merge(local: [{
                                     identifier: 'choice_question_no_bad_default',
                                     question: 'Is my default valid?',
                                     choice: [
@@ -291,7 +291,7 @@ RSpec.describe Metalware::Validation::Configure do
     end
 
     it 'fails with inconsistent choice types' do
-      h = correct_hash.deep_merge(self: [{
+      h = correct_hash.deep_merge(local: [{
                                     identifier: 'choice_question_no_bad_type',
                                     question: 'Are my choice types valid?',
                                     choice: [

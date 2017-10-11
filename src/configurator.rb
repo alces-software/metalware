@@ -62,10 +62,10 @@ module Metalware
         )
       end
 
-      def for_self(config:)
+      def for_local(config:)
         new(
           config: config,
-          questions_section: :self
+          questions_section: :local
         )
       end
 
@@ -127,7 +127,7 @@ module Metalware
         case questions_section
         when :domain
           []
-        when :group, :self
+        when :group, :local
           [loader.domain_answers]
         when :node
           node = Node.new(config, name)

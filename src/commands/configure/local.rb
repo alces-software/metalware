@@ -7,26 +7,18 @@ require 'constants'
 module Metalware
   module Commands
     module Configure
-      class Self < CommandHelpers::ConfigureCommand
+      class Local < CommandHelpers::ConfigureCommand
         private
 
         def setup; end
 
-        def answers_file
-          file_path.self_answers
-        end
-
-        def self_node
-          @self_node ||= Metalware::Node.new(config, 'self')
-        end
-
         def configurator
           @configurator ||=
-            Configurator.for_self(config: config)
+            Configurator.for_local(config: config)
         end
 
         def answer_file
-          file_path.self_answers
+          file_path.local_answers
         end
       end
     end
