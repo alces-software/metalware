@@ -92,7 +92,7 @@ RSpec.describe Metalware::AnswersTableCreator do
   end
 
   describe '#domain_table' do
-    it 'creates table with questions and domain answers' do
+    xit 'creates table with questions and domain answers' do
       filesystem.test do
         expected_table = Terminal::Table.new(
           headings: ['Question', 'Domain'],
@@ -114,7 +114,7 @@ RSpec.describe Metalware::AnswersTableCreator do
   end
 
   describe '#primary_group_table' do
-    it 'creates table with questions, and domain and primary group answers' do
+    xit 'creates table with questions, and domain and primary group answers' do
       filesystem.test do
         expected_table = Terminal::Table.new(
           headings: ['Question', 'Domain', "Group: #{group_name}"],
@@ -133,7 +133,7 @@ RSpec.describe Metalware::AnswersTableCreator do
   end
 
   describe '#node_table' do
-    it 'creates table with questions, and domain, primary group, and node answers' do
+    xit 'creates table with questions, and domain, primary group, and node answers' do
       filesystem.test do
         expected_table = Terminal::Table.new(
           headings: ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
