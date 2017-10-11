@@ -25,7 +25,6 @@
 require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
 require 'templater'
-require 'nodes'
 
 module Metalware
   module Commands

@@ -25,7 +25,6 @@
 require 'timeout'
 
 require 'commands/build'
-require 'node'
 require 'spec_utils'
 require 'config'
 require 'recursive_open_struct'

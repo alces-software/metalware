@@ -23,7 +23,7 @@
 #==============================================================================
 require 'command_helpers/base_command'
 require 'status/monitor'
-require 'nodes'
+#require 'nodes'
 require 'status/job'
 require 'fileutils'
 require 'exceptions'

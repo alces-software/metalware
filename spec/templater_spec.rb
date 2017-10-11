@@ -26,7 +26,7 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
-require 'node'
+#require 'node'
 require 'filesystem'
 require 'validation/answer'
 require 'namespaces/alces'

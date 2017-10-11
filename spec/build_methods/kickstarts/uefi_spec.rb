@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'build_methods/kickstarts/uefi'
-require 'node'
 require 'config'
 require 'filesystem'
 require 'file_path'

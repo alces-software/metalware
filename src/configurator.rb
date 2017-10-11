@@ -28,7 +28,7 @@ require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
-require 'node'
+#require 'node'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Question
 HighLine::Menu.prepend Metalware::Patches::HighLine::Menu

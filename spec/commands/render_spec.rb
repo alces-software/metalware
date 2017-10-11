@@ -25,7 +25,7 @@
 require 'timeout'
 
 require 'commands/render'
-require 'node'
+# require 'node'
 require 'spec_utils'
 require 'config'
 
