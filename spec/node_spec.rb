@@ -105,38 +105,6 @@ RSpec.describe do # Metalware::Node do
     end
   end
 
-  describe '#group_index' do
-    let :filesystem { FileSystem.setup }
-
-    xit 'returns 0 when groups.yaml does not exist' do
-      # This should never happen now as a node should always have a primary
-      # group, which should be in the cache.
-      expect(testnode01.group_index).to eq 0
-    end
-
-    context 'when some primary groups have been cached' do
-      before :each do
-        filesystem.with_group_cache_fixture('cache/groups.yaml')
-      end
-
-      xit "returns the index of the node's primary group" do
-        filesystem.test do
-          expect(testnode01.group_index).to eq(2)
-        end
-      end
-
-      xit "raises when the node's primary group is not in the cache" do
-        # This should never happen now as a node should always have a primary
-        # group.
-        expect(testnode02.group_index).to eq 0
-      end
-
-      xit 'returns 0 for the null object node' do
-        expect(node(nil).group_index).to eq 0
-      end
-    end
-  end
-
   describe '#==' do
     xit 'returns false if other object is not a Node' do
       other_object = Struct.new(:name).new('foonode')
