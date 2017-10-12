@@ -170,6 +170,9 @@ module Metalware
   class InvalidLocalBuild < MetalwareError
   end
 
+  class UninitializedLocalNode < MetalwareError
+  end
+
   class InternalError < MetalwareError
   end
 

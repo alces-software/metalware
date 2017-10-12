@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/string/strip'
 require 'nodeattr_interface'
 require 'group_cache'
 require 'hashie'
@@ -47,6 +48,20 @@ module Metalware
               MetalLog.warn warning
               Hashie::Mash.new
             end
+          end
+        end
+
+        LOCAL_ERROR = <<-EOF.strip_heredoc
+          The local node has not been configured
+          Please run: `metal configure local`
+        EOF
+
+        def local
+          @local ||= begin
+            unless nodes.respond_to?(:local)
+              raise UninitializedLocalNode, LOCAL_ERROR
+            end
+            nodes.local
           end
         end
 

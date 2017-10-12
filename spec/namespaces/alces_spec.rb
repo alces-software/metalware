@@ -49,4 +49,18 @@ RSpec.describe Metalware::Namespaces::Alces do
       end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
     end
   end
+
+  describe '#local' do
+    it 'errors if not initialized' do
+      expect{ alces.local }.to raise_error(Metalware::UninitializedLocalNode)
+    end
+
+    it 'returns the local node' do
+      local = Metalware::Namespaces::Node.create(alces, 'local')
+      nodes = double('nodes', local: local)
+      allow(alces).to receive(:nodes).and_return(nodes)
+
+      expect(alces.local).to be_a(Metalware::Namespaces::Local)
+    end
+  end
 end
