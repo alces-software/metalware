@@ -119,23 +119,13 @@ RSpec.describe Metalware::Commands::Build do
     end.to raise_error Timeout::Error
   end
 
-  def expect_renders(template_path, to:) # , parameters: expected_template_parameters)
+  def expect_renders(template_path, to:)
     expect(Metalware::Templater).to receive(:render_to_file).with(
       instance_of(Metalware::Namespaces::Node),
       template_path,
       to,
-      {} # parameters
+      instance_of(Hash)
     )
-  end
-
-  def expected_template_parameters
-    config = Metalware::Config.new
-    files = SpecUtils.create_mock_build_files_hash(self, config: config, node_name: 'testnode01')
-    {
-      nodename: 'testnode01',
-      firstboot: true,
-      files: files,
-    }
   end
 
   let :testnodes_config_path do
@@ -245,8 +235,7 @@ RSpec.describe Metalware::Commands::Build do
       ).once.ordered
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP' # ,
-        # TODO: parameters: expected_template_parameters.merge(firstboot: false)
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once.ordered
 
       run_build('testnode01')

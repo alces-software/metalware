@@ -54,28 +54,22 @@ module Metalware
     class << self
       def render(alces, template, **dynamic_namespace)
         raw_template = File.read(template)
-
-        # TODO: Make Node namespace support dynamic_namespace
-        begin
-          alces.render_erb_template(raw_template, dynamic_namespace)
-        rescue ArgumentError
-          alces.render_erb_template(raw_template)
-        end
+        alces.render_erb_template(raw_template, dynamic_namespace)
       end
 
-      def render_to_stdout(alces, template, **template_parameters)
-        puts render(alces, template, template_parameters)
+      def render_to_stdout(alces, template, **dynamic_namespace)
+        puts render(alces, template, **dynamic_namespace)
       end
 
       def render_to_file(
         alces,
         template,
         save_file,
-        prepend_managed_file_message: false,
-        **template_parameters,
+        prepend_managed_file_message: false, # TODO: Do not pass as key word
+        **dynamic_namespace,
         &validation_block
       )
-        rendered_template = render(alces, template, template_parameters)
+        rendered_template = render(alces, template, **dynamic_namespace)
         if prepend_managed_file_message
           rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
         end
