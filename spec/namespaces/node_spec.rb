@@ -55,7 +55,7 @@ RSpec.describe Metalware::Namespaces::Node do
     template_lambda.call(template)
   end
 
-  let :node { Metalware::Namespaces::Node.new(alces, node_name) }
+  let :node { Metalware::Namespaces::Node.create(alces, node_name) }
 
   ##
   # Mocks the HashMergers
@@ -100,8 +100,8 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   describe '#==' do
-    let :foonode { Metalware::Namespaces::Node.new(alces, 'foonode') }
-    let :barnode { Metalware::Namespaces::Node.new(alces, 'barnode') }
+    let :foonode { Metalware::Namespaces::Node.create(alces, 'foonode') }
+    let :barnode { Metalware::Namespaces::Node.create(alces, 'barnode') }
 
     it 'returns false if other object is not a Node' do
       other_object = Struct.new(:name).new('foonode')
@@ -118,10 +118,10 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   describe '#build_method' do
-    let :node { Metalware::Namespaces::Node.new(alces, 'node01') }
+    let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
 
-    def mock_build_method(method)
-      node.config.send(:define_singleton_method, :build_method) { method }
+    def mock_build_method(method, my_node = node)
+      my_node.config.send(:define_singleton_method, :build_method) { method }
     end
 
     context 'regular node' do
@@ -136,26 +136,38 @@ RSpec.describe Metalware::Namespaces::Node do
         expect(node.build_method).to eq(Metalware::BuildMethods::Basic)
       end
 
-      # TODO: Support self
-      xit 'errors if not the self node' do
+      it 'errors if tries to use local build' do
+        mock_build_method(:local)
+        expect {
+          node.build_method
+        }.to raise_error(Metalware::InvalidLocalBuild)
       end
     end
 
-    context "with the 'self' node" do
-      xit 'returns the self build method if not specified' do
-        expected = Metalware::BuildMethods::Self
-        expect(build_method_class('self', nil)).to eq(expected)
+    context "with the 'local' node" do
+      let :local do
+        Metalware::Namespaces::Node.create(alces, 'local')
       end
 
-      xit 'returns the self build method if specified' do
-        expected = Metalware::BuildMethods::Self
-        expect(build_method_class('self', :self)).to eq(expected)
+      let :local_build { Metalware::BuildMethods::Local }
+
+      def local_node_uses_local_build?(config_build_method)
+        mock_build_method(config_build_method, local)
+        expect(local.build_method).to eq(local_build)
       end
 
-      xit 'errors if the build method is not self' do
-        expect do
-          build_method_class('self', :basic)
-        end.to raise_error(Metalware::SelfBuildMethodError)
+      it 'returns the local build method if not specified' do
+        local_node_uses_local_build?(nil)
+      end
+
+      it 'returns the local build method if specified' do
+        local_node_uses_local_build?(:local)
+      end
+
+      # Their is no point adding additional ways metalware can fail
+      # Instead, always force the local node to use the local build
+      it 'it ignores incorrect config values' do
+        local_node_uses_local_build?(:pxelinux)
       end
     end
   end

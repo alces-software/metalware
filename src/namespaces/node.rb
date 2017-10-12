@@ -6,7 +6,19 @@ require 'build_methods'
 module Metalware
   module Namespaces
     class Node < HashMergerNamespace
-      include Mixins::Name
+      class << self
+        def create(alces, name)
+          name == 'local' ? Local.create(alces, name) : new(alces, name)
+        end
+
+        private
+
+        def new(*args)
+          super(*args)
+        end
+      end
+
+      include Namespaces::Mixins::Name
 
       def group
         @group ||= alces.groups.send(genders.first)
@@ -42,24 +54,20 @@ module Metalware
       end
 
       def build_method
-        validate_build_method
-
         case config.build_method
+        when :local
+          msg = "node '#{name}' can not use the local build"
+          raise InvalidLocalBuild, msg
         when :'uefi-kickstart'
           BuildMethods::Kickstarts::UEFI
         when :basic
           BuildMethods::Basic
-          # TODO: the self node is currently not supported
-          # when :self
-          #  BuildMethods::Self
         else
           BuildMethods::Kickstarts::Pxelinux
-          # self_node? ? BuildMethods::Self : BuildMethods::Kickstarts::Pxelinux
         end
       end
 
       private
-
 
       def hash_merger_input
         { groups: genders, node: name }
@@ -67,18 +75,6 @@ module Metalware
 
       def additional_dynamic_namespace
         { node: self }
-      end
-
-      def validate_build_method
-        return if 'Break statement until self is supported'.to_s
-        # TODO: Does not support self node
-        if self_node?
-          unless [:self, nil].include?(repo_build_method)
-            raise SelfBuildMethodError, build_method: repo_build_method
-          end
-        elsif repo_build_method == :self
-          raise SelfBuildMethodError, building_self_node: false
-        end
       end
     end
   end

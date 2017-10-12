@@ -6,15 +6,15 @@ require 'fileutils'
 
 module Metalware
   module BuildMethods
-    class Self < BuildMethod
-      TEMPLATES = [:self].freeze
+    class Local < BuildMethod
+      TEMPLATES = [:local].freeze
 
       def render_build_started_templates(parameters)
-        render_template(:self, parameters: parameters)
+        render_template(:local)# , parameters: parameters)
       end
 
       def start_build
-        rendered_self_template = file_path.template_save_path(:self, node: node)
+        rendered_self_template = file_path.template_save_path(:local, node: node)
         FileUtils.chmod 'u+x', rendered_self_template
         puts SystemCommand.run(rendered_self_template)
       end

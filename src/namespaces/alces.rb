@@ -7,11 +7,14 @@ require 'config'
 require 'utils/dynamic_require'
 require 'deployment_server'
 
+Metalware::Utils::DynamicRequire.relative('mixins')
+
 require 'namespaces/metal_array'
 require 'namespaces/hash_merger_namespace'
+require 'namespaces/node'
 require 'hash_mergers.rb'
 require 'ostruct'
-Metalware::Utils::DynamicRequire.relative('mixins')
+
 Metalware::Utils::DynamicRequire.relative('.')
 
 module Metalware
