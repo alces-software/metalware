@@ -8,7 +8,7 @@ module Metalware
     class Local < Node
       class << self
         def create(*args)
-          self.new(*args)
+          new(*args)
         end
 
         def new(*args)

@@ -138,9 +138,9 @@ RSpec.describe Metalware::Namespaces::Node do
 
       it 'errors if tries to use local build' do
         mock_build_method(:local)
-        expect {
+        expect do
           node.build_method
-        }.to raise_error(Metalware::InvalidLocalBuild)
+        end.to raise_error(Metalware::InvalidLocalBuild)
       end
     end
 

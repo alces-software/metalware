@@ -26,7 +26,7 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
-#require 'node'
+# require 'node'
 require 'filesystem'
 require 'validation/answer'
 require 'namespaces/alces'
@@ -452,8 +452,8 @@ RSpec.describe Metalware::Templater do
           )
 
           templater = Metalware::Templater.new(alces, nodename: 'testnode03',
-                                                       firstboot: true,
-                                                       files: build_files)
+                                                      firstboot: true,
+                                                      files: build_files)
           magic_namespace = templater.config.alces
 
           expect(magic_namespace.firstboot).to eq(true)

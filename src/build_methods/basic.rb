@@ -14,9 +14,9 @@ module Metalware
 
       private
 
-      def render_basic(parameters)
+      def render_basic(_parameters)
         # TODO: Is the parameters still required?
-        render_template(:basic, parameters: {})#parameters)
+        render_template(:basic, parameters: {}) # parameters)
       end
     end
   end

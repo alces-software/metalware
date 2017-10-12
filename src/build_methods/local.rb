@@ -9,8 +9,8 @@ module Metalware
     class Local < BuildMethod
       TEMPLATES = [:local].freeze
 
-      def render_build_started_templates(parameters)
-        render_template(:local)# , parameters: parameters)
+      def render_build_started_templates(_parameters)
+        render_template(:local) # , parameters: parameters)
       end
 
       def start_build

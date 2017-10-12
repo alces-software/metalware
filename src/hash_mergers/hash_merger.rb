@@ -86,9 +86,7 @@ module Metalware
       def merge_in_files!(existing_files, new_files)
         new_files&.each do |namespace, file_identifiers|
           file_identifiers.each do |file_identifier|
-            unless existing_files[namespace]
-              existing_files[namespace] = []
-            end
+            existing_files[namespace] = [] unless existing_files[namespace]
             replace_file_with_same_basename!(existing_files[namespace], file_identifier)
           end
         end

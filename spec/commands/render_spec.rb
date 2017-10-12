@@ -31,7 +31,7 @@ require 'config'
 RSpec.describe Metalware::Commands::Render do
   let :config { Metalware::Config.new }
   let :alces { Metalware::Namespaces::Alces.new(config) }
-  
+
   before :each do
     SpecUtils.use_unit_test_config(self)
   end

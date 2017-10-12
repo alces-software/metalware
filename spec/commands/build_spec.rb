@@ -279,33 +279,23 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called for group' do
-    #
-    # Skipped: can not build testnodes as it is not a configured
-    # group
-    #
     xit 'renders standard templates for each node' do
-      testnode01_params = hash_including(nodename: 'testnode01')
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode01',
-        parameters: testnode01_params
+        to: '/var/lib/metalware/rendered/kickstart/testnode01'
       )
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        to:        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        parameters: testnode01_params
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       )
 
-      testnode02_params = hash_including(nodename: 'testnode02')
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode02',
-        parameters: testnode02_params
+        to: '/var/lib/metalware/rendered/kickstart/testnode02'
       )
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        to:        '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
-        parameters: testnode02_params
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP'
       )
 
       run_build('testnodes', group: true)
