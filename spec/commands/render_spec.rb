@@ -25,18 +25,19 @@
 require 'timeout'
 
 require 'commands/render'
-# require 'node'
 require 'spec_utils'
 require 'config'
 
 RSpec.describe Metalware::Commands::Render do
+  let :config { Metalware::Config.new }
+  let :alces { Metalware::Namespaces::Alces.new(config) }
+  
   before :each do
     SpecUtils.use_unit_test_config(self)
   end
 
   context 'and with --strict option' do
     xit 'raises StrictWarningError when a parameter is missing' do
-      config = Metalware::Config.new(nil)
       path = File.join(config.repo_path, 'dhcp/default')
       expect do
         Metalware::Utils.run_command(

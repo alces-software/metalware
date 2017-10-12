@@ -34,23 +34,13 @@ module Metalware
       def setup; end
 
       def run
-        return new_templater if options.new_templater
-        template_path, maybe_node = args
-
-        template_parameters = {
-          nodename: maybe_node,
-        }.reject { |_param, value| value.nil? }
-
-        Templater.render_to_stdout(config, template_path, template_parameters)
-      end
-
-      def new_templater
-        puts 'USING NEW TEMPLATER'
-        template_path, maybe_node = args
+        template_path, name = args
 
         template = File.read(template_path)
-        alces = Namespaces::Alces.new(config)
-        puts alces.render_erb_template(template)
+        node = alces.nodes.find_by_name(name)
+
+        templater = node ? node : alces
+        puts templater.render_erb_template(template)
       end
     end
   end

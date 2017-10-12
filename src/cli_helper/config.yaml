@@ -349,8 +349,6 @@ commands:
       out. The template can be rendered for a specific node using the optional
       NODE input.
     action: Commands::Render
-    options:
-      - tags: [--new-templater]
 
   repo:
     syntax: metal repo [options]
