@@ -138,12 +138,15 @@ RSpec.describe Metalware::Commands::Build do
     end
   end
 
+  let :alces { Metalware::Namespaces::Alces.new(metal_config) }
+
   before :each do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
     SpecUtils.use_mock_genders(self, genders_file: 'genders/simple_cluster')
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependency(self)
+    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)
   end
 
   context 'when called without group argument' do
@@ -163,15 +166,18 @@ RSpec.describe Metalware::Commands::Build do
     end
 
     context 'when templates specified in repo config' do
-      before :each do
-        testnodes_config = OpenStruct.new(
+      let :testnode01_config do
+        OpenStruct.new(
           pxelinux: 'repo_pxelinux',
           kickstart: 'repo_kickstart'
         )
+      end
 
-        allow_any_instance_of(
-          Metalware::HashMergers::MetalRecursiveOpenStruct
-        ).to receive(:templates).and_return(testnodes_config)
+      before :each do
+        allow(alces.nodes.testnode01.config).to \
+          receive(:templates).and_return(testnode01_config)
+        allow(alces.nodes.testnode02.config).to \
+          receive(:templates).and_return(OpenStruct.new)
       end
 
       it 'uses specified templates' do
@@ -189,11 +195,12 @@ RSpec.describe Metalware::Commands::Build do
         end
       end
 
-      #
-      # SKIPPED: cluster is not a configured group and thus can not
-      # be built
-      #
-      xit 'specifies correct template dependencies' do
+      it 'specifies correct template dependencies' do
+        groups = Metalware::Namespaces::MetalArray.new(
+          [Metalware::Namespaces::Group.new(alces, 'cluster', index: 1)]
+        )
+        allow(alces).to receive(:groups).and_return(groups)
+
         filesystem.test do
           build_command = run_build('cluster', group: true)
 
@@ -201,16 +208,13 @@ RSpec.describe Metalware::Commands::Build do
           dependency_hash = build_command.send(:dependency_hash)
 
           expect(dependency_hash[:repo].sort).to eq([
-            # `default` templates used for node `login1`.
+            # `default` templates used for node `testnode02`.
             'pxelinux/default',
             'kickstart/default',
 
-            # Repo templates specified for all nodes in `testnodes` group.
+            # Repo templates for 'testnode01'
             'pxelinux/repo_pxelinux',
             'kickstart/repo_kickstart',
-
-            # PXELINUX template overridden for `testnode02`
-            'pxelinux/testnode02_repo_pxelinux',
           ].sort)
         end
       end
@@ -279,7 +283,15 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called for group' do
-    xit 'renders standard templates for each node' do
+    # Creates the test Group Namespace
+    before :each do
+      groups = Metalware::Namespaces::MetalArray.new(
+        [Metalware::Namespaces::Group.new(alces, 'testnodes', index: 1)]
+      )
+      allow(alces).to receive(:groups).and_return(groups)
+    end
+
+    it 'renders standard templates for each node' do
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
         to: '/var/lib/metalware/rendered/kickstart/testnode01'

@@ -127,11 +127,7 @@ module Metalware
     end
 
     def template_file_name(template_type, node:)
-      repo_template(template_type, node: node) || 'default'
-    end
-
-    def repo_template(template_type, node:)
-      node.config.templates&.send(template_type)
+      node.config.templates&.send(template_type) || 'default'
     end
 
     def answer_files
