@@ -345,23 +345,6 @@ RSpec.describe Metalware::Templater do
   # is useful to check they work together but we may want to test some things
   # directly on the `MagicNamespace`.
   describe 'magic alces namespace' do
-    def expect_environment_dependent_parameters_present(magic_namespace)
-      expect(magic_namespace.hostip).to eq('1.2.3.4')
-      expect(magic_namespace.hosts_url).to eq 'http://1.2.3.4/metalware/system/hosts'
-      expect(magic_namespace.genders_url).to eq 'http://1.2.3.4/metalware/system/genders'
-
-      # Check hunter config.
-      hunter_config = magic_namespace.hunter
-      expect(hunter_config.testnode01).to eq('testnode01-mac')
-      expect(hunter_config.testnode02).to eq('testnode02-mac')
-
-      # Check genders config.
-      genders_config = magic_namespace.genders
-      expect(genders_config.masters).to eq(['login1'])
-      expect(genders_config.cluster).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
-      expect(genders_config.non_existent).to eq([])
-    end
-
     describe 'answers' do
       context 'when node passed' do
         #
