@@ -6,6 +6,7 @@ require 'config'
 require 'constants'
 require 'hash_mergers'
 require 'recursive_open_struct'
+require 'spec_utils'
 
 RSpec.describe Metalware::Namespaces::Node do
   let :config { Metalware::Config.new }
@@ -79,6 +80,9 @@ RSpec.describe Metalware::Namespaces::Node do
       receive(:all_nodes).and_return(node_array)
   end
 
+  # Spoofs the hostip
+  before :each { SpecUtils.use_mock_determine_hostip_script(self) }
+
   it 'can access the node name' do
     expect(node.name).to eq(node_name)
   end
@@ -97,6 +101,16 @@ RSpec.describe Metalware::Namespaces::Node do
 
   it 'can determine the node index' do
     expect(node.index).to eq(2)
+  end
+
+  it 'has a kickstart_url' do
+    expected = "http://1.2.3.4/metalware/kickstart/#{node_name}"
+    expect(node.kickstart_url).to eq(expected)
+  end
+
+  it 'has a build complete url' do
+    exp = "http://1.2.3.4/metalware/exec/kscomplete.php?name=#{node_name}"
+    expect(node.build_complete_url).to eq(exp)
   end
 
   describe '#==' do

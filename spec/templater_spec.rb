@@ -160,24 +160,6 @@ RSpec.describe Metalware::Templater do
         end
       end
     end
-
-    context 'when passed node not in genders file' do
-      #
-      # This should now raise an error, but the error shouldn't
-      # be NoMethodError
-      #
-      xit 'does not raise error' do
-        filesystem.test do
-          expect do
-            Metalware::Templater.render(
-              alces,
-              template_path,
-              nodename: 'not_in_genders_node01'
-            )
-          end.to_not raise_error
-        end
-      end
-    end
   end
 
   describe '#render_to_file' do
@@ -380,33 +362,8 @@ RSpec.describe Metalware::Templater do
       expect(genders_config.non_existent).to eq([])
     end
 
-    let :filesystem do
-      FileSystem.setup do |fs|
-        fs.with_repo_fixtures 'repo'
-      end
-    end
-
-    before do
-      SpecUtils.use_mock_determine_hostip_script(self)
-      SpecUtils.use_mock_genders(self)
-    end
-
-    # XXX May be possible to combine these with other passed parameter testsgqic
-    # below?
     describe 'answers' do
-      before :each do
-        # Turns off answer validation as the configure.yaml has not been created
-        allow_any_instance_of(Metalware::Validation::Answer).to \
-          receive(:success?).and_return(true)
-        filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml',
-                        some_question: 'some_answer'
-      end
-
       context 'when node passed' do
-        let :templater do
-          Metalware::Templater.new(alces, nodename: 'testnode01')
-        end
-
         #
         # Missing parameter dectection still needs to be added
         # HOWEVER this will be tested in Alces namespace and thus the
@@ -416,59 +373,6 @@ RSpec.describe Metalware::Templater do
           filesystem.test do
             expect { answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
           end
-        end
-      end
-    end
-
-    context 'with cache files present' do
-      before :each do
-        filesystem.with_hunter_cache_fixture 'cache/hunter.yaml'
-        filesystem.with_group_cache_fixture 'cache/groups.yaml'
-      end
-
-      #
-      # Migrate these tests to Alces/Node/Domain namespace
-      #
-      xit 'is created with default values when no parameters passed' do
-        filesystem.test do
-          templater = Metalware::Templater.new(alces)
-          magic_namespace = templater.config.alces
-
-          expect(magic_namespace.nodename).to eq('')
-          expect(magic_namespace.firstboot).to eq(nil)
-          expect(magic_namespace.files).to eq(nil)
-          # The kickstart and build URL tests have been patched to an empty nodename
-          # Ideally in the future this should return nil
-          expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/')
-          expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=')
-          expect_environment_dependent_parameters_present(magic_namespace)
-        end
-      end
-
-      xit 'overrides defaults with applicable parameter values when parameters passed' do
-        filesystem.test do
-          build_files = SpecUtils.create_mock_build_files_hash(
-            self, config: config, node_name: 'testnode03'
-          )
-
-          templater = Metalware::Templater.new(alces, nodename: 'testnode03',
-                                                      firstboot: true,
-                                                      files: build_files)
-          magic_namespace = templater.config.alces
-
-          expect(magic_namespace.firstboot).to eq(true)
-          expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')
-          expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode03')
-
-          # Can reach inside the passed `files` object.
-          expect(
-            magic_namespace.files.namespace01.first.raw
-          ).to eq('/some/other/path')
-          expect(
-            magic_namespace.files.namespace02.first.raw
-          ).to eq('another_file_in_repo')
-
-          expect_environment_dependent_parameters_present(magic_namespace)
         end
       end
     end
