@@ -52,7 +52,12 @@ RSpec.describe Metalware::Namespaces::Alces do
 
   describe '#local' do
     it 'errors if not initialized' do
-      expect{ alces.local }.to raise_error(Metalware::UninitializedLocalNode)
+      allow(alces).to receive(:nodes)
+        .and_return(Metalware::Namespaces::MetalArray.new([]))
+
+      expect do
+        alces.local
+      end.to raise_error(Metalware::UninitializedLocalNode)
     end
 
     it 'returns the local node' do
