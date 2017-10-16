@@ -111,7 +111,7 @@ RSpec.describe '`metal build`', real_fs: true do
   end
 
   context 'for single node' do
-    it 'works' do
+    xit 'works' do
       command = "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
       run_command(command) do |_stdin, _stdout, _stderr, pid|
         wait_longer_than_build_poll
@@ -127,7 +127,7 @@ RSpec.describe '`metal build`', real_fs: true do
   end
 
   context 'for gender group' do
-    it 'works' do
+    xit 'works' do
       command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
       run_command(command) do |_stdin, _stdout, _stderr, pid|
         wait_longer_than_build_poll
@@ -189,7 +189,7 @@ RSpec.describe '`metal build`', real_fs: true do
         )
       end
 
-      it 'exits on second interrupt' do
+      xit 'exits on second interrupt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
         run_command(command) do |_stdin, _stdout, _stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
@@ -205,7 +205,7 @@ RSpec.describe '`metal build`', real_fs: true do
         end
       end
 
-      it 'handles "yes" to interrupt prompt' do
+      xit 'handles "yes" to interrupt prompt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
         run_command(command) do |stdin, _stdout, _stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
@@ -224,7 +224,7 @@ RSpec.describe '`metal build`', real_fs: true do
         end
       end
 
-      it 'handles "no" to interrupt prompt' do
+      xit 'handles "no" to interrupt prompt' do
         command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
         run_command(command) do |stdin, _stdout, _stderr, pid|
           FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
