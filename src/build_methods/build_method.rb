@@ -51,7 +51,7 @@ module Metalware
         Templater.render_to_file(node,
                                  template_type_path,
                                  save_path,
-                                 **parameters)
+                                 **parameters.to_h)
       end
     end
   end

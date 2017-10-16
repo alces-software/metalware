@@ -19,7 +19,9 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   def build_merged_hash(**hash_input)
-    Metalware::HashMergers.merge(config, **hash_input)
+    Metalware::HashMergers.merge(config, **hash_input) do |template_string|
+      template_string
+    end
   end
 
   def expect_config_value(my_hash)

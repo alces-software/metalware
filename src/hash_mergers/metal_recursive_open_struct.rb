@@ -29,14 +29,7 @@ module Metalware
 
       def [](key)
         value = table[key]
-        case value
-        when String
-          templater_block.call(value)
-        when Hash
-          MetalRecursiveOpenStruct.new(value, &templater_block)
-        else
-          value
-        end
+        convert_value(value)
       end
 
       def each
@@ -50,6 +43,19 @@ module Metalware
       private
 
       attr_reader :table, :templater_block
+
+      def convert_value(value)
+        case value
+        when String
+          templater_block.call(value)
+        when Hash
+          MetalRecursiveOpenStruct.new(value, &templater_block)
+        when Array
+          value.map { |arg| convert_value(arg) }
+        else
+          value
+        end
+      end
     end
   end
 end
