@@ -68,4 +68,24 @@ RSpec.describe Metalware::Namespaces::Alces do
       expect(alces.local).to be_a(Metalware::Namespaces::Local)
     end
   end
+
+  # NOTE: Trailing/ (leading) white space should be ignored for the
+  # conversion. Hence why some of the strings have a spaces
+  describe 'parses the rendered results' do
+    it 'converts the true string' do
+      expect(alces.render_erb_template(' true')).to be_a(TrueClass)
+    end
+
+    it 'converts the false string' do
+      expect(alces.render_erb_template('false ')).to be_a(FalseClass)
+    end
+
+    it 'converts the nil string' do
+      expect(alces.render_erb_template('nil')).to be_a(NilClass)
+    end
+
+    it 'converts integers' do
+      expect(alces.render_erb_template(' 1234 ')).to eq(1234)
+    end
+  end
 end

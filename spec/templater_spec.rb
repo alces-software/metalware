@@ -132,33 +132,6 @@ RSpec.describe Metalware::Templater do
           end
         end
       end
-
-      context 'when parsing recursive boolean values' do
-        let :template do
-          <<-EOF
-          <% if domain.config.recursive_true_repo_value -%>
-          true worked
-          <% end %>
-          <% unless domain.config.recursive_false_repo_value -%>
-          false worked
-          <% end %>
-          EOF
-        end
-
-        #
-        # After a string has been returned from the templater, it
-        # needs to check if the value has to be converted to a boolean
-        # or integer
-        #
-        xit 'renders them as booleans not strings' do
-          expected = <<-EOF
-          true worked
-          false worked
-          EOF
-
-          expect_renders({}, expected)
-        end
-      end
     end
   end
 

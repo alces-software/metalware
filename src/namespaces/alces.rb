@@ -68,7 +68,22 @@ module Metalware
         dynamic_stack.push(dynamic_namespace)
         result = yield
         dynamic_stack.pop
-        result
+        parse_result(result)
+      end
+
+      def parse_result(result)
+        case result.strip
+        when 'true'
+          true
+        when 'false'
+          false
+        when 'nil'
+          nil
+        when /\A\d+\Z/
+          result.to_i
+        else
+          result
+        end
       end
 
       def current_dynamic_namespace
