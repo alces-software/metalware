@@ -4,42 +4,35 @@
 require 'namespaces/alces'
 require 'hash_mergers'
 require 'config'
-
-module Metalware
-  module Namespaces
-    class Alces
-      def testing; end
-    end
-  end
-end
+require 'alces_utils'
 
 RSpec.describe Metalware::Namespaces::Alces do
-  let :config { Metalware::Config.new }
-  let :unstubed_alces {}
-  let :alces do
-    namespace = Metalware::Namespaces::Alces.new(config)
-    allow(namespace).to receive(:testing).and_return(testing(namespace))
-    namespace
-  end
-
-  def testing(alces)
-    Metalware::HashMergers::MetalRecursiveOpenStruct
-      .new(
-        key: 'value',
-        infinite_value1: '<%= alces.testing.infinite_value2 %>',
-        infinite_value2: '<%= alces.testing.infinite_value1 %>'
-      ) do |template_string|
-        alces.render_erb_template(template_string)
-      end
-  end
-
-  def render_template(template)
-    alces.render_erb_template(template)
-  end
+  include AlcesUtils
 
   describe '#template' do
+    before :each do
+      alces_mock = AlcesUtils::Mock.new(self)
+
+      # Creates a testing on alces that returns the MetalROS
+      alces_mock.define_method_testing do
+        Metalware::HashMergers::MetalRecursiveOpenStruct.new(
+          key: 'value',
+          embedded_key: '<%= alces.testing.key %>',
+          infinite_value1: '<%= alces.testing.infinite_value2 %>',
+          infinite_value2: '<%= alces.testing.infinite_value1 %>'
+        ) do |template_string|
+          alces.render_erb_template(template_string)
+        end
+      end
+    end
+
     it 'it can template a simple value' do
       expect(render_template('<%= alces.testing.key %>')).to eq('value')
+    end
+
+    it 'can do a single erb replacement' do
+      rendered = render_template('<%= alces.testing.embedded_key %>')
+      expect(rendered).to eq('value')
     end
 
     it 'errors if recursion depth is exceeded' do
@@ -70,7 +63,7 @@ RSpec.describe Metalware::Namespaces::Alces do
   end
 
   # NOTE: Trailing/ (leading) white space should be ignored for the
-  # conversion. Hence why some of the strings have a spaces
+  # conversion. Hence why some of the strings have spaces
   describe 'parses the rendered results' do
     it 'converts the true string' do
       expect(alces.render_erb_template(' true')).to be_a(TrueClass)

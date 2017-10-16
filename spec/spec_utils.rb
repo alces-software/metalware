@@ -22,6 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'alces_utils'
 require 'constants'
 require 'dependency'
 
