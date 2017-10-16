@@ -99,25 +99,12 @@ module Metalware
         nodes.each do |node|
           render_build_files(node)
           build_method = build_methods[node.name]
-          build_method.render_build_started_templates(build_files(node))
+          build_method.render_build_started_templates(node.files)
         end
       end
 
-      def build_files(node)
-        # Cache the build files as retrieved for each node so don't need to
-        # re-retrieve each time; in particular we don't want to re-make any
-        # network requests for files specified by a URL.
-        @build_files ||= {}
-        @build_files[node.name] ||= retrieve_build_files(node)
-      end
-
-      def retrieve_build_files(node)
-        retriever = BuildFilesRetriever.new(node.name, config)
-        retriever.retrieve(node.config.files)
-      end
-
       def render_build_files(node)
-        build_files(node).each do |namespace, files|
+        node.files.each do |namespace, files|
           files.each do |file|
             next if file[:error]
             render_path = file_path.rendered_build_file_path(node.name, namespace, file[:name])

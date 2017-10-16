@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'build_methods'
+require 'build_files_retriever'
 
 module Metalware
   module Namespaces
@@ -19,6 +20,12 @@ module Metalware
       end
 
       include Namespaces::Mixins::Name
+
+      def initialize(*args)
+        super(*args)
+        # Ensures the same config as alces is used
+        @metal_config = alces.send(:metal_config)
+      end
 
       def group
         @group ||= alces.groups.send(genders.first)
@@ -67,7 +74,24 @@ module Metalware
         end
       end
 
+      #
+      # The BuildFilesRetriever may be moved to the Alces namespace, for:
+      # 1. The raw files can be cached so they don't need new request for
+      #    each node
+      # 2. The metal_config doesn't need to be passed into Node as it it
+      #    would be handled by alces
+      #
+      def files
+        @files ||= begin
+          retriever = BuildFilesRetriever.new(name, metal_config)
+          Constants::HASH_MERGER_DATA_STRUCTURE
+            .new(retriever.retrieve(config.files), &template_block)
+        end
+      end
+
       private
+
+      attr_reader :metal_config
 
       def hash_merger_input
         { groups: genders, node: name }

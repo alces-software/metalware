@@ -94,7 +94,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
           expect(cache.primary_groups).to eq [
             'first_group',
             'second_group',
-            'local'
+            'local',
           ]
         end
       end
