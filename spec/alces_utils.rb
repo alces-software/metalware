@@ -50,10 +50,6 @@ module AlcesUtils
     alces.render_erb_template(template)
   end
 
-  def mock_alces(test)
-    AlcesUtils::Mock.new(test)
-  end
-
   # The following methods have to be initialized with a individual test
   # Example, when using: 'before :each { AlcesUtils::Mock.new(self) }'
   class Mock

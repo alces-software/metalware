@@ -19,7 +19,7 @@ RSpec.describe AlcesUtils do
 
   describe '#define_method_testing' do
     it 'runs the method block' do
-      mock_alces(self).define_method_testing do
+      AlcesUtils::Mock.new(self).define_method_testing do
         'value'
       end
       expect(alces.testing).to eq('value')
@@ -28,7 +28,8 @@ RSpec.describe AlcesUtils do
 
   context 'within the AlceUtils.mock method' do
     before :each do
-      mock_alces(self).define_method_testing {} # Intentionally blank
+      AlcesUtils::Mock.new(self)
+                      .define_method_testing {} # Intentionally blank
     end
 
     context 'with a block before each test' do
