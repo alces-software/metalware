@@ -10,16 +10,12 @@ RSpec.describe Metalware::Namespaces::Alces do
   include AlcesUtils
 
   AlcesUtils.mock self, :each do
-    validation_off
     with_blank_config_and_answer(alces.domain)
   end
 
-  describe '#template' do
-    before :each do
-      alces_mock = AlcesUtils::Mock.new(self)
-
-      # Creates a testing on alces that returns the MetalROS
-      alces_mock.define_method_testing do
+  describe '#render_erb_template' do
+    AlcesUtils.mock self, :each do
+      define_method_testing do
         Metalware::HashMergers::MetalRecursiveOpenStruct.new(
           key: 'value',
           embedded_key: '<%= alces.testing.key %>',
