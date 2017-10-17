@@ -37,6 +37,7 @@ module Metalware
     # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
       validation: true,
+      alces_default_to_domain_scope: true,
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
       built_nodes_storage_path: '/var/lib/metalware/cache/built-nodes',

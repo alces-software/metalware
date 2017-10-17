@@ -77,6 +77,11 @@ module AlcesUtils
       allow(metal_config).to receive(:validation).and_return(false)
     end
 
+    def alces_default_to_domain_scope_off
+      allow(metal_config).to \
+        receive(:alces_default_to_domain_scope).and_return(false)
+    end
+
     def with_blank_config_and_answer(namespace)
       allow(namespace).to receive(:config).and_return(OpenStruct.new)
       allow(namespace).to receive(:answer).and_return(OpenStruct.new)

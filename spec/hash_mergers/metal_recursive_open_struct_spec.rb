@@ -5,6 +5,7 @@ require 'hash_mergers'
 require 'config'
 require 'filesystem'
 require 'namespaces/alces'
+require 'alces_utils'
 
 module Metalware
   module Namespaces
@@ -15,9 +16,12 @@ module Metalware
 end
 
 RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
-  let :config { Metalware::Config.new }
+  include AlcesUtils
+
+  AlcesUtils.mock self, :each { alces_default_to_domain_scope_off }
+
   let :alces do
-    namespace = Metalware::Namespaces::Alces.new(config)
+    namespace = Metalware::Namespaces::Alces.new(metal_config)
     allow(namespace).to receive(:testing).and_return(build_default_hash)
     namespace
   end

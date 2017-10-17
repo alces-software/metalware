@@ -35,13 +35,9 @@ TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
 RSpec.describe Metalware::Templater do
-  let :config do
-    Metalware::Config.new
-  end
+  include AlcesUtils
 
-  let :alces do
-    Metalware::Namespaces::Alces.new(config)
-  end
+  AlcesUtils.mock self, :each { alces_default_to_domain_scope_off }
 
   let :filesystem do
     FileSystem.setup do |fs|

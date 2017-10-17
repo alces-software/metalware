@@ -30,6 +30,12 @@ require 'validation/loader'
 require 'spec_utils'
 
 RSpec.describe Metalware::Commands::Remove::Group do
+  include AlcesUtils
+
+  AlcesUtils.mock self, :each do
+    alces_default_to_domain_scope_off
+  end
+
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
@@ -38,9 +44,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
     end
   end
 
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
-  let :loader { Metalware::Validation::Loader.new(config) }
+  let :loader { Metalware::Validation::Loader.new(metal_config) }
   let :cache { loader.group_cache[:primary_groups] }
 
   let :initial_files { answer_files }
@@ -53,7 +57,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   end
 
   def answer_files
-    Dir[File.join(config.answer_files_path, '**/*.yaml')]
+    Dir[File.join(metal_config.answer_files_path, '**/*.yaml')]
   end
 
   def expected_deleted_files(group)
@@ -61,7 +65,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
       .nodes_in_primary_group(group)
       .map { |node| "nodes/#{node}.yaml" }
       .unshift(["groups/#{group}.yaml"])
-      .map { |f| File.join(config.answer_files_path, f) }
+      .map { |f| File.join(metal_config.answer_files_path, f) }
   end
 
   def test_remove_group(group)

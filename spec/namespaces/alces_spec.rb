@@ -9,6 +9,11 @@ require 'alces_utils'
 RSpec.describe Metalware::Namespaces::Alces do
   include AlcesUtils
 
+  AlcesUtils.mock self, :each do
+    validation_off
+    with_blank_config_and_answer(alces.domain)
+  end
+
   describe '#template' do
     before :each do
       alces_mock = AlcesUtils::Mock.new(self)
@@ -79,6 +84,18 @@ RSpec.describe Metalware::Namespaces::Alces do
 
     it 'converts integers' do
       expect(alces.render_erb_template(' 1234 ')).to eq(1234)
+    end
+  end
+
+  describe 'default template namespace' do
+    let :domain_config { { key: 'domain' } }
+
+    AlcesUtils.mock self, :each do
+      config(alces.domain, domain_config)
+    end
+
+    it 'templates against domain if no config is specified' do
+      expect(render_template('<%= config.key %>')).to eq('domain')
     end
   end
 end

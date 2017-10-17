@@ -28,9 +28,15 @@ module Metalware
       end
 
       def render_erb_template(template_string, dynamic_namespace = {})
-        run_with_dynamic(dynamic_namespace) do
-          Templating::Renderer
-            .replace_erb_with_binding(template_string, binding)
+        # Renders against a domain scope by default
+        redirect_off = !metal_config.alces_default_to_domain_scope
+        if dynamic_namespace.key?(:config) || redirect_off
+          run_with_dynamic(dynamic_namespace) do
+            Templating::Renderer
+              .replace_erb_with_binding(template_string, binding)
+          end
+        else
+          domain.render_erb_template(template_string, dynamic_namespace)
         end
       end
 
