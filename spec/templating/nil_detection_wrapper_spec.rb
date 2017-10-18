@@ -62,8 +62,9 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
       wrapped_object.nil
     end
 
-    xit 'issues a warning for a nested nil' do
-      expect(Metalware::MetalLog).to receive(:warn).once
+    it 'issues a warning for a nested nil' do
+      expect(metal_log).to receive(:warn).once
+      wrapped_object.key1.key2.key3.key4
     end
   end
 end

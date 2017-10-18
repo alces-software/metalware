@@ -43,7 +43,7 @@ module Metalware
           MetalLog.warn 'Nil detected'
           nil
         else
-          value
+          NilDetectionWrapper.new(value)
         end
       end
     end
