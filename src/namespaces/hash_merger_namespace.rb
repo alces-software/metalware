@@ -11,6 +11,7 @@ module Metalware
     class HashMergerNamespace
       def initialize(alces, name = nil)
         @alces = alces
+        @metal_config = alces.send(:metal_config)
         @name = name
       end
 
@@ -28,7 +29,7 @@ module Metalware
 
       private
 
-      attr_reader :alces
+      attr_reader :alces, :metal_config
 
       def run_hash_merger(hash_obj)
         hash_obj.merge(**hash_merger_input, &template_block)

@@ -23,8 +23,6 @@ module Metalware
 
       def initialize(*args)
         super(*args)
-        # Ensures the same config as alces is used
-        @metal_config = alces.send(:metal_config)
       end
 
       def group
@@ -78,8 +76,6 @@ module Metalware
       # The BuildFilesRetriever may be moved to the Alces namespace, for:
       # 1. The raw files can be cached so they don't need new request for
       #    each node
-      # 2. The metal_config doesn't need to be passed into Node as it it
-      #    would be handled by alces
       #
       def files
         @files ||= begin
@@ -90,8 +86,6 @@ module Metalware
       end
 
       private
-
-      attr_reader :metal_config
 
       def hash_merger_input
         { groups: genders, node: name }
