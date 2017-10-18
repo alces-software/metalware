@@ -305,32 +305,4 @@ RSpec.describe Metalware::Templater do
       end
     end
   end
-
-  # XXX These tests test `Templating::MagicNamespace` via the `Templater`; this
-  # is useful to check they work together but we may want to test some things
-  # directly on the `MagicNamespace`.
-  describe 'magic alces namespace' do
-    describe 'answers' do
-      context 'when node passed' do
-        #
-        # Missing parameter dectection still needs to be added
-        # HOWEVER this will be tested in Alces namespace and thus the
-        # test can be removed from here
-        #
-        xit "raises if attempt to access an answer which isn't present" do
-          filesystem.test do
-            expect { answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
-          end
-        end
-      end
-    end
-
-    context 'when no hunter cache file present' do
-      it 'loads the hunter parameter as an empty Hashie' do
-        filesystem.test do
-          expect(alces.hunter.to_h).to eq(Hashie::Mash.new)
-        end
-      end
-    end
-  end
 end

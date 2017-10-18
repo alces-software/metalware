@@ -94,4 +94,12 @@ RSpec.describe Metalware::Namespaces::Alces do
       expect(render_template('<%= config.key %>')).to eq('domain')
     end
   end
+
+  describe '#hunter' do
+    context 'when no hunter cache file present' do
+      it 'loads a empty Hashie' do
+        expect(alces.hunter.to_h).to eq(Hashie::Mash.new)
+      end
+    end
+  end
 end
