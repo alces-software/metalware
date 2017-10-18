@@ -116,15 +116,11 @@ RSpec.describe Metalware::Templater do
           'unset.parameter: <%= unset.parameter %>'
         end
 
-        ##
-        # Broken as the raise has been commented out, probably wont fix as
-        # the old Templater will be deprecated instead
-        #
-        xit 'raises' do
+        it 'raises' do
           filesystem.test do
             expect do
               Metalware::Templater.render(alces, template_path, {})
-            end.to raise_error Metalware::UnsetParameterAccessError
+            end.to raise_error NameError
           end
         end
       end

@@ -53,9 +53,6 @@ module Metalware
     end
   end
 
-  class UnsetParameterAccessError < MetalwareError
-  end
-
   class UnexpectedError < MetalwareError
     def initialize(msg = 'An unexpected error has occurred')
       super
