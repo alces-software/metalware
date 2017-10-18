@@ -13,6 +13,10 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     Metalware::Templating::NilDetectionWrapper.wrap(obj).receiver
   end
 
+  def expect_warning(msg)
+    expect(metal_log).to receive(:warn).once.with(msg)
+  end
+
   let :metal_log { Metalware::MetalLog.metal_log }
 
   it 'the wrap command returns a binding' do
@@ -60,7 +64,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     let :wrapped_object { build_wrapper_object(object) }
 
     it 'issues for a simple nil return value' do
-      expect(metal_log).to receive(:warn).once
+      expect_warning('nil')
       expect(wrapped_object.nil).to be_a(NilClass)
     end
 

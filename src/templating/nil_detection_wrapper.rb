@@ -28,7 +28,8 @@ module Metalware
 
       def method_missing(s, *a, &b)
         if respond_to_missing?(s)
-          parse_value(object.send(s, *a, &b))
+          next_call_stack = build_call_stack_str(s, *a, &b)
+          parse_value(object.send(s, *a, &b), next_call_stack)
         else
           super
         end
@@ -38,13 +39,21 @@ module Metalware
 
       attr_reader :object, :call_stack
 
-      def parse_value(value)
+      def build_call_stack_str(s, *_a, &_b)
+        s.to_s
+      end
+
+      def parse_value(value, next_call_stack)
         if value.nil?
-          MetalLog.warn 'Nil detected'
+          nil_detected(next_call_stack)
           nil
         else
           NilDetectionWrapper.new(value)
         end
+      end
+
+      def nil_detected(next_call_stack)
+        MetalLog.warn next_call_stack
       end
     end
   end
