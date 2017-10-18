@@ -3,6 +3,7 @@
 
 require 'exceptions'
 require 'templating/renderer'
+require 'templating/nil_detection_wrapper'
 require 'config'
 require 'utils/dynamic_require'
 require 'deployment_server'
@@ -33,7 +34,7 @@ module Metalware
         if dynamic_namespace.key?(:config) || redirect_off
           run_with_dynamic(dynamic_namespace) do
             Templating::Renderer
-              .replace_erb_with_binding(template_string, binding)
+              .replace_erb_with_binding(template_string, wrapped_binding)
           end
         else
           domain.render_erb_template(template_string, dynamic_namespace)
@@ -94,6 +95,10 @@ module Metalware
 
       def current_dynamic_namespace
         dynamic_stack.last
+      end
+
+      def wrapped_binding
+        Templating::NilDetectionWrapper.wrap(self)
       end
     end
   end

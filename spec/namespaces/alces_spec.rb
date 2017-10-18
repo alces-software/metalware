@@ -102,4 +102,13 @@ RSpec.describe Metalware::Namespaces::Alces do
       end
     end
   end
+
+  it 'templates have nil detection' do
+    AlcesUtils.mock self do
+      config(alces.domain, nil: nil)
+    end
+    expect(Metalware::MetalLog.metal_log).to \
+      receive(:warn).once.with('domain.config.nil')
+    render_template('<%= domain.config.nil %>')
+  end
 end

@@ -22,16 +22,20 @@ module Metalware
         binding
       end
 
-      def respond_to_missing?(s, *_a)
-        object.respond_to?(s)
+      def respond_to_missing?(*_a)
+        true # Respond to everything as it will be passed to wrapped obj
       end
 
       def method_missing(s, *a, &b)
-        if respond_to_missing?(s)
-          next_call_stack = build_call_stack_str(s, *a, &b)
-          parse_value(object.send(s, *a, &b), next_call_stack)
+        # Should never super. Only included as method_missing should always
+        # have a failback on super
+        super unless respond_to_missing?(s)
+        value = object.send(s, *a, &b)
+        if s == :to_s || s == :to_str
+          value
         else
-          super
+          next_call_stack = build_call_stack_str(s, *a, &b)
+          parse_value(value, next_call_stack)
         end
       end
 
