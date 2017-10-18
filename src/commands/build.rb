@@ -99,7 +99,7 @@ module Metalware
         nodes.each do |node|
           render_build_files(node)
           build_method = build_methods[node.name]
-          build_method.render_build_started_templates(node.files)
+          build_method.render_build_start_templates
         end
       end
 
@@ -186,7 +186,7 @@ module Metalware
       def render_build_complete_templates(nodes)
         nodes.each do |node|
           build_method = build_methods[node.name]
-          build_method.render_build_complete_templates(firstboot: false)
+          build_method.render_build_complete_templates
         end
       end
 
