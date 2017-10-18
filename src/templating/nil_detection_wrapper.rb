@@ -13,7 +13,7 @@ module Metalware
 
       include Blank
 
-      def initialize(object, call_stack = nil)
+      def initialize(object, call_stack = '')
         @object = object
         @call_stack = call_stack
       end
@@ -39,7 +39,12 @@ module Metalware
 
       attr_reader :object, :call_stack
 
-      def build_call_stack_str(s, *_a, &_b)
+      def build_call_stack_str(s, *a, &b)
+        stop = call_stack.empty? ? '' : '.'
+        call_stack + stop + build_call_stack_helper(s, *a, &b)
+      end
+
+      def build_call_stack_helper(s, *_a, &_b)
         s.to_s
       end
 
@@ -48,7 +53,7 @@ module Metalware
           nil_detected(next_call_stack)
           nil
         else
-          NilDetectionWrapper.new(value)
+          NilDetectionWrapper.new(value, next_call_stack)
         end
       end
 
