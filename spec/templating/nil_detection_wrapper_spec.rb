@@ -45,6 +45,8 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     let :object do
       RecursiveOpenStruct.new(
         nil: nil,
+        true: true,
+        false: false,
         key1: {
           key2: {
             key3: {
@@ -59,12 +61,22 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
 
     it 'issues for a simple nil return value' do
       expect(metal_log).to receive(:warn).once
-      wrapped_object.nil
+      expect(wrapped_object.nil).to be_a(NilClass)
     end
 
     it 'issues a warning for a nested nil' do
       expect(metal_log).to receive(:warn).once
       wrapped_object.key1.key2.key3.key4
+    end
+
+    it 'false is still a FalseClass' do
+      expect(wrapped_object.false).to be_a(FalseClass)
+      expect(wrapped_object.false).to be_falsey
+    end
+
+    it 'true is still a TrueClass' do
+      expect(wrapped_object.true).to be_a(TrueClass)
+      expect(wrapped_object.true).to be_truthy
     end
   end
 end
