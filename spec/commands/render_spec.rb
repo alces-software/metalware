@@ -29,19 +29,21 @@ require 'spec_utils'
 require 'config'
 
 RSpec.describe Metalware::Commands::Render do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  include AlcesUtils
 
-  before :each do
-    SpecUtils.use_unit_test_config(self)
-  end
+  AlcesUtils.mock self, :each { with_blank_config_and_answer(alces.domain) }
 
   context 'and with --strict option' do
-    xit 'raises StrictWarningError when a parameter is missing' do
-      path = File.join(config.repo_path, 'dhcp/default')
+    AlcesUtils.mock self, :each { mock_strict(true) }
+
+    let :template { '<%= domain.config.missing %>' }
+
+    it 'raises StrictWarningError when a parameter is missing' do
+      allow(File).to receive(:read).and_return(template)
+
       expect do
         Metalware::Utils.run_command(
-          Metalware::Commands::Render, path, strict: true
+          Metalware::Commands::Render, 'mocked_path', strict: 'mocked'
         )
       end.to raise_error(Metalware::StrictWarningError)
     end

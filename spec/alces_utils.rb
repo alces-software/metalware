@@ -73,6 +73,10 @@ module AlcesUtils
       allow(metal_config).to receive(:validation).and_return(false)
     end
 
+    def mock_strict(bool)
+      metal_config.cli[:strict] = bool
+    end
+
     def alces_default_to_domain_scope_off
       allow(metal_config).to \
         receive(:alces_default_to_domain_scope).and_return(false)
