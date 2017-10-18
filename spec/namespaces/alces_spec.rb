@@ -108,7 +108,7 @@ RSpec.describe Metalware::Namespaces::Alces do
       config(alces.domain, nil: nil)
     end
     expect(Metalware::MetalLog.metal_log).to \
-      receive(:warn).once.with('domain.config.nil')
+      receive(:warn).once.with(/.*domain.config.nil\Z/)
     render_template('<%= domain.config.nil %>')
   end
 end

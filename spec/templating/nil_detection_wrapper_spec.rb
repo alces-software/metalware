@@ -14,7 +14,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
   end
 
   def expect_warning(msg)
-    expect(metal_log).to receive(:warn).once.with(msg)
+    expect(metal_log).to receive(:warn).once.with(/.*#{msg}\Z/)
   end
 
   let :metal_log { Metalware::MetalLog.metal_log }
@@ -57,7 +57,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
               key4: nil,
             },
           },
-        },
+        }
       )
     end
 
@@ -81,6 +81,38 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     it 'true is still a TrueClass' do
       expect(wrapped_object.true).to be_a(TrueClass)
       expect(wrapped_object.true).to be_truthy
+    end
+  end
+
+  context 'with multiple input arguments' do
+    let :wrapped_object do
+      d = double('object', test: nil, :[] => nil)
+      build_wrapper_object(d)
+    end
+
+    it 'displays if a block is passed in' do
+      expect_warning('test\(&block\)')
+      wrapped_object.test { puts 'I am a blocky block' }
+    end
+
+    it 'displays the additional args' do
+      expect_warning('test\(arg1, arg2\)')
+      wrapped_object.test('arg1', 'arg2')
+    end
+
+    it 'converts [] method call (with symbol)' do
+      expect_warning('\[:key\]')
+      wrapped_object[:key]
+    end
+
+    it 'converts [] method calls (with string)' do
+      expect_warning('\[\'key\'\]')
+      wrapped_object['key']
+    end
+
+    it 'gets the order correct' do
+      expect_warning('\[:key\]\(arg2, arg3, &block\)')
+      wrapped_object.[](:key, 'arg2', 'arg3') { puts 'I am a block' }
     end
   end
 end
