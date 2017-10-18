@@ -54,7 +54,12 @@ module Metalware
     class << self
       def render(alces, template, **dynamic_namespace)
         raw_template = File.read(template)
-        alces.render_erb_template(raw_template, dynamic_namespace)
+        begin
+          alces.render_erb_template(raw_template, dynamic_namespace)
+        rescue => e
+          msg = "Failed to render template: #{template}"
+          raise e, "#{msg}\n#{e}", e.backtrace
+        end
       end
 
       def render_to_stdout(alces, template, **dynamic_namespace)
