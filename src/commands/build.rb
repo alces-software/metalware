@@ -212,11 +212,19 @@ module Metalware
         teardown
       end
 
+      # Allows the input to be mocked
+      def high_line
+        @high_line ||= HighLine.new
+      end
+
+      delegate :agree, to: :high_line
+
       def ask_if_should_rerender
         should_rerender = <<-EOF.strip_heredoc
           Re-render appropriate templates for nodes as if build succeeded?
           [yes/no]
         EOF
+
         render_all_build_complete_templates if agree(should_rerender)
       end
 

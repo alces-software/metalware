@@ -60,33 +60,6 @@ RSpec.describe '`metal build`', real_fs: true do
     sleep 2
   end
 
-  def run_command(command)
-    Timeout.timeout 20 do
-      Open3.popen3 command do |stdin, stdout, stderr, thread|
-        begin
-          pid = thread.pid
-          yield(stdin, stdout, stderr, pid)
-        rescue IntentionallyCatchAnyException => e
-          begin
-            stdout_data = read_io_stream(stdout)
-            stderr_data = read_io_stream(stderr)
-            puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
-          rescue
-            raise e
-          end
-          raise
-        end
-      end
-    end
-  end
-
-  def read_io_stream(stream)
-    max_bytes_to_read = 30_000
-    stream.read_nonblock(max_bytes_to_read)
-  rescue EOFError
-    ''
-  end
-
   def expect_clears_up_built_node_marker_files
     expect(Dir.empty?(TEST_BUILT_NODES_DIR)).to be true
   end
@@ -106,6 +79,8 @@ RSpec.describe '`metal build`', real_fs: true do
     yield thr
   end
 
+  let :stdin { StringIO.new }
+
   before :each do
     kill_any_metal_processes
 
@@ -121,6 +96,8 @@ RSpec.describe '`metal build`', real_fs: true do
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
 
     MinimalRepo.create_at(TEST_REPO)
+
+    allow(HighLine).to receive(:new).and_return(HighLine.new(stdin))
   end
 
   after do
@@ -243,18 +220,22 @@ RSpec.describe '`metal build`', real_fs: true do
         end
       end
 
-      xit 'handles "yes" to interrupt prompt' do
-        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |stdin, _stdout, _stderr, pid|
-          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be true
-
-          expect_interrupt_does_not_kill(pid)
-
+      it 'handles "yes" to interrupt prompt' do
+        build_node('nodes', group: true) do |thread|
           stdin.puts('yes')
+          stdin.rewind
+
+          touch_complete_file('testnode01')
+
           wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be false
+          expect(thread).to be_alive
+
+          # Do not check if alive after the Interrupt
+          # As it is directly raised, it exits faster than if it was a SIG
+          thread.raise(Interrupt)
+
+          wait_longer_than_build_poll
+          expect(thread.status).to eq(false)
           expect_clears_up_built_node_marker_files
 
           expect_permanent_pxelinux_rendered_for_testnode01
