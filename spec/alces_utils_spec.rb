@@ -26,10 +26,15 @@ RSpec.describe AlcesUtils do
     end
   end
 
-  context 'within the AlceUtils.mock method' do
+  context 'with the AlceUtils.mock method' do
     before :each do
       AlcesUtils::Mock.new(self)
                       .define_method_testing {} # Intentionally blank
+    end
+
+    it 'only has the local node by default' do
+      expect(alces.nodes.length).to eq(1)
+      expect(alces.nodes[0]).to be_a(Metalware::Namespaces::Local)
     end
 
     context 'with a block before each test' do
@@ -97,10 +102,52 @@ RSpec.describe AlcesUtils do
 
       it 'can still overide the config' do
         AlcesUtils.mock self do
-          config(alces.domain, { key: 'domain' })
+          config(alces.domain, key: 'domain')
         end
 
         expect(alces.domain.config.key).to eq('domain')
+      end
+    end
+
+    describe '#mock_node' do
+      let :name { 'some_random_test_node3456734' }
+
+      AlcesUtils.mock self, :each do
+        mock_node(name)
+      end
+
+      it 'creates the mock node' do
+        expect(alces.node.name).to eq(name)
+      end
+
+      it 'appears in the nodes list' do
+        expect(alces.nodes.length).to eq(2)
+        expect(alces.nodes.find_by_name(name).name).to eq(name)
+      end
+
+      it 'adds the node to test-group by default' do
+        expect(alces.node.genders).to eq(['test-group'])
+      end
+
+      it 'creates the node with a blank config and answer' do
+        expect(alces.node.config.to_h).to be_empty
+        expect(alces.node.answer.to_h).to be_empty
+      end
+
+      context 'with a new node' do
+        let :new_node { 'some_random_new_node4362346' }
+        let :genders { ['_some_group_1', '_some_group_2'] }
+
+        AlcesUtils.mock(self, :each) { mock_node(new_node, *genders) }
+
+        it 'sets the last mock node as alces.nodes' do
+          expect(alces.node.name).to eq(new_node)
+          expect(alces.nodes.length).to eq(3)
+        end
+
+        it 'uses the genders input' do
+          expect(alces.node.genders).to eq(genders)
+        end
       end
     end
   end

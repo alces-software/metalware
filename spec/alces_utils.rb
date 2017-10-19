@@ -5,6 +5,7 @@ require 'namespaces/alces'
 require 'config'
 require 'active_support/core_ext/module/delegation'
 require 'recursive_open_struct'
+require 'spec_utils'
 
 module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
@@ -21,6 +22,8 @@ module AlcesUtils
           test_alces = Metalware::Namespaces::Alces.new(metal_config)
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_return(test_alces)
+          # Allows the node method to be mocked
+          test_alces.define_singleton_method(:node) { method_missing(:node) }
           test_alces
         end
       end
@@ -53,7 +56,10 @@ module AlcesUtils
   # The following methods have to be initialized with a individual test
   # Example, when using: 'before :each { AlcesUtils::Mock.new(self) }'
   class Mock
-    def initialize(individual_spec_test)
+    def initialize(individual_spec_test, genders: 'genders/local_only')
+      SpecUtils.use_mock_genders(individual_spec_test,
+                                 genders_file: genders)
+
       @test = individual_spec_test
       @alces = test.instance_exec { alces }
       @metal_config = test.instance_exec { metal_config }
@@ -87,9 +93,26 @@ module AlcesUtils
       allow(namespace).to receive(:answer).and_return(OpenStruct.new)
     end
 
+    def mock_node(name, *genders)
+      genders = ['test-group'] if genders.empty?
+      node = Metalware::Namespaces::Node.create(alces, name)
+      with_blank_config_and_answer(node)
+      allow(node).to receive(:genders).and_return(genders)
+      nodes = alces.nodes
+                   .reduce([]) { |memo, n| memo.push(n) }
+                   .tap { |x| x.push(node) }
+      metal_nodes = Metalware::Namespaces::MetalArray.new(nodes)
+      allow(alces).to receive(:nodes).and_return(metal_nodes)
+      allow(alces).to receive(:node).and_return(node)
+    end
+
     private
 
     attr_reader :alces, :metal_config, :test
+
+    # Is called on initialize
+    def setup
+    end
 
     # Allows the RSpec methods to be accessed
     def respond_to_missing?(s, *_a)
