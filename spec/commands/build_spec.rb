@@ -41,41 +41,6 @@ module Metalware
   end
 end
 
-RSpec.shared_examples 'files rendering' do
-  #
-  # Currently broken. Rspec is having issues due to the mocking of the
-  # Templater.render_to_file. Instead the of mocking the render_to_file
-  # the FakeFS should be used and then checked after the build is finished
-  #
-  xit 'renders only files which could be retrieved' do
-    filesystem.test do
-      # Create needed repo files.
-      FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
-      FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
-
-      # Need to define valid build interface so `DeploymentServer` does not
-      # fail to get the IP on this interface.
-      Metalware::Data.dump(
-        Metalware::Constants::SERVER_CONFIG_PATH,
-        build_interface: Metalware::Network.interfaces.first
-      )
-
-      expect_renders(
-        "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
-        to: '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo'
-      )
-
-      # Should not try to render any other build files for this node.
-      node_rendered_path = '/var/lib/metalware/rendered/testnode01'
-      expect(Metalware::Templater).not_to receive(:render_to_file).with(
-        anything, /^#{node_rendered_path}/, anything
-      )
-
-      run_build('testnode01')
-    end
-  end
-end
-
 RSpec.describe Metalware::Commands::Build do
   let :metal_config { Metalware::Config.new }
 
@@ -150,8 +115,6 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called without group argument' do
-    include_examples 'files rendering'
-
     it 'renders default standard templates for given node' do
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
@@ -250,8 +213,6 @@ RSpec.describe Metalware::Commands::Build do
         allow_any_instance_of(Metalware::Namespaces::Node).to \
           receive(:build_method).and_return(Metalware::BuildMethods::Basic)
       end
-
-      include_examples 'files rendering'
 
       it 'renders only basic template' do
         filesystem.test do
