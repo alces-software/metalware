@@ -25,6 +25,7 @@
 require 'config'
 require 'constants'
 require 'spec_utils'
+require 'commands/build'
 
 require 'minimal_repo'
 
@@ -43,6 +44,8 @@ RSpec.describe '`metal build`', real_fs: true do
 
   TEST_REPO = File.join(TEST_DIR, 'repo')
   PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
+
+  AlcesUtils.start(self, config: CONFIG_FILE)
 
   def kill_any_metal_processes
     `pkill bin/metal -f`
@@ -93,6 +96,20 @@ RSpec.describe '`metal build`', real_fs: true do
     expect(Dir.empty?(TEST_BUILT_NODES_DIR)).to be true
   end
 
+  def build_node(name)
+    thr = Thread.new do
+      begin
+        Timeout.timeout 20 do
+          Metalware::Commands::Build.new([name], OpenStruct.new)
+        end
+      rescue => e
+        STDERR.puts e.inspect
+        STDERR.puts e.backtrace
+      end
+    end
+    yield thr
+  end
+
   before :each do
     kill_any_metal_processes
 
@@ -110,14 +127,18 @@ RSpec.describe '`metal build`', real_fs: true do
     kill_any_metal_processes
   end
 
-  context 'for single node' do
-    xit 'works' do
-      command = "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
-      run_command(command) do |_stdin, _stdout, _stderr, pid|
-        wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+  let :node { 'testnode01' }
+  let :node_build_complete_path do
+    'tmp/integration-test/built-nodes/metalwarebooter.testnode01'
+  end
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+  context 'for single node' do
+    it 'works' do
+      build_node(node) do |thread|
+        wait_longer_than_build_poll
+        expect(thread).to be_alive
+
+        FileUtils.touch(node_build_complete_path)
         wait_longer_than_build_poll
         expect(process_exists?(pid)).to be false
 

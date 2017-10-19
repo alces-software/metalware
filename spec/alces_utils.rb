@@ -10,10 +10,10 @@ require 'spec_utils'
 module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
-    def start(example_group)
+    def start(example_group, config: nil)
       example_group.instance_exec do
         let! :metal_config do
-          test_config = Metalware::Config.new
+          test_config = Metalware::Config.new(config)
           allow(Metalware::Config).to receive(:new).and_return(test_config)
           test_config
         end
