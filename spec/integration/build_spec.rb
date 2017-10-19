@@ -110,8 +110,10 @@ RSpec.describe '`metal build`', real_fs: true do
     kill_any_metal_processes
 
     SpecUtils.use_mock_genders(self)
-    allow_any_instance_of(Metalware::Namespaces::Node).to \
-      receive(:hexadecimal_ip).and_return('HEX_IP')
+    alces.nodes.each do |node|
+      hex = node.name + '_HEX_IP'
+      allow(node).to receive(:hexadecimal_ip).and_return(hex)
+    end
 
     FileUtils.remove_dir(TEST_DIR, force: true)
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
@@ -174,16 +176,16 @@ RSpec.describe '`metal build`', real_fs: true do
       # Initial interrupt does not exit CLI; gives prompt for whether to
       # re-render all Pxelinux configs as if nodes all built.
 
-      def expect_interrupt_does_not_kill(pid)
-        Process.kill('INT', pid)
+      def expect_interrupt_does_not_kill(thread)
+        thread.raise(Interrupt)
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+        expect(thread).to be_alive
       end
 
-      def expect_interrupt_kills(pid)
-        Process.kill('INT', pid)
+      def expect_interrupt_kills(thread)
+        thread.raise(Interrupt)
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be false
+        expect(thread.status).to be(false)
       end
 
       def expect_permanent_pxelinux_rendered_for_testnode01
@@ -191,7 +193,11 @@ RSpec.describe '`metal build`', real_fs: true do
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode01', firstboot: false)
+          Metalware::Templater.render(
+            alces,
+            PXELINUX_TEMPLATE,
+            nodename: 'testnode01',
+            firstboot: false)
         )
       end
 
@@ -200,7 +206,11 @@ RSpec.describe '`metal build`', real_fs: true do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode02', firstboot: false)
+          Metalware::Templater.render(
+            alces,
+            PXELINUX_TEMPLATE,
+            nodename: 'testnode02',
+            firstboot: false)
         )
       end
 
@@ -209,19 +219,23 @@ RSpec.describe '`metal build`', real_fs: true do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode02', firstboot: true)
+          Metalware::Templater.render(
+            alces,
+            PXELINUX_TEMPLATE,
+            nodename: 'testnode02',
+            firstboot: true)
         )
       end
 
-      xit 'exits on second interrupt' do
-        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |_stdin, _stdout, _stderr, pid|
-          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be true
+      it 'exits on second interrupt' do
+        build_node('nodes', group: true) do |thread|
+          touch_complete_file('testnode01')
 
-          expect_interrupt_does_not_kill(pid)
-          expect_interrupt_kills(pid)
+          wait_longer_than_build_poll
+          expect(thread).to be_alive
+
+          expect_interrupt_does_not_kill(thread)
+          expect_interrupt_kills(thread)
           expect_clears_up_built_node_marker_files
 
           expect_permanent_pxelinux_rendered_for_testnode01
