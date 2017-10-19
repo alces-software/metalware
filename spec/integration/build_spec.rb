@@ -48,15 +48,10 @@ RSpec.describe '`metal build`', real_fs: true do
   AlcesUtils.start(self, config: CONFIG_FILE)
 
   def kill_any_metal_processes
-    `pkill bin/metal -f`
-  end
-
-  # Refer to http://stackoverflow.com/a/3568291/2620402.
-  def process_exists?(pid)
-    Process.getpgid(pid)
-    true
-  rescue Errno::ESRCH
-    false
+    Thread.list.each do |t|
+      t.exit unless t == Thread.current
+    end
+    `pkill nodeattr -9`
   end
 
   def wait_longer_than_build_poll
@@ -96,11 +91,12 @@ RSpec.describe '`metal build`', real_fs: true do
     expect(Dir.empty?(TEST_BUILT_NODES_DIR)).to be true
   end
 
-  def build_node(name)
+  def build_node(name, group: false)
+    options = OpenStruct.new(group ? { group: true } : {})
     thr = Thread.new do
       begin
         Timeout.timeout 20 do
-          Metalware::Commands::Build.new([name], OpenStruct.new)
+          Metalware::Commands::Build.new([name], options)
         end
       rescue => e
         STDERR.puts e.inspect
@@ -129,18 +125,21 @@ RSpec.describe '`metal build`', real_fs: true do
     kill_any_metal_processes
   end
 
+  def touch_complete_file(node)
+    file = "tmp/integration-test/built-nodes/metalwarebooter.#{node}"
+    FileUtils.touch(file)
+  end
+
   context 'for single node' do
     let :node { 'testnode01' }
-    let :node_build_complete_path do
-      'tmp/integration-test/built-nodes/metalwarebooter.testnode01'
-    end
 
     it 'works' do
       build_node(node) do |thread|
         wait_longer_than_build_poll
         expect(thread).to be_alive
 
-        FileUtils.touch(node_build_complete_path)
+        touch_complete_file(node)
+
         wait_longer_than_build_poll
         expect(thread.status).to eq(false)
 
@@ -150,20 +149,22 @@ RSpec.describe '`metal build`', real_fs: true do
   end
 
   context 'for gender group' do
-    xit 'works' do
-      command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-      run_command(command) do |_stdin, _stdout, _stderr, pid|
-        wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+    let :nodes { ['testnode01', 'testnode02', 'testnode03'] }
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+    it 'works' do
+      build_node('nodes', group: true) do |thread|
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+        expect(thread).to be_alive
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode02')
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode03')
+        touch_complete_file(nodes[0])
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be false
+        expect(thread).to be_alive
+
+        touch_complete_file(nodes[1])
+        touch_complete_file(nodes[2])
+
+        wait_longer_than_build_poll
+        expect(thread.status).to eq(false)
 
         expect_clears_up_built_node_marker_files
       end
