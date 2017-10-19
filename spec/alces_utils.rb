@@ -71,7 +71,8 @@ module AlcesUtils
     end
 
     def config(namespace, h = {})
-      new_config = RecursiveOpenStruct.new(h)
+      new_config = Metalware::Constants::HASH_MERGER_DATA_STRUCTURE
+                   .new(h) { |template_str| template_str }
       allow(namespace).to receive(:config).and_return(new_config)
     end
 
