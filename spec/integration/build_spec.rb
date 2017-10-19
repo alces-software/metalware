@@ -113,7 +113,9 @@ RSpec.describe '`metal build`', real_fs: true do
   before :each do
     kill_any_metal_processes
 
-    ENV['PATH'] = "spec/fixtures/libexec/:#{ENV['PATH']}"
+    SpecUtils.use_mock_genders(self)
+    allow_any_instance_of(Metalware::Namespaces::Node).to \
+      receive(:hexadecimal_ip).and_return('HEX_IP')
 
     FileUtils.remove_dir(TEST_DIR, force: true)
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
@@ -127,12 +129,12 @@ RSpec.describe '`metal build`', real_fs: true do
     kill_any_metal_processes
   end
 
-  let :node { 'testnode01' }
-  let :node_build_complete_path do
-    'tmp/integration-test/built-nodes/metalwarebooter.testnode01'
-  end
-
   context 'for single node' do
+    let :node { 'testnode01' }
+    let :node_build_complete_path do
+      'tmp/integration-test/built-nodes/metalwarebooter.testnode01'
+    end
+
     it 'works' do
       build_node(node) do |thread|
         wait_longer_than_build_poll
@@ -140,7 +142,7 @@ RSpec.describe '`metal build`', real_fs: true do
 
         FileUtils.touch(node_build_complete_path)
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be false
+        expect(thread.status).to eq(false)
 
         expect_clears_up_built_node_marker_files
       end
