@@ -6,6 +6,7 @@ require 'config'
 require 'active_support/core_ext/module/delegation'
 require 'recursive_open_struct'
 require 'spec_utils'
+require 'filesystem'
 
 module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
@@ -65,7 +66,6 @@ module AlcesUtils
   # Example, when using: 'before :each { AlcesUtils::Mock.new(self) }'
   class Mock
     def initialize(individual_spec_test)
-
       @test = individual_spec_test
       @alces = test.instance_exec { alces }
       @metal_config = test.instance_exec { metal_config }
@@ -113,13 +113,17 @@ module AlcesUtils
       allow(alces).to receive(:node).and_return(node)
     end
 
+    def mock_group(name)
+      raise 'Can not mock group whilst FakeFS is off' unless FakeFS.activated?
+      group_cache.add(name)
+      alces.instance_variable_set(:@groups, nil)
+      alces.instance_variable_set(:@group_cache, nil)
+      with_blank_config_and_answer(alces.groups.find_by_name(name))
+    end
+
     private
 
     attr_reader :alces, :metal_config, :test
-
-    # Is called on initialize
-    def setup
-    end
 
     # Allows the RSpec methods to be accessed
     def respond_to_missing?(s, *_a)
@@ -128,6 +132,10 @@ module AlcesUtils
 
     def method_missing(s, *a, &b)
       respond_to_missing?(s) ? test.send(s, *a, &b) : super
+    end
+
+    def group_cache
+      @group_cache ||= Metalware::GroupCache.new(metal_config)
     end
   end
 end

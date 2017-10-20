@@ -6,6 +6,9 @@ require 'alces_utils'
 RSpec.describe AlcesUtils do
   include AlcesUtils
 
+  let :file_path { Metalware::FilePath.new(metal_config) }
+  let :group_cache { Metalware::GroupCache.new(metal_config) }
+
   describe '#new' do
     it 'returns the mocked config' do
       expect(metal_config.equal?(Metalware::Config.new)).to eq(true)
@@ -106,6 +109,42 @@ RSpec.describe AlcesUtils do
         end
 
         expect(alces.domain.config.key).to eq('domain')
+      end
+    end
+
+    describe '#mock_group' do
+      let :group { 'some random group' }
+      let :group2 { 'some other group' }
+
+      AlcesUtils.mock self, :each do
+        expect(File.exist?(file_path.group_cache)).to eq(false)
+        mock_group(group)
+      end
+
+      it 'creates the group cache' do
+        expect(File.exist?(file_path.group_cache)).to eq(true)
+      end
+
+      it 'creates the group' do
+        expect(alces.groups.send(group).name).to eq(group)
+      end
+
+      it 'can add another group' do
+        alces.groups # Initializes the old groups first
+        AlcesUtils.mock(self) { mock_group(group2) }
+        expect(alces.groups.send(group2).name).to eq(group2)
+      end
+
+      it 'sets the config to blank' do
+        expect(alces.groups.send(group).config.to_h).to be_empty
+      end
+
+      # The mocking would otherwise alter the actual file
+      it 'errors if FakeFS is off' do
+        FakeFS.deactivate!
+        expect do
+          AlcesUtils.mock(self) { mock_group(group2) }
+        end.to raise_error(RuntimeError)
       end
     end
 
