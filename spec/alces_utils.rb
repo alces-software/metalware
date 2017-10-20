@@ -33,6 +33,7 @@ module AlcesUtils
             receive(:new).and_return(test_alces)
           # Allows the node method to be mocked
           test_alces.define_singleton_method(:node) { method_missing(:node) }
+          test_alces.define_singleton_method(:group) { method_missing(:group) }
           test_alces
         end
       end
@@ -77,9 +78,11 @@ module AlcesUtils
     end
 
     def config(namespace, h = {})
-      new_config = Metalware::Constants::HASH_MERGER_DATA_STRUCTURE
-                   .new(h) { |template_str| template_str }
-      allow(namespace).to receive(:config).and_return(new_config)
+      allow(namespace).to receive(:config).and_return(hash_object(h))
+    end
+
+    def answer(namespace, h = {})
+      allow(namespace).to receive(:answer).and_return(hash_object(h))
     end
 
     def validation_off
@@ -122,7 +125,9 @@ module AlcesUtils
       group_cache.add(name)
       alces.instance_variable_set(:@groups, nil)
       alces.instance_variable_set(:@group_cache, nil)
-      with_blank_config_and_answer(alces.groups.find_by_name(name))
+      group = alces.groups.find_by_name(name)
+      with_blank_config_and_answer(group)
+      allow(alces).to receive(:group).and_return(group)
     end
 
     private
@@ -140,6 +145,12 @@ module AlcesUtils
 
     def group_cache
       @group_cache ||= Metalware::GroupCache.new(metal_config)
+    end
+
+    def hash_object(h = {})
+      Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(h) do |str|
+        str
+      end
     end
   end
 end

@@ -139,6 +139,10 @@ RSpec.describe AlcesUtils do
         expect(alces.groups.send(group).config.to_h).to be_empty
       end
 
+      it 'sets the group as the in scope group' do
+        expect(alces.group).to eq(alces.groups.send(group))
+      end
+
       # The mocking would otherwise alter the actual file
       it 'errors if FakeFS is off' do
         FakeFS.deactivate!

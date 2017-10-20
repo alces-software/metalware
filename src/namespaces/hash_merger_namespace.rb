@@ -9,6 +9,8 @@ require 'hash_mergers'
 module Metalware
   module Namespaces
     class HashMergerNamespace
+      include Mixins::WhiteListHasher
+
       def initialize(alces, name = nil)
         @alces = alces
         @metal_config = alces.send(:metal_config)
@@ -30,6 +32,14 @@ module Metalware
       private
 
       attr_reader :alces, :metal_config
+
+      def white_list_for_hasher
+        respond_to?(:name) ? [:name] : []
+      end
+
+      def recursive_white_list_for_hasher
+        [:config, :answer]
+      end
 
       def run_hash_merger(hash_obj)
         hash_obj.merge(**hash_merger_input, &template_block)

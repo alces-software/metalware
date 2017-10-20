@@ -9,6 +9,16 @@ require 'recursive_open_struct'
 require 'spec_utils'
 
 RSpec.describe Metalware::Namespaces::Node do
+  context 'with mocked node' do
+    include AlcesUtils
+
+    AlcesUtils.mock self, :each do
+      mock_node('test_node')
+    end
+
+    include_examples Metalware::Namespaces::HashMergerNamespace, :node
+  end
+
   let :config { Metalware::Config.new }
   let :alces do
     a = Metalware::Namespaces::Alces.new(config)
