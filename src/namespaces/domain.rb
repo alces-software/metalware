@@ -18,6 +18,10 @@ module Metalware
 
       private
 
+      def white_list_for_hasher
+        super.concat [:hostip, :hosts_url, :genders_url]
+      end
+
       def hash_merger_input
         {}
       end
