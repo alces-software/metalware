@@ -11,6 +11,14 @@ module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
+      # The mocking of the namespace expects the local node to exist
+      # However this means it needs to be in the genders file
+      # By default the local_only gender file is used
+      # However this does not prevent genders being mocked again
+      example_group.before :each do
+        SpecUtils.use_mock_genders(self, genders_file: 'genders/local_only')
+      end
+
       example_group.instance_exec do
         let! :metal_config do
           test_config = Metalware::Config.new(config)
@@ -56,9 +64,7 @@ module AlcesUtils
   # The following methods have to be initialized with a individual test
   # Example, when using: 'before :each { AlcesUtils::Mock.new(self) }'
   class Mock
-    def initialize(individual_spec_test, genders: 'genders/local_only')
-      SpecUtils.use_mock_genders(individual_spec_test,
-                                 genders_file: genders)
+    def initialize(individual_spec_test)
 
       @test = individual_spec_test
       @alces = test.instance_exec { alces }
