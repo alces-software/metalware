@@ -166,7 +166,7 @@ class FileSystem
 
     matches.each do |path|
       identifier = File.file?(path) ? 'f' : 'd'
-      puts "#{identifier}: #{path}"
+      STDERR.puts "#{identifier}: #{path}"
     end
   end
 

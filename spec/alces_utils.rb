@@ -86,6 +86,10 @@ module AlcesUtils
       allow(metal_config).to receive(:validation).and_return(false)
     end
 
+    def build_poll_sleep(time)
+      allow(metal_config).to receive(:build_poll_sleep).and_return(time)
+    end
+
     def mock_strict(bool)
       metal_config.cli[:strict] = bool
     end

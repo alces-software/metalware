@@ -26,26 +26,31 @@ require 'config'
 require 'constants'
 require 'spec_utils'
 require 'commands/build'
+require 'filesystem'
 
 require 'minimal_repo'
 
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
-RSpec.describe '`metal build`', real_fs: true do
-  METAL = Metalware::Constants::METAL_EXECUTABLE_PATH
+RSpec.describe '`metal build`' do
   TEST_DIR = 'tmp/integration-test'
-  CONFIG_FILE = SpecUtils.fixtures_config('integration-test.yaml')
-  TEST_CONFIG = Metalware::Config.new(CONFIG_FILE)
 
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_minimal_repo
+      fs.with_answer_fixtures('answers/integration-test')
+    end
+  end
+
+  AlcesUtils.start(self)
+
+  TEST_CONFIG = Metalware::Config.new
   TEST_KICKSTART_DIR = File.join(TEST_CONFIG.rendered_files_path, 'kickstart')
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
   TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
 
-  TEST_REPO = File.join(TEST_DIR, 'repo')
-  PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
-
-  AlcesUtils.start(self, config: CONFIG_FILE)
+  PXELINUX_TEMPLATE = '/var/lib/metalware/repo/pxelinux/default'
 
   def kill_any_metal_processes
     Thread.list.each do |t|
@@ -61,22 +66,25 @@ RSpec.describe '`metal build`', real_fs: true do
   end
 
   def expect_clears_up_built_node_marker_files
-    expect(Dir.empty?(TEST_BUILT_NODES_DIR)).to be true
+    files = Dir.glob(File.join(TEST_BUILT_NODES_DIR, '**/*'))
+    expect(files.empty?).to be true
   end
 
   def build_node(name, group: false)
     options = OpenStruct.new(group ? { group: true } : {})
-    thr = Thread.new do
-      begin
-        Timeout.timeout 20 do
-          Metalware::Commands::Build.new([name], options)
+    filesystem.test do
+      thr = Thread.new do
+        begin
+          Timeout.timeout 20 do
+            Metalware::Commands::Build.new([name], options)
+          end
+        rescue => e
+          STDERR.puts e.inspect
+          STDERR.puts e.backtrace
         end
-      rescue => e
-        STDERR.puts e.inspect
-        STDERR.puts e.backtrace
       end
+      yield thr
     end
-    yield thr
   end
 
   before :each do
@@ -88,21 +96,25 @@ RSpec.describe '`metal build`', real_fs: true do
       allow(node).to receive(:hexadecimal_ip).and_return(hex)
     end
 
-    FileUtils.remove_dir(TEST_DIR, force: true)
+    FileUtils.remove(TEST_DIR, force: true)
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
+  end
 
-    MinimalRepo.create_at(TEST_REPO)
+  AlcesUtils.mock self, :each do
+    mock_group('nodes')
+    build_poll_sleep(0.1)
   end
 
   after do
     kill_any_metal_processes
   end
 
+  let :file_path { Metalware::FilePath.new(metal_config) }
+
   def touch_complete_file(node)
-    file = "tmp/integration-test/built-nodes/metalwarebooter.#{node}"
-    FileUtils.touch(file)
+    FileUtils.touch(file_path.build_complete(node))
   end
 
   context 'for single node' do
