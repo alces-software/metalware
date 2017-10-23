@@ -387,29 +387,24 @@ commands:
       group: *view-answers_group
       node: *view-answers_node
 
-  view-config:
-    syntax: metal view-config [NODE] [options]
+  view:
+    syntax: metal view [ALCES_COMMAND] [options]
     summary: View domain templating config, optionally in context for given node
     description: >
-      View the exact standard templating config for the domain which will be
-      used when rendering templates. This can optionally be the config in the
-      context of a particular given node, in which case this will be the config
-      used when rendering a template for that node.
+      View the templating object that will be used for rendering templates. It
+      may optionally begin with 'alces' but this is optional.
 
-      Note that templating parameters which are only sometimes available when
-      rendering templates are not included, such as the 'alces.files'
-      parameter, which is only available when rendering 'build' templates. Also
-      note that the 'alces.groups' namespace and the nodes within the same primary
-      genders group are not included by default; this can be done using the
-      '--include-groups' option.
-    action: Commands::ViewConfig
+
+      The nodes, groups, domain and local namespaces can be viewed. The nodes
+      and groups have to be followed by the name of the object. The command
+      can be delimited by spaces or periods.
+
+
+      The displayed JSON can be navigated in the same way as templating. This
+      means 'alces.domain' will show all domain level parameters, where
+      'alces.domain.config' will only show the config.
+    action: Commands::View
     options:
-      - tags: [-i, --include-groups]
-        description: >
-          Include the 'alces.groups' namespace and nodes within the same primary
-          gender group in the JSON output; this is not done by default as it can
-          be very slow to gather the configuration for all nodes, and displaying
-          this can also be very verbose.
       - tags: [--color-output]
         description: >
           Force the output to be coloured even if not outputting to a terminal;
