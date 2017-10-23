@@ -87,6 +87,22 @@ module Metalware
 
       private
 
+      def white_list_for_hasher
+        super.concat([
+                       :group,
+                       :genders,
+                       :index,
+                       :kickstart_url,
+                       :build_complete_url,
+                       :hexadecimal_ip,
+                       :build_method,
+                     ])
+      end
+
+      def recursive_white_list_for_hasher
+        super.push(:files)
+      end
+
       def hash_merger_input
         { groups: genders, node: name }
       end

@@ -24,6 +24,10 @@ module Metalware
 
       private
 
+      def white_list_for_hasher
+        super.concat([:index, :nodes])
+      end
+
       def hash_merger_input
         { groups: [name] }
       end

@@ -12,7 +12,15 @@ module Metalware
       include CommandHelpers::AlcesCommand
 
       def run
-        pretty_print_json(alces_command.to_h.to_json)
+        pretty_print_json(cli_input_object.to_json)
+      end
+
+      def cli_input_object
+        if alces_command.is_a?(Namespaces::MetalArray)
+          alces_command
+        else
+          alces_command.to_h
+        end
       end
 
       def pretty_print_json(json)
