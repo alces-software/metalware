@@ -22,18 +22,13 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'erb'
 require 'active_support/core_ext/string/strip'
+require 'active_support/core_ext/string/filters'
 
 require 'constants'
 require 'metal_log'
 require 'exceptions'
 require 'utils'
-require 'templating/iterable_recursive_open_struct'
-require 'templating/missing_parameter_wrapper'
-require 'templating/magic_namespace'
-require 'templating/renderer'
-require 'templating/repo_config_parser'
 
 module Metalware
   class Templater
@@ -57,31 +52,40 @@ module Metalware
     )
 
     class << self
-      # XXX rename args in these methods - use `**parameters` for passing
-      # template parameters?
-      def render(config, template, **template_parameters)
-        Templater.new(config, template_parameters).render(template)
+      def render(alces, template, **dynamic_namespace)
+        raw_template = File.read(template)
+        begin
+          alces.render_erb_template(raw_template, dynamic_namespace)
+        rescue => e
+          msg = "Failed to render template: #{template}"
+          raise e, "#{msg}\n#{e}", e.backtrace
+        end
       end
 
-      def render_to_stdout(config, template, **template_parameters)
-        puts render(config, template, template_parameters)
+      def render_to_stdout(alces, template, **dynamic_namespace)
+        puts render(alces, template, **dynamic_namespace)
       end
 
       def render_to_file(
-        config,
+        alces,
         template,
         save_file,
         prepend_managed_file_message: false,
-        **template_parameters,
+        **dynamic_namespace,
         &validation_block
       )
-        rendered_template = render(config, template, template_parameters)
+        rendered_template = render(alces, template, **dynamic_namespace)
         if prepend_managed_file_message
           rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
         end
 
-        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
-          write_rendered_template(rendered_template, save_file: save_file) if valid
+        rendered_template_valid?(
+          rendered_template,
+          &validation_block
+        ).tap do |valid|
+          if valid
+            write_rendered_template(rendered_template, save_file: save_file)
+          end
         end
       end
 
@@ -93,9 +97,12 @@ module Metalware
       # appended to the bottom of the current file;
       # - if it exists with a managed section, this section will be replaced
       # with the new managed section.
-      def render_managed_file(config, template, managed_file, &validation_block)
-        rendered_template = render(config, template)
-        rendered_template_valid?(rendered_template, &validation_block).tap do |valid|
+      def render_managed_file(alces, template, managed_file, &validation_block)
+        rendered_template = render(alces, template)
+        rendered_template_valid?(
+          rendered_template,
+          &validation_block
+        ).tap do |valid|
           update_managed_file(managed_file, rendered_template) if valid
         end
       end
@@ -112,16 +119,14 @@ module Metalware
         pre, post = split_on_managed_section(
           current_file_contents(managed_file)
         )
-        new_managed_file = [pre, managed_section(rendered_template.strip), post].join
+        new_managed_file = [pre,
+                            managed_section(rendered_template.strip),
+                            post].join
         write_rendered_template(new_managed_file, save_file: managed_file)
       end
 
       def current_file_contents(file)
-        if File.exist?(file)
-          File.read(file).strip
-        else
-          ''
-        end
+        File.exist?(file) ? File.read(file).strip : ''
       end
 
       def split_on_managed_section(file_contents)
@@ -150,31 +155,5 @@ module Metalware
         MetalLog.info "Template Saved: #{save_file}"
       end
     end
-
-    attr_reader :config
-
-    # XXX Have this just take allowed keyword parameters:
-    # - nodename
-    # - index
-    # - what else?
-    def initialize(metalware_config, parameters = {})
-      @config = Templating::RepoConfigParser.parse_for_node(
-        node_name: parameters[:nodename],
-        config: metalware_config,
-        additional_parameters: parameters
-      )
-    end
-
-    def render(template)
-      File.open(template.chomp, 'r') do |f|
-        replace_erb(f.read, @config)
-      end
-    end
-
-    def render_from_string(str)
-      replace_erb(str, @config)
-    end
-
-    delegate :replace_erb, to: Templating::Renderer
   end
 end

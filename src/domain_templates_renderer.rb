@@ -26,15 +26,27 @@
 require 'exceptions'
 require 'constants'
 require 'network'
-require 'templating/repo_config_parser'
 require 'metal_log'
 require 'active_support/core_ext/string/strip'
 require 'dns/named'
+require 'namespaces/alces'
 
+#
+# XXX: This is getting very long. It should be broken up into different
+#      classes next time something needs to be added. Some of the render
+#      mangaged files/ section can be moved into the `Templater` class.
+#      The `Templater` class is a good location to keep all the file
+#      handling methods so they can be reused.
+#
+#      Also the different render methods can be broken out in a smilar
+#      way the `BuildMethods` are. This way the render method specific
+#      code (e.g. the validation blocks) can exist in a seperate class.
+#
 module Metalware
   class DomainTemplatesRenderer
-    def initialize(config, genders_invalid_message: nil)
+    def initialize(config, alces = nil, genders_invalid_message: nil)
       @config = config
+      @alces = alces
       @genders_invalid_message = genders_invalid_message
     end
 
@@ -51,6 +63,13 @@ module Metalware
     private
 
     attr_reader :config, :genders_invalid_message
+
+    def alces
+      unless @alces
+        MetalLog.warn 'Uninitialized, alces Namespace in DomainTemplateRenderer'
+      end
+      @alces ||= Metalware::Namespaces::Alces.new(config)
+    end
 
     def render_methods
       # These are order dependent, as data used in later methods may depend on
@@ -135,7 +154,7 @@ module Metalware
     EOF
 
     def render_dns
-      case repo_config.dns_type
+      case alces.domain.config.dns_type
       when nil
         MetalLog.warn(MISSING_DNS_TYPE)
         render_hosts
@@ -144,7 +163,8 @@ module Metalware
       when 'named'
         update_named
       else
-        raise InvalidConfigParameter, "Invalid DNS type: #{repo_config.dns_type}"
+        msg = "Invalid DNS type: #{alces.domain.config.dns_type}"
+        raise InvalidConfigParameter, msg
       end
     end
 
@@ -153,12 +173,12 @@ module Metalware
     end
 
     def render_managed_section_template(template, to:, &block)
-      Templater.render_managed_file(config, template, to, &block)
+      Templater.render_managed_file(alces, template, to, &block)
     end
 
     def render_fully_managed_template(template, to:, &block)
       Templater.render_to_file(
-        config,
+        alces,
         template,
         to,
         prepend_managed_file_message: true,
@@ -167,7 +187,7 @@ module Metalware
     end
 
     def update_named
-      DNS::Named.new(config).update
+      DNS::Named.new(alces).update
     end
 
     def server_config_template
@@ -185,11 +205,6 @@ module Metalware
     def template_path(template_type)
       # We currently always/only render the 'default' templates.
       File.join(config.repo_path, template_type, 'default')
-    end
-
-    def repo_config
-      Templating::RepoConfigParser
-        .parse_for_domain(config: config, include_groups: false).inspect
     end
   end
 end

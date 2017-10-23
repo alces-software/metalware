@@ -67,7 +67,11 @@ module Metalware
       end
 
       def server_config
-        Data.load(Constants::SERVER_CONFIG_PATH)
+        #
+        # This command runs before logging has been initialized
+        # Therefore the file load has to skip logging
+        #
+        Data.load(Constants::SERVER_CONFIG_PATH, skip_log: true)
       end
 
       def ip_on_interface(interface)

@@ -16,13 +16,13 @@ module Metalware
           super
         end
 
-        def render_build_started_templates(parameters)
-          render_kickstart(parameters)
-          render_pxelinux(parameters)
+        def render_build_start_templates
+          render_kickstart(DEFAULT_BUILD_START_PARAMETERS)
+          render_pxelinux(DEFAULT_BUILD_START_PARAMETERS)
         end
 
-        def render_build_complete_templates(parameters)
-          render_pxelinux(parameters)
+        def render_build_complete_templates
+          render_pxelinux(DEFAULT_BUILD_COMPLETE_PARAMETERS)
         end
 
         private

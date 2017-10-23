@@ -25,36 +25,18 @@
 require 'timeout'
 
 require 'commands/build'
-require 'node'
 require 'spec_utils'
 require 'config'
+require 'recursive_open_struct'
+require 'network'
 
-RSpec.shared_examples 'files rendering' do
-  it 'renders only files which could be retrieved' do
-    filesystem.test do
-      # Create needed repo files.
-      FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')
-      FileUtils.touch('/var/lib/metalware/repo/files/testnodes/some_file_in_repo')
-
-      # Need to define valid build interface so `DeploymentServer` does not
-      # fail to get the IP on this interface.
-      Metalware::Data.dump(
-        Metalware::Constants::SERVER_CONFIG_PATH,
-        build_interface: 'eth0'
-      )
-
-      expect_renders(
-        "#{metal_config.repo_path}/files/testnodes/some_file_in_repo",
-        to: '/var/lib/metalware/rendered/testnode01/namespace01/some_file_in_repo'
-      )
-
-      # Should not try to render any other build files for this node.
-      node_rendered_path = '/var/lib/metalware/rendered/testnode01'
-      expect(Metalware::Templater).not_to receive(:render_to_file).with(
-        anything, /^#{node_rendered_path}/, anything
-      )
-
-      run_build('testnode01')
+# Allows the templates method to be spoofed
+module Metalware
+  module HashMergers
+    class MetalRecursiveOpenStruct
+      def templates
+        self[:templates]
+      end
     end
   end
 end
@@ -82,17 +64,17 @@ RSpec.describe Metalware::Commands::Build do
   # not depend on environment.
   def use_mock_nodes(not_built_nodes: [])
     allow(
-      Metalware::Node
-    ).to receive(:new).and_wrap_original do |original_new, config, name|
-      original_new.call(config, name).tap do |node|
+      Metalware::Namespaces::Node
+    ).to receive(:new).and_wrap_original do |original_new, *args|
+      original_new.call(*args).tap do |node|
         # Stub this as depends on `gethostip` and `/etc/hosts`
         allow(node).to receive(:hexadecimal_ip).and_return(node.name + '_HEX_IP')
-
-        # Stub this to return that node is built, unless explicitly pass in
-        # node as not built.
-        node_built = !not_built_nodes.include?(node.name)
-        allow(node).to receive(:built?).and_return(node_built)
       end
+    end
+
+    allow_any_instance_of(Metalware::Commands::Build).to \
+      receive(:built?).and_wrap_original do |_original, node|
+      !not_built_nodes.include?(node.name)
     end
   end
 
@@ -102,23 +84,13 @@ RSpec.describe Metalware::Commands::Build do
     end.to raise_error Timeout::Error
   end
 
-  def expect_renders(template_path, to:, parameters: expected_template_parameters)
+  def expect_renders(template_path, to:)
     expect(Metalware::Templater).to receive(:render_to_file).with(
-      instance_of(Metalware::Config),
+      instance_of(Metalware::Namespaces::Node),
       template_path,
       to,
-      parameters
+      instance_of(Hash)
     )
-  end
-
-  def expected_template_parameters
-    config = Metalware::Config.new
-    files = SpecUtils.create_mock_build_files_hash(self, config: config, node_name: 'testnode01')
-    {
-      nodename: 'testnode01',
-      firstboot: true,
-      files: files,
-    }
   end
 
   let :testnodes_config_path do
@@ -131,17 +103,18 @@ RSpec.describe Metalware::Commands::Build do
     end
   end
 
+  let :alces { Metalware::Namespaces::Alces.new(metal_config) }
+
   before :each do
     allow(Metalware::Templater).to receive(:render_to_file)
     use_mock_nodes
     SpecUtils.use_mock_genders(self, genders_file: 'genders/simple_cluster')
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependency(self)
+    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)
   end
 
   context 'when called without group argument' do
-    include_examples 'files rendering'
-
     it 'renders default standard templates for given node' do
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
@@ -156,22 +129,18 @@ RSpec.describe Metalware::Commands::Build do
     end
 
     context 'when templates specified in repo config' do
-      before :each do
-        testnodes_config = {
-          templates: {
-            pxelinux: 'repo_pxelinux',
-            kickstart: 'repo_kickstart',
-          },
-        }
-        filesystem.dump(testnodes_config_path, testnodes_config)
+      let :testnode01_config do
+        OpenStruct.new(
+          pxelinux: 'repo_pxelinux',
+          kickstart: 'repo_kickstart'
+        )
+      end
 
-        testnode02_config_path = metal_config.repo_config_path('testnode02')
-        testnode02_config = {
-          templates: {
-            pxelinux: 'testnode02_repo_pxelinux',
-          },
-        }
-        filesystem.dump(testnode02_config_path, testnode02_config)
+      before :each do
+        allow(alces.nodes.testnode01.config).to \
+          receive(:templates).and_return(testnode01_config)
+        allow(alces.nodes.testnode02.config).to \
+          receive(:templates).and_return(OpenStruct.new)
       end
 
       it 'uses specified templates' do
@@ -190,6 +159,11 @@ RSpec.describe Metalware::Commands::Build do
       end
 
       it 'specifies correct template dependencies' do
+        groups = Metalware::Namespaces::MetalArray.new(
+          [Metalware::Namespaces::Group.new(alces, 'cluster', index: 1)]
+        )
+        allow(alces).to receive(:groups).and_return(groups)
+
         filesystem.test do
           build_command = run_build('cluster', group: true)
 
@@ -197,16 +171,13 @@ RSpec.describe Metalware::Commands::Build do
           dependency_hash = build_command.send(:dependency_hash)
 
           expect(dependency_hash[:repo].sort).to eq([
-            # `default` templates used for node `login1`.
+            # `default` templates used for node `testnode02`.
             'pxelinux/default',
             'kickstart/default',
 
-            # Repo templates specified for all nodes in `testnodes` group.
+            # Repo templates for 'testnode01'
             'pxelinux/repo_pxelinux',
             'kickstart/repo_kickstart',
-
-            # PXELINUX template overridden for `testnode02`
-            'pxelinux/testnode02_repo_pxelinux',
           ].sort)
         end
       end
@@ -231,8 +202,7 @@ RSpec.describe Metalware::Commands::Build do
       ).once.ordered
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        parameters: expected_template_parameters.merge(firstboot: false)
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).once.ordered
 
       run_build('testnode01')
@@ -240,23 +210,9 @@ RSpec.describe Metalware::Commands::Build do
 
     context "when 'basic' build method used" do
       before :each do
-        # This convoluted dance is because we want to update the fixtures
-        # `testnodes` config, not replace it entirely, but we can't do this
-        # directly as we are in a FakeFS but not the one we'll be in when we
-        # get to the tests themselves. This could be improved if we improve our
-        # FakeFS handling.
-        fixtures_testnodes_config_path = \
-          File.join(FIXTURES_PATH, 'repo/config/testnodes.yaml')
-        FakeFS.deactivate!
-        fixtures_testnodes_config = \
-          Metalware::Data.load(fixtures_testnodes_config_path)
-        FakeFS.activate!
-
-        testnodes_config = fixtures_testnodes_config.merge(build_method: 'basic')
-        filesystem.dump(testnodes_config_path, testnodes_config)
+        allow_any_instance_of(Metalware::Namespaces::Node).to \
+          receive(:build_method).and_return(Metalware::BuildMethods::Basic)
       end
-
-      include_examples 'files rendering'
 
       it 'renders only basic template' do
         filesystem.test do
@@ -288,29 +244,31 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called for group' do
+    # Creates the test Group Namespace
+    before :each do
+      groups = Metalware::Namespaces::MetalArray.new(
+        [Metalware::Namespaces::Group.new(alces, 'testnodes', index: 1)]
+      )
+      allow(alces).to receive(:groups).and_return(groups)
+    end
+
     it 'renders standard templates for each node' do
-      testnode01_params = hash_including(nodename: 'testnode01')
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode01',
-        parameters: testnode01_params
+        to: '/var/lib/metalware/rendered/kickstart/testnode01'
       )
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        to:        '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP',
-        parameters: testnode01_params
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       )
 
-      testnode02_params = hash_including(nodename: 'testnode02')
       expect_renders(
         "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode02',
-        parameters: testnode02_params
+        to: '/var/lib/metalware/rendered/kickstart/testnode02'
       )
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
-        to:        '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP',
-        parameters: testnode02_params
+        to: '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP'
       )
 
       run_build('testnodes', group: true)

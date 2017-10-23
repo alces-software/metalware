@@ -29,12 +29,15 @@ require 'constants'
 require 'exceptions'
 require 'ostruct'
 require 'metal_log'
+require 'data'
 
 module Metalware
   class Config
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
+      validation: true,
+      alces_default_to_domain_scope: true,
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
       built_nodes_storage_path: '/var/lib/metalware/cache/built-nodes',
@@ -53,14 +56,14 @@ module Metalware
         raise MetalwareError, "Config file '#{file}' does not exist"
       end
 
-      @config = Data.load(file)
+      @config = Metalware::Data.load(file, skip_log: true)
       @cli = OpenStruct.new(options)
       MetalLog.reset_log(self)
     end
 
     KEYS_WITH_DEFAULTS.each do |key, default|
       define_method :"#{key}" do
-        @config[key] || default
+        @config[key].nil? ? default : @config[key]
       end
     end
 

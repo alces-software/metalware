@@ -25,35 +25,38 @@
 require 'config'
 require 'constants'
 require 'spec_utils'
+require 'commands/build'
+require 'filesystem'
 
 require 'minimal_repo'
 
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
-RSpec.describe '`metal build`', real_fs: true do
-  METAL = Metalware::Constants::METAL_EXECUTABLE_PATH
+RSpec.describe '`metal build`' do
   TEST_DIR = 'tmp/integration-test'
-  CONFIG_FILE = SpecUtils.fixtures_config('integration-test.yaml')
-  TEST_CONFIG = Metalware::Config.new(CONFIG_FILE)
 
+  let :filesystem do
+    FileSystem.setup do |fs|
+      fs.with_minimal_repo
+      fs.with_answer_fixtures('answers/integration-test')
+    end
+  end
+
+  AlcesUtils.start(self)
+
+  TEST_CONFIG = Metalware::Config.new
   TEST_KICKSTART_DIR = File.join(TEST_CONFIG.rendered_files_path, 'kickstart')
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
   TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
 
-  TEST_REPO = File.join(TEST_DIR, 'repo')
-  PXELINUX_TEMPLATE = File.join(TEST_REPO, 'pxelinux/default')
+  PXELINUX_TEMPLATE = '/var/lib/metalware/repo/pxelinux/default'
 
   def kill_any_metal_processes
-    `pkill bin/metal -f`
-  end
-
-  # Refer to http://stackoverflow.com/a/3568291/2620402.
-  def process_exists?(pid)
-    Process.getpgid(pid)
-    true
-  rescue Errno::ESRCH
-    false
+    Thread.list.each do |t|
+      t.exit unless t == Thread.current
+    end
+    `pkill nodeattr -9`
   end
 
   def wait_longer_than_build_poll
@@ -62,64 +65,70 @@ RSpec.describe '`metal build`', real_fs: true do
     sleep 2
   end
 
-  def run_command(command)
-    Timeout.timeout 20 do
-      Open3.popen3 command do |stdin, stdout, stderr, thread|
+  def expect_clears_up_built_node_marker_files
+    files = Dir.glob(File.join(TEST_BUILT_NODES_DIR, '**/*'))
+    expect(files.empty?).to be true
+  end
+
+  def build_node(name, group: false)
+    options = OpenStruct.new(group ? { group: true } : {})
+    filesystem.test do
+      thr = Thread.new do
         begin
-          pid = thread.pid
-          yield(stdin, stdout, stderr, pid)
-        rescue IntentionallyCatchAnyException => e
-          begin
-            stdout_data = read_io_stream(stdout)
-            stderr_data = read_io_stream(stderr)
-            puts "stdout:\n#{stdout_data}\n\nstderr:\n#{stderr_data}"
-          rescue
-            raise e
+          Timeout.timeout 20 do
+            Metalware::Commands::Build.new([name], options)
           end
-          raise
+        rescue => e
+          STDERR.puts e.inspect
+          STDERR.puts e.backtrace
         end
       end
+      yield thr
     end
-  end
-
-  def read_io_stream(stream)
-    max_bytes_to_read = 30_000
-    stream.read_nonblock(max_bytes_to_read)
-  rescue EOFError
-    ''
-  end
-
-  def expect_clears_up_built_node_marker_files
-    expect(Dir.empty?(TEST_BUILT_NODES_DIR)).to be true
   end
 
   before :each do
     kill_any_metal_processes
 
-    ENV['PATH'] = "spec/fixtures/libexec/:#{ENV['PATH']}"
+    SpecUtils.use_mock_genders(self)
+    alces.nodes.each do |node|
+      hex = node.name + '_HEX_IP'
+      allow(node).to receive(:hexadecimal_ip).and_return(hex)
+    end
 
-    FileUtils.remove_dir(TEST_DIR, force: true)
+    FileUtils.remove(TEST_DIR, force: true)
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
     FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
+  end
 
-    MinimalRepo.create_at(TEST_REPO)
+  AlcesUtils.mock self, :each do
+    mock_group('nodes')
+    build_poll_sleep(0.1)
   end
 
   after do
     kill_any_metal_processes
   end
 
-  context 'for single node' do
-    it 'works' do
-      command = "#{METAL} build testnode01 --config #{CONFIG_FILE} --trace"
-      run_command(command) do |_stdin, _stdout, _stderr, pid|
-        wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+  let :file_path { Metalware::FilePath.new(metal_config) }
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+  def touch_complete_file(node)
+    FileUtils.touch(file_path.build_complete(node))
+  end
+
+  context 'for single node' do
+    let :node { 'testnode01' }
+
+    it 'works' do
+      build_node(node) do |thread|
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be false
+        expect(thread).to be_alive
+
+        touch_complete_file(node)
+
+        wait_longer_than_build_poll
+        expect(thread.status).to eq(false)
 
         expect_clears_up_built_node_marker_files
       end
@@ -127,20 +136,22 @@ RSpec.describe '`metal build`', real_fs: true do
   end
 
   context 'for gender group' do
+    let :nodes { ['testnode01', 'testnode02', 'testnode03'] }
+
     it 'works' do
-      command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-      run_command(command) do |_stdin, _stdout, _stderr, pid|
+      build_node('nodes', group: true) do |thread|
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+        expect(thread).to be_alive
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
+        touch_complete_file(nodes[0])
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+        expect(thread).to be_alive
 
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode02')
-        FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode03')
+        touch_complete_file(nodes[1])
+        touch_complete_file(nodes[2])
+
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be false
+        expect(thread.status).to eq(false)
 
         expect_clears_up_built_node_marker_files
       end
@@ -150,16 +161,16 @@ RSpec.describe '`metal build`', real_fs: true do
       # Initial interrupt does not exit CLI; gives prompt for whether to
       # re-render all Pxelinux configs as if nodes all built.
 
-      def expect_interrupt_does_not_kill(pid)
-        Process.kill('INT', pid)
+      def expect_interrupt_does_not_kill(thread)
+        thread.raise(Interrupt)
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be true
+        expect(thread).to be_alive
       end
 
-      def expect_interrupt_kills(pid)
-        Process.kill('INT', pid)
+      def expect_interrupt_kills(thread)
+        thread.raise(Interrupt)
         wait_longer_than_build_poll
-        expect(process_exists?(pid)).to be false
+        expect(thread.status).to be(false)
       end
 
       def expect_permanent_pxelinux_rendered_for_testnode01
@@ -167,7 +178,12 @@ RSpec.describe '`metal build`', real_fs: true do
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode01', firstboot: false)
+          Metalware::Templater.render(
+            alces,
+            PXELINUX_TEMPLATE,
+            nodename: 'testnode01',
+            firstboot: false
+          )
         )
       end
 
@@ -176,7 +192,12 @@ RSpec.describe '`metal build`', real_fs: true do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode02', firstboot: false)
+          Metalware::Templater.render(
+            alces,
+            PXELINUX_TEMPLATE,
+            nodename: 'testnode02',
+            firstboot: false
+          )
         )
       end
 
@@ -185,19 +206,24 @@ RSpec.describe '`metal build`', real_fs: true do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(TEST_CONFIG, PXELINUX_TEMPLATE, nodename: 'testnode02', firstboot: true)
+          Metalware::Templater.render(
+            alces,
+            PXELINUX_TEMPLATE,
+            nodename: 'testnode02',
+            firstboot: true
+          )
         )
       end
 
       it 'exits on second interrupt' do
-        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |_stdin, _stdout, _stderr, pid|
-          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be true
+        build_node('nodes', group: true) do |thread|
+          touch_complete_file('testnode01')
 
-          expect_interrupt_does_not_kill(pid)
-          expect_interrupt_kills(pid)
+          wait_longer_than_build_poll
+          expect(thread).to be_alive
+
+          expect_interrupt_does_not_kill(thread)
+          expect_interrupt_kills(thread)
           expect_clears_up_built_node_marker_files
 
           expect_permanent_pxelinux_rendered_for_testnode01
@@ -205,41 +231,57 @@ RSpec.describe '`metal build`', real_fs: true do
         end
       end
 
-      it 'handles "yes" to interrupt prompt' do
-        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |stdin, _stdout, _stderr, pid|
-          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be true
+      context 'with mocked highline' do
+        let :stdin { StringIO.new }
+        let :highline { HighLine.new(stdin) }
 
-          expect_interrupt_does_not_kill(pid)
-
-          stdin.puts('yes')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be false
-          expect_clears_up_built_node_marker_files
-
-          expect_permanent_pxelinux_rendered_for_testnode01
-          expect_permanent_pxelinux_rendered_for_testnode02
+        before :each do
+          allow(HighLine).to receive(:new).and_return(highline)
         end
-      end
 
-      it 'handles "no" to interrupt prompt' do
-        command = "#{METAL} build nodes --group --config #{CONFIG_FILE} --trace"
-        run_command(command) do |stdin, _stdout, _stderr, pid|
-          FileUtils.touch('tmp/integration-test/built-nodes/metalwarebooter.testnode01')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be true
+        it 'handles "yes" to interrupt prompt' do
+          build_node('nodes', group: true) do |thread|
+            stdin.puts('yes')
+            stdin.rewind
 
-          expect_interrupt_does_not_kill(pid)
+            touch_complete_file('testnode01')
 
-          stdin.puts('no')
-          wait_longer_than_build_poll
-          expect(process_exists?(pid)).to be false
-          expect_clears_up_built_node_marker_files
+            wait_longer_than_build_poll
+            expect(thread).to be_alive
 
-          expect_permanent_pxelinux_rendered_for_testnode01
-          expect_firstboot_pxelinux_rendered_for_testnode02
+            # Do not check if alive after the Interrupt
+            # As it is directly raised, it exits faster than if it was a SIG
+            thread.raise(Interrupt)
+
+            wait_longer_than_build_poll
+            expect(thread.status).to eq(false)
+            expect_clears_up_built_node_marker_files
+
+            expect_permanent_pxelinux_rendered_for_testnode01
+            expect_permanent_pxelinux_rendered_for_testnode02
+          end
+        end
+
+        it 'handles "no" to interrupt prompt' do
+          build_node('nodes', group: true) do |thread|
+            stdin.puts('no')
+            stdin.rewind
+
+            touch_complete_file('testnode01')
+
+            wait_longer_than_build_poll
+            expect(thread).to be_alive
+
+            # Do not check if alive after Interrupt, there is a race condition
+            thread.raise(Interrupt)
+
+            wait_longer_than_build_poll
+            expect(thread.status).to eq(false)
+            expect_clears_up_built_node_marker_files
+
+            expect_permanent_pxelinux_rendered_for_testnode01
+            expect_firstboot_pxelinux_rendered_for_testnode02
+          end
         end
       end
     end

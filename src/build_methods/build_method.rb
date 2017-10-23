@@ -9,18 +9,11 @@ module Metalware
         @node = node
       end
 
-      def render_build_started_templates(_parameters)
-        # Note: Currently both `BuildMethod` implementations
-        # `render_#{template_type}` for each `$template_type` in `TEMPLATES`;
-        # if this trend continues we could do this dynamically here and remove
-        # this method from the implementations (at the possible expense of
-        # understandability).
+      def render_build_start_templates
         raise NotImplementedError
       end
 
-      def render_build_complete_templates(_parameters)
-        raise NotImplementedError
-      end
+      def render_build_complete_templates; end
 
       def template_paths
         self.class::TEMPLATES.map do |template_type|
@@ -30,12 +23,20 @@ module Metalware
       end
 
       def start_build
-        # Runs after the files have been rendered but before build waits for the
-        # nodes to complete. Leave blank if the nodes build need to be started
-        # manually by powering them on.
+        # Runs after the files have been rendered but before build waits
+        # for the nodes to complete. Leave blank if the nodes build need to
+        # be started manually by powering them on.
       end
 
       private
+
+      DEFAULT_BUILD_START_PARAMETERS = {
+        firstboot: true,
+      }.freeze
+
+      DEFAULT_BUILD_COMPLETE_PARAMETERS = {
+        firstboot: false,
+      }.freeze
 
       attr_reader :config, :node
 
@@ -48,7 +49,10 @@ module Metalware
       def render_template(template_type, parameters:, save_path: nil)
         template_type_path = template_path template_type, node: node
         save_path ||= file_path.template_save_path(template_type, node: node)
-        Templater.render_to_file(config, template_type_path, save_path, parameters)
+        Templater.render_to_file(node,
+                                 template_type_path,
+                                 save_path,
+                                 **parameters.to_h)
       end
     end
   end

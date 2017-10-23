@@ -6,29 +6,29 @@ module Metalware
   # to enforce command dependencies.
   # XXX Consider moving generating of more `dependency_hash`s here.
   class DependencySpecifications
-    def initialize(config)
-      @config = config
+    def initialize(alces)
+      @alces = alces
     end
 
-    def for_node_in_configured_group(node_name)
-      primary_group = configured_primary_group_for_node(node_name)
+    def for_node_in_configured_group(name)
+      group = find_node(name).group
       {
         repo: ['configure.yaml'],
-        configure: ['domain.yaml', "groups/#{primary_group}.yaml"],
+        configure: ['domain.yaml', "groups/#{group.name}.yaml"],
         optional: {
-          configure: ["nodes/#{node_name}.yaml"],
+          configure: ["nodes/#{name}.yaml"],
         },
       }
     end
 
     private
 
-    attr_reader :config
+    attr_reader :alces
 
-    def configured_primary_group_for_node(node_name)
-      Node.new(
-        config, node_name, should_be_configured: true
-      ).primary_group
+    def find_node(name)
+      node = alces.nodes.find_by_name(name)
+      raise NodeNotInGendersError, "Could not find node: #{name}" unless node
+      node
     end
   end
 end

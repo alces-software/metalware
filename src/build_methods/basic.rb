@@ -6,11 +6,9 @@ module Metalware
     class Basic < BuildMethod
       TEMPLATES = [:basic].freeze
 
-      def render_build_started_templates(parameters)
-        render_basic(parameters)
+      def render_build_start_templates
+        render_basic(DEFAULT_BUILD_START_PARAMETERS)
       end
-
-      def render_build_complete_templates(_parameters); end
 
       private
 

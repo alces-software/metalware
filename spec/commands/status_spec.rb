@@ -27,18 +27,22 @@ require 'status/monitor'
 require 'status/job'
 require 'spec_utils'
 require 'config'
-require 'nodes'
 require 'timeout'
+require 'config'
+require 'namespaces/alces'
 
 RSpec.describe Metalware::Commands::Status do
 end
 
 RSpec.describe Metalware::Status::Monitor, real_fs: true do
+  let :config { Metalware::Config.new }
+  let :alces { Metalware::Namespaces::Alces.new(config) }
+
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)
     @config = Metalware::Config.new
-    @nodes = Metalware::Nodes.create(@config, 'status', true).map(&:name)
+    @nodes = alces.nodes.map(&:name)
     @cmds = [:ping, :power]
     @m_input = { nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
     @monitor = Metalware::Status::Monitor.new(@m_input)

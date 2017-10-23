@@ -46,16 +46,16 @@ module Metalware
         answer(path.node_answers(file), :node)
       end
 
-      def self_answers
-        answer(path.self_answers, :self)
+      def local_answers
+        answer(path.local_answers, :local)
       end
 
       def section_answers(section, name = nil)
         case section
         when :domain
           domain_answers
-        when :self
-          self_answers
+        when :local
+          local_answers
         when :group
           raise InternalError, 'No group name given' if name.nil?
           group_answers(name)

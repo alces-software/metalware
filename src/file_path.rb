@@ -24,7 +24,6 @@
 
 require 'constants'
 require 'config'
-require 'templating/repo_config_parser'
 
 module Metalware
   class FilePath
@@ -49,8 +48,24 @@ module Metalware
       config.node_answers_file(node)
     end
 
-    def self_answers
-      File.join(answer_files, 'self.yaml')
+    def local_answers
+      File.join(answer_files, 'local.yaml')
+    end
+
+    def domain_config
+      File.join(repo, 'config/domain.yaml')
+    end
+
+    def group_config(group)
+      File.join(repo, 'config', "#{group}.yaml")
+    end
+
+    def node_config(node)
+      File.join(repo, 'config', "#{node}.yaml")
+    end
+
+    def local_config
+      File.join(repo, 'config/local.yaml')
     end
 
     def repo
@@ -63,7 +78,6 @@ module Metalware
     end
 
     def template_path(template_type, node: nil)
-      node = Node.new(config, nil) if node.nil?
       File.join(
         config.repo_path,
         template_type.to_s,
@@ -84,6 +98,19 @@ module Metalware
       File.join(var_named, zone)
     end
 
+    def build_complete(name)
+      File.join(config.built_nodes_storage_path, "metalwarebooter.#{name}")
+    end
+
+    def rendered_build_file_path(node_name, namespace, file_name)
+      File.join(
+        config.rendered_files_path,
+        node_name,
+        namespace.to_s,
+        file_name
+      )
+    end
+
     private
 
     attr_reader :config
@@ -100,11 +127,7 @@ module Metalware
     end
 
     def template_file_name(template_type, node:)
-      repo_template(template_type, node: node) || 'default'
-    end
-
-    def repo_template(template_type, node:)
-      (node.repo_config[:templates] || {})[template_type]
+      node.config.templates&.send(template_type) || 'default'
     end
 
     def answer_files

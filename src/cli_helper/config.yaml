@@ -69,14 +69,14 @@ subcommands:
       templates themselves.
     action: Commands::Configure::Rerender
 
-  configure_self: &configure_self
-    syntax: metal configure self [options]
+  configure_local: &configure_local
+    syntax: metal configure local [options]
     summary: Configure the master Metalware node
     description: >
       Configures the node that metalware is running on. This is treated as the
       metalware master node. This must be ran to configure metalware to match
       the system environment. This command is intended to only be ran once.
-    action: Commands::Configure::Self
+    action: Commands::Configure::Local
 
   remove_group: &remove_group
     syntax: metal remove group GROUP_NAME [options]
@@ -201,7 +201,7 @@ commands:
       group: *configure_group
       node: *configure_node
       rerender: *configure_rerender
-      self: *configure_self
+      local: *configure_local
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]

@@ -46,8 +46,9 @@ module Metalware
     end
 
     def remove(group)
-      primary_groups_hash.delete(group.to_sym)
-      save(next_available_index, primary_groups_hash)
+      pgh = primary_groups_hash
+      pgh.delete(group.to_sym)
+      save(next_available_index, pgh)
     end
 
     def each
@@ -95,7 +96,7 @@ module Metalware
     end
 
     def primary_groups_hash
-      data[:primary_groups]
+      data[:primary_groups].merge(local: 0)
     end
 
     def next_available_index
@@ -103,6 +104,7 @@ module Metalware
     end
 
     def save(next_index, group_hash)
+      group_hash.delete(:local)
       payload = {
         next_index: next_index,
         primary_groups: group_hash,

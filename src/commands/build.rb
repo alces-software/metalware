@@ -28,11 +28,10 @@ require 'command_helpers/base_command'
 require 'config'
 require 'templater'
 require 'constants'
-require 'node'
-require 'nodes'
 require 'output'
 require 'build_files_retriever'
 require 'exceptions'
+require 'command_helpers/node_identifier'
 
 module Metalware
   module Commands
@@ -42,16 +41,19 @@ module Metalware
 
       private
 
-      attr_reader :group_name, :nodes, :edit_start, :edit_continue
+      attr_reader :edit_start, :edit_continue
 
       delegate :template_path, to: :file_path
       delegate :in_gui?, to: Utils
 
+      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
+
+      prepend CommandHelpers::NodeIdentifier
+
       def setup
-        setup_edit_mode
-        node_identifier = args.first
-        @group_name = node_identifier if options.group
-        @nodes = Nodes.create(config, node_identifier, options.group)
+        @edit_start = options.edit_start
+        @edit_continue = options.edit_continue
+        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
       end
 
       def run
@@ -74,43 +76,40 @@ module Metalware
           repo: repo_dependencies,
           configure: ['domain.yaml'],
           optional: {
-            configure: ["groups/#{group_name}.yaml"],
+            configure: ["groups/#{group&.name}.yaml"],
           },
         }
       end
 
       def repo_dependencies
-        nodes.map(&:build_template_paths).flatten.uniq
+        build_methods.reduce([]) do |memo, (_name, build_method)|
+          memo.push(build_method.template_paths)
+        end.flatten.uniq
       end
 
-      def render_build_templates
-        nodes.template_each firstboot: true do |parameters, node|
-          parameters[:files] = build_files(node)
-          render_build_files(parameters, node)
-          node.render_build_started_templates(parameters)
+      def build_methods
+        @build_methods = begin
+          nodes.reduce({}) do |memo, node|
+            memo.merge(node.name => node.build_method.new(config, node))
+          end
         end
       end
 
-      def build_files(node)
-        # Cache the build files as retrieved for each node so don't need to
-        # re-retrieve each time; in particular we don't want to re-make any
-        # network requests for files specified by a URL.
-        @build_files ||= {}
-        @build_files[node.name] ||= retrieve_build_files(node)
+      def render_build_templates
+        nodes.each do |node|
+          render_build_files(node)
+          build_method = build_methods[node.name]
+          build_method.render_build_start_templates
+        end
       end
 
-      def retrieve_build_files(node)
-        retriever = BuildFilesRetriever.new(node.name, config)
-        retriever.retrieve(node.build_files)
-      end
-
-      def render_build_files(parameters, node)
-        build_files(node).each do |namespace, files|
+      def render_build_files(node)
+        node.files.each do |namespace, files|
           files.each do |file|
             next if file[:error]
-            render_path = node.rendered_build_file_path(namespace, file[:name])
+            render_path = file_path.rendered_build_file_path(node.name, namespace, file[:name])
             FileUtils.mkdir_p(File.dirname(render_path))
-            Templater.render_to_file(config, file[:template_path], render_path, parameters)
+            Templater.render_to_file(node, file[:template_path], render_path)
           end
         end
       end
@@ -138,7 +137,7 @@ module Metalware
           gracefully_shutdown if should_gracefully_shutdown?
 
           nodes.select do |node|
-            !rerendered_nodes.include?(node) && node.built?
+            !rerendered_nodes.include?(node) && built?(node)
           end
                .tap do |nodes|
             render_build_complete_templates(nodes)
@@ -152,15 +151,15 @@ module Metalware
           if all_nodes_reported_built
             # For now at least, keep thread alive when in GUI so can keep
             # accessing messages. XXX Change this, this is very wasteful.
-            if in_gui?
-              record_gui_build_complete
-            else
-              break
-            end
+            in_gui? ? record_gui_build_complete : break
           end
 
           sleep config.build_poll_sleep
         end
+      end
+
+      def built?(node)
+        File.file?(file_path.build_complete(node.name))
       end
 
       def record_gui_build_complete
@@ -185,9 +184,9 @@ module Metalware
       end
 
       def render_build_complete_templates(nodes)
-        nodes.template_each firstboot: false do |parameters, node|
-          parameters[:files] = build_files(node)
-          node.render_build_complete_templates(parameters)
+        nodes.each do |node|
+          build_method = build_methods[node.name]
+          build_method.render_build_complete_templates
         end
       end
 
@@ -213,20 +212,20 @@ module Metalware
         teardown
       end
 
+      # Allows the input to be mocked
+      def high_line
+        @high_line ||= HighLine.new
+      end
+
+      delegate :agree, to: :high_line
+
       def ask_if_should_rerender
         should_rerender = <<-EOF.strip_heredoc
           Re-render appropriate templates for nodes as if build succeeded?
           [yes/no]
         EOF
+
         render_all_build_complete_templates if agree(should_rerender)
-      end
-
-      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
-
-      def setup_edit_mode
-        @edit_start = options.edit_start
-        @edit_continue = options.edit_continue
-        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
       end
 
       EDIT_START_MSG = <<-EOF.strip_heredoc

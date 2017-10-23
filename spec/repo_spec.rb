@@ -44,7 +44,7 @@ RSpec.describe Metalware::Repo do
       node: {
         baz: { question: 'baz' },
       },
-      self: {},
+      local: {},
     }
   end
   let :config { Metalware::Config.new }

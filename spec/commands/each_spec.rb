@@ -25,6 +25,8 @@
 require 'commands/each'
 require 'spec_utils'
 require 'ostruct'
+require 'hash_mergers'
+require 'namespaces/alces'
 
 RSpec.describe Metalware::Commands::Each, real_fs: true do
   before :each do
@@ -32,10 +34,32 @@ RSpec.describe Metalware::Commands::Each, real_fs: true do
     SpecUtils.use_unit_test_config(self)
   end
 
+  let :config { Metalware::Config.new }
+  let :alces do
+    a = Metalware::Namespaces::Alces.new(config)
+    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(a)
+    a
+  end
+  let :groups do
+    g = Metalware::Namespaces::Group.new(alces, 'nodes', index: 1)
+    Metalware::Namespaces::MetalArray.new([g])
+  end
+
+  # Spoofs the nodes group
+  before :each do
+    allow(alces).to receive(:groups).and_return(groups)
+  end
+
+  # Turns off loading of answers as they are not needed
+  before :each do
+    allow(Metalware::HashMergers::Answer).to \
+      receive(:new).and_return(double('answer', merge: {}))
+  end
+
   def run_command_echo(node, group = false)
     opt = OpenStruct.new(group: group)
     $stdout = tmp = Tempfile.new('stdout')
-    Metalware::Commands::Each.new([node, 'echo <%= alces.nodename %>'], opt)
+    Metalware::Commands::Each.new([node, 'echo <%= node.name %>'], opt)
     $stdout.flush
     $stdout.rewind
     $stdout.read

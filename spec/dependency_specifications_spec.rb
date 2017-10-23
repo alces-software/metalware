@@ -25,14 +25,20 @@
 
 require 'spec_utils'
 require 'dependency_specifications'
+require 'namespaces/alces'
 
-RSpec.describe Metalware::DependencySpecifications, real_fs: true do
+RSpec.describe Metalware::DependencySpecifications do
+  let :config { Metalware::Config.new }
+  let :alces { Metalware::Namespaces::Alces.new(config) }
+
   subject do
-    Metalware::DependencySpecifications.new(Metalware::Config.new)
+    Metalware::DependencySpecifications.new(alces)
   end
 
   before do
     SpecUtils.use_mock_genders(self)
+    allow_any_instance_of(Metalware::Namespaces::Node).to \
+      receive(:group).and_return(double('group', name: 'testnodes'))
   end
 
   describe '#for_node_in_configured_group' do

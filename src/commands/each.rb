@@ -23,24 +23,25 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
 require 'templater'
-require 'nodes'
 
 module Metalware
   module Commands
     class Each < CommandHelpers::BaseCommand
       private
 
+      prepend CommandHelpers::NodeIdentifier
+
       def setup
-        node_identifier = args[0]
-        @nodes = Nodes.create(config, node_identifier, options.group)
         @command = args[1]
       end
 
+      attr_reader :command
+
       def run
-        @nodes.template_each do |parameters, _node|
-          rendered_cmd = Templater.new(config, parameters)
-                                  .render_from_string(@command)
+        nodes.each do |node|
+          rendered_cmd = node.render_erb_template(command)
           opt = {
             out: $stdout.fileno ? $stdout.fileno : 1,
             err: $stderr.fileno ? $stderr.fileno : 2,

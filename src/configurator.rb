@@ -28,7 +28,7 @@ require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
-require 'node'
+# require 'node'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Question
 HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
@@ -62,10 +62,10 @@ module Metalware
         )
       end
 
-      def for_self(config:)
+      def for_local(config:)
         new(
           config: config,
-          questions_section: :self
+          questions_section: :local
         )
       end
 
@@ -127,7 +127,7 @@ module Metalware
         case questions_section
         when :domain
           []
-        when :group, :self
+        when :group, :local
           [loader.domain_answers]
         when :node
           node = Node.new(config, name)

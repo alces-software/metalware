@@ -23,29 +23,36 @@
 #==============================================================================
 
 require 'build_methods/kickstarts/uefi'
-require 'node'
 require 'config'
 require 'filesystem'
 require 'file_path'
 
 RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
   let :config { Metalware::Config.new }
+  let :alces { Metalware::Namespaces::Alces.new(config) }
+
   let :node do
-    node = Metalware::Node.new(config, 'nodeA01')
-    allow(node).to receive(:build_method).and_return(:uefi)
+    node = Metalware::Namespaces::Node.create(alces, 'nodeA01')
+    allow(node).to receive(:build_method).and_return(uefi_build_method)
     allow(node).to receive(:hexadecimal_ip).and_return('00000000')
     node
   end
-  let :build_uefi { Metalware::BuildMethods::Kickstarts::UEFI.new(config, node) }
+
+  let :build_uefi do
+    Metalware::BuildMethods::Kickstarts::UEFI.new(config, node)
+  end
+
   let :file_path { Metalware::FilePath.new(config) }
   let :filesystem do
     FileSystem.setup(&:with_minimal_repo)
   end
 
+  let :uefi_build_method { Metalware::BuildMethods::Kickstarts::UEFI }
+
   it 'contains the correct TEMPLATES list' do
     # The constant is set on initialize
-    Metalware::BuildMethods::Kickstarts::UEFI.new(nil, nil)
-    expect(Metalware::BuildMethods::Kickstarts::UEFI::TEMPLATES).to \
+    uefi_build_method.new(nil, nil)
+    expect(uefi_build_method::TEMPLATES).to \
       eq([:kickstart, :'uefi-kickstart'])
   end
 

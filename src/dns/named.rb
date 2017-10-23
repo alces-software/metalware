@@ -26,7 +26,6 @@
 require 'validation/loader'
 require 'pathname'
 require 'system_command'
-require 'templating/repo_config_parser'
 require 'templater'
 require 'exceptions'
 require 'metal_log'
@@ -34,8 +33,9 @@ require 'metal_log'
 module Metalware
   module DNS
     class Named
-      def initialize(metalware_config)
-        @config = metalware_config
+      def initialize(alces)
+        @alces = alces
+        @config = alces.send(:metal_config)
       end
 
       def update
@@ -49,27 +49,21 @@ module Metalware
 
       private
 
-      attr_reader :config
+      attr_reader :config, :alces
 
       def file_path
         @file_path ||= FilePath.new(config)
       end
 
-      def repo_config
-        @repo_config ||= Templating::RepoConfigParser
-                         .parse_for_domain(config: config,
-                                           include_groups: false)
-                         .inspect
-      end
-
       def render_base_named_conf
-        Templater.render_to_file(config, file_path.named_template, file_path.base_named)
+        Templater.render_to_file(alces, file_path.named_template, file_path.base_named)
       end
 
       def render_repo_named_conf
         FileUtils.mkdir_p(File.dirname(file_path.metalware_named))
-        Templater.render_to_file(config,
-                                 file_path.template_path('named'),
+        template_path = file_path.template_path('named', node: alces.domain)
+        Templater.render_to_file(alces,
+                                 template_path,
                                  file_path.metalware_named)
       end
 
@@ -79,16 +73,14 @@ module Metalware
       end
 
       def each_network
-        repo_config[:networks]&.each { |data| yield data }
+        alces.domain.config.networks&.each { |*data| yield(*data) }
       end
 
-      def named_zone_hash(zone, net)
+      def build_dynamic_namespace(zone, net)
         {
-          alces: {
-            named: {
-              zone: zone,
-              net: net,
-            },
+          named: {
+            zone: zone,
+            net: net,
           },
         }
       end
@@ -96,16 +88,18 @@ module Metalware
       def render_zone_template(direction, zone, net)
         zone_name = case direction
                     when 'forward'
-                      net[:named_fwd_zone]
+                      net.named_fwd_zone
                     when 'reverse'
-                      net[:named_rev_zone]
+                      net.named_rev_zone
                     end
-        zone_hash = named_zone_hash(zone, net)
         return unless zone_name
-        Templater.render_to_file(config,
-                                 file_path.template_path("named/#{direction}"),
-                                 file_path.named_zone(zone_name),
-                                 zone_hash)
+        dynamic_namespace = build_dynamic_namespace(zone, net)
+        Templater.render_to_file(
+          alces,
+          file_path.template_path("named/#{direction}", node: alces.domain),
+          file_path.named_zone(zone_name),
+          dynamic_namespace
+        )
       end
     end
   end
