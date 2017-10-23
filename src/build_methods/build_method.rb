@@ -13,8 +13,7 @@ module Metalware
         raise NotImplementedError
       end
 
-      def render_build_complete_templates
-      end
+      def render_build_complete_templates; end
 
       def template_paths
         self.class::TEMPLATES.map do |template_type|
@@ -33,11 +32,11 @@ module Metalware
 
       DEFAULT_BUILD_START_PARAMETERS = {
         firstboot: true,
-      }
+      }.freeze
 
       DEFAULT_BUILD_COMPLETE_PARAMETERS = {
         firstboot: false,
-      }
+      }.freeze
 
       attr_reader :config, :node
 

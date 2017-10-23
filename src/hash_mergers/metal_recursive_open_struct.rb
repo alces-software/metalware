@@ -16,11 +16,10 @@ module Metalware
       delegate :key?, to: :table
 
       def method_missing(s, *_a, &_b)
-        if respond_to_missing?(s)
-          value = self[s]
-          define_singleton_method(s) { value }
-          value
-        end
+        return nil unless respond_to_missing?(s)
+        value = self[s]
+        define_singleton_method(s) { value }
+        value
       end
 
       def respond_to_missing?(s, *_a)
