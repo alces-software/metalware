@@ -70,7 +70,7 @@ module Metalware
         alces,
         template,
         save_file,
-        prepend_managed_file_message: false, # TODO: Do not pass as key word
+        prepend_managed_file_message: false,
         **dynamic_namespace,
         &validation_block
       )

@@ -31,6 +31,17 @@ require 'active_support/core_ext/string/strip'
 require 'dns/named'
 require 'namespaces/alces'
 
+#
+# XXX: This is getting very long. It should be broken up into different
+#      classes next time something needs to be added. Some of the render
+#      mangaged files/ section can be moved into the `Templater` class.
+#      The `Templater` class is a good location to keep all the file
+#      handling methods so they can be reused.
+#
+#      Also the different render methods can be broken out in a smilar
+#      way the `BuildMethods` are. This way the render method specific
+#      code (e.g. the validation blocks) can exist in a seperate class.
+#
 module Metalware
   class DomainTemplatesRenderer
     def initialize(config, alces = nil, genders_invalid_message: nil)
