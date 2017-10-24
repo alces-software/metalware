@@ -40,6 +40,7 @@ RSpec.describe '`metal build`' do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.with_answer_fixtures('answers/integration-test')
+      fs.with_genders_fixtures
     end
   end
 
@@ -90,12 +91,6 @@ RSpec.describe '`metal build`' do
   before :each do
     kill_any_metal_processes
 
-    SpecUtils.use_mock_genders(self)
-    alces.nodes.each do |node|
-      hex = node.name + '_HEX_IP'
-      allow(node).to receive(:hexadecimal_ip).and_return(hex)
-    end
-
     FileUtils.remove(TEST_DIR, force: true)
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
@@ -103,7 +98,10 @@ RSpec.describe '`metal build`' do
   end
 
   AlcesUtils.mock self, :each do
-    mock_group('nodes')
+    filesystem.test do
+      alces.nodes.each { |node| hexadecimal_ip(node) }
+      mock_group('nodes')
+    end
     build_poll_sleep(0.1)
   end
 
