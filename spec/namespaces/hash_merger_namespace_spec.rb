@@ -10,7 +10,10 @@ RSpec.shared_examples \
   let :test_obj { alces.send(alces_method) }
 
   let :test_config do
-    { test_config: 'I am the config' }
+    {
+      test_config: 'I am the config',
+      files: [],
+    }
   end
 
   let :test_answer do

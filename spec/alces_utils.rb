@@ -81,6 +81,10 @@ module AlcesUtils
       msg = 'Can not use AlcesUtils without FakeFS'
       raise msg unless FakeFS.activated?
     end
+
+    def default_group
+      'default-test-group'
+    end
   end
 
   # The following method(s) will be included with AlcesUtils
@@ -133,9 +137,14 @@ module AlcesUtils
       allow(namespace).to receive(:answer).and_return(OpenStruct.new)
     end
 
+    def hexadecimal_ip(node)
+      hex = "#{node.name}_HEX_IP"
+      allow(node).to receive(:hexadecimal_ip).and_return(hex)
+    end
+
     def mock_node(name, *genders)
       AlcesUtils.check_and_raise_fakefs_error
-      genders = ['test-group'] if genders.empty?
+      genders = [AlcesUtils.default_group] if genders.empty?
       genders_entry = "#{name} #{genders.join(',')}\n"
       File.write(file_path.genders, genders_entry, mode: 'a')
       alces.instance_variable_set(:@nodes, nil)
