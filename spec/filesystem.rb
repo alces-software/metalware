@@ -148,6 +148,7 @@ class FileSystem
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
       '/var/named',
+      '/var/log/metalware',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)
