@@ -12,7 +12,7 @@ module Metalware
         def setup; end
 
         def run
-          puts AnswersTableCreator.new(config).domain_table
+          puts AnswersTableCreator.new(config, alces).domain_table
         end
 
         def dependency_hash

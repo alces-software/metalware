@@ -31,10 +31,12 @@ require 'config'
 require 'validation/loader'
 
 RSpec.describe Metalware::AnswersTableCreator do
+  include AlcesUtils
+
   subject do
-    Metalware::AnswersTableCreator.new(Metalware::Config.new)
+    Metalware::AnswersTableCreator.new(metal_config, alces)
   end
-  let :config { Metalware::Config.new }
+
   let :configure_data do
     {
       domain: {
@@ -49,10 +51,16 @@ RSpec.describe Metalware::AnswersTableCreator do
         question_2: { question: 'question 2', type: 'integer' },
         question_3: { question: 'question 3' },
       },
-      self: {},
+      local: {},
     }
   end
-  let :loader { Metalware::Validation::Loader.new(config) }
+
+  let! :loader do
+    l = Metalware::Validation::Loader.new(metal_config)
+    allow(l).to receive(:configure_data).and_return(configure_data)
+    allow(Metalware::Validation::Loader).to receive(:new).and_return(l)
+    l
+  end
 
   let :domain_answers do
     { question_1: 'domain question 1' }
@@ -71,83 +79,68 @@ RSpec.describe Metalware::AnswersTableCreator do
   end
 
   let :group_name { 'testnodes' }
-
   let :node_name { 'testnode01' }
 
-  let :filesystem do
-    FileSystem.setup do |fs|
-      fs.dump('/var/lib/metalware/answers/domain.yaml', domain_answers)
-      fs.dump("/var/lib/metalware/answers/groups/#{group_name}.yaml", group_answers)
-      fs.dump("/var/lib/metalware/answers/nodes/#{node_name}.yaml", node_answers)
-    end
-  end
-
-  before do
-    SpecUtils.use_mock_genders(self)
-  end
-
-  before :each do
-    allow(loader).to receive(:configure_data).and_return(configure_data)
-    allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
+  AlcesUtils.mock self, :each do
+    answer(alces.domain, domain_answers)
+    mock_node(node_name, group_name)
+    answer(alces.node, node_answers)
+    mock_group(group_name)
+    answer(alces.group, group_answers)
   end
 
   describe '#domain_table' do
-    xit 'creates table with questions and domain answers' do
-      filesystem.test do
-        expected_table = Terminal::Table.new(
-          headings: ['Question', 'Domain'],
-          rows: [
-            ['question_1', '"domain question 1"'],
-            ['question_2', 'nil'],
-            ['question_3', 'nil'],
-          ]
-        )
+    it 'creates table with questions and domain answers' do
 
-        # In this and following tests, convert tables to strings so can compare
-        # output rather than as objects (which will never be equal as we create
-        # different `Table`s).
-        expect(
-          subject.domain_table.to_s
-        ).to eq expected_table.to_s
-      end
+      expected_table = Terminal::Table.new(
+        headings: ['Question', 'Domain'],
+        rows: [
+          ['question_1', '"domain question 1"'],
+          ['question_2', 'nil'],
+          ['question_3', 'nil'],
+        ]
+      )
+
+      # In this and following tests, convert tables to strings so can compare
+      # output rather than as objects (which will never be equal as we create
+      # different `Table`s).
+      expect(
+        subject.domain_table.to_s
+      ).to eq expected_table.to_s
     end
   end
 
   describe '#primary_group_table' do
-    xit 'creates table with questions, and domain and primary group answers' do
-      filesystem.test do
-        expected_table = Terminal::Table.new(
-          headings: ['Question', 'Domain', "Group: #{group_name}"],
-          rows: [
-            ['question_1', '"domain question 1"', '"group question 1"'],
-            ['question_2', 'nil', '11'],
-            ['question_3', 'nil', 'nil'],
-          ]
-        )
+    it 'creates table with questions, and domain and primary group answers' do
+      expected_table = Terminal::Table.new(
+        headings: ['Question', 'Domain', "Group: #{group_name}"],
+        rows: [
+          ['question_1', '"domain question 1"', '"group question 1"'],
+          ['question_2', 'nil', '11'],
+          ['question_3', 'nil', 'nil'],
+        ]
+      )
 
-        expect(
-          subject.primary_group_table(group_name).to_s
-        ).to eq expected_table.to_s
-      end
+      expect(
+        subject.primary_group_table(group_name).to_s
+      ).to eq expected_table.to_s
     end
   end
 
   describe '#node_table' do
-    xit 'creates table with questions, and domain, primary group, and node answers' do
-      filesystem.test do
-        expected_table = Terminal::Table.new(
-          headings: ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
-          rows: [
-            ['question_1', '"domain question 1"', '"group question 1"', '"node question 1"'],
-            ['question_2', 'nil', '11', '13'],
-            ['question_3', 'nil', 'nil', '"node question 3"'],
-          ]
-        )
+    it 'creates table with questions, and domain, primary group, and node answers' do
+      expected_table = Terminal::Table.new(
+        headings: ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
+        rows: [
+          ['question_1', '"domain question 1"', '"group question 1"', '"node question 1"'],
+          ['question_2', 'nil', '11', '13'],
+          ['question_3', 'nil', 'nil', '"node question 3"'],
+        ]
+      )
 
-        expect(
-          subject.node_table(node_name).to_s
-        ).to eq expected_table.to_s
-      end
+      expect(
+        subject.node_table(node_name).to_s
+      ).to eq expected_table.to_s
     end
   end
 end
