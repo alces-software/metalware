@@ -12,16 +12,9 @@ module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
-      # The mocking of the namespace expects the local node to exist
-      # However this means it needs to be in the genders file
-      # By default the local_only gender file is used
-      # However this does not prevent genders being mocked again
-      example_group.before :each do
-        SpecUtils.use_mock_genders(self, genders_file: 'genders/local_only')
-      end
-
       example_group.instance_exec do
         let! :metal_config do
+          AlcesUtils.check_and_raise_fakefs_error
           test_config = Metalware::Config.new(config)
           allow(Metalware::Config).to receive(:new).and_return(test_config)
           test_config
@@ -35,6 +28,34 @@ module AlcesUtils
           test_alces.define_singleton_method(:node) { method_missing(:node) }
           test_alces.define_singleton_method(:group) { method_missing(:group) }
           test_alces
+        end
+
+        let! :file_path do
+          Metalware::FilePath.new(metal_config)
+        end
+
+        #
+        # Mocks nodeattr to use faked genders file
+        #
+        before :each do
+          unless File.exist?(file_path.genders)
+            File.open(file_path.genders, 'a') { |f| f.puts('local local') }
+          end
+
+          allow(Metalware::NodeattrInterface)
+            .to receive(:nodeattr).and_wrap_original do |method, *args|
+            AlcesUtils.check_and_raise_fakefs_error
+            genders_data = File.read(file_path.genders)
+            FakeFS.without do
+              f = Tempfile.open('mock-genders')
+              f.write(genders_data)
+              mock_cmd = "nodeattr -f #{f.path}"
+              f.close
+              nodeattr_result = method.call(*args, mock_nodeattr: mock_cmd)
+              f.unlink
+              nodeattr_result
+            end
+          end
         end
       end
     end
@@ -54,6 +75,11 @@ module AlcesUtils
       else
         test.before(*a, &mock_block)
       end
+    end
+
+    def check_and_raise_fakefs_error
+      msg = 'Can not use AlcesUtils without FakeFS'
+      raise msg unless FakeFS.activated?
     end
   end
 
@@ -108,20 +134,18 @@ module AlcesUtils
     end
 
     def mock_node(name, *genders)
+      AlcesUtils.check_and_raise_fakefs_error
       genders = ['test-group'] if genders.empty?
-      node = Metalware::Namespaces::Node.create(alces, name)
+      genders_entry = "#{name} #{genders.join(',')}\n"
+      File.write(file_path.genders, genders_entry, mode: 'a')
+      alces.instance_variable_set(:@nodes, nil)
+      node = alces.nodes.find_by_name(name)
       with_blank_config_and_answer(node)
-      allow(node).to receive(:genders).and_return(genders)
-      nodes = alces.nodes
-                   .reduce([]) { |memo, n| memo.push(n) }
-                   .tap { |x| x.push(node) }
-      metal_nodes = Metalware::Namespaces::MetalArray.new(nodes)
-      allow(alces).to receive(:nodes).and_return(metal_nodes)
       allow(alces).to receive(:node).and_return(node)
     end
 
     def mock_group(name)
-      raise 'Can not mock group whilst FakeFS is off' unless FakeFS.activated?
+      AlcesUtils.check_and_raise_fakefs_error
       group_cache.add(name)
       alces.instance_variable_set(:@groups, nil)
       alces.instance_variable_set(:@group_cache, nil)
