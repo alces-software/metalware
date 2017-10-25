@@ -31,6 +31,7 @@ require 'spec_utils'
 
 RSpec.describe Metalware::Config do
   it 'can have default values retrieved' do
+    FileSystem.root_setup { |fs| fs.with_clone_fixture('configs/empty.yaml') }
     config_file = SpecUtils.fixtures_config('empty.yaml')
     config = Metalware::Config.new(config_file)
     expect(config.built_nodes_storage_path).to eq('/var/lib/metalware/cache/built-nodes')
@@ -39,6 +40,9 @@ RSpec.describe Metalware::Config do
   end
 
   it 'can have set values retrieved over defaults' do
+    FileSystem.root_setup do |fs|
+      fs.with_clone_fixture('configs/non-empty.yaml')
+    end
     config_file = SpecUtils.fixtures_config('non-empty.yaml')
     config = Metalware::Config.new(config_file)
     expect(config.built_nodes_storage_path).to eq('/built/nodes')
