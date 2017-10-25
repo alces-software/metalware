@@ -36,9 +36,7 @@ RSpec.describe Metalware::Status::Monitor do
   let :nodes { alces.nodes.map(&:name) }
 
   before :each do
-    FileSystem.root_setup do |fs|
-      fs.with_genders_fixtures
-    end
+    FileSystem.root_setup(&:with_genders_fixtures)
     SpecUtils.use_mock_genders(self)
     @cmds = [:ping, :power]
     @m_input = { nodes: nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }

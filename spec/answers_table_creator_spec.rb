@@ -91,7 +91,6 @@ RSpec.describe Metalware::AnswersTableCreator do
 
   describe '#domain_table' do
     it 'creates table with questions and domain answers' do
-
       expected_table = Terminal::Table.new(
         headings: ['Question', 'Domain'],
         rows: [

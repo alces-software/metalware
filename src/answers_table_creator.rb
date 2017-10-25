@@ -72,7 +72,7 @@ module Metalware
       return nil unless group_name
       format_answer(
         question: question,
-        namespace: alces.groups.find_by_name(group_name),
+        namespace: alces.groups.find_by_name(group_name)
       )
     end
 
@@ -80,7 +80,7 @@ module Metalware
       return nil unless node_name
       format_answer(
         question: question,
-        namespace: alces.nodes.find_by_name(node_name),
+        namespace: alces.nodes.find_by_name(node_name)
       )
     end
 

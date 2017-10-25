@@ -47,9 +47,7 @@ RSpec.describe Metalware::NodeattrInterface do
 
   context 'using mock genders' do
     before :each do
-      FileSystem.root_setup do |fs|
-        fs.with_genders_fixtures
-      end
+      FileSystem.root_setup(&:with_genders_fixtures)
     end
 
     describe '#nodes_in_group' do

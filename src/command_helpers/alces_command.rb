@@ -17,7 +17,7 @@ module Metalware
       def alces_command
         @alces_command = begin
           alces_command_alpha_numeric_only
-          alces_command_split.reduce(alces) { |memo, cmd| memo.send(cmd) }
+          alces_command_split.reduce(alces) { |acc, elem| acc.send(elem) }
         end
       end
 
