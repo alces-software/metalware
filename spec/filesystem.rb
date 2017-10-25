@@ -131,6 +131,10 @@ class FileSystem
     )
   end
 
+  def with_clone_fixture(fixture_file)
+    with_fixtures(fixture_file, at: fixtures_path(fixture_file))
+  end
+
   def with_config_fixture(config_fixture_file, target)
     with_fixtures(
       config_fixture_file,

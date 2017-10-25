@@ -30,18 +30,16 @@ require 'config'
 require 'timeout'
 require 'config'
 require 'namespaces/alces'
-
-RSpec.describe Metalware::Commands::Status do
-end
+require 'filesystem'
 
 RSpec.describe Metalware::Status::Monitor do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  include AlcesUtils
 
   before :each do
-    SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self)
-    @config = Metalware::Config.new
+    FileSystem.root_setup do |fs|
+      fs.with_genders_fixtures
+      fs.with_clone_fixture('configs/unit-test.yaml')
+    end
     @nodes = alces.nodes.map(&:name)
     @cmds = [:ping, :power]
     @m_input = { nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
