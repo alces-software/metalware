@@ -9,6 +9,7 @@ require 'spec_utils'
 require 'filesystem'
 
 module AlcesUtils
+  GENDERS_FILE_REGEX = /-f [[:graph:]]+/
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
@@ -45,13 +46,15 @@ module AlcesUtils
           allow(Metalware::NodeattrInterface)
             .to receive(:nodeattr).and_wrap_original do |method, *args|
             AlcesUtils.check_and_raise_fakefs_error
-            genders_data = File.read(file_path.genders)
+            path = AlcesUtils.nodeattr_genders_file_path(args[0], file_path)
+            cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
+            genders_data = File.read(path)
             FakeFS.without do
               f = Tempfile.open('mock-genders')
               f.write(genders_data)
               mock_cmd = "nodeattr -f #{f.path}"
               f.close
-              nodeattr_result = method.call(*args, mock_nodeattr: mock_cmd)
+              nodeattr_result = method.call(cmd, mock_nodeattr: mock_cmd)
               f.unlink
               nodeattr_result
             end
@@ -62,6 +65,15 @@ module AlcesUtils
 
     def included(base)
       start(base)
+    end
+
+    def nodeattr_genders_file_path(command, file_path)
+      return file_path.genders unless command.include?('-f')
+      command.match(AlcesUtils::GENDERS_FILE_REGEX)[0].sub('-f ', '')
+    end
+
+    def nodeattr_cmd_trim_f(command)
+      command.sub(AlcesUtils::GENDERS_FILE_REGEX, '')
     end
 
     def mock(test, *a, &b)
