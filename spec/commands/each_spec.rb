@@ -29,17 +29,16 @@ require 'hash_mergers'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::Commands::Each do
+  include AlcesUtils
+
   before :each do
-    SpecUtils.use_mock_genders(self)
+    FileSystem.root_setup do |fs|
+      fs.with_genders_fixtures
+      fs.with_clone_fixture('configs/unit-test.yaml')
+    end
     SpecUtils.use_unit_test_config(self)
   end
 
-  let :config { Metalware::Config.new }
-  let :alces do
-    a = Metalware::Namespaces::Alces.new(config)
-    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(a)
-    a
-  end
   let :groups do
     g = Metalware::Namespaces::Group.new(alces, 'nodes', index: 1)
     Metalware::Namespaces::MetalArray.new([g])
@@ -57,15 +56,18 @@ RSpec.describe Metalware::Commands::Each do
   end
 
   def run_command_echo(node, group = false)
+    FakeFS.deactivate!
     opt = OpenStruct.new(group: group)
-    $stdout = tmp = Tempfile.new('stdout')
-    Metalware::Commands::Each.new([node, 'echo <%= node.name %>'], opt)
-    $stdout.flush
-    $stdout.rewind
-    $stdout.read
+    file = Tempfile.new
+    file.close
+    cmd = "echo <%= node.name %> >> #{file.path}"
+    FakeFS.with do
+      Metalware::Commands::Each.new([node, cmd], opt)
+    end
+    File.read(file.path)
   ensure
-    tmp.delete if tmp.respond_to?(:delete)
-    $stdout = STDOUT
+    file.unlink
+    FakeFS.activate!
   end
 
   it 'runs the command on a single node' do
