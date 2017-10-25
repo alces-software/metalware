@@ -147,4 +147,9 @@ RSpec.configure do |config|
       example.run
     end
   end
+
+  # Resets the filesystem after each test
+  config.after :each do
+    FileSystem.root_file_system_config(reset: true)
+  end
 end

@@ -57,7 +57,8 @@ class FileSystem
   # not thrown from where the actual failing call is made; it could be worth
   # actually running the methods to check this, and then replaying them afresh
   # when `test` is run.
-  def self.root_file_system_config
+  def self.root_file_system_config(reset: false)
+    @root_file_system_config = nil if reset
     @root_file_system_config ||= FileSystemConfigurator.new
   end
 
@@ -68,7 +69,10 @@ class FileSystem
   end
 
   def self.root_setup
-    yield FileSystem.root_file_system_config
+    FakeFS.without do
+      yield FileSystem.root_file_system_config
+      FileSystem.test {} # Applies the changes
+    end
   end
 
   def self.test(configurator = FileSystem.root_file_system_config)
