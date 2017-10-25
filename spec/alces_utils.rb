@@ -49,14 +49,17 @@ module AlcesUtils
             path = AlcesUtils.nodeattr_genders_file_path(args[0], file_path)
             cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
             genders_data = File.read(path)
-            FakeFS.without do
-              f = Tempfile.open('mock-genders')
-              f.write(genders_data)
-              mock_cmd = "nodeattr -f #{f.path}"
-              f.close
-              nodeattr_result = method.call(cmd, mock_nodeattr: mock_cmd)
-              f.unlink
-              nodeattr_result
+            tempfile = nil
+            begin
+              FakeFS.without do
+                tempfile = Tempfile.open('mock-genders')
+                tempfile.write(genders_data)
+                tempfile.close
+              end
+              mock_cmd = "nodeattr -f #{tempfile.path}"
+              method.call(cmd, mock_nodeattr: mock_cmd)
+            ensure
+              tempfile&.unlink
             end
           end
         end
