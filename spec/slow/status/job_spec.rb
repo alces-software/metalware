@@ -41,7 +41,6 @@ RSpec.describe Metalware::Status::Job do
 
   before :example do
     SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self)
     @config = Metalware::Config.new
     @cmd = :busy_sleep
     @node = 'node_name_not_found'
