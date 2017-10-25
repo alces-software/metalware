@@ -143,7 +143,7 @@ RSpec.configure do |config|
   config.around :each do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file
     # system
-    FileSystem.test do
+    FileSystem.test(FileSystem.root_file_system_config) do
       example.run
     end
   end

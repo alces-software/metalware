@@ -57,13 +57,21 @@ class FileSystem
   # not thrown from where the actual failing call is made; it could be worth
   # actually running the methods to check this, and then replaying them afresh
   # when `test` is run.
+  def self.root_file_system_config
+    @root_file_system_config ||= FileSystemConfigurator.new
+  end
+
   def self.setup(&block)
     FileSystemConfigurator.new.tap do |configurator|
       yield configurator if block
     end
   end
 
-  def self.test(configurator = FileSystemConfigurator.new)
+  def self.root_setup
+    yield FileSystem.root_file_system_config
+  end
+
+  def self.test(configurator = FileSystem.root_file_system_config)
     # Ensure the FakeFS is in a fresh state. XXX needed?
     FakeFS.deactivate!
     FakeFS.clear!
