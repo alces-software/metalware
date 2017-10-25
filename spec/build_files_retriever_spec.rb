@@ -27,7 +27,7 @@ require 'input'
 require 'spec_utils'
 require 'config'
 
-RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
+RSpec.describe Metalware::BuildFilesRetriever do
   TEST_FILES_HASH = {
     namespace01: [
       'some/file_in_repo',

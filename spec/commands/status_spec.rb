@@ -34,7 +34,7 @@ require 'namespaces/alces'
 RSpec.describe Metalware::Commands::Status do
 end
 
-RSpec.describe Metalware::Status::Monitor, real_fs: true do
+RSpec.describe Metalware::Status::Monitor do
   let :config { Metalware::Config.new }
   let :alces { Metalware::Namespaces::Alces.new(config) }
 

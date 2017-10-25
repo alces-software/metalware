@@ -29,7 +29,7 @@ require 'spec_utils'
 require 'config'
 require 'timeout'
 
-RSpec.describe Metalware::Status::Job, real_fs: true do
+RSpec.describe Metalware::Status::Job do
   before :all do
     Metalware::Status::Job.send(:define_method, :busy_sleep, lambda {
       until 1 == 2; end

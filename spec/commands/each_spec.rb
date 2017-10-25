@@ -28,7 +28,7 @@ require 'ostruct'
 require 'hash_mergers'
 require 'namespaces/alces'
 
-RSpec.describe Metalware::Commands::Each, real_fs: true do
+RSpec.describe Metalware::Commands::Each do
   before :each do
     SpecUtils.use_mock_genders(self)
     SpecUtils.use_unit_test_config(self)

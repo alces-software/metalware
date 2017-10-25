@@ -141,15 +141,10 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 
   config.around :each do |example|
-    # Run every test using `FakeFS` unless a truthy `real_fs` metadata value is
-    # passed; this prevents us polluting the real file system unless explicitly
-    # requested.
-    if example.metadata[:real_fs]
+    # Run every test using `FakeFS`, this prevents us polluting the real file
+    # system
+    FileSystem.test do
       example.run
-    else
-      FileSystem.test do
-        example.run
-      end
     end
   end
 end

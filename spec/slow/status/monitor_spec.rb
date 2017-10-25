@@ -30,7 +30,7 @@ require 'config'
 require 'timeout'
 require 'config'
 
-RSpec.describe Metalware::Status::Monitor, real_fs: true do
+RSpec.describe Metalware::Status::Monitor do
   let :config { Metalware::Config.new }
   let :alces { Metalware::Namespaces::Alces.new(config) }
   let :nodes { alces.nodes.map(&:name) }
