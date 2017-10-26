@@ -49,7 +49,7 @@ module Metalware
     end
 
     def local_answers
-      File.join(answer_files, 'local.yaml')
+      node_answers('local')
     end
 
     def domain_config
