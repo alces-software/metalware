@@ -36,7 +36,11 @@ module Metalware
           groups.reverse.each do |group|
             arr.push(cached_yaml(:group, group))
           end
-          arr.push(cached_yaml(:node, node)) if node
+          if node == 'local'
+            arr.push(cached_yaml(:local))
+          elsif node
+            arr.push(cached_yaml(:node, node))
+          end
         end
       end
 
