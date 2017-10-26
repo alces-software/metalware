@@ -19,7 +19,8 @@ module Metalware
         if alces_command.is_a?(Namespaces::MetalArray)
           alces_command
         else
-          alces_command.to_h
+          obj = alces_command
+          obj.is_a?(Array) ? obj.map(&:to_h) : obj.to_h
         end
       end
 
