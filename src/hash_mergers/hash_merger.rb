@@ -80,6 +80,7 @@ module Metalware
 
       def combine_hashes(hashes)
         hashes.each_with_object(files: {}) do |config, combined_config|
+          config = config.dup # Prevents the cache being deleted
           raise CombineHashError unless config.is_a? Hash
           files = config.delete(:files)
           combined_config.deep_merge!(config)
