@@ -57,6 +57,7 @@ module Metalware
         if File.file? data_file
           YAML.load_file(data_file) || {}
         else
+          log.info 'file not found'
           {}
         end
       end
