@@ -36,12 +36,12 @@ module Metalware
       @config = config
     end
 
-    def retrieve(node_name, file_namespaces)
-      file_namespaces&.map do |namespace, identifiers|
+    def retrieve(node)
+      node.config.files&.map do |namespace, identifiers|
         [
           namespace,
           identifiers.map do |identifier|
-            file_hash_for(node_name, namespace, identifier)
+            file_hash_for(node.name, namespace, identifier)
           end
         ]
       end.to_h
