@@ -37,17 +37,19 @@ module Metalware
     end
 
     def retrieve(node)
-      node.config.files&.map do |namespace, identifiers|
-        [
-          namespace,
-          identifiers.map do |identifier|
-            file_hash_for(node.name, namespace, identifier)
-          end
-        ]
+      node.config.files&.to_h&.keys&.map do |namespace|
+        retrieve_for_namespace(node, namespace)
       end.to_h
     end
 
     private
+
+    def retrieve_for_namespace(node, namespace)
+      file_hashes = node.config.files[namespace].map do |file|
+        file_hash_for(node.name, namespace, file)
+      end
+      [namespace, file_hashes]
+    end
 
     def file_hash_for(node_name, namespace, identifier)
       name = File.basename(identifier)
