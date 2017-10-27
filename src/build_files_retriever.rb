@@ -102,7 +102,7 @@ module Metalware
         # Download the template to the Metalware cache; will render it from
         # there.
         cache_template_path(name).tap do |template|
-          Input.download(identifier, template)
+          input.download(identifier, template)
         end
       elsif absolute_path?(identifier)
         # Path is an absolute path on the deployment server.
@@ -111,6 +111,10 @@ module Metalware
         # Path is within the repo `files` directory.
         repo_template_path(identifier)
       end
+    end
+
+    def input
+      @input ||= Input::Cache.new
     end
 
     def url?(identifier)
