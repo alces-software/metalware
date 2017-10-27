@@ -16,7 +16,8 @@ module Metalware
         end
 
         def run
-          puts AnswersTableCreator.new(config).node_table(node_name)
+          atc = AnswersTableCreator.new(config, alces)
+          puts atc.node_table(node_name)
         end
 
         def dependency_hash

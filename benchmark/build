@@ -1,0 +1,21 @@
+
+#frozen_string_literal: true
+
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../src')
+
+require 'ruby-prof'
+require 'cli'
+require 'namespaces/alces'
+require 'ostruct'
+
+result = RubyProf.profile do
+  begin
+    STDERR.puts Metalware::Commands::Build.new(['testgroup'], OpenStruct.new(group: true))
+  rescue => e
+    STDERR.puts e.inspect
+    # STDERR.puts e.backtrace
+  end
+end
+
+printer = RubyProf::FlatPrinter.new(result)
+printer.print($stdout)

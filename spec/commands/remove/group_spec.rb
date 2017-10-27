@@ -41,6 +41,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
       fs.with_minimal_repo
       fs.with_answer_fixtures('setup1/answers')
       fs.with_group_cache_fixture('setup1/cache/groups.yaml')
+      fs.with_genders_fixtures('setup1/genders')
     end
   end
 
@@ -52,7 +53,6 @@ RSpec.describe Metalware::Commands::Remove::Group do
 
   before :each do
     SpecUtils.mock_validate_genders_success(self)
-    SpecUtils.use_mock_genders(self, genders_file: 'setup1/genders')
     filesystem.test { initial_files }
   end
 

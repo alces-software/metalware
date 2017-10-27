@@ -38,10 +38,12 @@ module Metalware
     end
 
     def retrieve(file_namespaces)
-      file_namespaces.map do |namespace, identifiers|
+      file_namespaces&.map do |namespace, identifiers|
         [
           namespace,
-          identifiers.map { |identifier| file_hash_for(namespace, identifier) },
+          identifiers.map do |identifier|
+            file_hash_for(namespace, identifier)
+          end,
         ]
       end.to_h
     end

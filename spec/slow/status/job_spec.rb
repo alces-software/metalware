@@ -29,7 +29,7 @@ require 'spec_utils'
 require 'config'
 require 'timeout'
 
-RSpec.describe Metalware::Status::Job, real_fs: true do
+RSpec.describe Metalware::Status::Job do
   before :all do
     Metalware::Status::Job.send(:define_method, :busy_sleep, lambda {
       until 1 == 2; end
@@ -41,7 +41,6 @@ RSpec.describe Metalware::Status::Job, real_fs: true do
 
   before :example do
     SpecUtils.use_mock_genders(self)
-    SpecUtils.use_unit_test_config(self)
     @config = Metalware::Config.new
     @cmd = :busy_sleep
     @node = 'node_name_not_found'

@@ -2,38 +2,26 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'command_helpers/alces_command'
 
 module Metalware
   module Commands
-    class ViewConfig < CommandHelpers::BaseCommand
+    class View < CommandHelpers::BaseCommand
       private
 
-      attr_reader :node_name
-
-      def setup
-        @node_name = args.first
-      end
+      include CommandHelpers::AlcesCommand
 
       def run
-        pretty_print_json(templating_config_json)
+        pretty_print_json(cli_input_object.to_json)
       end
 
-      def dependency_hash
-        # If we want to view templating config for particular node,
-        # then that node must be part of a configured group.
-        if node_name
-          dependency_specifications.for_node_in_configured_group(node_name)
+      def cli_input_object
+        if alces_command.is_a?(Namespaces::MetalArray)
+          alces_command
         else
-          {}
+          obj = alces_command
+          obj.is_a?(Array) ? obj.map(&:to_h) : obj.to_h
         end
-      end
-
-      def templating_config_json
-        Metalware::Templating::RepoConfigParser.parse_for_node(
-          node_name: node_name,
-          config: config,
-          include_groups: options.include_groups
-        ).to_json
       end
 
       def pretty_print_json(json)

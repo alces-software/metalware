@@ -9,19 +9,13 @@ require 'spec_utils'
 require 'filesystem'
 
 module AlcesUtils
+  GENDERS_FILE_REGEX = /-f [[:graph:]]+/
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
-      # The mocking of the namespace expects the local node to exist
-      # However this means it needs to be in the genders file
-      # By default the local_only gender file is used
-      # However this does not prevent genders being mocked again
-      example_group.before :each do
-        SpecUtils.use_mock_genders(self, genders_file: 'genders/local_only')
-      end
-
       example_group.instance_exec do
         let! :metal_config do
+          AlcesUtils.check_and_raise_fakefs_error
           test_config = Metalware::Config.new(config)
           allow(Metalware::Config).to receive(:new).and_return(test_config)
           test_config
@@ -33,13 +27,56 @@ module AlcesUtils
             receive(:new).and_return(test_alces)
           # Allows the node method to be mocked
           test_alces.define_singleton_method(:node) { method_missing(:node) }
+          test_alces.define_singleton_method(:group) { method_missing(:group) }
           test_alces
+        end
+
+        let! :file_path do
+          Metalware::FilePath.new(metal_config)
+        end
+
+        #
+        # Mocks nodeattr to use faked genders file
+        #
+        before :each do
+          unless File.exist?(file_path.genders)
+            File.open(file_path.genders, 'a') { |f| f.puts('local local') }
+          end
+
+          allow(Metalware::NodeattrInterface)
+            .to receive(:nodeattr).and_wrap_original do |method, *args|
+            AlcesUtils.check_and_raise_fakefs_error
+            path = AlcesUtils.nodeattr_genders_file_path(args[0], file_path)
+            cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
+            genders_data = File.read(path)
+            tempfile = nil
+            begin
+              FakeFS.without do
+                tempfile = Tempfile.open('mock-genders')
+                tempfile.write(genders_data)
+                tempfile.close
+              end
+              mock_cmd = "nodeattr -f #{tempfile.path}"
+              method.call(cmd, mock_nodeattr: mock_cmd)
+            ensure
+              tempfile&.unlink
+            end
+          end
         end
       end
     end
 
     def included(base)
       start(base)
+    end
+
+    def nodeattr_genders_file_path(command, file_path)
+      return file_path.genders unless command.include?('-f')
+      command.match(AlcesUtils::GENDERS_FILE_REGEX)[0].sub('-f ', '')
+    end
+
+    def nodeattr_cmd_trim_f(command)
+      command.sub(AlcesUtils::GENDERS_FILE_REGEX, '')
     end
 
     def mock(test, *a, &b)
@@ -53,6 +90,15 @@ module AlcesUtils
       else
         test.before(*a, &mock_block)
       end
+    end
+
+    def check_and_raise_fakefs_error
+      msg = 'Can not use AlcesUtils without FakeFS'
+      raise msg unless FakeFS.activated?
+    end
+
+    def default_group
+      'default-test-group'
     end
   end
 
@@ -77,9 +123,11 @@ module AlcesUtils
     end
 
     def config(namespace, h = {})
-      new_config = Metalware::Constants::HASH_MERGER_DATA_STRUCTURE
-                   .new(h) { |template_str| template_str }
-      allow(namespace).to receive(:config).and_return(new_config)
+      allow(namespace).to receive(:config).and_return(hash_object(h))
+    end
+
+    def answer(namespace, h = {})
+      allow(namespace).to receive(:answer).and_return(hash_object(h))
     end
 
     def validation_off
@@ -104,25 +152,30 @@ module AlcesUtils
       allow(namespace).to receive(:answer).and_return(OpenStruct.new)
     end
 
+    def hexadecimal_ip(node)
+      hex = "#{node.name}_HEX_IP"
+      allow(node).to receive(:hexadecimal_ip).and_return(hex)
+    end
+
     def mock_node(name, *genders)
-      genders = ['test-group'] if genders.empty?
-      node = Metalware::Namespaces::Node.create(alces, name)
+      AlcesUtils.check_and_raise_fakefs_error
+      genders = [AlcesUtils.default_group] if genders.empty?
+      genders_entry = "#{name} #{genders.join(',')}\n"
+      File.write(file_path.genders, genders_entry, mode: 'a')
+      alces.instance_variable_set(:@nodes, nil)
+      node = alces.nodes.find_by_name(name)
       with_blank_config_and_answer(node)
-      allow(node).to receive(:genders).and_return(genders)
-      nodes = alces.nodes
-                   .reduce([]) { |memo, n| memo.push(n) }
-                   .tap { |x| x.push(node) }
-      metal_nodes = Metalware::Namespaces::MetalArray.new(nodes)
-      allow(alces).to receive(:nodes).and_return(metal_nodes)
       allow(alces).to receive(:node).and_return(node)
     end
 
     def mock_group(name)
-      raise 'Can not mock group whilst FakeFS is off' unless FakeFS.activated?
+      AlcesUtils.check_and_raise_fakefs_error
       group_cache.add(name)
       alces.instance_variable_set(:@groups, nil)
       alces.instance_variable_set(:@group_cache, nil)
-      with_blank_config_and_answer(alces.groups.find_by_name(name))
+      group = alces.groups.find_by_name(name)
+      with_blank_config_and_answer(group)
+      allow(alces).to receive(:group).and_return(group)
     end
 
     private
@@ -140,6 +193,12 @@ module AlcesUtils
 
     def group_cache
       @group_cache ||= Metalware::GroupCache.new(metal_config)
+    end
+
+    def hash_object(h = {})
+      Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(h) do |str|
+        str
+      end
     end
   end
 end

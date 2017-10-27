@@ -16,7 +16,8 @@ module Metalware
         end
 
         def run
-          puts AnswersTableCreator.new(config).primary_group_table(group_name)
+          atc = AnswersTableCreator.new(config, alces)
+          puts atc.primary_group_table(group_name)
         end
 
         def dependency_hash

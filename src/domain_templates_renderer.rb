@@ -65,9 +65,6 @@ module Metalware
     attr_reader :config, :genders_invalid_message
 
     def alces
-      unless @alces
-        MetalLog.warn 'Uninitialized, alces Namespace in DomainTemplateRenderer'
-      end
       @alces ||= Metalware::Namespaces::Alces.new(config)
     end
 

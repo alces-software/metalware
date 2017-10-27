@@ -27,6 +27,7 @@ require 'timeout'
 require 'commands/render'
 require 'spec_utils'
 require 'config'
+require 'tempfile'
 
 RSpec.describe Metalware::Commands::Render do
   include AlcesUtils
@@ -38,12 +39,21 @@ RSpec.describe Metalware::Commands::Render do
 
     let :template { '<%= domain.config.missing %>' }
 
-    it 'raises StrictWarningError when a parameter is missing' do
-      allow(File).to receive(:read).and_return(template)
+    let :template_file do
+      f = Tempfile.new('template')
+      f.write(template)
+      f.rewind
+      f
+    end
 
+    after :each do
+      template_file.unlink
+    end
+
+    it 'raises StrictWarningError when a parameter is missing' do
       expect do
         Metalware::Utils.run_command(
-          Metalware::Commands::Render, 'mocked_path', strict: 'mocked'
+          Metalware::Commands::Render, template_file.path, strict: 'mocked'
         )
       end.to raise_error(Metalware::StrictWarningError)
     end

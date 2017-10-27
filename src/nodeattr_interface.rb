@@ -72,14 +72,15 @@ module Metalware
         [false, e.message]
       end
 
-      private
-
-      def nodeattr(command, format_error: true)
+      def nodeattr(command, format_error: true, mock_nodeattr: nil)
+        mock_nodeattr ||= Constants::NODEATTR_COMMAND
         SystemCommand.run(
-          "#{Constants::NODEATTR_COMMAND} #{command}",
+          "#{mock_nodeattr} #{command}",
           format_error: format_error
         )
       end
+
+      private
 
       def nodes_to_groups
         nodeattr('--expand')

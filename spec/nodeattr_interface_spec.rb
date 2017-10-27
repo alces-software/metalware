@@ -25,11 +25,16 @@
 require 'nodeattr_interface'
 require 'spec_utils'
 require 'exceptions'
+require 'filesystem'
 
 RSpec.describe Metalware::NodeattrInterface do
+  include AlcesUtils
+
   context 'with setup1 genders' do
-    before do
-      SpecUtils.use_mock_genders(self, genders_file: 'setup1/genders')
+    before :each do
+      FileSystem.root_setup do |fs|
+        fs.with_genders_fixtures('setup1/genders')
+      end
     end
 
     describe '#nodes_in_primary_group' do
@@ -41,8 +46,8 @@ RSpec.describe Metalware::NodeattrInterface do
   end
 
   context 'using mock genders' do
-    before do
-      SpecUtils.use_mock_genders(self)
+    before :each do
+      FileSystem.root_setup(&:with_genders_fixtures)
     end
 
     describe '#nodes_in_group' do
@@ -84,7 +89,7 @@ RSpec.describe Metalware::NodeattrInterface do
     end
   end
 
-  describe '#validate_genders_file', real_fs: true do
+  describe '#validate_genders_file' do
     let :genders_file { Tempfile.new }
     let :genders_path { genders_file.path }
 

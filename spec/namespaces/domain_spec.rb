@@ -1,13 +1,15 @@
 
 # frozen_string_literal: true
 
+require 'namespaces/hash_merger_namespace_spec'
 require 'namespaces/alces'
 require 'config'
 require 'spec_utils'
 
 RSpec.describe Metalware::Namespaces::Node do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  include AlcesUtils
+
+  include_examples Metalware::Namespaces::HashMergerNamespace, :domain
 
   before :each { SpecUtils.use_mock_determine_hostip_script(self) }
 

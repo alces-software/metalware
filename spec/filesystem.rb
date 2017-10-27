@@ -57,13 +57,25 @@ class FileSystem
   # not thrown from where the actual failing call is made; it could be worth
   # actually running the methods to check this, and then replaying them afresh
   # when `test` is run.
+  def self.root_file_system_config(reset: false)
+    @root_file_system_config = nil if reset
+    @root_file_system_config ||= FileSystemConfigurator.new
+  end
+
   def self.setup(&block)
     FileSystemConfigurator.new.tap do |configurator|
       yield configurator if block
     end
   end
 
-  def self.test(configurator = FileSystemConfigurator.new)
+  def self.root_setup
+    FakeFS.without do
+      yield FileSystem.root_file_system_config
+      FileSystem.test {} # Applies the changes
+    end
+  end
+
+  def self.test(configurator = FileSystem.root_file_system_config)
     # Ensure the FakeFS is in a fresh state. XXX needed?
     FakeFS.deactivate!
     FakeFS.clear!
@@ -101,6 +113,10 @@ class FileSystem
     with_fixtures(answer_fixtures_dir, at: '/var/lib/metalware/answers')
   end
 
+  def with_genders_fixtures(genders_file = 'genders/default')
+    with_fixtures(genders_file, at: Metalware::Constants::GENDERS_PATH)
+  end
+
   def with_group_cache_fixture(group_cache_file)
     with_fixtures(
       group_cache_file,
@@ -113,6 +129,10 @@ class FileSystem
       hunter_cache_file,
       at: Metalware::Constants::HUNTER_PATH
     )
+  end
+
+  def with_clone_fixture(fixture_file)
+    with_fixtures(fixture_file, at: fixtures_path(fixture_file))
   end
 
   def with_config_fixture(config_fixture_file, target)
@@ -144,6 +164,7 @@ class FileSystem
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
       '/var/named',
+      '/var/log/metalware',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)

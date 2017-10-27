@@ -42,8 +42,12 @@ module Metalware
         answer(path.group_answers(file), :group)
       end
 
-      def node_answers(file)
-        answer(path.node_answers(file), :node)
+      def node_answers(name)
+        if name == 'local'
+          local_answers
+        else
+          answer(path.node_answers(name), :node)
+        end
       end
 
       def local_answers
