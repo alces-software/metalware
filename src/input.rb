@@ -23,14 +23,23 @@
 #==============================================================================
 
 require 'open-uri'
+require 'metal_log'
 
 module Metalware
   module Input
     class << self
       def download(from_url, to_path)
+        log.info 'Downloading: ' + from_url.to_s
+        log.info 'To: ' + to_path.to_s
         open(from_url) do |f|
           File.write(to_path, f.read)
         end
+      end
+
+      private
+
+      def log
+        @log ||= MetalLog.new('download')
       end
     end
   end
