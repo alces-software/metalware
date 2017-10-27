@@ -5,6 +5,7 @@ require 'file_path'
 require 'validation/loader'
 require 'data'
 require 'constants'
+require 'active_support/core_ext/object/deep_dup'
 
 module Metalware
   module HashMergers
@@ -45,11 +46,13 @@ module Metalware
       end
 
       def cached_yaml(section, section_name = nil)
-        data = cached_data(section, section_name)
-        return data if data
-        data = load_yaml(section, section_name)
-        add_cached_data(section, section_name, data)
-        data
+        begin
+          data = cached_data(section, section_name)
+          return data if data
+          data = load_yaml(section, section_name)
+          add_cached_data(section, section_name, data)
+          data
+        end.deep_dup
       end
 
       def cached_data(section, section_name)
@@ -79,21 +82,10 @@ module Metalware
       end
 
       def combine_hashes(hashes)
-        hashes.each_with_object(files: {}) do |config, combined_config|
+        hashes.each_with_object({}) do |config, combined_config|
           config = config.dup # Prevents the cache being deleted
           raise CombineHashError unless config.is_a? Hash
-          files = config.delete(:files)
           combined_config.deep_merge!(config)
-          merge_in_files!(combined_config[:files], files)
-        end
-      end
-
-      def merge_in_files!(existing_files, new_files)
-        new_files&.each do |namespace, file_identifiers|
-          file_identifiers.each do |file_identifier|
-            existing_files[namespace] = [] unless existing_files[namespace]
-            replace_file_with_same_basename!(existing_files[namespace], file_identifier)
-          end
         end
       end
 

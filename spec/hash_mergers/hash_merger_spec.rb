@@ -122,12 +122,12 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   describe '#build_files' do
-    it 'appends the files lists (within the namespace)' do
+    it 'replaces the files lists (within the namespace)' do
       filesystem.test do
         merged_hash = build_merged_hash(node: 'node3')
         files = merged_hash.config.files.namespace
-        expect(files.length).to eq(3)
-        expect(files).to include('domain', 'node3', 'duplicate')
+        expect(files.length).to eq(2)
+        expect(files).to include('node3', 'duplicate')
       end
     end
   end
