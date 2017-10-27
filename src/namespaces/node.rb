@@ -46,6 +46,11 @@ module Metalware
         @kickstart_url ||= DeploymentServer.kickstart_url(name)
       end
 
+      def build_complete_path
+        @build_complete_path ||= FilePath.new(metal_config)
+                                         .build_complete(name)
+      end
+
       def build_complete_url
         @build_complete_url ||= DeploymentServer.build_complete_url(name)
       end
