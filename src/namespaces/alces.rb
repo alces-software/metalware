@@ -15,6 +15,7 @@ require 'namespaces/hash_merger_namespace'
 require 'namespaces/node'
 require 'hash_mergers.rb'
 require 'ostruct'
+require 'metal_log'
 
 Metalware::Utils::DynamicRequire.relative('.')
 
@@ -22,6 +23,23 @@ module Metalware
   module Namespaces
     class Alces
       include Mixins::AlcesStatic
+      class << self
+        def alces_new_log
+          @alces_new_log ||= MetalLog.new('alces-new')
+        end
+
+        LOG_MESSAGE = <<-EOF.strip_heredoc
+          Create new Alces namespace. Building multiple namespaces will slow
+          down metalware as they do not share a file cache. Only build a new
+          namespace when required.
+        EOF
+
+        def new(*a)
+          alces_new_log.info LOG_MESSAGE
+          alces_new_log.info caller
+          super
+        end
+      end
 
       def initialize(metal_config)
         @metal_config = metal_config
