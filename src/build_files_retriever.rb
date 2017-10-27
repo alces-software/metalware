@@ -30,27 +30,26 @@ require 'input'
 
 module Metalware
   class BuildFilesRetriever
-    attr_reader :node_name, :config
+    attr_reader :config
 
-    def initialize(node_name, config)
-      @node_name = node_name
+    def initialize(config)
       @config = config
     end
 
-    def retrieve(file_namespaces)
+    def retrieve(node_name, file_namespaces)
       file_namespaces&.map do |namespace, identifiers|
         [
           namespace,
           identifiers.map do |identifier|
-            file_hash_for(namespace, identifier)
-          end,
+            file_hash_for(node_name, namespace, identifier)
+          end
         ]
       end.to_h
     end
 
     private
 
-    def file_hash_for(namespace, identifier)
+    def file_hash_for(node_name, namespace, identifier)
       name = File.basename(identifier)
       template = template_path(identifier)
 

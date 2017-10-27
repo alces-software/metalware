@@ -65,6 +65,10 @@ module Metalware
           end
         end
 
+        def build_files_retriever
+          @build_files_retriever ||= BuildFilesRetriever.new(metal_config)
+        end
+
         private
 
         def group_cache

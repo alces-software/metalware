@@ -84,9 +84,9 @@ module Metalware
       #
       def files
         @files ||= begin
-          retriever = BuildFilesRetriever.new(name, metal_config)
+          retriever = alces.build_files_retriever
           Constants::HASH_MERGER_DATA_STRUCTURE
-            .new(retriever.retrieve(config.files), &template_block)
+            .new(retriever.retrieve(name, config.files), &template_block)
         end
       end
 

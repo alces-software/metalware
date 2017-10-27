@@ -41,8 +41,10 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
   let :config { Metalware::Config.new }
 
+  let :node_name { 'testnode01' }
+
   subject do
-    Metalware::BuildFilesRetriever.new('testnode01', config)
+    Metalware::BuildFilesRetriever.new(config)
   end
 
   before do
@@ -70,7 +72,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
         FileUtils.mkdir_p File.dirname(url_path)
         FileUtils.touch(url_path)
 
-        retrieved_files = subject.retrieve(TEST_FILES_HASH)
+        retrieved_files = subject.retrieve(node_name, TEST_FILES_HASH)
 
         expect(retrieved_files[:namespace01][0]).to eq(raw: 'some/file_in_repo',
                                                        name: 'file_in_repo',
@@ -94,7 +96,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           '/var/lib/metalware/cache/templates/url'
         )
 
-        subject.retrieve(TEST_FILES_HASH)
+        subject.retrieve(node_name, TEST_FILES_HASH)
       end
     end
 
@@ -105,7 +107,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       describe 'for repo file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve(TEST_FILES_HASH)
+          retrieved_files = subject.retrieve(node_name, TEST_FILES_HASH)
 
           repo_file_entry = retrieved_files[:namespace01][0]
           template_path = "#{config.repo_path}/files/some/file_in_repo"
@@ -119,7 +121,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       describe 'for absolute path file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve(TEST_FILES_HASH)
+          retrieved_files = subject.retrieve(node_name, TEST_FILES_HASH)
 
           absolute_file_entry = retrieved_files[:namespace01][1]
           template_path = '/some/other/path'
@@ -138,7 +140,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
       end
 
       it 'adds error to file entry' do
-        retrieved_files = subject.retrieve(TEST_FILES_HASH)
+        retrieved_files = subject.retrieve(node_name, TEST_FILES_HASH)
 
         url_file_entry = retrieved_files[:namespace01][2]
         url = 'http://example.com/url'
