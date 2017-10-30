@@ -14,10 +14,10 @@ module Metalware
       end
 
       def start_build
-        rendered_self_template =
+        rendered_local_template =
           file_path.template_save_path(:local, node: node)
-        FileUtils.chmod 'u+x', rendered_self_template
-        puts SystemCommand.run(rendered_self_template)
+        FileUtils.chmod 'u+x', rendered_local_template
+        puts SystemCommand.run(rendered_local_template)
       end
     end
   end
