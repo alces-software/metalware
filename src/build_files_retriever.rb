@@ -30,27 +30,28 @@ require 'input'
 
 module Metalware
   class BuildFilesRetriever
-    attr_reader :node_name, :config
+    attr_reader :config
 
-    def initialize(node_name, config)
-      @node_name = node_name
+    def initialize(config)
       @config = config
     end
 
-    def retrieve(file_namespaces)
-      file_namespaces&.map do |namespace, identifiers|
-        [
-          namespace,
-          identifiers.map do |identifier|
-            file_hash_for(namespace, identifier)
-          end,
-        ]
+    def retrieve(node)
+      node.config.files&.to_h&.keys&.map do |namespace|
+        retrieve_for_namespace(node, namespace)
       end.to_h
     end
 
     private
 
-    def file_hash_for(namespace, identifier)
+    def retrieve_for_namespace(node, namespace)
+      file_hashes = node.config.files[namespace].map do |file|
+        file_hash_for(node.name, namespace, file)
+      end
+      [namespace, file_hashes]
+    end
+
+    def file_hash_for(node_name, namespace, identifier)
       name = File.basename(identifier)
       template = template_path(identifier)
 
@@ -101,7 +102,7 @@ module Metalware
         # Download the template to the Metalware cache; will render it from
         # there.
         cache_template_path(name).tap do |template|
-          Input.download(identifier, template)
+          input.download(identifier, template)
         end
       elsif absolute_path?(identifier)
         # Path is an absolute path on the deployment server.
@@ -110,6 +111,10 @@ module Metalware
         # Path is within the repo `files` directory.
         repo_template_path(identifier)
       end
+    end
+
+    def input
+      @input ||= Input::Cache.new
     end
 
     def url?(identifier)

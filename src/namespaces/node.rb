@@ -77,16 +77,10 @@ module Metalware
         end
       end
 
-      #
-      # The BuildFilesRetriever may be moved to the Alces namespace, for:
-      # 1. The raw files can be cached so they don't need new request for
-      #    each node
-      #
       def files
         @files ||= begin
-          retriever = BuildFilesRetriever.new(name, metal_config)
-          Constants::HASH_MERGER_DATA_STRUCTURE
-            .new(retriever.retrieve(config.files), &template_block)
+          data = alces.build_files_retriever.retrieve(self)
+          Constants::HASH_MERGER_DATA_STRUCTURE.new(data, &template_block)
         end
       end
 

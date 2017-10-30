@@ -42,5 +42,29 @@ module Metalware
         @log ||= MetalLog.new('download')
       end
     end
+
+    class Cache
+      def initialize
+        @cache = {}
+      end
+
+      def download(*args)
+        key = args.join(' - ')
+        save_to_cache(key, args: args)
+        result = cache[key]
+        result.is_a?(Exception) ? raise(result) : result
+      end
+
+      private
+
+      attr_reader :cache
+
+      def save_to_cache(key, args:)
+        return if cache[key]
+        cache[key] = Input.download(*args)
+      rescue => e
+        cache[key] = e
+      end
+    end
   end
 end
