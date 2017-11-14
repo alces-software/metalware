@@ -91,7 +91,7 @@ module SpecUtils
         node = Metalware::Node.new(config, node_name)
         Metalware::BuildFilesRetriever.new(
           node_name, config
-        ).retrieve(node.build_files)
+        ).retrieve(node.repo_config.files.to_h)
       end
     end
 

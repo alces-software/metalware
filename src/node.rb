@@ -90,22 +90,6 @@ module Metalware
       []
     end
 
-    # Get the configured `files` for this node, to be rendered and used in
-    # `build`. This is the merged namespaces with arrays of file identifiers
-    # from all `files` namespaces within all configs for the node, with
-    # identifiers in higher precedence configs replacing those with the same
-    # basename in lower precendence configs.
-    # XXX this may be better living in `Templating::Configuration`? `configs`
-    # and `load_config` could then be private.
-    def build_files
-      files_memo = Hash.new { |k, v| k[v] = [] }
-      configs.each_with_object(files_memo) do |config_name, files|
-        config = templating_configuration.load_config(config_name)
-        new_files = config[:files]
-        merge_in_files!(files, new_files)
-      end
-    end
-
     # The path the file with given `file_name` within the given `namespace`
     # will be rendered to for this node.
     def rendered_build_file_path(namespace, file_name)

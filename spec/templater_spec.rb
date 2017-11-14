@@ -492,7 +492,7 @@ RSpec.describe Metalware::Templater do
           # Can reach inside the passed `files` object.
           expect(
             magic_namespace.files.namespace01.first.raw
-          ).to eq('/some/other/path')
+          ).to eq('testnodes/some_file_in_repo')
           expect(
             magic_namespace.files.namespace02.first.raw
           ).to eq('another_file_in_repo')

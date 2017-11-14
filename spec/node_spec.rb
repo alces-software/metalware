@@ -100,28 +100,6 @@ RSpec.describe Metalware::Node do
       end
     end
 
-    describe '#build_files' do
-      it 'returns merged hash of files' do
-        expect(testnode01.build_files).to eq(namespace01: [
-          'testnodes/some_file_in_repo',
-          '/some/other/path',
-          'http://example.com/some/url',
-        ].sort,
-                                             namespace02: [
-                                               'another_file_in_repo',
-                                             ].sort)
-
-        expect(testnode02.build_files).to eq(namespace01: [
-          'testnode02/some_file_in_repo',
-          '/some/other/path',
-          'http://example.com/testnode02/some/url',
-        ].sort,
-                                             namespace02: [
-                                               'testnode02/another_file_in_repo',
-                                             ].sort)
-      end
-    end
-
     describe '#index' do
       it "returns consistent index of node within its 'primary' group" do
         # We define the 'primary' group for a node as the first group it is

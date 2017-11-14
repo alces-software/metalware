@@ -30,7 +30,7 @@ require 'spec_utils'
 require 'config'
 
 RSpec.shared_examples 'files rendering' do
-  it 'renders only files which could be retrieved' do
+  xit 'renders only files which could be retrieved' do
     filesystem.test do
       # Create needed repo files.
       FileUtils.mkdir_p('/var/lib/metalware/repo/files/testnodes')

@@ -101,7 +101,7 @@ module Metalware
 
       def retrieve_build_files(node)
         retriever = BuildFilesRetriever.new(node.name, config)
-        retriever.retrieve(node.build_files)
+        retriever.retrieve(node.repo_config.files.to_h)
       end
 
       def render_build_files(parameters, node)
