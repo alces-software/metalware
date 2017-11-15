@@ -305,4 +305,35 @@ RSpec.describe Metalware::Templater do
       end
     end
   end
+
+  describe '#render_to_staging' do
+    context 'with a basic template' do
+      let :test_node { 'random_test_node' }
+      AlcesUtils.mock self, :each do
+        mock_node(test_node)
+      end
+
+      let :template do
+        path = '/tmp/template'
+        File.write(path, '<%= node.name %>')
+        path
+      end
+
+      let :file { 'basic_test_file.foo' }
+      let :rendered_file do
+        File.join(Metalware::Constants::STAGING_DIR_PATH, file)
+      end
+
+      let :templater { Metalware::Templater.new(metal_config) }
+      before :each { templater.render_to_staging(alces.node, template, file) }
+
+      it 'places the file in the staging directory' do
+        expect(File.exist?(rendered_file)).to eq(true)
+      end
+
+      it 'renders the file' do
+        expect(File.read(rendered_file).chomp).to eq(test_node)
+      end
+    end
+  end
 end

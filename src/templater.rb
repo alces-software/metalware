@@ -29,6 +29,7 @@ require 'constants'
 require 'metal_log'
 require 'exceptions'
 require 'utils'
+require 'file_path'
 
 module Metalware
   class Templater
@@ -148,12 +149,46 @@ module Metalware
         ].join("\n") + "\n"
       end
 
+      # TODO: Remove this once render_to_file method is removed
       def write_rendered_template(rendered_template, save_file:)
         File.open(save_file.chomp, 'w') do |f|
           f.puts rendered_template
         end
         MetalLog.info "Template Saved: #{save_file}"
       end
+    end
+
+    def initialize(metal_config)
+      @metal_config = metal_config
+    end
+
+    def render_to_staging(
+      alces,
+      template,
+      save_file,
+      managed: false,
+      dynamic: {},
+      &validate
+    )
+      rendered_template = self.class.render(alces, template, dynamic)
+
+      staging_file = file_path.staging(save_file)
+      write_rendered_template(rendered_template, staging_file)
+    end
+
+    private
+
+    attr_reader :metal_config
+
+    def file_path
+      @file_path ||= FilePath.new(metal_config)
+    end
+
+    def write_rendered_template(rendered_template, save_file)
+      File.open(save_file.chomp, 'w') do |f|
+        f.puts rendered_template
+      end
+      MetalLog.info "Template Saved: #{save_file}"
     end
   end
 end
