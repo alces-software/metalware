@@ -334,6 +334,25 @@ RSpec.describe Metalware::Templater do
       it 'renders the file' do
         expect(File.read(rendered_file).chomp).to eq(test_node)
       end
+
+      it 'adds the file to the staging manifest' do
+        files = Metalware::Data.load(file_path.staging_manifest)[:files]
+        expect(files.length).to eq(1)
+        expect(files[0][:staging]).to eq(rendered_file)
+        expect(files[0][:sync]).to eq(save)
+        expect(files[0][:managed]).to eq(false)
+      end
+
+      it 'can add another file to the staging manifest' do
+        second_file = 'second_file.txt'
+        templater.render_to_staging(
+          alces.node, template, second_file, managed: true
+        )
+        files = Metalware::Data.load(file_path.staging_manifest)[:files]
+        expect(files.length).to eq(2)
+        expect(files[1][:sync]).to eq(second_file)
+        expect(files[1][:managed]).to eq(true)
+      end
     end
 
     context 'with a validation block' do

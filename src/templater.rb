@@ -30,6 +30,7 @@ require 'metal_log'
 require 'exceptions'
 require 'utils'
 require 'file_path'
+require 'data'
 
 module Metalware
   class Templater
@@ -177,7 +178,15 @@ module Metalware
         staging_file,
         dynamic: dynamic,
         &validate
-      )
+      ).tap do |valid|
+        if valid
+          update_staging_manifest(
+            staging_file,
+            sync_location,
+            managed
+          )
+        end
+      end
     end
 
     def render_to_file(
@@ -209,6 +218,19 @@ module Metalware
           MetalLog.info "Template Saved: #{save_file}"
         end
       end
+    end
+
+    def update_staging_manifest(staging_file, sync_location, managed)
+      manifest = Data.load(file_path.staging_manifest)
+      manifest = { files: [] } if manifest.empty?
+
+      manifest[:files].push(
+        staging: staging_file,
+        sync: sync_location,
+        managed: managed
+      )
+
+      Data.dump(file_path.staging_manifest, manifest)
     end
   end
 end

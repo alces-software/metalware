@@ -38,6 +38,7 @@ module Metalware
     GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
     INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
+    STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
 
     # XXX Following needs to actually be created somewhere.
     GUI_CREDENTIALS_PATH = File.join(CACHE_PATH, 'credentials.yaml')
