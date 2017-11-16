@@ -165,15 +165,30 @@ module Metalware
     def render_to_staging(
       alces,
       template,
-      save_file,
+      sync_location,
       managed: false,
       dynamic: {},
       &validate
     )
-      rendered_template = self.class.render(alces, template, dynamic)
-      staging_file = file_path.staging(save_file)
+      staging_file = file_path.staging(sync_location)
+      render_to_file(
+        alces,
+        template,
+        staging_file,
+        dynamic: dynamic,
+        &validate
+      )
+    end
 
-      validate_and_write_file(rendered_template, staging_file, &validate)
+    def render_to_file(
+      alces,
+      template,
+      save_file,
+      dynamic: {},
+      &validate
+    )
+      rendered_template = self.class.render(alces, template, dynamic)
+      validate_and_write_file(rendered_template, save_file, &validate)
     end
 
     private
