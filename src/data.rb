@@ -49,6 +49,7 @@ module Metalware
         raise dump_error(data) unless valid_data?(data)
         yaml = data.deep_transform_keys(&:to_s).to_yaml
         File.write(data_file, yaml)
+        log.info "dump: #{data_file}"
       end
 
       private

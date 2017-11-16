@@ -9,15 +9,17 @@ module Metalware
     class Local < BuildMethod
       TEMPLATES = [:local].freeze
 
-      def render_build_start_templates
-        render_template(:local, parameters: DEFAULT_BUILD_START_PARAMETERS)
-      end
-
       def start_build
         rendered_local_template =
           file_path.template_save_path(:local, node: node)
         FileUtils.chmod 'u+x', rendered_local_template
         puts SystemCommand.run(rendered_local_template)
+      end
+
+      private
+
+      def staging_templates
+        [:local]
       end
     end
   end

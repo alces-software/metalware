@@ -103,6 +103,7 @@ module Metalware
         end
       end
 
+      #TODO: Remove as it is handled in the BuildMethod
       def render_build_files(node)
         node.files.each do |namespace, files|
           files.each do |file|

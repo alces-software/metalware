@@ -379,6 +379,21 @@ commands:
         description: >
           Sets the maximum number of network operations
 
+  template:
+    syntax: metal template NODE_IDENTIFIER [options]
+    summary: Template the files for a node or group to stagging
+    description: >
+      The template command renders the files for a node or group. This includes
+      the templates for the particular build method used as well as the build
+      files as defined in the configs.
+
+
+      All the templates are rendered to the stagging directory. This is so they
+      can be reviewed before the are moved into place using the sync command.
+    action: Commands::Template
+    options:
+      - *group_option
+
   view-answers:
     syntax: metal view-answers [options]
     summary: View configured answers

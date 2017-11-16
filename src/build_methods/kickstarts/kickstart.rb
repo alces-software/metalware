@@ -16,19 +16,14 @@ module Metalware
           super
         end
 
-        def render_build_start_templates
-          render_kickstart(DEFAULT_BUILD_START_PARAMETERS)
-          render_pxelinux(DEFAULT_BUILD_START_PARAMETERS)
-        end
-
         def render_build_complete_templates
           render_pxelinux(DEFAULT_BUILD_COMPLETE_PARAMETERS)
         end
 
         private
 
-        def render_kickstart(parameters)
-          render_template(:kickstart, parameters: parameters)
+        def staging_templates
+          [:kickstart]
         end
 
         def render_pxelinux(parameters)

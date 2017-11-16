@@ -172,6 +172,7 @@ module Metalware
       validation_class: nil
     )
       staging_file = file_path.staging(sync_location)
+      FileUtils.mkdir_p File.dirname(staging_file)
       render_to_file(
         alces,
         template,
