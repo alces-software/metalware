@@ -169,24 +169,22 @@ module Metalware
       sync_location,
       managed: false,
       dynamic: {},
-      &validate
+      validation_class: nil
     )
       staging_file = file_path.staging(sync_location)
       render_to_file(
         alces,
         template,
         staging_file,
-        dynamic: dynamic,
-        &validate
-      ).tap do |valid|
-        if valid
-          update_staging_manifest(
-            staging_file,
-            sync_location,
-            managed
-          )
-        end
-      end
+        dynamic: dynamic
+      )
+
+      update_staging_manifest(
+        staging_file,
+        sync_location,
+        managed,
+        validation_class
+      )
     end
 
     def render_to_file(
@@ -220,16 +218,24 @@ module Metalware
       end
     end
 
-    def update_staging_manifest(staging_file, sync_location, managed)
+    def update_staging_manifest(
+      staging_file,
+      sync_location,
+      managed,
+      validation_class
+    )
       manifest = Data.load(file_path.staging_manifest)
       manifest = { files: [] } if manifest.empty?
 
-      manifest[:files].push(
+      staging_file_data = {
         staging: staging_file,
         sync: sync_location,
-        managed: managed
-      )
+        managed: managed,
+      }.tap do |d|
+        d[:validation_class] = validation_class if validation_class
+      end
 
+      manifest[:files].push staging_file_data
       Data.dump(file_path.staging_manifest, manifest)
     end
   end
