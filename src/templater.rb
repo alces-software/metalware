@@ -171,9 +171,9 @@ module Metalware
       &validate
     )
       rendered_template = self.class.render(alces, template, dynamic)
-
       staging_file = file_path.staging(save_file)
-      write_rendered_template(rendered_template, staging_file)
+
+      validate_and_write_file(rendered_template, staging_file, &validate)
     end
 
     private
@@ -184,11 +184,16 @@ module Metalware
       @file_path ||= FilePath.new(metal_config)
     end
 
-    def write_rendered_template(rendered_template, save_file)
-      File.open(save_file.chomp, 'w') do |f|
-        f.puts rendered_template
+    def validate_and_write_file(content, save_file, &validate)
+      # Ensures a validation block is defined
+      validate = ->(_t) { true } unless block_given?
+
+      validate.call(content).tap do |valid|
+        if valid
+          File.write(save_file, content)
+          MetalLog.info "Template Saved: #{save_file}"
+        end
       end
-      MetalLog.info "Template Saved: #{save_file}"
     end
   end
 end

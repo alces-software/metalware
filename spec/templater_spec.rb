@@ -307,6 +307,12 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render_to_staging' do
+    let :templater { Metalware::Templater.new(metal_config) }
+    let :save { 'template.foo' }
+    let :rendered_file do
+      File.join(Metalware::Constants::STAGING_DIR_PATH, save)
+    end
+
     context 'with a basic template' do
       let :test_node { 'random_test_node' }
       AlcesUtils.mock self, :each do
@@ -319,13 +325,7 @@ RSpec.describe Metalware::Templater do
         path
       end
 
-      let :file { 'basic_test_file.foo' }
-      let :rendered_file do
-        File.join(Metalware::Constants::STAGING_DIR_PATH, file)
-      end
-
-      let :templater { Metalware::Templater.new(metal_config) }
-      before :each { templater.render_to_staging(alces.node, template, file) }
+      before :each { templater.render_to_staging(alces.node, template, save) }
 
       it 'places the file in the staging directory' do
         expect(File.exist?(rendered_file)).to eq(true)
@@ -333,6 +333,30 @@ RSpec.describe Metalware::Templater do
 
       it 'renders the file' do
         expect(File.read(rendered_file).chomp).to eq(test_node)
+      end
+    end
+
+    context 'with a validation block' do
+      let :template do
+        path = '/tmp/template'
+        FileUtils.touch path
+        path
+      end
+
+      it 'saves if the validation returns true' do
+        result = templater.render_to_staging(alces, template, save) do |_t|
+          true
+        end
+        expect(File.exist?(rendered_file)).to eq(true)
+        expect(result).to eq(true)
+      end
+
+      it 'skips saving if the validation returns false' do
+        result = templater.render_to_staging(alces, template, save) do |_t|
+          false
+        end
+        expect(File.exist?(rendered_file)).to eq(false)
+        expect(result).to eq(false)
       end
     end
   end
