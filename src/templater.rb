@@ -31,6 +31,7 @@ require 'exceptions'
 require 'utils'
 require 'file_path'
 require 'data'
+require 'validation/loader'
 
 module Metalware
   class Templater
@@ -161,6 +162,8 @@ module Metalware
 
     def initialize(metal_config)
       @metal_config = metal_config
+      @file_path = FilePath.new(metal_config)
+      @loader = Validation::Loader.new(metal_config)
     end
 
     def render_to_staging(
@@ -201,11 +204,7 @@ module Metalware
 
     private
 
-    attr_reader :metal_config
-
-    def file_path
-      @file_path ||= FilePath.new(metal_config)
-    end
+    attr_reader :metal_config, :file_path, :loader
 
     def validate_and_write_file(content, save_file, &validate)
       # Ensures a validation block is defined
@@ -225,8 +224,7 @@ module Metalware
       managed,
       validation_class
     )
-      manifest = Data.load(file_path.staging_manifest)
-      manifest = { files: [] } if manifest.empty?
+      manifest = loader.staging_manifest
 
       staging_file_data = {
         staging: staging_file,
