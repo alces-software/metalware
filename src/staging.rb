@@ -31,7 +31,9 @@ module Metalware
       @file_path = FilePath.new(metal_config)
       manifest_hash = Data.load(file_path.staging_manifest)
       manifest_hash = blank_manifest if manifest_hash.empty?
-      @manifest = RecursiveOpenStruct.new(manifest_hash)
+      @manifest = RecursiveOpenStruct.new(
+        manifest_hash, recurse_over_arrays: true
+      )
     end
 
     attr_reader :manifest
@@ -45,12 +47,12 @@ module Metalware
       FileUtils.mkdir_p(File.dirname(staging))
       File.write(staging, content)
 
-      manifest.files.push(RecursiveOpenStruct.new(
-                            sync: sync,
-                            staging: staging,
-                            managed: managed,
-                            validator: validator
-      ))
+      manifest.files.push(
+        sync: sync,
+        staging: staging,
+        managed: managed,
+        validator: validator
+      )
     end
 
     private

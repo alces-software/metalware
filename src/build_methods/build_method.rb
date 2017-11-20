@@ -1,17 +1,21 @@
 
 # frozen_string_literal: true
 
+require 'staging'
+
 module Metalware
   module BuildMethods
     class BuildMethod
-      def initialize(config, node)
-        @config = config
+      def initialize(metal_config, node)
+        @metal_config = metal_config
         @node = node
       end
 
       def render_staging_templates
-        staging_templates.each { |t| render_to_staging(t) }
-        render_build_files_to_staging
+        Staging.template(metal_config) do |templator|
+          staging_templates.each { |t| render_to_staging(templator, t) }
+          render_build_files_to_staging(templator)
+        end
       end
 
       # TODO: Remove this once all build methods use the staging
@@ -39,15 +43,7 @@ module Metalware
 
       private
 
-      DEFAULT_BUILD_START_PARAMETERS = {
-        firstboot: true,
-      }.freeze
-
-      DEFAULT_BUILD_COMPLETE_PARAMETERS = {
-        firstboot: false,
-      }.freeze
-
-      attr_reader :config, :node
+      attr_reader :metal_config, :node
 
       delegate :template_path, to: :file_path
 
@@ -56,42 +52,27 @@ module Metalware
       end
 
       def file_path
-        @file_path ||= FilePath.new(config)
+        @file_path ||= FilePath.new(metal_config)
       end
 
-      def render_template(template_type, parameters:, save_path: nil)
-        template_type_path = template_path template_type, node: node
-        save_path ||= file_path.template_save_path(template_type, node: node)
-        Templater.render_to_file(node,
-                                 template_type_path,
-                                 save_path,
-                                 **parameters.to_h)
-      end
-
-      def render_build_files_to_staging
+      def render_build_files_to_staging(templater)
         node.files.each do |namespace, files|
           files.each do |file|
             next if file[:error]
-            render_path = file_path.rendered_build_file_path(node.name,
-                                                             namespace,
-                                                             file[:name])
-            templater.render_to_staging(node,
-                                        file[:template_path],
-                                        render_path)
+            render_path = file_path.rendered_build_file_path(
+              node.name,
+              namespace,
+              file[:name]
+            )
+            templater.render(node, file[:template_path], render_path)
           end
         end
       end
 
-      def render_to_staging(template_type, sync: nil)
+      def render_to_staging(templater, template_type, sync: nil)
         template_type_path = template_path template_type, node: node
         sync ||= file_path.template_save_path(template_type, node: node)
-        templater.render_to_staging(node,
-                                    template_type_path,
-                                    sync)
-      end
-
-      def templater
-        @templater ||= Templater.new(config)
+        templater.render(node, template_type_path, sync)
       end
     end
   end
