@@ -29,9 +29,8 @@ require 'constants'
 require 'metal_log'
 require 'exceptions'
 require 'utils'
-require 'file_path'
 require 'data'
-require 'validation/loader'
+require 'staging'
 
 module Metalware
   class Templater
@@ -160,82 +159,24 @@ module Metalware
       end
     end
 
-    def initialize(metal_config)
-      @metal_config = metal_config
-      @file_path = FilePath.new(metal_config)
-      @loader = Validation::Loader.new(metal_config)
+    def initialize(staging)
+      @staging = staging
     end
 
-    def render_to_staging(
+    # TODO: create render_manged_file method
+    def render(
       alces,
       template,
       sync_location,
-      managed: false,
       dynamic: {},
-      validation_class: nil
+      validator: nil
     )
-      staging_file = file_path.staging(sync_location)
-      FileUtils.mkdir_p File.dirname(staging_file)
-      render_to_file(
-        alces,
-        template,
-        staging_file,
-        dynamic: dynamic
-      )
-
-      update_staging_manifest(
-        staging_file,
-        sync_location,
-        managed,
-        validation_class
-      )
-    end
-
-    def render_to_file(
-      alces,
-      template,
-      save_file,
-      dynamic: {},
-      &validate
-    )
-      rendered_template = self.class.render(alces, template, dynamic)
-      validate_and_write_file(rendered_template, save_file, &validate)
+      rendered = self.class.render(alces, template, dynamic)
+      staging.push_file(sync_location, rendered, validator: validator)
     end
 
     private
 
-    attr_reader :metal_config, :file_path, :loader
-
-    def validate_and_write_file(content, save_file, &validate)
-      # Ensures a validation block is defined
-      validate = ->(_t) { true } unless block_given?
-
-      validate.call(content).tap do |valid|
-        if valid
-          File.write(save_file, content)
-          MetalLog.info "Template Saved: #{save_file}"
-        end
-      end
-    end
-
-    def update_staging_manifest(
-      staging_file,
-      sync_location,
-      managed,
-      validation_class
-    )
-      manifest = loader.staging_manifest
-
-      staging_file_data = {
-        staging: staging_file,
-        sync: sync_location,
-        managed: managed,
-      }.tap do |d|
-        d[:validation_class] = validation_class if validation_class
-      end
-
-      manifest[:files].push staging_file_data
-      Data.dump(file_path.staging_manifest, manifest)
-    end
+    attr_reader :staging
   end
 end
