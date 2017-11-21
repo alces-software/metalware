@@ -55,12 +55,43 @@ module Metalware
       )
     end
 
+    def sync_files
+      manifest.files.delete_if do |data|
+        begin
+          data[:managed] ? move_managed(data) : move_non_managed(data)
+          true
+        rescue => e
+          $stderr.puts e.inspect
+          return false
+        end
+      end
+    end
+
     private
 
     attr_reader :metal_config, :file_path
 
     def blank_manifest
       { files: [] }
+    end
+
+    def move_managed(data)
+      raise NotImplementedError
+    end
+
+    def move_non_managed(data)
+      validate(data, File.read(data[:staging]))
+      FileUtils.mv data[:staging], data[:sync]
+    end
+
+    def validate(data, content)
+      return unless data[:validator]
+      unless data[:validator].new.validate(content)
+        msg = "A file failed the following validator: #{data[:validator]}\n"
+        msg += "File: #{data[:staging]}"
+        msg += "Managed?: #{data[:managed]}"
+        raise ValidationFailure, msg
+      end
     end
   end
 end
