@@ -43,31 +43,34 @@ module Metalware
       Data.dump(file_path.staging_manifest, manifest.to_h)
     end
 
-    def push_file(sync, content, managed: false, validator: nil)
+    def push_file(sync, content, **options)
       staging = file_path.staging(sync)
       FileUtils.mkdir_p(File.dirname(staging))
       File.write(staging, content)
 
       manifest.files.push(
-        sync: sync,
-        staging: staging,
-        managed: managed,
-        validator: validator
+        {
+          sync: sync,
+          staging: staging,
+        }.merge(default_push_options)
+         .merge(options)
       )
     end
 
     def sync_files
       manifest.files.delete_if do |data|
+        return_value = nil
         begin
           managed = data[:managed]
           content = File.read(data[:staging])
           content = ManagedFile.content(data[:sync], content) if managed
           move_file(data, content)
-          true
+          return_value = true
         rescue => e
           $stderr.puts e.inspect
-          return false
+          return_value = false
         end
+        return_value
       end
     end
 
@@ -75,12 +78,21 @@ module Metalware
 
     attr_reader :metal_config, :file_path
 
+    def default_push_options
+      {
+        managed: false,
+        validator: nil,
+        mkdir: false,
+      }
+    end
+
     def blank_manifest
       { files: [] }
     end
 
     def move_file(data, content)
       validate(data, content)
+      FileUtils.mkdir_p(File.dirname(data[:sync])) if data[:mkdir]
       File.write(data[:sync], content)
       FileUtils.rm(data[:staging])
     end

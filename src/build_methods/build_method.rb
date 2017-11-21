@@ -64,7 +64,7 @@ module Metalware
               namespace,
               file[:name]
             )
-            templater.render(node, file[:template_path], render_path)
+            templater.render(node, file[:template_path], render_path, mkdir: true)
           end
         end
       end

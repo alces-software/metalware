@@ -163,16 +163,15 @@ module Metalware
       @staging = staging
     end
 
-    # TODO: create render_manged_file method
     def render(
       alces,
       template,
       sync_location,
       dynamic: {},
-      validator: nil
+      **staging_options
     )
       rendered = self.class.render(alces, template, dynamic)
-      staging.push_file(sync_location, rendered, validator: validator)
+      staging.push_file(sync_location, rendered, **staging_options)
     end
 
     private
