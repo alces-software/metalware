@@ -4,6 +4,7 @@ require 'data'
 require 'file_path'
 require 'recursive-open-struct'
 require 'templater'
+require 'managed_file'
 
 module Metalware
   class Staging
@@ -58,7 +59,10 @@ module Metalware
     def sync_files
       manifest.files.delete_if do |data|
         begin
-          data[:managed] ? move_managed(data) : move_non_managed(data)
+          managed = data[:managed]
+          content = File.read(data[:staging])
+          content = ManagedFile.content(data[:sync], content) if managed
+          move_file(data, content)
           true
         rescue => e
           $stderr.puts e.inspect
@@ -75,13 +79,10 @@ module Metalware
       { files: [] }
     end
 
-    def move_managed(data)
-      raise NotImplementedError
-    end
-
-    def move_non_managed(data)
-      validate(data, File.read(data[:staging]))
-      FileUtils.mv data[:staging], data[:sync]
+    def move_file(data, content)
+      validate(data, content)
+      File.write(data[:sync], content)
+      FileUtils.rm(data[:staging])
     end
 
     def validate(data, content)

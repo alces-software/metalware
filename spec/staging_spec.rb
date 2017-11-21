@@ -143,5 +143,55 @@ RSpec.describe Metalware::Staging do
         expect(stderr.read).to include('ValidationFailure')
       end
     end
+
+    context 'with a managed file' do
+      let :managed_file { '/tmp/managed' }
+      let :managed_content { 'Managed Content' }
+
+      def read_managed_content(file = managed_file)
+        File.read(file).gsub(/^$\n/, '').split("\n")
+      end
+
+      before :each do
+        Metalware::Staging.update(metal_config) do |staging|
+          staging.push_file(managed_file, managed_content, managed: true)
+        end
+        Metalware::Staging.update(metal_config) { |s| s.sync_files }
+      end
+
+      it 'writes to the file if it does not exist' do
+        expect(File.exist?(managed_file)).to eq(true)
+      end
+
+      it 'writes the managed file content and flags' do
+        content = read_managed_content
+        expect(content.first).to eq(Metalware::ManagedFile::MANAGED_START)
+        expect(content.last).to eq(Metalware::ManagedFile::MANAGED_END)
+        expect(content).to include(managed_content)
+      end
+
+      it 'preserves the start and end of the file and updates content' do
+        file_start = 'FILE START'
+        file_end = 'FILE END'
+        start_content = [
+          file_start,
+          File.read(managed_file),
+          file_end,
+        ].join("\n")
+        File.write(managed_file, start_content)
+
+        new_content = 'NEW CONTENT'
+        Metalware::Staging.update(metal_config) do |staging|
+          staging.push_file(managed_file, new_content, managed: true)
+          staging.sync_files
+        end
+
+        save_content = read_managed_content
+        expect(save_content.first).to eq(file_start)
+        expect(save_content.last).to eq(file_end)
+        expect(save_content).to include(new_content)
+        expect(save_content).not_to include(managed_content)
+      end
+    end
   end
 end
