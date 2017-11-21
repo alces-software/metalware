@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
+require 'staging'
 
 module Metalware
   module Commands
@@ -31,35 +32,10 @@ module Metalware
 
       attr_reader :manifest
 
-      def setup
-        @manifest = loader.staging_manifest
-      end
+      def setup; end
 
       def run
-        move_build_files_into_place
-      ensure
-        Data.dump(file_path.staging_manifest, manifest)
-      end
-
-      def move_build_files_into_place
-        manifest[:files].delete_if do |data|
-          begin
-            data[:managed] ? move_managed(data) : move_non_managed(data)
-            true
-          rescue => e
-            MetalLog.warn "Failed to sync: #{data[:staging]}"
-            MetalLog.warn e.inspect
-            return false
-          end
-        end
-      end
-
-      def move_non_managed(data)
-        FileUtils.mv(data[:staging], data[:sync])
-      end
-
-      def move_managed(data)
-        raise NotImplementedError
+        Staging.update(config, &:sync_files)
       end
     end
   end

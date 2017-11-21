@@ -48,11 +48,6 @@ module Metalware
         Data.load(path.group_cache)
       end
 
-      def staging_manifest
-        manifest = Data.load(path.staging_manifest)
-        manifest.empty? ? { files: [] } : manifest
-      end
-
       private
 
       attr_reader :path, :config, :cache_configure
