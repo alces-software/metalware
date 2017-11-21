@@ -174,7 +174,7 @@ commands:
       'true' the first time this is rendered and 'false' the second.
 
 
-      As the 'build self' command is repsonsible for configuring the metalware
+      As the 'build local' command is repsonsible for configuring the metalware
       master node, it functions differently to the other nodes. The build self
       command is responsible for starting the http server and thus can not curl
       for files. Instead it must directly access the file system to obtain the
@@ -184,14 +184,6 @@ commands:
     action: Commands::Build
     options:
       - *group_option
-      - tags: [--edit-start]
-        description: >
-          Only renders the build templates to be edited. Does not wait for the
-          nodes to be built
-      - tags: [--edit-continue]
-        description: >
-          Continues the build process after the files have been editted. Skips
-          the initial template rendering step
 
   configure:
     syntax: metal configure [options]

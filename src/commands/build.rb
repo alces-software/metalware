@@ -29,7 +29,6 @@ require 'config'
 require 'templater'
 require 'constants'
 require 'output'
-require 'build_files_retriever'
 require 'exceptions'
 require 'command_helpers/node_identifier'
 
@@ -50,18 +49,9 @@ module Metalware
 
       prepend CommandHelpers::NodeIdentifier
 
-      def setup
-        @edit_start = options.edit_start
-        @edit_continue = options.edit_continue
-        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
-      end
+      def setup; end
 
       def run
-        render_build_templates unless edit_continue
-        if edit_start
-          puts(EDIT_START_MSG)
-          return
-        end
         start_build
         wait_for_nodes_to_build
         teardown
@@ -95,29 +85,11 @@ module Metalware
         end
       end
 
-      def render_build_templates
-        nodes.each do |node|
-          render_build_files(node)
-          build_method = build_methods[node.name]
-          build_method.render_build_start_templates
-        end
-      end
-
-      #TODO: Remove as it is handled in the BuildMethod
-      def render_build_files(node)
-        node.files.each do |namespace, files|
-          files.each do |file|
-            next if file[:error]
-            render_path = file_path.rendered_build_file_path(node.name, namespace, file[:name])
-            FileUtils.mkdir_p(File.dirname(render_path))
-            Templater.render_to_file(node, file[:template_path], render_path)
-          end
-        end
-      end
-
       def start_build
         nodes.each do |node|
-          build_threads.add(Thread.new { node.start_build })
+          build_threads.add(Thread.new do
+            build_methods[node.name].start_build
+          end)
         end
       end
 
