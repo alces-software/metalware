@@ -117,10 +117,6 @@ RSpec.describe Metalware::Commands::Build do
   context 'when called without group argument' do
     it 'renders default standard templates for given node' do
       expect_renders(
-        "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode01'
-      )
-      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
         to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       ).at_least(:once)
@@ -145,10 +141,6 @@ RSpec.describe Metalware::Commands::Build do
 
       it 'uses specified templates' do
         filesystem.test do
-          expect_renders(
-            "#{metal_config.repo_path}/kickstart/repo_kickstart",
-            to: '/var/lib/metalware/rendered/kickstart/testnode01'
-          )
           expect_renders(
             "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
             to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
@@ -214,21 +206,6 @@ RSpec.describe Metalware::Commands::Build do
           receive(:build_method).and_return(Metalware::BuildMethods::Basic)
       end
 
-      it 'renders only basic template' do
-        filesystem.test do
-          # When using the 'basic' build method, the only templates to be
-          # rendered for a node are the `files` which can be retrieved, and the
-          # `basic` template once at the beginning of the build process.
-          allow(Metalware::Templater).to receive(:render_to_file).once
-          expect_renders(
-            "#{metal_config.repo_path}/basic/default",
-            to: '/var/lib/metalware/rendered/basic/testnode01'
-          )
-
-          run_build('testnode01')
-        end
-      end
-
       # Note: similar (but simpler) version of test for Kickstart build method.
       it 'specifies correct template dependencies' do
         filesystem.test do
@@ -254,18 +231,10 @@ RSpec.describe Metalware::Commands::Build do
 
     it 'renders standard templates for each node' do
       expect_renders(
-        "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode01'
-      )
-      expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
         to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
       )
 
-      expect_renders(
-        "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode02'
-      )
       expect_renders(
         "#{metal_config.repo_path}/pxelinux/default",
         to: '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP'

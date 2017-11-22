@@ -73,7 +73,7 @@ module Metalware
 
       def repo_dependencies
         build_methods.reduce([]) do |memo, (_name, build_method)|
-          memo.push(build_method.template_paths)
+          memo.push(build_method.dependency_paths)
         end.flatten.uniq
       end
 

@@ -27,9 +27,19 @@ module Metalware
         # Runs after the nodes have reported built
       end
 
+      def dependency_paths
+        staging_templates.map do |t|
+          strip_leading_repo_path(file_path.template_path(t, node: node))
+        end
+      end
+
       private
 
       attr_reader :metal_config, :node
+
+      def strip_leading_repo_path(path)
+        path.gsub(/^#{file_path.repo}\/?/, '')
+      end
 
       def staging_templates
         raise NotImplementedError

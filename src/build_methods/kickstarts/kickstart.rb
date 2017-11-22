@@ -15,6 +15,10 @@ module Metalware
           render_pxelinux(firstboot: false)
         end
 
+        def dependency_paths
+          super.push(strip_leading_repo_path(pxelinux_template_path))
+        end
+
         private
 
         def staging_templates
