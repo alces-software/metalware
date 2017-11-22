@@ -26,43 +26,31 @@ require 'build_methods/kickstarts/uefi'
 require 'config'
 require 'filesystem'
 require 'file_path'
+require 'alces_utils'
 
 RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  include AlcesUtils
 
-  let :node do
-    node = Metalware::Namespaces::Node.create(alces, 'nodeA01')
-    allow(node).to receive(:build_method).and_return(uefi_build_method)
-    allow(node).to receive(:hexadecimal_ip).and_return('00000000')
-    node
+  before :each do
+    FileSystem.root_setup do |fs|
+      fs.with_minimal_repo
+    end
   end
 
-  let :build_uefi do
-    Metalware::BuildMethods::Kickstarts::UEFI.new(config, node)
+  AlcesUtils.mock self, :each do
+    mock_node('nodeA01')
+    allow(alces.node).to receive(:hexadecimal_ip).and_return('00000000')
+    config(alces.node, build_method: :'uefi-kickstart')
   end
 
-  let :file_path { Metalware::FilePath.new(config) }
-  let :filesystem do
-    FileSystem.setup(&:with_minimal_repo)
-  end
-
-  let :uefi_build_method { Metalware::BuildMethods::Kickstarts::UEFI }
-
-  it 'contains the correct TEMPLATES list' do
-    # The constant is set on initialize
-    uefi_build_method.new(nil, nil)
-    expect(uefi_build_method::TEMPLATES).to \
-      eq([:kickstart, :'uefi-kickstart'])
+  let :build_method do
+    alces.node.build_method.new(metal_config, alces.node)
   end
 
   it 'renders the pxelinux template with correct save_path' do
-    inputs = {
-      parameters: {},
-      save_path: File.join(file_path.uefi_save, 'grub.cfg-00000000'),
-    }
-    expect(build_uefi).to receive(:render_template)
-      .with(:'uefi-kickstart', **inputs)
-    build_uefi.send(:render_pxelinux, {})
+    save_path = File.join(file_path.uefi_save, 'grub.cfg-00000000')
+    FileUtils.mkdir(File.dirname(save_path))
+    build_method.start_hook
+    expect(File.exist?(save_path)).to eq(true)
   end
 end
