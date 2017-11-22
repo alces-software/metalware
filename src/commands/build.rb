@@ -87,14 +87,20 @@ module Metalware
 
       def start_build
         nodes.each do |node|
-          build_threads.add(Thread.new do
-            build_methods[node.name].start_build
-          end)
+          run_in_build_thread do
+            build_methods[node.name].start_hook
+          end
         end
       end
 
       def build_threads
         @build_threads ||= ThreadGroup.new
+      end
+
+      def run_in_build_thread
+        build_threads.add(Thread.new do
+          yield if block_given?
+        end)
       end
 
       def clear_up_build_threads
@@ -113,7 +119,7 @@ module Metalware
             !rerendered_nodes.include?(node) && built?(node)
           end
                .tap do |nodes|
-            render_build_complete_templates(nodes)
+            run_complete_hook(nodes)
             rerendered_nodes.push(*nodes)
           end
                .each do |node|
@@ -147,19 +153,21 @@ module Metalware
         # XXX Somewhat similar to `handle_interrupt`; may not be easily
         # generalizable however.
         Output.info 'Exiting...'
-        render_all_build_complete_templates
+        run_all_complete_hooks
         teardown
         record_gui_build_complete
       end
 
-      def render_all_build_complete_templates
-        render_build_complete_templates(nodes)
+      def run_all_complete_hooks
+        run_complete_hook(nodes)
       end
 
-      def render_build_complete_templates(nodes)
+      def run_complete_hook(nodes)
         nodes.each do |node|
           build_method = build_methods[node.name]
-          build_method.render_build_complete_templates
+          run_in_build_thread do
+            build_method.complete_hook
+          end
         end
       end
 
@@ -181,7 +189,7 @@ module Metalware
         teardown
       rescue Interrupt
         Output.info 'Re-rendering templates anyway...'
-        render_all_build_complete_templates
+        run_all_complete_hooks
         teardown
       end
 
@@ -198,7 +206,7 @@ module Metalware
           [yes/no]
         EOF
 
-        render_all_build_complete_templates if agree(should_rerender)
+        run_all_complete_hooks if agree(should_rerender)
       end
 
       EDIT_START_MSG = <<-EOF.strip_heredoc

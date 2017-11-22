@@ -7,9 +7,7 @@ require 'fileutils'
 module Metalware
   module BuildMethods
     class Local < BuildMethod
-      TEMPLATES = [:local].freeze
-
-      def start_build
+      def start_hook
         rendered_local_template =
           file_path.template_save_path(:local, node: node)
         FileUtils.chmod 'u+x', rendered_local_template

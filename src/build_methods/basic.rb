@@ -4,8 +4,6 @@
 module Metalware
   module BuildMethods
     class Basic < BuildMethod
-      TEMPLATES = [:basic].freeze
-
       private
 
       def staging_templates

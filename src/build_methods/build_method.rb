@@ -11,6 +11,7 @@ module Metalware
         @node = node
       end
 
+      # TODO: Change name to staging_hook
       def render_staging_templates
         Staging.template(metal_config) do |templator|
           staging_templates.each { |t| render_to_staging(templator, t) }
@@ -18,34 +19,17 @@ module Metalware
         end
       end
 
-      # TODO: Remove this once all build methods use the staging
-      def render_build_start_templates
-        raise NotImplementedError
+      def start_hook
+        # Runs at the start of the build process
       end
 
-      # TODO: Change the name to match the build complete hook
-      def render_build_complete_templates; end
-
-      # TODO: Remove this if not required in refactor
-      def template_paths
-        self.class::TEMPLATES.map do |template_type|
-          full_template_path = template_path(template_type, node: node)
-          file_path.repo_relative_path_to(full_template_path)
-        end
-      end
-
-      # TODO: Change to build start hook
-      def start_build
-        # Runs after the files have been rendered but before build waits
-        # for the nodes to complete. Leave blank if the nodes build need to
-        # be started manually by powering them on.
+      def complete_hook
+        # Runs after the nodes have reported built
       end
 
       private
 
       attr_reader :metal_config, :node
-
-      delegate :template_path, to: :file_path
 
       def staging_templates
         raise NotImplementedError
