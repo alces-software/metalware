@@ -150,19 +150,22 @@ RSpec.describe Metalware::Namespaces::Node do
       let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
 
       def mock_build_method(method, my_node = node)
-        my_node.config.send(:define_singleton_method, :build_method) { method }
+        config = OpenStruct.new(build_method: method)
+        allow(my_node).to receive(:config).and_return(config)
+        my_node.instance_variable_set(:@build_method, nil)
       end
 
       context 'regular node' do
         it 'defaults to kickstart if not specified' do
           mock_build_method(nil)
           exp = Metalware::BuildMethods::Kickstarts::Pxelinux
-          expect(node.build_method).to eq(exp)
+          expect(node.build_method.class).to eq(exp)
         end
 
         it 'uses the config value' do
           mock_build_method(:basic)
-          expect(node.build_method).to eq(Metalware::BuildMethods::Basic)
+          exp = Metalware::BuildMethods::Basic
+          expect(node.build_method.class).to eq(exp)
         end
 
         it 'errors if tries to use local build' do

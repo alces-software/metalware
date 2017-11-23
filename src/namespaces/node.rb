@@ -21,10 +21,6 @@ module Metalware
 
       include Namespaces::Mixins::Name
 
-      def initialize(*args)
-        super(*args)
-      end
-
       def group
         @group ||= alces.groups.send(genders.first)
       end
@@ -64,17 +60,7 @@ module Metalware
       end
 
       def build_method
-        case config.build_method
-        when :local
-          msg = "node '#{name}' can not use the local build"
-          raise InvalidLocalBuild, msg
-        when :'uefi-kickstart'
-          BuildMethods::Kickstarts::UEFI
-        when :basic
-          BuildMethods::Basic
-        else
-          BuildMethods::Kickstarts::Pxelinux
-        end
+        @build_method ||= build_method_class.new(alces.metal_config, self)
       end
 
       def files
@@ -108,6 +94,20 @@ module Metalware
 
       def additional_dynamic_namespace
         { node: self }
+      end
+
+      def build_method_class
+        case config.build_method
+        when :local
+          msg = "node '#{name}' can not use the local build"
+          raise InvalidLocalBuild, msg
+        when :'uefi-kickstart'
+          BuildMethods::Kickstarts::UEFI
+        when :basic
+          BuildMethods::Basic
+        else
+          BuildMethods::Kickstarts::Pxelinux
+        end
       end
     end
   end

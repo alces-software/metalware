@@ -46,6 +46,8 @@ module Metalware
         @dynamic_stack = []
       end
 
+      attr_reader :metal_config
+
       def render_erb_template(template_string, dynamic_namespace = {})
         # Renders against a domain scope by default
         redirect_off = !metal_config.alces_default_to_domain_scope
@@ -82,7 +84,7 @@ module Metalware
 
       private
 
-      attr_reader :metal_config, :dynamic_stack
+      attr_reader :dynamic_stack
 
       def run_with_dynamic(namespace)
         if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH

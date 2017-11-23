@@ -43,14 +43,10 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
     config(alces.node, build_method: :'uefi-kickstart')
   end
 
-  let :build_method do
-    alces.node.build_method.new(metal_config, alces.node)
-  end
-
   it 'renders the pxelinux template with correct save_path' do
     save_path = File.join(file_path.uefi_save, 'grub.cfg-00000000')
     FileUtils.mkdir(File.dirname(save_path))
-    build_method.start_hook
+    alces.node.build_method.start_hook
     expect(File.exist?(save_path)).to eq(true)
   end
 end
