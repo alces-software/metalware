@@ -16,7 +16,7 @@ module Metalware
         def save_path
           # XXX handle nodes without hexadecimal IP, i.e. nodes not in `hosts`
           # file yet - best place to do this may be when creating `Node` objects?
-          File.join(config.pxelinux_cfg_path, node.hexadecimal_ip)
+          File.join(metal_config.pxelinux_cfg_path, node.hexadecimal_ip)
         end
       end
     end

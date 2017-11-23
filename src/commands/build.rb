@@ -86,17 +86,22 @@ module Metalware
       end
 
       def build_threads
-        @build_threads ||= ThreadGroup.new
+        @build_threads ||= []
       end
 
       def run_in_build_thread
-        build_threads.add(Thread.new do
-          yield if block_given?
+        build_threads.push(Thread.new do
+          begin
+            yield
+          rescue
+            $stderr.puts $!.message
+            $stderr.puts $!.backtrace
+          end
         end)
       end
 
       def clear_up_build_threads
-        build_threads.list.map(&:kill)
+        build_threads.each(&:kill)
       end
 
       def wait_for_nodes_to_build

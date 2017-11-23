@@ -14,7 +14,10 @@ module Metalware
           .join("\n")
       end
 
-      def run_command(command_class, *args, **options_hash)
+      def run_command(command_class, *args, stderr: $stderr, **options_hash)
+        old_stderr = $stderr
+        $stderr = stderr
+
         options = Commander::Command::Options.new
         options_hash.map do |option, value|
           option_setter = (option.to_s + '=').to_sym
@@ -22,6 +25,12 @@ module Metalware
         end
 
         command_class.new(args, options)
+      rescue
+        $stderr.puts $!.message
+        $stderr.puts $!.backtrace
+        raise $!
+      ensure
+        $stderr = old_stderr
       end
 
       def in_gui?
