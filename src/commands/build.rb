@@ -72,23 +72,15 @@ module Metalware
       end
 
       def repo_dependencies
-        build_methods.reduce([]) do |memo, (_name, build_method)|
-          memo.push(build_method.dependency_paths)
+        nodes.map(&:build_method).reduce([]) do |memo, bm|
+          memo.push(bm.dependency_paths)
         end.flatten.uniq
-      end
-
-      def build_methods
-        @build_methods = begin
-          nodes.reduce({}) do |memo, node|
-            memo.merge(node.name => node.build_method.new(config, node))
-          end
-        end
       end
 
       def start_build
         nodes.each do |node|
           run_in_build_thread do
-            build_methods[node.name].start_hook
+            node.build_method.start_hook
           end
         end
       end
@@ -164,9 +156,8 @@ module Metalware
 
       def run_complete_hook(nodes)
         nodes.each do |node|
-          build_method = build_methods[node.name]
           run_in_build_thread do
-            build_method.complete_hook
+            node.build_method.complete_hook
           end
         end
       end

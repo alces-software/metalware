@@ -59,7 +59,7 @@ module AlcesUtils
               mock_cmd = "nodeattr -f #{tempfile.path}"
               method.call(cmd, mock_nodeattr: mock_cmd)
             ensure
-              tempfile&.unlink
+              FakeFS.without { tempfile&.unlink }
             end
           end
         end

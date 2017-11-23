@@ -29,6 +29,7 @@ require 'spec_utils'
 require 'config'
 require 'recursive_open_struct'
 require 'network'
+require 'alces_utils'
 
 # Allows the templates method to be spoofed
 module Metalware
@@ -42,7 +43,7 @@ module Metalware
 end
 
 RSpec.describe Metalware::Commands::Build do
-  let :metal_config { Metalware::Config.new }
+  include AlcesUtils
 
   before :each do
     Thread.list.each do |th|
@@ -60,6 +61,7 @@ RSpec.describe Metalware::Commands::Build do
     end
   end
 
+  # TODO: Remove this method, mock using AlcesUtils
   # Makes `Node.new` return real `Node`s, but with certain methods stubbed to
   # not depend on environment.
   def use_mock_nodes(not_built_nodes: [])
@@ -97,21 +99,17 @@ RSpec.describe Metalware::Commands::Build do
     metal_config.repo_config_path('testnodes')
   end
 
-  let :filesystem do
-    FileSystem.setup do |fs|
+  # Sets up the filesystem
+  before :each do
+    FileSystem.root_setup do |fs|
       fs.with_repo_fixtures('repo')
+      fs.with_genders_fixtures('genders/simple_cluster')
     end
   end
 
-  let :alces { Metalware::Namespaces::Alces.new(metal_config) }
-
   before :each do
-    allow(Metalware::Templater).to receive(:render_to_file)
-    use_mock_nodes
-    SpecUtils.use_mock_genders(self, genders_file: 'genders/simple_cluster')
     SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependency(self)
-    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)
   end
 
   context 'when called without group argument' do
@@ -140,14 +138,12 @@ RSpec.describe Metalware::Commands::Build do
       end
 
       it 'uses specified templates' do
-        filesystem.test do
-          expect_renders(
-            "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
-            to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-          ).at_least(:once)
+        expect_renders(
+          "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
+          to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
+        ).at_least(:once)
 
-          run_build('testnode01')
-        end
+        run_build('testnode01')
       end
 
       it 'specifies correct template dependencies' do
@@ -156,22 +152,20 @@ RSpec.describe Metalware::Commands::Build do
         )
         allow(alces).to receive(:groups).and_return(groups)
 
-        filesystem.test do
-          build_command = run_build('cluster', group: true)
+        build_command = run_build('cluster', group: true)
 
-          # Not ideal to test private method, but seems best way in this case.
-          dependency_hash = build_command.send(:dependency_hash)
+        # Not ideal to test private method, but seems best way in this case.
+        dependency_hash = build_command.send(:dependency_hash)
 
-          expect(dependency_hash[:repo].sort).to eq([
-            # `default` templates used for node `testnode02`.
-            'pxelinux/default',
-            'kickstart/default',
+        expect(dependency_hash[:repo].sort).to eq([
+          # `default` templates used for node `testnode02`.
+          'pxelinux/default',
+          'kickstart/default',
 
-            # Repo templates for 'testnode01'
-            'pxelinux/repo_pxelinux',
-            'kickstart/repo_kickstart',
-          ].sort)
-        end
+          # Repo templates for 'testnode01'
+          'pxelinux/repo_pxelinux',
+          'kickstart/repo_kickstart',
+        ].sort)
       end
     end
 
@@ -208,14 +202,12 @@ RSpec.describe Metalware::Commands::Build do
 
       # Note: similar (but simpler) version of test for Kickstart build method.
       it 'specifies correct template dependencies' do
-        filesystem.test do
-          build_command = run_build('testnode01')
+        build_command = run_build('testnode01')
 
-          # Not ideal to test private method, but seems best way in this case.
-          dependency_hash = build_command.send(:dependency_hash)
+        # Not ideal to test private method, but seems best way in this case.
+        dependency_hash = build_command.send(:dependency_hash)
 
-          expect(dependency_hash[:repo]).to eq(['basic/default'])
-        end
+        expect(dependency_hash[:repo]).to eq(['basic/default'])
       end
     end
   end
