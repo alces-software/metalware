@@ -26,10 +26,7 @@ module Metalware
   class MetalwareError < StandardError
   end
 
-  class UnsetConfigLogError < MetalwareError
-    def initialize(msg = 'Error in MetalLog. Config not set')
-      super
-    end
+  class ConfigCacheError < MetalwareError
   end
 
   class NoGenderGroupError < MetalwareError

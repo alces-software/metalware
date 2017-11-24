@@ -24,6 +24,7 @@
 
 require 'yaml'
 require 'active_support/core_ext/hash/keys'
+require 'active_support/core_ext/string/filters'
 
 require 'constants'
 require 'exceptions'
@@ -33,6 +34,42 @@ require 'data'
 
 module Metalware
   class Config
+    CACHE_WARNING = <<-EOF.squish
+      Trying to cache a metal Config when a cached config already exists.
+      The new Config will replace the old file. This may lead to unexpected
+      errors if the config has changed.
+    EOF
+
+    CACHE_MISSING = <<-EOF.squish
+      A Config has not been previously cached. The cache can not implicitly
+      create a new Config without the 'new_if_missing' flag.
+    EOF
+
+    class << self
+      def clear_cache
+        @cache = nil
+      end
+
+      def cache=(config)
+        if @cache
+          MetalLog.warn CACHE_WARNING
+        else
+          MetalLog.info 'Caching new config'
+        end
+        @cache = config
+      end
+
+      def cache(new_if_missing: false)
+        if @cache
+          @cache
+        elsif new_if_missing
+          new
+        else
+          raise ConfigCacheError, CACHE_MISSING
+        end
+      end
+    end
+
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_DEFAULTS = {
@@ -50,15 +87,15 @@ module Metalware
 
     attr_reader :cli
 
-    def initialize(file = nil, options = {})
-      file ||= Constants::DEFAULT_CONFIG_PATH
+    # TODO: Remove the file input for configs. Always use the default
+    def initialize(_remove_this_file_input = nil, options = {})
+      file = Constants::DEFAULT_CONFIG_PATH
       unless File.file?(file)
         raise MetalwareError, "Config file '#{file}' does not exist"
       end
 
       @config = Metalware::Data.load(file, skip_log: true)
       @cli = OpenStruct.new(options)
-      MetalLog.reset_log(self)
     end
 
     KEYS_WITH_DEFAULTS.each do |key, default|

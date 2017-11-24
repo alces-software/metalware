@@ -14,10 +14,6 @@ anchor_options:
       saving user input.
 
 global_options:
-  - tags: [-c FILE, --config FILE]
-    description: >
-      Specify config file to use instead of default
-      (/opt/metalware/etc/config.yaml)
   - tags: [--strict]
     description: >
       Convert warnings to errors
