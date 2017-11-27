@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'build_methods'
-require 'file_path'
+require 'deployment_server'
 
 module Metalware
   module Namespaces
@@ -19,6 +19,10 @@ module Metalware
 
       def build_method
         BuildMethods::Local
+      end
+
+      def build_interface
+        @build_interface ||= DeploymentServer.build_interface
       end
     end
   end

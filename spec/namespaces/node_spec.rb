@@ -118,14 +118,20 @@ RSpec.describe Metalware::Namespaces::Node do
       expect(node.index).to eq(2)
     end
 
-    it 'has a kickstart_url' do
-      expected = "http://1.2.3.4/metalware/kickstart/#{node_name}"
-      expect(node.kickstart_url).to eq(expected)
-    end
+    context 'with cache config' do
+      before :each do
+        Metalware::Config.cache = config
+      end
 
-    it 'has a build complete url' do
-      exp = "http://1.2.3.4/metalware/exec/kscomplete.php?name=#{node_name}"
-      expect(node.build_complete_url).to eq(exp)
+      it 'has a kickstart_url' do
+        expected = "http://1.2.3.4/metalware/kickstart/#{node_name}"
+        expect(node.kickstart_url).to eq(expected)
+      end
+
+      it 'has a build complete url' do
+        exp = "http://1.2.3.4/metalware/exec/kscomplete.php?name=#{node_name}"
+        expect(node.build_complete_url).to eq(exp)
+      end
     end
 
     describe '#==' do

@@ -47,7 +47,6 @@ module Metalware
 
     NODEATTR_COMMAND = 'nodeattr'
 
-    SERVER_CONFIG_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/server.yaml')
     GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
     HOSTS_PATH = '/etc/hosts'
 

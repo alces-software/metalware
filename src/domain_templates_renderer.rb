@@ -72,27 +72,9 @@ module Metalware
       # These are order dependent, as data used in later methods may depend on
       # earlier files having been rendered successfully.
       [
-        :render_metalware_server_config,
         :render_genders,
         :render_dns,
       ]
-    end
-
-    def render_metalware_server_config
-      render_fully_managed_template(
-        server_config_template,
-        to: Constants::SERVER_CONFIG_PATH
-      ) do |rendered_config|
-        validate_rendered_server_config(rendered_config)
-      end
-    end
-
-    def validate_rendered_server_config(rendered_config)
-      config_data = Data.load_string(rendered_config)
-      build_interface = config_data[:build_interface]
-      Network.valid_interface?(build_interface).tap do |valid|
-        display_server_config_error(build_interface: build_interface) unless valid
-      end
     end
 
     def display_server_config_error(build_interface:)
@@ -171,16 +153,6 @@ module Metalware
 
     def render_managed_section_template(template, to:, &block)
       Templater.render_managed_file(alces, template, to, &block)
-    end
-
-    def render_fully_managed_template(template, to:, &block)
-      Templater.render_to_file(
-        alces,
-        template,
-        to,
-        prepend_managed_file_message: true,
-        &block
-      )
     end
 
     def update_named

@@ -69,6 +69,10 @@ module Metalware
         File.join(repo, 'config/local.yaml')
       end
 
+      def server_config
+        File.join(repo, 'server.yaml')
+      end
+
       def repo
         config.repo_path
       end
