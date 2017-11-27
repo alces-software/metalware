@@ -94,7 +94,7 @@ module Metalware
         raise MetalwareError, "Config file '#{file}' does not exist"
       end
 
-      @config = Metalware::Data.load(file, skip_log: true)
+      @config = YAML.load_file(file) || {}
       @cli = OpenStruct.new(options)
     end
 
