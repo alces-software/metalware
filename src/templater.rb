@@ -72,14 +72,10 @@ module Metalware
         alces,
         template,
         save_file,
-        prepend_managed_file_message: false,
-        **dynamic_namespace,
+        dynamic: {},
         &validation_block
       )
-        rendered_template = render(alces, template, **dynamic_namespace)
-        if prepend_managed_file_message
-          rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
-        end
+        rendered_template = render(alces, template, **dynamic)
 
         rendered_template_valid?(
           rendered_template,

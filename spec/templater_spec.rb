@@ -167,23 +167,6 @@ RSpec.describe Metalware::Templater do
         expect(template_rendered).to be false
       end
     end
-
-    context 'when passed `prepend_managed_file_message` option' do
-      it 'prepends the message to the rendered file' do
-        filesystem.test do
-          Metalware::Templater.render_to_file(
-            alces,
-            template_path,
-            output_path,
-            prepend_managed_file_message: true
-          )
-
-          expect(output).to eq(
-            "#{Metalware::Templater::MANAGED_FILE_MESSAGE}\n#{template}"
-          )
-        end
-      end
-    end
   end
 
   describe '#render_managed_file' do
