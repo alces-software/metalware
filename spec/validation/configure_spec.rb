@@ -28,9 +28,12 @@ require 'file_path'
 require 'data'
 require 'filesystem'
 require 'constants'
+require 'alces_utils'
 
 RSpec.describe Metalware::Validation::Configure do
-  let :config { Metalware::Config.new }
+  include AlcesUtils
+
+  let :config { metal_config }
   let :file_path { Metalware::FilePath.new(config) }
 
   let :correct_hash do

@@ -65,6 +65,8 @@ module Metalware
           strict: !!options.strict,
           quiet: !!options.quiet,
         }
+        # Ensures it uses it's own config
+        Config.clear_cache
         Config.cache = Config.new(options.config, cli_options)
       end
 

@@ -52,9 +52,11 @@ RSpec.describe Metalware::Commands::Render do
 
     it 'raises StrictWarningError when a parameter is missing' do
       expect do
-        Metalware::Utils.run_command(
-          Metalware::Commands::Render, template_file.path, strict: 'mocked'
-        )
+        AlcesUtils.redirect_std(:stderr) do
+          Metalware::Utils.run_command(
+            Metalware::Commands::Render, template_file.path, strict: 'mocked'
+          )
+        end
       end.to raise_error(Metalware::StrictWarningError)
     end
   end

@@ -25,11 +25,11 @@ require 'validation/answer'
 require 'data'
 require 'config'
 require 'filesystem'
+require 'alces_utils'
 
 RSpec.describe Metalware::Validation::Answer do
-  let :config do
-    Metalware::Config.new
-  end
+  include AlcesUtils
+  let :config { metal_config }
 
   let :configure_data do
     {

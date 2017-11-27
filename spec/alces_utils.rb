@@ -13,6 +13,10 @@ module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
+      AlcesUtils.mock example_group, :each do
+        cache_config
+      end
+
       example_group.instance_exec do
         let! :metal_config do
           AlcesUtils.check_and_raise_fakefs_error
@@ -79,6 +83,25 @@ module AlcesUtils
       command.sub(AlcesUtils::GENDERS_FILE_REGEX, '')
     end
 
+    def redirect_std(*input, &_b)
+      old = {
+        stdout: $stdout,
+        stderr: $stderr,
+      }
+      buffers = input.map { |k| [k, StringIO.new] }.to_h
+      update_std_files buffers
+      yield
+      buffers.each { |_k, v| v.rewind }
+      buffers
+    ensure
+      update_std_files old
+    end
+
+    def update_std_files(**hash)
+      $stdout = hash[:stdout] if hash[:stdout]
+      $stderr = hash[:stderr] if hash[:stderr]
+    end
+
     def mock(test, *a, &b)
       mock_block = lambda do |*_inputs|
         mock_alces = AlcesUtils::Mock.new(self)
@@ -142,6 +165,7 @@ module AlcesUtils
       metal_config.cli[:strict] = bool
     end
 
+    # TODO: Remove this. It is only used as part of the testing
     def alces_default_to_domain_scope_off
       allow(metal_config).to \
         receive(:alces_default_to_domain_scope).and_return(false)
@@ -176,6 +200,11 @@ module AlcesUtils
       group = alces.groups.find_by_name(name)
       with_blank_config_and_answer(group)
       allow(alces).to receive(:group).and_return(group)
+    end
+
+    def cache_config
+      cached_config = Metalware::Config.instance_variable_get(:@cache)
+      Metalware::Config.cache = Metalware::Config.new unless cached_config
     end
 
     private

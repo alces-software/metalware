@@ -31,8 +31,9 @@ require 'file_path'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::DNS::Named do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  include AlcesUtils
+
+  let :config { metal_config }
   let :named { Metalware::DNS::Named.new(alces) }
   let :file_path { Metalware::FilePath.new(config) }
   let :filesystem do

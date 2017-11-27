@@ -30,6 +30,9 @@ require 'constants'
 require 'spec_utils'
 
 RSpec.describe Metalware::Config do
+  # DO NOT test Metaware::Config with AlcesUtils. It relys on the Config to
+  # be working correctly inorder to mock the other methods
+
   it 'uses default config file' do
     expect(YAML).to receive(:load_file).with(
       Metalware::Constants::DEFAULT_CONFIG_PATH

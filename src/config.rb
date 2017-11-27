@@ -96,12 +96,7 @@ module Metalware
 
       @config = YAML.load_file(file) || {}
       @cli = OpenStruct.new(options)
-    end
-
-    KEYS_WITH_DEFAULTS.each do |key, default|
-      define_method :"#{key}" do
-        @config[key].nil? ? default : @config[key]
-      end
+      define_keys_with_defaults
     end
 
     def repo_config_path(config_name)
@@ -128,6 +123,16 @@ module Metalware
     def node_answers_file(node_name)
       file_name = "#{node_name}.yaml"
       File.join(answer_files_path, 'nodes', file_name)
+    end
+
+    private
+
+    def define_keys_with_defaults
+      KEYS_WITH_DEFAULTS.each do |key, default|
+        define_singleton_method :"#{key}" do
+          @config[key.to_s].nil? ? default : @config[key.to_s]
+        end
+      end
     end
   end
 end

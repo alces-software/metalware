@@ -194,4 +194,38 @@ RSpec.describe AlcesUtils do
       end
     end
   end
+
+  describe '#redirect_std' do
+    let :test_str { 'Testing' }
+
+    it 'can redirect stdout' do
+      io = AlcesUtils.redirect_std(:stdout) do
+        $stdout.puts test_str
+      end
+      expect(io[:stdout].read.chomp).to eq(test_str)
+    end
+
+    it 'can redirect stderr' do
+      io = AlcesUtils.redirect_std(:stderr) do
+        $stderr.puts test_str
+      end
+      expect(io[:stderr].read.chomp).to eq(test_str)
+    end
+
+    it 'resets stdout' do
+      test_stdout = StringIO.new
+      old_stdout = $stdout
+      begin
+        $stdout = test_stdout
+        AlcesUtils.redirect_std(:stdout) do
+          puts 'I should be captured'
+        end
+        puts test_str
+      ensure
+        $stdout = old_stdout
+      end
+      test_stdout.rewind
+      expect(test_stdout.read.chomp).to eq(test_str)
+    end
+  end
 end
