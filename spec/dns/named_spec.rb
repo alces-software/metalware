@@ -24,17 +24,16 @@
 #==============================================================================
 
 require 'dns/named'
-require 'config'
 require 'filesystem'
 require 'exceptions'
-require 'file_path'
 require 'namespaces/alces'
+require 'staging'
+require 'alces_utils'
 
 RSpec.describe Metalware::DNS::Named do
   include AlcesUtils
 
   let :config { metal_config }
-  let :named { Metalware::DNS::Named.new(alces) }
   let :file_path { Metalware::FilePath.new(config) }
   let :filesystem do
     FileSystem.setup do |fs|
@@ -50,18 +49,31 @@ RSpec.describe Metalware::DNS::Named do
     "DNS: #{externaldns}"
   end
 
-  xit 'updates named server' do
+  def run_named
+    Metalware::Staging.template do |templater|
+      yield Metalware::DNS::Named.new(alces, templater)
+    end
+  end
+
+  it 'updates named server' do
     filesystem.test do
       template_path = File.join(file_path.repo, 'named/forward/default')
       File.write(template_path, '<%= alces.named.zone %>')
-      expect(named).to receive(:restart_named)
 
-      named.update
+      run_named(&:update)
 
-      expect(File.file?(file_path.metalware_named)).to eq(true)
-      expect(File.file?(file_path.named_zone('fwd_named_zone'))).to eq(true)
-      expect(File.file?(file_path.named_zone('rev_named_zone'))).to eq(true)
-      expect(File.read(file_path.named_zone('fwd_named_zone'))).to eq("pri\n")
+      metal_named = staging_path(file_path.metalware_named)
+      fwd_named = staging_path(file_path.named_zone('fwd_named_zone'))
+      rev_named = staging_path(file_path.named_zone('rev_named_zone'))
+
+      expect(File.file?(metal_named)).to eq(true)
+      expect(File.file?(fwd_named)).to eq(true)
+      expect(File.file?(rev_named)).to eq(true)
+      expect(File.read(fwd_named)).to eq('pri')
     end
+  end
+
+  def staging_path(path)
+    Metalware::FilePath.staging(path)
   end
 end
