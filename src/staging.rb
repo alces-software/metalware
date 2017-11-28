@@ -65,6 +65,7 @@ module Metalware
           managed = data[:managed]
           content = File.read(data[:staging])
           content = ManagedFile.content(data[:sync], content) if managed
+          validate(data, content)
           move_file(data, content)
           return_value = true
         rescue => e
@@ -92,7 +93,6 @@ module Metalware
     end
 
     def move_file(data, content)
-      validate(data, content)
       FileUtils.mkdir_p(File.dirname(data[:sync])) if data[:mkdir]
       File.write(data[:sync], content)
       FileUtils.rm(data[:staging])
@@ -100,12 +100,18 @@ module Metalware
 
     def validate(data, content)
       return unless data[:validator]
-      unless data[:validator].new.validate(content)
-        msg = "A file failed the following validator: #{data[:validator]}\n"
-        msg += "File: #{data[:staging]}"
-        msg += "Managed?: #{data[:managed]}"
-        raise ValidationFailure, msg
+      error = nil
+      begin
+        return if data[:validator].constantize.validate(content)
+      rescue => e
+        error = e
       end
+      msg = "A file failed to be validated"
+      msg += "\nFile: #{data[:staging]}"
+      msg += "\nValidator: #{data[:validator]}"
+      msg += "\nManaged: #{data[:managed]}"
+      msg += "\nError: #{error.inspect}" if error
+      raise ValidationFailure, msg
     end
   end
 end

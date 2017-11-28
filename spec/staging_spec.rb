@@ -7,13 +7,13 @@ require 'alces_utils'
 module Metalware
   module Testing
     class GoodValidation
-      def validate(_content)
+      def self.validate(_content)
         true
       end
     end
 
     class BadValidation
-      def validate(_content)
+      def self.validate(_content)
         false
       end
     end
@@ -89,7 +89,7 @@ RSpec.describe Metalware::Staging do
 
     before :each do
       Metalware::Staging.update(metal_config) do |staging|
-        good_validator = Metalware::Testing::GoodValidation
+        good_validator = Metalware::Testing::GoodValidation.to_s
         staging.push_file(validate_file, '', validator: good_validator)
         files.each { |f| staging.push_file(f, '') }
       end
@@ -124,7 +124,7 @@ RSpec.describe Metalware::Staging do
 
       before :each do
         Metalware::Staging.update(metal_config) do |staging|
-          bad_validator = Metalware::Testing::BadValidation
+          bad_validator = Metalware::Testing::BadValidation.to_s
           staging.push_file(bad_file, '', validator: bad_validator)
         end
         old_stderr = $stderr
