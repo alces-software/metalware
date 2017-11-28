@@ -67,7 +67,7 @@ module Metalware
       end
 
       def server_config
-        Data.load(FilePath.server_config)
+        Data.load(FilePath.new_config_if_missing { server_config })
       end
 
       def ip_on_interface(interface)

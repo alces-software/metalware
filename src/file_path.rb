@@ -132,10 +132,19 @@ module Metalware
                  end
       end
 
+      def new_config_if_missing(&block)
+        @new_if_missing = true
+        instance_exec(&block)
+      ensure
+        @new_if_missing = false
+      end
+
       private
 
+      attr_reader :new_if_missing
+
       def config
-        Config.cache
+        Config.cache(new_if_missing: new_if_missing)
       end
 
       def template_file_name(template_type, node:)
