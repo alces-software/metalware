@@ -72,7 +72,6 @@ module Metalware
       # These are order dependent, as data used in later methods may depend on
       # earlier files having been rendered successfully.
       [
-        :render_genders,
         :render_dns,
       ]
     end
@@ -83,47 +82,6 @@ module Metalware
         "\nAborting rendering domain templates; the rendered server config is invalid:"
       Output.stderr_indented_error_message \
         "#{build_interface} is not a valid interface; valid interfaces: #{interfaces_list}"
-    end
-
-    def render_genders
-      render_managed_section_template(
-        genders_template,
-        to: Constants::GENDERS_PATH
-      ) do |rendered_genders|
-        validate_rendered_genders(rendered_genders)
-      end
-    end
-
-    def validate_rendered_genders(rendered_genders)
-      genders_valid, nodeattr_error = validate_genders_using_nodeattr(rendered_genders)
-      handle_invalid_genders(rendered_genders, nodeattr_error) unless genders_valid
-      genders_valid
-    end
-
-    def validate_genders_using_nodeattr(rendered_genders)
-      Tempfile.open do |tempfile|
-        tempfile.write(rendered_genders)
-        tempfile.flush
-        NodeattrInterface.validate_genders_file(tempfile.path)
-      end
-    end
-
-    def handle_invalid_genders(rendered_genders, nodeattr_error)
-      cache_invalid_genders(rendered_genders)
-      display_genders_error(nodeattr_error)
-    end
-
-    def cache_invalid_genders(rendered_genders)
-      File.write(Constants::INVALID_RENDERED_GENDERS_PATH, rendered_genders)
-    end
-
-    def display_genders_error(nodeattr_error)
-      Output.stderr "\nAborting rendering domain templates; " \
-        'the rendered genders file is invalid:'
-      Output.stderr_indented_error_message(nodeattr_error)
-      Output.stderr \
-        "The rendered file can be found at #{Constants::INVALID_RENDERED_GENDERS_PATH}"
-      Output.stderr "\n" + genders_invalid_message if genders_invalid_message
     end
 
     MISSING_DNS_TYPE = <<~EOF.strip_heredoc
