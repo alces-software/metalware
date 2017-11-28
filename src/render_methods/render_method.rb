@@ -7,7 +7,8 @@ module Metalware
     class RenderMethod
       class << self
         def render_to_staging(namespace, templater)
-          templater.render(namespace, template, sync_location, **staging_opt)
+          file = template(namespace)
+          templater.render(namespace, file, sync_location, **staging_opts)
         end
 
         # validate methods may return a truthy or falsey results
@@ -42,7 +43,7 @@ module Metalware
           raise NotImplementedError
         end
 
-        def template
+        def template(_namespace)
           raise NotImplementedError
         end
       end

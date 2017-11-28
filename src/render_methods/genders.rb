@@ -16,8 +16,8 @@ module Metalware
           FilePath.genders
         end
 
-        def template
-          FilePath.template_path('genders')
+        def template(namespace)
+          FilePath.template_path('genders', node: namespace)
         end
       end
     end

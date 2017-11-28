@@ -82,7 +82,7 @@ module Metalware
         Pathname.new(path).relative_path_from(repo_path).to_s
       end
 
-      def template_path(template_type, node: nil)
+      def template_path(template_type, node:)
         File.join(
           config.repo_path,
           template_type.to_s,

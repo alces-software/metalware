@@ -5,24 +5,25 @@ require 'file_path'
 require 'recursive-open-struct'
 require 'templater'
 require 'managed_file'
+require 'config'
 
 module Metalware
   class Staging
-    def self.update(metal_config)
-      staging = new(metal_config)
+    def self.update(_remove_this_input = nil)
+      staging = new(Config.cache)
       yield staging if block_given?
     ensure
       staging.save
     end
 
-    def self.template(metal_config)
-      update(metal_config) do |staging|
+    def self.template(_remove_this_input = nil)
+      update do |staging|
         yield Templater.new(staging) if block_given?
       end
     end
 
-    def self.manifest(metal_config)
-      new(metal_config).manifest
+    def self.manifest(_remove_this_input = nil)
+      new(Config.cache).manifest
     end
 
     private_class_method :new

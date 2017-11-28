@@ -26,6 +26,8 @@ require 'command_helpers/base_command'
 require 'configurator'
 require 'domain_templates_renderer'
 require 'active_support/core_ext/string/strip'
+require 'render_methods'
+require 'staging'
 
 module Metalware
   module CommandHelpers
@@ -43,6 +45,7 @@ module Metalware
         configurator.configure(answers)
         custom_configuration
         render_domain_templates
+        render_genders
       end
 
       def answers
@@ -91,6 +94,12 @@ module Metalware
           config,
           genders_invalid_message: GENDERS_INVALID_MESSAGE
         ).render
+      end
+
+      def render_genders
+        Staging.template do |templater|
+          RenderMethods::Genders.render_to_staging(alces.domain, templater)
+        end
       end
     end
   end
