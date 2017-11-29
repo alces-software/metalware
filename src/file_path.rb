@@ -82,6 +82,7 @@ module Metalware
         Pathname.new(path).relative_path_from(repo_path).to_s
       end
 
+      # TODO: Change input from node to namespace
       def template_path(template_type, node:)
         File.join(
           config.repo_path,

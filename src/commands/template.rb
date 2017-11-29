@@ -26,6 +26,7 @@ require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
 require 'templater'
 require 'dns'
+require 'render_methods'
 
 module Metalware
   module Commands
@@ -46,6 +47,7 @@ module Metalware
             build_method.render_staging_templates(templator)
           end
           dns_class.new(alces, templator).update
+          RenderMethods::DHCP.render_to_staging(alces.domain, templator)
         end
       end
 
