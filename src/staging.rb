@@ -10,7 +10,7 @@ require 'config'
 module Metalware
   class Staging
     def self.update(_remove_this_input = nil)
-      staging = new(Config.cache)
+      staging = new
       yield staging if block_given?
     ensure
       staging.save
@@ -23,44 +23,42 @@ module Metalware
     end
 
     def self.manifest(_remove_this_input = nil)
-      new(Config.cache).manifest
+      new.manifest
     end
 
     private_class_method :new
 
-    def initialize(metal_config)
-      @metal_config = metal_config
+    def initialize
+      @metal_config = Config.cache
       @file_path = FilePath.new(metal_config)
-      manifest_hash = Data.load(file_path.staging_manifest)
-      manifest_hash = blank_manifest if manifest_hash.empty?
-      @manifest = RecursiveOpenStruct.new(
-        manifest_hash, recurse_over_arrays: true
-      )
     end
-
-    attr_reader :manifest
 
     def save
       Data.dump(file_path.staging_manifest, manifest.to_h)
+    end
+
+    def manifest
+      @manifest ||= begin
+        Data.load(file_path.staging_manifest).tap do |x|
+          x.merge! blank_manifest if x.empty?
+          # Converts the file paths to strings
+          x[:files] = x[:files].map { |key, data| [key.to_s, data] }.to_h
+        end
+      end
     end
 
     def push_file(sync, content, **options)
       staging = file_path.staging(sync)
       FileUtils.mkdir_p(File.dirname(staging))
       File.write(staging, content)
-
-      manifest.files.push(
-        {
-          sync: sync,
-          staging: staging,
-        }.merge(default_push_options)
-         .merge(options)
-      )
+      manifest[:files][sync] = default_push_options.merge(options)
     end
 
     def sync_files
-      manifest.files.delete_if do |data|
+      manifest[:files].delete_if do |raw_sync_path, raw_data|
         return_value = nil
+        sync = raw_sync_path.to_s
+        data = raw_data.dup.merge(sync: sync, staging: FilePath.staging(sync))
         begin
           managed = data[:managed]
           content = File.read(data[:staging])
@@ -89,7 +87,7 @@ module Metalware
     end
 
     def blank_manifest
-      { files: [] }
+      { files: {} }
     end
 
     def move_file(data, content)
@@ -106,7 +104,7 @@ module Metalware
       rescue => e
         error = e
       end
-      msg = "A file failed to be validated"
+      msg = 'A file failed to be validated'
       msg += "\nFile: #{data[:staging]}"
       msg += "\nValidator: #{data[:validator]}"
       msg += "\nManaged: #{data[:managed]}"

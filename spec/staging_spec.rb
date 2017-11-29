@@ -24,16 +24,16 @@ RSpec.describe Metalware::Staging do
   include AlcesUtils
 
   def manifest
-    Metalware::Staging.manifest(metal_config)
+    Metalware::Staging.manifest
   end
 
   def update(&b)
-    Metalware::Staging.update(metal_config, &b)
+    Metalware::Staging.update(&b)
   end
 
   it 'loads a blank file list if the manifest is missing' do
-    expect(manifest.files).to be_a(Array)
-    expect(manifest.files).to be_empty
+    expect(manifest[:files]).to be_a(Hash)
+    expect(manifest[:files]).to be_empty
   end
 
   describe '#push_file' do
@@ -54,13 +54,12 @@ RSpec.describe Metalware::Staging do
     end
 
     it 'saves the default options' do
-      expect(manifest.files.first.managed).to eq(false)
-      expect(manifest.files.first.validator).to eq(nil)
+      expect(manifest[:files].first[1][:managed]).to eq(false)
+      expect(manifest[:files].first[1][:validator]).to eq(nil)
     end
 
     it 'updates the manifest' do
-      expect(manifest.files.first.staging).to eq(test_staging)
-      expect(manifest.files.first.sync).to eq(test_sync)
+      expect(manifest[:files][test_sync]).not_to be_empty
     end
 
     it 'can push more files' do
@@ -68,18 +67,19 @@ RSpec.describe Metalware::Staging do
         staging.push_file('second', '')
         staging.push_file('third', '')
       end
-      expect(manifest.files.length).to eq(3)
-      expect(manifest.files[1].staging).to eq(file_path.staging('second'))
-      expect(manifest.files[2].staging).to eq(file_path.staging('third'))
+      keys = manifest[:files].keys
+      expect(manifest[:files].length).to eq(3)
+      expect(keys[1]).to eq('second')
+      expect(keys[2]).to eq('third')
     end
 
     it 'saves the additional options' do
       update do |staging|
         staging.push_file('other', '', managed: true, validator: 'validate')
       end
-
-      expect(manifest.files.last.managed).to eq(true)
-      expect(manifest.files.last.validator).to eq('validate')
+      key = manifest[:files].keys.last
+      expect(manifest[:files][key][:managed]).to eq(true)
+      expect(manifest[:files][key][:validator]).to eq('validate')
     end
   end
 
@@ -103,7 +103,7 @@ RSpec.describe Metalware::Staging do
       end
 
       it 'leaves the file list empty' do
-        expect(manifest.files).to be_empty
+        expect(manifest[:files]).to be_empty
       end
 
       it 'leaves the staging directory empty' do
@@ -134,8 +134,8 @@ RSpec.describe Metalware::Staging do
       end
 
       it "isn't removed from the manifest" do
-        expect(manifest.files.length).to eq(1)
-        expect(manifest.files.first.sync).to eq(bad_file)
+        expect(manifest[:files].length).to eq(1)
+        expect(manifest[:files].first[0]).to eq(bad_file)
       end
 
       it 'issues a validation failure error message' do
@@ -156,7 +156,7 @@ RSpec.describe Metalware::Staging do
         Metalware::Staging.update(metal_config) do |staging|
           staging.push_file(managed_file, managed_content, managed: true)
         end
-        Metalware::Staging.update(metal_config) { |s| s.sync_files }
+        Metalware::Staging.update(&:sync_files)
       end
 
       it 'writes to the file if it does not exist' do
