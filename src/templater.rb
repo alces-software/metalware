@@ -54,6 +54,9 @@ module Metalware
     )
 
     class << self
+      # NOTE: The 'alces' input to any of these methods can be subsituted for a
+      # Node, Group, or Domain namespace. By doing so, the scope of the render
+      # will automatically be set
       def render(alces, template, **dynamic_namespace)
         raw_template = File.read(template)
         begin

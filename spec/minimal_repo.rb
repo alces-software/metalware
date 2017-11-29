@@ -23,6 +23,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'network_interface'
+
 module MinimalRepo
   class << self
     FILES = {

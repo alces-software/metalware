@@ -24,7 +24,6 @@
 
 require 'command_helpers/base_command'
 require 'configurator'
-require 'domain_templates_renderer'
 require 'active_support/core_ext/string/strip'
 require 'render_methods'
 require 'staging'
@@ -44,7 +43,6 @@ module Metalware
       def run
         configurator.configure(answers)
         custom_configuration
-        render_domain_templates
         render_genders
       end
 
@@ -84,16 +82,6 @@ module Metalware
 
       def configurator
         raise NotImplementedError
-      end
-
-      # Render the templates which are relevant across the whole domain; these
-      # are re-rendered at the end of every configure command as the data used
-      # in the templates could change with each command.
-      def render_domain_templates
-        DomainTemplatesRenderer.new(
-          config,
-          genders_invalid_message: GENDERS_INVALID_MESSAGE
-        ).render
       end
 
       def render_genders
