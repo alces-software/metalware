@@ -25,6 +25,7 @@
 require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
 require 'templater'
+require 'dns'
 
 module Metalware
   module Commands
@@ -36,14 +37,36 @@ module Metalware
       attr_reader :build_methods
 
       def setup
-        @build_methods = nodes.map do |node|
-          node.build_method.new(config, node)
-        end
+        @build_methods = nodes.map { |node| node.build_method }
       end
 
       def run
-        build_methods.each do |build_method|
-          build_method.render_staging_templates
+        Staging.template(Config.cache) do |templator|
+          build_methods.each do |build_method|
+            build_method.render_staging_templates(templator)
+          end
+          dns_class.new(alces, templator).update
+        end
+      end
+
+      MISSING_DNS_TYPE = <<~EOF.strip_heredoc
+        The DNS type has not been set. Reverting to default DNS type: 'hosts'. To
+        prevent this message, please set "dns_type" in your repo configs, "domain.yaml"
+        file.
+     EOF
+
+      def dns_class
+        case alces.domain.config.dns_type
+        when nil
+          MetalLog.warn(MISSING_DNS_TYPE)
+          DNS::Hosts
+        when 'hosts'
+          DNS::Hosts
+        when 'named'
+          DNS::Named
+        else
+          msg = "Invalid DNS type: #{alces.domain.config.dns_type}"
+          raise InvalidConfigParameter, msg
         end
       end
     end
