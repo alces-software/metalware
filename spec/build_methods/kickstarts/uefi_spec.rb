@@ -32,9 +32,7 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
   include AlcesUtils
 
   before :each do
-    FileSystem.root_setup do |fs|
-      fs.with_minimal_repo
-    end
+    FileSystem.root_setup(&:with_minimal_repo)
   end
 
   AlcesUtils.mock self, :each do

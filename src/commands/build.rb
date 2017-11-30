@@ -94,8 +94,8 @@ module Metalware
           begin
             yield
           rescue
-            $stderr.puts $!.message
-            $stderr.puts $!.backtrace
+            $stderr.puts $ERROR_INFO.message
+            $stderr.puts $ERROR_INFO.backtrace
           end
         end)
       end

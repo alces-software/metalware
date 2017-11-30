@@ -38,7 +38,7 @@ module Metalware
       attr_reader :build_methods
 
       def setup
-        @build_methods = nodes.map { |node| node.build_method }
+        @build_methods = nodes.map(&:build_method)
       end
 
       def run
