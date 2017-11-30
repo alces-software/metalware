@@ -37,6 +37,8 @@ module Metalware
       def run
         Staging.update do |staging|
           sync_files(staging)
+          staging.save
+          restart_services(staging)
         end
       end
 
@@ -44,6 +46,7 @@ module Metalware
         staging.delete_file_if do |file|
           validate(file)
           FileUtils.mkdir_p File.dirname(file.sync)
+          staging.push_service(file.service) if file.service
           File.write(file.sync, file.content)
         end
       end
@@ -62,6 +65,12 @@ module Metalware
         msg += "\nManaged: #{data.managed}"
         msg += "\nError: #{error.inspect}" if error
         raise ValidationFailure, msg
+      end
+
+      def restart_services(staging)
+        staging.delete_service_if do |service|
+          service.constantize.restart_service
+        end
       end
     end
   end

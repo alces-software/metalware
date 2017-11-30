@@ -70,8 +70,13 @@ module Metalware
       end
     end
 
-    def restart_service
-      manifest[:restart_service]
+    def push_service(service)
+      services = manifest[:services]
+      services.push(service) unless services.include? service
+    end
+
+    def delete_service_if
+      manifest[:services].delete_if { |service| yield service }
     end
 
     private
@@ -81,12 +86,12 @@ module Metalware
     def default_push_options
       {
         managed: false,
-        validator: nil
+        validator: nil,
       }
     end
 
     def blank_manifest
-      { files: {}, restart_service: [] }
+      { files: {}, services: [] }
     end
 
     def file_content(data)
