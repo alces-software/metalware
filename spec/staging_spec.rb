@@ -83,6 +83,47 @@ RSpec.describe Metalware::Staging do
     end
   end
 
+  describe '#delete_file_if' do
+    let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
+
+    before :each do
+      Metalware::Staging.update(metal_config) do |staging|
+        files.each { |f| staging.push_file(f, '') }
+      end
+    end
+
+    def run_delete_files(&b)
+      Metalware::Staging.update do |staging|
+        staging.delete_file_if(&b)
+      end
+    end
+
+    it 'deletes the files if the block returns true' do
+      run_delete_files { |_file| true }
+      expect(manifest[:files].keys.length).to eq(0)
+      files.each { |path| expect(File.exist?(path)).to eq(false) }
+    end
+
+    it 'leaves the files in place' do
+      run_delete_files { |_file| false }
+      expect(manifest[:files].keys.length).to eq(files.length)
+      files.map { |path| Metalware::FilePath.staging(path) }
+           .each { |path| expect(File.exist?(path)).to eq(true) }
+    end
+
+    it 'can delete a single file' do
+      run_delete_files { |file| file.sync.include?('second') }
+      expect(manifest[:files].length).to eq(files.length - 1)
+      expect(manifest[:files].keys.first).to include('first')
+      expect(manifest[:files].keys.last).to include('third')
+    end
+
+    it 'files are not deleted if there is an error' do
+      run_delete_files { |_f| raise 'test error' }
+      expect(manifest[:files].length).to eq(files.length)
+    end
+  end
+
   describe '#sync_files' do
     let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
     let :validate_file { '/tmp/validate-file' }
@@ -123,6 +164,10 @@ RSpec.describe Metalware::Staging do
       let :stderr { StringIO.new }
 
       before :each do
+        # Allows the error to be printed
+        allow(Metalware::Output).to \
+          (receive(:stderr).and_wrap_original { |_m, *arg| $stderr.puts arg })
+
         Metalware::Staging.update(metal_config) do |staging|
           bad_validator = Metalware::Testing::BadValidation.to_s
           staging.push_file(bad_file, '', validator: bad_validator)

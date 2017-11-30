@@ -54,24 +54,35 @@ module Metalware
       manifest[:files][sync] = default_push_options.merge(options)
     end
 
-    def sync_files
-      manifest[:files].delete_if do |raw_sync_path, raw_data|
-        return_value = nil
-        sync = raw_sync_path.to_s
-        data = raw_data.dup.merge(sync: sync, staging: FilePath.staging(sync))
+    def delete_file_if
+      manifest[:files].delete_if do |sync_path, raw_data|
+        ret = nil
         begin
-          managed = data[:managed]
-          content = File.read(data[:staging])
-          content = ManagedFile.content(data[:sync], content) if managed
-          validate(data, content)
-          move_file(data, content)
-          return_value = true
+          data = OpenStruct.new(raw_data.merge(
+            sync: sync_path,
+            staging: FilePath.staging(sync_path)
+          ))
+          data.content = file_content(data)
+          ret = yield OpenStruct.new(data)
         rescue => e
-          $stderr.puts e.inspect
-          return_value = false
+          MetalLog.warn e.inspect
+          ret = false
         end
-        return_value
+        FileUtils.rm FilePath.staging(sync_path) if ret
+        ret
       end
+    end
+
+    def sync_files
+      delete_file_if do |file|
+        validate(file)
+        FileUtils.mkdir_p File.dirname(file.sync)
+        File.write(file.sync, file.content)
+      end
+    end
+
+    def restart_service
+      manifest[:restart_service]
     end
 
     private
@@ -87,7 +98,12 @@ module Metalware
     end
 
     def blank_manifest
-      { files: {} }
+      { files: {}, restart_service: [] }
+    end
+
+    def file_content(data)
+      raw = File.read data.staging
+      data.managed ? ManagedFile.content(data.sync, raw) : raw
     end
 
     def move_file(data, content)
@@ -96,18 +112,18 @@ module Metalware
       FileUtils.rm(data[:staging])
     end
 
-    def validate(data, content)
-      return unless data[:validator]
+    def validate(data)
+      return unless data.validator
       error = nil
       begin
-        return if data[:validator].constantize.validate(content)
+        return if data.validator.constantize.validate(data.content)
       rescue => e
         error = e
       end
       msg = 'A file failed to be validated'
-      msg += "\nFile: #{data[:staging]}"
-      msg += "\nValidator: #{data[:validator]}"
-      msg += "\nManaged: #{data[:managed]}"
+      msg += "\nFile: #{data.staging}"
+      msg += "\nValidator: #{data.validator}"
+      msg += "\nManaged: #{data.managed}"
       msg += "\nError: #{error.inspect}" if error
       raise ValidationFailure, msg
     end
