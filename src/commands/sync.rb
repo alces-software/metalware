@@ -39,6 +39,7 @@ module Metalware
           sync_files(staging)
           staging.save
           restart_services(staging)
+          clean_up_staging_directory
         end
       end
 
@@ -71,6 +72,13 @@ module Metalware
         staging.delete_service_if do |service|
           service.constantize.restart_service
         end
+      end
+
+      def clean_up_staging_directory
+        Dir[File.join(FilePath.staging_dir, '**/*')]
+          .select { |d| File.directory?(d) }
+          .reverse
+          .each { |d| Dir.rmdir d if Dir[File.join(d, '**/*')].length.zero? }
       end
     end
   end
