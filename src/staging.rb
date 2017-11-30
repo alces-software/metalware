@@ -58,10 +58,7 @@ module Metalware
       manifest[:files].delete_if do |sync_path, raw_data|
         ret = nil
         begin
-          data = OpenStruct.new(raw_data.merge(
-            sync: sync_path,
-            staging: FilePath.staging(sync_path)
-          ))
+          data = OpenStruct.new(raw_data.merge(sync: sync_path))
           data.content = file_content(data)
           ret = yield OpenStruct.new(data)
         rescue => e
@@ -70,14 +67,6 @@ module Metalware
         end
         FileUtils.rm FilePath.staging(sync_path) if ret
         ret
-      end
-    end
-
-    def sync_files
-      delete_file_if do |file|
-        validate(file)
-        FileUtils.mkdir_p File.dirname(file.sync)
-        File.write(file.sync, file.content)
       end
     end
 
@@ -92,8 +81,7 @@ module Metalware
     def default_push_options
       {
         managed: false,
-        validator: nil,
-        mkdir: false,
+        validator: nil
       }
     end
 
@@ -102,30 +90,8 @@ module Metalware
     end
 
     def file_content(data)
-      raw = File.read data.staging
+      raw = File.read(FilePath.staging(data.sync))
       data.managed ? ManagedFile.content(data.sync, raw) : raw
-    end
-
-    def move_file(data, content)
-      FileUtils.mkdir_p(File.dirname(data[:sync])) if data[:mkdir]
-      File.write(data[:sync], content)
-      FileUtils.rm(data[:staging])
-    end
-
-    def validate(data)
-      return unless data.validator
-      error = nil
-      begin
-        return if data.validator.constantize.validate(data.content)
-      rescue => e
-        error = e
-      end
-      msg = 'A file failed to be validated'
-      msg += "\nFile: #{data.staging}"
-      msg += "\nValidator: #{data.validator}"
-      msg += "\nManaged: #{data.managed}"
-      msg += "\nError: #{error.inspect}" if error
-      raise ValidationFailure, msg
     end
   end
 end
