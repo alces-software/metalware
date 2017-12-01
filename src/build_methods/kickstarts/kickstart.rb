@@ -7,38 +7,35 @@ module Metalware
   module BuildMethods
     module Kickstarts
       class Kickstart < BuildMethod
-        # Defines the TEMPLATES for the kickstart build method
-        def initialize(*a)
-          unless self.class.const_defined?('TEMPLATES')
-            templates = [:kickstart, self.class::REPO_DIR].freeze
-            self.class.const_set('TEMPLATES', templates)
-          end
-          super
+        def start_hook
+          render_pxelinux(firstboot: true)
         end
 
-        def render_build_start_templates
-          render_kickstart(DEFAULT_BUILD_START_PARAMETERS)
-          render_pxelinux(DEFAULT_BUILD_START_PARAMETERS)
+        def complete_hook
+          render_pxelinux(firstboot: false)
         end
 
-        def render_build_complete_templates
-          render_pxelinux(DEFAULT_BUILD_COMPLETE_PARAMETERS)
+        def dependency_paths
+          super.push(strip_leading_repo_path(pxelinux_template_path))
         end
 
         private
 
-        def render_kickstart(parameters)
-          render_template(:kickstart, parameters: parameters)
+        def staging_templates
+          [:kickstart]
         end
 
         def render_pxelinux(parameters)
-          render_template(pxelinux_repo_dir,
-                          parameters: parameters,
-                          save_path: save_path)
+          Templater.render_to_file(
+            node,
+            pxelinux_template_path,
+            save_path,
+            **parameters
+          )
         end
 
-        def pxelinux_repo_dir
-          self.class::REPO_DIR
+        def pxelinux_template_path
+          raise NotImplementedError
         end
 
         def save_path

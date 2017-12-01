@@ -29,249 +29,157 @@ require 'spec_utils'
 require 'config'
 require 'recursive_open_struct'
 require 'network'
-
-# Allows the templates method to be spoofed
-module Metalware
-  module HashMergers
-    class MetalRecursiveOpenStruct
-      def templates
-        self[:templates]
-      end
-    end
-  end
-end
+require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Build do
-  let :metal_config { Metalware::Config.new }
+  include AlcesUtils
 
   before :each do
+    # Shortens the wait times for the tests
+    allow(metal_config).to receive(:build_poll_sleep).and_return(0.1)
+    # Makes sure there aren't any other threads
     Thread.list.each do |th|
       th.kill unless th == Thread.main
     end
   end
 
-  def run_build(node_identifier, **options_hash)
-    # Run command in timeout as `build` will wait indefinitely, but want to
-    # abort tests if it looks like this is happening.
-    Timeout.timeout 0.5 do
-      Metalware::Utils.run_command(
-        Metalware::Commands::Build, node_identifier, **options_hash
-      )
-    end
-  end
+  let :build_wait_time { metal_config.build_poll_sleep * 5 }
 
-  # Makes `Node.new` return real `Node`s, but with certain methods stubbed to
-  # not depend on environment.
-  def use_mock_nodes(not_built_nodes: [])
-    allow(
-      Metalware::Namespaces::Node
-    ).to receive(:new).and_wrap_original do |original_new, *args|
-      original_new.call(*args).tap do |node|
-        # Stub this as depends on `gethostip` and `/etc/hosts`
-        allow(node).to receive(:hexadecimal_ip).and_return(node.name + '_HEX_IP')
+  def run_build(node_group, delay_report_built: nil, **options_hash)
+    Timeout.timeout build_wait_time do
+      th = Thread.new do
+        Metalware::Utils.run_command(
+          Metalware::Commands::Build, node_group.name, **options_hash
+        )
       end
+
+      # Allows the build to report finished after a set delay
+      if delay_report_built
+        sleep delay_report_built
+        if node_group.is_a?(Metalware::Namespaces::Node)
+          [node_group]
+        else
+          node_group.nodes
+        end.each do |node|
+          FileUtils.touch node.build_complete_path
+        end
+      end
+      th.join
     end
-
-    allow_any_instance_of(Metalware::Commands::Build).to \
-      receive(:built?).and_wrap_original do |_original, node|
-      !not_built_nodes.include?(node.name)
-    end
   end
 
-  def expect_runs_longer_than(seconds, &block)
-    expect do
-      Timeout.timeout(seconds, &block)
-    end.to raise_error Timeout::Error
-  end
-
-  def expect_renders(template_path, to:)
-    expect(Metalware::Templater).to receive(:render_to_file).with(
-      instance_of(Metalware::Namespaces::Node),
-      template_path,
-      to,
-      instance_of(Hash)
-    )
-  end
-
-  let :testnodes_config_path do
-    metal_config.repo_config_path('testnodes')
-  end
-
-  let :filesystem do
-    FileSystem.setup do |fs|
+  # Sets up the filesystem
+  before :each do
+    FileSystem.root_setup do |fs|
       fs.with_repo_fixtures('repo')
+      fs.with_genders_fixtures
     end
   end
 
-  let :alces { Metalware::Namespaces::Alces.new(metal_config) }
+  # Mocks the test node
+  let :testnode { alces.nodes.find_by_name('testnode01') }
+  AlcesUtils.mock self, :each do
+    config(testnode, build_method: :kickstart)
+    hexadecimal_ip(testnode)
+  end
 
   before :each do
-    allow(Metalware::Templater).to receive(:render_to_file)
-    use_mock_nodes
-    SpecUtils.use_mock_genders(self, genders_file: 'genders/simple_cluster')
-    SpecUtils.fake_download_error(self)
     SpecUtils.use_mock_dependency(self)
-    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)
   end
 
   context 'when called without group argument' do
-    it 'renders default standard templates for given node' do
-      expect_renders(
-        "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode01'
-      )
-      expect_renders(
-        "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-      ).at_least(:once)
-
-      run_build('testnode01')
-    end
-
-    context 'when templates specified in repo config' do
-      let :testnode01_config do
-        OpenStruct.new(
-          pxelinux: 'repo_pxelinux',
-          kickstart: 'repo_kickstart'
-        )
+    context 'with a node that builds successfully' do
+      it 'calls the start_hook' do
+        expect(testnode.build_method).to receive(:start_hook).once
+        run_build(testnode, delay_report_built: build_wait_time / 10)
       end
 
-      before :each do
-        allow(alces.nodes.testnode01.config).to \
-          receive(:templates).and_return(testnode01_config)
-        allow(alces.nodes.testnode02.config).to \
-          receive(:templates).and_return(OpenStruct.new)
-      end
-
-      it 'uses specified templates' do
-        filesystem.test do
-          expect_renders(
-            "#{metal_config.repo_path}/kickstart/repo_kickstart",
-            to: '/var/lib/metalware/rendered/kickstart/testnode01'
-          )
-          expect_renders(
-            "#{metal_config.repo_path}/pxelinux/repo_pxelinux",
-            to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-          ).at_least(:once)
-
-          run_build('testnode01')
-        end
-      end
-
-      it 'specifies correct template dependencies' do
-        groups = Metalware::Namespaces::MetalArray.new(
-          [Metalware::Namespaces::Group.new(alces, 'cluster', index: 1)]
-        )
-        allow(alces).to receive(:groups).and_return(groups)
-
-        filesystem.test do
-          build_command = run_build('cluster', group: true)
-
-          # Not ideal to test private method, but seems best way in this case.
-          dependency_hash = build_command.send(:dependency_hash)
-
-          expect(dependency_hash[:repo].sort).to eq([
-            # `default` templates used for node `testnode02`.
-            'pxelinux/default',
-            'kickstart/default',
-
-            # Repo templates for 'testnode01'
-            'pxelinux/repo_pxelinux',
-            'kickstart/repo_kickstart',
-          ].sort)
-        end
+      it 'calls the complete_hook' do
+        expect(testnode.build_method).to receive(:complete_hook).once
+        run_build(testnode, delay_report_built: build_wait_time / 10)
       end
     end
 
-    it 'renders pxelinux once with firstboot true if node does not build' do
-      time_to_wait = 0.2
-      use_mock_nodes(not_built_nodes: 'testnode01')
-
-      expect_renders(
-        "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-      ).once
-
-      expect_runs_longer_than(time_to_wait) { run_build('testnode01') }
-    end
-
-    it 'renders pxelinux twice with firstboot switched if node builds' do
-      expect_renders(
-        "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-      ).once.ordered
-      expect_renders(
-        "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-      ).once.ordered
-
-      run_build('testnode01')
-    end
-
-    context "when 'basic' build method used" do
-      before :each do
-        allow_any_instance_of(Metalware::Namespaces::Node).to \
-          receive(:build_method).and_return(Metalware::BuildMethods::Basic)
+    context 'with an incomplete build' do
+      def incomplete_build
+        th = Thread.new { run_build(testnode) }
+        sleep(build_wait_time / 10)
+        th.raise(Interrupt) while th.alive?
       end
 
-      it 'renders only basic template' do
-        filesystem.test do
-          # When using the 'basic' build method, the only templates to be
-          # rendered for a node are the `files` which can be retrieved, and the
-          # `basic` template once at the beginning of the build process.
-          allow(Metalware::Templater).to receive(:render_to_file).once
-          expect_renders(
-            "#{metal_config.repo_path}/basic/default",
-            to: '/var/lib/metalware/rendered/basic/testnode01'
-          )
-
-          run_build('testnode01')
-        end
+      it 'calls the start hook' do
+        expect(testnode.build_method).to receive(:start_hook)
+        incomplete_build
       end
 
-      # Note: similar (but simpler) version of test for Kickstart build method.
-      it 'specifies correct template dependencies' do
-        filesystem.test do
-          build_command = run_build('testnode01')
-
-          # Not ideal to test private method, but seems best way in this case.
-          dependency_hash = build_command.send(:dependency_hash)
-
-          expect(dependency_hash[:repo]).to eq(['basic/default'])
-        end
+      it 'does not call the complete hook' do
+        expect(testnode.build_method).not_to receive(:complete_hook)
+        incomplete_build
       end
     end
   end
 
   context 'when called for group' do
-    # Creates the test Group Namespace
-    before :each do
-      groups = Metalware::Namespaces::MetalArray.new(
-        [Metalware::Namespaces::Group.new(alces, 'testnodes', index: 1)]
-      )
-      allow(alces).to receive(:groups).and_return(groups)
+    AlcesUtils.mock self, :each do
+      test_group = 'some_random_test_group'
+      mock_group(test_group)
+      ['node00', 'node01', 'node02', 'node03'].each do |node|
+        mock_node(node, test_group)
+        hexadecimal_ip(alces.node)
+      end
     end
 
-    it 'renders standard templates for each node' do
-      expect_renders(
-        "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode01'
-      )
-      expect_renders(
-        "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode01_HEX_IP'
-      )
+    let :testnodes { alces.group }
+    let :delay_build { build_wait_time / 10 }
 
-      expect_renders(
-        "#{metal_config.repo_path}/kickstart/default",
-        to: '/var/lib/metalware/rendered/kickstart/testnode02'
-      )
-      expect_renders(
-        "#{metal_config.repo_path}/pxelinux/default",
-        to: '/var/lib/tftpboot/pxelinux.cfg/testnode02_HEX_IP'
-      )
+    it 'starts all the builds' do
+      testnodes.nodes do |node|
+        expect(node).to receive(:start_hook).once
+      end
+      run_build(testnodes, delay_report_built: delay_build, group: true)
+    end
 
-      run_build('testnodes', group: true)
+    it 'completes all the nodes once built' do
+      testnodes.nodes do |node|
+        expect(node).to receive(:complete_hook).once
+      end
+      run_build(testnodes, delay_report_built: delay_build, group: true)
+    end
+
+    it 'finishes once all the nodes are built' do
+      expect do
+        run_build(testnodes, delay_report_built: delay_build, group: true)
+      end.not_to raise_error
+    end
+
+    context 'with a single node that has not been built' do
+      def build_all_but_one_node
+        built_nodes = testnodes.nodes.dup
+        built_nodes.shift # The first node will not be built
+        th = Thread.new do
+          run_build(testnodes, group: true)
+          sleep(build_wait_time / 10)
+          built_nodes.each { |n| FileUtils n.build_complete_path }
+        end
+        th.join
+      end
+
+      it 'hangs if a node has not finish building' do
+        expect do
+          build_all_but_one_node
+        end.to raise_error(Timeout::Error)
+      end
+
+      it 'cleans up all the build files' do
+        begin
+          build_all_but_one_node
+          raise 'Test should intentionally timeout'
+        rescue Timeout::Error
+          path = File.dirname(testnodes.nodes.first.build_complete_path)
+          build_complete_files = Dir[File.join(path, '**/*')]
+          expect(build_complete_files).to be_empty
+        end
+      end
     end
   end
 end

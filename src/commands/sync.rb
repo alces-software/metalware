@@ -22,31 +22,21 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'build_methods/kickstarts/uefi'
-require 'config'
-require 'filesystem'
-require 'file_path'
-require 'alces_utils'
+require 'command_helpers/base_command'
+require 'staging'
 
-RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
-  include AlcesUtils
+module Metalware
+  module Commands
+    class Sync < CommandHelpers::BaseCommand
+      private
 
-  before :each do
-    FileSystem.root_setup do |fs|
-      fs.with_minimal_repo
+      attr_reader :manifest
+
+      def setup; end
+
+      def run
+        Staging.update(config, &:sync_files)
+      end
     end
-  end
-
-  AlcesUtils.mock self, :each do
-    mock_node('nodeA01')
-    allow(alces.node).to receive(:hexadecimal_ip).and_return('00000000')
-    config(alces.node, build_method: :'uefi-kickstart')
-  end
-
-  it 'renders the pxelinux template with correct save_path' do
-    save_path = File.join(file_path.uefi_save, 'grub.cfg-00000000')
-    FileUtils.mkdir(File.dirname(save_path))
-    alces.node.build_method.start_hook
-    expect(File.exist?(save_path)).to eq(true)
   end
 end

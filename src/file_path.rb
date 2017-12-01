@@ -111,6 +111,10 @@ module Metalware
       )
     end
 
+    def staging(path)
+      File.join(staging_dir, path)
+    end
+
     private
 
     attr_reader :config

@@ -1,58 +1,72 @@
 
 # frozen_string_literal: true
 
+require 'staging'
+
 module Metalware
   module BuildMethods
     class BuildMethod
-      def initialize(config, node)
-        @config = config
+      def initialize(metal_config, node)
+        @metal_config = metal_config
         @node = node
       end
 
-      def render_build_start_templates
-        raise NotImplementedError
-      end
-
-      def render_build_complete_templates; end
-
-      def template_paths
-        self.class::TEMPLATES.map do |template_type|
-          full_template_path = template_path(template_type, node: node)
-          file_path.repo_relative_path_to(full_template_path)
+      # TODO: Change name to staging_hook
+      def render_staging_templates
+        Staging.template(metal_config) do |templator|
+          staging_templates.each { |t| render_to_staging(templator, t) }
+          render_build_files_to_staging(templator)
         end
       end
 
-      def start_build
-        # Runs after the files have been rendered but before build waits
-        # for the nodes to complete. Leave blank if the nodes build need to
-        # be started manually by powering them on.
+      def start_hook
+        # Runs at the start of the build process
+      end
+
+      def complete_hook
+        # Runs after the nodes have reported built
+      end
+
+      def dependency_paths
+        staging_templates.map do |t|
+          strip_leading_repo_path(file_path.template_path(t, node: node))
+        end
       end
 
       private
 
-      DEFAULT_BUILD_START_PARAMETERS = {
-        firstboot: true,
-      }.freeze
+      attr_reader :metal_config, :node
 
-      DEFAULT_BUILD_COMPLETE_PARAMETERS = {
-        firstboot: false,
-      }.freeze
-
-      attr_reader :config, :node
-
-      delegate :template_path, to: :file_path
-
-      def file_path
-        @file_path ||= FilePath.new(config)
+      def strip_leading_repo_path(path)
+        path.gsub(/^#{file_path.repo}\/?/, '')
       end
 
-      def render_template(template_type, parameters:, save_path: nil)
+      def staging_templates
+        raise NotImplementedError
+      end
+
+      def file_path
+        @file_path ||= FilePath.new(metal_config)
+      end
+
+      def render_build_files_to_staging(templater)
+        node.files.each do |namespace, files|
+          files.each do |file|
+            next if file[:error]
+            render_path = file_path.rendered_build_file_path(
+              node.name,
+              namespace,
+              file[:name]
+            )
+            templater.render(node, file[:template_path], render_path, mkdir: true)
+          end
+        end
+      end
+
+      def render_to_staging(templater, template_type, sync: nil)
         template_type_path = template_path template_type, node: node
-        save_path ||= file_path.template_save_path(template_type, node: node)
-        Templater.render_to_file(node,
-                                 template_type_path,
-                                 save_path,
-                                 **parameters.to_h)
+        sync ||= file_path.template_save_path(template_type, node: node)
+        templater.render(node, template_type_path, sync)
       end
     end
   end

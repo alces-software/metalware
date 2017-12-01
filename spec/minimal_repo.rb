@@ -30,6 +30,7 @@ module MinimalRepo
       'files/': nil,
       'pxelinux/default': "<%= alces.firstboot ? 'FIRSTBOOT' : 'NOT_FIRSTBOOT' %>\n",
       'kickstart/default': '',
+      'uefi-kickstart/default': '',
       'basic/default': '',
       'hosts/default': '',
       'named/default': '',

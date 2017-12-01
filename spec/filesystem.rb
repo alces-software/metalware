@@ -156,6 +156,7 @@ class FileSystem
       '/tmp',
       '/etc',
       '/var/log/metalware',
+      '/var/lib/metalware/staging',
       '/var/lib/metalware/rendered/kickstart',
       '/var/lib/metalware/rendered/system',
       '/var/lib/metalware/cache/built-nodes',
