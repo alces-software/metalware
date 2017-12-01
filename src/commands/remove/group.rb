@@ -23,9 +23,10 @@
 #==============================================================================
 
 require 'nodeattr_interface'
-require 'domain_templates_renderer'
 require 'active_support/core_ext/string/strip'
 require 'data'
+require 'staging'
+require 'render_methods'
 
 module Metalware
   module Commands
@@ -39,19 +40,14 @@ module Metalware
         def run
           delete_answer_files
           cache.remove(primary_group)
-          update_domain_templates
+          Staging.template do |templator|
+            RenderMethods::Genders.render_to_staging(alces.domain, templator)
+          end
         end
 
         private
 
         attr_reader :primary_group, :cache
-
-        # Deleting a group should not break the genders file, so this error is
-        # not expected to run
-        GENDERS_INVALID_MESSAGE = <<-EOF.strip_heredoc
-          This error is most likely an issue with the Metalware repo you are
-          using.
-        EOF
 
         def dependency_hash
           {
@@ -69,13 +65,6 @@ module Metalware
           NodeattrInterface.nodes_in_primary_group(primary_group)
                            .map { |node| config.node_answers_file(node) }
                            .unshift(config.group_answers_file(primary_group))
-        end
-
-        def update_domain_templates
-          DomainTemplatesRenderer.new(
-            config,
-            genders_invalid_message: GENDERS_INVALID_MESSAGE
-          ).render
         end
       end
     end

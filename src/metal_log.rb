@@ -34,11 +34,6 @@ module Metalware
         metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
       end
 
-      def reset_log(config)
-        @metal_log = nil
-        @config = config
-      end
-
       def metal_log
         @metal_log ||= MetalLog.new('metal')
       end
@@ -61,9 +56,7 @@ module Metalware
     private
 
     def config
-      config = self.class.instance_variable_get :@config
-      raise UnsetConfigLogError if config.nil?
-      config
+      Config.cache(new_if_missing: true)
     end
   end
 end

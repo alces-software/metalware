@@ -30,7 +30,7 @@ module Metalware
             node,
             pxelinux_template_path,
             save_path,
-            **parameters
+            dynamic: parameters
           )
         end
 

@@ -54,6 +54,9 @@ module Metalware
     )
 
     class << self
+      # NOTE: The 'alces' input to any of these methods can be subsituted for a
+      # Node, Group, or Domain namespace. By doing so, the scope of the render
+      # will automatically be set
       def render(alces, template, **dynamic_namespace)
         raw_template = File.read(template)
         begin
@@ -72,14 +75,10 @@ module Metalware
         alces,
         template,
         save_file,
-        prepend_managed_file_message: false,
-        **dynamic_namespace,
+        dynamic: {},
         &validation_block
       )
-        rendered_template = render(alces, template, **dynamic_namespace)
-        if prepend_managed_file_message
-          rendered_template = "#{MANAGED_FILE_MESSAGE}\n#{rendered_template}"
-        end
+        rendered_template = render(alces, template, **dynamic)
 
         rendered_template_valid?(
           rendered_template,

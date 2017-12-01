@@ -35,7 +35,50 @@ module Metalware
       def setup; end
 
       def run
-        Staging.update(config, &:sync_files)
+        Staging.update do |staging|
+          sync_files(staging)
+          staging.save
+          restart_services(staging)
+          clean_up_staging_directory
+        end
+      end
+
+      def sync_files(staging)
+        staging.delete_file_if do |file|
+          validate(file)
+          FileUtils.mkdir_p File.dirname(file.sync)
+          staging.push_service(file.service) if file.service
+          File.write(file.sync, file.content)
+        end
+      end
+
+      def validate(data)
+        return unless data.validator
+        error = nil
+        begin
+          return if data.validator.constantize.validate(data.content)
+        rescue => e
+          error = e
+        end
+        msg = 'A file failed to be validated'
+        msg += "\nSync Path: #{data.sync}"
+        msg += "\nValidator: #{data.validator}"
+        msg += "\nManaged: #{data.managed}"
+        msg += "\nError: #{error.inspect}" if error
+        raise ValidationFailure, msg
+      end
+
+      def restart_services(staging)
+        staging.delete_service_if do |service|
+          service.constantize.restart_service
+        end
+      end
+
+      def clean_up_staging_directory
+        Dir[File.join(FilePath.staging_dir, '**/*')]
+          .select { |d| File.directory?(d) }
+          .reverse
+          .each { |d| Dir.rmdir d if Dir[File.join(d, '**/*')].length.zero? }
       end
     end
   end

@@ -7,9 +7,16 @@ require 'filesystem'
 require 'data'
 require 'constants'
 require 'spec_utils'
+require 'alces_utils'
 
 RSpec.describe Metalware::HashMergers::HashMerger do
-  let :config { Metalware::Config.new }
+  include AlcesUtils
+
+  AlcesUtils.mock self, :each do
+    validation_off
+  end
+
+  let :config { metal_config }
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_repo_fixtures('merged_hash')

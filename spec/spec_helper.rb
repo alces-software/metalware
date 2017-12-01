@@ -140,6 +140,11 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
+  # Resets the config cache each test
+  config.before :each do
+    Metalware::Config.clear_cache
+  end
+
   config.around :each do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file
     # system

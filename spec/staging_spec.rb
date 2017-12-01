@@ -4,36 +4,20 @@
 require 'staging'
 require 'alces_utils'
 
-module Metalware
-  module Testing
-    class GoodValidation
-      def validate(_content)
-        true
-      end
-    end
-
-    class BadValidation
-      def validate(_content)
-        false
-      end
-    end
-  end
-end
-
 RSpec.describe Metalware::Staging do
   include AlcesUtils
 
   def manifest
-    Metalware::Staging.manifest(metal_config)
+    Metalware::Staging.manifest
   end
 
   def update(&b)
-    Metalware::Staging.update(metal_config, &b)
+    Metalware::Staging.update(&b)
   end
 
   it 'loads a blank file list if the manifest is missing' do
-    expect(manifest.files).to be_a(Array)
-    expect(manifest.files).to be_empty
+    expect(manifest[:files]).to be_a(Hash)
+    expect(manifest[:files]).to be_empty
   end
 
   describe '#push_file' do
@@ -54,13 +38,12 @@ RSpec.describe Metalware::Staging do
     end
 
     it 'saves the default options' do
-      expect(manifest.files.first.managed).to eq(false)
-      expect(manifest.files.first.validator).to eq(nil)
+      expect(manifest[:files].first[1][:managed]).to eq(false)
+      expect(manifest[:files].first[1][:validator]).to eq(nil)
     end
 
     it 'updates the manifest' do
-      expect(manifest.files.first.staging).to eq(test_staging)
-      expect(manifest.files.first.sync).to eq(test_sync)
+      expect(manifest[:files][test_sync]).not_to be_empty
     end
 
     it 'can push more files' do
@@ -68,80 +51,60 @@ RSpec.describe Metalware::Staging do
         staging.push_file('second', '')
         staging.push_file('third', '')
       end
-      expect(manifest.files.length).to eq(3)
-      expect(manifest.files[1].staging).to eq(file_path.staging('second'))
-      expect(manifest.files[2].staging).to eq(file_path.staging('third'))
+      keys = manifest[:files].keys
+      expect(manifest[:files].length).to eq(3)
+      expect(keys[1]).to eq('second')
+      expect(keys[2]).to eq('third')
     end
 
     it 'saves the additional options' do
       update do |staging|
         staging.push_file('other', '', managed: true, validator: 'validate')
       end
-
-      expect(manifest.files.last.managed).to eq(true)
-      expect(manifest.files.last.validator).to eq('validate')
+      key = manifest[:files].keys.last
+      expect(manifest[:files][key][:managed]).to eq(true)
+      expect(manifest[:files][key][:validator]).to eq('validate')
     end
   end
 
-  describe '#sync_files' do
+  describe '#delete_file_if' do
     let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
-    let :validate_file { '/tmp/validate-file' }
 
     before :each do
       Metalware::Staging.update(metal_config) do |staging|
-        good_validator = Metalware::Testing::GoodValidation
-        staging.push_file(validate_file, '', validator: good_validator)
         files.each { |f| staging.push_file(f, '') }
       end
     end
 
-    context 'with valid files (aka no errors expected)' do
-      before :each { Metalware::Staging.update(metal_config, &:sync_files) }
-
-      it 'moves the files into place' do
-        files.each { |f| expect(File.exist?(f)).to eq(true) }
-      end
-
-      it 'leaves the file list empty' do
-        expect(manifest.files).to be_empty
-      end
-
-      it 'leaves the staging directory empty' do
-        files = Dir[File.join(file_path.staging_dir, '**/*')].reject do |p|
-          File.directory?(p)
-        end
-        expect(files).to be_empty
-      end
-
-      it 'moves the validated file into place' do
-        expect(File.exist?(validate_file)).to eq(true)
+    def run_delete_files(&b)
+      Metalware::Staging.update do |staging|
+        staging.delete_file_if(&b)
       end
     end
 
-    context 'with a validation error' do
-      let :bad_file { '/tmp/bad-validator-file' }
-      let :stderr { StringIO.new }
+    it 'deletes the files if the block returns true' do
+      run_delete_files { |_file| true }
+      expect(manifest[:files].keys.length).to eq(0)
+      files.each { |path| expect(File.exist?(path)).to eq(false) }
+    end
 
-      before :each do
-        Metalware::Staging.update(metal_config) do |staging|
-          bad_validator = Metalware::Testing::BadValidation
-          staging.push_file(bad_file, '', validator: bad_validator)
-        end
-        old_stderr = $stderr
-        $stderr = stderr
-        Metalware::Staging.update(metal_config, &:sync_files)
-        $stderr = old_stderr
-      end
+    it 'leaves the files in place' do
+      run_delete_files { |_file| false }
+      expect(manifest[:files].keys.length).to eq(files.length)
+      files.map { |path| Metalware::FilePath.staging(path) }
+           .each { |path| expect(File.exist?(path)).to eq(true) }
+    end
 
-      it "isn't removed from the manifest" do
-        expect(manifest.files.length).to eq(1)
-        expect(manifest.files.first.sync).to eq(bad_file)
-      end
+    it 'can delete a single file' do
+      run_delete_files { |file| file.sync.include?('second') }
+      expect(manifest[:files].length).to eq(files.length - 1)
+      expect(manifest[:files].keys.first).to include('first')
+      expect(manifest[:files].keys.last).to include('third')
+    end
 
-      it 'issues a validation failure error message' do
-        stderr.rewind
-        expect(stderr.read).to include('ValidationFailure')
-      end
+    it 'files are not deleted if there is an error' do
+      run_delete_files { |_f| raise 'test error' }
+      expect(manifest[:files].length).to eq(files.length)
     end
 
     context 'with a managed file' do
@@ -155,12 +118,10 @@ RSpec.describe Metalware::Staging do
       before :each do
         Metalware::Staging.update(metal_config) do |staging|
           staging.push_file(managed_file, managed_content, managed: true)
+          staging.delete_file_if do |file|
+            File.write file.sync, file.content
+          end
         end
-        Metalware::Staging.update(metal_config) { |s| s.sync_files }
-      end
-
-      it 'writes to the file if it does not exist' do
-        expect(File.exist?(managed_file)).to eq(true)
       end
 
       it 'writes the managed file content and flags' do
@@ -181,16 +142,15 @@ RSpec.describe Metalware::Staging do
         File.write(managed_file, start_content)
 
         new_content = 'NEW CONTENT'
-        Metalware::Staging.update(metal_config) do |staging|
+        Metalware::Staging.update do |staging|
           staging.push_file(managed_file, new_content, managed: true)
-          staging.sync_files
+          staging.delete_file_if do |file|
+            expect(file.content.first).to eq(file_start)
+            expect(file.content.last).to eq(file_end)
+            expect(file.content).to include(new_content)
+            expect(file.content).not_to include(managed_content)
+          end
         end
-
-        save_content = read_managed_content
-        expect(save_content.first).to eq(file_start)
-        expect(save_content.last).to eq(file_end)
-        expect(save_content).to include(new_content)
-        expect(save_content).not_to include(managed_content)
       end
     end
   end

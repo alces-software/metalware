@@ -100,16 +100,14 @@ RSpec.describe Metalware::NodeattrInterface do
     it 'returns true and no error when given a valid genders file' do
       File.write(genders_path, "node01 nodes,other,groups\n")
 
-      expect(subject).to eq [true, '']
+      expect(subject).to eq true
     end
 
-    it 'returns false and the error when given an invalid genders file' do
+    it 'raises an error if the genders file is invalid' do
       # This genders file is invalid as `node01` is given `nodes` group twice.
       File.write(genders_path, "node01 nodes,other,groups\nnode01 nodes\n")
 
-      expect(subject.length).to be 2 # Sanity check.
-      expect(subject.first).to be false
-      expect(subject.last).to match(/duplicate attribute/)
+      expect { subject }.to raise_error Metalware::SystemCommandError
     end
 
     it 'raises if given file does not exist' do

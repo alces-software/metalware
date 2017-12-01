@@ -31,12 +31,12 @@ module Metalware
         @log ||= MetalLog.new('file')
       end
 
-      def load(data_file, skip_log: false)
-        log.info "load: #{data_file}" unless skip_log
-        data = raw_load(data_file, skip_log: skip_log)
+      def load(data_file)
+        log.info "load: #{data_file}"
+        data = raw_load(data_file)
         process_loaded_data(data, source: data_file)
       rescue => e
-        log.error("Fail: #{e.inspect}") unless skip_log
+        log.error("Fail: #{e.inspect}")
         raise e
       end
 
@@ -54,11 +54,11 @@ module Metalware
 
       private
 
-      def raw_load(data_file, skip_log:)
+      def raw_load(data_file)
         if File.file? data_file
           YAML.load_file(data_file) || {}
         else
-          log.info 'file not found' unless skip_log
+          log.info 'file not found'
           {}
         end
       end

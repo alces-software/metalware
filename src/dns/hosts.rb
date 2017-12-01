@@ -23,19 +23,16 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'validation/loader'
-require 'pathname'
-require 'system_command'
 require 'templater'
 require 'exceptions'
 require 'metal_log'
+require 'file_path'
 
 module Metalware
   module DNS
-    class Named
+    class Hosts
       def self.restart_service
-        MetalLog.info 'Restarting named'
-        SystemCommand.run('systemctl restart named')
+        MetalLog.warn 'DNS::Hosts does not currently support restarting services'
       end
 
       def initialize(alces, templater)
@@ -44,59 +41,23 @@ module Metalware
       end
 
       def update
-        render_repo_named_conf
-        each_network do |zone, net|
-          render_zone_template('forward', zone, net)
-          render_zone_template('reverse', zone, net)
-        end
+        templater.render(alces, template, rendered_path, **staging_options)
       end
 
       private
 
       attr_reader :alces, :templater
 
-      def render_repo_named_conf
-        template_path = FilePath.template_path('named', node: alces.domain)
-        templater.render(alces,
-                         template_path,
-                         FilePath.metalware_named,
-                         **staging_options)
+      def template
+        FilePath.template_path('hosts', node: alces.domain)
       end
 
-      def each_network
-        alces.domain.config.networks&.each { |*data| yield(*data) }
-      end
-
-      def build_dynamic_namespace(zone, net)
-        {
-          named: {
-            zone: zone,
-            net: net,
-          },
-        }
-      end
-
-      def render_zone_template(direction, zone, net)
-        zone_name = case direction
-                    when 'forward'
-                      net.named_fwd_zone
-                    when 'reverse'
-                      net.named_rev_zone
-                    end
-        return unless zone_name
-        dynamic_namespace = build_dynamic_namespace(zone, net)
-        templater.render(
-          alces,
-          FilePath.template_path("named/#{direction}", node: alces.domain),
-          FilePath.named_zone(zone_name),
-          dynamic: dynamic_namespace,
-          **staging_options
-        )
+      def rendered_path
+        FilePath.hosts
       end
 
       def staging_options
         {
-          mkdir: true,
           service: self.class.name,
         }
       end

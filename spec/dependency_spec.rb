@@ -31,14 +31,16 @@ require 'ostruct'
 require 'spec_helper'
 require 'fileutils'
 require 'filesystem'
+require 'alces_utils'
 
 RSpec.describe Metalware::Dependency do
-  let :config { Metalware::Config.new }
+  include AlcesUtils
+
   let :filesystem { FileSystem.setup }
 
   def enforce_dependencies(dependencies_hash = {})
     filesystem.test do |_fs|
-      Metalware::Dependency.new(config, 'test', dependencies_hash).enforce
+      Metalware::Dependency.new(metal_config, 'test', dependencies_hash).enforce
     end
   end
 

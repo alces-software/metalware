@@ -25,10 +25,10 @@ module Metalware
         end
 
         command_class.new(args, options)
-      rescue
-        $stderr.puts $!.message
-        $stderr.puts $!.backtrace
-        raise $!
+      rescue => e
+        $stderr.puts e.message
+        $stderr.puts e.backtrace
+        raise e
       ensure
         $stderr = old_stderr
       end

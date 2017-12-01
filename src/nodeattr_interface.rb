@@ -67,9 +67,7 @@ module Metalware
         end
 
         nodeattr("-f #{genders_path} --parse-check", format_error: false)
-        [true, '']
-      rescue SystemCommandError => e
-        [false, e.message]
+        true
       end
 
       def nodeattr(command, format_error: true, mock_nodeattr: nil)

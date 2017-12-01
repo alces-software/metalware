@@ -14,10 +14,6 @@ anchor_options:
       saving user input.
 
 global_options:
-  - tags: [-c FILE, --config FILE]
-    description: >
-      Specify config file to use instead of default
-      (/opt/metalware/etc/config.yaml)
   - tags: [--strict]
     description: >
       Convert warnings to errors
@@ -58,16 +54,6 @@ subcommands:
     action: Commands::Configure::Node
     options:
       - *configure_answers_option
-
-  configure_rerender: &configure_rerender
-    syntax: metal configure rerender [options]
-    summary: Re-render the Metalware domain templates
-    description: >
-      Re-render the Metalware domain templates, in particular the genders and
-      hosts file templates. This is useful after manually editing files
-      involved in rendering these templates, such as answer files or the
-      templates themselves.
-    action: Commands::Configure::Rerender
 
   configure_local: &configure_local
     syntax: metal configure local [options]
@@ -192,7 +178,6 @@ commands:
       domain: *configure_domain
       group: *configure_group
       node: *configure_node
-      rerender: *configure_rerender
       local: *configure_local
 
   console:
@@ -202,22 +187,6 @@ commands:
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
     action: CommandHelpers::BashCommand
-
-  dhcp:
-    syntax: metal dhcp [options]
-    summary: Renders and reboots dhcp from the hunter cache
-    description: >
-      Dhcp renders a template which is used to update the dhcp server. Dhcp is
-      designed  to run after hunter and read from its cache. Hunter cache can be
-      iterated over in the template with "alces.hunter.each". The rendered dhcp
-      template is validated before the dhcp server is reset.
-    action: Commands::Dhcp
-    options:
-      - tags: [-t TEMPLATE, --template TEMPLATE]
-        type: String
-        default: default
-        description: >
-          Specify dhcp template to use
 
   each:
     syntax: metal each NODE_IDENTIFIER COMMAND [options]

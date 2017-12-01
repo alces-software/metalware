@@ -28,6 +28,7 @@ require 'config'
 require 'filesystem'
 require 'file_path'
 require 'data'
+require 'alces_utils'
 
 module SaverSpec
   module TestingMethods
@@ -43,7 +44,9 @@ end
 Metalware::Validation::Saver::Methods.prepend(SaverSpec::TestingMethods)
 
 RSpec.describe Metalware::Validation::Saver do
-  let :config { Metalware::Config.new }
+  include AlcesUtils
+
+  let :config { metal_config }
   let :path { Metalware::FilePath.new(config) }
   let :saver do
     Metalware::Validation::Saver.new(config)

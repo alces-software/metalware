@@ -5,73 +5,78 @@ require 'file_path'
 require 'recursive-open-struct'
 require 'templater'
 require 'managed_file'
+require 'config'
 
 module Metalware
   class Staging
-    def self.update(metal_config)
-      staging = new(metal_config)
+    def self.update(_remove_this_input = nil)
+      staging = new
       yield staging if block_given?
     ensure
       staging.save
     end
 
-    def self.template(metal_config)
-      update(metal_config) do |staging|
+    def self.template(_remove_this_input = nil)
+      update do |staging|
         yield Templater.new(staging) if block_given?
       end
     end
 
-    def self.manifest(metal_config)
-      new(metal_config).manifest
+    def self.manifest(_remove_this_input = nil)
+      new.manifest
     end
 
     private_class_method :new
 
-    def initialize(metal_config)
-      @metal_config = metal_config
+    def initialize
+      @metal_config = Config.cache
       @file_path = FilePath.new(metal_config)
-      manifest_hash = Data.load(file_path.staging_manifest)
-      manifest_hash = blank_manifest if manifest_hash.empty?
-      @manifest = RecursiveOpenStruct.new(
-        manifest_hash, recurse_over_arrays: true
-      )
     end
-
-    attr_reader :manifest
 
     def save
       Data.dump(file_path.staging_manifest, manifest.to_h)
+    end
+
+    def manifest
+      @manifest ||= begin
+        Data.load(file_path.staging_manifest).tap do |x|
+          x.merge! blank_manifest if x.empty?
+          # Converts the file paths to strings
+          x[:files] = x[:files].map { |key, data| [key.to_s, data] }.to_h
+        end
+      end
     end
 
     def push_file(sync, content, **options)
       staging = file_path.staging(sync)
       FileUtils.mkdir_p(File.dirname(staging))
       File.write(staging, content)
-
-      manifest.files.push(
-        {
-          sync: sync,
-          staging: staging,
-        }.merge(default_push_options)
-         .merge(options)
-      )
+      manifest[:files][sync] = default_push_options.merge(options)
     end
 
-    def sync_files
-      manifest.files.delete_if do |data|
-        return_value = nil
+    def delete_file_if
+      manifest[:files].delete_if do |sync_path, raw_data|
+        ret = nil
         begin
-          managed = data[:managed]
-          content = File.read(data[:staging])
-          content = ManagedFile.content(data[:sync], content) if managed
-          move_file(data, content)
-          return_value = true
+          data = OpenStruct.new(raw_data.merge(sync: sync_path))
+          data.content = file_content(data)
+          ret = yield OpenStruct.new(data)
         rescue => e
-          $stderr.puts e.inspect
-          return_value = false
+          MetalLog.warn e.inspect
+          ret = false
         end
-        return_value
+        FileUtils.rm FilePath.staging(sync_path) if ret
+        ret
       end
+    end
+
+    def push_service(service)
+      services = manifest[:services]
+      services.push(service) unless services.include? service
+    end
+
+    def delete_service_if
+      manifest[:services].delete_if { |service| yield service }
     end
 
     private
@@ -82,29 +87,16 @@ module Metalware
       {
         managed: false,
         validator: nil,
-        mkdir: false,
       }
     end
 
     def blank_manifest
-      { files: [] }
+      { files: {}, services: [] }
     end
 
-    def move_file(data, content)
-      validate(data, content)
-      FileUtils.mkdir_p(File.dirname(data[:sync])) if data[:mkdir]
-      File.write(data[:sync], content)
-      FileUtils.rm(data[:staging])
-    end
-
-    def validate(data, content)
-      return unless data[:validator]
-      unless data[:validator].new.validate(content)
-        msg = "A file failed the following validator: #{data[:validator]}\n"
-        msg += "File: #{data[:staging]}"
-        msg += "Managed?: #{data[:managed]}"
-        raise ValidationFailure, msg
-      end
+    def file_content(data)
+      raw = File.read(FilePath.staging(data.sync))
+      data.managed ? ManagedFile.content(data.sync, raw) : raw
     end
   end
 end

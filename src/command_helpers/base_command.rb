@@ -47,7 +47,7 @@ module Metalware
 
       private
 
-      attr_reader :config, :args, :options
+      attr_reader :args, :options
 
       def pre_setup(args, options)
         setup_config(options)
@@ -65,7 +65,13 @@ module Metalware
           strict: !!options.strict,
           quiet: !!options.quiet,
         }
-        @config = Config.new(options.config, cli_options)
+        # Ensures it uses it's own config
+        Config.clear_cache
+        Config.cache = Config.new(options.config, cli_options)
+      end
+
+      def config
+        Config.cache
       end
 
       def dependency_specifications
