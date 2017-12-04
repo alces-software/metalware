@@ -205,7 +205,7 @@ RSpec.describe Metalware::Namespaces::Alces do
   shared_examples '#node errors' do
     describe '#node' do
       it 'errors' do
-        expect { render_node_template }.to raise_error(Metalware::ScopeError)
+        expect { alces.node }.to raise_error(Metalware::ScopeError)
       end
     end
   end
@@ -213,7 +213,7 @@ RSpec.describe Metalware::Namespaces::Alces do
   shared_examples '#group errors' do
     describe '#group' do
       it 'errors' do
-        expect { render_group_template }.to raise_error(Metalware::ScopeError)
+        expect { alces.group }.to raise_error(Metalware::ScopeError)
       end
     end
   end
@@ -230,7 +230,7 @@ RSpec.describe Metalware::Namespaces::Alces do
 
     describe '#node' do
       it 'returns a Node' do
-        expect(render_node_template).to eq(Metalware::Namespaces::Node.to_s)
+        expect(alces.node.class).to eq(Metalware::Namespaces::Node.to_s)
       end
     end
   end
@@ -241,7 +241,7 @@ RSpec.describe Metalware::Namespaces::Alces do
 
     describe '#group' do
       it 'returns a Group' do
-        expect(render_group_template).to eq(Metalware::Namespaces::Group.to_s)
+        expect(alces.group.class).to eq(Metalware::Namespaces::Group.to_s)
       end
     end
   end
