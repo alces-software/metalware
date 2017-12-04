@@ -114,11 +114,13 @@ RSpec.describe Metalware::Namespaces::Alces do
 
   describe '#scope' do
     let :scope_template { '<%= alces.scope.class %>' }
-    let :node_double { double(Metalware::Namespaces::Node) }
-    let :group_double { double(Metalware::Namespaces::Group) }
+    let :node_class { Metalware::Namespaces::Node }
+    let :group_class { Metalware::Namespaces::Group }
+    let :node_double { double(node_class, class: node_class) }
+    let :group_double { double(group_class, class: group_class) }
 
     def render_scope_template(**dynamic)
-      alces.render_erb_template(scope_template, **dynamic)
+      alces.render_erb_template(scope_template, **dynamic).constantize
     end
 
     # TODO: Remove this redirect, it will be replaced by the scope eventually
@@ -128,13 +130,21 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     it 'defaults to the Domain namespace' do
-      expect(render_scope_template.constantize).to eq(alces.domain.class)
+      expect(render_scope_template).to eq(alces.domain.class)
     end
 
     it 'errors if a group and node are both in scope' do
       expect {
         render_scope_template(node: node_double, group: group_double)
       }.to raise_error(Metalware::InternalError)
+    end
+
+    it 'can set a node as the scope' do
+      expect(render_scope_template(node: node_double)).to eq(node_class)
+    end
+
+    it 'can set a group as the scope' do
+      expect(render_scope_template(group: group_double)).to eq(group_class)
     end
   end
 end
