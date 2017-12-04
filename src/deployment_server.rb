@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'network'
+
 module Metalware
   module DeploymentServer
     class << self
@@ -56,7 +58,7 @@ module Metalware
         # rendering the server config itself (the template shouldn't normally
         # depend on values dependent on the `build_interface`, but if it's
         # unspecified the `alces` namespace will fail to be created).
-        server_config[:build_interface] || Network.interfaces.first
+        server_config[:build_interface] || Metalware::Network.interfaces.first
       end
 
       private
