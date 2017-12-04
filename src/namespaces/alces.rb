@@ -49,13 +49,13 @@ module Metalware
       # TODO: Remove this method, use Config.cache instead
       attr_reader :metal_config
 
-      SCOPE_ERROR = 'A node and group can not both be in scope'
-
       delegate :config, :answer, to: :scope
+
+      DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
 
       def scope
         dynamic = current_dynamic_namespace
-        raise InternalError, SCOPE_ERROR if dynamic.group && dynamic.node
+        raise ScopeError, DOUBLE_SCOPE_ERROR if dynamic.group && dynamic.node
         if dynamic.node
           node
         elsif dynamic.group

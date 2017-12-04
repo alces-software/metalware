@@ -145,9 +145,6 @@ module Metalware
     end
   end
 
-  class DomainTemplatesInternalError < MetalwareError
-  end
-
   class EditModeError < MetalwareError
   end
 
@@ -171,6 +168,9 @@ module Metalware
   end
 
   class AnswerJSONSyntax < MetalwareError
+  end
+
+  class ScopeError < MetalwareError
   end
 end
 
