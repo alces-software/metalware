@@ -79,6 +79,7 @@ module Metalware
                        :index,
                        :kickstart_url,
                        :build_complete_url,
+                       :build_complete_path,
                        :hexadecimal_ip,
                        :build_method,
                      ])

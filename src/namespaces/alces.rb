@@ -46,18 +46,43 @@ module Metalware
         @dynamic_stack = []
       end
 
+      # TODO: Remove this method, use Config.cache instead
       attr_reader :metal_config
 
-      def render_erb_template(template_string, dynamic_namespace = {})
-        # Renders against a domain scope by default
-        redirect_off = !metal_config.alces_default_to_domain_scope
-        if dynamic_namespace.key?(:config) || redirect_off
-          run_with_dynamic(dynamic_namespace) do
-            Templating::Renderer
-              .replace_erb_with_binding(template_string, wrapped_binding)
-          end
+      delegate :config, :answer, to: :scope
+
+      NODE_ERROR = 'Error, a Node is not in scope'
+
+      def node
+        raise ScopeError, NODE_ERROR unless scope.is_a? Namespaces::Node
+        scope
+      end
+
+      GROUP_ERROR = 'Error, a Group is not in scope'
+
+      def group
+        raise ScopeError, GROUP_ERROR unless scope.is_a? Namespaces::Group
+        scope
+      end
+
+      DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
+
+      def scope
+        dynamic = current_dynamic_namespace
+        raise ScopeError, DOUBLE_SCOPE_ERROR if dynamic.group && dynamic.node
+        if dynamic.node
+          dynamic.node
+        elsif dynamic.group
+          dynamic.group
         else
-          domain.render_erb_template(template_string, dynamic_namespace)
+          domain
+        end
+      end
+
+      def render_erb_template(template_string, dynamic_namespace = {})
+        run_with_dynamic(dynamic_namespace) do
+          Templating::Renderer
+            .replace_erb_with_binding(template_string, wrapped_binding)
         end
       end
 

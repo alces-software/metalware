@@ -191,7 +191,7 @@ RSpec.describe Metalware::Namespaces::Node do
 
         def local_node_uses_local_build?(config_build_method)
           mock_build_method(config_build_method, local)
-          expect(local.build_method).to eq(local_build)
+          expect(local.build_method).to be_a(local_build)
         end
 
         it 'returns the local build method if not specified' do

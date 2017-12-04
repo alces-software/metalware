@@ -53,8 +53,6 @@ module Metalware
         lambda do |template|
           alces.render_erb_template(
             template,
-            config: config,
-            answer: answer,
             **additional_dynamic_namespace,
             **user_dynamic_namespace
           )

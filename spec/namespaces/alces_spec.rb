@@ -7,6 +7,8 @@ require 'config'
 require 'alces_utils'
 
 RSpec.describe Metalware::Namespaces::Alces do
+  # TODO: The Alces class should not be tested with AlcesUtils
+  # Remove AlcesUtils and mock the configs blank manually
   include AlcesUtils
 
   AlcesUtils.mock self, :each do
@@ -110,5 +112,137 @@ RSpec.describe Metalware::Namespaces::Alces do
     expect(Metalware::MetalLog.metal_log).to \
       receive(:warn).once.with(/.*domain.config.nil\Z/)
     render_template('<%= domain.config.nil %>')
+  end
+
+  # Note scope is tested by rendering a template containing alces.scope
+  # This allows the dynamic namespace to be set as if it was rendering a real
+  # template
+  describe '#scope' do
+    let :scope_template { '<%= alces.scope.class %>' }
+    let :node_class { Metalware::Namespaces::Node }
+    let :group_class { Metalware::Namespaces::Group }
+    let :node_double { double(node_class, class: node_class) }
+    let :group_double { double(group_class, class: group_class) }
+
+    def render_scope_template(**dynamic)
+      alces.render_erb_template(scope_template, **dynamic).constantize
+    end
+
+    it 'defaults to the Domain namespace' do
+      expect(render_scope_template).to eq(alces.domain.class)
+    end
+
+    it 'errors if a group and node are both in scope' do
+      expect do
+        render_scope_template(node: node_double, group: group_double)
+      end.to raise_error(Metalware::ScopeError)
+    end
+
+    it 'can set a node as the scope' do
+      expect(render_scope_template(node: node_double)).to eq(node_class)
+    end
+
+    it 'can set a group as the scope' do
+      expect(render_scope_template(group: group_double)).to eq(group_class)
+    end
+  end
+
+  shared_examples 'scope method tests' do |scope_class|
+    let :scope_str { scope_class.to_s }
+    let :test_h { double(test: scope_str) }
+
+    let :scope do
+      d = double(scope_class, class: scope_str, config: test_h, answer: test_h)
+      d.define_singleton_method(:is_a?) do |input|
+        input == scope_class
+      end
+      d
+    end
+
+    before :each do
+      allow(alces).to receive(:scope).and_return(scope)
+    end
+
+    def render_template(template)
+      alces.render_erb_template(template)
+    end
+
+    def render_node_template
+      render_template('<%= alces.node.class %>')
+    end
+
+    def render_group_template
+      render_template('<%= alces.group.class %>')
+    end
+
+    describe '#domain' do
+      it 'returns the domain namespace' do
+        domain_class = Metalware::Namespaces::Domain.to_s
+        expect(render_template('<%= alces.domain.class %>')).to eq(domain_class)
+      end
+    end
+
+    describe '#local' do
+      it 'returns the local node' do
+        local_class = Metalware::Namespaces::Local.to_s
+        expect(render_template('<%= alces.local.class %>')).to eq(local_class)
+      end
+    end
+
+    describe '#config' do
+      it 'uses the scope to obtain the config' do
+        expect(render_template('<%= alces.config.test %>')).to eq(scope_str)
+      end
+    end
+
+    describe '#answer' do
+      it 'uses the scope to obtain the config' do
+        expect(render_template('<%= alces.answer.test %>')).to eq(scope_str)
+      end
+    end
+  end
+
+  shared_examples '#node errors' do
+    describe '#node' do
+      it 'errors' do
+        expect { alces.node }.to raise_error(Metalware::ScopeError)
+      end
+    end
+  end
+
+  shared_examples '#group errors' do
+    describe '#group' do
+      it 'errors' do
+        expect { alces.group }.to raise_error(Metalware::ScopeError)
+      end
+    end
+  end
+
+  context 'with a Domain scope' do
+    include_examples 'scope method tests', Metalware::Namespaces::Domain
+    include_examples '#node errors'
+    include_examples '#group errors'
+  end
+
+  context 'with a Node in scope' do
+    include_examples 'scope method tests', Metalware::Namespaces::Node
+    include_examples '#group errors'
+
+    describe '#node' do
+      it 'returns a Node' do
+        expect(alces.node.class).to eq(Metalware::Namespaces::Node.to_s)
+      end
+    end
+  end
+
+  context 'with a Group in scope' do
+    include_examples 'scope method tests', Metalware::Namespaces::Group
+    include_examples '#node errors'
+
+    describe '#group' do
+      it 'returns a Group' do
+        expect(alces.group.class).to eq(Metalware::Namespaces::Group.to_s)
+      end
+    end
   end
 end
