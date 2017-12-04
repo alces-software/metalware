@@ -46,7 +46,12 @@ module Metalware
         @dynamic_stack = []
       end
 
+      # TODO: Remove this method, use Config.cache instead
       attr_reader :metal_config
+
+      def scope
+        alces.domain
+      end
 
       def render_erb_template(template_string, dynamic_namespace = {})
         # Renders against a domain scope by default

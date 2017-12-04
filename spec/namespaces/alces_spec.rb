@@ -111,4 +111,16 @@ RSpec.describe Metalware::Namespaces::Alces do
       receive(:warn).once.with(/.*domain.config.nil\Z/)
     render_template('<%= domain.config.nil %>')
   end
+
+  describe '#scope' do
+    let :scope_template { '<%= alces.scope.class %>' }
+
+    def render_scope_template(**dynamic)
+      alces.render_erb_template(scope_template, **dynamic)
+    end
+
+    it 'defaults to the Domain namespace' do
+      expect(render_scope_template.constantize).to eq(alces.domain.class)
+    end
+  end
 end
