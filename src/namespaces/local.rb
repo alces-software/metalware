@@ -17,12 +17,18 @@ module Metalware
         end
       end
 
-      def build_method
-        BuildMethods::Local
-      end
-
       def build_interface
         @build_interface ||= DeploymentServer.build_interface
+      end
+
+      private
+
+      def white_list_for_hasher
+        super.push(:build_interface)
+      end
+
+      def build_method_class
+        BuildMethods::Local
       end
     end
   end
