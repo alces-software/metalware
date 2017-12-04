@@ -128,12 +128,6 @@ RSpec.describe Metalware::Namespaces::Alces do
       alces.render_erb_template(scope_template, **dynamic).constantize
     end
 
-    # TODO: Remove this redirect, it will be replaced by the scope eventually
-    before :each do
-      allow(Metalware::Config.cache).to \
-        receive(:alces_default_to_domain_scope).and_return(false)
-    end
-
     it 'defaults to the Domain namespace' do
       expect(render_scope_template).to eq(alces.domain.class)
     end
@@ -154,8 +148,11 @@ RSpec.describe Metalware::Namespaces::Alces do
   end
 
   shared_examples 'scope method tests' do |scope_class|
+    let :scope_str { scope_class.to_s }
+    let :test_hash { double(test: scope_str) }
+
     let :scope do
-      double(scope_class, config: 'config', answer: 'answer')
+      double(scope_class, config: test_hash, answer: test_hash)
     end
 
     before :each do
@@ -179,6 +176,22 @@ RSpec.describe Metalware::Namespaces::Alces do
         expect(render_template('<%= alces.local.class %>')).to eq(local_class)
       end
     end
+
+    describe '#config' do
+      it 'uses the scope to obtain the config' do
+        expect(render_template('<%= alces.config.test %>')).to eq(scope_str)
+      end
+    end
+
+    describe '#answer' do
+      it 'uses the scope to obtain the config' do
+        expect(render_template('<%= alces.answer.test %>')).to eq(scope_str)
+      end
+    end
+  end
+
+  context 'with a Domain scope' do
+    include_examples 'scope method tests', Metalware::Namespaces::Domain
   end
 
   context 'with a Node in scope' do

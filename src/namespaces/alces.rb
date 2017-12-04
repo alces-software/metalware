@@ -51,6 +51,8 @@ module Metalware
 
       SCOPE_ERROR = 'A node and group can not both be in scope'
 
+      delegate :config, :answer, to: :scope
+
       def scope
         dynamic = current_dynamic_namespace
         raise InternalError, SCOPE_ERROR if dynamic.group && dynamic.node
@@ -64,15 +66,9 @@ module Metalware
       end
 
       def render_erb_template(template_string, dynamic_namespace = {})
-        # Renders against a domain scope by default
-        redirect_off = !metal_config.alces_default_to_domain_scope
-        if dynamic_namespace.key?(:config) || redirect_off
-          run_with_dynamic(dynamic_namespace) do
-            Templating::Renderer
-              .replace_erb_with_binding(template_string, wrapped_binding)
-          end
-        else
-          domain.render_erb_template(template_string, dynamic_namespace)
+        run_with_dynamic(dynamic_namespace) do
+          Templating::Renderer
+            .replace_erb_with_binding(template_string, wrapped_binding)
         end
       end
 
