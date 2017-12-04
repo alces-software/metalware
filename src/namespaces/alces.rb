@@ -50,7 +50,12 @@ module Metalware
       attr_reader :metal_config
 
       def scope
-        alces.domain
+        dynamic = current_dynamic_namespace
+        if dynamic.group && dynamic.node
+          raise InternalError, 'A node and group can not both be in scope'
+        else
+          alces.domain
+        end
       end
 
       def render_erb_template(template_string, dynamic_namespace = {})
