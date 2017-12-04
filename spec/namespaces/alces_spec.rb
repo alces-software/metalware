@@ -152,7 +152,11 @@ RSpec.describe Metalware::Namespaces::Alces do
     let :test_h { double(test: scope_str) }
 
     let :scope do
-      double(scope_class, class: scope_str, config: test_h, answer: test_h)
+      d = double(scope_class, class: scope_str, config: test_h, answer: test_h)
+      d.define_singleton_method(:is_a?) do |input|
+        input == scope_class
+      end
+      d
     end
 
     before :each do
@@ -237,7 +241,7 @@ RSpec.describe Metalware::Namespaces::Alces do
 
     describe '#group' do
       it 'returns a Group' do
-        expect(render_node_template).to eq(Metalware::Namespaces::Group.to_s)
+        expect(render_group_template).to eq(Metalware::Namespaces::Group.to_s)
       end
     end
   end

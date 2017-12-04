@@ -29,9 +29,6 @@ module AlcesUtils
           test_alces = Metalware::Namespaces::Alces.new(metal_config)
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_return(test_alces)
-          # Allows the node method to be mocked
-          test_alces.define_singleton_method(:node) { method_missing(:node) }
-          test_alces.define_singleton_method(:group) { method_missing(:group) }
           test_alces
         end
 

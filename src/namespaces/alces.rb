@@ -51,17 +51,31 @@ module Metalware
 
       delegate :config, :answer, to: :scope
 
+      NODE_ERROR = 'Error, a Node is not in scope'
+
+      def node
+        raise ScopeError, NODE_ERROR unless scope.is_a? Namespaces::Node
+        scope
+      end
+
+      GROUP_ERROR = 'Error, a Group is not in scope'
+
+      def group
+        raise ScopeError, GROUP_ERROR unless scope.is_a? Namespaces::Group
+        scope
+      end
+
       DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
 
       def scope
         dynamic = current_dynamic_namespace
         raise ScopeError, DOUBLE_SCOPE_ERROR if dynamic.group && dynamic.node
         if dynamic.node
-          node
+          dynamic.node
         elsif dynamic.group
-          group
+          dynamic.group
         else
-          alces.domain
+          domain
         end
       end
 
