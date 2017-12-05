@@ -34,7 +34,10 @@ RSpec.describe Metalware::Commands::Configure::Group do
   end
 
   let :config { Metalware::Config.new }
-  let :cache { Metalware::GroupCache.new(config, force_reload_file: true) }
+
+  def new_cache
+    Metalware::GroupCache.new(config)
+  end
 
   let :filesystem do
     FileSystem.setup(&:with_minimal_repo)
@@ -62,7 +65,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
         filesystem.test do
           run_configure_group 'testnodes'
 
-          expect(cache.primary_groups).to eq [
+          expect(new_cache.primary_groups).to eq [
             'testnodes',
             'local',
           ]
@@ -73,11 +76,11 @@ RSpec.describe Metalware::Commands::Configure::Group do
     context 'when `cache/groups.yaml` exists' do
       it 'inserts primary group if new' do
         filesystem.test do
-          cache.add('first_group')
+          new_cache.add('first_group')
 
           run_configure_group 'second_group'
 
-          expect(cache.primary_groups).to eq [
+          expect(new_cache.primary_groups).to eq [
             'first_group',
             'second_group',
             'local',
@@ -87,11 +90,11 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
       it 'does nothing if primary group already presnt' do
         filesystem.test do
-          ['first_group', 'second_group'].each { |g| cache.add(g) }
+          ['first_group', 'second_group'].each { |g| new_cache.add(g) }
 
           run_configure_group 'second_group'
 
-          expect(cache.primary_groups).to eq [
+          expect(new_cache.primary_groups).to eq [
             'first_group',
             'second_group',
             'local',
