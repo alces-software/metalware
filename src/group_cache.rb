@@ -71,6 +71,16 @@ module Metalware
       primary_groups_hash.keys.map(&:to_s)
     end
 
+    def orphans
+      data[:orphans]
+    end
+
+    def push_orphan(name)
+      return if orphans.include?(name)
+      orphans.push(name)
+      save
+    end
+
     private
 
     attr_reader :config, :force_reload
@@ -87,7 +97,8 @@ module Metalware
       loader.group_cache.tap do |d|
         if d.empty?
           d.merge!(next_index: 1,
-                   primary_groups: {})
+                   primary_groups: {},
+                   orphans: [])
         end
       end
     end
@@ -116,6 +127,7 @@ module Metalware
       payload = {
         next_index: next_available_index,
         primary_groups: groups_hash,
+        orphans: orphans,
       }
       Data.dump(file_path.group_cache, payload)
       @data = nil # Reloads the cached file

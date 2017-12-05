@@ -69,6 +69,10 @@ module Metalware
           @build_files_retriever ||= BuildFilesRetriever.new(metal_config)
         end
 
+        def orphan_list
+          @orphan_list ||= group_cache.orphans
+        end
+
         private
 
         def group_cache
