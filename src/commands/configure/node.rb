@@ -18,7 +18,7 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_node(node_name, config: config)
+            Configurator.for_node(alces, node_name)
         end
 
         def answer_file

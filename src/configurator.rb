@@ -36,16 +36,16 @@ HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 module Metalware
   class Configurator
     class << self
-      def for_domain(config:)
+      def for_domain(alces)
         new(
-          config: config,
+          alces,
           questions_section: :domain
         )
       end
 
-      def for_group(group_name, config:)
+      def for_group(alces, group_name)
         new(
-          config: config,
+          alces,
           questions_section: :group,
           name: group_name
         )
@@ -54,17 +54,17 @@ module Metalware
       # Note: This is slightly inconsistent with `for_group`, as that just
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
-      def for_node(node_name, config:)
+      def for_node(alces, node_name)
         new(
-          config: config,
+          alces,
           questions_section: :node,
           name: node_name
         )
       end
 
-      def for_local(config:)
+      def for_local(alces)
         new(
-          config: config,
+          alces,
           questions_section: :local
         )
       end
@@ -76,12 +76,13 @@ module Metalware
     end
 
     def initialize(
-      config:,
+      alces,
       questions_section:,
       name: nil
     )
+      @alces = alces
       @highline = HighLine.new
-      @config = config
+      @config = Config.cache
       @questions_section = questions_section
       @name = name
     end
@@ -101,7 +102,8 @@ module Metalware
 
     private
 
-    attr_reader :config,
+    attr_reader :alces,
+                :config,
                 :highline,
                 :questions_section,
                 :name

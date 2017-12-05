@@ -68,7 +68,7 @@ RSpec.describe Metalware::Configurator do
     # Spoofs HighLine to always return the testing version of highline
     allow(HighLine).to receive(:new).and_return(highline)
     Metalware::Configurator.new(
-      config: config,
+      alces,
       questions_section: :domain
     )
   end

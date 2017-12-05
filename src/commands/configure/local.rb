@@ -14,7 +14,7 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_local(config: config)
+            Configurator.for_local(alces)
         end
 
         def answer_file
