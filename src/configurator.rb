@@ -132,10 +132,10 @@ module Metalware
         when :group, :local
           [loader.domain_answers]
         when :node
-          node = Node.new(config, name)
+          node = alces.nodes.find_by_name(name)
           [
             loader.domain_answers,
-            loader.group_answers(node.primary_group),
+            loader.group_answers(node.group),
           ]
         else
           raise InternalError, "Unrecognised question section: #{questions_section}"
