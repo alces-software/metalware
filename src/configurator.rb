@@ -55,6 +55,7 @@ module Metalware
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
       def for_node(alces, node_name)
+        return for_local(alces) if node_name == 'local'
         new(
           alces,
           questions_section: :node,
