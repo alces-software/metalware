@@ -179,7 +179,7 @@ module Metalware
 
       def handle_interrupt(_e)
         Output.info 'Exiting...'
-        ask_if_should_rerender
+        ask_if_should_run_build_complete
         teardown
       rescue Interrupt
         Output.info 'Re-rendering templates anyway...'
@@ -194,9 +194,9 @@ module Metalware
 
       delegate :agree, to: :high_line
 
-      def ask_if_should_rerender
+      def ask_if_should_run_build_complete
         should_rerender = <<-EOF.strip_heredoc
-          Re-render appropriate templates for nodes as if build succeeded?
+          Run the complete_hook for nodes as if build succeeded?
           [yes/no]
         EOF
 
