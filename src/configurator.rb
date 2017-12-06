@@ -28,7 +28,7 @@ require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
-# require 'node'
+require 'group_cache'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Question
 HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
@@ -85,7 +85,7 @@ module Metalware
       @highline = HighLine.new
       @config = Config.cache
       @questions_section = questions_section
-      @name = name
+      @name = (questions_section == :local ? 'local' : name)
     end
 
     def configure(answers = nil)
@@ -117,6 +117,10 @@ module Metalware
       @saver ||= Validation::Saver.new(config)
     end
 
+    def group_cache
+      @group_cache ||= GroupCache.new(config)
+    end
+
     def configure_data
       @configure_data ||= loader.configure_data
     end
@@ -125,21 +129,38 @@ module Metalware
       configure_data[questions_section]
     end
 
-    def higher_level_answer_data
-      @higher_level_answer_data ||= begin
+    def default_hash
+      @default_hash ||= begin
         case questions_section
         when :domain
           alces.domain
         when :group
           alces.groups.find_by_name(name)
-        when :node
-          alces.nodes.find_by_name(name)
-        when :local
-          alces.local
+        when :node, :local
+          alces.nodes.find_by_name(name) || create_orphan_node
         else
           raise internalerror, "unrecognised question section: #{questions_section}"
         end.answer.to_h
       end
+    end
+
+    def orphan_warning
+      msg = <<-EOF.squish
+        Could not find node '#{name}' in genders file. The node will be added
+        to the orphan group.
+      EOF
+      msg += "\n\n" + <<-EOF.squish
+        The node will not be removed from the orphan group automatically. The
+        behaviour of an orphan node that is later added to a group is undefined.
+        A node can be removed from the orphan group by editing:
+      EOF
+      msg + "\n" + FilePath.group_cache
+    end
+
+    def create_orphan_node
+      MetalLog.warn orphan_warning unless questions_section == :local
+      group_cache.push_orphan(name)
+      alces.groups.orphan
     end
 
     def old_answers
@@ -172,7 +193,7 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
-      default = higher_level_answer_data[identifier]
+      default = default_hash[identifier]
 
       Question.new(
         config: config,

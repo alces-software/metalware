@@ -42,8 +42,11 @@ RSpec.describe Metalware::Configurator do
     Tempfile.new
   end
 
-  let :highline do
-    HighLine.new(input, output)
+  # Spoofs HighLine to always return the testing version of highline
+  let! :highline do
+    hl = HighLine.new(input, output)
+    allow(HighLine).to receive(:new).and_return(hl)
+    hl
   end
 
   let :answers do
@@ -55,18 +58,11 @@ RSpec.describe Metalware::Configurator do
   let :config { metal_config }
   let :loader { Metalware::Validation::Loader.new(config) }
 
-  def define_higher_level_answer_files(answer_file_hashes)
-    allow(configurator).to \
-      receive(:higher_level_answer_data).and_return(answer_file_hashes)
-  end
-
   let :configurator do
     make_configurator
   end
 
   def make_configurator
-    # Spoofs HighLine to always return the testing version of highline
-    allow(HighLine).to receive(:new).and_return(highline)
     Metalware::Configurator.new(
       alces,
       questions_section: :domain
@@ -100,17 +96,17 @@ RSpec.describe Metalware::Configurator do
     $stdout = STDOUT
   end
 
-  def configure_with_input(input_string)
+  def configure_with_input(input_string, test_obj: configurator)
     redirect_stdout do
       input.write(input_string)
       input.rewind
-      configurator.configure
+      test_obj.configure
     end
   end
 
-  def configure_with_answers(answers)
+  def configure_with_answers(answers, test_obj: configurator)
     # Each answer must be entered followed by a newline to terminate it.
-    configure_with_input(answers.join("\n") + "\n")
+    configure_with_input(answers.join("\n") + "\n", test_obj: test_obj)
   end
 
   # Do not want to use readline to get input in tests as tests will then
@@ -396,6 +392,29 @@ RSpec.describe Metalware::Configurator do
 
         expect(answers).to eq(passed_answers)
       end
+    end
+  end
+
+  context 'with an orphan node' do
+    let :orphan { 'i_am_a_orphan_node' }
+    let :configure_orphan { Metalware::Configurator.for_node(alces, orphan) }
+
+    def new_group_cache
+      Metalware::GroupCache.new(Metalware::Config.cache)
+    end
+
+    before :each do
+      define_questions(node: {
+                         string_q: {
+                           question: 'String?',
+                           default: 'default',
+                         },
+                       })
+      configure_with_answers(['answer', 'sagh'], test_obj: configure_orphan)
+    end
+
+    it 'creates the orphan node' do
+      expect(new_group_cache.orphans).to include(orphan)
     end
   end
 end
