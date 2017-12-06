@@ -79,9 +79,7 @@ module Metalware
 
       def start_build
         nodes.each do |node|
-          run_in_build_thread do
-            node.build_method.start_hook
-          end
+          run_in_build_thread { node.build_method.start_hook }
         end
       end
 
@@ -204,11 +202,6 @@ module Metalware
 
         run_all_complete_hooks if agree(should_rerender)
       end
-
-      EDIT_START_MSG = <<-EOF.strip_heredoc
-        The build templates have been rendered and ready to be edited with `metal edit`
-        Continue the build process with the `--edit-continue` flag
-      EOF
     end
   end
 end
