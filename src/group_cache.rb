@@ -109,7 +109,7 @@ module Metalware
 
     def primary_groups_hash
       @primary_groups_hash ||= begin
-        data[:primary_groups][:local] = 0
+        data[:primary_groups][:orphan] = 0
         data[:primary_groups]
       end
     end
@@ -123,7 +123,7 @@ module Metalware
     end
 
     def save
-      groups_hash = primary_groups_hash.dup.tap { |x| x.delete(:local) }
+      groups_hash = primary_groups_hash.dup.tap { |x| x.delete(:orphan) }
       payload = {
         next_index: next_available_index,
         primary_groups: groups_hash,
