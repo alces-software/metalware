@@ -41,7 +41,7 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_group(group_name, config: config)
+            Configurator.for_group(alces, group_name)
         end
 
         def answer_file

@@ -29,7 +29,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
 
     def configurator
       Metalware::Configurator.new(
-        config: config,
+        alces,
         questions_section: :domain
       )
     end

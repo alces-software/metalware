@@ -28,7 +28,11 @@ require 'filesystem'
 
 RSpec.describe Metalware::GroupCache do
   let :config { Metalware::Config.new }
-  let :cache { Metalware::GroupCache.new(config) }
+  let :cache { new_cache }
+
+  def new_cache
+    Metalware::GroupCache.new(config)
+  end
 
   let :filesystem do
     FileSystem.setup do |fs|
@@ -103,6 +107,29 @@ RSpec.describe Metalware::GroupCache do
         cache.add(group2)
         expect(cache.index(group2)).to eq 4
       end
+    end
+  end
+
+  describe '#orphans' do
+    it 'is a blank list by default' do
+      expect(cache.orphans).to eq([])
+    end
+  end
+
+  describe '#add_orphan' do
+    it 'adds the orphans' do
+      orphans = ['node1', 'node2', 'node3']
+      orphans.each do |orphan|
+        cache.push_orphan(orphan)
+      end
+      expect(new_cache.orphans).to eq(orphans)
+    end
+
+    it 'siliently refuses to double add orphans' do
+      orphan = 'node1'
+      new_cache.push_orphan(orphan)
+      new_cache.push_orphan(orphan)
+      expect(new_cache.orphans).to eq([orphan])
     end
   end
 end

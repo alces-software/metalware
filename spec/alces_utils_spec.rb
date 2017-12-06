@@ -71,17 +71,12 @@ RSpec.describe AlcesUtils do
     context 'with a mocked config' do
       AlcesUtils.mock self, :each do
         validation_off
-        alces_default_to_domain_scope_off
         mock_strict(false)
       end
 
       it 'turns the validation off' do
         config = Metalware::Config.new
         expect(config.validation).to be_a(FalseClass)
-      end
-
-      it 'does not default to domain scope' do
-        expect { alces.config }.to raise_error(NoMethodError)
       end
 
       it 'strict matches what is set' do

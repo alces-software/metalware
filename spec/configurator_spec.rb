@@ -42,8 +42,11 @@ RSpec.describe Metalware::Configurator do
     Tempfile.new
   end
 
-  let :highline do
-    HighLine.new(input, output)
+  # Spoofs HighLine to always return the testing version of highline
+  let! :highline do
+    hl = HighLine.new(input, output)
+    allow(HighLine).to receive(:new).and_return(hl)
+    hl
   end
 
   let :answers do
@@ -55,26 +58,24 @@ RSpec.describe Metalware::Configurator do
   let :config { metal_config }
   let :loader { Metalware::Validation::Loader.new(config) }
 
-  def define_higher_level_answer_files(answer_file_hashes)
-    allow(configurator).to \
-      receive(:higher_level_answer_data).and_return(answer_file_hashes)
-  end
-
   let :configurator do
     make_configurator
   end
 
   def make_configurator
-    # Spoofs HighLine to always return the testing version of highline
-    allow(HighLine).to receive(:new).and_return(highline)
     Metalware::Configurator.new(
-      config: config,
+      alces,
       questions_section: :domain
     )
   end
 
+  let :blank_questions do
+    { domain: {}, group: {}, node: {}, local: {} }
+  end
+
   def define_questions(questions_hash)
-    allow(loader).to receive(:configure_data).and_return(questions_hash)
+    merged_hash = blank_questions.merge questions_hash
+    allow(loader).to receive(:configure_data).and_return(merged_hash)
     allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
   end
 
@@ -95,17 +96,17 @@ RSpec.describe Metalware::Configurator do
     $stdout = STDOUT
   end
 
-  def configure_with_input(input_string)
+  def configure_with_input(input_string, test_obj: configurator)
     redirect_stdout do
       input.write(input_string)
       input.rewind
-      configurator.configure
+      test_obj.configure
     end
   end
 
-  def configure_with_answers(answers)
+  def configure_with_answers(answers, test_obj: configurator)
     # Each answer must be entered followed by a newline to terminate it.
-    configure_with_input(answers.join("\n") + "\n")
+    configure_with_input(answers.join("\n") + "\n", test_obj: test_obj)
   end
 
   # Do not want to use readline to get input in tests as tests will then
@@ -304,85 +305,6 @@ RSpec.describe Metalware::Configurator do
       expect(answers).to eq(original_answers)
     end
 
-    context 'when higher level answer files provided' do
-      before do
-        define_higher_level_answer_files(
-          [
-            {
-              top_level_q: 'top_level_q_answer',
-              both_higher_levels_q: 'both_higher_levels_q_top_level_answer',
-            },
-            {
-              overridden_default_q: 'higher_level_q_overriding_answer',
-              both_higher_levels_q: 'both_higher_levels_q_higher_answer',
-              higher_level_q: 'higher_level_q_answer',
-            },
-          ]
-        )
-
-        define_questions(domain: {
-                           default_q: {
-                             question: 'default_q',
-                             default: 'default_answer',
-                           },
-                           overridden_default_q: {
-                             question: 'overridden_default_q',
-                             default: 'default_answer',
-                           },
-                           top_level_q: { question: 'top_level_q' },
-                           both_higher_levels_q: { question: 'both_higher_levels_q' },
-                           higher_level_q: { question: 'higher_level_q' },
-                         })
-      end
-
-      it 'saves nothing if no input given' do
-        configure_with_answers([''] * 5)
-
-        expect(answers).to eq({})
-      end
-
-      it 'uses the highest precedence answer for each question as the default' do
-        configure_with_answers([''] * 5)
-
-        output.rewind
-        output_lines = output.read.split("\n")
-
-        expected_defaults = [
-          'default_answer',
-          'higher_level_q_overriding_answer',
-          'top_level_q_answer',
-          'both_higher_levels_q_higher_answer',
-          'higher_level_q_answer',
-        ]
-
-        output_lines.zip(expected_defaults).each do |output_line, expected_default|
-          expect(output_line).to include("|#{expected_default}|")
-        end
-      end
-    end
-
-    context 'with boolean question answered at higher level' do
-      it 'correctly inherits false default' do
-        define_higher_level_answer_files(
-          [
-            { false_boolean_q: false },
-          ]
-        )
-
-        define_questions(domain: {
-                           false_boolean_q: {
-                             question: 'Boolean?',
-                             type: 'boolean',
-                           },
-                         })
-
-        configure_with_answers([''])
-
-        output.rewind
-        expect(output.read).to include('|no|')
-      end
-    end
-
     it 're-asks the required questions if no answer is given' do
       define_questions(domain: {
                          string_q: {
@@ -470,6 +392,29 @@ RSpec.describe Metalware::Configurator do
 
         expect(answers).to eq(passed_answers)
       end
+    end
+  end
+
+  context 'with an orphan node' do
+    let :orphan { 'i_am_a_orphan_node' }
+    let :configure_orphan { Metalware::Configurator.for_node(alces, orphan) }
+
+    def new_group_cache
+      Metalware::GroupCache.new(Metalware::Config.cache)
+    end
+
+    before :each do
+      define_questions(node: {
+                         string_q: {
+                           question: 'String?',
+                           default: 'default',
+                         },
+                       })
+      configure_with_answers(['answer', 'sagh'], test_obj: configure_orphan)
+    end
+
+    it 'creates the orphan node' do
+      expect(new_group_cache.orphans).to include(orphan)
     end
   end
 end

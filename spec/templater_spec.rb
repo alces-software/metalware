@@ -37,8 +37,6 @@ EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 RSpec.describe Metalware::Templater do
   include AlcesUtils
 
-  AlcesUtils.mock self, :each { alces_default_to_domain_scope_off }
-
   let :filesystem do
     FileSystem.setup do |fs|
       fs.write template_path, template.strip_heredoc

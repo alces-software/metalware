@@ -33,7 +33,6 @@ RSpec.describe Metalware::Commands::Remove::Group do
   include AlcesUtils
 
   AlcesUtils.mock self, :each do
-    alces_default_to_domain_scope_off
     validation_off
   end
 

@@ -41,14 +41,15 @@ module Metalware
 
     def add(group)
       return if group?(group)
-      new_groups = primary_groups_hash.merge(group.to_sym => next_available_index)
-      save(next_available_index + 1, new_groups)
+      primary_groups_hash[group.to_sym] = next_available_index
+      bump_next_index
+      save
     end
 
     def remove(group)
       pgh = primary_groups_hash
       pgh.delete(group.to_sym)
-      save(next_available_index, pgh)
+      save
     end
 
     def each
@@ -70,6 +71,16 @@ module Metalware
       primary_groups_hash.keys.map(&:to_s)
     end
 
+    def orphans
+      data[:orphans]
+    end
+
+    def push_orphan(name)
+      return if orphans.include?(name)
+      orphans.push(name)
+      save
+    end
+
     private
 
     attr_reader :config, :force_reload
@@ -86,7 +97,8 @@ module Metalware
       loader.group_cache.tap do |d|
         if d.empty?
           d.merge!(next_index: 1,
-                   primary_groups: {})
+                   primary_groups: {},
+                   orphans: [])
         end
       end
     end
@@ -96,18 +108,26 @@ module Metalware
     end
 
     def primary_groups_hash
-      data[:primary_groups].merge(local: 0)
+      @primary_groups_hash ||= begin
+        data[:primary_groups][:orphan] = 0
+        data[:primary_groups]
+      end
     end
 
     def next_available_index
       data[:next_index]
     end
 
-    def save(next_index, group_hash)
-      group_hash.delete(:local)
+    def bump_next_index
+      data[:next_index] += 1
+    end
+
+    def save
+      groups_hash = primary_groups_hash.dup.tap { |x| x.delete(:orphan) }
       payload = {
-        next_index: next_index,
-        primary_groups: group_hash,
+        next_index: next_available_index,
+        primary_groups: groups_hash,
+        orphans: orphans,
       }
       Data.dump(file_path.group_cache, payload)
       @data = nil # Reloads the cached file

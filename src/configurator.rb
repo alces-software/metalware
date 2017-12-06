@@ -28,7 +28,7 @@ require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
-# require 'node'
+require 'group_cache'
 
 HighLine::Question.prepend Metalware::Patches::HighLine::Question
 HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
@@ -36,16 +36,16 @@ HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 module Metalware
   class Configurator
     class << self
-      def for_domain(config:)
+      def for_domain(alces)
         new(
-          config: config,
+          alces,
           questions_section: :domain
         )
       end
 
-      def for_group(group_name, config:)
+      def for_group(alces, group_name)
         new(
-          config: config,
+          alces,
           questions_section: :group,
           name: group_name
         )
@@ -54,17 +54,18 @@ module Metalware
       # Note: This is slightly inconsistent with `for_group`, as that just
       # takes a group name and this takes a Node object (as we need to be able
       # to access the Node's primary group).
-      def for_node(node_name, config:)
+      def for_node(alces, node_name)
+        return for_local(alces) if node_name == 'local'
         new(
-          config: config,
+          alces,
           questions_section: :node,
           name: node_name
         )
       end
 
-      def for_local(config:)
+      def for_local(alces)
         new(
-          config: config,
+          alces,
           questions_section: :local
         )
       end
@@ -76,14 +77,15 @@ module Metalware
     end
 
     def initialize(
-      config:,
+      alces,
       questions_section:,
       name: nil
     )
+      @alces = alces
       @highline = HighLine.new
-      @config = config
+      @config = Config.cache
       @questions_section = questions_section
-      @name = name
+      @name = (questions_section == :local ? 'local' : name)
     end
 
     def configure(answers = nil)
@@ -101,7 +103,8 @@ module Metalware
 
     private
 
-    attr_reader :config,
+    attr_reader :alces,
+                :config,
                 :highline,
                 :questions_section,
                 :name
@@ -114,6 +117,10 @@ module Metalware
       @saver ||= Validation::Saver.new(config)
     end
 
+    def group_cache
+      @group_cache ||= GroupCache.new(config)
+    end
+
     def configure_data
       @configure_data ||= loader.configure_data
     end
@@ -122,23 +129,38 @@ module Metalware
       configure_data[questions_section]
     end
 
-    def higher_level_answer_data
-      @higher_level_answer_data ||= begin
+    def default_hash
+      @default_hash ||= begin
         case questions_section
         when :domain
-          []
-        when :group, :local
-          [loader.domain_answers]
-        when :node
-          node = Node.new(config, name)
-          [
-            loader.domain_answers,
-            loader.group_answers(node.primary_group),
-          ]
+          alces.domain
+        when :group
+          alces.groups.find_by_name(name)
+        when :node, :local
+          alces.nodes.find_by_name(name) || create_orphan_node
         else
-          raise InternalError, "Unrecognised question section: #{questions_section}"
-        end
+          raise internalerror, "unrecognised question section: #{questions_section}"
+        end.answer.to_h
       end
+    end
+
+    def orphan_warning
+      msg = <<-EOF.squish
+        Could not find node '#{name}' in genders file. The node will be added
+        to the orphan group.
+      EOF
+      msg += "\n\n" + <<-EOF.squish
+        The node will not be removed from the orphan group automatically. The
+        behaviour of an orphan node that is later added to a group is undefined.
+        A node can be removed from the orphan group by editing:
+      EOF
+      msg + "\n" + FilePath.group_cache
+    end
+
+    def create_orphan_node
+      MetalLog.warn orphan_warning unless questions_section == :local
+      group_cache.push_orphan(name)
+      alces.groups.orphan
     end
 
     def old_answers
@@ -153,16 +175,16 @@ module Metalware
     end
 
     def answer_pair_to_save(question, answer)
+      save_obj = [question.identifier, answer]
       if answer == question.default
-        # If a question is answered with the default answer, we do not want to
-        # save it so that the default answer is always used, whatever that
-        # might later be changed to. Note: this means we save nothing if the
-        # default is manually re-entered; ideally we would save the input in
-        # this case but I can't see a way to tell if input has been entered
-        # with HighLine, and this isn't a big issue.
-        nil
+        # Whether the answer is saved depends if it matches the default AND
+        # if it was previously saved. If there is no old_answer, then the
+        # default must be set at a higher level. In this case it shouldn't be
+        # saved. If there is an old_answer then it is the default. In this case
+        # it needs to be saved again so it is not lost.
+        question.old_answer.nil? ? nil : save_obj
       else
-        [question.identifier, answer]
+        save_obj
       end
     end
 
@@ -171,13 +193,7 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
-      higher_level_answer = higher_level_answer_data.map { |d| d[identifier] }
-                                                    .reject(&:nil?)
-                                                    .last
-
-      # If no answer saved at any higher level, fall back to the default
-      # defined for the question in `configure.yaml`, if any.
-      default = higher_level_answer.nil? ? properties[:default] : higher_level_answer
+      default = default_hash[identifier]
 
       Question.new(
         config: config,
@@ -326,7 +342,6 @@ module Metalware
           !input.empty?
         end
       end
-
       class HighLinePrettyValidateProc < Proc
         def initialize(print_message, &b)
           # NOTE: print_message is prefaced with "must match" when used by

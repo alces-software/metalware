@@ -68,7 +68,7 @@ module Metalware
       DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
 
       def scope
-        dynamic = current_dynamic_namespace
+        dynamic = current_dynamic_namespace || OpenStruct.new
         raise ScopeError, DOUBLE_SCOPE_ERROR if dynamic.group && dynamic.node
         if dynamic.node
           dynamic.node

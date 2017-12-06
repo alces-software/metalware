@@ -42,7 +42,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
   it 'creates correct configurator' do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
-        config: instance_of(Metalware::Config),
+        instance_of(Metalware::Namespaces::Alces),
         questions_section: :node,
         name: 'testnode01'
       ).and_call_original
