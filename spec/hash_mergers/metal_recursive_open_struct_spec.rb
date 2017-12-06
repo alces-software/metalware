@@ -16,9 +16,7 @@ module Metalware
 end
 
 RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
-  include AlcesUtils
-
-  AlcesUtils.mock self, :each { alces_default_to_domain_scope_off }
+  let :metal_config { Metalware::Config.cache(new_if_missing: true) }
 
   let :alces do
     namespace = Metalware::Namespaces::Alces.new(metal_config)
