@@ -85,8 +85,11 @@ module Metalware
       end
 
       def render_genders
+        # The genders file must be templated with a new namespace object as the
+        # answers may have changed since they where loaded
+        new_alces = Namespaces::Alces.new(config)
         Staging.template do |templater|
-          RenderMethods::Genders.render_to_staging(alces.domain, templater)
+          RenderMethods::Genders.render_to_staging(new_alces, templater)
         end
       end
     end

@@ -129,18 +129,16 @@ module Metalware
       @higher_level_answer_data ||= begin
         case questions_section
         when :domain
-          []
-        when :group, :local
-          [loader.domain_answers]
+          alces.domain
+        when :group
+          alces.groups.find_by_name(name)
         when :node
-          node = alces.nodes.find_by_name(name)
-          [
-            loader.domain_answers,
-            loader.group_answers(node.group),
-          ]
+          alces.nodes.find_by_name(name)
+        when :local
+          alces.local
         else
-          raise InternalError, "Unrecognised question section: #{questions_section}"
-        end
+          raise internalerror, "unrecognised question section: #{questions_section}"
+        end.answer.to_h
       end
     end
 
@@ -156,16 +154,16 @@ module Metalware
     end
 
     def answer_pair_to_save(question, answer)
+      save_obj = [question.identifier, answer]
       if answer == question.default
-        # If a question is answered with the default answer, we do not want to
-        # save it so that the default answer is always used, whatever that
-        # might later be changed to. Note: this means we save nothing if the
-        # default is manually re-entered; ideally we would save the input in
-        # this case but I can't see a way to tell if input has been entered
-        # with HighLine, and this isn't a big issue.
-        nil
+        # Whether the answer is saved depends if it matches the default AND
+        # if it was previously saved. If there is no old_answer, then the
+        # default must be set at a higher level. In this case it shouldn't be
+        # saved. If there is an old_answer then it is the default. In this case
+        # it needs to be saved again so it is not lost.
+        question.old_answer.nil? ? nil : save_obj
       else
-        [question.identifier, answer]
+        save_obj
       end
     end
 
@@ -174,13 +172,7 @@ module Metalware
     end
 
     def create_question(identifier, properties, index)
-      higher_level_answer = higher_level_answer_data.map { |d| d[identifier] }
-                                                    .reject(&:nil?)
-                                                    .last
-
-      # If no answer saved at any higher level, fall back to the default
-      # defined for the question in `configure.yaml`, if any.
-      default = higher_level_answer.nil? ? properties[:default] : higher_level_answer
+      default = higher_level_answer_data[identifier]
 
       Question.new(
         config: config,
@@ -329,7 +321,6 @@ module Metalware
           !input.empty?
         end
       end
-
       class HighLinePrettyValidateProc < Proc
         def initialize(print_message, &b)
           # NOTE: print_message is prefaced with "must match" when used by

@@ -73,8 +73,13 @@ RSpec.describe Metalware::Configurator do
     )
   end
 
+  let :blank_questions do
+    { domain: {}, group: {}, node: {}, local: {} }
+  end
+
   def define_questions(questions_hash)
-    allow(loader).to receive(:configure_data).and_return(questions_hash)
+    merged_hash = blank_questions.merge questions_hash
+    allow(loader).to receive(:configure_data).and_return(merged_hash)
     allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
   end
 
@@ -302,85 +307,6 @@ RSpec.describe Metalware::Configurator do
 
       configure_with_answers([''] * 5)
       expect(answers).to eq(original_answers)
-    end
-
-    context 'when higher level answer files provided' do
-      before do
-        define_higher_level_answer_files(
-          [
-            {
-              top_level_q: 'top_level_q_answer',
-              both_higher_levels_q: 'both_higher_levels_q_top_level_answer',
-            },
-            {
-              overridden_default_q: 'higher_level_q_overriding_answer',
-              both_higher_levels_q: 'both_higher_levels_q_higher_answer',
-              higher_level_q: 'higher_level_q_answer',
-            },
-          ]
-        )
-
-        define_questions(domain: {
-                           default_q: {
-                             question: 'default_q',
-                             default: 'default_answer',
-                           },
-                           overridden_default_q: {
-                             question: 'overridden_default_q',
-                             default: 'default_answer',
-                           },
-                           top_level_q: { question: 'top_level_q' },
-                           both_higher_levels_q: { question: 'both_higher_levels_q' },
-                           higher_level_q: { question: 'higher_level_q' },
-                         })
-      end
-
-      it 'saves nothing if no input given' do
-        configure_with_answers([''] * 5)
-
-        expect(answers).to eq({})
-      end
-
-      it 'uses the highest precedence answer for each question as the default' do
-        configure_with_answers([''] * 5)
-
-        output.rewind
-        output_lines = output.read.split("\n")
-
-        expected_defaults = [
-          'default_answer',
-          'higher_level_q_overriding_answer',
-          'top_level_q_answer',
-          'both_higher_levels_q_higher_answer',
-          'higher_level_q_answer',
-        ]
-
-        output_lines.zip(expected_defaults).each do |output_line, expected_default|
-          expect(output_line).to include("|#{expected_default}|")
-        end
-      end
-    end
-
-    context 'with boolean question answered at higher level' do
-      it 'correctly inherits false default' do
-        define_higher_level_answer_files(
-          [
-            { false_boolean_q: false },
-          ]
-        )
-
-        define_questions(domain: {
-                           false_boolean_q: {
-                             question: 'Boolean?',
-                             type: 'boolean',
-                           },
-                         })
-
-        configure_with_answers([''])
-
-        output.rewind
-        expect(output.read).to include('|no|')
-      end
     end
 
     it 're-asks the required questions if no answer is given' do
