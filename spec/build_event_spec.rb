@@ -51,7 +51,7 @@ RSpec.describe Metalware::BuildEvent do
 
   describe '#process' do
     def process(test_obj: build_event)
-      AlcesUtils.redirect_std(:stderr) do
+      AlcesUtils.redirect_std(:stdout, :stderr) do
         test_obj.process
         wait_for_hooks_to_run(test_obj: test_obj)
       end
@@ -104,6 +104,26 @@ RSpec.describe Metalware::BuildEvent do
       it 'finishes the build' do
         process
         expect(build_event.build_complete?).to eq(true)
+      end
+    end
+
+    context 'with an event trigger' do
+      let :node { alces.nodes[3] }
+
+      context 'with basic features only (no hooks nor messages)' do
+        let :event { '__trigger_without_a_build_method_hook__' }
+        let :event_file { Metalware::FilePath.event(node, event) }
+
+        before :each { FileUtils.touch event_file }
+
+        it 'reports the event and node names to stdout' do
+          expect(process[:stdout].read).to include(node.name, event)
+        end
+
+        it 'deletes the file' do
+          process
+          expect(File.exist? event_file).to eq(false)
+        end
       end
     end
   end

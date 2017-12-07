@@ -69,6 +69,10 @@ module Metalware
         end
       end
 
+      def event_dir
+        FilePath.event self
+      end
+
       private
 
       def white_list_for_hasher

@@ -13,6 +13,9 @@ module Metalware
     # TODO: Atm only the complete_hook is supported. Eventually this needs to
     # be expanded to other hooks
     def process
+      nodes.each do |node|
+        event_files(node).each { |f| process_event_file(f) }
+      end
       nodes_complete
     end
 
@@ -44,7 +47,7 @@ module Metalware
       nodes.delete_if do |node|
         next unless File.exist?(node.build_complete_path)
         run_hook(node, 'complete')
-        FileUtils.rm node.build_complete_path
+        process_event_file node.build_complete_path
         true
       end
     end
@@ -58,6 +61,22 @@ module Metalware
           $stderr.puts e.backtrace
         end
       end)
+    end
+
+    # The build complete event is special as it needs run at the end
+    # This ensures that other events are read before the complete event is
+    def event_files(node)
+      Dir[File.join(node.event_dir, '**/*')].reject do |f|
+        File.directory?(f) || (File.basename(f) == 'complete')
+      end
+    end
+
+    def process_event_file(file)
+      path_arr = file.split(File::SEPARATOR)
+      event = path_arr[-1]
+      node_str = path_arr[-2]
+      puts "#{node_str}: #{event}"
+      FileUtils.rm file
     end
   end
 end
