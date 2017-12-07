@@ -70,6 +70,18 @@ RSpec.describe Metalware::BuildEvent do
         process
         expect(File.exist?(built_node.build_complete_path)).to eq(false)
       end
+
+      it 'only builds the node once' do
+        expect(built_node.build_method).to receive(:complete_hook).once
+        process
+        build_node(built_node)
+        process
+      end
+
+      it 'does not finish the build' do
+        process
+        expect(build_event.build_complete?).to eq(false)
+      end
     end
 
     context 'with all the nodes built' do
@@ -87,6 +99,11 @@ RSpec.describe Metalware::BuildEvent do
         alces.nodes.each do |node|
           expect(File.exist?(node.build_complete_path)).to eq(false)
         end
+      end
+
+      it 'finishes the build' do
+        process
+        expect(build_event.build_complete?).to eq(true)
       end
     end
   end

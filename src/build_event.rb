@@ -13,9 +13,7 @@ module Metalware
     # TODO: Atm only the complete_hook is supported. Eventually this needs to
     # be expanded to other hooks
     def process
-      nodes.each do |node|
-        node_complete(node)
-      end
+      nodes_complete
     end
 
     def build_complete?
@@ -42,10 +40,13 @@ module Metalware
       @build_threads ||= []
     end
 
-    def node_complete(node)
-      return unless File.exist?(node.build_complete_path)
-      run_hook(node, 'complete')
-      FileUtils.rm node.build_complete_path
+    def nodes_complete
+      nodes.delete_if do |node|
+        next unless File.exist?(node.build_complete_path)
+        run_hook(node, 'complete')
+        FileUtils.rm node.build_complete_path
+        true
+      end
     end
 
     def run_hook(node, hook_name)
