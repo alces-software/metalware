@@ -7,7 +7,6 @@ RSpec.describe Metalware::BuildEvent do
   include AlcesUtils
 
   let :nodes { ['node01', 'node02', 'node03', 'nodes4'] }
-  let :built_node { nodes[2] }
   let :build_event { Metalware::BuildEvent.new(alces.nodes) }
   let :empty_build_event { Metalware::BuildEvent.new([]) }
 
@@ -22,6 +21,10 @@ RSpec.describe Metalware::BuildEvent do
     end
   end
 
+  def build_node(node)
+    FileUtils.touch node.build_complete_path
+  end
+
   describe '#run_start_hooks' do
     it 'runs the start_hook for each node' do
       alces.nodes.each do |node|
@@ -29,6 +32,19 @@ RSpec.describe Metalware::BuildEvent do
       end
       build_event.run_start_hooks
       wait_for_hooks_to_run
+    end
+  end
+
+  describe '#process' do
+    context 'with a single node built' do
+      let :built_node { alces.nodes[2] }
+
+      it 'runs the complete_hook for the node' do
+        expect(built_node.build_method).to receive(:complete_hook)
+        build_node(built_node)
+        build_event.process
+        wait_for_hooks_to_run
+      end
     end
   end
 
