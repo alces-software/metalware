@@ -20,6 +20,7 @@ RSpec.describe Metalware::BuildEvent do
 
   AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
+    alces.nodes.each { |node| hexadecimal_ip(node) }
     Thread.list.each { |t| t.kill unless t == Thread.current }
   end
 
@@ -45,8 +46,10 @@ RSpec.describe Metalware::BuildEvent do
 
   describe '#process' do
     def process(test_obj: build_event)
-      test_obj.process
-      wait_for_hooks_to_run(test_obj: test_obj)
+      AlcesUtils.redirect_std(:stderr) do
+        test_obj.process
+        wait_for_hooks_to_run(test_obj: test_obj)
+      end
     end
 
     context 'with a single node built' do

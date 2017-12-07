@@ -25,6 +25,7 @@ module Metalware
 
     def hook_active?
       build_threads.delete_if { |th| !th.alive? }
+                   .each(&:join)
       !build_threads.empty?
     end
 
@@ -50,9 +51,9 @@ module Metalware
       build_threads.push(Thread.new do
         begin
           node.build_method.send("#{hook_name}_hook")
-        rescue
-          $stderr.puts $ERROR_INFO.message
-          $stderr.puts $ERROR_INFO.backtrace
+        rescue => e
+          $stderr.puts e.message
+          $stderr.puts e.backtrace
         end
       end)
     end
