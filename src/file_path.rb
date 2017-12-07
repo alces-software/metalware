@@ -104,8 +104,8 @@ module Metalware
         File.join(var_named, zone)
       end
 
-      def build_complete(name)
-        File.join(config.built_nodes_storage_path, "metalwarebooter.#{name}")
+      def build_complete(node_namespace)
+        event(node_namespace, 'complete')
       end
 
       def rendered_build_file_path(node_name, namespace, file_name)
@@ -138,6 +138,12 @@ module Metalware
         instance_exec(&block)
       ensure
         @new_if_missing = false
+      end
+
+      def event(node_namespace, event = '', mkdir: true)
+        path = File.join(events_dir, node_namespace.name, event)
+        FileUtils.mkdir_p(event == '' ? path : File.dirname(path)) if mkdir
+        path
       end
 
       private

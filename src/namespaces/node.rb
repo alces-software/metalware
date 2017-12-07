@@ -43,8 +43,7 @@ module Metalware
       end
 
       def build_complete_path
-        @build_complete_path ||= FilePath.new(metal_config)
-                                         .build_complete(name)
+        @build_complete_path ||= FilePath.build_complete(self)
       end
 
       def build_complete_url

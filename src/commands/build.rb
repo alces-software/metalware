@@ -133,7 +133,7 @@ module Metalware
       end
 
       def built?(node)
-        File.file?(file_path.build_complete(node.name))
+        File.file?(file_path.build_complete(node))
       end
 
       def record_gui_build_complete
@@ -172,9 +172,9 @@ module Metalware
       end
 
       def clear_up_built_node_marker_files
-        glob = File.join(config.built_nodes_storage_path, '*')
-        files = Dir.glob(glob)
-        FileUtils.rm_rf(files)
+        nodes.each do |node|
+          FileUtils.rm_rf(node.build_complete_path)
+        end
       end
 
       def handle_interrupt(_e)
