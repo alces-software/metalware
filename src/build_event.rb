@@ -7,7 +7,7 @@ module Metalware
     end
 
     def run_start_hooks
-      nodes.each { |node| run_hook { node.build_method.start_hook } }
+      nodes.each { |node| run_hook(node, 'start') }
     end
 
     # TODO: Atm only the complete_hook is supported. Eventually this needs to
@@ -42,15 +42,13 @@ module Metalware
 
     def node_complete(node)
       return unless File.exist?(node.build_complete_path)
-      run_hook do
-        node.build_method.complete_hook
-      end
+      run_hook(node, 'complete')
     end
 
-    def run_hook
+    def run_hook(node, hook_name)
       build_threads.push(Thread.new do
         begin
-          yield
+          node.build_method.send("#{hook_name}_hook")
         rescue
           $stderr.puts $ERROR_INFO.message
           $stderr.puts $ERROR_INFO.backtrace

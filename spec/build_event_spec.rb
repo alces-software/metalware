@@ -3,6 +3,14 @@
 require 'build_event'
 require 'alces_utils'
 
+module Metalware
+  class BuildEvent
+    def test_thread
+      build_threads.push(Thread.new { yield })
+    end
+  end
+end
+
 RSpec.describe Metalware::BuildEvent do
   include AlcesUtils
 
@@ -54,7 +62,7 @@ RSpec.describe Metalware::BuildEvent do
     end
 
     it 'returns false if a hook is still active' do
-      empty_build_event.send(:run_hook) { sleep 0 }
+      empty_build_event.test_thread { sleep 0 }
       expect(empty_build_event.build_complete?).to eq(false)
     end
 
@@ -69,12 +77,12 @@ RSpec.describe Metalware::BuildEvent do
     end
 
     it 'returns true if there is a running thread' do
-      build_event.send(:run_hook) { sleep 0 }
+      build_event.test_thread { sleep 0 }
       expect(build_event.hook_active?).to eq(true)
     end
 
     it 'returns false once the thread has finished' do
-      build_event.send(:run_hook) { sleep 0.1 }
+      build_event.test_thread { sleep 0.1 }
       expect(build_event.hook_active?).to eq(true)
       wait_for_hooks_to_run
       expect(build_event.hook_active?).to eq(false)
@@ -83,8 +91,8 @@ RSpec.describe Metalware::BuildEvent do
 
   describe '#kill_threads' do
     it 'kills all the threads' do
-      build_event.send(:run_hook) { sleep 0 }
-      build_event.send(:run_hook) { sleep 0 }
+      build_event.test_thread { sleep 0 }
+      build_event.test_thread { sleep 0 }
       build_event.kill_threads
       wait_for_hooks_to_run
       expect(build_event.hook_active?).to eq(false)
