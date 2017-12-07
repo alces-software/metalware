@@ -109,11 +109,10 @@ RSpec.describe Metalware::BuildEvent do
 
     context 'with an event trigger' do
       let :node { alces.nodes[3] }
+      let :event { '__trigger_without_a_build_method_hook__' }
+      let :event_file { Metalware::FilePath.event(node, event) }
 
       context 'with basic features only (no hooks nor messages)' do
-        let :event { '__trigger_without_a_build_method_hook__' }
-        let :event_file { Metalware::FilePath.event(node, event) }
-
         before :each { FileUtils.touch event_file }
 
         it 'reports the event and node names to stdout' do
@@ -123,6 +122,21 @@ RSpec.describe Metalware::BuildEvent do
         it 'deletes the file' do
           process
           expect(File.exist? event_file).to eq(false)
+        end
+      end
+
+      context 'with a message' do
+        let :message_arr do
+          ['I am a little message', 'With multiple lines', 'potato']
+        end
+
+        before :each do
+          FileUtils.mkdir_p File.dirname(event_file)
+          File.write(event_file, message_arr.join("\n"))
+        end
+
+        it 'displays the message' do
+          expect(process[:stdout].read).to include(*message_arr)
         end
       end
     end

@@ -10,8 +10,6 @@ module Metalware
       nodes.each { |node| run_hook(node, 'start') }
     end
 
-    # TODO: Atm only the complete_hook is supported. Eventually this needs to
-    # be expanded to other hooks
     def process
       nodes.each do |node|
         event_files(node).each { |f| process_event_file(f) }
@@ -76,6 +74,9 @@ module Metalware
       event = path_arr[-1]
       node_str = path_arr[-2]
       puts "#{node_str}: #{event}"
+      content = File.read(file).chomp
+      puts content unless content.empty?
+      puts
       FileUtils.rm file
     end
   end
