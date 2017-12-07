@@ -25,7 +25,7 @@ RSpec.describe Metalware::BuildEvent do
 
   def wait_for_hooks_to_run(test_obj: build_event)
     Timeout.timeout 3 do
-      sleep 0.1 while test_obj.hook_active?
+      sleep 0.001 while test_obj.hook_active?
     end
   end
 
@@ -44,14 +44,41 @@ RSpec.describe Metalware::BuildEvent do
   end
 
   describe '#process' do
+    def process(test_obj: build_event)
+      test_obj.process
+      wait_for_hooks_to_run(test_obj: test_obj)
+    end
+
     context 'with a single node built' do
       let :built_node { alces.nodes[2] }
+      before :each { build_node(built_node) }
 
       it 'runs the complete_hook for the node' do
         expect(built_node.build_method).to receive(:complete_hook)
-        build_node(built_node)
-        build_event.process
-        wait_for_hooks_to_run
+        process
+      end
+
+      it 'deletes the build file' do
+        process
+        expect(File.exist?(built_node.build_complete_path)).to eq(false)
+      end
+    end
+
+    context 'with all the nodes built' do
+      before :each { alces.nodes.each { |node| build_node(node) } }
+
+      it 'runs all the complete hooks' do
+        alces.nodes.each do |node|
+          expect(node.build_method).to receive(:complete_hook)
+        end
+        process
+      end
+
+      it 'deletes all the build files' do
+        process
+        alces.nodes.each do |node|
+          expect(File.exist?(node.build_complete_path)).to eq(false)
+        end
       end
     end
   end

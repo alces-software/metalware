@@ -43,6 +43,7 @@ module Metalware
     def node_complete(node)
       return unless File.exist?(node.build_complete_path)
       run_hook(node, 'complete')
+      FileUtils.rm node.build_complete_path
     end
 
     def run_hook(node, hook_name)
