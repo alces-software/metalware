@@ -21,7 +21,12 @@ RSpec.describe Metalware::BuildEvent do
   AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
     alces.nodes.each { |node| hexadecimal_ip(node) }
-    Thread.list.each { |t| t.kill unless t == Thread.current }
+    Thread.list.each do |t| 
+      unless t == Thread.current
+        t.kill
+        t.join
+      end
+    end
   end
 
   def wait_for_hooks_to_run(test_obj: build_event)
@@ -126,6 +131,14 @@ RSpec.describe Metalware::BuildEvent do
       build_event.kill_threads
       wait_for_hooks_to_run
       expect(build_event.hook_active?).to eq(false)
+    end
+
+    it 'hangs until all the threads have been killed' do
+      init_th = Thread.list
+      10.times { build_event.test_thread { sleep 0 } }
+      build_threads = Thread.list.reject { |t| init_th.include?(t) }
+      build_event.kill_threads
+      expect(Thread.list).not_to include(*build_threads)
     end
   end
 end

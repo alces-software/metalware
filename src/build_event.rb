@@ -31,6 +31,7 @@ module Metalware
 
     def kill_threads
       build_threads.each(&:kill)
+      sleep 0.001 while hook_active?
     end
 
     private
