@@ -31,6 +31,7 @@ require 'constants'
 require 'output'
 require 'exceptions'
 require 'command_helpers/node_identifier'
+require 'build_event'
 
 module Metalware
   module Commands
@@ -40,19 +41,37 @@ module Metalware
 
       private
 
-      attr_reader :edit_start, :edit_continue
-
       delegate :template_path, to: :file_path
       delegate :in_gui?, to: Utils
 
-      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
-
       prepend CommandHelpers::NodeIdentifier
 
-      def setup; end
+      def setup
+        @build_event = BuildEvent.new(nodes)
+      end
 
       def run
-        start_build
+        Output.success 'Waiting for nodes to report as built...'
+        Output.cli_only '(Ctrl-C to terminate)'
+
+        build_event.run_start_hooks
+
+        until build_event.build_complete?
+          gracefully_shutdown if should_gracefully_shutdown?
+
+          # TODO: Split process up more should go in here
+          build_event.process
+
+          # TODO: Consider moving GUI code into BuildEvent
+          if build_event.build_complete?
+            # For now at least, keep thread alive when in GUI so can keep
+            # accessing messages. XXX Change this, this is very wasteful.
+            in_gui? ? record_gui_build_complete : break
+          end
+
+          sleep config.build_poll_sleep
+        end
+
         wait_for_nodes_to_build
         teardown
       rescue
@@ -60,6 +79,8 @@ module Metalware
         record_gui_build_complete if in_gui?
         raise
       end
+
+      attr_reader :build_event
 
       def dependency_hash
         {
@@ -77,59 +98,7 @@ module Metalware
         end.flatten.uniq
       end
 
-      def start_build
-        nodes.each do |node|
-          run_in_build_thread { node.build_method.start_hook }
-        end
-      end
-
-      def build_threads
-        @build_threads ||= []
-      end
-
-      def run_in_build_thread
-        build_threads.push(Thread.new do
-          begin
-            yield
-          rescue
-            $stderr.puts $ERROR_INFO.message
-            $stderr.puts $ERROR_INFO.backtrace
-          end
-        end)
-      end
-
-      def clear_up_build_threads
-        build_threads.each(&:kill)
-      end
-
       def wait_for_nodes_to_build
-        Output.success 'Waiting for nodes to report as built...'
-        Output.cli_only '(Ctrl-C to terminate)'
-
-        rerendered_nodes = []
-        loop do
-          gracefully_shutdown if should_gracefully_shutdown?
-
-          nodes.select do |node|
-            !rerendered_nodes.include?(node) && built?(node)
-          end
-               .tap do |nodes|
-            run_complete_hook(nodes)
-            rerendered_nodes.push(*nodes)
-          end
-               .each do |node|
-            Output.success "Node #{node.name} built."
-          end
-
-          all_nodes_reported_built = rerendered_nodes.length == nodes.length
-          if all_nodes_reported_built
-            # For now at least, keep thread alive when in GUI so can keep
-            # accessing messages. XXX Change this, this is very wasteful.
-            in_gui? ? record_gui_build_complete : break
-          end
-
-          sleep config.build_poll_sleep
-        end
       end
 
       def built?(node)
@@ -167,7 +136,7 @@ module Metalware
 
       def teardown
         clear_up_built_node_marker_files
-        clear_up_build_threads
+        build_event.kill_threads
         Output.info 'Done.'
       end
 

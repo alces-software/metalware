@@ -10,6 +10,9 @@ module Metalware
       nodes.each { |node| run_hook(node, 'start') }
     end
 
+    # TODO: split process into to parts:
+    # process_events: - all hooks BUT complete
+    # complete_nodes: Check for completed nodes
     def process
       nodes.each do |node|
         event_files(node).each { |f| process_event_file(f) }
@@ -69,6 +72,7 @@ module Metalware
       end
     end
 
+    # TODO: Use the Output class to connect to the GUI
     def process_event_file(file)
       path_arr = file.split(File::SEPARATOR)
       event = path_arr[-1]
