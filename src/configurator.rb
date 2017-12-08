@@ -135,10 +135,7 @@ module Metalware
         when :domain
           alces.domain
         when :group
-          alces.groups.find_by_name(name) || begin
-            idx = GroupCache.new.next_available_index
-            Namespaces::Group.new(alces, name, index: idx)
-          end
+          alces.groups.find_by_name(name) || create_new_group
         when :node, :local
           alces.nodes.find_by_name(name) || create_orphan_node
         else
@@ -158,6 +155,11 @@ module Metalware
         A node can be removed from the orphan group by editing:
       EOF
       msg + "\n" + FilePath.group_cache
+    end
+
+    def create_new_group
+      idx = GroupCache.new.next_available_index
+      Namespaces::Group.new(alces, name, index: idx)
     end
 
     def create_orphan_node
