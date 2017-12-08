@@ -25,9 +25,12 @@
 require 'config'
 require 'group_cache'
 require 'filesystem'
+require 'alces_utils'
 
 RSpec.describe Metalware::GroupCache do
-  let :config { Metalware::Config.new }
+  include AlcesUtils
+
+  let :config { metal_config }
   let :cache { new_cache }
 
   def new_cache
