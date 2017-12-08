@@ -43,8 +43,7 @@ module Metalware
       end
 
       def build_complete_path
-        @build_complete_path ||= FilePath.new(metal_config)
-                                         .build_complete(name)
+        @build_complete_path ||= FilePath.build_complete(self)
       end
 
       def build_complete_url
@@ -70,6 +69,10 @@ module Metalware
         end
       end
 
+      def event_dir
+        FilePath.event self
+      end
+
       private
 
       def white_list_for_hasher
@@ -91,6 +94,12 @@ module Metalware
 
       def hash_merger_input
         { groups: genders, node: name }
+      rescue NodeNotInGendersError
+        # The answer hash needs to be accessable by the Configurator
+        # Nodes in a group work fine as they appear in the genders file
+        # BUT local and orphan nodes DO NOT appear in the genders file and
+        # cause the above error
+        return { groups: ['orphan'], node: name }
       end
 
       def additional_dynamic_namespace

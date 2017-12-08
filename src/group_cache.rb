@@ -30,9 +30,10 @@ module Metalware
   class GroupCache
     include Enumerable
 
-    def initialize(metalware_config, force_reload_file: false)
+    # TODO: Remove the input
+    def initialize(_remove_this_input = nil, force_reload_file: false)
       @force_reload = force_reload_file
-      @config = metalware_config
+      @config = Config.cache
     end
 
     def group?(group)
@@ -69,6 +70,10 @@ module Metalware
 
     def primary_groups
       primary_groups_hash.keys.map(&:to_s)
+    end
+
+    def next_available_index
+      data[:next_index]
     end
 
     def orphans
@@ -112,10 +117,6 @@ module Metalware
         data[:primary_groups][:orphan] = 0
         data[:primary_groups]
       end
-    end
-
-    def next_available_index
-      data[:next_index]
     end
 
     def bump_next_index

@@ -45,7 +45,6 @@ RSpec.describe Metalware::Config do
       fs.with_metal_config_fixture('configs/empty.yaml')
     end
     config = Metalware::Config.new
-    expect(config.built_nodes_storage_path).to eq('/var/lib/metalware/cache/built-nodes')
     expect(config.rendered_files_path).to eq('/var/lib/metalware/rendered')
     expect(config.build_poll_sleep).to eq(10)
   end
@@ -55,7 +54,6 @@ RSpec.describe Metalware::Config do
       fs.with_metal_config_fixture('configs/non-empty.yaml')
     end
     config = Metalware::Config.new
-    expect(config.built_nodes_storage_path).to eq('/built/nodes')
     expect(config.rendered_files_path).to eq('/rendered/files')
     expect(config.build_poll_sleep).to eq(5)
   end

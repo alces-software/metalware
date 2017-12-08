@@ -135,7 +135,7 @@ module Metalware
         when :domain
           alces.domain
         when :group
-          alces.groups.find_by_name(name)
+          alces.groups.find_by_name(name) || create_new_group
         when :node, :local
           alces.nodes.find_by_name(name) || create_orphan_node
         else
@@ -157,10 +157,15 @@ module Metalware
       msg + "\n" + FilePath.group_cache
     end
 
+    def create_new_group
+      idx = GroupCache.new.next_available_index
+      Namespaces::Group.new(alces, name, index: idx)
+    end
+
     def create_orphan_node
       MetalLog.warn orphan_warning unless questions_section == :local
       group_cache.push_orphan(name)
-      alces.groups.orphan
+      Namespaces::Node.create(alces, name)
     end
 
     def old_answers

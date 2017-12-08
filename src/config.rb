@@ -76,7 +76,6 @@ module Metalware
       validation: true,
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
-      built_nodes_storage_path: '/var/lib/metalware/cache/built-nodes',
       rendered_files_path: '/var/lib/metalware/rendered',
       pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
       repo_path: '/var/lib/metalware/repo',

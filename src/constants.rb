@@ -40,6 +40,8 @@ module Metalware
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
     STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
 
+    EVENTS_DIR_PATH = File.join(METALWARE_DATA_PATH, 'events')
+
     DHCPD_HOSTS_PATH = '/etc/dhcp/dhcpd.hosts'
 
     # XXX Following needs to actually be created somewhere.

@@ -25,15 +25,18 @@
 require 'spec_utils'
 require 'filesystem'
 require 'group_cache'
+require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Configure::Group do
+  include AlcesUtils
+
   def run_configure_group(group)
     Metalware::Utils.run_command(
       Metalware::Commands::Configure::Group, group
     )
   end
 
-  let :config { Metalware::Config.new }
+  let :config { Metalware::Config.cache }
 
   def new_cache
     Metalware::GroupCache.new(config)

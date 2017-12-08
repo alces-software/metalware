@@ -31,6 +31,7 @@ require 'constants'
 require 'output'
 require 'exceptions'
 require 'command_helpers/node_identifier'
+require 'build_event'
 
 module Metalware
   module Commands
@@ -40,26 +41,45 @@ module Metalware
 
       private
 
-      attr_reader :edit_start, :edit_continue
-
       delegate :template_path, to: :file_path
       delegate :in_gui?, to: Utils
 
-      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
-
       prepend CommandHelpers::NodeIdentifier
 
-      def setup; end
+      def setup
+        @build_event = BuildEvent.new(nodes)
+      end
 
       def run
-        start_build
-        wait_for_nodes_to_build
+        Output.success 'Waiting for nodes to report as built...'
+        Output.cli_only '(Ctrl-C to terminate)'
+
+        build_event.run_start_hooks
+
+        until build_event.build_complete?
+          gracefully_shutdown if should_gracefully_shutdown?
+
+          # TODO: Split process up more should go in here
+          build_event.process
+
+          # TODO: Consider moving GUI code into BuildEvent
+          if build_event.build_complete?
+            # For now at least, keep thread alive when in GUI so can keep
+            # accessing messages. XXX Change this, this is very wasteful.
+            in_gui? ? record_gui_build_complete : break
+          end
+
+          sleep config.build_poll_sleep
+        end
+
         teardown
       rescue
         # Ensure command is recorded as complete when in GUI.
         record_gui_build_complete if in_gui?
         raise
       end
+
+      attr_reader :build_event
 
       def dependency_hash
         {
@@ -77,67 +97,6 @@ module Metalware
         end.flatten.uniq
       end
 
-      def start_build
-        nodes.each do |node|
-          run_in_build_thread do
-            node.build_method.start_hook
-          end
-        end
-      end
-
-      def build_threads
-        @build_threads ||= []
-      end
-
-      def run_in_build_thread
-        build_threads.push(Thread.new do
-          begin
-            yield
-          rescue
-            $stderr.puts $ERROR_INFO.message
-            $stderr.puts $ERROR_INFO.backtrace
-          end
-        end)
-      end
-
-      def clear_up_build_threads
-        build_threads.each(&:kill)
-      end
-
-      def wait_for_nodes_to_build
-        Output.success 'Waiting for nodes to report as built...'
-        Output.cli_only '(Ctrl-C to terminate)'
-
-        rerendered_nodes = []
-        loop do
-          gracefully_shutdown if should_gracefully_shutdown?
-
-          nodes.select do |node|
-            !rerendered_nodes.include?(node) && built?(node)
-          end
-               .tap do |nodes|
-            run_complete_hook(nodes)
-            rerendered_nodes.push(*nodes)
-          end
-               .each do |node|
-            Output.success "Node #{node.name} built."
-          end
-
-          all_nodes_reported_built = rerendered_nodes.length == nodes.length
-          if all_nodes_reported_built
-            # For now at least, keep thread alive when in GUI so can keep
-            # accessing messages. XXX Change this, this is very wasteful.
-            in_gui? ? record_gui_build_complete : break
-          end
-
-          sleep config.build_poll_sleep
-        end
-      end
-
-      def built?(node)
-        File.file?(file_path.build_complete(node.name))
-      end
-
       def record_gui_build_complete
         Thread.current.thread_variable_set(COMPLETE_KEY, true)
       end
@@ -150,42 +109,31 @@ module Metalware
         # XXX Somewhat similar to `handle_interrupt`; may not be easily
         # generalizable however.
         Output.info 'Exiting...'
+        build_event.run_all_complete_hooks
         run_all_complete_hooks
         teardown
         record_gui_build_complete
       end
 
-      def run_all_complete_hooks
-        run_complete_hook(nodes)
-      end
-
-      def run_complete_hook(nodes)
-        nodes.each do |node|
-          run_in_build_thread do
-            node.build_method.complete_hook
-          end
-        end
-      end
-
       def teardown
         clear_up_built_node_marker_files
-        clear_up_build_threads
+        build_event.kill_threads
         Output.info 'Done.'
       end
 
       def clear_up_built_node_marker_files
-        glob = File.join(config.built_nodes_storage_path, '*')
-        files = Dir.glob(glob)
-        FileUtils.rm_rf(files)
+        nodes.each do |node|
+          FileUtils.rm_rf(node.build_complete_path)
+        end
       end
 
       def handle_interrupt(_e)
         Output.info 'Exiting...'
-        ask_if_should_rerender
+        ask_if_should_run_build_complete
         teardown
       rescue Interrupt
         Output.info 'Re-rendering templates anyway...'
-        run_all_complete_hooks
+        build_event.run_all_complete_hooks
         teardown
       end
 
@@ -196,19 +144,14 @@ module Metalware
 
       delegate :agree, to: :high_line
 
-      def ask_if_should_rerender
+      def ask_if_should_run_build_complete
         should_rerender = <<-EOF.strip_heredoc
-          Re-render appropriate templates for nodes as if build succeeded?
+          Run the complete_hook for nodes as if build succeeded?
           [yes/no]
         EOF
 
         run_all_complete_hooks if agree(should_rerender)
       end
-
-      EDIT_START_MSG = <<-EOF.strip_heredoc
-        The build templates have been rendered and ready to be edited with `metal edit`
-        Continue the build process with the `--edit-continue` flag
-      EOF
     end
   end
 end

@@ -49,10 +49,6 @@ module Metalware
         end
 
         def custom_configuration
-          record_primary_group
-        end
-
-        def record_primary_group
           cache.add(group_name)
         end
       end

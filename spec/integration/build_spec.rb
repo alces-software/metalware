@@ -49,7 +49,6 @@ RSpec.describe '`metal build`' do
   TEST_CONFIG = Metalware::Config.new
   TEST_KICKSTART_DIR = File.join(TEST_CONFIG.rendered_files_path, 'kickstart')
   TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
-  TEST_BUILT_NODES_DIR = TEST_CONFIG.built_nodes_storage_path
 
   PXELINUX_TEMPLATE = '/var/lib/metalware/repo/pxelinux/default'
 
@@ -67,7 +66,8 @@ RSpec.describe '`metal build`' do
   end
 
   def expect_clears_up_built_node_marker_files
-    files = Dir.glob(File.join(TEST_BUILT_NODES_DIR, '**/*'))
+    files = Dir.glob(File.join(Metalware::FilePath.events_dir, '**/*'))
+               .reject { |file| File.directory?(file) }
     expect(files.empty?).to be true
   end
 
@@ -94,7 +94,6 @@ RSpec.describe '`metal build`' do
     FileUtils.remove(TEST_DIR, force: true)
     FileUtils.mkdir_p(TEST_KICKSTART_DIR)
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
-    FileUtils.mkdir_p(TEST_BUILT_NODES_DIR)
   end
 
   AlcesUtils.mock self, :each do
@@ -111,8 +110,8 @@ RSpec.describe '`metal build`' do
 
   let :file_path { Metalware::FilePath.new(metal_config) }
 
-  def touch_complete_file(node)
-    FileUtils.touch(file_path.build_complete(node))
+  def touch_complete_file(name)
+    FileUtils.touch(file_path.build_complete(alces.nodes.find_by_name(name)))
   end
 
   context 'for single node' do
