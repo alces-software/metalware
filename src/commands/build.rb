@@ -72,7 +72,6 @@ module Metalware
           sleep config.build_poll_sleep
         end
 
-        wait_for_nodes_to_build
         teardown
       rescue
         # Ensure command is recorded as complete when in GUI.
@@ -98,13 +97,6 @@ module Metalware
         end.flatten.uniq
       end
 
-      def wait_for_nodes_to_build
-      end
-
-      def built?(node)
-        File.file?(file_path.build_complete(node))
-      end
-
       def record_gui_build_complete
         Thread.current.thread_variable_set(COMPLETE_KEY, true)
       end
@@ -117,21 +109,10 @@ module Metalware
         # XXX Somewhat similar to `handle_interrupt`; may not be easily
         # generalizable however.
         Output.info 'Exiting...'
+        build_event.run_all_complete_hooks
         run_all_complete_hooks
         teardown
         record_gui_build_complete
-      end
-
-      def run_all_complete_hooks
-        run_complete_hook(nodes)
-      end
-
-      def run_complete_hook(nodes)
-        nodes.each do |node|
-          run_in_build_thread do
-            node.build_method.complete_hook
-          end
-        end
       end
 
       def teardown
@@ -152,7 +133,7 @@ module Metalware
         teardown
       rescue Interrupt
         Output.info 'Re-rendering templates anyway...'
-        run_all_complete_hooks
+        build_event.run_all_complete_hooks
         teardown
       end
 

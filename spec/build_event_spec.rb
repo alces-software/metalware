@@ -39,6 +39,16 @@ RSpec.describe Metalware::BuildEvent do
     FileUtils.touch node.build_complete_path
   end
 
+  describe '#run_all_complete_hooks' do
+    it 'runs the complete hook for each node' do
+      alces.nodes.each do |node|
+        expect(node.build_method).to receive(:complete_hook).once
+      end
+      build_event.run_all_complete_hooks
+      wait_for_hooks_to_run
+    end
+  end
+
   describe '#run_start_hooks' do
     it 'runs the start_hook for each node' do
       alces.nodes.each do |node|
