@@ -87,6 +87,26 @@ RSpec.describe Metalware::Validation::Configure do
           type: 'boolean',
           default: false,
         },
+        {
+          identifier: 'dependent_parent',
+          question: 'Do I have dependent questions?',
+          dependent: [
+            {
+              identifier: 'basic_dependent_question',
+              question: 'Can there be a single level dependent question?',
+            },
+            {
+              identifier: 'mid_level_dependent_question',
+              question: 'Can there be multiple levels of dependency?',
+              dependent: [
+                {
+                  identifier: 'leaf_level_dependent_question',
+                  question: 'Am I a leaf of the question tree?',
+                },
+              ],
+            },
+          ],
+        },
       ],
 
       node: [
@@ -189,6 +209,25 @@ RSpec.describe Metalware::Validation::Configure do
                                       identifier: '',
                                     }])
         expect_validation_failure(h, /must be filled/)
+      end
+    end
+
+    context 'invalid dependent question' do
+      it 'fails if the identifier is missing' do
+        h = correct_hash.merge(
+          domain: [
+            {
+              identifier: 'bad_parent',
+              question: 'Am I a bad question parent?',
+              dependent: [
+                {
+                  question: 'Am I missing my identifier',
+                },
+              ],
+            },
+          ]
+        )
+        expect_validation_failure(h, /is missing/)
       end
     end
 
