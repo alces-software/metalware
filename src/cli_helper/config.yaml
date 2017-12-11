@@ -182,11 +182,13 @@ commands:
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
-    summary: Volatile. Display a node's console in the terminal
+    summary: Display a node's console in the terminal
     description: >
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
-    action: CommandHelpers::BashCommand
+    action: Commands::Console
+    options:
+      - *group_option
 
   each:
     syntax: metal each NODE_IDENTIFIER COMMAND [options]
@@ -253,47 +255,42 @@ commands:
 
   ipmi:
     syntax: metal ipmi NODE_IDENTIFIER [options]
-    summary: Volatile. Perform ipmi commands on single or multiple machines
+    summary: Perform ipmi commands on single or multiple machines
     description: >
-      ***VOLATILE***
-
        Perform ipmi commands on single or multiple machines
-    action: CommandHelpers::BashCommand
+    action: Commands::Ipmi
     options:
-      - tags: [-g]
+      - *group_option
+      - tags: [--group NAME, -g NAME]
+        type: String,
         description: >
-          Specifies that NODE_IDENTIFIER is the group. MUST be before
-          NODE_IDENTIFIER
-      - tags: [-k COMMAND]
-        type: String
-        description: >
-          Specifies the ipmi command
+          Select the genders group to run the desired
+          power command against
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
-    summary: Volatile. Run power commands on a node.
+    summary: Run power commands on a node.
     description: >
-      Allows ipmi power commands to be ran on a node(s)
+      Allows ipmi power commands to be run on a node or group
+      of nodes as specified in the genders file.
 
 
       The following commands are supported:
-
       on        - Turns the node on
-
       off       - Turns the node off
-
       status    - Display the power status
-
       locate    - Turns the node locater light on
-
       locateoff - Turns the node locater light off
-
       cycle     - Power cycle the node
-
       reset     - Warm reset the node
-    action: CommandHelpers::BashCommand
+    action: Commands::Power
     options:
       - *group_option
+      - tags: [--group NAME, -g NAME]
+        type: String,
+        description: >
+          Select the genders group to run the desired
+          power command against
 
   remove:
     syntax: metal remove [options]
