@@ -35,9 +35,9 @@ module Metalware
 
       def command
         if @options.group
-          hosts = "-g #{node_names}"
+          hosts = "-g #{node_names[0]}"
         else
-          hosts = "-H #{node_names}"
+          hosts = "-H #{node_names[0]}"
         end
         "ipmitool #{hosts} #{render_credentials} #{render_command(@args[1].to_s)}"
       end
