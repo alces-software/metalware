@@ -175,12 +175,12 @@ RSpec.describe Metalware::Validation::Configure do
 
   context 'with a valid input' do
     it 'passes with questions key' do
-      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
+      expect(run_configure_validation(correct_hash)).to be_a(Tree::TreeNode)
     end
 
     it 'passes without questions key' do
       correct_hash.delete(:questions)
-      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
+      expect(run_configure_validation(correct_hash)).to be_a(Tree::TreeNode)
     end
   end
 

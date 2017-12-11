@@ -61,38 +61,31 @@ module Metalware
 
       def data(raw: false)
         return return_data(raw) unless config.validation
-        raise ValidationFailure, error_msg unless validate.success?
-        return_data(raw)
+        raise ValidationFailure, error_msg unless success?
+        tree
       end
 
       private
 
       attr_reader :config, :raw_data
 
-      def return_data(raw)
-        raw ? raw_data : transform_array_to_hash
-      end
-
-      def transform_array_to_hash
-        array_data = raw_data.dup
-        hash_data = {}
-        Constants::CONFIGURE_SECTIONS.each do |section|
-          hash_data[section] = array_data[section].each_with_object({}) do |question, memo|
-            identifier = question.delete(:identifier)
-            memo[identifier.to_sym] = question
-          end
-        end
-        hash_data
-      end
-
       def load_configure_file
         Data.load(FilePath.configure_file)
       end
 
+      def success?
+        validate.reject(&:success?).empty?
+      end
+
       def validate
-        @validate ||= begin
-          tree.print_tree
+        question_results = []
+        tree.children.each do |section|
+          section.each do |question|
+            next if question == section
+            question_results.push QuestionSchema.call(question.content)
+          end
         end
+        question_results
       end
 
       def error_msg
