@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
 require 'config'
 
 module Metalware
@@ -30,9 +31,28 @@ module Metalware
     class Ipmi < CommandHelpers::BaseCommand
       private
 
-      def setup; end
+      prepend CommandHelpers::NodeIdentifier
+
+      def setup
+        @options = options
+        @args = args
+      end
 
       def run; end
+
+      def ipmi(cmd)
+        system(cmd.to_s)
+      end
+
+      def node_names
+        @node_names ||= nodes.map(&:name)
+      end
+
+      def render_credentials
+        username = alces.domain.config.networks.bmc.bmcuser
+        password = alces.domain.config.networks.bmc.bmcpassword
+        "-U #{username.to_s} -P #{password.to_s}"
+      end
     end
   end
 end
