@@ -74,18 +74,14 @@ module Metalware
       end
 
       def success?
-        validate.reject(&:success?).empty?
-      end
-
-      def validate
-        question_results = []
-        tree.children.each do |section|
-          section.each do |question|
-            next if question == section
-            question_results.push QuestionSchema.call(question.content)
+        @success ||= begin
+          tree.each do |node|
+            # The root and section nodes do not have a content
+            next unless node.content
+            return false unless node.content[:result].success?
           end
+          true
         end
-        question_results
       end
 
       def error_msg
@@ -100,8 +96,9 @@ module Metalware
           Constants::CONFIGURE_SECTIONS.each do |section|
             sub_tree = Tree::TreeNode.new(section)
             root << sub_tree
-            raw_data[section].each { |d| add_dependent_child(sub_tree, d) }
+            raw_data[section].each { |d| add_dependent_child(sub_tree, **d) }
           end
+          validate(root)
           root
         end
       end
@@ -112,6 +109,20 @@ module Metalware
         parent_node << child_node
         node_hash[:dependent]&.each do |grandchild_node|
           add_dependent_child(child_node, **grandchild_node)
+        end
+      end
+
+      def validate(root)
+        root.children.each do |section|
+          section.each do |question|
+            next if question == section
+            result = QuestionSchema.call(question.content)
+            question.content = if question.content.is_a? Hash
+                                 question.content.merge(result: result)
+                               else
+                                 { result: result }
+                               end
+          end
         end
       end
 
