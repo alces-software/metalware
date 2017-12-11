@@ -187,8 +187,6 @@ commands:
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
     action: Commands::Console
-    options:
-      - *group_option
 
   each:
     syntax: metal each NODE_IDENTIFIER COMMAND [options]
@@ -261,11 +259,6 @@ commands:
     action: Commands::Ipmi
     options:
       - *group_option
-      - tags: [--group NAME, -g NAME]
-        type: String,
-        description: >
-          Select the genders group to run the desired
-          power command against
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
@@ -273,7 +266,6 @@ commands:
     description: >
       Allows ipmi power commands to be run on a node or group
       of nodes as specified in the genders file.
-
 
       The following commands are supported:
       on        - Turns the node on
@@ -286,11 +278,6 @@ commands:
     action: Commands::Power
     options:
       - *group_option
-      - tags: [--group NAME, -g NAME]
-        type: String,
-        description: >
-          Select the genders group to run the desired
-          power command against
 
   remove:
     syntax: metal remove [options]
