@@ -203,6 +203,9 @@ GEM
     ruby-prof (0.16.2)
     ruby-progressbar (1.8.1)
     ruby_dep (1.5.0)
+    rubytree (0.8.3)
+      json (>= 1.7.5)
+      structured_warnings (>= 0.1.3)
     rugged (0.26.0)
     sass (3.5.1)
       sass-listen (~> 4.0.0)
@@ -233,6 +236,7 @@ GEM
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
+    structured_warnings (0.3.0)
     terminal-table (1.8.0)
       unicode-display_width (~> 1.1, >= 1.1.1)
     therubyracer (0.12.3)
@@ -283,6 +287,7 @@ DEPENDENCIES
   rspec
   rubocop
   ruby-prof
+  rubytree
   rugged
   sass-rails (~> 5.0)
   simplecov
@@ -299,4 +304,4 @@ RUBY VERSION
    ruby 2.4.1p111
 
 BUNDLED WITH
-   1.15.4
+   1.16.0

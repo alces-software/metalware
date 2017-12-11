@@ -27,6 +27,7 @@ require 'file_path'
 require 'data'
 require 'dry-validation'
 require 'constants'
+require 'rubytree'
 
 module Metalware
   module Validation
@@ -84,17 +85,13 @@ module Metalware
         hash_data
       end
 
-      def file_path
-        @file_path ||= FilePath.new(config)
-      end
-
       def load_configure_file
-        Data.load(file_path.configure_file)
+        Data.load(FilePath.configure_file)
       end
 
       def validate
         @validate ||= begin
-          ConfigureSchema.call(data: raw_data)
+          tree.print_tree
         end
       end
 
@@ -102,6 +99,27 @@ module Metalware
         msg_header = 'An error occurred validating the questions. ' \
                      "The following error(s) have been detected: \n"
         msg_header + validate.errors[:data].to_s
+      end
+
+      def tree
+        @tree ||= begin
+          root = Tree::TreeNode.new('ROOT')
+          Constants::CONFIGURE_SECTIONS.each do |section|
+            sub_tree = Tree::TreeNode.new(section)
+            root << sub_tree
+            raw_data[section].each { |d| add_dependent_child(sub_tree, d) }
+          end
+          root
+        end
+      end
+
+      def add_dependent_child(parent_node, **node_hash)
+        identifier = node_hash[:identifier].to_s
+        child_node = Tree::TreeNode.new(identifier, node_hash)
+        parent_node << child_node
+        node_hash[:dependent]&.each do |grandchild_node|
+          add_dependent_child(child_node, **grandchild_node)
+        end
       end
 
       QuestionSchema = Dry::Validation.Schema do

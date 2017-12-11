@@ -18,6 +18,7 @@ gem 'pcap', git: 'https://github.com/alces-software/ruby-pcap.git'
 gem 'recursive-open-struct'
 gem 'rugged'
 gem 'terminal-table'
+gem 'rubytree'
 
 group :test do
   gem 'fakefs'
