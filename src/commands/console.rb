@@ -24,7 +24,7 @@
 
 module Metalware
   module Commands
-    class Power < Ipmi
+    class Console < Ipmi
       private
 
       def setup; end
