@@ -22,14 +22,48 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'commands/ipmi'
+
 module Metalware
   module Commands
     class Power < Ipmi
       private
 
-      def setup; end
+      def run
+        ipmi(command)
+      end
 
-      def run; end
+      def command
+        if @options.group
+          hosts = "-g #{node_names}"
+        else
+          hosts = "-H #{node_names}"
+        end
+        "ipmitool #{hosts} #{render_credentials} #{render_command(@args[1].to_s)}"
+      end
+
+      def render_command(cmd)
+        case cmd
+        when 'on'
+          'chassis power on'
+        when 'off'
+          'chassis power off'
+        when 'locate'
+          'chassis identify force'
+        when 'locateoff'
+          'chassis identify 0'
+        when 'status'
+          'chassis power status'
+        when 'cycle'
+          'chassis power cycle'
+        when 'reset'
+          'chassis power reset'
+        when 'sensor'
+          'sensor'
+        else
+          raise 'Invalid power command'
+        end
+      end
     end
   end
 end
