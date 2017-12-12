@@ -28,6 +28,7 @@ require 'data'
 require 'dry-validation'
 require 'constants'
 require 'rubytree'
+require 'stringio'
 
 module Metalware
   module Validation
@@ -80,9 +81,22 @@ module Metalware
 
       def raise_error_if_validation_failed
         return if success?
-        msg_header = 'An error occurred validating the questions. ' \
-                     "The following error(s) have been detected: \n"
-        raise ValidationFailure, msg_header + validate.errors[:data].to_s
+        prune_successful_leaves
+        io = StringIO.new
+        print_error_node(io)
+        tree.print_tree(0, nil, print_error_node(io))
+        io.rewind
+        raise ValidationFailure, io.read
+      end
+
+      def print_error_node(io)
+        lambda do |node, prefix|
+          io.puts "#{prefix} #{node.name}"
+          result = node.content&.[](:result)
+          if !(result.nil? || result&.success?)
+            io.puts result.errors.to_s
+          end
+        end
       end
 
       def success?
@@ -123,6 +137,23 @@ module Metalware
                                else
                                  { result: result }
                                end
+          end
+        end
+      end
+
+      def prune_successful_leaves
+        # Postorder sort starts at the leaves and works its way in
+        tree.postordered_each do |node|
+          node.remove_from_parent! if begin
+            if node.has_children? # Only remove leaves
+              false
+            elsif node.content&.[](:result).nil? # Remove section/root nodes
+              true
+            elsif node.content[:result].success? # Remove successful nodes
+              true
+            else
+              false
+            end
           end
         end
       end
