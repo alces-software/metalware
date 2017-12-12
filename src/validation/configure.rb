@@ -105,40 +105,37 @@ module Metalware
 
       def tree
         @tree ||= begin
-          root = Tree::TreeNode.new('ROOT')
+          root = Tree::TreeNode.new('ROOT', { pass: true })
           Constants::CONFIGURE_SECTIONS.each do |section|
-            sub_tree = Tree::TreeNode.new(section)
-            root << sub_tree
-            raw_data[section].each { |d| add_dependent_child(sub_tree, **d) }
+            section_h = { section: section }
+            section_node = Tree::TreeNode.new(section.upcase, section_h)
+            root << section_node
+            raw_data[section].each do |h|
+              section_node << make_question_node(root, **h)
+            end
           end
-          validate(root)
           root
         end
       end
 
-      def add_dependent_child(parent_node, **node_hash)
-        identifier = node_hash[:identifier].to_s
-        child_node = Tree::TreeNode.new(identifier, node_hash)
-        parent_node << child_node
-        node_hash[:dependent]&.each do |grandchild_node|
-          add_dependent_child(child_node, **grandchild_node)
+      def make_question_node(root, **question)
+        result_h = { result: QuestionSchema.call(question) }
+        data = (question.is_a?(Hash) ? question.merge(result_h) : result_h)
+        node_q = Tree::TreeNode.new(data[:identifier].to_s, data)
+        add_children(root, node_q) do
+          question[:dependent]&.map do |sub_question|
+            make_question_node(root, **sub_question)
+          end
         end
       end
 
-      def validate(root)
-        root.content = { failed: false }
-        root.children.each do |section|
-          section.each do |question|
-            next if question == section
-            result = QuestionSchema.call(question.content)
-            root.content = { failed: true } unless result.success?
-            question.content = if question.content.is_a? Hash
-                                 question.content.merge(result: result)
-                               else
-                                 { result: result }
-                               end
-          end
+      def add_children(root, parent)
+        if parent.content[:result].success?
+          yield&.each { |child| parent << child }
+        else
+          root.content = { pass: false }
         end
+        parent
       end
 
       def prune_successful_leaves
