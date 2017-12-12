@@ -100,21 +100,29 @@ module Metalware
       end
 
       def success?
-        !tree.content[:failed]
+        tree.content[:pass]
       end
 
       def tree
         @tree ||= begin
           root = Tree::TreeNode.new('ROOT', { pass: true })
-          Constants::CONFIGURE_SECTIONS.each do |section|
-            section_h = { section: section }
-            section_node = Tree::TreeNode.new(section.upcase, section_h)
-            root << section_node
-            raw_data[section].each do |h|
-              section_node << make_question_node(root, **h)
+          add_children(root, root) do
+            Constants::CONFIGURE_SECTIONS.map do |section|
+              make_section_node(root, section)
             end
           end
           root
+        end
+      end
+
+      def make_section_node(root, section)
+        data = {
+          section: section,
+          result: DependantSchema.call(dependent: raw_data[section])
+        }
+        node_s = Tree::TreeNode.new(section.upcase, data)
+        add_children(root, node_s) do
+          raw_data[section].map { |q| make_question_node(root, q) }
         end
       end
 
@@ -130,7 +138,7 @@ module Metalware
       end
 
       def add_children(root, parent)
-        if parent.content[:result].success?
+        if root == parent || parent.content[:result].success?
           yield&.each { |child| parent << child }
         else
           root.content = { pass: false }
@@ -155,6 +163,15 @@ module Metalware
         end
       end
 
+      DependantSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
+        end
+
+        optional(:dependent) { array? && (each { hash? }) }
+      end
+
       QuestionSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
@@ -176,6 +193,8 @@ module Metalware
         optional(:type) { supported_type? }
         optional(:default) { default? }
         optional(:choice) { array? }
+
+        schema(DependantSchema)
       end
 
       ConfigureSchema = Dry::Validation.Schema do
