@@ -229,6 +229,21 @@ RSpec.describe Metalware::Validation::Configure do
         )
         expect_validation_failure(h, /is missing/)
       end
+
+      it 'fails if the dependent field is not an array' do
+        h = correct_hash.merge(
+          domain: [{
+            identifier: 'bad_parent',
+            question: 'Is my dependent field an array?',
+            dependent: {
+              identifier: 'dependent_not_array',
+              question: 'Should I be an array?',
+              default: 'YEP!!',
+            },
+          }]
+        )
+        expect_validation_failure(h, /must be an array/)
+      end
     end
 
     context 'with invalid question' do

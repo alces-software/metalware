@@ -154,8 +154,6 @@ module Metalware
           node.remove_from_parent! if begin
             if node.has_children? # Only remove leaves
               false
-            elsif node.content&.[](:result).nil? # Remove section/root nodes
-              true
             elsif node.content[:result].success? # Remove successful nodes
               true
             else
@@ -195,7 +193,6 @@ module Metalware
         optional(:type) { supported_type? }
         optional(:default) { default? }
         optional(:choice) { array? }
-        schema(DependantSchema)
       end
 
       QuestionSchema = Dry::Validation.Schema do
@@ -232,6 +229,7 @@ module Metalware
           default_type? & \
             choice_with_default? & \
             choice_type? & \
+            schema(DependantSchema) & \
             schema(QuestionFieldSchema)
         end
       end
