@@ -118,13 +118,14 @@ module Metalware
       end
 
       def make_section_node(root, section)
+        question_data = raw_data[section] || []
         data = {
           section: section,
-          result: DependantSchema.call(dependent: raw_data[section])
+          result: DependantSchema.call(dependent: question_data)
         }
         node_s = Tree::TreeNode.new(section.upcase, data)
         add_children(root, node_s) do
-          raw_data[section].map { |q| make_question_node(root, q) }
+          question_data.map { |q| make_question_node(root, q) }
         end
       end
 

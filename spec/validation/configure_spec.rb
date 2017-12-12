@@ -280,15 +280,6 @@ RSpec.describe Metalware::Validation::Configure do
     end
   end
 
-  context 'with missing question blocks' do
-    Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
-      xit "fails when #{section} is missing" do
-        correct_hash.delete(section)
-        expect_validation_failure(correct_hash, /is missing/)
-      end
-    end
-  end
-
   context 'with invalid string questions' do
     it 'fails with a non-string default with no type specified' do
       h = correct_hash.deep_merge(domain: [{
