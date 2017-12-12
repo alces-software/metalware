@@ -35,7 +35,7 @@ module Metalware
 
       def command
         if @options.group
-          hosts = "-g #{node_names[0]}"
+          hosts = "-g #{@args[0]}"
         else
           hosts = "-H #{node_names[0]}"
         end
