@@ -26,10 +26,23 @@ module Metalware
   module Commands
     class Console < Ipmi
       private
+      def run
+        puts "Attempting to connect to node #{node_names[0]}.."
+        if valid_connection?
+          puts 'Establishing SOL connection, type &. to exit..'
+          command('activate')
+        else
+          puts 'Failed to connect..'
+        end
+      end
 
-      def setup; end
+      def command(type)
+        "ipmitool -H #{node_names[0]} #{render_credentials} -E -I lanplus -e sol #{type}"
+      end
 
-      def run; end
+      def valid_connection?
+        ipmi(command('info'))
+      end
     end
   end
 end
