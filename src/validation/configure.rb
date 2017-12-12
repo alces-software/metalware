@@ -59,9 +59,12 @@ module Metalware
         @raw_data = (data_hash || load_configure_file).freeze
       end
 
+      # TODO: Rethink the raw input, it is a bit odd on closer inspection
+      # It will need to be reworked for Tree. Consider removing or better
+      # mocking in the test
       def data(raw: false)
         return return_data(raw) unless config.validation
-        raise ValidationFailure, error_msg unless success?
+        raise_error_if_validation_failed
         tree
       end
 
@@ -73,21 +76,17 @@ module Metalware
         Data.load(FilePath.configure_file)
       end
 
-      def success?
-        @success ||= begin
-          tree.each do |node|
-            # The root and section nodes do not have a content
-            next unless node.content
-            return false unless node.content[:result].success?
-          end
-          true
-        end
-      end
+      attr_accessor :failed_validation
 
-      def error_msg
+      def raise_error_if_validation_failed
+        return if success?
         msg_header = 'An error occurred validating the questions. ' \
                      "The following error(s) have been detected: \n"
-        msg_header + validate.errors[:data].to_s
+        raise ValidationFailure, msg_header + validate.errors[:data].to_s
+      end
+
+      def success?
+        !tree.content[:failed]
       end
 
       def tree
@@ -113,10 +112,12 @@ module Metalware
       end
 
       def validate(root)
+        root.content = { failed: false }
         root.children.each do |section|
           section.each do |question|
             next if question == section
             result = QuestionSchema.call(question.content)
+            root.content = { failed: true } unless result.success?
             question.content = if question.content.is_a? Hash
                                  question.content.merge(result: result)
                                else
