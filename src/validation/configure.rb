@@ -129,7 +129,7 @@ module Metalware
       end
 
       def make_question_node(root, **question)
-        result_h = { result: QuestionSchema.call(question) }
+        result_h = { result: QuestionSchema.call(question: question) }
         data = (question.is_a?(Hash) ? question.merge(result_h) : result_h)
         node_q = Tree::TreeNode.new(data[:identifier].to_s, data)
         add_children(root, node_q) do
@@ -174,7 +174,7 @@ module Metalware
         optional(:dependent) { array? && (each { hash? }) }
       end
 
-      QuestionSchema = Dry::Validation.Schema do
+      QuestionFieldSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
           config.namespace = :configure
@@ -195,8 +195,45 @@ module Metalware
         optional(:type) { supported_type? }
         optional(:default) { default? }
         optional(:choice) { array? }
-
         schema(DependantSchema)
+      end
+
+      QuestionSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
+
+          def default_type?(value)
+            default = value[:default]
+            type = value[:type]
+            return true if default.nil?
+            ::Metalware::Validation::Configure.type_check(type, default)
+          end
+
+          def choice_with_default?(value)
+            return true if value[:choice].nil? || value[:default].nil?
+            return false unless value[:choice].is_a?(Array)
+            value[:choice].include?(value[:default])
+          end
+
+          def choice_type?(value)
+            return true if value[:choice].nil?
+            return false unless value[:choice].is_a?(Array)
+            value[:choice].each do |choice|
+              type = value[:type]
+              r = ::Metalware::Validation::Configure.type_check(type, choice)
+              return false unless r
+            end
+            true
+          end
+        end
+
+        required(:question) do
+          default_type? & \
+            choice_with_default? & \
+            choice_type? & \
+            schema(QuestionFieldSchema)
+        end
       end
 
       TopLevelSchema = Dry::Validation.Schema do
@@ -211,62 +248,6 @@ module Metalware
         end
 
         required(:data) { top_level_keys? }
-      end
-
-      ConfigureSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure
-
-          def top_level_keys?(data)
-            section = Constants::CONFIGURE_SECTIONS.dup.push(:questions)
-            (data.keys - section).empty?
-          end
-        end
-
-        required(:data) do
-          top_level_keys? & schema do
-            configure do
-              config.messages_file = ERROR_FILE
-              config.namespace = :configure
-
-              def default_type?(value)
-                default = value[:default]
-                type = value[:type]
-                return true if default.nil?
-                ::Metalware::Validation::Configure.type_check(type, default)
-              end
-
-              def choice_with_default?(value)
-                return true if value[:choice].nil? || value[:default].nil?
-                return false unless value[:choice].is_a?(Array)
-                value[:choice].include?(value[:default])
-              end
-
-              def choice_type?(value)
-                return true if value[:choice].nil?
-                return false unless value[:choice].is_a?(Array)
-                value[:choice].each do |choice|
-                  type = value[:type]
-                  r = ::Metalware::Validation::Configure.type_check(type, choice)
-                  return false unless r
-                end
-                true
-              end
-            end
-
-            # Loops through each section
-            ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
-              required(section) do
-                # Loops through each question
-                array? & each do
-                  schema(QuestionSchema) & \
-                    default_type? & choice_with_default? & choice_type?
-                end
-              end
-            end
-          end
-        end
       end
     end
   end
