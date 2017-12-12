@@ -92,10 +92,8 @@ module Metalware
       def print_error_node(io)
         lambda do |node, prefix|
           io.puts "#{prefix} #{node.name}"
-          result = node.content&.[](:result)
-          if !(result.nil? || result&.success?)
-            io.puts result.errors.to_s
-          end
+          result = node.content[:result]
+          io.puts result.errors.to_s unless result.success?
         end
       end
 
@@ -105,13 +103,17 @@ module Metalware
 
       def tree
         @tree ||= begin
-          root = Tree::TreeNode.new('ROOT', { pass: true })
-          add_children(root, root) do
-            Constants::CONFIGURE_SECTIONS.map do |section|
-              make_section_node(root, section)
+          root_hash = {
+            pass: true,
+            result: TopLevelSchema.call(data: raw_data),
+          }
+          Tree::TreeNode.new('ROOT', root_hash).tap do |root|
+            add_children(root, root) do
+              Constants::CONFIGURE_SECTIONS.map do |section|
+                make_section_node(root, section)
+              end
             end
           end
-          root
         end
       end
 
@@ -138,10 +140,10 @@ module Metalware
       end
 
       def add_children(root, parent)
-        if root == parent || parent.content[:result].success?
+        if parent.content[:result].success?
           yield&.each { |child| parent << child }
         else
-          root.content = { pass: false }
+          root.content[:pass] = false
         end
         parent
       end
@@ -195,6 +197,20 @@ module Metalware
         optional(:choice) { array? }
 
         schema(DependantSchema)
+      end
+
+      TopLevelSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
+
+          def top_level_keys?(data)
+            section = Constants::CONFIGURE_SECTIONS.dup.push(:questions)
+            (data.keys - section).empty?
+          end
+        end
+
+        required(:data) { top_level_keys? }
       end
 
       ConfigureSchema = Dry::Validation.Schema do
