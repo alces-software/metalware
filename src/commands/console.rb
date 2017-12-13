@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'pty'
+
 module Metalware
   module Commands
     class Console < Ipmi
@@ -30,18 +32,21 @@ module Metalware
         puts "Attempting to connect to node #{node_names[0]}.."
         if valid_connection?
           puts 'Establishing SOL connection, type &. to exit..'
-          command('activate')
+          console(command('activate'))
         else
           puts 'Failed to connect..'
         end
       end
 
       def command(type)
-        "ipmitool -H #{node_names[0]} #{render_credentials} -E -I lanplus -e sol #{type}"
+        "ipmitool -H #{render_hostname} #{render_credentials} -E -I lanplus sol #{type}"
+      end
+
+      def console(cmd)
       end
 
       def valid_connection?
-        ipmi(command('info'))
+        system(command('info > /dev/null 2>&1'))
       end
     end
   end
