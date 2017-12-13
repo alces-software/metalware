@@ -94,10 +94,12 @@ module Metalware
     end
 
     def questions
-      @questions ||= questions_in_section
-                     .map.with_index do |question, index|
-        identifier, properties = question
-        create_question(identifier, properties, index + 1)
+      @questions ||= section_question_tree.each_with_index do |node_q, index|
+        next if index == 0 # Skip the section node
+        properties = node_q.content
+        identifier = properties[:identifier]
+        node_q.content.ask_question = \
+          create_question(identifier, properties, index + 1)
       end
     end
 
@@ -121,12 +123,8 @@ module Metalware
       @group_cache ||= GroupCache.new(config)
     end
 
-    def configure_data
-      @configure_data ||= loader.configure_data
-    end
-
-    def questions_in_section
-      configure_data[questions_section]
+    def section_question_tree
+      loader.configure_section(questions_section)
     end
 
     def default_hash
@@ -173,23 +171,24 @@ module Metalware
     end
 
     def ask_questions
-      questions.map do |question|
-        answer = question.ask(highline)
-        answer_pair_to_save(question, answer)
-      end.reject(&:nil?).to_h
+      questions.each_with_object({}) do |node_q, memo|
+        next unless node_q.content.ask_question
+        question = node_q.content
+        answer = answer_to_save(question, question.ask_question.ask(highline))
+        memo[question[:identifier]] = answer unless answer.nil?
+      end
     end
 
-    def answer_pair_to_save(question, answer)
-      save_obj = [question.identifier, answer]
+    def answer_to_save(question, answer)
       if answer == question.default
         # Whether the answer is saved depends if it matches the default AND
         # if it was previously saved. If there is no old_answer, then the
         # default must be set at a higher level. In this case it shouldn't be
         # saved. If there is an old_answer then it is the default. In this case
         # it needs to be saved again so it is not lost.
-        question.old_answer.nil? ? nil : save_obj
+        question.old_answer.nil? ? nil : answer
       else
-        save_obj
+        answer
       end
     end
 
@@ -197,13 +196,13 @@ module Metalware
       saver.section_answers(answers, questions_section, name)
     end
 
+    # TODO: Remove identifier as an input
     def create_question(identifier, properties, index)
       default = default_hash[identifier]
 
       Question.new(
         config: config,
         default: default,
-        identifier: identifier,
         properties: properties,
         questions_section: questions_section,
         old_answer: old_answers[identifier],
@@ -216,7 +215,7 @@ module Metalware
     end
 
     def total_questions
-      questions_in_section.length
+      section_question_tree.size - 1
     end
 
     class Question
@@ -235,19 +234,18 @@ module Metalware
       def initialize(
         config:,
         default:,
-        identifier:,
         old_answer: nil,
         progress_indicator:,
         properties:,
         questions_section:
       )
-        @choices = properties[:choices]
+        @choices = properties.choices
         @default = default
-        @identifier = identifier
+        @identifier = properties.identifier
         @old_answer = old_answer
         @progress_indicator = progress_indicator
-        @question = properties[:question]
-        @required = !properties[:optional]
+        @question = properties.question
+        @required = !properties.optional
 
         @type = type_for(
           properties[:type],
