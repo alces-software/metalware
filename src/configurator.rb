@@ -93,13 +93,11 @@ module Metalware
       save_answers(answers)
     end
 
+    # TODO: Can questions and each_question be merged to form the enumerator?
+    # Then it can be used to ask the questions
     def questions
-      @questions ||= section_question_tree.each_with_index do |node_q, index|
-        next if index == 0 # Skip the section node
-        properties = node_q.content
-        identifier = properties[:identifier]
-        node_q.content.ask_question = \
-          create_question(identifier, properties, index + 1)
+      @questions ||= each_question.with_index do |question, index|
+        question.ask_question = create_question(question, index + 1)
       end
     end
 
@@ -123,8 +121,17 @@ module Metalware
       @group_cache ||= GroupCache.new(config)
     end
 
+    def each_question
+      Enumerator.new do |enum|
+        section_question_tree.each do |node_q|
+          next if node_q.content.section
+          enum << node_q.content
+        end
+      end
+    end
+
     def section_question_tree
-      loader.configure_section(questions_section)
+      @section_question_tree ||= loader.configure_section(questions_section)
     end
 
     def default_hash
@@ -171,14 +178,14 @@ module Metalware
     end
 
     def ask_questions
-      questions.each_with_object({}) do |node_q, memo|
-        next unless node_q.content.ask_question
-        question = node_q.content
+      each_question.with_object({}) do |question, memo|
         answer = answer_to_save(question, question.ask_question.ask(highline))
-        memo[question[:identifier]] = answer unless answer.nil?
+        memo[question.identifier] = answer unless answer.nil?
       end
     end
 
+    # TODO: Merge this method with ask_questions, there is no need for them
+    # to be seperate
     def answer_to_save(question, answer)
       if answer == question.default
         # Whether the answer is saved depends if it matches the default AND
@@ -196,10 +203,12 @@ module Metalware
       saver.section_answers(answers, questions_section, name)
     end
 
-    # TODO: Remove identifier as an input
-    def create_question(identifier, properties, index)
-      default = default_hash[identifier]
+    def create_question(properties, index)
+      default = default_hash[properties.identifier]
 
+      # TODO: Remove default as an input and save the default in the
+      # properties object. The same can be done with the old_answer
+      # TODO: Break out the Question object into seperate file
       Question.new(
         config: config,
         default: default,
