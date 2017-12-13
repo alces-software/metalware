@@ -29,10 +29,6 @@ module Metalware
     class Power < Ipmi
       private
 
-      def run
-        ipmi(command)
-      end
-
       def command
         if @options.group
           hosts = "-g #{@args[0]}"
