@@ -78,12 +78,13 @@ title "Creating initial directory structure"
 doing 'Create'
 mkdir -p /var/log/metalware
 mkdir -p /var/lib/metalware/rendered/{basic,kickstart,system}
-mkdir -p /var/lib/metalware/cache/{built-nodes,templates}
+mkdir -p /var/lib/metalware/cache/templates
+mkdir -p /var/lib/metalware/events
 mkdir -p /var/lib/metalware/repo
 mkdir -p /var/lib/metalware/answers/{groups,nodes}
 mkdir -p /etc/named
 touch /etc/named/metalware.conf
-chmod a+rw /var/lib/metalware/cache/built-nodes
+chmod a+rw /var/lib/metalware/events
 
 # Link hosts files in to Metalware data dir; this will then be made available
 # on the Metalware deployment server.
