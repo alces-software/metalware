@@ -38,9 +38,7 @@ RSpec.describe Metalware::Commands::Build do
     # Shortens the wait times for the tests
     allow(metal_config).to receive(:build_poll_sleep).and_return(0.1)
     # Makes sure there aren't any other threads
-    Thread.list.each do |th|
-      th.kill unless th == Thread.main
-    end
+    AlcesUtils.kill_other_threads
   end
 
   let :build_wait_time { metal_config.build_poll_sleep * 5 }
