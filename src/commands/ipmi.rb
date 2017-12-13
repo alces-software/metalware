@@ -38,7 +38,9 @@ module Metalware
         @args = args
       end
 
-      def run; end
+      def run
+        ipmi(command)
+      end
 
       def ipmi(cmd)
         system(cmd.to_s)
@@ -48,8 +50,16 @@ module Metalware
         @node_names ||= nodes.map(&:name)
       end
 
+      def command
+        "ipmitool #{render_hosts} #{render_credentials} #{render_command}"
+      end
+
+      def render_command
+        @options.command
+      end
+
       def render_credentials
-        if @options.g
+        if @options.group
           username = alces.domain.config.networks.bmc.bmcuser
           password = alces.domain.config.networks.bmc.bmcpassword
         else
@@ -64,6 +74,14 @@ module Metalware
       def render_hostname
         node = alces.nodes.find_by_name(node_names[0])
         node.config.networks.bmc.ip
+      end
+
+      def render_hosts
+        if @options.group
+          hosts = "-g #{@args[0]}"
+        else
+          hosts = "-H #{render_hostname}"
+        end
       end
     end
   end

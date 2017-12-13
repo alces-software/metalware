@@ -252,13 +252,17 @@ commands:
           node name in the hunter cache
 
   ipmi:
-    syntax: metal ipmi NODE_IDENTIFIER [options]
+    syntax: metal ipmi NODE_IDENTIFIER [COMMAND] [options]
     summary: Perform ipmi commands on single or multiple machines
     description: >
        Perform ipmi commands on single or multiple machines
     action: Commands::Ipmi
     options:
       - *group_option
+      - tags: [-c COMMAND, --command COMMAND]
+        type: String
+        description: >
+          The IPMI tool command to run, for example `sel list`
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
