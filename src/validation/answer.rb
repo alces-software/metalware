@@ -89,11 +89,7 @@ module Metalware
       end
 
       def questions_in_section
-        questions[section]
-      end
-
-      def questions
-        @configure_data ||= loader.configure_data
+        loader.flattened_configure_section(section)
       end
 
       def validation_hash

@@ -61,12 +61,20 @@ module Metalware
         raise_error_if_validation_failed
       end
 
-      # TODO: Rethink the raw input, it is a bit odd on closer inspection
-      # It will need to be reworked for Tree. Consider removing or better
-      # mocking in the test
-      def data(raw: false)
-        return return_data(raw) unless config.validation
-        tree
+      def tree
+        @tree ||= begin
+          root_hash = {
+            pass: true,
+            result: TopLevelSchema.call(data: raw_data),
+          }
+          Tree::TreeNode.new('ROOT', root_hash).tap do |root|
+            add_children(root, root) do
+              Constants::CONFIGURE_SECTIONS.map do |section|
+                make_section_node(root, section)
+              end
+            end
+          end
+        end
       end
 
       private
@@ -101,29 +109,13 @@ module Metalware
         tree.content[:pass]
       end
 
-      def tree
-        @tree ||= begin
-          root_hash = {
-            pass: true,
-            result: TopLevelSchema.call(data: raw_data),
-          }
-          Tree::TreeNode.new('ROOT', root_hash).tap do |root|
-            add_children(root, root) do
-              Constants::CONFIGURE_SECTIONS.map do |section|
-                make_section_node(root, section)
-              end
-            end
-          end
-        end
-      end
-
       def make_section_node(root, section)
         question_data = raw_data[section] || []
         data = {
           section: section,
           result: DependantSchema.call(dependent: question_data)
         }
-        node_s = Tree::TreeNode.new(section.upcase, data)
+        node_s = Tree::TreeNode.new(section, data)
         add_children(root, node_s) do
           question_data.map { |q| make_question_node(root, q) }
         end
