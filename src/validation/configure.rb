@@ -58,6 +58,7 @@ module Metalware
       def initialize(config, data_hash = nil)
         @config = config
         @raw_data = (data_hash || load_configure_file).freeze
+        raise_error_if_validation_failed
       end
 
       # TODO: Rethink the raw input, it is a bit odd on closer inspection
@@ -65,7 +66,6 @@ module Metalware
       # mocking in the test
       def data(raw: false)
         return return_data(raw) unless config.validation
-        raise_error_if_validation_failed
         tree
       end
 

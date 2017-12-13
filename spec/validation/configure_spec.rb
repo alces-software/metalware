@@ -149,7 +149,7 @@ RSpec.describe Metalware::Validation::Configure do
 
   context 'without a hash input' do
     it 'loads configure file from the repo' do
-      data = { data: 'I am the configure data' }
+      data = { domain: [], group: [] } # Intentionally incomplete
       Metalware::Data.dump(file_path.configure_file, data)
       v = Metalware::Validation::Configure.new(config)
       expect(v.send(:raw_data)).to eq(data)
