@@ -150,7 +150,7 @@ module Metalware
           [yes/no]
         EOF
 
-        run_all_complete_hooks if agree(should_rerender)
+        build_event.run_all_complete_hooks if agree(should_rerender)
       end
     end
   end
