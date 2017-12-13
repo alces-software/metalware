@@ -39,10 +39,11 @@ module Metalware
       end
 
       def command(type)
-        "ipmitool -H #{render_hostname} #{render_credentials} -E -I lanplus sol #{type}"
+        "ipmitool -H #{render_hostname} #{render_credentials} -e '&' -I lanplus sol #{type}"
       end
 
       def console(cmd)
+        system cmd
       end
 
       def valid_connection?
