@@ -28,6 +28,7 @@ module Metalware
   module Commands
     class Console < Ipmi
       private
+
       def run
         puts "Attempting to connect to node #{node_names[0]}.."
         if valid_connection?
