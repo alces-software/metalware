@@ -132,14 +132,29 @@ module Metalware
     # saved. If there is an old_answer then it is the default. In this case
     # it needs to be saved again so it is not lost.
     def ask_questions
-      questions.with_object({}) do |(_node_q, content), memo|
+      questions.with_object({}) do |(node_q, content), memo|
+        next unless ask_question_based_on_parent_answer(node_q)
         raw_answer = content.ask_question.ask(highline)
-        answer = if raw_answer == content.default
-                   content.old_answer.nil? ? nil : answer
-                 else
-                   raw_answer
-                 end
-        memo[content.identifier.to_sym] = answer unless answer.nil?
+        content.answer = if raw_answer == content.default
+                           content.old_answer.nil? ? nil : answer
+                         else
+                           raw_answer
+                         end
+        identifier = content.identifier.to_sym
+        memo[identifier] = content.answer unless content.answer.nil?
+      end
+    end
+
+    def ask_question_based_on_parent_answer(node_q)
+      # Question nodes hang off a section node (eventually) and are thus asked
+      if node_q.parent.content.section
+        true
+      # If the parent's answer is truthy the child is asked
+      elsif node_q.parent.content.answer
+        true
+      # Otherwise don't ask the question
+      else
+        false
       end
     end
 

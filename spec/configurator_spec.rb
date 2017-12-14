@@ -432,4 +432,33 @@ RSpec.describe Metalware::Configurator do
       expect(new_group_cache.orphans).to include(orphan)
     end
   end
+
+  context 'with a dependent questions' do
+    before :each do
+      define_questions(domain: [
+        {
+          identifier: 'parent',
+          question: 'Ask my child?',
+          type: 'boolean',
+          dependent: [
+            {
+              identifier: 'child',
+              question: 'Did I get asked?',
+              type: 'boolean',
+            },
+          ],
+        },
+      ])
+    end
+
+    it 'asks the child if the parent is true' do
+      configure_with_answers(['yes', 'yes'])
+      expect(answers[:child]).to be(true)
+    end
+
+    it 'skips the child if the parent is false' do
+      configure_with_answers(['no', 'yes'])
+      expect(answers[:child]).to be(nil)
+    end
+  end
 end
