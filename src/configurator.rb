@@ -180,7 +180,7 @@ module Metalware
     def ask_questions
       each_question.with_object({}) do |question, memo|
         answer = answer_to_save(question, question.ask_question.ask(highline))
-        memo[question.identifier] = answer unless answer.nil?
+        memo[question.identifier.to_sym] = answer unless answer.nil?
       end
     end
 
