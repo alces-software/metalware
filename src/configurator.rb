@@ -99,6 +99,7 @@ module Metalware
         section_question_tree.each do |node_q|
           content = node_q.content
           next if content.section
+          content.identifier = content.identifier.to_sym
           content.ask_question = create_question(content, (idx += 1))
           enum << [node_q, content]
         end
