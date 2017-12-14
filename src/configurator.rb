@@ -93,11 +93,15 @@ module Metalware
       save_answers(answers)
     end
 
-    # TODO: Can questions and each_question be merged to form the enumerator?
-    # Then it can be used to ask the questions
     def questions
-      @questions ||= each_question.with_index do |question, index|
-        question.ask_question = create_question(question, index + 1)
+      Enumerator.new do |enum|
+        idx = 0
+        section_question_tree.each do |node_q|
+          content = node_q.content
+          next if content.section
+          content.ask_question = create_question(content, (idx += 1))
+          enum << [node_q, content]
+        end
       end
     end
 
@@ -121,12 +125,20 @@ module Metalware
       @group_cache ||= GroupCache.new(config)
     end
 
-    def each_question
-      Enumerator.new do |enum|
-        section_question_tree.each do |node_q|
-          next if node_q.content.section
-          enum << node_q.content
-        end
+    # Whether the answer is saved depends if it matches the default AND
+    # if it was previously saved. If there is no old_answer, then the
+    # default must be set at a higher level. In this case it shouldn't be
+    # saved. If there is an old_answer then it is the default. In this case
+    # it needs to be saved again so it is not lost.
+    def ask_questions
+      questions.with_object({}) do |(_node_q, content), memo|
+        raw_answer = content.ask_question.ask(highline)
+        answer = if raw_answer == content.default
+                   content.old_answer.nil? ? nil : answer
+                 else
+                   raw_answer
+                 end
+        memo[content.identifier.to_sym] = answer unless answer.nil?
       end
     end
 
@@ -177,28 +189,6 @@ module Metalware
       @old_answers ||= loader.section_answers(questions_section, name)
     end
 
-    def ask_questions
-      each_question.with_object({}) do |question, memo|
-        answer = answer_to_save(question, question.ask_question.ask(highline))
-        memo[question.identifier.to_sym] = answer unless answer.nil?
-      end
-    end
-
-    # TODO: Merge this method with ask_questions, there is no need for them
-    # to be seperate
-    def answer_to_save(question, answer)
-      if answer == question.default
-        # Whether the answer is saved depends if it matches the default AND
-        # if it was previously saved. If there is no old_answer, then the
-        # default must be set at a higher level. In this case it shouldn't be
-        # saved. If there is an old_answer then it is the default. In this case
-        # it needs to be saved again so it is not lost.
-        question.old_answer.nil? ? nil : answer
-      else
-        answer
-      end
-    end
-
     def save_answers(answers)
       saver.section_answers(answers, questions_section, name)
     end
@@ -214,7 +204,7 @@ module Metalware
         default: default,
         properties: properties,
         questions_section: questions_section,
-        old_answer: old_answers[identifier],
+        old_answer: old_answers[properties.identifier],
         progress_indicator: progress_indicator(index)
       )
     end
