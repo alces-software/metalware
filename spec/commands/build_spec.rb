@@ -121,7 +121,7 @@ RSpec.describe Metalware::Commands::Build do
     AlcesUtils.mock self, :each do
       test_group = 'some_random_test_group'
       mock_group(test_group)
-      ['node00', 'node01', 'node02', 'node03'].each do |node|
+      ['nodeA00', 'nodeA01', 'nodeA02', 'nodeA03'].each do |node|
         mock_node(node, test_group)
         hexadecimal_ip(alces.node)
       end

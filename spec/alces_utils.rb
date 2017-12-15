@@ -181,7 +181,7 @@ module AlcesUtils
 
     def mock_node(name, *genders)
       AlcesUtils.check_and_raise_fakefs_error
-      alces.nodes # Ensures the nodes list is initialized
+      raise_if_node_exists(name)
       add_node_to_genders_file(name, *genders)
       Metalware::Namespaces::Node.create(alces, name).tap do |node|
         with_blank_config_and_answer(node)
@@ -211,6 +211,12 @@ module AlcesUtils
     private
 
     attr_reader :alces, :metal_config, :test
+
+    def raise_if_node_exists(name)
+      return unless File.exist? Metalware::FilePath.genders
+      msg = "Node '#{name}' already exists"
+      raise Metalware::InternalError, msg if alces.nodes.find_by_name(name)
+    end
 
     def add_node_to_genders_file(name, *genders)
       genders = [AlcesUtils.default_group] if genders.empty?
