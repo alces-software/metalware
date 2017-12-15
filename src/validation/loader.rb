@@ -39,9 +39,23 @@ module Metalware
 
       def configure_data
         return @configure_data if @configure_data
-        data = Validation::Configure.new(config).data
-        @configure_data = data if cache_configure
-        data
+        tree = Validation::Configure.new(config).tree
+        @configure_data = tree if cache_configure
+        tree
+      end
+
+      # Returns a tree
+      def configure_section(section)
+        configure_data.children.find { |c| c.name == section }
+      end
+
+      # Returns a hash of identifiers and questions
+      def flattened_configure_section(section)
+        section_root = configure_section(section)
+        section_root.each_with_object({}) do |node, memo|
+          next if section_root == node
+          memo[node.name.to_sym] = node.content
+        end
       end
 
       def group_cache

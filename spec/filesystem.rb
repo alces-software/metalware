@@ -25,6 +25,7 @@
 require 'fakefs/safe'
 require 'constants'
 require 'minimal_repo'
+require 'validation/configure'
 
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
 
@@ -99,6 +100,10 @@ class FileSystem
   def with_fixtures(fixtures_dir, at:)
     path = fixtures_path(fixtures_dir)
     FakeFS::FileSystem.clone(path, at)
+  end
+
+  def with_validation_error_file
+    FakeFS::FileSystem.clone(Metalware::Validation::Configure::ERROR_FILE)
   end
 
   def with_repo_fixtures(repo_fixtures_dir)

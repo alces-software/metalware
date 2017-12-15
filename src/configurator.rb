@@ -94,10 +94,15 @@ module Metalware
     end
 
     def questions
-      @questions ||= questions_in_section
-                     .map.with_index do |question, index|
-        identifier, properties = question
-        create_question(identifier, properties, index + 1)
+      Enumerator.new do |enum|
+        idx = 0
+        section_question_tree.each do |node_q|
+          content = node_q.content
+          next if content.section
+          content.identifier = content.identifier.to_sym
+          content.ask_question = create_question(content, (idx += 1))
+          enum << [node_q, content]
+        end
       end
     end
 
@@ -121,12 +126,40 @@ module Metalware
       @group_cache ||= GroupCache.new(config)
     end
 
-    def configure_data
-      @configure_data ||= loader.configure_data
+    # Whether the answer is saved depends if it matches the default AND
+    # if it was previously saved. If there is no old_answer, then the
+    # default must be set at a higher level. In this case it shouldn't be
+    # saved. If there is an old_answer then it is the default. In this case
+    # it needs to be saved again so it is not lost.
+    def ask_questions
+      questions.with_object({}) do |(node_q, content), memo|
+        next unless ask_question_based_on_parent_answer(node_q)
+        raw_answer = content.ask_question.ask(highline)
+        content.answer = if raw_answer == content.default
+                           content.old_answer.nil? ? nil : answer
+                         else
+                           raw_answer
+                         end
+        identifier = content.identifier.to_sym
+        memo[identifier] = content.answer unless content.answer.nil?
+      end
     end
 
-    def questions_in_section
-      configure_data[questions_section]
+    def ask_question_based_on_parent_answer(node_q)
+      # Question nodes hang off a section node (eventually) and are thus asked
+      if node_q.parent.content.section
+        true
+      # If the parent's answer is truthy the child is asked
+      elsif node_q.parent.content.answer
+        true
+      # Otherwise don't ask the question
+      else
+        false
+      end
+    end
+
+    def section_question_tree
+      @section_question_tree ||= loader.configure_section(questions_section)
     end
 
     def default_hash
@@ -172,41 +205,22 @@ module Metalware
       @old_answers ||= loader.section_answers(questions_section, name)
     end
 
-    def ask_questions
-      questions.map do |question|
-        answer = question.ask(highline)
-        answer_pair_to_save(question, answer)
-      end.reject(&:nil?).to_h
-    end
-
-    def answer_pair_to_save(question, answer)
-      save_obj = [question.identifier, answer]
-      if answer == question.default
-        # Whether the answer is saved depends if it matches the default AND
-        # if it was previously saved. If there is no old_answer, then the
-        # default must be set at a higher level. In this case it shouldn't be
-        # saved. If there is an old_answer then it is the default. In this case
-        # it needs to be saved again so it is not lost.
-        question.old_answer.nil? ? nil : save_obj
-      else
-        save_obj
-      end
-    end
-
     def save_answers(answers)
       saver.section_answers(answers, questions_section, name)
     end
 
-    def create_question(identifier, properties, index)
-      default = default_hash[identifier]
+    def create_question(properties, index)
+      default = default_hash[properties.identifier]
 
+      # TODO: Remove default as an input and save the default in the
+      # properties object. The same can be done with the old_answer
+      # TODO: Break out the Question object into seperate file
       Question.new(
         config: config,
         default: default,
-        identifier: identifier,
         properties: properties,
         questions_section: questions_section,
-        old_answer: old_answers[identifier],
+        old_answer: old_answers[properties.identifier],
         progress_indicator: progress_indicator(index)
       )
     end
@@ -216,7 +230,7 @@ module Metalware
     end
 
     def total_questions
-      questions_in_section.length
+      section_question_tree.size - 1
     end
 
     class Question
@@ -235,19 +249,18 @@ module Metalware
       def initialize(
         config:,
         default:,
-        identifier:,
         old_answer: nil,
         progress_indicator:,
         properties:,
         questions_section:
       )
-        @choices = properties[:choices]
+        @choices = properties.choices
         @default = default
-        @identifier = identifier
+        @identifier = properties.identifier
         @old_answer = old_answer
         @progress_indicator = progress_indicator
-        @question = properties[:question]
-        @required = !properties[:optional]
+        @question = properties.question
+        @required = !properties.optional
 
         @type = type_for(
           properties[:type],
