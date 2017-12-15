@@ -46,9 +46,11 @@ RSpec.describe Metalware::Commands::Build do
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do
       th = Thread.new do
-        Metalware::Utils.run_command(
-          Metalware::Commands::Build, node_group.name, **options_hash
-        )
+        AlcesUtils.redirect_std(:stdout) do
+          Metalware::Utils.run_command(
+            Metalware::Commands::Build, node_group.name, **options_hash
+          )
+        end
       end
 
       # Allows the build to report finished after a set delay
@@ -121,7 +123,7 @@ RSpec.describe Metalware::Commands::Build do
     AlcesUtils.mock self, :each do
       test_group = 'some_random_test_group'
       mock_group(test_group)
-      ['node00', 'node01', 'node02', 'node03'].each do |node|
+      ['nodeA00', 'nodeA01', 'nodeA02', 'nodeA03'].each do |node|
         mock_node(node, test_group)
         hexadecimal_ip(alces.node)
       end

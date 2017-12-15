@@ -172,6 +172,12 @@ RSpec.describe AlcesUtils do
         expect(alces.node.answer.to_h).to be_empty
       end
 
+      it 'errors if the node already exists' do
+        expect do
+          AlcesUtils.mock(self) { mock_node(name) }
+        end.to raise_error(Metalware::InternalError)
+      end
+
       context 'with a new node' do
         let :new_node { 'some_random_new_node4362346' }
         let :genders { ['_some_group_1', '_some_group_2'] }

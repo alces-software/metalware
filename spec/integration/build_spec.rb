@@ -77,7 +77,9 @@ RSpec.describe '`metal build`' do
       thr = Thread.new do
         begin
           Timeout.timeout 20 do
-            Metalware::Commands::Build.new([name], options)
+            AlcesUtils.redirect_std(:stdout) do
+              Metalware::Commands::Build.new([name], options)
+            end
           end
         rescue => e
           STDERR.puts e.inspect
