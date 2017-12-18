@@ -22,7 +22,8 @@ RSpec.describe Metalware::Namespaces::Alces do
           key: 'value',
           embedded_key: '<%= alces.testing.key %>',
           infinite_value1: '<%= alces.testing.infinite_value2 %>',
-          infinite_value2: '<%= alces.testing.infinite_value1 %>'
+          infinite_value2: '<%= alces.testing.infinite_value1 %>',
+          false_key: false
         ) do |template_string|
           alces.render_erb_template(template_string)
         end
@@ -43,6 +44,11 @@ RSpec.describe Metalware::Namespaces::Alces do
         output = render_template('<%= alces.testing.infinite_value1 %>')
         STDERR.puts "Template output: #{output}"
       end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
+    end
+
+    it 'evalutes the false string as Falsey' do
+      template = '<%= alces.testing.false_key ? "true" : "false" %>'
+      expect(render_template(template)).to eq(false)
     end
   end
 
