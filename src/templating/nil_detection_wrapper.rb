@@ -29,15 +29,16 @@ module Metalware
       end
 
       def method_missing(s, *a, &b)
-        # Should never super. Only included as method_missing should always
-        # have a failback on super
+        # Should never super. Only included as method_missing requires it
         super unless respond_to_missing?(s)
         value = object.send(s, *a, &b)
-        if [:to_s, :to_str].include?(s)
+        next_call_stack = build_call_stack_str(s, *a, &b)
+        warn_if_nil(value, next_call_stack)
+        # Do not wrap falsy values or if ERB converts it to a string
+        if [:to_s, :to_str].include?(s) || !value
           value
         else
-          next_call_stack = build_call_stack_str(s, *a, &b)
-          parse_value(value, next_call_stack)
+          NilDetectionWrapper.new(value, next_call_stack)
         end
       end
 
@@ -64,13 +65,9 @@ module Metalware
         s << ')'
       end
 
-      def parse_value(value, next_call_stack)
-        if value.nil?
-          MetalLog.warn next_call_stack
-          nil
-        else
-          NilDetectionWrapper.new(value, next_call_stack)
-        end
+      def warn_if_nil(value, next_call_stack)
+        return unless value.nil?
+        MetalLog.warn next_call_stack
       end
     end
   end
