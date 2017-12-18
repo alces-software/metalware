@@ -22,6 +22,7 @@ module Metalware
 
     def run_all_complete_hooks
       nodes.each { |node| run_hook(node, 'complete') }
+      loop if hook_active?
     end
 
     def build_complete?

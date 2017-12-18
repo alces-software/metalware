@@ -61,7 +61,9 @@ RSpec.describe Metalware::Commands::Build do
         else
           node_group.nodes
         end.each do |node|
-          FileUtils.touch node.build_complete_path
+          path = node.build_complete_path
+          FileUtils.mkdir_p File.dirname(path)
+          FileUtils.touch path
         end
       end
       th.join

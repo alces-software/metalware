@@ -24,6 +24,24 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
       be_a(Binding)
   end
 
+  context 'with a falsey result' do
+    let :false_obj do
+      build_wrapper_object(OpenStruct.new(nil_key: nil, false_key: false))
+    end
+
+    def expect_falsey(value)
+      expect(value ? true : false).to be(false)
+    end
+
+    it 'preserves the falsey-ness of nil' do
+      expect_falsey(false_obj.nil_key)
+    end
+
+    it "preserves the falsey-ness of 'false'" do
+      expect_falsey(false_obj.false_key)
+    end
+  end
+
   context 'with a wrapped integer' do
     let :object { 100 }
     let :wrapped_object { build_wrapper_object(object) }

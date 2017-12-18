@@ -113,7 +113,9 @@ RSpec.describe '`metal build`' do
   let :file_path { Metalware::FilePath.new(metal_config) }
 
   def touch_complete_file(name)
-    FileUtils.touch(file_path.build_complete(alces.nodes.find_by_name(name)))
+    path = file_path.build_complete(alces.nodes.find_by_name(name))
+    FileUtils.mkdir_p File.dirname(path)
+    FileUtils.touch(path)
   end
 
   context 'for single node' do
