@@ -29,6 +29,7 @@ require 'exceptions'
 require 'dependency_specifications'
 require 'validation/loader'
 require 'file_path'
+require 'namespaces/alces'
 
 module Metalware
   module CommandHelpers
@@ -46,7 +47,7 @@ module Metalware
 
       private
 
-      attr_reader :config, :args, :options
+      attr_reader :args, :options
 
       def pre_setup(args, options)
         setup_config(options)
@@ -64,11 +65,17 @@ module Metalware
           strict: !!options.strict,
           quiet: !!options.quiet,
         }
-        @config = Config.new(options.config, cli_options)
+        # Ensures it uses it's own config
+        Config.clear_cache
+        Config.cache = Config.new(options.config, cli_options)
+      end
+
+      def config
+        Config.cache
       end
 
       def dependency_specifications
-        DependencySpecifications.new(config)
+        DependencySpecifications.new(alces)
       end
 
       def dependency_hash
@@ -95,6 +102,10 @@ module Metalware
 
       def class_name_parts
         self.class.name.split('::').map(&:downcase).map(&:to_sym)
+      end
+
+      def alces
+        @alces ||= Namespaces::Alces.new(config)
       end
 
       def log_command

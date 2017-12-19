@@ -31,18 +31,8 @@ module Metalware
   class MetalLog < Logger
     class << self
       def method_missing(s, *a, &b)
-        # Only log things outside of unit tests.
-        if $PROGRAM_NAME !~ /rspec$/
-          metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
-        end
+        metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
       end
-
-      def reset_log(config)
-        @metal_log = nil
-        @config = config
-      end
-
-      private
 
       def metal_log
         @metal_log ||= MetalLog.new('metal')
@@ -66,9 +56,7 @@ module Metalware
     private
 
     def config
-      config = self.class.instance_variable_get :@config
-      raise UnsetConfigLogError if config.nil?
-      config
+      Config.cache(new_if_missing: true)
     end
   end
 end

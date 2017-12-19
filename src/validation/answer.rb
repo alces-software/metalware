@@ -30,10 +30,11 @@ module Metalware
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(metalware_config, answers, answer_section: nil)
+      def initialize(metalware_config, answers, answer_section: nil, configure_data: nil)
         @config = metalware_config
         @answers = answers
         @section = answer_section
+        @configure_data = configure_data
       end
 
       def validate
@@ -70,6 +71,7 @@ module Metalware
       end
 
       def success?
+        return true unless config.validation
         validate if @validation_result.nil?
         @validation_result.success?
       end
@@ -91,7 +93,7 @@ module Metalware
       end
 
       def questions
-        loader.configure_data
+        @configure_data ||= loader.configure_data
       end
 
       def validation_hash

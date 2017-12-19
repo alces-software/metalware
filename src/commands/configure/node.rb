@@ -18,15 +18,11 @@ module Metalware
 
         def configurator
           @configurator ||=
-            Configurator.for_node(node_name, config: config)
+            Configurator.for_node(alces, node_name)
         end
 
         def answer_file
           file_path.node_answers(node_name)
-        end
-
-        def dependency_hash
-          dependency_specifications.for_node_in_configured_group(node_name)
         end
       end
     end

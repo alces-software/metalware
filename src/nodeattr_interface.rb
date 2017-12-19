@@ -53,6 +53,12 @@ module Metalware
         raise NodeNotInGendersError, "Could not find node in genders: #{node}"
       end
 
+      def all_nodes
+        nodeattr('--expand')
+          .split("\n")
+          .map { |node_details| node_details.split[0] }
+      end
+
       # Returns whether the given file is a valid genders file, along with any
       # validation error.
       def validate_genders_file(genders_path)
@@ -61,19 +67,18 @@ module Metalware
         end
 
         nodeattr("-f #{genders_path} --parse-check", format_error: false)
-        [true, '']
-      rescue SystemCommandError => e
-        [false, e.message]
+        true
       end
 
-      private
-
-      def nodeattr(command, format_error: true)
+      def nodeattr(command, format_error: true, mock_nodeattr: nil)
+        mock_nodeattr ||= Constants::NODEATTR_COMMAND
         SystemCommand.run(
-          "#{Constants::NODEATTR_COMMAND} #{command}",
+          "#{mock_nodeattr} #{command}",
           format_error: format_error
         )
       end
+
+      private
 
       def nodes_to_groups
         nodeattr('--expand')

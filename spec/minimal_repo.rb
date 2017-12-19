@@ -23,6 +23,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'network_interface'
+
 module MinimalRepo
   class << self
     FILES = {
@@ -30,6 +32,7 @@ module MinimalRepo
       'files/': nil,
       'pxelinux/default': "<%= alces.firstboot ? 'FIRSTBOOT' : 'NOT_FIRSTBOOT' %>\n",
       'kickstart/default': '',
+      'uefi-kickstart/default': '',
       'basic/default': '',
       'hosts/default': '',
       'named/default': '',
@@ -42,24 +45,33 @@ module MinimalRepo
                                   domain: [],
                                   group: [],
                                   node: [],
-                                  self: []),
+                                  local: []),
       # Define the build interface to be whatever the first interface is; this
       # should always be sufficient for testing purposes.
       'server.yaml': YAML.dump(build_interface: NetworkInterface.interfaces.first),
     }.freeze
 
+    ABSOLUTE_FILES = {
+      '/var/lib/tftpboot/pxelinux.cfg/': nil,
+    }.freeze
+
     def create_at(path)
       FILES.each do |file, content|
         file_path = File.join(path, file.to_s)
-        just_dir = content.nil?
-        FileUtils.mkdir_p(
-          dir_path(file_path, just_dir: just_dir)
-        )
-        File.write(file_path, content) unless just_dir
+        make_file(file_path, content)
       end
+      ABSOLUTE_FILES.each { |f, c| make_file(f.to_s, c) }
     end
 
     private
+
+    def make_file(abs_file, content)
+      just_dir = content.nil?
+      FileUtils.mkdir_p(
+        dir_path(abs_file, just_dir: just_dir)
+      )
+      File.write(abs_file, content) unless just_dir
+    end
 
     def dir_path(file_path, just_dir:)
       if just_dir

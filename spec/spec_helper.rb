@@ -47,6 +47,8 @@ SimpleCov.start 'metalware'
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../src')
+require 'config'
+Metalware::Config.new
 
 # Require main entry point to Metalware CLI so every file picked up by
 # simplecov, even entirely untested ones.
@@ -138,16 +140,21 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
+  # Resets the config cache each test
+  config.before :each do
+    Metalware::Config.clear_cache
+  end
+
   config.around :each do |example|
-    # Run every test using `FakeFS` unless a truthy `real_fs` metadata value is
-    # passed; this prevents us polluting the real file system unless explicitly
-    # requested.
-    if example.metadata[:real_fs]
+    # Run every test using `FakeFS`, this prevents us polluting the real file
+    # system
+    FileSystem.test(FileSystem.root_file_system_config) do
       example.run
-    else
-      FileSystem.test do
-        example.run
-      end
     end
+  end
+
+  # Resets the filesystem after each test
+  config.after :each do
+    FileSystem.root_file_system_config(reset: true)
   end
 end

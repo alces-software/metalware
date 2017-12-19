@@ -26,7 +26,7 @@ require 'config'
 require 'constants'
 require 'file_path'
 
-RSpec.describe Metalware::Network do
+RSpec.describe Metalware::FilePath do
   let :config { Metalware::Config.new }
 
   describe 'dynamic constant paths' do

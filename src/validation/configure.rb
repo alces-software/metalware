@@ -59,13 +59,18 @@ module Metalware
       end
 
       def data(raw: false)
+        return return_data(raw) unless config.validation
         raise ValidationFailure, error_msg unless validate.success?
-        raw ? raw_data : transform_array_to_hash
+        return_data(raw)
       end
 
       private
 
       attr_reader :config, :raw_data
+
+      def return_data(raw)
+        raw ? raw_data : transform_array_to_hash
+      end
 
       def transform_array_to_hash
         array_data = raw_data.dup

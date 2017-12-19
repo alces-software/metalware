@@ -28,11 +28,10 @@ require 'command_helpers/base_command'
 require 'config'
 require 'templater'
 require 'constants'
-require 'node'
-require 'nodes'
 require 'output'
-require 'build_files_retriever'
 require 'exceptions'
+require 'command_helpers/node_identifier'
+require 'build_event'
 
 module Metalware
   module Commands
@@ -42,26 +41,37 @@ module Metalware
 
       private
 
-      attr_reader :group_name, :nodes, :edit_start, :edit_continue
-
       delegate :template_path, to: :file_path
       delegate :in_gui?, to: Utils
 
+      prepend CommandHelpers::NodeIdentifier
+
       def setup
-        setup_edit_mode
-        node_identifier = args.first
-        @group_name = node_identifier if options.group
-        @nodes = Nodes.create(config, node_identifier, options.group)
+        @build_event = BuildEvent.new(nodes)
       end
 
       def run
-        render_build_templates unless edit_continue
-        if edit_start
-          puts(EDIT_START_MSG)
-          return
+        Output.success 'Waiting for nodes to report as built...'
+        Output.cli_only '(Ctrl-C to terminate)'
+
+        build_event.run_start_hooks
+
+        until build_event.build_complete?
+          gracefully_shutdown if should_gracefully_shutdown?
+
+          # TODO: Split process up more should go in here
+          build_event.process
+
+          # TODO: Consider moving GUI code into BuildEvent
+          if build_event.build_complete?
+            # For now at least, keep thread alive when in GUI so can keep
+            # accessing messages. XXX Change this, this is very wasteful.
+            in_gui? ? record_gui_build_complete : break
+          end
+
+          sleep config.build_poll_sleep
         end
-        start_build
-        wait_for_nodes_to_build
+
         teardown
       rescue
         # Ensure command is recorded as complete when in GUI.
@@ -69,98 +79,22 @@ module Metalware
         raise
       end
 
+      attr_reader :build_event
+
       def dependency_hash
         {
           repo: repo_dependencies,
           configure: ['domain.yaml'],
           optional: {
-            configure: ["groups/#{group_name}.yaml"],
+            configure: ["groups/#{group&.name}.yaml"],
           },
         }
       end
 
       def repo_dependencies
-        nodes.map(&:build_template_paths).flatten.uniq
-      end
-
-      def render_build_templates
-        nodes.template_each firstboot: true do |parameters, node|
-          parameters[:files] = build_files(node)
-          render_build_files(parameters, node)
-          node.render_build_started_templates(parameters)
-        end
-      end
-
-      def build_files(node)
-        # Cache the build files as retrieved for each node so don't need to
-        # re-retrieve each time; in particular we don't want to re-make any
-        # network requests for files specified by a URL.
-        @build_files ||= {}
-        @build_files[node.name] ||= retrieve_build_files(node)
-      end
-
-      def retrieve_build_files(node)
-        retriever = BuildFilesRetriever.new(node.name, config)
-        retriever.retrieve(node.build_files)
-      end
-
-      def render_build_files(parameters, node)
-        build_files(node).each do |namespace, files|
-          files.each do |file|
-            next if file[:error]
-            render_path = node.rendered_build_file_path(namespace, file[:name])
-            FileUtils.mkdir_p(File.dirname(render_path))
-            Templater.render_to_file(config, file[:template_path], render_path, parameters)
-          end
-        end
-      end
-
-      def start_build
-        nodes.each do |node|
-          build_threads.add(Thread.new { node.start_build })
-        end
-      end
-
-      def build_threads
-        @build_threads ||= ThreadGroup.new
-      end
-
-      def clear_up_build_threads
-        build_threads.list.map(&:kill)
-      end
-
-      def wait_for_nodes_to_build
-        Output.success 'Waiting for nodes to report as built...'
-        Output.cli_only '(Ctrl-C to terminate)'
-
-        rerendered_nodes = []
-        loop do
-          gracefully_shutdown if should_gracefully_shutdown?
-
-          nodes.select do |node|
-            !rerendered_nodes.include?(node) && node.built?
-          end
-               .tap do |nodes|
-            render_build_complete_templates(nodes)
-            rerendered_nodes.push(*nodes)
-          end
-               .each do |node|
-            Output.success "Node #{node.name} built."
-          end
-
-          all_nodes_reported_built = rerendered_nodes.length == nodes.length
-          if all_nodes_reported_built
-            # For now at least, keep thread alive when in GUI so can keep
-            # accessing messages. XXX Change this, this is very wasteful.
-            if in_gui?
-              record_gui_build_complete
-            else
-              break
-            end
-          end
-
-          sleep config.build_poll_sleep
-        end
+        nodes.map(&:build_method).reduce([]) do |memo, bm|
+          memo.push(bm.dependency_paths)
+        end.flatten.uniq
       end
 
       def record_gui_build_complete
@@ -175,64 +109,49 @@ module Metalware
         # XXX Somewhat similar to `handle_interrupt`; may not be easily
         # generalizable however.
         Output.info 'Exiting...'
-        render_all_build_complete_templates
+        build_event.run_all_complete_hooks
+        run_all_complete_hooks
         teardown
         record_gui_build_complete
       end
 
-      def render_all_build_complete_templates
-        render_build_complete_templates(nodes)
-      end
-
-      def render_build_complete_templates(nodes)
-        nodes.template_each firstboot: false do |parameters, node|
-          parameters[:files] = build_files(node)
-          node.render_build_complete_templates(parameters)
-        end
-      end
-
       def teardown
         clear_up_built_node_marker_files
-        clear_up_build_threads
+        build_event.kill_threads
         Output.info 'Done.'
       end
 
       def clear_up_built_node_marker_files
-        glob = File.join(config.built_nodes_storage_path, '*')
-        files = Dir.glob(glob)
-        FileUtils.rm_rf(files)
+        nodes.each do |node|
+          FileUtils.rm_rf(node.build_complete_path)
+        end
       end
 
       def handle_interrupt(_e)
         Output.info 'Exiting...'
-        ask_if_should_rerender
+        ask_if_should_run_build_complete
         teardown
       rescue Interrupt
         Output.info 'Re-rendering templates anyway...'
-        render_all_build_complete_templates
+        build_event.run_all_complete_hooks
         teardown
       end
 
-      def ask_if_should_rerender
+      # Allows the input to be mocked
+      def high_line
+        @high_line ||= HighLine.new
+      end
+
+      delegate :agree, to: :high_line
+
+      def ask_if_should_run_build_complete
         should_rerender = <<-EOF.strip_heredoc
-          Re-render appropriate templates for nodes as if build succeeded?
+          Run the complete_hook for nodes as if build succeeded?
           [yes/no]
         EOF
-        render_all_build_complete_templates if agree(should_rerender)
+
+        build_event.run_all_complete_hooks if agree(should_rerender)
       end
-
-      EDIT_SETUP_ERROR = 'Can not start and continue editing together'
-
-      def setup_edit_mode
-        @edit_start = options.edit_start
-        @edit_continue = options.edit_continue
-        raise EditModeError, EDIT_SETUP_ERROR if edit_start && edit_continue
-      end
-
-      EDIT_START_MSG = <<-EOF.strip_heredoc
-        The build templates have been rendered and ready to be edited with `metal edit`
-        Continue the build process with the `--edit-continue` flag
-      EOF
     end
   end
 end

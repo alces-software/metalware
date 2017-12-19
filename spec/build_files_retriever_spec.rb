@@ -27,7 +27,9 @@ require 'input'
 require 'spec_utils'
 require 'config'
 
-RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
+RSpec.describe Metalware::BuildFilesRetriever do
+  include AlcesUtils
+
   TEST_FILES_HASH = {
     namespace01: [
       'some/file_in_repo',
@@ -39,13 +41,19 @@ RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
     ],
   }.freeze
 
-  let :config { Metalware::Config.new }
+  AlcesUtils.mock self, :each do
+    mock_node('testnode01')
+    config(alces.node, files: TEST_FILES_HASH)
+  end
 
   subject do
-    Metalware::BuildFilesRetriever.new('testnode01', config)
+    Metalware::BuildFilesRetriever.new(metal_config)
   end
 
   before do
+    FileSystem.root_setup do |fs|
+      fs.with_clone_fixture('configs/unit-test.yaml')
+    end
     SpecUtils.use_mock_determine_hostip_script(self)
     SpecUtils.use_unit_test_config(self)
   end
@@ -56,26 +64,32 @@ RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
     end
 
     context 'when everything works' do
-      before :each do
-        allow(File).to receive(:exist?).and_return(true)
-      end
-
       it 'returns the correct files object' do
-        retrieved_files = subject.retrieve(TEST_FILES_HASH)
+        some_path = File.join(metal_config.repo_path, 'files/some/file_in_repo')
+        FileUtils.mkdir_p File.dirname(some_path)
+        FileUtils.touch(some_path)
+        other_path = '/some/other/path'
+        FileUtils.mkdir_p File.dirname(other_path)
+        FileUtils.touch(other_path)
+        url_path = '/var/lib/metalware/cache/templates/url'
+        FileUtils.mkdir_p File.dirname(url_path)
+        FileUtils.touch(url_path)
+
+        retrieved_files = subject.retrieve(alces.node)
 
         expect(retrieved_files[:namespace01][0]).to eq(raw: 'some/file_in_repo',
                                                        name: 'file_in_repo',
-                                                       template_path: File.join(config.repo_path, 'files/some/file_in_repo'),
+                                                       template_path: some_path,
                                                        url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo')
 
         expect(retrieved_files[:namespace01][1]).to eq(raw: '/some/other/path',
                                                        name: 'path',
-                                                       template_path: '/some/other/path',
+                                                       template_path: other_path,
                                                        url: 'http://1.2.3.4/metalware/testnode01/namespace01/path')
 
         expect(retrieved_files[:namespace01][2]).to eq(raw: 'http://example.com/url',
                                                        name: 'url',
-                                                       template_path: '/var/lib/metalware/cache/templates/url',
+                                                       template_path: url_path,
                                                        url: 'http://1.2.3.4/metalware/testnode01/namespace01/url')
       end
 
@@ -85,7 +99,7 @@ RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
           '/var/lib/metalware/cache/templates/url'
         )
 
-        subject.retrieve(TEST_FILES_HASH)
+        subject.retrieve(alces.node)
       end
     end
 
@@ -96,10 +110,10 @@ RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
 
       describe 'for repo file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve(TEST_FILES_HASH)
+          retrieved_files = subject.retrieve(alces.node)
 
           repo_file_entry = retrieved_files[:namespace01][0]
-          template_path = "#{config.repo_path}/files/some/file_in_repo"
+          template_path = "#{metal_config.repo_path}/files/some/file_in_repo"
           expect(repo_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
@@ -110,7 +124,7 @@ RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
 
       describe 'for absolute path file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve(TEST_FILES_HASH)
+          retrieved_files = subject.retrieve(alces.node)
 
           absolute_file_entry = retrieved_files[:namespace01][1]
           template_path = '/some/other/path'
@@ -129,7 +143,7 @@ RSpec.describe Metalware::BuildFilesRetriever, real_fs: true do
       end
 
       it 'adds error to file entry' do
-        retrieved_files = subject.retrieve(TEST_FILES_HASH)
+        retrieved_files = subject.retrieve(alces.node)
 
         url_file_entry = retrieved_files[:namespace01][2]
         url = 'http://example.com/url'

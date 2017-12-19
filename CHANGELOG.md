@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2017.2.0]
+- Added `metal template` command which renders the templates and build files
+  for a node or group. All files are rendered to the staging directory and not
+  there final location.
+- Added `metal sync` command which moves staged files in place and restarts
+  associated services.
+- Remove rendering of templates/ files as part of `metal build`. This has been
+  replaced by `metal template` followed by `metal sync`. Also removed the
+  obselete edit start and continue flags.
+- Removed the `metal dhcp` command as it has been replaced by `metal template`
+  followed by `metal sync`.
+- Added staging to rendering of genders file in `metal configure`. The genders
+  file needs to be synced (using `metal sync`) before it can be used by
+  `metal template`.
+- Fixed the bugs that slowed down metalware. A shared cache is now used to
+  render all metalware templates/ files.
+- Updated to the new `Namespace` structure. See documentation for further
+  details.
+
 ## [2017.1.0] - 2017-09-26
 
 - Added `metal configure` commands, to answer questions for various objects

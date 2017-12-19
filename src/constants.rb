@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'hash_mergers/metal_recursive_open_struct'
+
 module Metalware
   module Constants
     METALWARE_INSTALL_PATH = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
@@ -35,6 +37,13 @@ module Metalware
     HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
     GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
     INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
+    STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
+    STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
+
+    EVENTS_DIR_PATH = File.join(METALWARE_DATA_PATH, 'events')
+
+    DHCPD_HOSTS_PATH = '/etc/dhcp/dhcpd.hosts'
+
     # XXX Following needs to actually be created somewhere.
     GUI_CREDENTIALS_PATH = File.join(CACHE_PATH, 'credentials.yaml')
 
@@ -42,7 +51,6 @@ module Metalware
 
     NODEATTR_COMMAND = 'nodeattr'
 
-    SERVER_CONFIG_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/server.yaml')
     GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
     HOSTS_PATH = '/etc/hosts'
 
@@ -52,6 +60,9 @@ module Metalware
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 
-    CONFIGURE_SECTIONS = [:domain, :group, :node, :self].freeze
+    CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
+
+    HASH_MERGER_DATA_STRUCTURE =
+      Metalware::HashMergers::MetalRecursiveOpenStruct
   end
 end

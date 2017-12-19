@@ -1,0 +1,5 @@
+value3: node3
+files:
+  namespace:
+    - node3
+    - duplicate

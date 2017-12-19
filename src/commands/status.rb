@@ -22,8 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
 require 'status/monitor'
-require 'nodes'
 require 'status/job'
 require 'fileutils'
 require 'exceptions'
@@ -33,6 +33,8 @@ module Metalware
     class Status < CommandHelpers::BaseCommand
       private
 
+      prepend CommandHelpers::NodeIdentifier
+
       def setup
         @opt = options
         if @opt.thread_limit < 1
@@ -41,9 +43,10 @@ module Metalware
           raise InvalidInput, 'The wait limit can not be less than 1s'
         end
         @cmds = [:power, :ping]
-        node_identifier = args.first
-        @nodes = Nodes.create(@config, node_identifier, options.group)
-        @nodes = @nodes.to_a.map(&:name)
+      end
+
+      def node_names
+        @node_names ||= nodes.map(&:name)
       end
 
       def run
@@ -53,10 +56,12 @@ module Metalware
       end
 
       def start_monitor
-        @monitor = Metalware::Status::Monitor.new(nodes: @nodes,
-                                                  cmds: @cmds,
-                                                  thread_limit: @opt.thread_limit,
-                                                  wait_limit: @opt.wait_limit)
+        @monitor = Metalware::Status::Monitor.new(
+          nodes: node_names,
+          cmds: @cmds,
+          thread_limit: @opt.thread_limit,
+          wait_limit: @opt.wait_limit
+        )
         @monitor.start
       end
 
@@ -104,8 +109,8 @@ module Metalware
 
       def get_finished_data
         @finished_node_index ||= 0
-        return { 'FINISHED' => true } unless @finished_node_index < @nodes.length
-        nodename = @nodes[@finished_node_index]
+        return { 'FINISHED' => true } unless @finished_node_index < nodes.length
+        nodename = node_names[@finished_node_index]
 
         current_results = Metalware::Status::Job.results.tap do |r|
           return {} if r.nil?

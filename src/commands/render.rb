@@ -24,6 +24,7 @@
 
 require 'command_helpers/base_command'
 require 'templater'
+require 'namespaces/alces'
 
 module Metalware
   module Commands
@@ -33,13 +34,13 @@ module Metalware
       def setup; end
 
       def run
-        template_path, maybe_node = args
+        template_path, name = args
 
-        template_parameters = {
-          nodename: maybe_node,
-        }.reject { |_param, value| value.nil? }
+        template = File.read(template_path)
+        node = alces.nodes.find_by_name(name)
 
-        Templater.render_to_stdout(config, template_path, template_parameters)
+        templater = node ? node : alces
+        puts templater.render_erb_template(template)
       end
     end
   end

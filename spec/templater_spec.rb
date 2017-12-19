@@ -26,17 +26,16 @@ require 'active_support/core_ext/string/strip'
 
 require 'templater'
 require 'spec_utils'
-require 'node'
+# require 'node'
 require 'filesystem'
 require 'validation/answer'
+require 'namespaces/alces'
 
 TEST_HUNTER_PATH = File.join(FIXTURES_PATH, 'cache/hunter.yaml')
 EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 
 RSpec.describe Metalware::Templater do
-  let :config do
-    Metalware::Config.new
-  end
+  include AlcesUtils
 
   let :filesystem do
     FileSystem.setup do |fs|
@@ -50,12 +49,11 @@ RSpec.describe Metalware::Templater do
   let :template do
     <<-EOF
     This is a test template
-    some_passed_value: <%= some_passed_value %>
-    some_repo_value: <%= some_repo_value %>
-    erb_repo_value: <%= erb_repo_value %>
-    very_recursive_erb_repo_value: <%= very_recursive_erb_repo_value %>
-    nested.repo_value: <%= nested ? nested.repo_value : nil %>
-    alces.index: <%= alces.index %>
+    some_passed_value: <%= domain.config.some_passed_value %>
+    some_repo_value: <%= domain.config.some_repo_value %>
+    erb_repo_value: <%= domain.config.erb_repo_value %>
+    very_recursive_erb_repo_value: <%= domain.config.very_recursive_erb_repo_value %>
+    nested.repo_value: <%= domain.config.nested ? domain.config.nested.repo_value : nil %>
     EOF
   end
 
@@ -66,7 +64,7 @@ RSpec.describe Metalware::Templater do
       # Strip trailing spaces from rendered output to make comparisons less
       # brittle.
       rendered = Metalware::Templater.render(
-        config, template_path, template_parameters
+        alces, template_path, template_parameters
       ).gsub(/\s+\n/, "\n")
 
       expect(rendered).to eq(expected.strip_heredoc)
@@ -74,7 +72,7 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render' do
-    context 'without a repo', real_fs: true do
+    context 'without a repo' do
       before :each do
         @config = Metalware::Config.new(EMPTY_REPO_PATH)
       end
@@ -87,27 +85,9 @@ RSpec.describe Metalware::Templater do
         erb_repo_value:
         very_recursive_erb_repo_value:
         nested.repo_value:
-        alces.index: 0
         EOF
 
         expect_renders({}, expected)
-      end
-
-      it 'renders template with extra passed parameters' do
-        template_parameters = {
-          some_passed_value: 'my_value',
-        }
-        expected = <<-EOF
-        This is a test template
-        some_passed_value: my_value
-        some_repo_value:
-        erb_repo_value:
-        very_recursive_erb_repo_value:
-        nested.repo_value:
-        alces.index: 0
-        EOF
-
-        expect_renders(template_parameters, expected)
       end
     end
 
@@ -121,23 +101,12 @@ RSpec.describe Metalware::Templater do
         This is a test template
         some_passed_value:
         some_repo_value: repo_value
-        erb_repo_value: 1
+        erb_repo_value: repo_value
         very_recursive_erb_repo_value: repo_value
         nested.repo_value: nested_repo_value
-        alces.index: 0
         EOF
 
         expect_renders({}, expected)
-      end
-
-      it 'raises if maximum recursive config depth exceeded' do
-        stub_const('Metalware::Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH', 3)
-
-        filesystem.test do
-          expect do
-            Metalware::Templater.new(config)
-          end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
-        end
       end
 
       context 'when template uses property of unset parameter' do
@@ -148,45 +117,9 @@ RSpec.describe Metalware::Templater do
         it 'raises' do
           filesystem.test do
             expect do
-              Metalware::Templater.render(config, template_path, {})
-            end.to raise_error Metalware::UnsetParameterAccessError
+              Metalware::Templater.render(alces, template_path, {})
+            end.to raise_error NameError
           end
-        end
-      end
-
-      context 'when parsing recursive boolean values' do
-        let :template do
-          <<-EOF
-          <% if recursive_true_repo_value -%>
-          true worked
-          <% end %>
-          <% unless recursive_false_repo_value -%>
-          false worked
-          <% end %>
-          EOF
-        end
-
-        it 'renders them as booleans not strings' do
-          expected = <<-EOF
-          true worked
-          false worked
-          EOF
-
-          expect_renders({}, expected)
-        end
-      end
-    end
-
-    context 'when passed node not in genders file' do
-      it 'does not raise error' do
-        filesystem.test do
-          expect do
-            Metalware::Templater.render(
-              config,
-              template_path,
-              nodename: 'not_in_genders_node01'
-            )
-          end.to_not raise_error
         end
       end
     end
@@ -199,7 +132,7 @@ RSpec.describe Metalware::Templater do
 
     def render_to_file_with_block(&block)
       Metalware::Templater.render_to_file(
-        config,
+        alces,
         template_path,
         output_path,
         &block
@@ -232,23 +165,6 @@ RSpec.describe Metalware::Templater do
         expect(template_rendered).to be false
       end
     end
-
-    context 'when passed `prepend_managed_file_message` option' do
-      it 'prepends the message to the rendered file' do
-        filesystem.test do
-          Metalware::Templater.render_to_file(
-            config,
-            template_path,
-            output_path,
-            prepend_managed_file_message: true
-          )
-
-          expect(output).to eq(
-            "#{Metalware::Templater::MANAGED_FILE_MESSAGE}\n#{template}"
-          )
-        end
-      end
-    end
   end
 
   describe '#render_managed_file' do
@@ -268,7 +184,7 @@ RSpec.describe Metalware::Templater do
 
     def render_managed_file
       Metalware::Templater.render_managed_file(
-        config,
+        alces,
         template_path,
         output_path
       )
@@ -276,7 +192,7 @@ RSpec.describe Metalware::Templater do
 
     def render_managed_file_with_block(&block)
       Metalware::Templater.render_managed_file(
-        config,
+        alces,
         template_path,
         output_path,
         &block
@@ -366,148 +282,6 @@ RSpec.describe Metalware::Templater do
           # same, the final template output should also remain the same after
           # repeated renderings.
           expect(output).to match(rendered_file_regex)
-        end
-      end
-    end
-  end
-
-  # XXX These tests test `Templating::MagicNamespace` via the `Templater`; this
-  # is useful to check they work together but we may want to test some things
-  # directly on the `MagicNamespace`.
-  describe 'magic alces namespace' do
-    def expect_environment_dependent_parameters_present(magic_namespace)
-      expect(magic_namespace.hostip).to eq('1.2.3.4')
-      expect(magic_namespace.hosts_url).to eq 'http://1.2.3.4/metalware/system/hosts'
-      expect(magic_namespace.genders_url).to eq 'http://1.2.3.4/metalware/system/genders'
-
-      # Check hunter config.
-      hunter_config = magic_namespace.hunter
-      expect(hunter_config.testnode01).to eq('testnode01-mac')
-      expect(hunter_config.testnode02).to eq('testnode02-mac')
-
-      # Check genders config.
-      genders_config = magic_namespace.genders
-      expect(genders_config.masters).to eq(['login1'])
-      expect(genders_config.cluster).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
-      expect(genders_config.non_existent).to eq([])
-    end
-
-    let :filesystem do
-      FileSystem.setup do |fs|
-        fs.with_repo_fixtures 'repo'
-      end
-    end
-
-    before do
-      SpecUtils.use_mock_determine_hostip_script(self)
-      SpecUtils.use_mock_genders(self)
-    end
-
-    # XXX May be possible to combine these with other passed parameter testsgqic
-    # below?
-    describe 'answers' do
-      before :each do
-        # Turns off answer validation as the configure.yaml has not been created
-        allow_any_instance_of(Metalware::Validation::Answer).to \
-          receive(:success?).and_return(true)
-        filesystem.dump '/var/lib/metalware/answers/nodes/testnode01.yaml',
-                        some_question: 'some_answer'
-      end
-
-      let :answers { templater.config.alces.answers }
-
-      context 'when node passed' do
-        let :templater do
-          Metalware::Templater.new(config, nodename: 'testnode01')
-        end
-
-        it 'can access answers for the node' do
-          filesystem.test do
-            expect(answers.some_question).to eq('some_answer')
-          end
-        end
-
-        it "raises if attempt to access an answer which isn't present" do
-          filesystem.test do
-            expect { answers.invalid_question }.to raise_error(Metalware::MissingParameterError)
-          end
-        end
-      end
-
-      context 'when no node passed' do
-        let :templater do
-          Metalware::Templater.new(config)
-        end
-
-        it 'returns nil for all values in answers namespace' do
-          filesystem.test do
-            expect(answers.anything).to be nil
-          end
-        end
-      end
-    end
-
-    context 'with cache files present' do
-      before :each do
-        filesystem.with_hunter_cache_fixture 'cache/hunter.yaml'
-        filesystem.with_group_cache_fixture 'cache/groups.yaml'
-      end
-
-      it 'is created with default values when no parameters passed' do
-        filesystem.test do
-          templater = Metalware::Templater.new(config)
-          magic_namespace = templater.config.alces
-
-          expect(magic_namespace.index).to eq(0)
-          expect(magic_namespace.group_index).to eq(0)
-          expect(magic_namespace.nodename).to eq('')
-          expect(magic_namespace.firstboot).to eq(nil)
-          expect(magic_namespace.files).to eq(nil)
-          # The kickstart and build URL tests have been patched to an empty nodename
-          # Ideally in the future this should return nil
-          expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/')
-          expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=')
-          expect_environment_dependent_parameters_present(magic_namespace)
-        end
-      end
-
-      it 'overrides defaults with applicable parameter values when parameters passed' do
-        filesystem.test do
-          build_files = SpecUtils.create_mock_build_files_hash(
-            self, config: config, node_name: 'testnode03'
-          )
-
-          templater = Metalware::Templater.new(config, nodename: 'testnode03',
-                                                       firstboot: true,
-                                                       files: build_files)
-          magic_namespace = templater.config.alces
-
-          expect(magic_namespace.index).to eq(3)
-          expect(magic_namespace.group_index).to eq(2)
-          expect(magic_namespace.nodename).to eq('testnode03')
-          expect(magic_namespace.firstboot).to eq(true)
-          expect(magic_namespace.kickstart_url).to eq('http://1.2.3.4/metalware/kickstart/testnode03')
-          expect(magic_namespace.build_complete_url).to eq('http://1.2.3.4/metalware/exec/kscomplete.php?name=testnode03')
-
-          # Can reach inside the passed `files` object.
-          expect(
-            magic_namespace.files.namespace01.first.raw
-          ).to eq('/some/other/path')
-          expect(
-            magic_namespace.files.namespace02.first.raw
-          ).to eq('another_file_in_repo')
-
-          expect_environment_dependent_parameters_present(magic_namespace)
-        end
-      end
-    end
-
-    context 'when no hunter cache file present' do
-      it 'loads the hunter parameter as an empty Hashie' do
-        filesystem.test do
-          templater = Metalware::Templater.new(config)
-          magic_namespace = templater.config.alces
-          expect(magic_namespace.hunter.to_h).to eq(Hashie::Mash.new)
         end
       end
     end

@@ -22,13 +22,22 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'yaml'
+require 'metal_log'
 
 module Metalware
   module Data
     class << self
+      def log
+        @log ||= MetalLog.new('file')
+      end
+
       def load(data_file)
+        log.info "load: #{data_file}"
         data = raw_load(data_file)
         process_loaded_data(data, source: data_file)
+      rescue => e
+        log.error("Fail: #{e.inspect}")
+        raise e
       end
 
       def load_string(data_string)
@@ -40,6 +49,7 @@ module Metalware
         raise dump_error(data) unless valid_data?(data)
         yaml = data.deep_transform_keys(&:to_s).to_yaml
         File.write(data_file, yaml)
+        log.info "dump: #{data_file}"
       end
 
       private
@@ -48,6 +58,7 @@ module Metalware
         if File.file? data_file
           YAML.load_file(data_file) || {}
         else
+          log.info 'file not found'
           {}
         end
       end

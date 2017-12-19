@@ -93,8 +93,7 @@ Style/MethodMissing:
   Exclude:
     - 'spec/filesystem.rb'
     - 'src/metal_log.rb'
-    - 'src/templating/magic_namespace.rb'
-    - 'src/templating/missing_parameter_wrapper.rb'
+    - 'src/hash_mergers/metal_recursive_open_struct.rb'
 
 # Offense count: 3
 Style/MultilineBlockChain:

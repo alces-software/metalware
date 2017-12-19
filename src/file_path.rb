@@ -24,91 +24,144 @@
 
 require 'constants'
 require 'config'
-require 'templating/repo_config_parser'
 
 module Metalware
   class FilePath
-    def initialize(metalware_config)
-      @config = metalware_config
-      define_constant_paths
-    end
+    class << self
+      # TODO: Remove the new method. It only ensures backwards compatibility
+      def new(*_args)
+        self
+      end
 
-    def configure_file
-      config.configure_file
-    end
+      def configure_file
+        config.configure_file
+      end
 
-    def domain_answers
-      config.domain_answers_file
-    end
+      def domain_answers
+        config.domain_answers_file
+      end
 
-    def group_answers(group)
-      config.group_answers_file(group)
-    end
+      def group_answers(group)
+        config.group_answers_file(group)
+      end
 
-    def node_answers(node)
-      config.node_answers_file(node)
-    end
+      def node_answers(node)
+        config.node_answers_file(node)
+      end
 
-    def self_answers
-      File.join(answer_files, 'self.yaml')
-    end
+      def local_answers
+        node_answers('local')
+      end
 
-    def repo
-      config.repo_path
-    end
+      def domain_config
+        File.join(repo, 'config/domain.yaml')
+      end
 
-    def repo_relative_path_to(path)
-      repo_path = Pathname.new(repo)
-      Pathname.new(path).relative_path_from(repo_path).to_s
-    end
+      def group_config(group)
+        File.join(repo, 'config', "#{group}.yaml")
+      end
 
-    def template_path(template_type, node: nil)
-      node = Node.new(config, nil) if node.nil?
-      File.join(
-        config.repo_path,
-        template_type.to_s,
-        template_file_name(template_type, node: node)
-      )
-    end
+      def node_config(node)
+        File.join(repo, 'config', "#{node}.yaml")
+      end
 
-    def template_save_path(template_type, node: nil)
-      node = Node.new(config, nil) if node.nil?
-      File.join(
-        config.rendered_files_path,
-        template_type.to_s,
-        node.name
-      )
-    end
+      def local_config
+        File.join(repo, 'config/local.yaml')
+      end
 
-    def named_zone(zone)
-      File.join(var_named, zone)
-    end
+      def server_config
+        File.join(repo, 'server.yaml')
+      end
 
-    private
+      def repo
+        config.repo_path
+      end
 
-    attr_reader :config
+      def repo_relative_path_to(path)
+        repo_path = Pathname.new(repo)
+        Pathname.new(path).relative_path_from(repo_path).to_s
+      end
 
-    def define_constant_paths
-      Constants.constants
-               .map(& :to_s)
-               .select { |const| /\A.+_PATH\Z/.match?(const) }
-               .each do |const|
-                 define_singleton_method :"#{const.chomp('_PATH').downcase}" do
-                   Constants.const_get(const)
+      # TODO: Change input from node to namespace
+      def template_path(template_type, node:)
+        File.join(
+          config.repo_path,
+          template_type.to_s,
+          template_file_name(template_type, node: node)
+        )
+      end
+
+      def template_save_path(template_type, node: nil)
+        node = Node.new(config, nil) if node.nil?
+        File.join(
+          config.rendered_files_path,
+          template_type.to_s,
+          node.name
+        )
+      end
+
+      def named_zone(zone)
+        File.join(var_named, zone)
+      end
+
+      def build_complete(node_namespace)
+        event(node_namespace, 'complete')
+      end
+
+      def rendered_build_file_path(node_name, namespace, file_name)
+        File.join(
+          config.rendered_files_path,
+          node_name,
+          namespace.to_s,
+          file_name
+        )
+      end
+
+      def staging(path)
+        File.join(staging_dir, path)
+      end
+
+      def define_constant_paths
+        Constants.constants
+                 .map(& :to_s)
+                 .select { |const| /\A.+_PATH\Z/.match?(const) }
+                 .each do |const|
+                   method_name = :"#{const.chomp('_PATH').downcase}"
+                   define_singleton_method method_name do
+                     Constants.const_get(const)
+                   end
                  end
-               end
-    end
+      end
 
-    def template_file_name(template_type, node:)
-      repo_template(template_type, node: node) || 'default'
-    end
+      def new_config_if_missing(&block)
+        @new_if_missing = true
+        instance_exec(&block)
+      ensure
+        @new_if_missing = false
+      end
 
-    def repo_template(template_type, node:)
-      (node.repo_config[:templates] || {})[template_type]
-    end
+      # TODO: Remove mkdir input
+      def event(node_namespace, event = '', mkdir: true)
+        File.join(events_dir, node_namespace.name, event)
+      end
 
-    def answer_files
-      config.answer_files_path
+      private
+
+      attr_reader :new_if_missing
+
+      def config
+        Config.cache(new_if_missing: new_if_missing)
+      end
+
+      def template_file_name(template_type, node:)
+        node.config.templates&.send(template_type) || 'default'
+      end
+
+      def answer_files
+        config.answer_files_path
+      end
     end
   end
 end
+
+Metalware::FilePath.define_constant_paths

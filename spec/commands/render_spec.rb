@@ -25,23 +25,38 @@
 require 'timeout'
 
 require 'commands/render'
-require 'node'
 require 'spec_utils'
 require 'config'
+require 'tempfile'
 
 RSpec.describe Metalware::Commands::Render do
-  before :each do
-    SpecUtils.use_unit_test_config(self)
-  end
+  include AlcesUtils
+
+  AlcesUtils.mock self, :each { with_blank_config_and_answer(alces.domain) }
 
   context 'and with --strict option' do
-    xit 'raises StrictWarningError when a parameter is missing' do
-      config = Metalware::Config.new(nil)
-      path = File.join(config.repo_path, 'dhcp/default')
+    AlcesUtils.mock self, :each { mock_strict(true) }
+
+    let :template { '<%= domain.config.missing %>' }
+
+    let :template_file do
+      f = Tempfile.new('template')
+      f.write(template)
+      f.rewind
+      f
+    end
+
+    after :each do
+      template_file.unlink
+    end
+
+    it 'raises StrictWarningError when a parameter is missing' do
       expect do
-        Metalware::Utils.run_command(
-          Metalware::Commands::Render, path, strict: true
-        )
+        AlcesUtils.redirect_std(:stderr) do
+          Metalware::Utils.run_command(
+            Metalware::Commands::Render, template_file.path, strict: 'mocked'
+          )
+        end
       end.to raise_error(Metalware::StrictWarningError)
     end
   end
