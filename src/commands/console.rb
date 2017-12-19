@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'pty'
+require 'commands/ipmi'
 
 module Metalware
   module Commands
