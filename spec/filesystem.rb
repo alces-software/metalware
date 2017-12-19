@@ -168,7 +168,7 @@ class FileSystem
       '/var/lib/metalware/staging',
       '/var/lib/metalware/rendered/kickstart',
       '/var/lib/metalware/rendered/system',
-      '/var/lib/metalware/cache/built-nodes',
+      '/var/lib/metalware/events',
       '/var/lib/metalware/cache/templates',
       '/var/lib/metalware/repo',
       '/var/lib/metalware/answers/groups',

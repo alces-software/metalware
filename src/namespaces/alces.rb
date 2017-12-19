@@ -115,12 +115,16 @@ module Metalware
         if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
           raise RecursiveConfigDepthExceededError
         end
-        dynamic_namespace =
-          Constants::HASH_MERGER_DATA_STRUCTURE.new(namespace)
-        dynamic_stack.push(dynamic_namespace)
+        dynamic_stack.push(dynamic_hash(namespace))
         result = yield
         dynamic_stack.pop
         parse_result(result)
+      end
+
+      def dynamic_hash(namespace)
+        Constants::HASH_MERGER_DATA_STRUCTURE.new(namespace) do |template|
+          alces.render_erb_template(template)
+        end
       end
 
       def parse_result(result)

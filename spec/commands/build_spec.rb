@@ -38,9 +38,7 @@ RSpec.describe Metalware::Commands::Build do
     # Shortens the wait times for the tests
     allow(metal_config).to receive(:build_poll_sleep).and_return(0.1)
     # Makes sure there aren't any other threads
-    Thread.list.each do |th|
-      th.kill unless th == Thread.main
-    end
+    AlcesUtils.kill_other_threads
   end
 
   let :build_wait_time { metal_config.build_poll_sleep * 5 }
@@ -48,9 +46,11 @@ RSpec.describe Metalware::Commands::Build do
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do
       th = Thread.new do
-        Metalware::Utils.run_command(
-          Metalware::Commands::Build, node_group.name, **options_hash
-        )
+        AlcesUtils.redirect_std(:stdout) do
+          Metalware::Utils.run_command(
+            Metalware::Commands::Build, node_group.name, **options_hash
+          )
+        end
       end
 
       # Allows the build to report finished after a set delay
@@ -61,7 +61,9 @@ RSpec.describe Metalware::Commands::Build do
         else
           node_group.nodes
         end.each do |node|
-          FileUtils.touch node.build_complete_path
+          path = node.build_complete_path
+          FileUtils.mkdir_p File.dirname(path)
+          FileUtils.touch path
         end
       end
       th.join
@@ -123,7 +125,7 @@ RSpec.describe Metalware::Commands::Build do
     AlcesUtils.mock self, :each do
       test_group = 'some_random_test_group'
       mock_group(test_group)
-      ['node00', 'node01', 'node02', 'node03'].each do |node|
+      ['nodeA00', 'nodeA01', 'nodeA02', 'nodeA03'].each do |node|
         mock_node(node, test_group)
         hexadecimal_ip(alces.node)
       end

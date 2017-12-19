@@ -21,12 +21,7 @@ RSpec.describe Metalware::BuildEvent do
   AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
     alces.nodes.each { |node| hexadecimal_ip(node) }
-    Thread.list.each do |t| 
-      unless t == Thread.current
-        t.kill
-        t.join
-      end
-    end
+    AlcesUtils.kill_other_threads
   end
 
   def wait_for_hooks_to_run(test_obj: build_event)
@@ -36,7 +31,12 @@ RSpec.describe Metalware::BuildEvent do
   end
 
   def build_node(node)
-    FileUtils.touch node.build_complete_path
+    touch_file node.build_complete_path
+  end
+
+  def touch_file(path)
+    FileUtils.mkdir_p File.dirname(path)
+    FileUtils.touch path
   end
 
   describe '#run_all_complete_hooks' do
@@ -123,7 +123,7 @@ RSpec.describe Metalware::BuildEvent do
       let :event_file { Metalware::FilePath.event(node, event) }
 
       context 'with basic features only (no hooks nor messages)' do
-        before :each { FileUtils.touch event_file }
+        before :each { touch_file event_file }
 
         it 'reports the event and node names to stdout' do
           expect(process[:stdout].read).to include(node.name, event)

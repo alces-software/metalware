@@ -99,6 +99,13 @@ module AlcesUtils
       $stderr = hash[:stderr] if hash[:stderr]
     end
 
+    def kill_other_threads
+      Thread.list
+            .reject { |t| t == Thread.current }
+            .tap { |t| t.each(&:kill) }
+            .tap { |t| t.each(&:join) }
+    end
+
     def mock(test, *a, &b)
       mock_block = lambda do |*_inputs|
         mock_alces = AlcesUtils::Mock.new(self)
@@ -174,13 +181,16 @@ module AlcesUtils
 
     def mock_node(name, *genders)
       AlcesUtils.check_and_raise_fakefs_error
-      genders = [AlcesUtils.default_group] if genders.empty?
-      genders_entry = "#{name} #{genders.join(',')}\n"
-      File.write(file_path.genders, genders_entry, mode: 'a')
-      alces.instance_variable_set(:@nodes, nil)
-      node = alces.nodes.find_by_name(name)
-      with_blank_config_and_answer(node)
-      allow(alces).to receive(:node).and_return(node)
+      raise_if_node_exists(name)
+      add_node_to_genders_file(name, *genders)
+      Metalware::Namespaces::Node.create(alces, name).tap do |node|
+        with_blank_config_and_answer(node)
+        hexadecimal_ip(node)
+        new_nodes = alces.nodes.reduce([node], &:push)
+        metal_nodes = Metalware::Namespaces::MetalArray.new(new_nodes)
+        allow(alces).to receive(:nodes).and_return(metal_nodes)
+        allow(alces).to receive(:node).and_return(node)
+      end
     end
 
     def mock_group(name)
@@ -201,6 +211,18 @@ module AlcesUtils
     private
 
     attr_reader :alces, :metal_config, :test
+
+    def raise_if_node_exists(name)
+      return unless File.exist? Metalware::FilePath.genders
+      msg = "Node '#{name}' already exists"
+      raise Metalware::InternalError, msg if alces.nodes.find_by_name(name)
+    end
+
+    def add_node_to_genders_file(name, *genders)
+      genders = [AlcesUtils.default_group] if genders.empty?
+      genders_entry = "#{name} #{genders.join(',')}\n"
+      File.write(file_path.genders, genders_entry, mode: 'a')
+    end
 
     # Allows the RSpec methods to be accessed
     def respond_to_missing?(s, *_a)

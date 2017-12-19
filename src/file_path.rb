@@ -140,10 +140,9 @@ module Metalware
         @new_if_missing = false
       end
 
+      # TODO: Remove mkdir input
       def event(node_namespace, event = '', mkdir: true)
-        path = File.join(events_dir, node_namespace.name, event)
-        FileUtils.mkdir_p(event == '' ? path : File.dirname(path)) if mkdir
-        path
+        File.join(events_dir, node_namespace.name, event)
       end
 
       private
