@@ -46,16 +46,20 @@ module Metalware
         system(cmd.to_s)
       end
 
-      def node_names
-        @node_names ||= nodes.map(&:name)
-      end
-
       def command
         "ipmitool #{render_hosts} #{render_credentials} #{render_command}"
       end
 
       def render_command
         @options.command
+      end
+
+      def render_hosts
+        if @options.group
+          "-g #{@args[0]}"
+        else
+          "-H #{render_hostname}"
+        end
       end
 
       def render_credentials
@@ -77,12 +81,8 @@ module Metalware
         alces.nodes.find_by_name(node_names[0])
       end
 
-      def render_hosts
-        if @options.group
-          "-g #{@args[0]}"
-        else
-          "-H #{render_hostname}"
-        end
+      def node_names
+        @node_names ||= nodes.map(&:name)
       end
     end
   end
