@@ -67,7 +67,7 @@ module Metalware
           username = node.config.networks.bmc.bmcuser
           password = node.config.networks.bmc.bmcpassword
         end
-        "-U #{username.to_s} -P #{password.to_s}"
+        "-U #{username} -P #{password}"
       end
 
       def render_hostname
@@ -76,11 +76,11 @@ module Metalware
       end
 
       def render_hosts
-        hosts = if @options.group
-                  "-g #{@args[0]}"
-                else
-                  "-H #{render_hostname}"
-                end
+        if @options.group
+          "-g #{@args[0]}"
+        else
+          "-H #{render_hostname}"
+        end
       end
     end
   end
