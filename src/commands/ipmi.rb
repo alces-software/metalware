@@ -67,8 +67,7 @@ module Metalware
           username = node.config.networks.bmc.bmcuser
           password = node.config.networks.bmc.bmcpassword
         end
-        # "-U #{username.to_s} -P #{password.to_s}"
-        "-U admin -P #{password}"
+        "-U #{username.to_s} -P #{password.to_s}"
       end
 
       def render_hostname
