@@ -69,7 +69,7 @@ module Metalware
         end
       end
 
-      def event_dir
+      def events_dir
         FilePath.event self
       end
 

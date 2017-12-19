@@ -72,7 +72,7 @@ module Metalware
     # The build complete event is special as it needs run at the end
     # This ensures that other events are read before the complete event is
     def event_files(node)
-      Dir[File.join(node.event_dir, '**/*')].reject do |f|
+      Dir[File.join(node.events_dir, '**/*')].reject do |f|
         File.directory?(f) || (File.basename(f) == 'complete')
       end
     end
