@@ -63,7 +63,6 @@ module Metalware
           username = alces.domain.config.networks.bmc.bmcuser
           password = alces.domain.config.networks.bmc.bmcpassword
         else
-          node = alces.nodes.find_by_name(node_names[0])
           username = node.config.networks.bmc.bmcuser
           password = node.config.networks.bmc.bmcpassword
         end
@@ -71,8 +70,11 @@ module Metalware
       end
 
       def render_hostname
-        node = alces.nodes.find_by_name(node_names[0])
         node.config.networks.bmc.ip
+      end
+
+      def node
+        alces.nodes.find_by_name(node_names[0])
       end
 
       def render_hosts
