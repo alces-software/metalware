@@ -52,7 +52,7 @@ module Metalware
         when 'sensor'
           'sensor'
         else
-          raise 'Invalid power command'
+          raise MetalwareError "Invalid power command: #{cmd}"
         end
       end
     end
