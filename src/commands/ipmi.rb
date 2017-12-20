@@ -33,11 +33,6 @@ module Metalware
 
       prepend CommandHelpers::NodeIdentifier
 
-      def setup
-        @options = options
-        @args = args
-      end
-
       def run
         ipmi(command)
       end
