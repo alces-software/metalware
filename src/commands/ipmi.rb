@@ -64,8 +64,8 @@ module Metalware
 
       def render_credentials
         if @options.group
-          username = alces.domain.config.networks.bmc.bmcuser
-          password = alces.domain.config.networks.bmc.bmcpassword
+          username = group.config.networks.bmc.bmcuser
+          password = group.config.networks.bmc.bmcpassword
         else
           username = node.config.networks.bmc.bmcuser
           password = node.config.networks.bmc.bmcpassword
@@ -75,6 +75,10 @@ module Metalware
 
       def render_hostname
         node.config.networks.bmc.ip
+      end
+
+      def group
+        alces.groups.find_by_name(@args[0])
       end
 
       def node
