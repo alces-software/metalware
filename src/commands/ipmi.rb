@@ -60,14 +60,9 @@ module Metalware
       end
 
       def render_credentials
-        if options.group
-          username = group.config.networks.bmc.bmcuser
-          password = group.config.networks.bmc.bmcpassword
-        else
-          username = node.config.networks.bmc.bmcuser
-          password = node.config.networks.bmc.bmcpassword
-        end
-        "-U #{username} -P #{password}"
+        object = options.group ? group : node
+        bmc_config = object.config.networks.bmc
+        "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end
 
       def render_hostname
