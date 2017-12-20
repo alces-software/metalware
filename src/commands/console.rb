@@ -34,7 +34,7 @@ module Metalware
         puts "Attempting to connect to node #{node_names[0]}.."
         if valid_connection?
           puts 'Establishing SOL connection, type &. to exit..'
-          console(command('activate'))
+          ipmi(command('activate'))
         else
           puts 'Failed to connect..'
         end
@@ -44,12 +44,8 @@ module Metalware
         "ipmitool -H #{render_hostname} #{render_credentials} -e '&' -I lanplus sol #{type}"
       end
 
-      def console(cmd)
-        system cmd
-      end
-
       def valid_connection?
-        system(command('info > /dev/null 2>&1'))
+        ipmi(command('info'))
       end
     end
   end

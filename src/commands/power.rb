@@ -29,8 +29,8 @@ module Metalware
     class Power < Ipmi
       private
 
-      def command
-        "ipmitool #{render_hosts} #{render_credentials} #{render_command(args[1].to_s)}"
+      def command(host)
+        "ipmitool -H #{host}.bmc #{render_credentials} #{render_command(args[1].to_s)}"
       end
 
       def render_command(cmd)

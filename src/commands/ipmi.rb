@@ -25,6 +25,7 @@
 require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
 require 'config'
+require 'system_command'
 
 module Metalware
   module Commands
@@ -34,35 +35,33 @@ module Metalware
       prepend CommandHelpers::NodeIdentifier
 
       def run
-        ipmi(command)
+        ipmi(command(node.name)) unless options.group
+        run_each if options.group
+      end
+
+      def run_each
+        node_names.each do |node|
+          puts "#{node}: #{ipmi(command(node))}"
+        end
       end
 
       def ipmi(cmd)
-        system(cmd.to_s)
+        SystemCommand.run(cmd)
       end
 
-      def command
-        "ipmitool #{render_hosts} #{render_credentials} #{render_command}"
+      def command(host)
+        "ipmitool -H #{host}.bmc #{render_credentials} #{render_command}"
       end
 
       def render_command
-        @options.command
-      end
-
-      def render_hosts
-        if @options.group
-          "-g #{@args[0]}"
-        if options.group
-          "-g #{args[0]}"
-        else
-          "-H #{render_hostname}"
-        end
+        options.command
       end
 
       def render_credentials
         object = options.group ? group : node
         bmc_config = object.config.networks.bmc
-        "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
+        #"-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
+        "-U admin -P #{bmc_config.bmcpassword}"
       end
 
       def render_hostname
