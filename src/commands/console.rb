@@ -22,28 +22,30 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/base_command'
-require 'metal_log'
-require 'config'
-require 'constants'
+require 'pty'
+require 'commands/ipmi'
 
 module Metalware
-  module CommandHelpers
-    class BashCommand < BaseCommand
+  module Commands
+    class Console < Ipmi
       private
 
-      def setup
-        @command = ARGV[0]
-        @cli_input = ARGV[1..(ARGV.length - 1)]
+      def run
+        puts "Attempting to connect to node #{node_names[0]}.."
+        if valid_connection?
+          puts 'Establishing SOL connection, type &. to exit..'
+          system(command('activate'))
+        else
+          puts 'Failed to connect..'
+        end
       end
 
-      def run
-        script = File.join(Constants::METALWARE_INSTALL_PATH,
-                           'libexec',
-                           @command.to_s)
-        MetalLog.info "Running: #{script}"
-        MetalLog.info "Inputs: #{@cli_input}"
-        exec(script, *@cli_input)
+      def command(type)
+        "ipmitool -H #{node.name} #{render_credentials} -e '&' -I lanplus sol #{type}"
+      end
+
+      def valid_connection?
+        SystemCommand.run(command('info'))
       end
     end
   end

@@ -182,11 +182,11 @@ commands:
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
-    summary: Volatile. Display a node's console in the terminal
+    summary: Display a node's console in the terminal
     description: >
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
-    action: CommandHelpers::BashCommand
+    action: Commands::Console
 
   each:
     syntax: metal each NODE_IDENTIFIER COMMAND [options]
@@ -252,29 +252,24 @@ commands:
           node name in the hunter cache
 
   ipmi:
-    syntax: metal ipmi NODE_IDENTIFIER [options]
-    summary: Volatile. Perform ipmi commands on single or multiple machines
+    syntax: metal ipmi NODE_IDENTIFIER [COMMAND] [options]
+    summary: Perform ipmi commands on single or multiple machines
     description: >
-      ***VOLATILE***
-
        Perform ipmi commands on single or multiple machines
-    action: CommandHelpers::BashCommand
+    action: Commands::Ipmi
     options:
-      - tags: [-g]
-        description: >
-          Specifies that NODE_IDENTIFIER is the group. MUST be before
-          NODE_IDENTIFIER
-      - tags: [-k COMMAND]
+      - *group_option
+      - tags: [-c COMMAND, --command COMMAND]
         type: String
         description: >
-          Specifies the ipmi command
+          The IPMI tool command to run, for example `sel list`
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
-    summary: Volatile. Run power commands on a node.
+    summary: Run power commands on a node.
     description: >
-      Allows ipmi power commands to be ran on a node(s)
-
+      Allows ipmi power commands to be run on a node or group
+      of nodes as specified in the genders file.
 
       The following commands are supported:
 
@@ -291,7 +286,7 @@ commands:
       cycle     - Power cycle the node
 
       reset     - Warm reset the node
-    action: CommandHelpers::BashCommand
+    action: Commands::Power
     options:
       - *group_option
 

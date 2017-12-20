@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -20,12 +22,35 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-#NB Settings in this file may be overridden by the shared or local bmc configs
-###########################
-#USERNAME=admin
-#PASSWORD=password
-###########################
+require 'commands/ipmi'
 
-#IPMI_HEAD=
-IPMI_TAIL=.bmc
-STEP_INTERVAL=2
+module Metalware
+  module Commands
+    class Power < Ipmi
+      private
+
+      def render_command
+        case args[1].to_s
+        when 'on'
+          'chassis power on'
+        when 'off'
+          'chassis power off'
+        when 'locate'
+          'chassis identify force'
+        when 'locateoff'
+          'chassis identify 0'
+        when 'status'
+          'chassis power status'
+        when 'cycle'
+          'chassis power cycle'
+        when 'reset'
+          'chassis power reset'
+        when 'sensor'
+          'sensor'
+        else
+          raise MetalwareError, "Invalid power command: #{args[1]}"
+        end
+      end
+    end
+  end
+end
