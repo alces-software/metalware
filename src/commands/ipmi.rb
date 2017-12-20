@@ -34,8 +34,7 @@ module Metalware
 
       prepend CommandHelpers::NodeIdentifier
 
-      def setup
-      end
+      def setup; end
 
       def run
         SystemCommand.run(command(node.name)) unless options.group
