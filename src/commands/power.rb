@@ -29,12 +29,8 @@ module Metalware
     class Power < Ipmi
       private
 
-      def command(host)
-        "ipmitool -H #{host}.bmc #{render_credentials} #{render_command(args[1].to_s)}"
-      end
-
-      def render_command(cmd)
-        case cmd
+      def render_command
+        case args[1].to_s
         when 'on'
           'chassis power on'
         when 'off'
