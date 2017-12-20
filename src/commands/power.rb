@@ -31,11 +31,11 @@ module Metalware
 
       def command
         hosts = if @options.group
-                  "-g #{@args[0]}"
+                  "-g #{args[0]}"
                 else
                   "-H #{render_hostname}"
                 end
-        "ipmitool #{hosts} #{render_credentials} #{render_command(@args[1].to_s)}"
+        "ipmitool #{hosts} #{render_credentials} #{render_command(args[1].to_s)}"
       end
 
       def render_command(cmd)

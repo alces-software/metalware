@@ -52,13 +52,15 @@ module Metalware
       def render_hosts
         if @options.group
           "-g #{@args[0]}"
+        if options.group
+          "-g #{args[0]}"
         else
           "-H #{render_hostname}"
         end
       end
 
       def render_credentials
-        if @options.group
+        if options.group
           username = group.config.networks.bmc.bmcuser
           password = group.config.networks.bmc.bmcpassword
         else
@@ -73,7 +75,7 @@ module Metalware
       end
 
       def group
-        alces.groups.find_by_name(@args[0])
+        alces.groups.find_by_name(args[0])
       end
 
       def node
