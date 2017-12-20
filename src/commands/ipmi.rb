@@ -34,19 +34,16 @@ module Metalware
 
       prepend CommandHelpers::NodeIdentifier
 
+      def setup
+      end
+
       def run
-        ipmi(command(node.name)) unless options.group
-        run_each if options.group
-      end
-
-      def run_each
-        node_names.each do |node|
-          puts "#{node}: #{ipmi(command(node))}"
+        SystemCommand.run(command(node.name)) unless options.group
+        if options.group
+          node_names.each do |node|
+            puts "#{node}: #{SystemCommand.run(command(node))}"
+          end
         end
-      end
-
-      def ipmi(cmd)
-        SystemCommand.run(cmd)
       end
 
       def command(host)
