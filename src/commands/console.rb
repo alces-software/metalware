@@ -34,7 +34,7 @@ module Metalware
         puts "Attempting to connect to node #{node_names[0]}.."
         if valid_connection?
           puts 'Establishing SOL connection, type &. to exit..'
-          ipmi(command('activate'))
+          system(command('activate'))
         else
           puts 'Failed to connect..'
         end
@@ -45,7 +45,7 @@ module Metalware
       end
 
       def valid_connection?
-        ipmi(command('info'))
+        SystemCommand.run(command('info'))
       end
     end
   end
