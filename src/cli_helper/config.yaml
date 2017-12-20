@@ -64,6 +64,16 @@ subcommands:
       the system environment. This command is intended to only be ran once.
     action: Commands::Configure::Local
 
+  orchestrate_create: &orchestrate_create
+    syntax: metal orchestrate create NODE_IDENTIFIER [options]
+    summary: Creates a new virtual machine
+    action: Commands::Orchestrate::Create
+
+  orchestrate_destroy: &orchestrate_destroy
+    syntax: metal orchestrate destroy NODE_IDENTIFIER [options]
+    summary: Destroys a new virtual machine
+    action: Commands::Orchestrate::Destroy
+
   remove_group: &remove_group
     syntax: metal remove group GROUP_NAME [options]
     summary: Removes a previously configured group
@@ -281,6 +291,13 @@ commands:
         type: String
         description: >
           The IPMI tool command to run, for example `sel list`
+
+  orchestrate:
+    syntax: metal orchestrate [COMMAND] [options]
+    summary: Orchestrate virtual machines
+    subcommands:
+      create: *orchestrate_create
+      destroy: *orchestrate_destroy
 
   plugin:
     syntax: metal plugin [options]
