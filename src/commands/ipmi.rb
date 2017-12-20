@@ -37,11 +37,12 @@ module Metalware
       def setup; end
 
       def run
-        SystemCommand.run(command(node.name)) unless options.group
         if options.group
           node_names.each do |node|
             puts "#{node}: #{SystemCommand.run(command(node))}"
           end
+        else
+          SystemCommand.run(command(node.name))
         end
       end
 
