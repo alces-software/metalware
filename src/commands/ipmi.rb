@@ -57,8 +57,7 @@ module Metalware
       def render_credentials
         object = options.group ? group : node
         bmc_config = object.config.networks.bmc
-        #"-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
-        "-U admin -P #{bmc_config.bmcpassword}"
+        "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end
 
       def render_hostname
