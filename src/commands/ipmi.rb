@@ -46,12 +46,10 @@ module Metalware
               puts "#{node}: #{SystemCommand.run(command(node))}"
             end
           end
+        elsif vm?
+          libvirt_run(libvirt_info[:host], node.name)
         else
-          if vm?
-            libvirt_run(libvirt_info[:host], node.name)
-          else
-            puts "#{node.name}: #{SystemCommand.run(command(node.name))}"
-          end
+          puts "#{node.name}: #{SystemCommand.run(command(node.name))}"
         end
       end
 
@@ -91,7 +89,7 @@ module Metalware
         object = options.group ? group : node
         {
           host: object.answer.libvirt_host,
-          vm: object.answer.is_vm
+          vm: object.answer.is_vm,
         }
       end
 
