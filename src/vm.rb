@@ -26,8 +26,8 @@ module Metalware
         stop
       when 'status'
         puts "#{@node}: Power state: #{info[:state]}"
-        else
-          raise 'Not possible'
+      else
+        raise 'Not possible'
       end
     end
 
@@ -47,7 +47,7 @@ module Metalware
     private
 
     def domain
-     @libvirt.lookup_domain_by_name(@node)
+      @libvirt.lookup_domain_by_name(@node)
     end
 
     def exists?
@@ -60,10 +60,10 @@ module Metalware
 
     def state
       case domain.info.state
-        when 5
-          'off'
-        when 1
-          'on'
+      when 5
+        'off'
+      when 1
+        'on'
       end
     end
 
