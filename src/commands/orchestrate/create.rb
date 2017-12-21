@@ -25,7 +25,6 @@
 require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
 require 'config'
-require 'vm'
 
 module Metalware
   module Commands
@@ -33,10 +32,12 @@ module Metalware
       class Create < CommandHelpers::BaseCommand
         private
 
+        prepend CommandHelpers::NodeIdentifier
+
         def setup; end
 
         def run
-          if option.group
+          if options.group
             nodes.each do |node|
               create_domain(node)
             end
@@ -49,9 +50,9 @@ module Metalware
           }
         end
 
-        def create_domain
+        def create_domain(node)
           libvirt = Metalware::Vm.new(node_info[:libvirt_host], node)
-          libvirt.create_domain
+          libvirt.create_domain(render_template)
         end
 
         def group
@@ -62,8 +63,15 @@ module Metalware
           alces.nodes.find_by_name(node_names[0])
         end
 
-        def nodes
-          @nodes ||= nodes.map(&:name)
+        def node_names
+          @node_names ||= nodes.map(&:name)
+        end
+
+        def render_template
+          template_path = '/var/lib/metalware/repo/libvirt/vm.xml'
+          template = File.read(template_path)
+          templater = node ? node : alces
+          templater.render_erb_template(template)
         end
       end
     end

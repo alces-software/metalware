@@ -68,6 +68,8 @@ subcommands:
     syntax: metal orchestrate create NODE_IDENTIFIER [options]
     summary: Creates a new virtual machine
     action: Commands::Orchestrate::Create
+    options:
+      - *group_option
 
   orchestrate_destroy: &orchestrate_destroy
     syntax: metal orchestrate destroy NODE_IDENTIFIER [options]
