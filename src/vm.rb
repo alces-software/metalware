@@ -9,6 +9,7 @@ module Metalware
 
     def initialize(libvirt_host, node)
       @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
+      @storage ||= @libvirt.lookup_storage_pool_by_name(node.vm_storage_pool)
       @node = node
     end
 
@@ -58,8 +59,9 @@ module Metalware
       domain.shutdown if running?
     end
 
-    def create(template)
-      @libvirt.define_domain_xml(template)
+    def create(storage, vm)
+      @storage.create_volume_xml(storage)
+      @libvirt.define_domain_xml(vm)
     end
 
     private
