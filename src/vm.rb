@@ -26,13 +26,13 @@ module Metalware
         stop
       when 'status'
         puts "#{@node}: Power state: #{info[:state]}"
-      else
-        raise 'Not possible'
+        else
+          raise 'Not possible'
       end
     end
 
     def console
-      puts "Attempting to connect to node #{node.name}"
+      puts "Attempting to connect to node #{@node}"
       domain.open_console if running?
     end
 
@@ -65,6 +65,10 @@ module Metalware
         when 1
           'on'
       end
+    end
+
+    def stream
+      @libvirt.stream
     end
   end
 end

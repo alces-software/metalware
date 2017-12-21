@@ -32,7 +32,7 @@ module Metalware
 
       def run
         if vm?
-          libvirt = Metalware::Vm.new(libvirt_info[:host], node.name)
+          libvirt = Metalware::Vm.new(libvirt_info[:host], node_names[0])
           libvirt.console
         else
           puts "Attempting to connect to node #{node_names[0]}.."
