@@ -19,6 +19,7 @@ gem 'pcap', git: 'https://github.com/alces-software/ruby-pcap.git'
 gem 'recursive-open-struct'
 gem 'rugged'
 gem 'terminal-table'
+gem 'ruby-libvirt'
 
 # Forked of a fork containing a logger fix. The main gem can be used
 # again once StructuredWarnings is removed
