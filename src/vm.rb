@@ -24,6 +24,9 @@ module Metalware
       when 'off'
         puts "Powering down node #{@node}.."
         stop
+      when 'reboot'
+        puts "Rebooting node #{@node}.."
+        reboot
       when 'status'
         puts "#{@node}: Power state: #{info[:state]}"
       else
@@ -34,6 +37,10 @@ module Metalware
     def console
       puts "Attempting to connect to node #{@node}"
       domain.open_console if running?
+    end
+
+    def reboot
+      domain.reboot if running?
     end
 
     def start
