@@ -23,12 +23,48 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
+require 'config'
+require 'vm'
 
 module Metalware
   module Commands
     module Orchestrate
       class Create < CommandHelpers::BaseCommand
         private
+
+        def setup; end
+
+        def run
+          if option.group
+            nodes.each do |node|
+              create_domain(node)
+            end
+          end
+        end
+
+        def node_info
+          {
+            libvirt_host: node.config.libvirt_host
+          }
+        end
+
+        def create_domain
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node)
+          libvirt.create_domain
+        end
+
+        def group
+          alces.groups.find_by_name(args[0])
+        end
+
+        def node
+          alces.nodes.find_by_name(node_names[0])
+        end
+
+        def nodes
+          @nodes ||= nodes.map(&:name)
+        end
       end
     end
   end
