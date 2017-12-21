@@ -31,12 +31,17 @@ module Metalware
       private
 
       def run
-        puts "Attempting to connect to node #{node_names[0]}.."
-        if valid_connection?
-          puts 'Establishing SOL connection, type &. to exit..'
-          system(command('activate'))
+        if vm?
+          libvirt = Metalware::Vm.new(libvirt_info[:host], node.name)
+          libvirt.console
         else
-          puts 'Failed to connect..'
+          puts "Attempting to connect to node #{node_names[0]}.."
+          if valid_connection?
+            puts 'Establishing SOL connection, type &. to exit..'
+            system(command('activate'))
+          else
+            puts 'Failed to connect'
+          end
         end
       end
 

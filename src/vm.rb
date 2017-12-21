@@ -31,6 +31,11 @@ module Metalware
       end
     end
 
+    def console
+      puts "Attempting to connect to node #{node.name}"
+      domain.open_console if running?
+    end
+
     def start
       domain.create unless running?
     end
