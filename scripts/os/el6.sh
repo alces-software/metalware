@@ -36,7 +36,9 @@ install_base_prerequisites() {
 install_build_prerequisites() {
     # ruby: openssl readline zlib libffi
     # hunter: libpcap
+    # ruby-libvirt: libvirt-devel
     yum -e0 -y groupinstall "Development Tools" && \
         yum -e0 -y install openssl-devel readline-devel zlib-devel libffi-devel && \
-        yum -e0 -y install libpcap-devel
+        yum -e0 -y install libpcap-devel && \
+        yum -e0 -y install libvirt-devel
 }
