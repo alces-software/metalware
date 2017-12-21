@@ -18,6 +18,9 @@ module Metalware
 
     def run(cmd)
       case cmd
+      when 'kill'
+        puts "Killing node #{@node}.."
+        kill
       when 'on'
         puts "Powering up node #{@node}.."
         start
@@ -37,6 +40,10 @@ module Metalware
     def console
       puts "Attempting to connect to node #{@node}"
       domain.open_console if running?
+    end
+
+    def kill
+      domain.destroy if running?
     end
 
     def reboot
