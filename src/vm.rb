@@ -58,6 +58,10 @@ module Metalware
       domain.shutdown if running?
     end
 
+    def create(template)
+      @libvirt.define_domain_xml(template)
+    end
+
     private
 
     def domain

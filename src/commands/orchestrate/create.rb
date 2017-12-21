@@ -39,7 +39,7 @@ module Metalware
         def run
           if options.group
             nodes.each do |node|
-              create_domain(node)
+              create(node)
             end
           end
         end
@@ -50,9 +50,13 @@ module Metalware
           }
         end
 
-        def create_domain(node)
+        def create(node)
           libvirt = Metalware::Vm.new(node_info[:libvirt_host], node)
-          libvirt.create_domain(render_template)
+          libvirt.create(render_template)
+        end
+
+        def object
+          options.group ? group : node
         end
 
         def group
