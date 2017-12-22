@@ -10,7 +10,7 @@ module Metalware
 
     def initialize(libvirt_host, node, *args)
       @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
-      @storage ||= @libvirt.lookup_storage_pool_by_name(args[0])
+      @storage ||= @libvirt.lookup_storage_pool_by_name(args[0]) if args[0]
       @node = node
     end
 
@@ -45,10 +45,10 @@ module Metalware
     end
 
     def create(storage, vm)
-      puts "Provisioning new disk for #{@name}" unless disk_exists?
+      puts "Provisioning new disk for #{@node}"
       @storage.create_volume_xml(storage)
-      puts "Provisioning new machine #{@name}" unless exists?
-      #@libvirt.define_domain_xml(vm)
+      puts "Provisioning new machine #{@node}"
+      @libvirt.define_domain_xml(vm)
     end
 
     private
@@ -59,10 +59,6 @@ module Metalware
 
     def exists?
       @libvirt.lookup_domain_by_name(@node)
-    end
-
-    def disk_exists?
-      @storage.lookup_volume_by_name(@node)
     end
 
     def running?

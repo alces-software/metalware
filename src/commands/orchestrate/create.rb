@@ -53,7 +53,7 @@ module Metalware
         end
 
         def create(node)
-          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node, node.answer.vm_disk_pool)
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
           libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
         end
 
