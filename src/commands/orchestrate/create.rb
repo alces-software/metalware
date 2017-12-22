@@ -42,7 +42,7 @@ module Metalware
               create(node)
             end
           else
-            create(node)
+            create(node.name)
           end
         end
 
@@ -53,8 +53,8 @@ module Metalware
         end
 
         def create(node)
-          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node)
-          libvirt.create(render_template('disk'), render_template('vm'))
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node, node.answer.vm_disk_pool)
+          libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
         end
 
         def object
@@ -73,9 +73,10 @@ module Metalware
           @node_names ||= nodes.map(&:name)
         end
 
-        def render_template(type)
+        def render_template(node, type)
           template_path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
           template = File.read(template_path)
+          node = alces.nodes.find_by_name(node)
           templater = node ? node : alces
           templater.render_erb_template(template)
         end

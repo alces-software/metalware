@@ -2,14 +2,15 @@
 
 require 'config'
 require 'libvirt'
+require 'metal_log'
 
 module Metalware
   class Vm
     attr_accessor :node
 
-    def initialize(libvirt_host, node)
+    def initialize(libvirt_host, node, *args)
       @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
-      @storage ||= @libvirt.lookup_storage_pool_by_name(node.vm_storage_pool)
+      @storage ||= @libvirt.lookup_storage_pool_by_name(args[0])
       @node = node
     end
 
@@ -21,16 +22,16 @@ module Metalware
       case cmd
       when 'kill'
         puts "Killing node #{@node}.."
-        kill
+        domain.destroy if running?
       when 'on'
         puts "Powering up node #{@node}.."
-        start
+        domain.create unless running?
       when 'off'
         puts "Powering down node #{@node}.."
-        stop
+        domain.shutdown if running?
       when 'reboot'
         puts "Rebooting node #{@node}.."
-        reboot
+        domain.reboot if running?
       when 'status'
         puts "#{@node}: Power state: #{info[:state]}"
       else
@@ -43,25 +44,11 @@ module Metalware
       domain.open_console if running?
     end
 
-    def kill
-      domain.destroy if running?
-    end
-
-    def reboot
-      domain.reboot if running?
-    end
-
-    def start
-      domain.create unless running?
-    end
-
-    def stop
-      domain.shutdown if running?
-    end
-
     def create(storage, vm)
+      puts "Provisioning new disk for #{@name}" unless disk_exists?
       @storage.create_volume_xml(storage)
-      @libvirt.define_domain_xml(vm)
+      puts "Provisioning new machine #{@name}" unless exists?
+      #@libvirt.define_domain_xml(vm)
     end
 
     private
@@ -72,6 +59,10 @@ module Metalware
 
     def exists?
       @libvirt.lookup_domain_by_name(@node)
+    end
+
+    def disk_exists?
+      @storage.lookup_volume_by_name(@node)
     end
 
     def running?
