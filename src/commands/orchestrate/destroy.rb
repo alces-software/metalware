@@ -23,12 +23,55 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
+require 'config'
 
 module Metalware
   module Commands
     module Orchestrate
       class Destroy < CommandHelpers::BaseCommand
         private
+
+        prepend CommandHelpers::NodeIdentifier
+
+        def setup; end
+
+        def run
+          if options.group
+            nodes.each do |node|
+              destroy(node)
+            end
+          else
+            destroy(node.name)
+          end
+        end
+
+        def node_info
+          {
+            libvirt_host: node.answer.libvirt_host
+          }
+        end
+
+        def destroy(node)
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
+          libvirt.destroy(node.name, 'vm')
+        end
+
+        def object
+          options.group ? group : node
+        end
+
+        def group
+          alces.groups.find_by_name(args[0])
+        end
+
+        def node
+          alces.nodes.find_by_name(node_names[0])
+        end
+
+        def node_names
+          @node_names ||= nodes.map(&:name)
+        end
       end
     end
   end
