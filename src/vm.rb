@@ -43,11 +43,23 @@ module Metalware
       domain.open_console if running?
     end
 
+    # Creates a new VM
+    # - storage: Rendered Libvirt storage XML, used to create the root disk
+    # - vm: Rendered Libvirt domain XML, used to create the domain
     def create(storage, vm)
       puts "Provisioning new disk for #{@node}"
       @storage.create_volume_xml(storage)
       puts "Provisioning new machine #{@node}"
       @libvirt.define_domain_xml(vm)
+    end
+
+    # Destroys a VM and its associated disk
+    # - domain: Domain name
+    def destroy(domain)
+      domain.destroy
+      domain.undefine
+      vol = storage.lookup_volume_by_name(domain)
+      vol.delete
     end
 
     private
