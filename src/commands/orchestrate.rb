@@ -22,23 +22,44 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
+require 'config'
+
 module Metalware
   module Commands
-    class Create < Orchestrate
+    class Orchestrate < CommandHelpers::BaseCommand
+      def setup; end
+
       private
-      def run
-        if options.group
-          nodes.each do |node|
-            create(node)
-          end
-        else
-          create(node.name)
-        end
+
+      prepend CommandHelpers::NodeIdentifier
+
+      def node_info
+        { libvirt_host: node.answer.libvirt_host }
       end
 
-      def create(node)
-        libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
-        libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
+      def object
+        options.group ? group : node
+      end
+
+      def group
+        alces.groups.find_by_name(args[0])
+      end
+
+      def node
+        alces.nodes.find_by_name(node_names[0])
+      end
+
+      def node_names
+        @node_names ||= nodes.map(&:mame)
+      end
+
+      def render_template(node, type)
+        path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
+        node = alces.nodes.find_by_name(node)
+        templater = node ? node : alces
+        templater.render_erb_template(File.read(path))
       end
     end
   end
