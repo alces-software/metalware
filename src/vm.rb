@@ -10,7 +10,6 @@ module Metalware
 
     def initialize(libvirt_host, node, *args)
       @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
-      @storage ||= @libvirt.lookup_storage_pool_by_name(args[0]) if args[0]
       @node = node
     end
 
@@ -76,6 +75,10 @@ module Metalware
 
     def stream
       @libvirt.stream
+    end
+
+    def storage
+      @storage ||= @libvirt.lookup_storage_pool_by_name(args[0])
     end
   end
 end
