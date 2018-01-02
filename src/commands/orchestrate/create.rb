@@ -22,7 +22,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'constants'
 require 'command_helpers/orchestrate_command'
+require 'hunter_updater'
 
 module Metalware
   module Commands
@@ -42,7 +44,14 @@ module Metalware
 
         def create(node)
           libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
+          MetalLog.info "Creating new node #{node.name}"
           libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
+          MetalLog.info "Updating MAC address for #{node.name}"
+          hunter_updater.add(node.name, node.answers.vm_mac_address_build)
+        end
+
+        def hunter_updater
+          @hunter_updater ||= HunterUpdater.new(Constants::HUNTER_PATH)
         end
       end
     end
