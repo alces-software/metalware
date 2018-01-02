@@ -22,23 +22,28 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'command_helpers/orchestrate_command'
+
 module Metalware
   module Commands
-    class Create < Orchestrate
-      private
-      def run
-        if options.group
-          nodes.each do |node|
-            create(node)
-          end
-        else
-          create(node.name)
-        end
-      end
+    module Orchestrate
+      class Create < CommandHelpers::OrchestrateCommand
+        private
 
-      def create(node)
-        libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
-        libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
+        def run
+          if options.group
+            nodes.each do |node|
+              create(node)
+            end
+          else
+            create(node.name)
+          end
+        end
+
+        def create(node)
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
+          libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
+        end
       end
     end
   end

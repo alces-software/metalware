@@ -75,6 +75,8 @@ subcommands:
     syntax: metal orchestrate destroy NODE_IDENTIFIER [options]
     summary: Destroys a new virtual machine
     action: Commands::Orchestrate::Destroy
+    options:
+      - *group_option
 
   remove_group: &remove_group
     syntax: metal remove group GROUP_NAME [options]

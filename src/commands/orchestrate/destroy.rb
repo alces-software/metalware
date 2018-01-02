@@ -22,24 +22,28 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'command_helpers/orchestrate_command'
+
 module Metalware
   module Commands
-    class Destroy < Orchestrate
-      private
+    module Orchestrate
+      class Destroy < CommandHelpers::ConfigureCommand
+        private
 
-      def run
-        if options.group
-          nodes.each do |node|
-            destroy(node)
+        def run
+          if options.group
+            nodes.each do |node|
+              destroy(node)
+            end
+          else
+            destroy(node.name)
           end
-        else
-          destroy(node.name)
         end
-      end
 
-      def destroy(node)
-        libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
-        libvirt.destroy(node.name, 'vm')
+        def destroy(node)
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
+          libvirt.destroy(node.name, 'vm')
+        end
       end
     end
   end

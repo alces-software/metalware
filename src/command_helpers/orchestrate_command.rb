@@ -27,13 +27,13 @@ require 'command_helpers/node_identifier'
 require 'config'
 
 module Metalware
-  module Commands
-    class Orchestrate < CommandHelpers::BaseCommand
-      def setup; end
-
+  module CommandHelpers
+    class OrchestrateCommand < BaseCommand
       private
 
       prepend CommandHelpers::NodeIdentifier
+
+      def setup; end
 
       def node_info
         { libvirt_host: node.answer.libvirt_host }
@@ -52,12 +52,12 @@ module Metalware
       end
 
       def node_names
-        @node_names ||= nodes.map(&:mame)
+        @node_names ||= nodes.map(&:name)
       end
 
-      def render_template(node, type)
+      def render_template(node_name, type)
         path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
-        node = alces.nodes.find_by_name(node)
+        node = alces.nodes.find_by_name(node_name)
         templater = node ? node : alces
         templater.render_erb_template(File.read(path))
       end
