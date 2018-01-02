@@ -77,6 +77,10 @@ module Metalware
         config.repo_path
       end
 
+      def plugins_dir
+        File.join(repo, 'plugins')
+      end
+
       def repo_relative_path_to(path)
         repo_path = Pathname.new(repo)
         Pathname.new(path).relative_path_from(repo_path).to_s

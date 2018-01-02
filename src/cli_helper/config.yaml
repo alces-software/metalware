@@ -103,6 +103,14 @@ subcommands:
         description: >
           Force update even if local changes have been made to the repo
 
+  plugin_list: &plugin_list
+    syntax: metal plugin list [options]
+    summary: List available and enabled plugins
+    description: >
+      List all available Metalware plugins, along with which of these are
+      currently enabled.
+    action: Commands::Plugin::List
+
   view-answers_domain: &view-answers_domain
     syntax: metal view-answers domain [options]
     summary: View configured answers for the overall domain
@@ -263,6 +271,12 @@ commands:
         type: String
         description: >
           The IPMI tool command to run, for example `sel list`
+
+  plugin:
+    syntax: metal plugin [options]
+    summary: View and manage enabled plugins
+    subcommands:
+      list: *plugin_list
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
