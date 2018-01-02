@@ -112,9 +112,9 @@ module Metalware
         MetalLog.info "metal #{ARGV.join(' ')}"
       end
 
-      def setup
-        raise NotImplementedError
-      end
+      # Setup can optionally be used to perform command-specific setup early on
+      # in command execution.
+      def setup; end
 
       def run
         raise NotImplementedError
