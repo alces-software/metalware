@@ -36,7 +36,7 @@ module Metalware
               create(node)
             end
           else
-            create(node.name)
+            create(node)
           end
         end
 

@@ -11,6 +11,7 @@ module Metalware
     def initialize(libvirt_host, node, *args)
       @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
       @node = node
+      @args = args
     end
 
     def info
@@ -46,19 +47,21 @@ module Metalware
     # Creates a new VM
     # - storage: Rendered Libvirt storage XML, used to create the root disk
     # - vm: Rendered Libvirt domain XML, used to create the domain
-    def create(storage, vm)
+    def create(disk_tpl, domain_tpl)
       puts "Provisioning new disk for #{@node}"
-      @storage.create_volume_xml(storage)
+      storage.create_volume_xml(disk_tpl)
       puts "Provisioning new machine #{@node}"
-      @libvirt.define_domain_xml(vm)
+      @libvirt.define_domain_xml(domain_tpl)
     end
 
     # Destroys a VM and its associated disk
     # - domain: Domain name
-    def destroy(domain)
-      domain.destroy
+    def destroy(node_name)
+      domain.destroy if running?
+      puts "Removing domain #{node_name}"
       domain.undefine
-      vol = storage.lookup_volume_by_name(domain)
+      vol = storage.lookup_volume_by_name(node_name)
+      puts "Removing #{node_name} storage volume"
       vol.delete
     end
 
@@ -90,7 +93,7 @@ module Metalware
     end
 
     def storage
-      @storage ||= @libvirt.lookup_storage_pool_by_name(args[0])
+      @storage ||= @libvirt.lookup_storage_pool_by_name(@args[0])
     end
   end
 end

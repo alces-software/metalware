@@ -27,7 +27,7 @@ require 'command_helpers/orchestrate_command'
 module Metalware
   module Commands
     module Orchestrate
-      class Destroy < CommandHelpers::ConfigureCommand
+      class Destroy < CommandHelpers::OrchestrateCommand
         private
 
         def run
@@ -36,13 +36,13 @@ module Metalware
               destroy(node)
             end
           else
-            destroy(node.name)
+            destroy(node)
           end
         end
 
         def destroy(node)
           libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
-          libvirt.destroy(node.name, 'vm')
+          libvirt.destroy(node.name)
         end
       end
     end
