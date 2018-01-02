@@ -22,22 +22,52 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/base_command'
-require 'plugins'
-
 module Metalware
-  module Commands
-    module Plugin
-      class List < CommandHelpers::BaseCommand
-        private
+  module Plugins
+    class << self
+      include Enumerable
 
-        def run
-          output = Plugins.map do |plugin|
-            "#{plugin.name} #{plugin.enabled_identifier}"
-          end.join("\n")
-
-          puts output
+      def each(&block)
+        plugin_directories.each do |dir|
+          plugin = Plugin.new(dir)
+          block.call(plugin)
         end
+      end
+
+      def enabled_plugin_names
+        cache[:enabled] || []
+      end
+
+      private
+
+      def plugin_directories
+        plugins_dir.children.select(&:directory?)
+      end
+
+      def plugins_dir
+        Pathname.new(FilePath.plugins_dir)
+      end
+
+      def cache
+        Data.load(Constants::PLUGINS_CACHE_PATH)
+      end
+    end
+  end
+
+  Plugin = Struct.new(:path) do
+    def name
+      path.basename.to_s
+    end
+
+    def enabled?
+      Plugins.enabled_plugin_names.include?(name)
+    end
+
+    def enabled_identifier
+      if enabled?
+        '[ENABLED]'.green
+      else
+        '[DISABLED]'.red
       end
     end
   end
