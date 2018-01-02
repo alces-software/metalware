@@ -31,11 +31,14 @@ module Metalware
         private
 
         def run
-          puts plugin_names.join("\n")
-        end
+          output = plugin_directories.map do |dir|
+            name = dir.basename.to_s
+            enabled = enabled_plugins.include?(name)
+            enabled_string = enabled ? '[ENABLED]'.green : '[DISABLED]'.red
+            "#{name} #{enabled_string}"
+          end.join("\n")
 
-        def plugin_names
-          plugin_directories.map(&:basename)
+          puts output
         end
 
         def plugin_directories
@@ -44,6 +47,14 @@ module Metalware
 
         def plugins_dir
           Pathname.new(file_path.plugins_dir)
+        end
+
+        def enabled_plugins
+          plugins_cache[:enabled] || []
+        end
+
+        def plugins_cache
+          Data.load(Constants::PLUGINS_CACHE_PATH)
         end
       end
     end

@@ -53,7 +53,22 @@ RSpec.describe Metalware::Commands::Plugin::List do
         run_plugin_list
       end[:stdout].read
 
-      expect(stdout).to eq "example01\nexample02\n"
+      expect(stdout).to match(/example01.*\nexample02.*\n/)
+    end
+  end
+
+  it 'specifies whether each plugin is enabled in output' do
+    filesystem.test do |fs|
+      # XXX Replace this with `plugin enable` once implemented?
+      fs.dump Metalware::Constants::PLUGINS_CACHE_PATH, {enabled: ['example01']}
+
+      stdout = AlcesUtils.redirect_std(:stdout) do
+        run_plugin_list
+      end[:stdout].read
+
+      enabled = '[ENABLED]'.green
+      disabled = '[DISABLED]'.red
+      expect(stdout).to eq "example01 #{enabled}\nexample02 #{disabled}\n"
     end
   end
 end

@@ -39,6 +39,7 @@ module Metalware
     INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
     STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
+    PLUGINS_CACHE_PATH = File.join(CACHE_PATH, 'plugins.yaml')
 
     EVENTS_DIR_PATH = File.join(METALWARE_DATA_PATH, 'events')
 
