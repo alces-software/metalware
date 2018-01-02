@@ -48,10 +48,14 @@ module Metalware
     # - storage: Rendered Libvirt storage XML, used to create the root disk
     # - vm: Rendered Libvirt domain XML, used to create the domain
     def create(disk_tpl, domain_tpl)
-      puts "Provisioning new disk for #{@node}"
-      storage.create_volume_xml(disk_tpl)
-      puts "Provisioning new machine #{@node}"
-      @libvirt.define_domain_xml(domain_tpl)
+      unless volume_exists?
+        puts "Provisioning new storage volume for #{@node}"
+        storage.create_volume_xml(disk_tpl)
+      end
+      unless domain_exists?
+        puts "Provisioning new machine #{@node}"
+        @libvirt.define_domain_xml(domain_tpl)
+      end
     end
 
     # Destroys a VM and its associated disk
@@ -71,8 +75,12 @@ module Metalware
       @libvirt.lookup_domain_by_name(@node)
     end
 
-    def exists?
+    def domain_exists?
       @libvirt.lookup_domain_by_name(@node)
+    end
+
+    def volume_exists?
+      storage.lookup_volume_by_name(@node)
     end
 
     def running?
