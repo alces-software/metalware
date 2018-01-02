@@ -66,14 +66,14 @@ subcommands:
 
   orchestrate_create: &orchestrate_create
     syntax: metal orchestrate create NODE_IDENTIFIER [options]
-    summary: Creates a new virtual machine
+    summary: Creates a new virtual machine or group of machines
     action: Commands::Orchestrate::Create
     options:
       - *group_option
 
   orchestrate_destroy: &orchestrate_destroy
     syntax: metal orchestrate destroy NODE_IDENTIFIER [options]
-    summary: Destroys a new virtual machine
+    summary: Destroys a single or group of virtual machines
     action: Commands::Orchestrate::Destroy
     options:
       - *group_option
