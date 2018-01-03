@@ -115,3 +115,8 @@ Style/NumericPredicate:
 Naming/BinaryOperatorParameterName:
   Exclude:
     - 'src/node.rb'
+
+# Offense count: 1
+Style/OpMethod:
+  Exclude:
+    - 'src/node.rb'
