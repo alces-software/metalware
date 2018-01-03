@@ -38,7 +38,25 @@ module Metalware
         cache[:enabled] || []
       end
 
+      def enable!(plugin_name)
+        raise MetalwareError,
+          "Unknown plugin: #{plugin_name}" unless exists?(plugin_name)
+        return if enabled_plugin_names.include?(plugin_name)
+
+        new_enabled_plugins = enabled_plugin_names + [plugin_name]
+        new_cache = cache.merge(enabled: new_enabled_plugins)
+        Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
+      end
+
       private
+
+      def exists?(plugin_name)
+        all_plugin_names.include?(plugin_name)
+      end
+
+      def all_plugin_names
+        self.map(&:name)
+      end
 
       def plugin_directories
         plugins_dir.children.select(&:directory?)
@@ -69,6 +87,10 @@ module Metalware
       else
         '[DISABLED]'.red
       end
+    end
+
+    def enable!
+      Plugins.enable!(name)
     end
   end
 end

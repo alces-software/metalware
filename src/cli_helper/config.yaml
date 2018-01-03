@@ -111,6 +111,11 @@ subcommands:
       currently enabled.
     action: Commands::Plugin::List
 
+  plugin_enable: &plugin_enable
+    syntax: metal plugin enable PLUGIN_NAME [options]
+    summary: Enable given plugin for domain
+    action: Commands::Plugin::Enable
+
   view-answers_domain: &view-answers_domain
     syntax: metal view-answers domain [options]
     summary: View configured answers for the overall domain
@@ -277,6 +282,7 @@ commands:
     summary: View and manage enabled plugins
     subcommands:
       list: *plugin_list
+      enable: *plugin_enable
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
