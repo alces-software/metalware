@@ -27,10 +27,10 @@ module Metalware
     class << self
       include Enumerable
 
-      def each(&block)
+      def each
         plugin_directories.each do |dir|
           plugin = Plugin.new(dir)
-          block.call(plugin)
+          yield(plugin)
         end
       end
 
@@ -58,8 +58,10 @@ module Metalware
       private
 
       def validate_plugin_exists!(plugin_name)
-        raise MetalwareError,
-          "Unknown plugin: #{plugin_name}" unless exists?(plugin_name)
+        unless exists?(plugin_name)
+          raise MetalwareError,
+                "Unknown plugin: #{plugin_name}"
+        end
       end
 
       def update_enabled_plugins!(new_enabled_plugins)
@@ -72,7 +74,7 @@ module Metalware
       end
 
       def all_plugin_names
-        self.map(&:name)
+        map(&:name)
       end
 
       def plugin_directories
