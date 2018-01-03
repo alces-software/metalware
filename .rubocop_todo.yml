@@ -57,7 +57,7 @@ Security/Eval:
     - 'src/cli_helper/parser.rb'
 
 # Offense count: 1
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Exclude:
     - 'src/commands/status.rb'
 
