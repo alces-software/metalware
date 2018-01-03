@@ -53,6 +53,13 @@ module Metalware
         def hunter_updater
           @hunter_updater ||= HunterUpdater.new(Constants::HUNTER_PATH)
         end
+
+        def render_template(node_name, type)
+          path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
+          node = alces.nodes.find_by_name(node_name)
+          templater = node ? node : alces
+          templater.render_erb_template(File.read(path))
+        end
       end
     end
   end

@@ -54,13 +54,6 @@ module Metalware
       def node_names
         @node_names ||= nodes.map(&:name)
       end
-
-      def render_template(node_name, type)
-        path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
-        node = alces.nodes.find_by_name(node_name)
-        templater = node ? node : alces
-        templater.render_erb_template(File.read(path))
-      end
     end
   end
 end
