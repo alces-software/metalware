@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'pty'
 require 'commands/ipmi'
 
 module Metalware
@@ -32,7 +31,7 @@ module Metalware
 
       def run
         if vm?
-          libvirt = Metalware::Vm.new(libvirt_info[:host], node_names[0])
+          system("virsh console #{node.name}")
         elsif valid_connection?
           puts 'Establishing SOL connection, type &. to exit ..'
           system(command('activate'))
