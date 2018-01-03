@@ -8,6 +8,7 @@ source 'https://rubygems.org'
 # https://github.com/fakefs/fakefs#fakefs-----typeerror-superclass-mismatch-for-class-file.
 require 'pp'
 
+gem 'colorize'
 gem 'commander', git: 'https://github.com/alces-software/commander'
 gem 'dry-validation'
 gem 'hashie'

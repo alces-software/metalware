@@ -112,6 +112,6 @@ Style/NumericPredicate:
     - 'src/commands/repo/update.rb'
 
 # Offense count: 1
-Style/OpMethod:
+Naming/BinaryOperatorParameterName:
   Exclude:
     - 'src/node.rb'

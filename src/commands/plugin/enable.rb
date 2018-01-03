@@ -21,36 +21,24 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-# See http://stackoverflow.com/questions/837123/adding-a-directory-to-load-path-ruby.
-$LOAD_PATH.unshift File.dirname(__FILE__)
 
-require 'rubygems'
-require 'bundler/setup'
-require 'commander'
-require 'colorize'
-
-require 'commander_extensions'
-require 'cli_helper/parser'
-require 'data'
+require 'command_helpers/base_command'
+require 'plugins'
 
 module Metalware
-  class Cli
-    include Commander::Methods
-    include CommanderExtensions::Delegates
+  module Commands
+    module Plugin
+      class Enable < CommandHelpers::BaseCommand
+        private
 
-    def run
-      program :name, 'metal'
-      program :version, '2017.2.0'
-      program :description, 'Alces tools for the management and configuration of bare metal machines'
+        def run
+          Plugins.enable!(plugin_name)
+        end
 
-      CliHelper::Parser.new(self).parse_commands
-
-      run!
-    end
-
-    def run!
-      ARGV.push '--help' if ARGV.empty?
-      super
+        def plugin_name
+          args.first
+        end
+      end
     end
   end
 end
