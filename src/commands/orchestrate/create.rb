@@ -47,7 +47,7 @@ module Metalware
           MetalLog.info "Creating new node #{node.name}"
           libvirt.create(render_template(node.name, 'disk'), render_template(node.name, 'vm'))
           MetalLog.info "Updating MAC address for #{node.name}"
-          hunter_updater.add(node.name, node.answers.vm_mac_address_build)
+          hunter_updater.add(node.name, node.answer.vm_mac_address_build)
         end
 
         def hunter_updater
