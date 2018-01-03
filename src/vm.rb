@@ -6,8 +6,6 @@ require 'metal_log'
 
 module Metalware
   class Vm
-    attr_accessor :node
-
     def initialize(libvirt_host, node, *args)
       @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
       @node = node
