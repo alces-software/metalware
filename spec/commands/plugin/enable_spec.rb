@@ -66,8 +66,8 @@ RSpec.describe Metalware::Commands::Plugin::Enable do
 
       run_plugin_enable(example_plugin_name)
 
-      matching_enabled_plugins = Metalware::Plugins.enabled_plugin_names.select do |name|
-        name == example_plugin_name
+      matching_enabled_plugins = Metalware::Plugins.select do |plugin|
+        plugin.name == example_plugin_name && plugin.enabled?
       end
       expect(matching_enabled_plugins.length).to eq 1
     end

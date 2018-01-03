@@ -34,8 +34,8 @@ module Metalware
         end
       end
 
-      def enabled_plugin_names
-        cache[:enabled] || []
+      def enabled?(plugin_name)
+        enabled_plugin_names.include?(plugin_name)
       end
 
       def enable!(plugin_name)
@@ -73,6 +73,10 @@ module Metalware
         all_plugin_names.include?(plugin_name)
       end
 
+      def enabled_plugin_names
+        cache[:enabled] || []
+      end
+
       def all_plugin_names
         map(&:name)
       end
@@ -97,7 +101,7 @@ module Metalware
     end
 
     def enabled?
-      Plugins.enabled_plugin_names.include?(name)
+      Plugins.enabled?(name)
     end
 
     def enabled_identifier
