@@ -14,7 +14,7 @@ module Metalware
       results = RubyProf.profile do
         begin
           STDERR.puts yield
-        rescue => e
+        rescue StandardError => e
           puts e.message
           puts e.backtrace.inspect
         end

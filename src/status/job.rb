@@ -52,7 +52,7 @@ module Metalware
           begin
             @status_log.info "Job Thread: #{Thread.current}"
             run_command
-          rescue => e
+          rescue StandardError => e
             @status_log.fatal "JOB #{Thread.current}: #{e.inspect}"
           end
         end

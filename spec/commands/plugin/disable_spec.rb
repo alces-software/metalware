@@ -69,7 +69,7 @@ RSpec.describe Metalware::Commands::Plugin::Disable do
           run_plugin_disable(unknown_plugin_name)
         end
       end.to raise_error Metalware::MetalwareError,
-        "Unknown plugin: #{unknown_plugin_name}"
+                         "Unknown plugin: #{unknown_plugin_name}"
     end
   end
 end

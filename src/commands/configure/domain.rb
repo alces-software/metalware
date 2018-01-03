@@ -17,7 +17,7 @@ module Metalware
         end
 
         def configurator
-         @configurator ||=
+          @configurator ||=
             Configurator.for_domain(alces)
         end
       end

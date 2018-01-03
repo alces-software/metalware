@@ -40,9 +40,7 @@ module AlcesUtils
         # Mocks nodeattr to use faked genders file
         #
         before :each do
-          unless File.exist?(file_path.genders)
-            File.open(file_path.genders, 'a') { |f| f.puts('local local') }
-          end
+          File.open(file_path.genders, 'a') { |f| f.puts('local local') } unless File.exist?(file_path.genders)
 
           allow(Metalware::NodeattrInterface)
             .to receive(:nodeattr).and_wrap_original do |method, *args|

@@ -73,7 +73,7 @@ module Metalware
         end
 
         teardown
-      rescue
+      rescue StandardError
         # Ensure command is recorded as complete when in GUI.
         record_gui_build_complete if in_gui?
         raise

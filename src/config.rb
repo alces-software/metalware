@@ -88,9 +88,7 @@ module Metalware
     # TODO: Remove the file input for configs. Always use the default
     def initialize(_remove_this_file_input = nil, options = {})
       file = Constants::DEFAULT_CONFIG_PATH
-      unless File.file?(file)
-        raise MetalwareError, "Config file '#{file}' does not exist"
-      end
+      raise MetalwareError, "Config file '#{file}' does not exist" unless File.file?(file)
 
       @config = YAML.load_file(file) || {}
       @cli = OpenStruct.new(options)

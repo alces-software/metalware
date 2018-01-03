@@ -58,9 +58,7 @@ module Metalware
 
         def local
           @local ||= begin
-            unless nodes.respond_to?(:local)
-              raise UninitializedLocalNode, LOCAL_ERROR
-            end
+            raise UninitializedLocalNode, LOCAL_ERROR unless nodes.respond_to?(:local)
             nodes.local
           end
         end

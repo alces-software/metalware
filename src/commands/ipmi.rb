@@ -56,9 +56,7 @@ module Metalware
 
       def render_credentials
         object = options.group ? group : node
-        unless object.config.networks.bmc.defined
-          raise MetalwareError, "BMC network not defined for #{object.name}"
-        end
+        raise MetalwareError, "BMC network not defined for #{object.name}" unless object.config.networks.bmc.defined
         bmc_config = object.config.networks.bmc
         "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end

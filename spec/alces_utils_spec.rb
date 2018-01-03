@@ -32,7 +32,7 @@ RSpec.describe AlcesUtils do
   context 'with the AlceUtils.mock method' do
     before :each do
       AlcesUtils::Mock.new(self)
-                      .define_method_testing {} # Intentionally blank
+                      .define_method_testing{} # Intentionally blank
     end
 
     it 'only has the local node by default' do
@@ -208,7 +208,7 @@ RSpec.describe AlcesUtils do
 
     it 'can redirect stderr' do
       io = AlcesUtils.redirect_std(:stderr) do
-        $stderr.puts test_str
+        warn test_str
       end
       expect(io[:stderr].read.chomp).to eq(test_str)
     end

@@ -112,9 +112,7 @@ module Metalware
       attr_reader :dynamic_stack
 
       def run_with_dynamic(namespace)
-        if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
-          raise RecursiveConfigDepthExceededError
-        end
+        raise RecursiveConfigDepthExceededError if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
         dynamic_stack.push(dynamic_hash(namespace))
         result = yield
         dynamic_stack.pop

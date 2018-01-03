@@ -72,7 +72,7 @@ class FileSystem
   def self.root_setup
     FakeFS.without do
       yield FileSystem.root_file_system_config
-      FileSystem.test {} # Applies the changes
+      FileSystem.test{} # Applies the changes
     end
   end
 

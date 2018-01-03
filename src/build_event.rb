@@ -62,9 +62,9 @@ module Metalware
       build_threads.push(Thread.new do
         begin
           node.build_method.send("#{hook_name}_hook")
-        rescue => e
-          $stderr.puts e.message
-          $stderr.puts e.backtrace
+        rescue StandardError => e
+          warn e.message
+          warn e.backtrace
         end
       end)
     end

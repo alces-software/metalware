@@ -57,7 +57,7 @@ module Metalware
         error = nil
         begin
           return if data.validator.constantize.validate(data.content)
-        rescue => e
+        rescue StandardError => e
           error = e
         end
         msg = 'A file failed to be validated'

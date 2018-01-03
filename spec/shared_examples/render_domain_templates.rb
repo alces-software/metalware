@@ -124,9 +124,7 @@ RSpec.shared_examples :render_domain_templates do |test_command|
     let :genders_invalid_message do
       # A slightly hacky way to check that we include a note to use the
       # `configure rerender` command if this command is a `ConfigureCommand`.
-      if test_command.ancestors.include?(Metalware::CommandHelpers::ConfigureCommand)
-        /configure rerender/
-      end
+      /configure rerender/ if test_command.ancestors.include?(Metalware::CommandHelpers::ConfigureCommand)
     end
 
     xit 'does not render hosts file and gives error' do

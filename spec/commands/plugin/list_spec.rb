@@ -58,7 +58,7 @@ RSpec.describe Metalware::Commands::Plugin::List do
   end
 
   it 'specifies whether each plugin is enabled in output' do
-    filesystem.test do |fs|
+    filesystem.test do |_fs|
       # XXX Replace this with `plugin enable` once implemented?
       Metalware::Plugins.enable!('example01')
 

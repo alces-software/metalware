@@ -67,7 +67,7 @@ module Metalware
           error: "Template path '#{template}' for '#{identifier}' does not exist"
         )
       end
-    rescue => error
+    rescue StandardError => error
       error_file_hash(
         identifier,
         error: "Retrieving '#{identifier}' gave error '#{error.message}'"
@@ -118,7 +118,7 @@ module Metalware
     end
 
     def url?(identifier)
-      identifier =~ URI.regexp
+      identifier =~ URI::DEFAULT_PARSER.make_regexp
     end
 
     def absolute_path?(identifier)

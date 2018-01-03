@@ -78,11 +78,11 @@ RSpec.describe Metalware::Configurator do
     $stdout = tmp = Tempfile.new
     yield
     tmp.close
-  rescue => e
+  rescue StandardError => e
     begin
       $stdout.rewind
       STDERR.puts $stdout.read
-    rescue
+    rescue StandardError
       # XXX Not handling this gives a Rubocop warning; should we do something
       # here?
     end
@@ -436,19 +436,19 @@ RSpec.describe Metalware::Configurator do
   context 'with a dependent questions' do
     before :each do
       define_questions(domain: [
-        {
-          identifier: 'parent',
-          question: 'Ask my child?',
-          type: 'boolean',
-          dependent: [
-            {
-              identifier: 'child',
-              question: 'Did I get asked?',
-              type: 'boolean',
-            },
-          ],
-        },
-      ])
+                         {
+                           identifier: 'parent',
+                           question: 'Ask my child?',
+                           type: 'boolean',
+                           dependent: [
+                             {
+                               identifier: 'child',
+                               question: 'Did I get asked?',
+                               type: 'boolean',
+                             },
+                           ],
+                         },
+                       ])
     end
 
     it 'asks the child if the parent is true' do

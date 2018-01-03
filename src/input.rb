@@ -62,7 +62,7 @@ module Metalware
       def save_to_cache(key, args:)
         return if cache[key]
         cache[key] = Input.download(*args)
-      rescue => e
+      rescue StandardError => e
         cache[key] = e
       end
     end

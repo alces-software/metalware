@@ -131,7 +131,7 @@ RSpec.describe Metalware::BuildEvent do
 
         it 'deletes the file' do
           process
-          expect(File.exist? event_file).to eq(false)
+          expect(File.exist?(event_file)).to eq(false)
         end
       end
 

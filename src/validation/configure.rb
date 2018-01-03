@@ -115,7 +115,7 @@ module Metalware
         question_data = raw_data[section] || []
         data = {
           section: section,
-          result: DependantSchema.call(dependent: question_data)
+          result: DependantSchema.call(dependent: question_data),
         }
         node_s = Tree::TreeNode.new(section, data)
         add_children(root, node_s) do

@@ -44,7 +44,7 @@ class ConfigureController < ApplicationController
   def coerce_answer(answer, type)
     case type
     when :boolean
-      answer == 'true' ? true : false
+      answer == 'true'
     else
       answer
     end
