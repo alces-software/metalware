@@ -60,7 +60,7 @@ RSpec.describe Metalware::Commands::Plugin::List do
   it 'specifies whether each plugin is enabled in output' do
     filesystem.test do |fs|
       # XXX Replace this with `plugin enable` once implemented?
-      fs.dump Metalware::Constants::PLUGINS_CACHE_PATH, {enabled: ['example01']}
+      Metalware::Plugins.enable!('example01')
 
       stdout = AlcesUtils.redirect_std(:stdout) do
         run_plugin_list
