@@ -116,6 +116,11 @@ subcommands:
     summary: Enable given plugin for domain
     action: Commands::Plugin::Enable
 
+  plugin_disable: &plugin_disable
+    syntax: metal plugin disable PLUGIN_NAME [options]
+    summary: Disable given plugin for domain
+    action: Commands::Plugin::Disable
+
   view-answers_domain: &view-answers_domain
     syntax: metal view-answers domain [options]
     summary: View configured answers for the overall domain
@@ -283,6 +288,7 @@ commands:
     subcommands:
       list: *plugin_list
       enable: *plugin_enable
+      disable: *plugin_disable
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]

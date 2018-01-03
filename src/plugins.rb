@@ -39,16 +39,33 @@ module Metalware
       end
 
       def enable!(plugin_name)
-        raise MetalwareError,
-          "Unknown plugin: #{plugin_name}" unless exists?(plugin_name)
+        validate_plugin_exists!(plugin_name)
         return if enabled_plugin_names.include?(plugin_name)
 
         new_enabled_plugins = enabled_plugin_names + [plugin_name]
-        new_cache = cache.merge(enabled: new_enabled_plugins)
-        Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
+        update_enabled_plugins!(new_enabled_plugins)
+      end
+
+      def disable!(plugin_name)
+        validate_plugin_exists!(plugin_name)
+
+        new_enabled_plugins = enabled_plugin_names.reject do |name|
+          name == plugin_name
+        end
+        update_enabled_plugins!(new_enabled_plugins)
       end
 
       private
+
+      def validate_plugin_exists!(plugin_name)
+        raise MetalwareError,
+          "Unknown plugin: #{plugin_name}" unless exists?(plugin_name)
+      end
+
+      def update_enabled_plugins!(new_enabled_plugins)
+        new_cache = cache.merge(enabled: new_enabled_plugins)
+        Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
+      end
 
       def exists?(plugin_name)
         all_plugin_names.include?(plugin_name)
