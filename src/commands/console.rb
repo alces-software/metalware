@@ -36,7 +36,7 @@ module Metalware
           puts 'Establishing SOL connection, type &. to exit ..'
           system(command('activate'))
         else
-          raise MetalwareError, "Unable to connect to #{node_names[0]}"
+          raise MetalwareError, "Unable to connect to #{node.name}"
         end
       end
 
