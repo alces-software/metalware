@@ -39,22 +39,20 @@ module Metalware
 
       def run
         if options.group
-          node_names.each do |node|
-            run_vm if vm?
-            run_baremetal unless vm?
+          node_names.each do
+            ipmi
           end
         else
-          run_vm if vm?
-          run_baremetal unless vm?
+          ipmi
         end
       end
 
-      def run_vm
-        libvirt_run(libvirt_info[:host], node)
-      end
-
-      def run_baremetal
-        puts "#{node}: #{SystemCommand.run(command(node))}"
+      def ipmi
+        if vm?
+          libvirt_run(libvirt_info[:host], node)
+        else
+          puts "#{node}: #{SystemCommand.run(command(node))}"
+        end
       end
 
       def libvirt_run(host, node)
