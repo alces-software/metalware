@@ -52,7 +52,6 @@ module Metalware
       @libvirt.define_domain_xml(domain_tpl)
     end
 
-    # Destroys a VM and its associated disk
     def destroy
       domain.destroy if running?
       puts "Removing domain #{@node}"
