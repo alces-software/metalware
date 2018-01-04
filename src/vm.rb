@@ -3,6 +3,7 @@
 require 'config'
 require 'libvirt'
 require 'metal_log'
+require 'namespaces/alces'
 
 module Metalware
   class Vm
@@ -42,14 +43,11 @@ module Metalware
       domain.open_console if running?
     end
 
-    # Creates a new VM
-    # - storage: Rendered Libvirt storage XML, used to create the root disk
-    # - vm: Rendered Libvirt domain XML, used to create the domain
-    def create(disk_tpl, domain_tpl)
+    def create
       puts "Provisioning new storage volume for #{@node}"
-      storage.create_volume_xml(disk_tpl)
+      storage.create_volume_xml(render_template('disk'))
       puts "Provisioning new machine #{@node}"
-      @libvirt.define_domain_xml(domain_tpl)
+      @libvirt.define_domain_xml(render_template('vm'))
     end
 
     def destroy
@@ -98,6 +96,13 @@ module Metalware
 
     def storage
       @storage ||= @libvirt.lookup_storage_pool_by_name(@args[0])
+    end
+
+    def render_template(type)
+      path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
+      node = alces.nodes.find_by_name(@node)
+      templater = node ? node : alces
+      templater.render_erb_template(File.read(path))
     end
   end
 end
