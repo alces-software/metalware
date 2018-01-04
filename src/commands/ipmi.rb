@@ -36,9 +36,9 @@ module Metalware
       prepend CommandHelpers::NodeIdentifier
 
       def run
-        nodes.each do
-          run_vm if vm?
-          run_baremetal unless vm?
+        nodes.each do |node|
+          run_vm if vm?(node)
+          run_baremetal unless vm?(node)
         end
       end
 
@@ -78,16 +78,12 @@ module Metalware
         @node_names ||= nodes.map(&:name)
       end
 
-      def libvirt_info
-        object = options.group ? group : node
-        {
-          host: object.config.libvirt_host,
-          vm: object.config.is_vm,
-        }
+      def libvirt_host(node)
+        node.config.libvirt_host
       end
 
-      def vm?
-        libvirt_info[:vm]
+      def vm?(node)
+        node.config.is_vm?
       end
     end
   end
