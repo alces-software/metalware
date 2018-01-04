@@ -12,7 +12,6 @@ module Metalware
     def initialize(node)
       @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
       @node = node
-      @args = args
     end
 
     def run(cmd)
@@ -60,7 +59,7 @@ module Metalware
     private
 
     def domain
-      @libvirt.lookup_domain_by_name(@node)
+      @libvirt.lookup_domain_by_name(@node.name)
     end
 
     def running?
