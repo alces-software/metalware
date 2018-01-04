@@ -16,7 +16,7 @@ module Metalware
       def nodes
         @nodes ||= begin
           nodes = if options.group
-                    alces.groups.find_by_name(node_identifier)&.nodes
+                    group&.nodes
                   else
                     alces.nodes.find_by_name(node_identifier)
                   end
