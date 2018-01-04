@@ -53,13 +53,12 @@ module Metalware
     end
 
     # Destroys a VM and its associated disk
-    # - domain: Domain name
-    def destroy(node_name)
+    def destroy
       domain.destroy if running?
-      puts "Removing domain #{node_name}"
+      puts "Removing domain #{@node}"
       domain.undefine
-      vol = storage.lookup_volume_by_name(node_name)
-      puts "Removing #{node_name} storage volume"
+      vol = storage.lookup_volume_by_name(@node)
+      puts "Removing #{@node} storage volume"
       vol.delete
     end
 
