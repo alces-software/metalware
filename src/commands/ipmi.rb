@@ -37,9 +37,13 @@ module Metalware
 
       def run
         nodes.each do |node|
-          run_vm if vm?(node)
-          run_baremetal unless vm?(node)
+          ipmi(node)
         end
+      end
+
+      def ipmi(node)
+        run_vm if vm?(node)
+        run_baremetal unless vm?(node)
       end
 
       def run_vm
@@ -83,7 +87,7 @@ module Metalware
       end
 
       def vm?(node)
-        node.config.is_vm?
+        node.config.is_vm
       end
     end
   end
