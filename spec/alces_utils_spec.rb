@@ -32,7 +32,7 @@ RSpec.describe AlcesUtils do
   context 'with the AlceUtils.mock method' do
     before :each do
       AlcesUtils::Mock.new(self)
-                      .define_method_testing{} # Intentionally blank
+                      .define_method_testing {} # Intentionally blank
     end
 
     it 'only has the local node by default' do
