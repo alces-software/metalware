@@ -36,26 +36,19 @@ module Metalware
       prepend CommandHelpers::NodeIdentifier
 
       def run
-        if options.group
-          node_names.each do
-            ipmi
-          end
-        else
-          ipmi
+        nodes.each do
+          run_vm if vm?
+          run_baremetal unless vm?
         end
       end
 
-      def ipmi
-        if vm?
-          libvirt_run(libvirt_info[:host], node)
-        else
-          puts "#{node}: #{SystemCommand.run(command(node))}"
-        end
-      end
-
-      def libvirt_run(host, node)
-        libvirt = Metalware::Vm.new(host, node)
+      def run_vm
+        libvirt = Metalware::Vm.new(node)
         libvirt.run(args[1])
+      end
+
+      def run_baremetal
+        puts "#{node}: #{SystemCommand.run(command(node))}"
       end
 
       def command(host)
