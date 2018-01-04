@@ -75,10 +75,22 @@ module Metalware
 
     def state
       case domain.info.state
-      when 5
-        'off'
+      when 0
+        'no state'
       when 1
         'on'
+      when 2
+        'blocked'
+      when 3
+        'paused'
+      when 4
+        'shutting down'
+      when 5
+        'off'
+      when 6
+        'crashed'
+      when 7
+        'suspended'
       end
     end
 
