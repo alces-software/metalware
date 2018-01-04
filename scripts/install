@@ -130,6 +130,64 @@ case $user_shell in
         ;;
 esac
 
+# Certificate generation for Libvirt integration
+title "Configuring certificates"
+doing 'Setup'
+CA_DIR=/opt/alces/ca_setup
+mkdir -p /opt/alces/ca_setup
+say_done $?
+
+doing 'Setting up certificate authority'
+certtool --generate-prvkey > $CA_DIR/cakey.pem &> "${dep_logs}/install.log"
+cat << EOF > $CA_DIR/ca.info
+cn = Alces Software
+ca
+cert_signing_key
+EOF
+certtool --generate-self-signed \
+         --load-privkey $CA_DIR/cakey.pem \
+         --template $CA_DIR/ca.info \
+         --outfile $CA_DIR/cacert.pem &> "${dep_logs}/install.log"
+cp $CA_DIR/cacert.pem /etc/pki/CA/
+say_done $?
+
+doing 'Setting up server authority'
+certtool --generate-privkey > $CA_DIR/server-key.pem &> "${dep_logs}/install.log"
+cat << EOF > $CA_DIR/server.info
+organization = Alces Software
+cn = Libvirt
+tls_www_server
+encryption_key
+signing_key
+EOF
+certtool --generate-certificate \
+         --load-privkey $CA_DIR/server-key.pem \
+         --load-ca-certificate $CA_DIR/cacert.pem \
+         --load-ca-privkey $CA_DIR/cakey.pem \
+         --template $CA_DIR/server.info \
+         --outfile $CA_DIR/server-cert.pem &> "${dep_logs}/install.log"
+say_done $?
+
+doing 'Setting up client certificate'
+certtool --generate-privkey > $CA_DIR/clientkey.pem &> "${dep_logs}/install.log"
+cat << EOF > $CA_DIR/client.info
+organization = Alces Software
+cn = controller
+tls_www_client
+encryption_key
+signing_key
+EOF
+certtool --generate-certificate \
+         --load-privkey $CA_DIR/clientkey.pem \
+         --load-ca-certificate $CA_DIR/cacert.pem \
+         --load-ca-privkey $CA_DIR/cakey.pem \
+         --template $CA_DIR/client.info \
+         --outfile $CA_DIR/clientcert.pem &> "${dep_logs}/install.log"
+mkdir -p /etc/pki/libvirt/private/
+cp $CA_DIR/clientkey.pem /etc/pki/libvirt/private/
+cp $CA_DIR/clientcert.pem /etc/pki/libvirt/
+say_done $?
+
 cat <<EOF
 [33m
 ===============================================================================
@@ -146,5 +204,10 @@ Please login again, or manually run the following:
 source /etc/profile.d/alces-metalware.${rc_script_ext}
 
 Afterwards, execute 'metal --help' for further information.
+
+If the Libvirt integration is required, please copy to the Libvirt hosts:
+  - $CA_DIR/cacert.pem (local) to /etc/pki/CA/cacert.pem (remote)
+  - $CA_DIR/server-{key,cert}.pem (local) to /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem} (remote)
+
 [0m
 EOF
