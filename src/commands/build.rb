@@ -43,6 +43,9 @@ module Metalware
 
       delegate :template_path, to: :file_path
       delegate :in_gui?, to: Utils
+      delegate :agree, to: :high_line
+
+      attr_reader :build_event
 
       prepend CommandHelpers::NodeIdentifier
 
@@ -78,8 +81,6 @@ module Metalware
         record_gui_build_complete if in_gui?
         raise
       end
-
-      attr_reader :build_event
 
       def dependency_hash
         {
@@ -141,8 +142,6 @@ module Metalware
       def high_line
         @high_line ||= HighLine.new
       end
-
-      delegate :agree, to: :high_line
 
       def ask_if_should_run_build_complete
         should_rerender = <<-EOF.strip_heredoc
