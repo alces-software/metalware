@@ -32,8 +32,6 @@ module Metalware
 
       attr_reader :manifest
 
-      def setup; end
-
       def run
         Staging.update do |staging|
           sync_files(staging)

@@ -17,6 +17,7 @@ gem 'net-dhcp'
 gem 'network_interface', '~> 0.0.1'
 gem 'pcap', git: 'https://github.com/alces-software/ruby-pcap.git'
 gem 'recursive-open-struct'
+gem 'ruby-libvirt'
 gem 'rugged'
 gem 'terminal-table'
 

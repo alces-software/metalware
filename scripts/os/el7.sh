@@ -42,8 +42,10 @@ install_build_prerequisites() {
     # ruby: openssl readline zlib libffi
     # hunter: libpcap
     # rugged: cmake libcurl-devel libssh2-devel gmp-devel
+    # ruby-libvirt: libvirt-devel
     yum -e0 -y groupinstall "Development Tools" && \
         yum -e0 -y install openssl-devel readline-devel zlib-devel libffi-devel && \
         yum -e0 -y install libpcap-devel && \
-        yum -e0 -y install cmake libcurl-devel libssh2-devel gmp-devel
+        yum -e0 -y install cmake libcurl-devel libssh2-devel gmp-devel && \
+        yum -e0 -y install libvirt-devel
 }

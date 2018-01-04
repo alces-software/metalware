@@ -22,30 +22,35 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'commands/ipmi'
+require 'command_helpers/base_command'
+require 'command_helpers/node_identifier'
+require 'config'
 
 module Metalware
-  module Commands
-    class Console < Ipmi
+  module CommandHelpers
+    class OrchestrateCommand < BaseCommand
       private
 
-      def run
-        if vm?
-          system("virsh console #{node.name}")
-        elsif valid_connection?
-          puts 'Establishing SOL connection, type &. to exit ..'
-          system(command('activate'))
-        else
-          raise MetalwareError, "Unable to connect to #{node_names[0]}"
-        end
+      prepend CommandHelpers::NodeIdentifier
+
+      def node_info
+        { libvirt_host: node.answer.libvirt_host }
       end
 
-      def command(type)
-        "ipmitool -H #{node.name} #{render_credentials} -e '&' -I lanplus sol #{type}"
+      def object
+        options.group ? group : node
       end
 
-      def valid_connection?
-        SystemCommand.run(command('info'))
+      def group
+        alces.groups.find_by_name(args[0])
+      end
+
+      def node
+        alces.nodes.find_by_name(node_names[0])
+      end
+
+      def node_names
+        @node_names ||= nodes.map(&:name)
       end
     end
   end

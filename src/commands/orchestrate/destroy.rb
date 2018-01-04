@@ -22,30 +22,28 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'commands/ipmi'
+require 'command_helpers/orchestrate_command'
 
 module Metalware
   module Commands
-    class Console < Ipmi
-      private
+    module Orchestrate
+      class Destroy < CommandHelpers::OrchestrateCommand
+        private
 
-      def run
-        if vm?
-          system("virsh console #{node.name}")
-        elsif valid_connection?
-          puts 'Establishing SOL connection, type &. to exit ..'
-          system(command('activate'))
-        else
-          raise MetalwareError, "Unable to connect to #{node_names[0]}"
+        def run
+          if options.group
+            nodes.each do |node|
+              destroy(node)
+            end
+          else
+            destroy(node)
+          end
         end
-      end
 
-      def command(type)
-        "ipmitool -H #{node.name} #{render_credentials} -e '&' -I lanplus sol #{type}"
-      end
-
-      def valid_connection?
-        SystemCommand.run(command('info'))
+        def destroy(node)
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
+          libvirt.destroy(node.name)
+        end
       end
     end
   end

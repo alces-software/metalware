@@ -31,8 +31,6 @@ module Metalware
     class Render < CommandHelpers::BaseCommand
       private
 
-      def setup; end
-
       def run
         template_path, name = args
 

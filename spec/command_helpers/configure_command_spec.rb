@@ -14,8 +14,6 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   class TestCommand < Metalware::CommandHelpers::ConfigureCommand
     private
 
-    def setup; end
-
     # Overridden to be three element array with third a valid `configure.yaml`
     # questions section; `BaseCommand` expects command classes to be namespaced
     # by two modules.
