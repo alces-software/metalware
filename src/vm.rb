@@ -93,8 +93,7 @@ module Metalware
 
     def render_template(type)
       path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
-      templater = @node ? @node : alces
-      templater.render_erb_template(File.read(path))
+      @node.render_erb_template(File.read(path))
     end
   end
 end
