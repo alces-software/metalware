@@ -27,10 +27,8 @@ install_dist() {
 }
 
 install_certs() {
-    doing 'Setup'
     export CA_DIR=/opt/alces/ca_setup
     mkdir -p $CA_DIR
-    say_done $?
 
     if [[ ! -f $CA_DIR/cakey.pem ]]; then
       configure_certificate_authority
@@ -46,7 +44,6 @@ install_certs() {
 }
 
 configure_certificate_authority() {
-    doing 'Configuring certificate authority'
     certtool --generate-privkey > $CA_DIR/cakey.pem
     cat << EOF > $CA_DIR/ca.info
 cn = Alces Software
@@ -58,11 +55,9 @@ EOF
              --template $CA_DIR/ca.info \
              --outfile $CA_DIR/cacert.pem
     cp $CA_DIR/cacert.pem /etc/pki/CA/
-    say_done $?
 }
 
 configure_server_authority() {
-    doing 'Configuring server authority'
     certtool --generate-privkey > $CA_DIR/server-key.pem
     cat << EOF > $CA_DIR/server.info
 organization = Alces Software
@@ -77,11 +72,9 @@ EOF
              --load-ca-privkey $CA_DIR/cakey.pem \
              --template $CA_DIR/server.info \
              --outfile $CA_DIR/server-cert.pem
-    say_done $?
 }
 
 configure_client_certificate() {
-    doing 'Configuring client certificates'
     certtool --generate-privkey > $CA_DIR/clientkey.pem
     cat << EOF > $CA_DIR/client.info
 organization = Alces Software
@@ -99,5 +92,4 @@ EOF
     mkdir -p /etc/pki/libvirt/private
     cp $CA_DIR/clientkey.pem /etc/pki/libvirt/private/
     cp $CA_DIR/clientcert.pem /etc/pki/libvirt/
-    say_done $?
 }
