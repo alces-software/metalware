@@ -138,7 +138,7 @@ mkdir -p /opt/alces/ca_setup
 say_done $?
 
 doing 'Setting up certificate authority'
-certtool --generate-privkey > $CA_DIR/cakey.pem &> "${dep_logs}/install.log"
+certtool --generate-privkey > $CA_DIR/cakey.pem 2>&1
 cat << EOF > $CA_DIR/ca.info
 cn = Alces Software
 ca
@@ -147,12 +147,12 @@ EOF
 certtool --generate-self-signed \
          --load-privkey $CA_DIR/cakey.pem \
          --template $CA_DIR/ca.info \
-         --outfile $CA_DIR/cacert.pem &> "${dep_logs}/install.log"
+         --outfile $CA_DIR/cacert.pem 2>&1
 cp $CA_DIR/cacert.pem /etc/pki/CA/
 say_done $?
 
 doing 'Setting up server authority'
-certtool --generate-privkey > $CA_DIR/server-key.pem &> "${dep_logs}/install.log"
+certtool --generate-privkey > $CA_DIR/server-key.pem 2>&1
 cat << EOF > $CA_DIR/server.info
 organization = Alces Software
 cn = Libvirt
@@ -165,11 +165,11 @@ certtool --generate-certificate \
          --load-ca-certificate $CA_DIR/cacert.pem \
          --load-ca-privkey $CA_DIR/cakey.pem \
          --template $CA_DIR/server.info \
-         --outfile $CA_DIR/server-cert.pem &> "${dep_logs}/install.log"
+         --outfile $CA_DIR/server-cert.pem 2>&1
 say_done $?
 
 doing 'Setting up client certificate'
-certtool --generate-privkey > $CA_DIR/clientkey.pem &> "${dep_logs}/install.log"
+certtool --generate-privkey > $CA_DIR/clientkey.pem 2>&1
 cat << EOF > $CA_DIR/client.info
 organization = Alces Software
 cn = controller
@@ -182,7 +182,7 @@ certtool --generate-certificate \
          --load-ca-certificate $CA_DIR/cacert.pem \
          --load-ca-privkey $CA_DIR/cakey.pem \
          --template $CA_DIR/client.info \
-         --outfile $CA_DIR/clientcert.pem &> "${dep_logs}/install.log"
+         --outfile $CA_DIR/clientcert.pem 2>&1
 mkdir -p /etc/pki/libvirt/private/
 cp $CA_DIR/clientkey.pem /etc/pki/libvirt/private/
 cp $CA_DIR/clientcert.pem /etc/pki/libvirt/
