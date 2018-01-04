@@ -13,10 +13,6 @@ module Metalware
       @args = args
     end
 
-    def info
-      { state: state }
-    end
-
     def run(cmd)
       case cmd
       when 'kill'
@@ -32,7 +28,7 @@ module Metalware
         puts "Rebooting node #{@node}.."
         domain.reboot
       when 'status'
-        puts "#{@node}: Power state: #{info[:state]}"
+        puts "#{@node}: Power state: #{state}"
       else
         raise MetalwareError, "Invalid command: #{cmd}"
       end
