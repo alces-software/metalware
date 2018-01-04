@@ -132,61 +132,7 @@ esac
 
 # Certificate generation for Libvirt integration
 title "Configuring certificates"
-doing 'Setup'
-CA_DIR=/opt/alces/ca_setup
-mkdir -p /opt/alces/ca_setup
-say_done $?
-
-doing 'Setting up certificate authority'
-certtool --generate-privkey > $CA_DIR/cakey.pem 2>&1
-cat << EOF > $CA_DIR/ca.info
-cn = Alces Software
-ca
-cert_signing_key
-EOF
-certtool --generate-self-signed \
-         --load-privkey $CA_DIR/cakey.pem \
-         --template $CA_DIR/ca.info \
-         --outfile $CA_DIR/cacert.pem 2>&1
-cp $CA_DIR/cacert.pem /etc/pki/CA/
-say_done $?
-
-doing 'Setting up server authority'
-certtool --generate-privkey > $CA_DIR/server-key.pem 2>&1
-cat << EOF > $CA_DIR/server.info
-organization = Alces Software
-cn = Libvirt
-tls_www_server
-encryption_key
-signing_key
-EOF
-certtool --generate-certificate \
-         --load-privkey $CA_DIR/server-key.pem \
-         --load-ca-certificate $CA_DIR/cacert.pem \
-         --load-ca-privkey $CA_DIR/cakey.pem \
-         --template $CA_DIR/server.info \
-         --outfile $CA_DIR/server-cert.pem 2>&1
-say_done $?
-
-doing 'Setting up client certificate'
-certtool --generate-privkey > $CA_DIR/clientkey.pem 2>&1
-cat << EOF > $CA_DIR/client.info
-organization = Alces Software
-cn = controller
-tls_www_client
-encryption_key
-signing_key
-EOF
-certtool --generate-certificate \
-         --load-privkey $CA_DIR/clientkey.pem \
-         --load-ca-certificate $CA_DIR/cacert.pem \
-         --load-ca-privkey $CA_DIR/cakey.pem \
-         --template $CA_DIR/client.info \
-         --outfile $CA_DIR/clientcert.pem 2>&1
-mkdir -p /etc/pki/libvirt/private/
-cp $CA_DIR/clientkey.pem /etc/pki/libvirt/private/
-cp $CA_DIR/clientcert.pem /etc/pki/libvirt/
-say_done $?
+install_certs &> "${dep_logs}/install.log"
 
 cat <<EOF
 [33m

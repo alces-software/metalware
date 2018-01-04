@@ -25,3 +25,79 @@ install_dist() {
     tar -C "${target}" -xzf "${dep_src}/$name.tar.gz"
     say_done $?
 }
+
+install_certs() {
+    doing 'Setup'
+    export CA_DIR=/opt/alces/ca_setup
+    mkdir -p $CA_DIR
+    say_done $?
+
+    if [[ ! -f $CA_DIR/cakey.pem ]]; then
+      configure_certificate_authority
+    fi
+
+    if [[ ! -f $CA_DIR/server-key.pem ]]; then
+      configure_server_authority
+    fi
+
+    if [[ ! -f $CA_DIR/clientkey.pem ]]; then
+      configure_client_certificate
+    fi
+}
+
+configure_certificate_authority() {
+    doing 'Configuring certificate authority'
+    certtool --generate-privkey > $CA_DIR/cakey.pem
+    cat << EOF > $CA_DIR/ca.info
+cn = Alces Software
+ca
+cert_signing_key
+EOF
+    certtool --generate-self-signed \
+             --load-privkey $CA_DIR/cakey.pem \
+             --template $CA_DIR/ca.info \
+             --outfile $CA_DIR/cacert.pem
+    cp $CA_DIR/cacert.pem /etc/pki/CA/
+    say_done $?
+}
+
+configure_server_authority() {
+    doing 'Configuring server authority'
+    certtool --generate-privkey > $CA_DIR/server-key.pem
+    cat << EOF > $CA_DIR/server.info
+organization = Alces Software
+cn = Libvirt
+tls_www_server
+encryption_key
+signing_key
+EOF
+    certtool --generate-certificate \
+             --load-privkey $CA_DIR/server-key.pem \
+             --load-ca-certificate $CA_DIR/cacert.pem \
+             --load-ca-privkey $CA_DIR/cakey.pem \
+             --template $CA_DIR/server.info \
+             --outfile $CA_DIR/server-cert.pem
+    say_done $?
+}
+
+configure_client_certificate() {
+    doing 'Configuring client certificates'
+    certtool --generate-privkey > $CA_DIR/clientkey.pem
+    cat << EOF > $CA_DIR/client.info
+organization = Alces Software
+cn = controller
+tls_www_client
+encryption_key
+signing_key
+EOF
+    certtool --generate-certificate \
+             --load-privkey $CA_DIR/clientkey.pem \
+             --load-ca-certificate $CA_DIR/cacert.pem \
+             --load-ca-privkey $CA_DIR/cakey.pem \
+             --template $CA_DIR/client.info \
+             --outfile $CA_DIR/clientcert.pem
+    mkdir -p /etc/pki/libvirt/private
+    cp $CA_DIR/clientkey.pem /etc/pki/libvirt/private/
+    cp $CA_DIR/clientcert.pem /etc/pki/libvirt/
+    say_done $?
+}
