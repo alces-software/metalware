@@ -9,7 +9,7 @@ module Metalware
   class Vm
     attr_reader :node
 
-    def initialize(node, *args)
+    def initialize(node)
       @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
       @node = node
       @args = args
@@ -18,42 +18,42 @@ module Metalware
     def run(cmd)
       case cmd
       when 'kill'
-        puts "Killing node #{@node}.."
+        puts "Killing node #{@node.name}.."
         domain.destroy
       when 'on'
-        puts "Powering up node #{@node}.."
+        puts "Powering up node #{@node.name}.."
         domain.create
       when 'off'
-        puts "Powering down node #{@node}.."
+        puts "Powering down node #{@node.name}.."
         domain.shutdown
       when 'reboot'
-        puts "Rebooting node #{@node}.."
+        puts "Rebooting node #{@node.name}.."
         domain.reboot
       when 'status'
-        puts "#{@node}: Power state: #{state}"
+        puts "#{@node.name}: Power state: #{state}"
       else
         raise MetalwareError, "Invalid command: #{cmd}"
       end
     end
 
     def console
-      puts "Attempting to connect to node #{@node}"
+      puts "Attempting to connect to node #{@node.name}"
       domain.open_console if running?
     end
 
     def create
-      puts "Provisioning new storage volume for #{@node}"
+      puts "Provisioning new storage volume for #{@node.name}"
       storage.create_volume_xml(render_template('disk'))
-      puts "Provisioning new machine #{@node}"
+      puts "Provisioning new machine #{@node.name}"
       @libvirt.define_domain_xml(render_template('vm'))
     end
 
     def destroy
       domain.destroy if running?
-      puts "Removing domain #{@node}"
+      puts "Removing domain #{@node.name}"
       domain.undefine
-      vol = storage.lookup_volume_by_name(@node)
-      puts "Removing #{@node} storage volume"
+      vol = storage.lookup_volume_by_name(@node.name)
+      puts "Removing #{@node.name} storage volume"
       vol.delete
     end
 
@@ -88,12 +88,8 @@ module Metalware
       end
     end
 
-    def stream
-      @libvirt.stream
-    end
-
     def storage
-      @storage ||= @libvirt.lookup_storage_pool_by_name(@args[0])
+      @storage ||= @libvirt.lookup_storage_pool_by_name(@node.config.vm_disk_pool)
     end
 
     def render_template(type)
