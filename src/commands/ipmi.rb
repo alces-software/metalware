@@ -81,8 +81,8 @@ module Metalware
       def libvirt_info
         object = options.group ? group : node
         {
-          host: object.answer.libvirt_host,
-          vm: object.answer.is_vm,
+          host: object.config.libvirt_host,
+          vm: object.config.is_vm,
         }
       end
 
