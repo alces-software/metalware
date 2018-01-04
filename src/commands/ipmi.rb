@@ -42,16 +42,16 @@ module Metalware
       end
 
       def ipmi(node)
-        run_vm if vm?(node)
-        run_baremetal unless vm?(node)
+        run_vm(node) if vm?(node)
+        run_baremetal(node) unless vm?(node)
       end
 
-      def run_vm
+      def run_vm(node)
         libvirt = Metalware::Vm.new(node)
         libvirt.run(args[1])
       end
 
-      def run_baremetal
+      def run_baremetal(node)
         puts "#{node}: #{SystemCommand.run(command(node))}"
       end
 
