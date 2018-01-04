@@ -10,8 +10,6 @@ module Metalware
       class Local < CommandHelpers::ConfigureCommand
         private
 
-        def setup; end
-
         def configurator
           @configurator ||=
             Configurator.for_local(alces)

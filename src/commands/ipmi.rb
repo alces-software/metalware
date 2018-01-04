@@ -35,8 +35,6 @@ module Metalware
 
       prepend CommandHelpers::NodeIdentifier
 
-      def setup; end
-
       def run
         if options.group
           node_names.each do

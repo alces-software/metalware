@@ -33,8 +33,6 @@ module Metalware
 
       prepend CommandHelpers::NodeIdentifier
 
-      def setup; end
-
       def node_info
         { libvirt_host: node.answer.libvirt_host }
       end

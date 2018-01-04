@@ -9,8 +9,6 @@ module Metalware
       class Domain < CommandHelpers::BaseCommand
         private
 
-        def setup; end
-
         def run
           puts AnswersTableCreator.new(config, alces).domain_table
         end
