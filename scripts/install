@@ -138,7 +138,7 @@ mkdir -p /opt/alces/ca_setup
 say_done $?
 
 doing 'Setting up certificate authority'
-certtool --generate-prvkey > $CA_DIR/cakey.pem &> "${dep_logs}/install.log"
+certtool --generate-privkey > $CA_DIR/cakey.pem &> "${dep_logs}/install.log"
 cat << EOF > $CA_DIR/ca.info
 cn = Alces Software
 ca
