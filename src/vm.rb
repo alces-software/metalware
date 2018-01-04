@@ -20,20 +20,20 @@ module Metalware
       case cmd
       when 'kill'
         puts "Killing node #{@node}.."
-        domain.destroy if running?
+        domain.destroy
       when 'on'
         puts "Powering up node #{@node}.."
-        domain.create unless running?
+        domain.create
       when 'off'
         puts "Powering down node #{@node}.."
-        domain.shutdown if running?
+        domain.shutdown
       when 'reboot'
         puts "Rebooting node #{@node}.."
-        domain.reboot if running?
+        domain.reboot
       when 'status'
         puts "#{@node}: Power state: #{info[:state]}"
       else
-        raise 'Not possible'
+        raise MetalwareError, "Invalid command: #{cmd}"
       end
     end
 
