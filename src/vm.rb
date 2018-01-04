@@ -7,8 +7,10 @@ require 'namespaces/alces'
 
 module Metalware
   class Vm
-    def initialize(libvirt_host, node, *args)
-      @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
+    attr_reader :node
+
+    def initialize(node, *args)
+      @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
       @node = node
       @args = args
     end

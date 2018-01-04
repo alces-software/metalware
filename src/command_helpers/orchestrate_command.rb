@@ -34,19 +34,15 @@ module Metalware
       prepend CommandHelpers::NodeIdentifier
 
       def node_info
-        { libvirt_host: node.answer.libvirt_host }
-      end
-
-      def object
-        options.group ? group : node
+        { libvirt_host: first_node.config.libvirt_host }
       end
 
       def group
         alces.groups.find_by_name(args[0])
       end
 
-      def node
-        alces.nodes.find_by_name(node_names[0])
+      def first_node
+        nodes.first
       end
 
       def node_names

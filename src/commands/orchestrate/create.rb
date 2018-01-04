@@ -38,12 +38,12 @@ module Metalware
               create(node)
             end
           else
-            create(node)
+            create(first_node)
           end
         end
 
         def create(node)
-          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
+          libvirt = Metalware::Vm.new(node_info[:libvirt_host], first_node.name, first_node.config.vm_disk_pool)
           libvirt.create
           hunter_updater.add(node.name, node.answer.vm_mac_address_build)
         end
