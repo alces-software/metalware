@@ -31,11 +31,7 @@ module Metalware
         private
 
         def run
-          if options.group
-            nodes.each do |node|
-              destroy(node)
-            end
-          else
+          nodes.each do |node|
             destroy(node)
           end
         end
