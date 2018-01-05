@@ -31,7 +31,7 @@ module Metalware
 
       def run
         if vm?
-          system("virsh console #{node.name}")
+          raise MetalwareError, "Console not supported on virtual machines"
         elsif valid_connection?
           puts 'Establishing SOL connection, type &. to exit ..'
           system(command('activate'))
