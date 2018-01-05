@@ -87,6 +87,8 @@ module Metalware
         'crashed'
       when 7
         'suspended'
+      else
+        raise MetalwareError, "Unknown state: #{domain.info.state}"
       end
     end
 
