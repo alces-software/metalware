@@ -51,7 +51,7 @@ module Metalware
     end
 
     def destroy
-      domain.destroy if running?
+      domain.destroy
       puts "Removing domain #{node.name}"
       domain.undefine
       vol = storage.lookup_volume_by_name(node.name)
