@@ -50,6 +50,18 @@ RSpec.describe Metalware::Namespaces::Alces do
       template = '<%= alces.testing.false_key ? "true" : "false" %>'
       expect(render_template(template)).to eq(false)
     end
+
+    it 'preserve the scope when threaded' do
+      template = '<% sleep 0.2 %><%= key %>'
+      long_sleep = '<% sleep 0.3 %>'
+      t = Thread.new do
+        rendered = alces.render_erb_template(template, key: 'correct')
+        expect(rendered).to eq('correct')
+      end
+      sleep 0.1
+      alces.render_erb_template(long_sleep, key: 'incorrect scope')
+      t.join
+    end
   end
 
   describe '#local' do

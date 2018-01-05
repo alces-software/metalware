@@ -43,7 +43,7 @@ module Metalware
 
       def initialize(metal_config)
         @metal_config = metal_config
-        @dynamic_stack = []
+        @stacks_hash = {}
       end
 
       # TODO: Remove this method, use Config.cache instead
@@ -109,7 +109,7 @@ module Metalware
 
       private
 
-      attr_reader :dynamic_stack
+      attr_reader :stacks_hash
 
       def run_with_dynamic(namespace)
         if dynamic_stack.length > Constants::MAXIMUM_RECURSIVE_CONFIG_DEPTH
@@ -144,6 +144,13 @@ module Metalware
 
       def current_dynamic_namespace
         dynamic_stack.last
+      end
+
+      attr_reader :stacks_hash
+
+      def dynamic_stack
+        stacks_hash[Thread.current] = [] unless stacks_hash[Thread.current]
+        stacks_hash[Thread.current]
       end
 
       def wrapped_binding
