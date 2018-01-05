@@ -14,25 +14,28 @@ module Metalware
       @node = node
     end
 
-    def run(cmd)
-      case cmd
-      when 'kill'
-        puts "Killing node #{@node.name}.."
-        domain.destroy
-      when 'on'
-        puts "Powering up node #{@node.name}.."
-        domain.create
-      when 'off'
-        puts "Powering down node #{@node.name}.."
-        domain.shutdown
-      when 'reboot'
-        puts "Rebooting node #{@node.name}.."
-        domain.reboot
-      when 'status'
-        puts "#{@node.name}: Power state: #{state}"
-      else
-        raise MetalwareError, "Invalid command: #{cmd}"
-      end
+    def kill
+      puts "Killing node #{@node.name}.."
+      domain.destroy
+    end
+
+    def on
+      puts "Powering up node #{@node.name}.."
+      domain.create
+    end
+
+    def off
+      puts "Powering down node #{@node.name}.."
+      domain.shutdown
+    end
+
+    def reboot
+      puts "Rebooting node #{@node.name}.."
+      domain.reboot
+    end
+
+    def status
+      puts "#{@node.name}: Power state: #{state}"
     end
 
     def console

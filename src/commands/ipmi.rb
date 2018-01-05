@@ -48,7 +48,7 @@ module Metalware
 
       def run_vm(node)
         libvirt = Metalware::Vm.new(node)
-        libvirt.run(args[1])
+        libvirt.send(args[1])
       end
 
       def run_baremetal(node)
