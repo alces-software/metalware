@@ -40,7 +40,7 @@ module Metalware
 
     def run
       program :name, 'metal'
-      program :version, '2017.2.0'
+      program :version, '2017.2.1'
       program :description, 'Alces tools for the management and configuration of bare metal machines'
 
       CliHelper::Parser.new(self).parse_commands

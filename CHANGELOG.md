@@ -2,8 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2017.2.0] - 2017-12-19
+## [2017.2.1] - 2018-01-05
+- Fix the infinite recursion bug when rendering the pxelinux file for
+  multiple nodes in the build command.
 
+## [2017.2.0] - 2017-12-19
 - Added `metal template` command which renders the templates and build files
   for a node or group. All files are rendered to the staging directory and not
   their final location.
