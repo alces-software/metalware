@@ -30,24 +30,7 @@ module Metalware
   module CommandHelpers
     class OrchestrateCommand < BaseCommand
       private
-
       prepend CommandHelpers::NodeIdentifier
-
-      def node_info
-        { libvirt_host: first_node.config.libvirt_host }
-      end
-
-      def group
-        alces.groups.find_by_name(args[0])
-      end
-
-      def first_node
-        nodes.first
-      end
-
-      def node_names
-        @node_names ||= nodes.map(&:name)
-      end
     end
   end
 end
