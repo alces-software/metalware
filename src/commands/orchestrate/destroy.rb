@@ -31,18 +31,14 @@ module Metalware
         private
 
         def run
-          if options.group
-            nodes.each do |node|
-              destroy(node)
-            end
-          else
+          nodes.each do |node|
             destroy(node)
           end
         end
 
         def destroy(node)
-          libvirt = Metalware::Vm.new(node_info[:libvirt_host], node.name, 'vm')
-          libvirt.destroy(node.name)
+          libvirt = Metalware::Vm.new(node)
+          libvirt.destroy
         end
       end
     end

@@ -3,70 +3,66 @@
 require 'config'
 require 'libvirt'
 require 'metal_log'
+require 'namespaces/alces'
 
 module Metalware
   class Vm
-    def initialize(libvirt_host, node, *args)
-      @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
+    attr_reader :node
+
+    def initialize(node)
+      @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
       @node = node
-      @args = args
     end
 
-    def info
-      { state: state }
+    def kill
+      puts "Killing node #{node.name}.."
+      domain.destroy
     end
 
-    def run(cmd)
-      case cmd
-      when 'kill'
-        puts "Killing node #{@node}.."
-        domain.destroy
-      when 'on'
-        puts "Powering up node #{@node}.."
-        domain.create
-      when 'off'
-        puts "Powering down node #{@node}.."
-        domain.shutdown
-      when 'reboot'
-        puts "Rebooting node #{@node}.."
-        domain.reboot
-      when 'status'
-        puts "#{@node}: Power state: #{info[:state]}"
-      else
-        raise MetalwareError, "Invalid command: #{cmd}"
-      end
+    def on
+      puts "Powering up node #{node.name}.."
+      domain.create
+    end
+
+    def off
+      puts "Powering down node #{node.name}.."
+      domain.shutdown
+    end
+
+    def reboot
+      puts "Rebooting node #{node.name}.."
+      domain.reboot
+    end
+
+    def status
+      puts "#{node.name}: Power state: #{state}"
     end
 
     def console
-      puts "Attempting to connect to node #{@node}"
+      puts "Attempting to connect to node #{node.name}"
       domain.open_console if running?
     end
 
-    # Creates a new VM
-    # - storage: Rendered Libvirt storage XML, used to create the root disk
-    # - vm: Rendered Libvirt domain XML, used to create the domain
-    def create(disk_tpl, domain_tpl)
-      puts "Provisioning new storage volume for #{@node}"
-      storage.create_volume_xml(disk_tpl)
-      puts "Provisioning new machine #{@node}"
-      @libvirt.define_domain_xml(domain_tpl)
+    def create
+      puts "Provisioning new storage volume for #{node.name}"
+      storage.create_volume_xml(render_template('disk'))
+      puts "Provisioning new machine #{node.name}"
+      @libvirt.define_domain_xml(render_template('vm'))
     end
 
-    # Destroys a VM and its associated disk
-    # - domain: Domain name
-    def destroy(node_name)
-      domain.destroy if running?
-      puts "Removing domain #{node_name}"
+    def destroy
+      domain.destroy
+      puts "Removing domain #{node.name}"
       domain.undefine
-      vol = storage.lookup_volume_by_name(node_name)
-      puts "Removing #{node_name} storage volume"
+      vol = storage.lookup_volume_by_name(node.name)
+      puts "Removing #{node.name} storage volume"
       vol.delete
     end
 
     private
 
     def domain
-      @libvirt.lookup_domain_by_name(@node)
+      @libvirt.lookup_domain_by_name(node.name)
     end
 
     def running?
@@ -75,19 +71,34 @@ module Metalware
 
     def state
       case domain.info.state
-      when 5
-        'off'
+      when 0
+        'no state'
       when 1
         'on'
+      when 2
+        'blocked'
+      when 3
+        'paused'
+      when 4
+        'shutting down'
+      when 5
+        'off'
+      when 6
+        'crashed'
+      when 7
+        'suspended'
+      else
+        raise MetalwareError, "Unknown state: #{domain.info.state}"
       end
     end
 
-    def stream
-      @libvirt.stream
+    def storage
+      @storage ||= @libvirt.lookup_storage_pool_by_name(node.config.vm_disk_pool)
     end
 
-    def storage
-      @storage ||= @libvirt.lookup_storage_pool_by_name(@args[0])
+    def render_template(type)
+      path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
+      node.render_erb_template(File.read(path))
     end
   end
 end

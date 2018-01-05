@@ -29,29 +29,7 @@ require 'config'
 module Metalware
   module CommandHelpers
     class OrchestrateCommand < BaseCommand
-      private
-
       prepend CommandHelpers::NodeIdentifier
-
-      def node_info
-        { libvirt_host: node.answer.libvirt_host }
-      end
-
-      def object
-        options.group ? group : node
-      end
-
-      def group
-        alces.groups.find_by_name(args[0])
-      end
-
-      def node
-        alces.nodes.find_by_name(node_names[0])
-      end
-
-      def node_names
-        @node_names ||= nodes.map(&:name)
-      end
     end
   end
 end
