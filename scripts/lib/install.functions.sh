@@ -27,7 +27,7 @@ install_dist() {
 }
 
 install_certs() {
-    export CA_DIR=/opt/alces/ca_setup
+    export CA_DIR=/var/lib/metalware/certs
     mkdir -p $CA_DIR
 
     if [[ ! -f $CA_DIR/cakey.pem ]]; then
