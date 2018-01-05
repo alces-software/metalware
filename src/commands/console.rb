@@ -30,7 +30,7 @@ module Metalware
       private
 
       def run
-        raise MetalwareError, 'Console not supported on virtual machines' if vm?
+        raise MetalwareError, 'Console not supported on virtual machines' if vm?(node)
         raise MetalwareError, "Unable to connect to #{node.name}" unless valid_connection?
         puts 'Establishing SOL connection, type &. to exit..'
         system(command('activate'))
