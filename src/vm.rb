@@ -11,7 +11,7 @@ module Metalware
 
     def initialize(node)
       @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
-      node = node
+      @node = node
     end
 
     def kill
