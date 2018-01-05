@@ -11,58 +11,58 @@ module Metalware
 
     def initialize(node)
       @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
-      @node = node
+      node = node
     end
 
     def kill
-      puts "Killing node #{@node.name}.."
+      puts "Killing node #{node.name}.."
       domain.destroy
     end
 
     def on
-      puts "Powering up node #{@node.name}.."
+      puts "Powering up node #{node.name}.."
       domain.create
     end
 
     def off
-      puts "Powering down node #{@node.name}.."
+      puts "Powering down node #{node.name}.."
       domain.shutdown
     end
 
     def reboot
-      puts "Rebooting node #{@node.name}.."
+      puts "Rebooting node #{node.name}.."
       domain.reboot
     end
 
     def status
-      puts "#{@node.name}: Power state: #{state}"
+      puts "#{node.name}: Power state: #{state}"
     end
 
     def console
-      puts "Attempting to connect to node #{@node.name}"
+      puts "Attempting to connect to node #{node.name}"
       domain.open_console if running?
     end
 
     def create
-      puts "Provisioning new storage volume for #{@node.name}"
+      puts "Provisioning new storage volume for #{node.name}"
       storage.create_volume_xml(render_template('disk'))
-      puts "Provisioning new machine #{@node.name}"
+      puts "Provisioning new machine #{node.name}"
       @libvirt.define_domain_xml(render_template('vm'))
     end
 
     def destroy
       domain.destroy if running?
-      puts "Removing domain #{@node.name}"
+      puts "Removing domain #{node.name}"
       domain.undefine
-      vol = storage.lookup_volume_by_name(@node.name)
-      puts "Removing #{@node.name} storage volume"
+      vol = storage.lookup_volume_by_name(node.name)
+      puts "Removing #{node.name} storage volume"
       vol.delete
     end
 
     private
 
     def domain
-      @libvirt.lookup_domain_by_name(@node.name)
+      @libvirt.lookup_domain_by_name(node.name)
     end
 
     def running?
@@ -91,12 +91,12 @@ module Metalware
     end
 
     def storage
-      @storage ||= @libvirt.lookup_storage_pool_by_name(@node.config.vm_disk_pool)
+      @storage ||= @libvirt.lookup_storage_pool_by_name(node.config.vm_disk_pool)
     end
 
     def render_template(type)
       path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
-      @node.render_erb_template(File.read(path))
+      node.render_erb_template(File.read(path))
     end
   end
 end
