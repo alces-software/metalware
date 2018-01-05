@@ -82,10 +82,6 @@ module Metalware
         @node_names ||= nodes.map(&:name)
       end
 
-      def libvirt_host(node)
-        node.config.libvirt_host
-      end
-
       def vm?(node)
         node.config.is_vm
       end
