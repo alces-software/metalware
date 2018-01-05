@@ -42,8 +42,7 @@ module Metalware
       end
 
       def ipmi(node)
-        run_vm(node) if vm?(node)
-        run_baremetal(node) unless vm?(node)
+        vm?(node? ? run_vm(node) : run_baremetal(node)
       end
 
       def run_vm(node)
