@@ -29,7 +29,6 @@ require 'config'
 module Metalware
   module CommandHelpers
     class OrchestrateCommand < BaseCommand
-      private
       prepend CommandHelpers::NodeIdentifier
     end
   end
