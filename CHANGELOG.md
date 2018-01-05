@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.  This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2017.2.1]
+- Fix the infinite recursion bug when rendering the pxelinux file for
+  multiple nodes in the build command.
+
 ## [2017.2.0]
 - Added `metal template` command which renders the templates and build files
   for a node or group. All files are rendered to the staging directory and not
