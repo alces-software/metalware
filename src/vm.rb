@@ -65,9 +65,9 @@ module Metalware
 
     CERT_GENERATION_MSG = <<-EOF
     The following certificates have been generated, copy them
-    to the specified remote directory on julius:
+    to the specified remote directory on #{libvirt_host}:
 
-      from (local): #{CERTS_DIR}/julius-{key,cert}.pem
+      from (local): #{CERTS_DIR}/#{libvirt_host}-{key,cert}.pem
        to (remote): /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem}
     EOF
 
