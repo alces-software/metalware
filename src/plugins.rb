@@ -40,7 +40,7 @@ module Metalware
 
       def enable!(plugin_name)
         validate_plugin_exists!(plugin_name)
-        return if enabled_plugin_names.include?(plugin_name)
+        return if enabled?(plugin_name)
 
         new_enabled_plugins = enabled_plugin_names + [plugin_name]
         update_enabled_plugins!(new_enabled_plugins)
