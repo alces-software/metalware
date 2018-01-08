@@ -63,14 +63,6 @@ module Metalware
 
     CERTS_DIR = '/var/lib/metalware/certs'
 
-    CERT_GENERATION_MSG = <<-EOF
-    The following certificates have been generated, copy them
-    to the specified remote directory on #{libvirt_host}:
-
-      from (local): #{CERTS_DIR}/#{libvirt_host}-{key,cert}.pem
-       to (remote): /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem}
-    EOF
-
     def libvirt_host
       node.config.libvirt_host
     end
@@ -87,7 +79,7 @@ module Metalware
       generate_certificate_key
       generate_certificate_info
       generate_server_certificates
-      puts CERT_GENERATION_MSG
+      puts certificate_generation_message
       exit
     end
 
@@ -112,6 +104,16 @@ module Metalware
                         --load-ca-privkey #{CERTS_DIR}/cakey.pem \
                         --template #{CERTS_DIR}/#{libvirt_host}.info \
                         --outfile #{CERTS_DIR}/#{libvirt_host}-cert.pem")
+    end
+
+    def certificate_generation_message
+      <<-EOF
+  The following certificates have been generated, copy them
+  to the specified remote directory on #{libvirt_host}:
+
+    from (local): #{CERTS_DIR}/#{libvirt_host}-{key,cert}.pem
+     to (remote): /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem}
+      EOF
     end
 
     def domain
