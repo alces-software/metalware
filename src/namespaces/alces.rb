@@ -144,8 +144,6 @@ module Metalware
         dynamic_stack.last
       end
 
-      attr_reader :stacks_hash
-
       def dynamic_stack
         stacks_hash[Thread.current] = [] unless stacks_hash[Thread.current]
         stacks_hash[Thread.current]
