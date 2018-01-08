@@ -11,8 +11,8 @@ module Metalware
     attr_reader :node
 
     def initialize(node)
-      @libvirt ||= certificate? libvirt : generate_certificate
       @node = node
+      @libvirt ||= certificate? ? libvirt : generate_certificate
     end
 
     def kill
@@ -64,13 +64,17 @@ module Metalware
 
     CERTS_DIR = '/var/lib/metalware/certs'
 
-    CERT_GENERATION_MSG = <<-EOF.strip_heredoc
+    CERT_GENERATION_MSG = <<-EOF
     The following certificates have been generated, copy them
-    to the specified remote directory on #{libvirt_host}:
+    to the specified remote directory on julius:
 
-      from (local): #{CERTS_DIR}/#{libvirt_host}-{key,cert}.pem
+      from (local): #{CERTS_DIR}/julius-{key,cert}.pem
        to (remote): /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem}
     EOF
+
+    def libvirt_host
+      node.config.libvirt_host
+    end
 
     def libvirt
       Libvirt.open("qemu://#{libvirt_host}/system")
@@ -83,13 +87,9 @@ module Metalware
     def generate_certificate
       generate_certificate_key
       generate_certificate_info
-      SystemCommand.run("certtool --generate-certificate \
-                        --load-privkey #{CERTS_DIR}/#{libvirt_host} \
-                        --load-ca-certificate #{CERTS_DIR}/cacert.pem \
-                        --load-ca-privkey #{CERTS_DIR}/cakey.pem \
-                        --template #{CERTS_DIR}/#{libvirt_host} \
-                        --outfile #{CERTS_DIR}/#{libvirt_host}")
+      generate_server_certificates
       puts CERT_GENERATION_MSG
+      exit
     end
 
     def generate_certificate_key
@@ -106,12 +106,17 @@ module Metalware
       end
     end
 
-    def domain
-      @libvirt.lookup_domain_by_name(node.name)
+    def generate_server_certificates
+      SystemCommand.run("certtool --generate-certificate \
+                        --load-privkey #{CERTS_DIR}/#{libvirt_host}-key.pem \
+                        --load-ca-certificate #{CERTS_DIR}/cacert.pem \
+                        --load-ca-privkey #{CERTS_DIR}/cakey.pem \
+                        --template #{CERTS_DIR}/#{libvirt_host}.info \
+                        --outfile #{CERTS_DIR}/#{libvirt_host}-cert.pem")
     end
 
-    def libvirt_host
-      node.config.libvirt_host
+    def domain
+      @libvirt.lookup_domain_by_name(node.name)
     end
 
     def running?
