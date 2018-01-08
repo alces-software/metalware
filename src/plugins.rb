@@ -25,13 +25,14 @@
 module Metalware
   module Plugins
     class << self
-      include Enumerable
-
-      def each
-        plugin_directories.each do |dir|
-          plugin = Plugin.new(dir)
-          yield(plugin)
+      def all
+        plugin_directories.map do |dir|
+          Plugin.new(dir)
         end
+      end
+
+      def enabled
+        all.select(&:enabled?)
       end
 
       def enabled?(plugin_name)
@@ -78,7 +79,7 @@ module Metalware
       end
 
       def all_plugin_names
-        map(&:name)
+        all.map(&:name)
       end
 
       def plugin_directories

@@ -45,7 +45,7 @@ RSpec.describe Metalware::Commands::Plugin::Disable do
   let :example_plugin_name { 'example' }
 
   def example_plugin
-    Metalware::Plugins.find do |plugin|
+    Metalware::Plugins.all.find do |plugin|
       plugin.name == example_plugin_name
     end
   end

@@ -45,7 +45,7 @@ RSpec.describe Metalware::Commands::Plugin::Enable do
   let :example_plugin_name { 'example' }
 
   def example_plugin
-    Metalware::Plugins.find do |plugin|
+    Metalware::Plugins.all.find do |plugin|
       plugin.name == example_plugin_name
     end
   end
@@ -66,8 +66,8 @@ RSpec.describe Metalware::Commands::Plugin::Enable do
 
       run_plugin_enable(example_plugin_name)
 
-      matching_enabled_plugins = Metalware::Plugins.select do |plugin|
-        plugin.name == example_plugin_name && plugin.enabled?
+      matching_enabled_plugins = Metalware::Plugins.enabled.select do |plugin|
+        plugin.name == example_plugin_name
       end
       expect(matching_enabled_plugins.length).to eq 1
     end
