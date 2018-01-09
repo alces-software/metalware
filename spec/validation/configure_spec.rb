@@ -147,22 +147,6 @@ RSpec.describe Metalware::Validation::Configure do
     }
   end
 
-  context 'without a hash input' do
-    it 'loads configure file from the repo' do
-      data = { domain: [], group: [] } # Intentionally incomplete
-      Metalware::Data.dump(file_path.configure_file, data)
-      v = Metalware::Validation::Configure.new(config)
-      expect(v.send(:raw_data)).to eq(data)
-    end
-  end
-
-  context 'with a hash input' do
-    it 'uses the hash as the data input' do
-      v = Metalware::Validation::Configure.new(config, correct_hash)
-      expect(v.send(:raw_data)).to eq(correct_hash)
-    end
-  end
-
   def run_configure_validation(my_hash = {})
     Metalware::Validation::Configure.new(config, my_hash).tree
   end

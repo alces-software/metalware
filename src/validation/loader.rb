@@ -39,7 +39,7 @@ module Metalware
 
       def configure_data
         return @configure_data if @configure_data
-        tree = Validation::Configure.new(config).tree
+        tree = Validation::Configure.new(config, repo_configure_data).tree
         @configure_data = tree if cache_configure
         tree
       end
@@ -73,6 +73,10 @@ module Metalware
                                            answer_section: section,
                                            configure_data: configure_data)
         validator.data
+      end
+
+      def repo_configure_data
+        Data.load(FilePath.configure_file)
       end
     end
   end
