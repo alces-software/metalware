@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'namespaces/hash_merger_namespace_spec'
+require 'shared_examples/hash_merger_namespace'
 
 require 'namespaces/alces'
 require 'config'
