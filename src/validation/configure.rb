@@ -69,7 +69,7 @@ module Metalware
                 make_section_node(root, section)
               end
             end
-            # Make the content OpenStruct's
+            # Make the content OpenStructs
             root.each { |node| node.content = OpenStruct.new(node.content) }
           end
         end
