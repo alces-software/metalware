@@ -20,7 +20,6 @@ module Metalware
         generate_certificate_info
         generate_server_certificates
         puts certificate_generation_message
-        exit
       end
 
       private
