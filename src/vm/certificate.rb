@@ -75,7 +75,7 @@ module Metalware
       end
 
       def certificate_generation_message
-        <<~EOF
+        <<~EOF.strip_heredoc
           The following certificates have been generated, copy them
           to the specified remote directory on #{libvirt_host}:
 
