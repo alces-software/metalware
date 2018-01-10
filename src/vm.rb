@@ -12,7 +12,7 @@ module Metalware
 
     def initialize(node)
       @node = node
-      certs = Certificates.new(node)
+      certs = Certificate.new(node)
       certs.generate && return unless certs.exist?
     end
 
