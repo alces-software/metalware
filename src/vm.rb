@@ -4,6 +4,7 @@ require 'config'
 require 'libvirt'
 require 'metal_log'
 require 'namespaces/alces'
+require 'vm/certificate'
 
 module Metalware
   class Vm
