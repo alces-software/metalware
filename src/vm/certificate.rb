@@ -70,14 +70,14 @@ module Metalware
 
     def certificate_generation_message
       <<-EOF
-The following certificates have been generated, copy them
-to the specified remote directory on #{libvirt_host}:
+  The following certificates have been generated, copy them
+  to the specified remote directory on #{libvirt_host}:
 
-  from (local): #{certificate_path}
-   to (remote): /etc/pki/libvirt/servercert.pem
+    from (local): #{certificate_path}
+     to (remote): /etc/pki/libvirt/servercert.pem
 
-  from (local): #{certificate_key_path}
-   to (remote): /etc/pki/libvirt/private/serverkey.pem
+    from (local): #{certificate_key_path}
+     to (remote): /etc/pki/libvirt/private/serverkey.pem
       EOF
     end
   end
