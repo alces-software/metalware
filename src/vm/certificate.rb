@@ -86,6 +86,6 @@ module Metalware
              to (remote): /etc/pki/libvirt/private/serverkey.pem
       EOF
       end
-  end
+    end
   end
 end
