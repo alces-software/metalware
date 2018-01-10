@@ -4,14 +4,16 @@ require 'config'
 require 'libvirt'
 require 'metal_log'
 require 'namespaces/alces'
+require 'vm/certificate'
 
 module Metalware
   class Vm
     attr_reader :node
 
     def initialize(node)
-      @libvirt ||= Libvirt.open("qemu://#{node.config.libvirt_host}/system")
       @node = node
+      certs = Certificate.new(node)
+      certs.generate && return unless certs.exist?
     end
 
     def kill
@@ -61,8 +63,16 @@ module Metalware
 
     private
 
+    def libvirt_host
+      node.config.libvirt_host
+    end
+
+    def libvirt
+      @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
+    end
+
     def domain
-      @libvirt.lookup_domain_by_name(node.name)
+      libvirt.lookup_domain_by_name(node.name)
     end
 
     def running?
@@ -93,7 +103,7 @@ module Metalware
     end
 
     def storage
-      @storage ||= @libvirt.lookup_storage_pool_by_name(node.config.vm_disk_pool)
+      @storage ||= libvirt.lookup_storage_pool_by_name(node.config.vm_disk_pool)
     end
 
     def render_template(type)
