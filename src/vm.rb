@@ -11,7 +11,8 @@ module Metalware
 
     def initialize(node)
       @node = node
-      @libvirt ||= certificate? ? libvirt : generate_certificate
+      certs = Certificates.new(node)
+      certs.generate && return unless certs.exist?
     end
 
     def kill
@@ -61,63 +62,16 @@ module Metalware
 
     private
 
-    CERTS_DIR = '/var/lib/metalware/certs'
-
     def libvirt_host
       node.config.libvirt_host
     end
 
     def libvirt
-      Libvirt.open("qemu://#{libvirt_host}/system")
-    end
-
-    def certificate?
-      File.exist?("#{CERTS_DIR}/#{libvirt_host}-key.pem")
-    end
-
-    def generate_certificate
-      generate_certificate_key
-      generate_certificate_info
-      generate_server_certificates
-      puts certificate_generation_message
-      exit
-    end
-
-    def generate_certificate_key
-      SystemCommand.run("certtool --generate-privkey > #{CERTS_DIR}/#{libvirt_host}-key.pem")
-    end
-
-    def generate_certificate_info
-      File.open("#{CERTS_DIR}/#{libvirt_host}.info", 'w') do |f|
-        f.puts 'organization = Alces Software'
-        f.puts "cn = #{libvirt_host}"
-        f.puts 'tls_www_server'
-        f.puts 'encryption_key'
-        f.puts 'signing_key'
-      end
-    end
-
-    def generate_server_certificates
-      SystemCommand.run("certtool --generate-certificate \
-                        --load-privkey #{CERTS_DIR}/#{libvirt_host}-key.pem \
-                        --load-ca-certificate #{CERTS_DIR}/cacert.pem \
-                        --load-ca-privkey #{CERTS_DIR}/cakey.pem \
-                        --template #{CERTS_DIR}/#{libvirt_host}.info \
-                        --outfile #{CERTS_DIR}/#{libvirt_host}-cert.pem")
-    end
-
-    def certificate_generation_message
-      <<-EOF
-  The following certificates have been generated, copy them
-  to the specified remote directory on #{libvirt_host}:
-
-    from (local): #{CERTS_DIR}/#{libvirt_host}-{key,cert}.pem
-     to (remote): /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem}
-      EOF
+      @libvirt ||= Libvirt.open("qemu://#{libvirt_host}/system")
     end
 
     def domain
-      @libvirt.lookup_domain_by_name(node.name)
+      libvirt.lookup_domain_by_name(node.name)
     end
 
     def running?
@@ -148,7 +102,7 @@ module Metalware
     end
 
     def storage
-      @storage ||= @libvirt.lookup_storage_pool_by_name(node.config.vm_disk_pool)
+      @storage ||= libvirt.lookup_storage_pool_by_name(node.config.vm_disk_pool)
     end
 
     def render_template(type)
