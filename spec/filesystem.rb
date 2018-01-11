@@ -42,6 +42,13 @@ class FileSystem
   delegate :write, to: File
   delegate :dump, to: Metalware::Data
 
+  def self.root_setup
+    FakeFS.without do
+      yield FileSystem.root_file_system_config
+      FileSystem.test {} # Applies the changes
+    end
+  end
+
   def self.root_file_system_config(reset: false)
     @root_file_system_config = nil if reset
     @root_file_system_config ||= FileSystemConfigurator.new
@@ -66,13 +73,6 @@ class FileSystem
   def self.setup(&block)
     FileSystemConfigurator.new.tap do |configurator|
       yield configurator if block
-    end
-  end
-
-  def self.root_setup
-    FakeFS.without do
-      yield FileSystem.root_file_system_config
-      FileSystem.test {} # Applies the changes
     end
   end
 
