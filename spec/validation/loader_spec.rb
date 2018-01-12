@@ -67,16 +67,17 @@ RSpec.describe Metalware::Validation::Loader do
 
     let :filesystem do
       FileSystem.setup do |fs|
-        file_path = Metalware::FilePath
-
-        fs.dump(file_path.configure_file, configure_questions_hash)
+        fs.dump(Metalware::FilePath.configure_file, configure_questions_hash)
 
         # Create example plugin.
-        example_plugin_dir = File.join(file_path.plugins_dir, 'example')
         fs.mkdir_p example_plugin_dir
         example_plugin_configure_file = File.join(example_plugin_dir, 'configure.yaml')
         fs.dump(example_plugin_configure_file, example_plugin_configure_questions_hash)
       end
+    end
+
+    let :example_plugin_dir do
+      File.join(Metalware::FilePath.plugins_dir, 'example')
     end
 
     let :sections_to_loaded_questions do
@@ -160,11 +161,9 @@ RSpec.describe Metalware::Validation::Loader do
           end
 
           context 'when no configure.yaml for plugin' do
-            # XXX DRY up
             before :each do
-              plugin_dir = File.join(Metalware::FilePath.plugins_dir, 'example')
-              filesystem.rm_rf plugin_dir
-              filesystem.mkdir_p plugin_dir
+              filesystem.rm_rf example_plugin_dir
+              filesystem.mkdir_p example_plugin_dir
             end
 
             # XXX DRY up
