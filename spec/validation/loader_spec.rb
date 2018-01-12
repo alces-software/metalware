@@ -85,14 +85,12 @@ RSpec.describe Metalware::Validation::Loader do
       end.to_h
     end
 
-    RSpec.shared_examples 'loads_repo_configure_questions' do
-      it 'loads repo configure.yaml questions for all sections' do
+    RSpec.shared_examples 'loads_repo_configure_questions' do |section|
+      it 'loads repo configure.yaml questions' do
         filesystem.test do
-          configure_sections.each do |section|
-            questions = sections_to_loaded_questions[section]
-            question_identifiers = questions.map { |q| q.content.identifier }
-            expect(question_identifiers).to include "#{section}_identifier"
-          end
+          questions = sections_to_loaded_questions[section]
+          question_identifiers = questions.map { |q| q.content.identifier }
+          expect(question_identifiers).to include "#{section}_identifier"
         end
       end
     end
@@ -105,62 +103,60 @@ RSpec.describe Metalware::Validation::Loader do
       Metalware::Config.clear_cache
     end
 
-    context 'when no plugins enabled' do
-      include_examples 'loads_repo_configure_questions'
-    end
+    Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
+      context "for #{section}" do
 
-    context 'when plugin enabled' do
-      before :each do
-        filesystem.enable!('example')
-      end
-
-      # XXX Extract class for handling internal configure identifiers.
-      let :plugin_enabled_question_identifier { 'metalware_internal--plugin_enabled--example' }
-
-      def plugin_enabled_question_for_section(section)
-        questions = sections_to_loaded_questions[section]
-        questions.find do |question|
-          question.content.identifier == plugin_enabled_question_identifier
+        context 'when no plugins enabled' do
+          include_examples 'loads_repo_configure_questions', section
         end
-      end
 
-      include_examples 'loads_repo_configure_questions'
-
-      it 'includes generated plugin enabled question for each section' do
-        filesystem.test do
-          configure_sections.each do |section|
-            plugin_enabled_question = plugin_enabled_question_for_section(section)
-            question_content = plugin_enabled_question.content
-
-            expect(
-              question_content.question
-            ).to eq "Should 'example' plugin be enabled for #{section}?"
-            expect(
-              question_content.type
-            ).to eq 'boolean'
+        context 'when plugin enabled' do
+          before :each do
+            filesystem.enable!('example')
           end
-        end
-      end
 
-      it 'generated questions include plugin questions for section as dependents' do
-        filesystem.test do
-          configure_sections.each do |section|
-            plugin_enabled_question = plugin_enabled_question_for_section(section)
+          # XXX Extract class for handling internal configure identifiers.
+          let :plugin_enabled_question_identifier { 'metalware_internal--plugin_enabled--example' }
 
-            plugin_question = plugin_enabled_question.children.first
-            plugin_question_content = plugin_question.content
-            expect(plugin_question_content.identifier).to eq "example_plugin_#{section}_identifier"
+          let :plugin_enabled_question do
+            questions = sections_to_loaded_questions[section]
+            questions.find do |question|
+              question.content.identifier == plugin_enabled_question_identifier
+            end
+          end
 
-            # NOTE: plugin name has been prepended to question to indicate
-            # where this question comes from.
-            expect(plugin_question_content.question).to eq "[example] example_plugin_#{section}_question"
+          include_examples 'loads_repo_configure_questions', section
 
-            plugin_dependent_question = plugin_question.children.first
+          it 'includes generated plugin enabled question' do
+            filesystem.test do
+              question_content = plugin_enabled_question.content
 
-            # As above, plugin name has been prepended to dependent question.
-            expect(
-              plugin_dependent_question.content.question
-            ).to eq "[example] example_plugin_#{section}_dependent_question"
+              expect(
+                question_content.question
+              ).to eq "Should 'example' plugin be enabled for #{section}?"
+              expect(
+                question_content.type
+              ).to eq 'boolean'
+            end
+          end
+
+          it "generated question includes plugin questions for #{section} as dependents" do
+            filesystem.test do
+              plugin_question = plugin_enabled_question.children.first
+              plugin_question_content = plugin_question.content
+              expect(plugin_question_content.identifier).to eq "example_plugin_#{section}_identifier"
+
+              # NOTE: plugin name has been prepended to question to indicate
+              # where this question comes from.
+              expect(plugin_question_content.question).to eq "[example] example_plugin_#{section}_question"
+
+              plugin_dependent_question = plugin_question.children.first
+
+              # As above, plugin name has been prepended to dependent question.
+              expect(
+                plugin_dependent_question.content.question
+              ).to eq "[example] example_plugin_#{section}_dependent_question"
+            end
           end
         end
       end
