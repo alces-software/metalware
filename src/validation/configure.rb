@@ -33,7 +33,6 @@ require 'stringio'
 module Metalware
   module Validation
     class Configure
-
       # NOTE: Supported types in error.yaml message must be updated manually
       SUPPORTED_TYPES = ['string', 'integer', 'boolean'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
