@@ -158,6 +158,35 @@ RSpec.describe Metalware::Validation::Loader do
               ).to eq "[example] example_plugin_#{section}_dependent_question"
             end
           end
+
+          context 'when no configure.yaml for plugin' do
+            # XXX DRY up
+            before :each do
+              plugin_dir = File.join(Metalware::FilePath.plugins_dir, 'example')
+              filesystem.rm_rf plugin_dir
+              filesystem.mkdir_p plugin_dir
+            end
+
+            # XXX DRY up
+            it 'includes generated plugin enabled question' do
+              filesystem.test do
+                question_content = plugin_enabled_question.content
+
+                expect(
+                  question_content.question
+                ).to eq "Should 'example' plugin be enabled for #{section}?"
+                expect(
+                  question_content.type
+                ).to eq 'boolean'
+              end
+            end
+
+            it 'generated question has no dependents' do
+              filesystem.test do
+                expect(plugin_enabled_question.children).to be_empty
+              end
+            end
+          end
         end
       end
     end

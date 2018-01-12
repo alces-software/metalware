@@ -152,7 +152,15 @@ module Metalware
     end
 
     def configure_data
-      @configure_data ||= Data.load(configure_file_path)
+      @configure_data ||= default_configure_data.merge(
+        Data.load(configure_file_path)
+      )
+    end
+
+    def default_configure_data
+      Constants::CONFIGURE_SECTIONS.map do |section|
+        [section, []]
+      end.to_h
     end
 
     def configure_file_path

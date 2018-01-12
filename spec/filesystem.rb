@@ -38,7 +38,7 @@ class FileSystem
   # called on a `FileSystemConfigurator` instance and will then be correctly
   # invoked when `FileSystem.test` is run with that instance. If these were run
   # directly outside of a `test` block then the real file system would be used.
-  delegate :mkdir_p, :touch, to: FileUtils
+  delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
   delegate :write, to: File
   delegate :dump, to: Metalware::Data
   delegate :enable!, to: Metalware::Plugins
