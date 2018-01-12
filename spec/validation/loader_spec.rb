@@ -79,16 +79,18 @@ RSpec.describe Metalware::Validation::Loader do
       end
     end
 
+    let :sections_to_loaded_questions do
+      configure_sections.map do |section|
+        [section, subject.configure_data[section].children]
+      end.to_h
+    end
+
     RSpec.shared_examples 'loads_repo_configure_questions' do
       it 'loads repo configure.yaml questions for all sections' do
         filesystem.test do
-          sections_to_loaded_questions = configure_sections.map do |section|
-            [section, subject.configure_data[section].children.map(&:content).map(&:to_h)]
-          end.to_h
-
           configure_sections.each do |section|
             questions = sections_to_loaded_questions[section]
-            question_identifiers = questions.map { |q| q[:identifier] }
+            question_identifiers = questions.map { |q| q.content.identifier }
             expect(question_identifiers).to include "#{section}_identifier"
           end
         end
@@ -117,11 +119,6 @@ RSpec.describe Metalware::Validation::Loader do
       # XXX Split this massive test up
       it 'includes generated plugin question with plugin questions as dependents' do
         filesystem.test do
-          # XXX DRY up with above
-          sections_to_loaded_questions = configure_sections.map do |section|
-            [section, subject.configure_data[section].children]
-          end.to_h
-
           # XXX Extract class for handling internal configure identifiers.
           plugin_enabled_identifier = 'metalware_internal--plugin_enabled--example'
 
