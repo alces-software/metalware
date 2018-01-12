@@ -41,6 +41,7 @@ class FileSystem
   delegate :mkdir_p, :touch, to: FileUtils
   delegate :write, to: File
   delegate :dump, to: Metalware::Data
+  delegate :enable!, to: Metalware::Plugins
 
   def self.root_setup
     FakeFS.without do

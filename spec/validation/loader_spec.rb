@@ -49,7 +49,29 @@ RSpec.describe Metalware::Validation::Loader do
 
     let :filesystem do
       FileSystem.setup do |fs|
-        fs.dump(Metalware::FilePath.configure_file, configure_questions_hash)
+        file_path = Metalware::FilePath
+
+        fs.dump(file_path.configure_file, configure_questions_hash)
+
+        # Create example plugin.
+        example_plugin_dir = File.join(file_path.plugins_dir, 'example')
+        fs.mkdir_p example_plugin_dir
+      end
+    end
+
+    RSpec.shared_examples 'loads_repo_configure_questions' do
+      it 'loads repo configure.yaml questions for all sections' do
+        filesystem.test do
+          sections_to_loaded_questions = configure_sections.map do |section|
+            [section, subject.configure_data[section].children.map(&:content).map(&:to_h)]
+          end.to_h
+
+          configure_sections.each do |section|
+            questions = sections_to_loaded_questions[section]
+            question_identifiers = questions.map { |q| q[:identifier] }
+            expect(question_identifiers).to include "#{section}_identifier"
+          end
+        end
       end
     end
 
@@ -62,19 +84,15 @@ RSpec.describe Metalware::Validation::Loader do
     end
 
     context 'when no plugins enabled' do
-      it 'loads repo configure.yaml questions for all sections' do
-        filesystem.test do
-          sections_to_loaded_questions = configure_sections.map do |section|
-            [section, subject.configure_data[section].children.map(&:content).map(&:to_h)]
-          end.to_h
+      include_examples 'loads_repo_configure_questions'
+    end
 
-          configure_sections.each do |section|
-            questions = sections_to_loaded_questions[section]
-            question_identifiers = questions.map { |q| q[:identifier] }
-            expect(question_identifiers).to eq ["#{section}_identifier"]
-          end
-        end
+    context 'when plugin enabled' do
+      before :each do
+        filesystem.enable!('example')
       end
+
+      include_examples 'loads_repo_configure_questions'
     end
   end
 end
