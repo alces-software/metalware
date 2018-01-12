@@ -40,8 +40,8 @@ module Metalware
         def run
           delete_answer_files
           cache.remove(primary_group)
-          Staging.template do |templator|
-            RenderMethods::Genders.render_to_staging(alces.domain, templator)
+          Staging.template do |templater|
+            RenderMethods::Genders.render_to_staging(alces.domain, templater)
           end
         end
 

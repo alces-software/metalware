@@ -12,9 +12,9 @@ module Metalware
         @file_path = FilePath # Inherited class still require file_path
       end
 
-      def render_staging_templates(templator)
-        staging_templates.each { |t| render_to_staging(templator, t) }
-        render_build_files_to_staging(templator)
+      def render_staging_templates(templater)
+        staging_templates.each { |t| render_to_staging(templater, t) }
+        render_build_files_to_staging(templater)
       end
 
       def start_hook

@@ -33,12 +33,7 @@ require 'stringio'
 module Metalware
   module Validation
     class Configure
-      # TODO: 'choice' is going to be removed as a valid type. Instead the type
-      # will that of the data contained. Whether their is any choices will be
-      # determined by whether they are supplied.
-
       # NOTE: Supported types in error.yaml message must be updated manually
-
       SUPPORTED_TYPES = ['string', 'integer', 'boolean'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
@@ -73,7 +68,7 @@ module Metalware
                 make_section_node(root, section)
               end
             end
-            # Make the content OpenStruct's
+            # Make the content OpenStructs
             root.each { |node| node.content = OpenStruct.new(node.content) }
           end
         end

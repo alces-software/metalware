@@ -23,11 +23,17 @@ module Metalware
   module Namespaces
     class Alces
       include Mixins::AlcesStatic
-      class << self
-        def alces_new_log
-          @alces_new_log ||= MetalLog.new('alces-new')
-        end
 
+      NODE_ERROR = 'Error, a Node is not in scope'
+      GROUP_ERROR = 'Error, a Group is not in scope'
+      DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
+
+      # TODO: Remove this method, use Config.cache instead
+      attr_reader :metal_config
+
+      delegate :config, :answer, to: :scope
+
+      class << self
         LOG_MESSAGE = <<-EOF.strip_heredoc
           Create new Alces namespace. Building multiple namespaces will slow
           down metalware as they do not share a file cache. Only build a new
@@ -39,6 +45,10 @@ module Metalware
           alces_new_log.info caller
           super
         end
+
+        def alces_new_log
+          @alces_new_log ||= MetalLog.new('alces-new')
+        end
       end
 
       def initialize(metal_config)
@@ -46,26 +56,15 @@ module Metalware
         @stacks_hash = {}
       end
 
-      # TODO: Remove this method, use Config.cache instead
-      attr_reader :metal_config
-
-      delegate :config, :answer, to: :scope
-
-      NODE_ERROR = 'Error, a Node is not in scope'
-
       def node
         raise ScopeError, NODE_ERROR unless scope.is_a? Namespaces::Node
         scope
       end
 
-      GROUP_ERROR = 'Error, a Group is not in scope'
-
       def group
         raise ScopeError, GROUP_ERROR unless scope.is_a? Namespaces::Group
         scope
       end
-
-      DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
 
       def scope
         dynamic = current_dynamic_namespace || OpenStruct.new
@@ -143,8 +142,6 @@ module Metalware
       def current_dynamic_namespace
         dynamic_stack.last
       end
-
-      attr_reader :stacks_hash
 
       def dynamic_stack
         stacks_hash[Thread.current] = [] unless stacks_hash[Thread.current]

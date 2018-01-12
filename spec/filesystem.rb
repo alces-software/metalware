@@ -42,6 +42,18 @@ class FileSystem
   delegate :write, to: File
   delegate :dump, to: Metalware::Data
 
+  def self.root_setup
+    FakeFS.without do
+      yield FileSystem.root_file_system_config
+      FileSystem.test {} # Applies the changes
+    end
+  end
+
+  def self.root_file_system_config(reset: false)
+    @root_file_system_config = nil if reset
+    @root_file_system_config ||= FileSystemConfigurator.new
+  end
+
   # Perform optional configuration of the `FileSystem` prior to a `test`. The
   # yielded and returned `FileSystemConfigurator` caches any unknown method
   # calls it receives. When `test` is later called on it, it runs
@@ -58,21 +70,9 @@ class FileSystem
   # not thrown from where the actual failing call is made; it could be worth
   # actually running the methods to check this, and then replaying them afresh
   # when `test` is run.
-  def self.root_file_system_config(reset: false)
-    @root_file_system_config = nil if reset
-    @root_file_system_config ||= FileSystemConfigurator.new
-  end
-
   def self.setup(&block)
     FileSystemConfigurator.new.tap do |configurator|
       yield configurator if block
-    end
-  end
-
-  def self.root_setup
-    FakeFS.without do
-      yield FileSystem.root_file_system_config
-      FileSystem.test {} # Applies the changes
     end
   end
 
