@@ -118,8 +118,19 @@ module Metalware
       Plugins.enable!(name)
     end
 
-    # XXX Extract class for loading plugin questions?
     def configure_questions
+      ConfigureQuestionsBuilder.build(self)
+    end
+  end
+
+  ConfigureQuestionsBuilder = Struct.new(:plugin) do
+    private_class_method :new
+
+    def self.build(plugin)
+      new(plugin).build
+    end
+
+    def build
       Constants::CONFIGURE_SECTIONS.map do |section|
         [section, question_tree_for_section(section)]
       end.to_h
@@ -129,8 +140,8 @@ module Metalware
 
     def question_tree_for_section(section)
       {
-        identifier: "metalware_internal--plugin_enabled--#{name}",
-        question: "Should '#{name}' plugin be enabled for #{section}?",
+        identifier: "metalware_internal--plugin_enabled--#{plugin.name}",
+        question: "Should '#{plugin.name}' plugin be enabled for #{section}?",
         type: 'boolean',
         dependent: questions_for_section(section),
       }
@@ -145,7 +156,7 @@ module Metalware
     end
 
     def configure_file_path
-      File.join(path, 'configure.yaml')
+      File.join(plugin.path, 'configure.yaml')
     end
 
     def namespace_question_tree(question_hash)
@@ -166,7 +177,7 @@ module Metalware
     end
 
     def plugin_identifier
-      "[#{name}]"
+      "[#{plugin.name}]"
     end
   end
 end
