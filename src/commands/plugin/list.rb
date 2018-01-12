@@ -32,7 +32,7 @@ module Metalware
         private
 
         def run
-          output = Plugins.map do |plugin|
+          output = Plugins.all.map do |plugin|
             "#{plugin.name} #{plugin.enabled_identifier}"
           end.join("\n")
 
