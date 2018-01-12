@@ -47,6 +47,24 @@ RSpec.describe Metalware::Validation::Loader do
       end.to_h
     end
 
+    let :example_plugin_configure_questions_hash do
+      # XXX DRY up parts of this and above?
+      configure_sections.map do |section|
+        [
+          section, [{
+            identifier: "example_plugin_#{section}_identifier",
+            question: "example_plugin_#{section}_question",
+            dependent: [
+              {
+                identifier: "example_plugin_#{section}_dependent_identifier",
+                question: "example_plugin_#{section}_dependent_question",
+              }
+            ]
+          }]
+        ]
+      end.to_h
+    end
+
     let :filesystem do
       FileSystem.setup do |fs|
         file_path = Metalware::FilePath
@@ -56,6 +74,8 @@ RSpec.describe Metalware::Validation::Loader do
         # Create example plugin.
         example_plugin_dir = File.join(file_path.plugins_dir, 'example')
         fs.mkdir_p example_plugin_dir
+        example_plugin_configure_file = File.join(example_plugin_dir, 'configure.yaml')
+        fs.dump(example_plugin_configure_file, example_plugin_configure_questions_hash)
       end
     end
 
@@ -93,6 +113,55 @@ RSpec.describe Metalware::Validation::Loader do
       end
 
       include_examples 'loads_repo_configure_questions'
+
+      # XXX Split this massive test up
+      it 'includes generated plugin question with plugin questions as dependents' do
+        filesystem.test do
+          # XXX DRY up with above
+          sections_to_loaded_questions = configure_sections.map do |section|
+            [section, subject.configure_data[section].children]
+          end.to_h
+
+          # XXX Extract class for handling internal configure identifiers.
+          plugin_enabled_identifier = 'metalware_internal--plugin_enabled--example'
+
+          configure_sections.each do |section|
+            questions = sections_to_loaded_questions[section]
+            question_identifiers = questions.map { |q| q.content.identifier }
+
+            expect(question_identifiers).to include(plugin_enabled_identifier)
+
+            plugin_enabled_question = questions.find do |question|
+              question.content.identifier == plugin_enabled_identifier
+            end
+            question_content = plugin_enabled_question.content
+
+            expect(
+              question_content.question
+            ).to eq "Should 'example' plugin be enabled for #{section}?"
+            expect(
+              question_content.type
+            ).to eq 'boolean'
+
+            expect(plugin_enabled_question.children.length).to eq 1
+            plugin_question = plugin_enabled_question.children.first
+            plugin_question_content = plugin_question.content
+            expect(plugin_question_content.identifier).to eq "example_plugin_#{section}_identifier"
+
+            # NOTE: plugin name has been prepended to question to indicate
+            # where this question comes from.
+            expect(plugin_question_content.question).to eq "[example] example_plugin_#{section}_question"
+
+            expect(plugin_question.children.length).to eq 1
+            plugin_dependent_question = plugin_question.children.first
+
+            # As above, plugin name has been prepended to dependent question.
+            expect(
+              plugin_dependent_question.content.question
+            ).to eq "[example] example_plugin_#{section}_dependent_question"
+          end
+        end
+      end
     end
   end
 end

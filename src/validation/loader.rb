@@ -71,12 +71,33 @@ module Metalware
         validator.data
       end
 
+      # XXX Extract object for loading configure data?
       def configure_data_tree
-        Validation::Configure.new(config, repo_configure_data).tree
+        Validation::Configure.new(config, combined_configure_data).tree
       end
 
-      def repo_configure_data
-        Data.load(FilePath.configure_file)
+      def combined_configure_data
+        Constants::CONFIGURE_SECTIONS.map do |section|
+          [section, all_questions_for_section(section)]
+        end.to_h
+      end
+
+      def all_questions_for_section(section)
+        [
+          repo_configure_questions,
+          *plugin_configure_questions,
+        ].flat_map do |question_group|
+          question_group[section]
+        end
+      end
+
+      def repo_configure_questions
+        @repo_configure_questions ||= Data.load(FilePath.configure_file)
+      end
+
+      def plugin_configure_questions
+        @plugin_configure_questions ||=
+          Plugins.enabled.map(&:configure_questions)
       end
     end
   end
