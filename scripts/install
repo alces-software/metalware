@@ -156,8 +156,5 @@ to the Libvirt host(s):
 
   from (local): $CA_DIR/cacert.pem
    to (remote): /etc/pki/CA/cacert.pem (remote)
-
-  from (local): $CA_DIR/server-{key,cert}.pem
-   to (remote): /etc/pki/libvirt/{servercert.pem,/private/serverkey.pem}
 [0m
 EOF

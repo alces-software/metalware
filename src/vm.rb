@@ -18,22 +18,22 @@ module Metalware
 
     def kill
       puts "Killing node #{node.name}.."
-      domain.destroy
+      domain.destroy if running?
     end
 
     def on
       puts "Powering up node #{node.name}.."
-      domain.create
+      domain.create unless running?
     end
 
     def off
       puts "Powering down node #{node.name}.."
-      domain.shutdown
+      domain.shutdown if running?
     end
 
     def reboot
       puts "Rebooting node #{node.name}.."
-      domain.reboot
+      domain.reboot if running?
     end
 
     def status
@@ -53,7 +53,7 @@ module Metalware
     end
 
     def destroy
-      domain.destroy
+      kill
       puts "Removing domain #{node.name}"
       domain.undefine
       vol = storage.lookup_volume_by_name(node.name)
