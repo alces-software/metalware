@@ -48,7 +48,6 @@ RSpec.describe Metalware::Validation::Loader do
     end
 
     let :example_plugin_configure_questions_hash do
-      # XXX DRY up parts of this and above?
       configure_sections.map do |section|
         [
           section, [{
