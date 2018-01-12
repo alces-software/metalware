@@ -114,23 +114,22 @@ RSpec.describe Metalware::Validation::Loader do
         filesystem.enable!('example')
       end
 
+      # XXX Extract class for handling internal configure identifiers.
+      let :plugin_enabled_question_identifier { 'metalware_internal--plugin_enabled--example' }
+
+      def plugin_enabled_question_for_section(section)
+        questions = sections_to_loaded_questions[section]
+        questions.find do |question|
+          question.content.identifier == plugin_enabled_question_identifier
+        end
+      end
+
       include_examples 'loads_repo_configure_questions'
 
-      # XXX Split this massive test up
-      it 'includes generated plugin question with plugin questions as dependents' do
+      it 'includes generated plugin enabled question for each section' do
         filesystem.test do
-          # XXX Extract class for handling internal configure identifiers.
-          plugin_enabled_identifier = 'metalware_internal--plugin_enabled--example'
-
           configure_sections.each do |section|
-            questions = sections_to_loaded_questions[section]
-            question_identifiers = questions.map { |q| q.content.identifier }
-
-            expect(question_identifiers).to include(plugin_enabled_identifier)
-
-            plugin_enabled_question = questions.find do |question|
-              question.content.identifier == plugin_enabled_identifier
-            end
+            plugin_enabled_question = plugin_enabled_question_for_section(section)
             question_content = plugin_enabled_question.content
 
             expect(
@@ -139,8 +138,15 @@ RSpec.describe Metalware::Validation::Loader do
             expect(
               question_content.type
             ).to eq 'boolean'
+          end
+        end
+      end
 
-            expect(plugin_enabled_question.children.length).to eq 1
+      it 'generated questions include plugin questions for section as dependents' do
+        filesystem.test do
+          configure_sections.each do |section|
+            plugin_enabled_question = plugin_enabled_question_for_section(section)
+
             plugin_question = plugin_enabled_question.children.first
             plugin_question_content = plugin_question.content
             expect(plugin_question_content.identifier).to eq "example_plugin_#{section}_identifier"
@@ -149,7 +155,6 @@ RSpec.describe Metalware::Validation::Loader do
             # where this question comes from.
             expect(plugin_question_content.question).to eq "[example] example_plugin_#{section}_question"
 
-            expect(plugin_question.children.length).to eq 1
             plugin_dependent_question = plugin_question.children.first
 
             # As above, plugin name has been prepended to dependent question.
