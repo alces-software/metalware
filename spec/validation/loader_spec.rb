@@ -96,6 +96,21 @@ RSpec.describe Metalware::Validation::Loader do
       end
     end
 
+    RSpec.shared_examples 'includes_generated_plugin_enabled_question' do |section|
+      it 'includes generated plugin enabled question' do
+        filesystem.test do
+          question_content = plugin_enabled_question.content
+
+          expect(
+            question_content.question
+          ).to eq "Should 'example' plugin be enabled for #{section}?"
+          expect(
+            question_content.type
+          ).to eq 'boolean'
+        end
+      end
+    end
+
     subject do
       described_class.new(config)
     end
@@ -127,19 +142,7 @@ RSpec.describe Metalware::Validation::Loader do
           end
 
           include_examples 'loads_repo_configure_questions', section
-
-          it 'includes generated plugin enabled question' do
-            filesystem.test do
-              question_content = plugin_enabled_question.content
-
-              expect(
-                question_content.question
-              ).to eq "Should 'example' plugin be enabled for #{section}?"
-              expect(
-                question_content.type
-              ).to eq 'boolean'
-            end
-          end
+          include_examples 'includes_generated_plugin_enabled_question', section
 
           it "generated question includes plugin questions for #{section} as dependents" do
             filesystem.test do
@@ -166,19 +169,7 @@ RSpec.describe Metalware::Validation::Loader do
               filesystem.mkdir_p example_plugin_dir
             end
 
-            # XXX DRY up
-            it 'includes generated plugin enabled question' do
-              filesystem.test do
-                question_content = plugin_enabled_question.content
-
-                expect(
-                  question_content.question
-                ).to eq "Should 'example' plugin be enabled for #{section}?"
-                expect(
-                  question_content.type
-                ).to eq 'boolean'
-              end
-            end
+            include_examples 'includes_generated_plugin_enabled_question', section
 
             it 'generated question has no dependents' do
               filesystem.test do
