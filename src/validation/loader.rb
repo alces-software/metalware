@@ -37,7 +37,9 @@ module Metalware
       end
 
       def configure_data
-        @configure_data ||= configure_data_tree
+        # XXX Extract object for loading configure data?
+        @configure_data ||=
+          Validation::Configure.new(config, combined_configure_data).tree
       end
 
       # Returns a tree
@@ -69,11 +71,6 @@ module Metalware
                                            answer_section: section,
                                            configure_data: configure_data)
         validator.data
-      end
-
-      # XXX Extract object for loading configure data?
-      def configure_data_tree
-        Validation::Configure.new(config, combined_configure_data).tree
       end
 
       def combined_configure_data
