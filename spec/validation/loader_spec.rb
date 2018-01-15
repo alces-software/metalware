@@ -127,7 +127,7 @@ RSpec.describe Metalware::Validation::Loader do
 
         context 'when plugin enabled' do
           before :each do
-            filesystem.enable!('example')
+            filesystem.enable_plugin('example')
           end
 
           # XXX Extract class for handling internal configure identifiers.

@@ -46,7 +46,10 @@ class FileSystem
     delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
     delegate :write, to: File
     delegate :dump, to: Metalware::Data
-    delegate :enable!, to: Metalware::Plugins
+
+    def enable_plugin(plugin_name)
+      Metalware::Plugins.enable!(plugin_name)
+    end
   end
   include SetupMethods
 
