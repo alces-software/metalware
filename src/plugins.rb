@@ -83,6 +83,7 @@ module Metalware
       end
 
       def plugin_directories
+        return [] unless plugins_dir.exist?
         plugins_dir.children.select(&:directory?)
       end
 
@@ -115,6 +116,76 @@ module Metalware
 
     def enable!
       Plugins.enable!(name)
+    end
+
+    def configure_questions
+      ConfigureQuestionsBuilder.build(self)
+    end
+  end
+
+  ConfigureQuestionsBuilder = Struct.new(:plugin) do
+    private_class_method :new
+
+    def self.build(plugin)
+      new(plugin).build
+    end
+
+    def build
+      Constants::CONFIGURE_SECTIONS.map do |section|
+        [section, question_hash_for_section(section)]
+      end.to_h
+    end
+
+    private
+
+    def question_hash_for_section(section)
+      {
+        identifier: "metalware_internal--plugin_enabled--#{plugin.name}",
+        question: "Should '#{plugin.name}' plugin be enabled for #{section}?",
+        type: 'boolean',
+        dependent: questions_for_section(section),
+      }
+    end
+
+    def questions_for_section(section)
+      configure_data[section].map { |q| namespace_question_hash(q) }
+    end
+
+    def configure_data
+      @configure_data ||= default_configure_data.merge(
+        Data.load(configure_file_path)
+      )
+    end
+
+    def default_configure_data
+      Constants::CONFIGURE_SECTIONS.map do |section|
+        [section, []]
+      end.to_h
+    end
+
+    def configure_file_path
+      File.join(plugin.path, 'configure.yaml')
+    end
+
+    def namespace_question_hash(question_hash)
+      # Prepend plugin name to question text, as well as recursively to all
+      # dependent questions, so source of plugin questions is clear when
+      # configuring.
+      question_hash.map do |k, v|
+        new_value = case k
+                    when :question
+                      "#{plugin_identifier} #{v}"
+                    when :dependent
+                      v.map { |q| namespace_question_hash(q) }
+                    else
+                      v
+                    end
+        [k, new_value]
+      end.to_h
+    end
+
+    def plugin_identifier
+      "[#{plugin.name}]"
     end
   end
 end
