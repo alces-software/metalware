@@ -132,13 +132,13 @@ module Metalware
 
     def build
       Constants::CONFIGURE_SECTIONS.map do |section|
-        [section, question_tree_for_section(section)]
+        [section, question_hash_for_section(section)]
       end.to_h
     end
 
     private
 
-    def question_tree_for_section(section)
+    def question_hash_for_section(section)
       {
         identifier: "metalware_internal--plugin_enabled--#{plugin.name}",
         question: "Should '#{plugin.name}' plugin be enabled for #{section}?",
@@ -148,7 +148,7 @@ module Metalware
     end
 
     def questions_for_section(section)
-      configure_data[section].map { |q| namespace_question_tree(q) }
+      configure_data[section].map { |q| namespace_question_hash(q) }
     end
 
     def configure_data
@@ -167,7 +167,7 @@ module Metalware
       File.join(plugin.path, 'configure.yaml')
     end
 
-    def namespace_question_tree(question_hash)
+    def namespace_question_hash(question_hash)
       # Prepend plugin name to question text, as well as recursively to all
       # dependent questions, so source of plugin questions is clear when
       # configuring.
@@ -176,7 +176,7 @@ module Metalware
                     when :question
                       "#{plugin_identifier} #{v}"
                     when :dependent
-                      v.map { |q| namespace_question_tree(q) }
+                      v.map { |q| namespace_question_hash(q) }
                     else
                       v
                     end
