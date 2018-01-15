@@ -30,8 +30,7 @@ module Metalware
       end
 
       def load_yaml(section, section_name = nil)
-        input = (section_name ? [section_name] : [])
-        loader.section_answers(section, *input)
+        loader.section_answers(section, section_name)
       end
 
       def section_default(section)
