@@ -49,18 +49,16 @@ RSpec.describe Metalware::Validation::Loader do
 
     let :example_plugin_configure_questions_hash do
       configure_sections.map do |section|
-        [
-          section, [{
-            identifier: "example_plugin_#{section}_identifier",
-            question: "example_plugin_#{section}_question",
-            dependent: [
-              {
-                identifier: "example_plugin_#{section}_dependent_identifier",
-                question: "example_plugin_#{section}_dependent_question",
-              }
-            ]
-          }]
-        ]
+        dependent_question = {
+          identifier: "example_plugin_#{section}_dependent_identifier",
+          question: "example_plugin_#{section}_dependent_question",
+        }
+        top_level_question = {
+          identifier: "example_plugin_#{section}_identifier",
+          question: "example_plugin_#{section}_question",
+          dependent: [dependent_question]
+        }
+        [section, [top_level_question]]
       end.to_h
     end
 
