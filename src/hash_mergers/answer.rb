@@ -29,7 +29,7 @@ module Metalware
         end
       end
 
-      def load_yaml(section, section_name = nil)
+      def load_yaml(section, section_name)
         loader.section_answers(section, section_name)
       end
 
