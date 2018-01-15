@@ -34,14 +34,21 @@ class FileSystem
   # `test` on the resulting object, or to call `FileSystem.test` directly.
   private_class_method :new
 
-  # Delegate file system handling methods appropriately here, so these can be
-  # called on a `FileSystemConfigurator` instance and will then be correctly
-  # invoked when `FileSystem.test` is run with that instance. If these were run
-  # directly outside of a `test` block then the real file system would be used.
-  delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
-  delegate :write, to: File
-  delegate :dump, to: Metalware::Data
-  delegate :enable!, to: Metalware::Plugins
+  module SetupMethods
+    # This module contains all methods to be called on a FileSystem to set up
+    # the underlying FakeFS. All methods are appropriately delegated here, so
+    # these can be called on a `FileSystemConfigurator` instance and will then
+    # be correctly invoked when `FileSystem.test` is run with that instance.
+    # This module is necessary as if any of the original methods were run
+    # directly outside of a `test` block then the real file system would be
+    # used.
+
+    delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
+    delegate :write, to: File
+    delegate :dump, to: Metalware::Data
+    delegate :enable!, to: Metalware::Plugins
+  end
+  include SetupMethods
 
   def self.root_setup
     FakeFS.without do
