@@ -95,10 +95,10 @@ module Metalware
       def hash_merger_input
         { groups: genders, node: name }
       rescue NodeNotInGendersError
-        # The answer hash needs to be accessable by the Configurator
-        # Nodes in a group work fine as they appear in the genders file
-        # BUT local and orphan nodes DO NOT appear in the genders file and
-        # cause the above error
+        # The answer hash needs to be accessible by the Configurator. Nodes in
+        # a group work fine as they appear in the genders file BUT local and
+        # orphan nodes DO NOT appear in the genders file and cause the above
+        # error.
         return { groups: ['orphan'], node: name }
       end
 
