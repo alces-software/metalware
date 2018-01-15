@@ -9,8 +9,9 @@ module Metalware
       private
 
       def load_yaml(section, section_name = nil)
-        input = (section_name ? [section_name] : [])
-        Data.load(file_path.send("#{section}_config", *input))
+        args = [section_name].compact
+        config_file = file_path.send("#{section}_config", *args)
+        Data.load(config_file)
       end
     end
   end
