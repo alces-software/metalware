@@ -64,17 +64,6 @@ RSpec.describe Metalware::Validation::Loader do
       end.to_h
     end
 
-    let :filesystem do
-      FileSystem.setup do |fs|
-        fs.dump(Metalware::FilePath.configure_file, configure_questions_hash)
-
-        # Create example plugin.
-        fs.mkdir_p example_plugin_dir
-        example_plugin_configure_file = File.join(example_plugin_dir, 'configure.yaml')
-        fs.dump(example_plugin_configure_file, example_plugin_configure_questions_hash)
-      end
-    end
-
     let :example_plugin_dir do
       File.join(Metalware::FilePath.plugins_dir, 'example')
     end
@@ -87,31 +76,38 @@ RSpec.describe Metalware::Validation::Loader do
 
     RSpec.shared_examples 'loads_repo_configure_questions' do |section|
       it 'loads repo configure.yaml questions' do
-        filesystem.test do
-          questions = sections_to_loaded_questions[section]
-          question_identifiers = questions.map { |q| q.content.identifier }
-          expect(question_identifiers).to include "#{section}_identifier"
-        end
+        questions = sections_to_loaded_questions[section]
+        question_identifiers = questions.map { |q| q.content.identifier }
+        expect(question_identifiers).to include "#{section}_identifier"
       end
     end
 
     RSpec.shared_examples 'includes_generated_plugin_enabled_question' do |section|
       it 'includes generated plugin enabled question' do
-        filesystem.test do
-          question_content = plugin_enabled_question.content
+        question_content = plugin_enabled_question.content
 
-          expect(
-            question_content.question
-          ).to eq "Should 'example' plugin be enabled for #{section}?"
-          expect(
-            question_content.type
-          ).to eq 'boolean'
-        end
+        expect(
+          question_content.question
+        ).to eq "Should 'example' plugin be enabled for #{section}?"
+        expect(
+          question_content.type
+        ).to eq 'boolean'
       end
     end
 
     subject do
       described_class.new(config)
+    end
+
+    before :each do
+      FileSystem.root_setup do |fs|
+        fs.dump(Metalware::FilePath.configure_file, configure_questions_hash)
+
+        # Create example plugin.
+        fs.mkdir_p example_plugin_dir
+        example_plugin_configure_file = File.join(example_plugin_dir, 'configure.yaml')
+        fs.dump(example_plugin_configure_file, example_plugin_configure_questions_hash)
+      end
     end
 
     after :each do
@@ -127,7 +123,9 @@ RSpec.describe Metalware::Validation::Loader do
 
         context 'when plugin enabled' do
           before :each do
-            filesystem.enable_plugin('example')
+            FileSystem.root_setup do |fs|
+              fs.enable_plugin('example')
+            end
           end
 
           # XXX Extract class for handling internal configure identifiers.
@@ -144,36 +142,34 @@ RSpec.describe Metalware::Validation::Loader do
           include_examples 'includes_generated_plugin_enabled_question', section
 
           it "generated question includes plugin questions for #{section} as dependents" do
-            filesystem.test do
-              plugin_question = plugin_enabled_question.children.first
-              plugin_question_content = plugin_question.content
-              expect(plugin_question_content.identifier).to eq "example_plugin_#{section}_identifier"
+            plugin_question = plugin_enabled_question.children.first
+            plugin_question_content = plugin_question.content
+            expect(plugin_question_content.identifier).to eq "example_plugin_#{section}_identifier"
 
-              # NOTE: plugin name has been prepended to question to indicate
-              # where this question comes from.
-              expect(plugin_question_content.question).to eq "[example] example_plugin_#{section}_question"
+            # NOTE: plugin name has been prepended to question to indicate
+            # where this question comes from.
+            expect(plugin_question_content.question).to eq "[example] example_plugin_#{section}_question"
 
-              plugin_dependent_question = plugin_question.children.first
+            plugin_dependent_question = plugin_question.children.first
 
-              # As above, plugin name has been prepended to dependent question.
-              expect(
-                plugin_dependent_question.content.question
-              ).to eq "[example] example_plugin_#{section}_dependent_question"
-            end
+            # As above, plugin name has been prepended to dependent question.
+            expect(
+              plugin_dependent_question.content.question
+            ).to eq "[example] example_plugin_#{section}_dependent_question"
           end
 
           context 'when no configure.yaml for plugin' do
             before :each do
-              filesystem.rm_rf example_plugin_dir
-              filesystem.mkdir_p example_plugin_dir
+              FileSystem.root_setup do |fs|
+                fs.rm_rf example_plugin_dir
+                fs.mkdir_p example_plugin_dir
+              end
             end
 
             include_examples 'includes_generated_plugin_enabled_question', section
 
             it 'generated question has no dependents' do
-              filesystem.test do
-                expect(plugin_enabled_question.children).to be_empty
-              end
+              expect(plugin_enabled_question.children).to be_empty
             end
           end
         end
