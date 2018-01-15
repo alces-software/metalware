@@ -13,7 +13,7 @@ module Metalware
       def initialize(metalware_config)
         @metalware_config = metalware_config
         @file_path = FilePath.new(metalware_config)
-        @loader = Validation::Loader.new(metalware_config, cache_configure: true)
+        @loader = Validation::Loader.new(metalware_config)
         @cache = {}
       end
 

@@ -50,9 +50,9 @@ module Metalware
         end
       end
 
-      def initialize(config, data_hash = nil)
+      def initialize(config, questions_hash)
         @config = config
-        @raw_data = (data_hash || load_configure_file).freeze
+        @questions_hash = questions_hash.freeze
         raise_error_if_validation_failed
       end
 
@@ -60,7 +60,7 @@ module Metalware
         @tree ||= begin
           root_hash = {
             pass: true,
-            result: TopLevelSchema.call(data: raw_data),
+            result: TopLevelSchema.call(data: questions_hash),
           }
           Tree::TreeNode.new('ROOT', root_hash).tap do |root|
             add_children(root, root) do
@@ -76,12 +76,7 @@ module Metalware
 
       private
 
-      attr_reader :config, :raw_data
-
-      def load_configure_file
-        Data.load(FilePath.configure_file)
-      end
-
+      attr_reader :config, :questions_hash
       attr_accessor :failed_validation
 
       def raise_error_if_validation_failed
@@ -107,7 +102,7 @@ module Metalware
       end
 
       def make_section_node(root, section)
-        question_data = raw_data[section] || []
+        question_data = questions_hash[section] || []
         data = {
           section: section,
           result: DependantSchema.call(dependent: question_data),
