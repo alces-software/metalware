@@ -3,6 +3,7 @@
 
 require 'build_methods'
 require 'build_files_retriever'
+require 'namespaces/plugin'
 
 module Metalware
   module Namespaces
@@ -73,6 +74,12 @@ module Metalware
         FilePath.event self
       end
 
+      def plugins
+        Plugins.enabled.map do |plugin|
+          Namespaces::Plugin.new(plugin) if plugin_enabled?(plugin)
+        end.compact
+      end
+
       private
 
       def white_list_for_hasher
@@ -118,6 +125,11 @@ module Metalware
         else
           BuildMethods::Kickstarts::Pxelinux
         end
+      end
+
+      def plugin_enabled?(plugin)
+        # XXX internal identifier duplicated here
+        answer.send("metalware_internal--plugin_enabled--#{plugin.name}".to_sym)
       end
     end
   end

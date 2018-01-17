@@ -50,6 +50,14 @@ class FileSystem
     def enable_plugin(plugin_name)
       Metalware::Plugins.enable!(plugin_name)
     end
+
+    # Perform arbitrary other FileSystem setup.
+    # TODO Maybe everything/more things should be changed to just do this,
+    # rather than continuing to add new methods here every time we want to
+    # create a file in a new way?
+    def setup(&block)
+      block.call
+    end
   end
   include SetupMethods
 
