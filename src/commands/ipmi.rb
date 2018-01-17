@@ -52,7 +52,7 @@ module Metalware
       end
 
       def run_baremetal(node)
-        puts "#{node}: #{SystemCommand.run(command(node))}"
+        puts "#{node.name}: #{SystemCommand.run(command(node.name))}"
       end
 
       def command(host)
