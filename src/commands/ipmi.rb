@@ -52,11 +52,11 @@ module Metalware
       end
 
       def run_baremetal(node)
-        puts "#{node}: #{SystemCommand.run(command(node))}"
+        puts "#{node.name}: #{SystemCommand.run(command(node.name))}"
       end
 
       def command(host)
-        "ipmitool -H #{host}.bmc #{render_credentials} #{render_command}"
+        "ipmitool -H #{host}.bmc -I lanplus #{render_credentials} #{render_command}"
       end
 
       def render_command
