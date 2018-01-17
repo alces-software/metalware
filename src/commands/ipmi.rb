@@ -56,7 +56,7 @@ module Metalware
       end
 
       def command(host)
-        "ipmitool -H #{host}.bmc #{render_credentials} #{render_command}"
+        "ipmitool -H #{host}.bmc -I lanplus #{render_credentials} #{render_command}"
       end
 
       def render_command
