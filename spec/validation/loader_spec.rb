@@ -126,13 +126,11 @@ RSpec.describe Metalware::Validation::Loader do
             end
           end
 
-          # XXX Extract class for handling internal configure identifiers.
-          let :plugin_enabled_question_identifier { 'metalware_internal--plugin_enabled--example' }
-
           let :plugin_enabled_question do
             questions = sections_to_loaded_questions[section]
             questions.find do |question|
-              question.content.identifier == plugin_enabled_question_identifier
+              question.content.identifier ==
+                Metalware::Plugins.enabled_question_identifier('example')
             end
           end
 

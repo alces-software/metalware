@@ -128,8 +128,7 @@ module Metalware
       end
 
       def plugin_enabled?(plugin)
-        # XXX internal identifier duplicated here
-        answer.send("metalware_internal--plugin_enabled--#{plugin.name}".to_sym)
+        answer.send(plugin.enabled_question_identifier)
       end
     end
   end
