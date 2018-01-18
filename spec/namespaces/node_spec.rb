@@ -219,9 +219,9 @@ RSpec.describe Metalware::Namespaces::Node do
 
     # XXX Need to handle situation of plugin being enabled for node but not
     # available globally?
-    # XXX handle enabled but unconfigured plugin for node here
     let :node_enabled_plugin { 'node_enabled_plugin' }
     let :node_disabled_plugin { 'node_disabled_plugin' }
+    let :node_unconfigured_plugin { 'node_unconfigured_plugin' }
     let :globally_disabled_plugin { 'globally_disabled_plugin' }
 
     before :each do
@@ -231,13 +231,22 @@ RSpec.describe Metalware::Namespaces::Node do
         fs.with_minimal_repo
 
         # Create all test plugins.
-        [node_enabled_plugin, node_disabled_plugin, globally_disabled_plugin].each do |plugin|
+        [
+          node_enabled_plugin,
+          node_disabled_plugin,
+          node_unconfigured_plugin,
+          globally_disabled_plugin
+        ].each do |plugin|
           fs.mkdir_p File.join(Metalware::FilePath.plugins_dir, plugin)
         end
 
         fs.setup do
           # Enable these plugins globally.
-          [node_enabled_plugin, node_disabled_plugin].each do |plugin|
+          [
+            node_enabled_plugin,
+            node_disabled_plugin,
+            node_unconfigured_plugin
+          ].each do |plugin|
             Metalware::Plugins.enable!(plugin)
           end
 
