@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 RSpec.describe Metalware::Plugins::Plugin do
   describe '#enabled_question_identifier' do
     it 'gives correct identifier for generated plugin enabled question' do

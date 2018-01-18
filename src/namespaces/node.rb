@@ -96,7 +96,7 @@ module Metalware
       end
 
       def recursive_white_list_for_hasher
-        super.push(:files)
+        super.push(:files, :plugins)
       end
 
       def hash_merger_input

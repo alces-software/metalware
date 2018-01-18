@@ -235,7 +235,7 @@ RSpec.describe Metalware::Namespaces::Node do
           node_enabled_plugin,
           node_disabled_plugin,
           node_unconfigured_plugin,
-          globally_disabled_plugin
+          globally_disabled_plugin,
         ].each do |plugin|
           fs.mkdir_p File.join(Metalware::FilePath.plugins_dir, plugin)
         end
@@ -245,7 +245,7 @@ RSpec.describe Metalware::Namespaces::Node do
           [
             node_enabled_plugin,
             node_disabled_plugin,
-            node_unconfigured_plugin
+            node_unconfigured_plugin,
           ].each do |plugin|
             Metalware::Plugins.enable!(plugin)
           end
