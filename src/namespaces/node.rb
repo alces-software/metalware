@@ -75,7 +75,7 @@ module Metalware
       end
 
       def plugins
-        Plugins.enabled.map do |plugin|
+        @plugins ||= Plugins.enabled.map do |plugin|
           Namespaces::Plugin.new(plugin) if plugin_enabled?(plugin)
         end.compact
       end
