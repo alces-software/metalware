@@ -2,11 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2018.1.0-pre1] - 2018-01-22
+
+- Added support for conditional Metalware configuration questions.
+- Added `orchestrate` commands for orchestration of VMs via Libvirt in
+  Metalware.
+- Added support for running `ipmi` (or at least VM equivalent to this) and
+  `power` commands on VMs.
+- Improved error-handling in existing `ipmi`, `power`, and `console` commands.
+- Added `plugin` commands for Metalware plugin management.
+- Added support for configuration of Metalware plugins.
+- Various other small bug fixes and tweaks.
+
 ## [2017.2.1] - 2018-01-05
+
 - Fix the infinite recursion bug when rendering the pxelinux file for
   multiple nodes in the build command.
 
 ## [2017.2.0] - 2017-12-19
+
 - Added `metal template` command which renders the templates and build files
   for a node or group. All files are rendered to the staging directory and not
   their final location.
