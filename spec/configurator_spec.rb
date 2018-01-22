@@ -69,25 +69,20 @@ RSpec.describe Metalware::Configurator do
     )
   end
 
-  let :blank_questions do
-    { domain: {}, group: {}, node: {}, local: {} }
-  end
-
-  def define_questions(questions_hash)
-    merged_hash = blank_questions.merge questions_hash
-    allow(loader).to receive(:configure_data).and_return(merged_hash)
-    allow(Metalware::Validation::Loader).to receive(:new).and_return(loader)
+  def define_questions(**h)
+    v = Metalware::Validation::Configure.new(metal_config, h)
+    allow(Metalware::Validation::Configure).to receive(:new).and_return(v)
   end
 
   def redirect_stdout
     $stdout = tmp = Tempfile.new
     yield
     tmp.close
-  rescue => e
+  rescue StandardError => e
     begin
       $stdout.rewind
       STDERR.puts $stdout.read
-    rescue
+    rescue StandardError
       # XXX Not handling this gives a Rubocop warning; should we do something
       # here?
     end
@@ -117,12 +112,13 @@ RSpec.describe Metalware::Configurator do
 
   describe '#configure' do
     it 'asks questions with type `string`' do
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'Can you enter a string?',
                            type: 'string',
                          },
-                       })
+                       ])
 
       configure_with_answers(['My string'])
 
@@ -130,11 +126,12 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks questions with no `type` as `string`' do
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'Can you enter a string?',
                          },
-                       })
+                       ])
 
       configure_with_answers(['My string'])
 
@@ -142,12 +139,13 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks questions with type `integer`' do
-      define_questions(domain: {
-                         integer_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'integer_q',
                            question: 'Can you enter an integer?',
                            type: 'integer',
                          },
-                       })
+                       ])
 
       configure_with_answers(['7'])
 
@@ -155,12 +153,13 @@ RSpec.describe Metalware::Configurator do
     end
 
     it "uses confirmation for questions with type 'boolean'" do
-      define_questions(domain: {
-                         boolean_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'boolean_q',
                            question: 'Should this cluster be awesome?',
                            type: 'boolean',
                          },
-                       })
+                       ])
 
       expect(highline).to receive(
         :agree
@@ -176,12 +175,13 @@ RSpec.describe Metalware::Configurator do
     end
 
     it "offers choices for question with type 'choice'" do
-      define_questions(domain: {
-                         choice_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'choice_q',
                            question: 'What choice would you like?',
                            choices: ['foo', 'bar'],
                          },
-                       })
+                       ])
 
       expect(highline).to receive(
         :choose
@@ -195,25 +195,23 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'asks all questions in order' do
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'String?',
                            type: 'string',
                          },
-                         integer_q: {
+                         {
+                           identifier: 'integer_q',
                            question: 'Integer?',
                            type: 'integer',
                          },
-                         boolean_q: {
+                         {
+                           identifier: 'boolean_q',
                            question: 'Boolean?',
                            type: 'boolean',
                          },
-                       },
-                       some_other_questions: {
-                         not_asked_q: {
-                           question: 'Not asked?',
-                         },
-                       })
+                       ])
 
       configure_with_answers(['Some string', '11', 'no'])
 
@@ -228,32 +226,37 @@ RSpec.describe Metalware::Configurator do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'String?',
                            type: 'string',
                            default: str_ans,
                          },
-                         string_erb: {
+                         {
+                           identifier: 'string_erb',
                            question: 'Erb?',
                            default: erb_ans,
                          },
-                         integer_q: {
+                         {
+                           identifier: 'integer_q',
                            question: 'Integer?',
                            type: 'integer',
                            default: 10,
                          },
-                         true_boolean_q: {
+                         {
+                           identifier: 'true_boolean_q',
                            question: 'Boolean?',
                            type: 'boolean',
                            default: true,
                          },
-                         false_boolean_q: {
+                         {
+                           identifier: 'false_boolean_q',
                            question: 'More boolean?',
                            type: 'boolean',
                            default: false,
                          },
-                       })
+                       ])
 
       configure_with_answers([''] * 5)
 
@@ -261,30 +264,35 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-saves the old answers if new answers not provided' do
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'String?',
                            default: 'This is the wrong string',
                          },
-                         integer_q: {
+                         {
+                           identifier: 'integer_q',
                            question: 'Integer?',
                            type: 'integer',
                            default: 10,
                          },
-                         false_saved_boolean_q: {
+                         {
+                           identifier: 'false_saved_boolean_q',
                            question: 'Boolean?',
                            type: 'boolean',
                            default: true,
                          },
-                         true_saved_boolean_q: {
+                         {
+                           identifier: 'true_saved_boolean_q',
                            question: 'More boolean?',
                            type: 'boolean',
                            default: false,
                          },
-                         should_keep_old_answer: {
+                         {
+                           identifier: 'should_keep_old_answer',
                            question: 'Did I keep my old answer?',
                          },
-                       })
+                       ])
 
       original_answers = {
         string_q: 'CORRECT',
@@ -306,11 +314,12 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 're-asks the required questions if no answer is given' do
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'I should be re-asked',
                          },
-                       })
+                       ])
 
       expect do
         old_stderr = STDERR
@@ -334,12 +343,13 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'allows optional questions to have empty answers' do
-      define_questions(domain: {
-                         string_q: {
+      define_questions(domain: [
+                         {
+                           identifier: 'string_q',
                            question: 'I should NOT be re-asked',
                            optional: true,
                          },
-                       })
+                       ])
       expected = {
         string_q: '',
       }
@@ -349,20 +359,23 @@ RSpec.describe Metalware::Configurator do
     end
 
     it 'indicates how far through questions you are' do
-      define_questions(domain: {
-                         question_1: {
+      define_questions(domain: [
+                         {
+                           identifier: 'question_1',
                            question: 'String question',
                          },
-                         question_2: {
+                         {
+                           identifier: 'question_2',
                            question: 'Integer question',
                            type: 'integer',
                          },
-                         question_3: {
-                           # This question has trailing spaces to test these are stripped.
+                         {
+                           identifier: 'question_3',
+                           # The trailing spaces to test these are stripped.
                            question: '  Boolean question  ',
                            type: 'boolean',
                          },
-                       })
+                       ])
 
       configure_with_answers(['foo', 1, true])
 
@@ -379,11 +392,12 @@ RSpec.describe Metalware::Configurator do
 
     context 'when answers passed to configure' do
       it 'uses given answers instead of asking questions' do
-        define_questions(domain: {
-                           question_1: {
+        define_questions(domain: [
+                           {
+                             identifier: 'question_1',
                              question: 'Some question',
                            },
-                         })
+                         ])
         passed_answers = {
           question_1: 'answer_1',
         }
@@ -404,17 +418,47 @@ RSpec.describe Metalware::Configurator do
     end
 
     before :each do
-      define_questions(node: {
-                         string_q: {
+      define_questions(node: [
+                         {
+                           identifier: 'string_q',
                            question: 'String?',
                            default: 'default',
                          },
-                       })
+                       ])
       configure_with_answers(['answer', 'sagh'], test_obj: configure_orphan)
     end
 
     it 'creates the orphan node' do
       expect(new_group_cache.orphans).to include(orphan)
+    end
+  end
+
+  context 'with a dependent questions' do
+    before :each do
+      define_questions(domain: [
+                         {
+                           identifier: 'parent',
+                           question: 'Ask my child?',
+                           type: 'boolean',
+                           dependent: [
+                             {
+                               identifier: 'child',
+                               question: 'Did I get asked?',
+                               type: 'boolean',
+                             },
+                           ],
+                         },
+                       ])
+    end
+
+    it 'asks the child if the parent is true' do
+      configure_with_answers(['yes', 'yes'])
+      expect(answers[:child]).to be(true)
+    end
+
+    it 'skips the child if the parent is false' do
+      configure_with_answers(['no', 'yes'])
+      expect(answers[:child]).to be(nil)
     end
   end
 end

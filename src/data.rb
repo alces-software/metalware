@@ -35,7 +35,7 @@ module Metalware
         log.info "load: #{data_file}"
         data = raw_load(data_file)
         process_loaded_data(data, source: data_file)
-      rescue => e
+      rescue StandardError => e
         log.error("Fail: #{e.inspect}")
         raise e
       end

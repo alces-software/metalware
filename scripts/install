@@ -91,7 +91,7 @@ chmod a+rw /var/lib/metalware/events
 ln -s /etc/hosts /var/lib/metalware/rendered/system/
 
 mkdir -p "${target}"
-cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src,templates} "${target}"
+cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
@@ -130,6 +130,10 @@ case $user_shell in
         ;;
 esac
 
+# Certificate generation for Libvirt integration
+title "Configuring certificates"
+install_certs &> "${dep_logs}/install.log"
+
 cat <<EOF
 [33m
 ===============================================================================
@@ -146,5 +150,11 @@ Please login again, or manually run the following:
 source /etc/profile.d/alces-metalware.${rc_script_ext}
 
 Afterwards, execute 'metal --help' for further information.
+
+If the Libvirt integration is required, please copy the following certificates
+to the Libvirt host(s):
+
+  from (local): $CA_DIR/cacert.pem
+   to (remote): /etc/pki/CA/cacert.pem (remote)
 [0m
 EOF

@@ -25,6 +25,7 @@
 require 'fakefs/safe'
 require 'constants'
 require 'minimal_repo'
+require 'validation/configure'
 
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
 
@@ -33,13 +34,36 @@ class FileSystem
   # `test` on the resulting object, or to call `FileSystem.test` directly.
   private_class_method :new
 
-  # Delegate file system handling methods appropriately here, so these can be
-  # called on a `FileSystemConfigurator` instance and will then be correctly
-  # invoked when `FileSystem.test` is run with that instance. If these were run
-  # directly outside of a `test` block then the real file system would be used.
-  delegate :mkdir_p, to: FileUtils
-  delegate :write, to: File
-  delegate :dump, to: Metalware::Data
+  module SetupMethods
+    # This module contains all methods to be called on a FileSystem to set up
+    # the underlying FakeFS. All methods are appropriately delegated here, so
+    # these can be called on a `FileSystemConfigurator` instance and will then
+    # be correctly invoked when `FileSystem.test` is run with that instance.
+    # This module is necessary as if any of the original methods were run
+    # directly outside of a `test` block then the real file system would be
+    # used.
+
+    delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
+    delegate :write, to: File
+    delegate :dump, to: Metalware::Data
+
+    def enable_plugin(plugin_name)
+      Metalware::Plugins.enable!(plugin_name)
+    end
+  end
+  include SetupMethods
+
+  def self.root_setup
+    FakeFS.without do
+      yield FileSystem.root_file_system_config
+      FileSystem.test {} # Applies the changes
+    end
+  end
+
+  def self.root_file_system_config(reset: false)
+    @root_file_system_config = nil if reset
+    @root_file_system_config ||= FileSystemConfigurator.new
+  end
 
   # Perform optional configuration of the `FileSystem` prior to a `test`. The
   # yielded and returned `FileSystemConfigurator` caches any unknown method
@@ -57,21 +81,9 @@ class FileSystem
   # not thrown from where the actual failing call is made; it could be worth
   # actually running the methods to check this, and then replaying them afresh
   # when `test` is run.
-  def self.root_file_system_config(reset: false)
-    @root_file_system_config = nil if reset
-    @root_file_system_config ||= FileSystemConfigurator.new
-  end
-
   def self.setup(&block)
     FileSystemConfigurator.new.tap do |configurator|
       yield configurator if block
-    end
-  end
-
-  def self.root_setup
-    FakeFS.without do
-      yield FileSystem.root_file_system_config
-      FileSystem.test {} # Applies the changes
     end
   end
 
@@ -99,6 +111,10 @@ class FileSystem
   def with_fixtures(fixtures_dir, at:)
     path = fixtures_path(fixtures_dir)
     FakeFS::FileSystem.clone(path, at)
+  end
+
+  def with_validation_error_file
+    FakeFS::FileSystem.clone(Metalware::Validation::Configure::ERROR_FILE)
   end
 
   def with_repo_fixtures(repo_fixtures_dir)

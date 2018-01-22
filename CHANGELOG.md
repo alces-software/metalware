@@ -1,30 +1,48 @@
 # Change Log
 
-All notable changes to this project will be documented in this file.  This
-project adheres to [Semantic Versioning](http://semver.org/).
+All notable changes to this project will be documented in this file.
 
-## [2017.2.1]
+## [2018.1.0-pre1] - 2018-01-22
+
+- Added support for conditional Metalware configuration questions.
+- Added `orchestrate` commands for orchestration of VMs via Libvirt in
+  Metalware.
+- Added support for running `ipmi` (or at least VM equivalent to this) and
+  `power` commands on VMs.
+- Improved error-handling in existing `ipmi`, `power`, and `console` commands.
+- Added `plugin` commands for Metalware plugin management.
+- Added support for configuration of Metalware plugins.
+- Various other small bug fixes and tweaks.
+
+## [2017.2.1] - 2018-01-05
+
 - Fix the infinite recursion bug when rendering the pxelinux file for
   multiple nodes in the build command.
 
-## [2017.2.0]
+## [2017.2.0] - 2017-12-19
+
 - Added `metal template` command which renders the templates and build files
   for a node or group. All files are rendered to the staging directory and not
-  there final location.
+  their final location.
 - Added `metal sync` command which moves staged files in place and restarts
   associated services.
 - Remove rendering of templates/ files as part of `metal build`. This has been
   replaced by `metal template` followed by `metal sync`. Also removed the
-  obselete edit start and continue flags.
+  obsolete edit start and continue flags.
 - Removed the `metal dhcp` command as it has been replaced by `metal template`
   followed by `metal sync`.
 - Added staging to rendering of genders file in `metal configure`. The genders
-  file needs to be synced (using `metal sync`) before it can be used by
-  `metal template`.
+  file needs to be synced (using `metal sync`) before it can be used by `metal
+  template`.
 - Fixed the bugs that slowed down metalware. A shared cache is now used to
   render all metalware templates/ files.
 - Updated to the new `Namespace` structure. See documentation for further
   details.
+
+## [2017.1.1] - 2017-11-14
+
+- Have build `files` replace rather than be merged in to `files` set at a
+  higher config level.
 
 ## [2017.1.0] - 2017-09-26
 

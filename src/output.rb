@@ -34,7 +34,7 @@ module Metalware
     class << self
       def stderr(*lines)
         # Don't output anything in unit tests to prevent noise.
-        $stderr.puts(*lines) if $PROGRAM_NAME !~ /rspec$/
+        warn(*lines) if $PROGRAM_NAME !~ /rspec$/
       end
 
       def stderr_indented_error_message(text)

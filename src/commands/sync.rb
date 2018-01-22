@@ -32,8 +32,6 @@ module Metalware
 
       attr_reader :manifest
 
-      def setup; end
-
       def run
         Staging.update do |staging|
           sync_files(staging)
@@ -57,7 +55,7 @@ module Metalware
         error = nil
         begin
           return if data.validator.constantize.validate(data.content)
-        rescue => e
+        rescue StandardError => e
           error = e
         end
         msg = 'A file failed to be validated'

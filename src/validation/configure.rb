@@ -27,16 +27,13 @@ require 'file_path'
 require 'data'
 require 'dry-validation'
 require 'constants'
+require 'rubytree'
+require 'stringio'
 
 module Metalware
   module Validation
     class Configure
-      # TODO: 'choice' is going to be removed as a valid type. Instead the type
-      # will that of the data contained. Whether their is any choices will be
-      # determined by whether they are supplied.
-
       # NOTE: Supported types in error.yaml message must be updated manually
-
       SUPPORTED_TYPES = ['string', 'integer', 'boolean'].freeze
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
@@ -53,58 +50,114 @@ module Metalware
         end
       end
 
-      def initialize(config, data_hash = nil)
+      def initialize(config, questions_hash)
         @config = config
-        @raw_data = (data_hash || load_configure_file).freeze
+        @questions_hash = questions_hash.freeze
+        raise_error_if_validation_failed
       end
 
-      def data(raw: false)
-        return return_data(raw) unless config.validation
-        raise ValidationFailure, error_msg unless validate.success?
-        return_data(raw)
+      def tree
+        @tree ||= begin
+          root_hash = {
+            pass: true,
+            result: TopLevelSchema.call(data: questions_hash),
+          }
+          Tree::TreeNode.new('ROOT', root_hash).tap do |root|
+            add_children(root, root) do
+              Constants::CONFIGURE_SECTIONS.map do |section|
+                make_section_node(root, section)
+              end
+            end
+            # Make the content OpenStructs
+            root.each { |node| node.content = OpenStruct.new(node.content) }
+          end
+        end
       end
 
       private
 
-      attr_reader :config, :raw_data
+      attr_reader :config, :questions_hash
+      attr_accessor :failed_validation
 
-      def return_data(raw)
-        raw ? raw_data : transform_array_to_hash
+      def raise_error_if_validation_failed
+        return if success?
+        prune_successful_leaves
+        io = StringIO.new
+        print_error_node(io)
+        tree.print_tree(0, nil, print_error_node(io))
+        io.rewind
+        raise ValidationFailure, io.read
       end
 
-      def transform_array_to_hash
-        array_data = raw_data.dup
-        hash_data = {}
-        Constants::CONFIGURE_SECTIONS.each do |section|
-          hash_data[section] = array_data[section].each_with_object({}) do |question, memo|
-            identifier = question.delete(:identifier)
-            memo[identifier.to_sym] = question
+      def print_error_node(io)
+        lambda do |node, prefix|
+          io.puts "#{prefix} #{node.name}"
+          result = node.content[:result]
+          io.puts result.errors.to_s unless result.success?
+        end
+      end
+
+      def success?
+        tree.content[:pass]
+      end
+
+      def make_section_node(root, section)
+        question_data = questions_hash[section] || []
+        data = {
+          section: section,
+          result: DependantSchema.call(dependent: question_data),
+        }
+        node_s = Tree::TreeNode.new(section, data)
+        add_children(root, node_s) do
+          question_data.map { |q| make_question_node(root, q) }
+        end
+      end
+
+      def make_question_node(root, **question)
+        result_h = { result: QuestionSchema.call(question: question) }
+        data = (question.is_a?(Hash) ? question.merge(result_h) : result_h)
+        node_q = Tree::TreeNode.new(data[:identifier].to_s, data)
+        add_children(root, node_q) do
+          question[:dependent]&.map do |sub_question|
+            make_question_node(root, **sub_question)
           end
         end
-        hash_data
       end
 
-      def file_path
-        @file_path ||= FilePath.new(config)
+      def add_children(root, parent)
+        if parent.content[:result].success?
+          yield&.each { |child| parent << child }
+        else
+          root.content[:pass] = false
+        end
+        parent
       end
 
-      def load_configure_file
-        Data.load(file_path.configure_file)
-      end
-
-      def validate
-        @validate ||= begin
-          ConfigureSchema.call(data: raw_data)
+      def prune_successful_leaves
+        # Postorder sort starts at the leaves and works its way in
+        tree.postordered_each do |node|
+          node.remove_from_parent! if begin
+            if node.has_children? # Only remove leaves
+              false
+            elsif node.content[:result].success? # Remove successful nodes
+              true
+            else
+              false
+            end
+          end
         end
       end
 
-      def error_msg
-        msg_header = 'An error occurred validating the questions. ' \
-                     "The following error(s) have been detected: \n"
-        msg_header + validate.errors[:data].to_s
+      DependantSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
+        end
+
+        optional(:dependent) { array? && (each { hash? }) }
       end
 
-      QuestionSchema = Dry::Validation.Schema do
+      QuestionFieldSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
           config.namespace = :configure
@@ -127,7 +180,46 @@ module Metalware
         optional(:choice) { array? }
       end
 
-      ConfigureSchema = Dry::Validation.Schema do
+      QuestionSchema = Dry::Validation.Schema do
+        configure do
+          config.messages_file = ERROR_FILE
+          config.namespace = :configure
+
+          def default_type?(value)
+            default = value[:default]
+            type = value[:type]
+            return true if default.nil?
+            ::Metalware::Validation::Configure.type_check(type, default)
+          end
+
+          def choice_with_default?(value)
+            return true if value[:choice].nil? || value[:default].nil?
+            return false unless value[:choice].is_a?(Array)
+            value[:choice].include?(value[:default])
+          end
+
+          def choice_type?(value)
+            return true if value[:choice].nil?
+            return false unless value[:choice].is_a?(Array)
+            value[:choice].each do |choice|
+              type = value[:type]
+              r = ::Metalware::Validation::Configure.type_check(type, choice)
+              return false unless r
+            end
+            true
+          end
+        end
+
+        required(:question) do
+          default_type? & \
+            choice_with_default? & \
+            choice_type? & \
+            schema(DependantSchema) & \
+            schema(QuestionFieldSchema)
+        end
+      end
+
+      TopLevelSchema = Dry::Validation.Schema do
         configure do
           config.messages_file = ERROR_FILE
           config.namespace = :configure
@@ -138,49 +230,7 @@ module Metalware
           end
         end
 
-        required(:data) do
-          top_level_keys? & schema do
-            configure do
-              config.messages_file = ERROR_FILE
-              config.namespace = :configure
-
-              def default_type?(value)
-                default = value[:default]
-                type = value[:type]
-                return true if default.nil?
-                ::Metalware::Validation::Configure.type_check(type, default)
-              end
-
-              def choice_with_default?(value)
-                return true if value[:choice].nil? || value[:default].nil?
-                return false unless value[:choice].is_a?(Array)
-                value[:choice].include?(value[:default])
-              end
-
-              def choice_type?(value)
-                return true if value[:choice].nil?
-                return false unless value[:choice].is_a?(Array)
-                value[:choice].each do |choice|
-                  type = value[:type]
-                  r = ::Metalware::Validation::Configure.type_check(type, choice)
-                  return false unless r
-                end
-                true
-              end
-            end
-
-            # Loops through each section
-            ::Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
-              required(section) do
-                # Loops through each question
-                array? & each do
-                  schema(QuestionSchema) & \
-                    default_type? & choice_with_default? & choice_type?
-                end
-              end
-            end
-          end
-        end
+        required(:data) { top_level_keys? }
       end
     end
   end

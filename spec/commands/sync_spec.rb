@@ -61,7 +61,7 @@ RSpec.describe Metalware::Commands::Sync do
       before :each do
         # Allows the error to be printed
         allow(Metalware::Output).to \
-          (receive(:stderr).and_wrap_original { |_m, *arg| $stderr.puts arg })
+          (receive(:stderr).and_wrap_original { |_m, *arg| warn arg })
 
         Metalware::Staging.update(metal_config) do |staging|
           bad_validator = Metalware::Testing::BadValidation.to_s

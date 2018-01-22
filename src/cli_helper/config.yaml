@@ -64,6 +64,20 @@ subcommands:
       the system environment. This command is intended to only be ran once.
     action: Commands::Configure::Local
 
+  orchestrate_create: &orchestrate_create
+    syntax: metal orchestrate create NODE_IDENTIFIER [options]
+    summary: Creates a new virtual machine or group of machines
+    action: Commands::Orchestrate::Create
+    options:
+      - *group_option
+
+  orchestrate_destroy: &orchestrate_destroy
+    syntax: metal orchestrate destroy NODE_IDENTIFIER [options]
+    summary: Destroys a single or group of virtual machines
+    action: Commands::Orchestrate::Destroy
+    options:
+      - *group_option
+
   remove_group: &remove_group
     syntax: metal remove group GROUP_NAME [options]
     summary: Removes a previously configured group
@@ -102,6 +116,24 @@ subcommands:
       - tags: [-f, --force]
         description: >
           Force update even if local changes have been made to the repo
+
+  plugin_list: &plugin_list
+    syntax: metal plugin list [options]
+    summary: List available and enabled plugins
+    description: >
+      List all available Metalware plugins, along with which of these are
+      currently enabled.
+    action: Commands::Plugin::List
+
+  plugin_enable: &plugin_enable
+    syntax: metal plugin enable PLUGIN_NAME [options]
+    summary: Enable given plugin for domain
+    action: Commands::Plugin::Enable
+
+  plugin_disable: &plugin_disable
+    syntax: metal plugin disable PLUGIN_NAME [options]
+    summary: Disable given plugin for domain
+    action: Commands::Plugin::Disable
 
   view-answers_domain: &view-answers_domain
     syntax: metal view-answers domain [options]
@@ -182,11 +214,11 @@ commands:
 
   console:
     syntax: metal console NODE_IDENTIFIER [options]
-    summary: Volatile. Display a node's console in the terminal
+    summary: Display a node's console in the terminal
     description: >
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
-    action: CommandHelpers::BashCommand
+    action: Commands::Console
 
   each:
     syntax: metal each NODE_IDENTIFIER COMMAND [options]
@@ -252,29 +284,39 @@ commands:
           node name in the hunter cache
 
   ipmi:
-    syntax: metal ipmi NODE_IDENTIFIER [options]
-    summary: Volatile. Perform ipmi commands on single or multiple machines
+    syntax: metal ipmi NODE_IDENTIFIER [COMMAND] [options]
+    summary: Perform ipmi commands on single or multiple machines
     description: >
-      ***VOLATILE***
-
        Perform ipmi commands on single or multiple machines
-    action: CommandHelpers::BashCommand
+    action: Commands::Ipmi
     options:
-      - tags: [-g]
-        description: >
-          Specifies that NODE_IDENTIFIER is the group. MUST be before
-          NODE_IDENTIFIER
-      - tags: [-k COMMAND]
+      - *group_option
+      - tags: [-c COMMAND, --command COMMAND]
         type: String
         description: >
-          Specifies the ipmi command
+          The IPMI tool command to run, for example `sel list`
+
+  orchestrate:
+    syntax: metal orchestrate [COMMAND] [options]
+    summary: Orchestrate virtual machines
+    subcommands:
+      create: *orchestrate_create
+      destroy: *orchestrate_destroy
+
+  plugin:
+    syntax: metal plugin [options]
+    summary: View and manage enabled plugins
+    subcommands:
+      list: *plugin_list
+      enable: *plugin_enable
+      disable: *plugin_disable
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
-    summary: Volatile. Run power commands on a node.
+    summary: Run power commands on a node.
     description: >
-      Allows ipmi power commands to be ran on a node(s)
-
+      Allows ipmi power commands to be run on a node or group
+      of nodes as specified in the genders file.
 
       The following commands are supported:
 
@@ -291,7 +333,7 @@ commands:
       cycle     - Power cycle the node
 
       reset     - Warm reset the node
-    action: CommandHelpers::BashCommand
+    action: Commands::Power
     options:
       - *group_option
 

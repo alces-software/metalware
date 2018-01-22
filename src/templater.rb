@@ -61,7 +61,7 @@ module Metalware
         raw_template = File.read(template)
         begin
           alces.render_erb_template(raw_template, dynamic_namespace)
-        rescue => e
+        rescue StandardError => e
           msg = "Failed to render template: #{template}"
           raise e, "#{msg}\n#{e}", e.backtrace
         end
@@ -84,9 +84,7 @@ module Metalware
           rendered_template,
           &validation_block
         ).tap do |valid|
-          if valid
-            write_rendered_template(rendered_template, save_file: save_file)
-          end
+          write_rendered_template(rendered_template, save_file: save_file) if valid
         end
       end
 

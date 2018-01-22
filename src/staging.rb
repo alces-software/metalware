@@ -61,7 +61,7 @@ module Metalware
           data = OpenStruct.new(raw_data.merge(sync: sync_path))
           data.content = file_content(data)
           ret = yield OpenStruct.new(data)
-        rescue => e
+        rescue StandardError => e
           MetalLog.warn e.inspect
           ret = false
         end

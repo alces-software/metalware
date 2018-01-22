@@ -10,7 +10,7 @@ module Metalware
       nodes.each { |node| run_hook(node, 'start') }
     end
 
-    # TODO: split process into to parts:
+    # TODO: split process into two parts:
     # process_events: - all hooks BUT complete
     # complete_nodes: Check for completed nodes
     def process
@@ -62,9 +62,9 @@ module Metalware
       build_threads.push(Thread.new do
         begin
           node.build_method.send("#{hook_name}_hook")
-        rescue => e
-          $stderr.puts e.message
-          $stderr.puts e.backtrace
+        rescue StandardError => e
+          warn e.message
+          warn e.backtrace
         end
       end)
     end

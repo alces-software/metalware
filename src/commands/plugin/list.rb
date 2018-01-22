@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -20,12 +22,23 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-#NB Settings in this file may be overridden by the shared or local bmc configs
-###########################
-#USERNAME=admin
-#PASSWORD=password
-###########################
+require 'command_helpers/base_command'
+require 'plugins'
 
-#IPMI_HEAD=
-IPMI_TAIL=.bmc
-STEP_INTERVAL=2
+module Metalware
+  module Commands
+    module Plugin
+      class List < CommandHelpers::BaseCommand
+        private
+
+        def run
+          output = Plugins.all.map do |plugin|
+            "#{plugin.name} #{plugin.enabled_identifier}"
+          end.join("\n")
+
+          puts output
+        end
+      end
+    end
+  end
+end

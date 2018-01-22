@@ -24,8 +24,8 @@ module Metalware
       end
 
       def default_hash(section)
-        configure_data[section].each_with_object({}) do |(key, value), memo|
-          memo[key] = value[:default] if value.key? :default
+        section_default(section).each_with_object({}) do |(key, value), memo|
+          memo[key] = value.default unless value.default.nil?
         end
       end
 
@@ -34,8 +34,8 @@ module Metalware
         loader.section_answers(section, *input)
       end
 
-      def configure_data
-        @configure_data ||= loader.configure_data
+      def section_default(section)
+        loader.flattened_configure_section(section)
       end
     end
   end

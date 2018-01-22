@@ -208,7 +208,7 @@ RSpec.describe AlcesUtils do
 
     it 'can redirect stderr' do
       io = AlcesUtils.redirect_std(:stderr) do
-        $stderr.puts test_str
+        warn test_str
       end
       expect(io[:stderr].read.chomp).to eq(test_str)
     end

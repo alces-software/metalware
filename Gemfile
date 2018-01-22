@@ -8,6 +8,7 @@ source 'https://rubygems.org'
 # https://github.com/fakefs/fakefs#fakefs-----typeerror-superclass-mismatch-for-class-file.
 require 'pp'
 
+gem 'colorize'
 gem 'commander', git: 'https://github.com/alces-software/commander'
 gem 'dry-validation'
 gem 'hashie'
@@ -16,8 +17,13 @@ gem 'net-dhcp'
 gem 'network_interface', '~> 0.0.1'
 gem 'pcap', git: 'https://github.com/alces-software/ruby-pcap.git'
 gem 'recursive-open-struct'
+gem 'ruby-libvirt'
 gem 'rugged'
 gem 'terminal-table'
+
+# Forked of a fork containing a logger fix. The main gem can be used
+# again once StructuredWarnings is removed
+gem 'rubytree', git: 'https://github.com/alces-software/RubyTree'
 
 group :test do
   gem 'fakefs'

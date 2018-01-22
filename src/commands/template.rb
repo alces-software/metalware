@@ -42,12 +42,12 @@ module Metalware
       end
 
       def run
-        Staging.template(Config.cache) do |templator|
+        Staging.template(Config.cache) do |templater|
           build_methods.each do |build_method|
-            build_method.render_staging_templates(templator)
+            build_method.render_staging_templates(templater)
           end
-          dns_class.new(alces, templator).update
-          RenderMethods::DHCP.render_to_staging(alces.domain, templator)
+          dns_class.new(alces, templater).update
+          RenderMethods::DHCP.render_to_staging(alces.domain, templater)
         end
       end
 

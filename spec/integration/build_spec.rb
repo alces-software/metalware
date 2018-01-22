@@ -81,7 +81,7 @@ RSpec.describe '`metal build`' do
               Metalware::Commands::Build.new([name], options)
             end
           end
-        rescue => e
+        rescue StandardError => e
           STDERR.puts e.inspect
           STDERR.puts e.backtrace
         end

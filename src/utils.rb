@@ -25,9 +25,9 @@ module Metalware
         end
 
         command_class.new(args, options)
-      rescue => e
-        $stderr.puts e.message
-        $stderr.puts e.backtrace
+      rescue StandardError => e
+        warn e.message
+        warn e.backtrace
         raise e
       ensure
         $stderr = old_stderr

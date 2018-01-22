@@ -31,17 +31,29 @@ require 'data'
 module Metalware
   module Validation
     class Loader < LoadSaveBase
-      def initialize(metalware_config, cache_configure: false)
+      def initialize(metalware_config)
         @config = metalware_config
         @path = FilePath.new(config)
-        @cache_configure = cache_configure
       end
 
       def configure_data
-        return @configure_data if @configure_data
-        data = Validation::Configure.new(config).data
-        @configure_data = data if cache_configure
-        data
+        # XXX Extract object for loading configure data?
+        @configure_data ||=
+          Validation::Configure.new(config, combined_configure_data).tree
+      end
+
+      # Returns a tree
+      def configure_section(section)
+        configure_data.children.find { |c| c.name == section }
+      end
+
+      # Returns a hash of identifiers and questions
+      def flattened_configure_section(section)
+        section_root = configure_section(section)
+        section_root.each_with_object({}) do |node, memo|
+          next if section_root == node
+          memo[node.name.to_sym] = node.content
+        end
       end
 
       def group_cache
@@ -50,7 +62,7 @@ module Metalware
 
       private
 
-      attr_reader :path, :config, :cache_configure
+      attr_reader :path, :config
 
       def answer(absolute_path, section)
         yaml = Data.load(absolute_path)
@@ -59,6 +71,30 @@ module Metalware
                                            answer_section: section,
                                            configure_data: configure_data)
         validator.data
+      end
+
+      def combined_configure_data
+        Constants::CONFIGURE_SECTIONS.map do |section|
+          [section, all_questions_for_section(section)]
+        end.to_h
+      end
+
+      def all_questions_for_section(section)
+        [
+          repo_configure_questions,
+          *plugin_configure_questions,
+        ].flat_map do |question_group|
+          question_group[section]
+        end
+      end
+
+      def repo_configure_questions
+        @repo_configure_questions ||= Data.load(FilePath.configure_file)
+      end
+
+      def plugin_configure_questions
+        @plugin_configure_questions ||=
+          Plugins.enabled.map(&:configure_questions)
       end
     end
   end

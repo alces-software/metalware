@@ -110,7 +110,7 @@ RSpec.describe Metalware::Status::Monitor do
         end
         until running.empty?
           t = running.sample
-          t.thread.kill unless t.nil?
+          t&.thread&.kill
         end
         monitor_thr.join
       end

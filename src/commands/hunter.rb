@@ -176,7 +176,7 @@ module Metalware
           hunter_log.info "#{name}-#{hwaddr}"
           Output.stderr 'Logged node'
         end
-      rescue => e
+      rescue StandardError => e
         warn e # XXX Needed?
         if Utils.in_gui?
           # XXX Handle this better?

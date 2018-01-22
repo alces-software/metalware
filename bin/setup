@@ -39,6 +39,9 @@ yum install libpcap libpcap-devel -y
 # Required for `nodeattr`.
 yum install genders -y
 
+# Required for ruby-libvirt gem.
+yum install libvirt-devel -y
+
 # Install Ruby and gems.
 rvm install ruby-2.4.1
 cd .. && cd -  # Let RVM automatically use correct Ruby for dir.

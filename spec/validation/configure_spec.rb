@@ -33,6 +33,8 @@ require 'alces_utils'
 RSpec.describe Metalware::Validation::Configure do
   include AlcesUtils
 
+  before :each { FileSystem.root_setup(&:with_validation_error_file) }
+
   let :config { metal_config }
   let :file_path { Metalware::FilePath.new(config) }
 
@@ -85,6 +87,26 @@ RSpec.describe Metalware::Validation::Configure do
           type: 'boolean',
           default: false,
         },
+        {
+          identifier: 'dependent_parent',
+          question: 'Do I have dependent questions?',
+          dependent: [
+            {
+              identifier: 'basic_dependent_question',
+              question: 'Can there be a single level dependent question?',
+            },
+            {
+              identifier: 'mid_level_dependent_question',
+              question: 'Can there be multiple levels of dependency?',
+              dependent: [
+                {
+                  identifier: 'leaf_level_dependent_question',
+                  question: 'Am I a leaf of the question tree?',
+                },
+              ],
+            },
+          ],
+        },
       ],
 
       node: [
@@ -125,24 +147,8 @@ RSpec.describe Metalware::Validation::Configure do
     }
   end
 
-  context 'without a hash input' do
-    it 'loads configure file from the repo' do
-      data = { data: 'I am the configure data' }
-      Metalware::Data.dump(file_path.configure_file, data)
-      v = Metalware::Validation::Configure.new(config)
-      expect(v.send(:raw_data)).to eq(data)
-    end
-  end
-
-  context 'with a hash input' do
-    it 'uses the hash as the data input' do
-      v = Metalware::Validation::Configure.new(config, correct_hash)
-      expect(v.send(:raw_data)).to eq(correct_hash)
-    end
-  end
-
   def run_configure_validation(my_hash = {})
-    Metalware::Validation::Configure.new(config, my_hash).data(raw: true)
+    Metalware::Validation::Configure.new(config, my_hash).tree
   end
 
   def expect_validation_failure(my_hash, msg_regex)
@@ -153,12 +159,12 @@ RSpec.describe Metalware::Validation::Configure do
 
   context 'with a valid input' do
     it 'passes with questions key' do
-      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
+      expect(run_configure_validation(correct_hash)).to be_a(Tree::TreeNode)
     end
 
     it 'passes without questions key' do
       correct_hash.delete(:questions)
-      expect(run_configure_validation(correct_hash)).to eq(correct_hash)
+      expect(run_configure_validation(correct_hash)).to be_a(Tree::TreeNode)
     end
   end
 
@@ -187,6 +193,40 @@ RSpec.describe Metalware::Validation::Configure do
                                       identifier: '',
                                     }])
         expect_validation_failure(h, /must be filled/)
+      end
+    end
+
+    context 'invalid dependent question' do
+      it 'fails if the identifier is missing' do
+        h = correct_hash.merge(
+          domain: [
+            {
+              identifier: 'bad_parent',
+              question: 'Am I a bad question parent?',
+              dependent: [
+                {
+                  question: 'Am I missing my identifier',
+                },
+              ],
+            },
+          ]
+        )
+        expect_validation_failure(h, /is missing/)
+      end
+
+      it 'fails if the dependent field is not an array' do
+        h = correct_hash.merge(
+          domain: [{
+            identifier: 'bad_parent',
+            question: 'Is my dependent field an array?',
+            dependent: {
+              identifier: 'dependent_not_array',
+              question: 'Should I be an array?',
+              default: 'YEP!!',
+            },
+          }]
+        )
+        expect_validation_failure(h, /must be an array/)
       end
     end
 
@@ -221,15 +261,6 @@ RSpec.describe Metalware::Validation::Configure do
                                     optional: 'I should be true or false',
                                   }])
       expect_validation_failure(h, /must be boolean/)
-    end
-  end
-
-  context 'with missing question blocks' do
-    Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
-      it "fails when #{section} is missing" do
-        correct_hash.delete(section)
-        expect_validation_failure(correct_hash, /is missing/)
-      end
     end
   end
 
