@@ -69,7 +69,7 @@ module Metalware
       end
 
       def plugins_dir
-        File.join(repo, 'plugins')
+        File.join(Constants::METALWARE_DATA_PATH, 'plugins')
       end
 
       def repo_relative_path_to(path)
