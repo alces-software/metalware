@@ -59,8 +59,8 @@ RSpec.describe Metalware::Commands::Plugin::List do
 
   it 'specifies whether each plugin is activated in output' do
     filesystem.test do |_fs|
-      # XXX Replace this with `plugin enable` once implemented?
       Metalware::Plugins.activate!('example01')
+      Metalware::Plugins.deactivate!('example02')
 
       stdout = AlcesUtils.redirect_std(:stdout) do
         run_plugin_list

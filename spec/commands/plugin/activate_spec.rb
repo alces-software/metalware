@@ -52,24 +52,11 @@ RSpec.describe Metalware::Commands::Plugin::Activate do
 
   it 'switches the plugin to be activated' do
     filesystem.test do
-      expect(example_plugin).not_to be_activated
+      Metalware::Plugins.deactivate!(example_plugin_name)
 
       run_plugin_activate(example_plugin_name)
 
       expect(example_plugin).to be_activated
-    end
-  end
-
-  it 'does not duplicate activated plugin if already activated' do
-    filesystem.test do
-      example_plugin.activate!
-
-      run_plugin_activate(example_plugin_name)
-
-      matching_activated_plugins = Metalware::Plugins.activated.select do |plugin|
-        plugin.name == example_plugin_name
-      end
-      expect(matching_activated_plugins.length).to eq 1
     end
   end
 

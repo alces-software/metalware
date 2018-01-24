@@ -39,24 +39,24 @@ module Metalware
       end
 
       def activated?(plugin_name)
-        activated_plugin_names.include?(plugin_name)
+        !deactivated_plugin_names.include?(plugin_name)
       end
 
       def activate!(plugin_name)
         validate_plugin_exists!(plugin_name)
         return if activated?(plugin_name)
 
-        new_activated_plugins = activated_plugin_names + [plugin_name]
-        update_activated_plugins!(new_activated_plugins)
+        new_deactivated_plugins = deactivated_plugin_names.reject do |name|
+          name == plugin_name
+        end
+        update_deactivated_plugins!(new_deactivated_plugins)
       end
 
       def deactivate!(plugin_name)
         validate_plugin_exists!(plugin_name)
 
-        new_activated_plugins = activated_plugin_names.reject do |name|
-          name == plugin_name
-        end
-        update_activated_plugins!(new_activated_plugins)
+        new_deactivated_plugins = deactivated_plugin_names + [plugin_name]
+        update_deactivated_plugins!(new_deactivated_plugins)
       end
 
       def enabled_question_identifier(plugin_name)
@@ -76,8 +76,8 @@ module Metalware
         end
       end
 
-      def update_activated_plugins!(new_activated_plugins)
-        new_cache = cache.merge(activated: new_activated_plugins)
+      def update_deactivated_plugins!(new_deactivated_plugins)
+        new_cache = cache.merge(deactivated: new_deactivated_plugins)
         Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
       end
 
@@ -85,8 +85,8 @@ module Metalware
         all_plugin_names.include?(plugin_name)
       end
 
-      def activated_plugin_names
-        cache[:activated] || []
+      def deactivated_plugin_names
+        cache[:deactivated] || []
       end
 
       def all_plugin_names
