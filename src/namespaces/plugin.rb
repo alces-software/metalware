@@ -40,7 +40,7 @@ module Metalware
       end
 
       def additional_dynamic_namespace
-        {}
+        { node: node_namespace }
       end
     end
   end
