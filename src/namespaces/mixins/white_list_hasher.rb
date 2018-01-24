@@ -20,6 +20,7 @@ module Metalware
         end
 
         def merge_white_list_recursive_methods(h = {})
+          # XXX make this work for arrays of hashable things
           recursive_white_list_for_hasher
             .each_with_object(h) do |method, memo|
             memo[method] = send(method).to_h
