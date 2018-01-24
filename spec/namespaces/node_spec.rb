@@ -242,7 +242,6 @@ RSpec.describe Metalware::Namespaces::Node do
           end
 
           # Enable/disable plugins for node as needed.
-          # XXX internal identifiers duplicated here also
           answers = {
             Metalware::Plugins.enabled_question_identifier(node_enabled_plugin) => true,
             Metalware::Plugins.enabled_question_identifier(node_disabled_plugin) => false,
