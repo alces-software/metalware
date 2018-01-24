@@ -32,20 +32,25 @@ module Metalware
       end
 
       def domain_config
-        File.join(base, 'config/domain.yaml')
-      end
-
-      def group_config(group)
-        File.join(base, 'config', "#{group}.yaml")
-      end
-
-      def node_config(node)
-        File.join(base, 'config', "#{node}.yaml")
+        path 'domain'
       end
 
       def local_config
-        File.join(base, 'config/local.yaml')
+        path 'local'
       end
+
+      def path(name)
+        file_name = "#{name}.yaml"
+        File.join(base, 'config', file_name)
+      end
+
+      # These are the names we currently expect to use to access the different
+      # config paths elsewhere. Since they all go the same place maybe we don't
+      # need different methods. Or maybe we should change configs to use same
+      # file structure as answers, which is more structured and helps prevent
+      # conflicts.
+      alias_method :group_config, :path
+      alias_method :node_config, :path
     end
   end
 end
