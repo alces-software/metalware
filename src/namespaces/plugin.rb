@@ -11,6 +11,10 @@ module Metalware
     class Plugin < HashMergerNamespace
       delegate :name, to: :plugin
 
+      # These methods are defined in HashMergerNamespace, but are not
+      # meaningful for this namespace.
+      undef :answer, :render_erb_template
+
       def initialize(node_namespace, plugin)
         @node_namespace = node_namespace
         @plugin = plugin
