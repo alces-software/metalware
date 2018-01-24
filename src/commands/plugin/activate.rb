@@ -28,7 +28,7 @@ require 'plugins'
 module Metalware
   module Commands
     module Plugin
-      class Enable < CommandHelpers::BaseCommand
+      class Activate < CommandHelpers::BaseCommand
         private
 
         def run
