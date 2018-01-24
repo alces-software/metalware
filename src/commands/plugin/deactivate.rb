@@ -32,7 +32,7 @@ module Metalware
         private
 
         def run
-          Plugins.disable!(plugin_name)
+          Plugins.deactivate!(plugin_name)
         end
 
         def plugin_name
