@@ -33,7 +33,7 @@ module Metalware
 
         def run
           output = Plugins.all.map do |plugin|
-            "#{plugin.name} #{plugin.enabled_identifier}"
+            "#{plugin.name} #{plugin.activated_identifier}"
           end.join("\n")
 
           puts output

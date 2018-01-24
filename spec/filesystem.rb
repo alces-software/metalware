@@ -47,8 +47,8 @@ class FileSystem
     delegate :write, to: File
     delegate :dump, to: Metalware::Data
 
-    def enable_plugin(plugin_name)
-      Metalware::Plugins.enable!(plugin_name)
+    def activate_plugin(plugin_name)
+      Metalware::Plugins.activate!(plugin_name)
     end
 
     # Perform arbitrary other FileSystem setup.

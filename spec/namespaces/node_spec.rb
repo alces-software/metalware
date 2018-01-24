@@ -219,10 +219,10 @@ RSpec.describe Metalware::Namespaces::Node do
 
     # XXX Need to handle situation of plugin being enabled for node but not
     # available globally?
-    let :node_enabled_plugin { 'node_enabled_plugin' }
-    let :node_disabled_plugin { 'node_disabled_plugin' }
-    let :node_unconfigured_plugin { 'node_unconfigured_plugin' }
-    let :globally_disabled_plugin { 'globally_disabled_plugin' }
+    let :enabled_plugin { 'enabled_plugin' }
+    let :disabled_plugin { 'disabled_plugin' }
+    let :unconfigured_plugin { 'unconfigured_plugin' }
+    let :deactivated_plugin { 'deactivated_plugin' }
 
     before :each do
       Metalware::Config.cache = config
@@ -232,28 +232,28 @@ RSpec.describe Metalware::Namespaces::Node do
 
         # Create all test plugins.
         [
-          node_enabled_plugin,
-          node_disabled_plugin,
-          node_unconfigured_plugin,
-          globally_disabled_plugin
+          enabled_plugin,
+          disabled_plugin,
+          unconfigured_plugin,
+          deactivated_plugin
         ].each do |plugin|
           fs.mkdir_p File.join(Metalware::FilePath.plugins_dir, plugin)
         end
 
         fs.setup do
-          # Enable these plugins globally.
+          # Activate these plugins.
           [
-            node_enabled_plugin,
-            node_disabled_plugin,
-            node_unconfigured_plugin
+            enabled_plugin,
+            disabled_plugin,
+            unconfigured_plugin
           ].each do |plugin|
-            Metalware::Plugins.enable!(plugin)
+            Metalware::Plugins.activate!(plugin)
           end
 
           # Enable/disable plugins for node as needed.
           answers = {
-            Metalware::Plugins.enabled_question_identifier(node_enabled_plugin) => true,
-            Metalware::Plugins.enabled_question_identifier(node_disabled_plugin) => false,
+            Metalware::Plugins.enabled_question_identifier(enabled_plugin) => true,
+            Metalware::Plugins.enabled_question_identifier(disabled_plugin) => false,
           }.to_json
           Metalware::Utils.run_command(
             Metalware::Commands::Configure::Node, node.name, answers: answers
@@ -272,7 +272,7 @@ RSpec.describe Metalware::Namespaces::Node do
         node_plugin_names << plugin.name
       end
 
-      expect(node_plugin_names).to eq [node_enabled_plugin]
+      expect(node_plugin_names).to eq [enabled_plugin]
     end
 
     it 'uses plugin namespace for each enabled plugin' do
