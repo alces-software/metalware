@@ -25,6 +25,12 @@
 module Metalware
   module Plugins
     Plugin = Struct.new(:path) do
+      delegate :domain_config,
+        :group_config,
+        :node_config,
+        :local_config,
+        to: :config_path
+
       def name
         path.basename.to_s
       end
@@ -51,6 +57,12 @@ module Metalware
 
       def enabled_question_identifier
         Plugins.enabled_question_identifier(name)
+      end
+
+      private
+
+      def config_path
+        @config_path ||= FilePath::ConfigPath.new(base: path)
       end
     end
   end
