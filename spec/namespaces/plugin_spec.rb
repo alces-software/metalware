@@ -67,5 +67,13 @@ RSpec.describe Metalware::Namespaces::Plugin do
       expect(subject.config.group_parameter).to eq('group_value')
       expect(subject.config.node_parameter).to eq('node_value')
     end
+
+    it 'supports templating, with access to node namespace values' do
+      Metalware::Data.dump(plugin.domain_config, {
+        node_name: '<%= node.name %>',
+      })
+
+      expect(subject.config.node_name).to eq(node.name)
+    end
   end
 end
