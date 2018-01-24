@@ -15,10 +15,10 @@ module Metalware
       # meaningful for this namespace.
       undef :answer, :render_erb_template
 
-      def initialize(node_namespace, plugin)
-        @node_namespace = node_namespace
+      def initialize(plugin, node:)
+        @node_namespace = node
         @plugin = plugin
-        alces = node_namespace.send(:alces)
+        alces = node.send(:alces)
         super(alces, plugin.name)
       end
 

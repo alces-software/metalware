@@ -19,7 +19,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
     Metalware::Plugins.all.find { |plugin| plugin.name == plugin_name }
   end
 
-  subject { described_class.new(node, plugin) }
+  subject { described_class.new(plugin, node: node) }
 
   before :each do
     Metalware::Config.cache = config
