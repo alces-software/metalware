@@ -39,6 +39,10 @@ module Metalware
         Plugins.activated?(name)
       end
 
+      def deactivated?
+        !activated?
+      end
+
       def activated_identifier
         if activated?
           '[ACTIVATED]'.green

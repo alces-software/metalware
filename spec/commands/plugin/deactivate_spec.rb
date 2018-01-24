@@ -52,11 +52,23 @@ RSpec.describe Metalware::Commands::Plugin::Deactivate do
 
   it 'switches the plugin to be deactivated' do
     filesystem.test do
-      example_plugin.activate!
+      expect(example_plugin).to be_activated
 
       run_plugin_deactivate(example_plugin_name)
 
       expect(example_plugin).not_to be_activated
+    end
+  end
+
+  it 'does not duplicate deactivated plugin if already deactivated' do
+    filesystem.test do
+      run_plugin_deactivate(example_plugin_name)
+      run_plugin_deactivate(example_plugin_name)
+
+      matching_deactivated_plugins = Metalware::Plugins.all.select do |plugin|
+        plugin.deactivated? && plugin.name == example_plugin_name
+      end
+      expect(matching_deactivated_plugins.length).to eq 1
     end
   end
 
