@@ -51,7 +51,7 @@ module Metalware
 
     RetrievalProcess = KeywordStruct.new(:metal_config, :input, :node) do
       def retrieve
-        node.config.files&.to_h&.keys&.map do |section|
+        files&.to_h&.keys&.map do |section|
           retrieve_for_section(section)
         end.to_h
       end
@@ -59,10 +59,14 @@ module Metalware
       private
 
       def retrieve_for_section(section)
-        file_hashes = node.config.files[section].map do |file|
+        file_hashes = files[section].map do |file|
           file_hash_for(section, file)
         end
         [section, file_hashes]
+      end
+
+      def files
+        node.config.files
       end
 
       def file_hash_for(section, identifier)
