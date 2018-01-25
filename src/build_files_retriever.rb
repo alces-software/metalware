@@ -51,7 +51,7 @@ module Metalware
 
     RetrievalProcess = KeywordStruct.new(:metal_config, :input, :node) do
       def retrieve
-        files&.to_h&.keys&.map do |section|
+        files.to_h.keys.map do |section|
           retrieve_for_section(section)
         end.to_h
       end
