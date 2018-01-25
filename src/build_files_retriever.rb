@@ -33,22 +33,21 @@ module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
     def retrieve_for_node(node)
       repo_files_dir = File.join(metal_config.repo_path, 'files')
-      retrieve(node, repo_files_dir, node.name)
+      retrieve(
+        namespace: node,
+        internal_templates_dir: repo_files_dir,
+        rendered_dir:  node.name,
+      )
     end
 
     private
 
-    def retrieve(namespace, internal_templates_dir, rendered_dir)
+    def retrieve(**kwargs)
       # `input` is passed in to RetrievalProcess (rather than intialized within
       # it, which would still work) so that a shared cache is used for
       # retrieving all files for this BuildFilesRetriever, to avoid duplicate
       # retrievals of the same remote URLs across different RetrievalProcesses.
-      RetrievalProcess.new(
-        input: input,
-        namespace: namespace,
-        internal_templates_dir: internal_templates_dir,
-        rendered_dir: rendered_dir,
-      ).retrieve
+      RetrievalProcess.new(input: input, **kwargs).retrieve
     end
 
     def input
