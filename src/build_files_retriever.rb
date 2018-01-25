@@ -31,25 +31,35 @@ require 'keyword_struct'
 
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
-    def retrieve(node)
-      # `input` is passed in to RetrievalProcess (rather than intialized within
-      # it, which would still work) so that a shared cache is used for
-      # retrieving files across nodes, and so the same remote URLs are only
-      # retrieved once in the lifetime of a single BuildFilesRetriever.
-      RetrievalProcess.new(
-        metal_config: metal_config,
-        input: input,
-        node: node,
-      ).retrieve
+    def retrieve_for_node(node)
+      retrieve(node, node.name)
     end
 
     private
+
+    def retrieve(namespace, files_dir)
+      # `input` is passed in to RetrievalProcess (rather than intialized within
+      # it, which would still work) so that a shared cache is used for
+      # retrieving all files for this BuildFilesRetriever, to avoid duplicate
+      # retrievals of the same remote URLs across different RetrievalProcesses.
+      RetrievalProcess.new(
+        metal_config: metal_config,
+        input: input,
+        namespace: namespace,
+        files_dir: files_dir,
+      ).retrieve
+    end
 
     def input
       @input ||= Input::Cache.new
     end
 
-    RetrievalProcess = KeywordStruct.new(:metal_config, :input, :node) do
+    RetrievalProcess = KeywordStruct.new(
+      :metal_config,
+      :input,
+      :namespace,
+      :files_dir
+    ) do
       def retrieve
         files.to_h.keys.map do |section|
           retrieve_for_section(section)
@@ -66,7 +76,7 @@ module Metalware
       end
 
       def files
-        node.config.files
+        namespace.config.files
       end
 
       def file_hash_for(section, identifier)
@@ -77,7 +87,7 @@ module Metalware
           success_file_hash(
             identifier,
             template_path: template,
-            url: DeploymentServer.build_file_url(node.name, section, name)
+            url: DeploymentServer.build_file_url(files_dir, section, name)
           )
         else
           error_file_hash(

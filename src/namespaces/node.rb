@@ -65,7 +65,7 @@ module Metalware
 
       def files
         @files ||= begin
-          data = alces.build_files_retriever.retrieve(self)
+          data = alces.build_files_retriever.retrieve_for_node(self)
           Constants::HASH_MERGER_DATA_STRUCTURE.new(data, &template_block)
         end
       end
