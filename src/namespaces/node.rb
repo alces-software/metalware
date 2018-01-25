@@ -75,9 +75,7 @@ module Metalware
       end
 
       def plugins
-        @plugins ||= Plugins.activated.map do |plugin|
-          Namespaces::Plugin.new(plugin, node: self) if plugin_enabled?(plugin)
-        end.compact
+        @plugins ||= MetalArray.new(enabled_plugin_namespaces)
       end
 
       private
@@ -125,6 +123,12 @@ module Metalware
         else
           BuildMethods::Kickstarts::Pxelinux
         end
+      end
+
+      def enabled_plugin_namespaces
+        Plugins.activated.map do |plugin|
+          Namespaces::Plugin.new(plugin, node: self) if plugin_enabled?(plugin)
+        end.compact
       end
 
       def plugin_enabled?(plugin)

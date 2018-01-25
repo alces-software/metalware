@@ -280,5 +280,11 @@ RSpec.describe Metalware::Namespaces::Node do
 
       expect(first_plugin).to be_a(Metalware::Namespaces::Plugin)
     end
+
+    it 'provides access to plugin namespaces by plugin name' do
+      plugin = node.plugins.enabled_plugin
+
+      expect(plugin.name).to eq enabled_plugin
+    end
   end
 end
