@@ -37,100 +37,112 @@ module Metalware
     end
 
     def retrieve(node)
-      node.config.files&.to_h&.keys&.map do |section|
-        retrieve_for_section(node, section)
-      end.to_h
+      # `input` is passed in to RetrievalProcess (rather than intialized within
+      # it, which would still work) so that a shared cache is used for
+      # retrieving files across nodes, and so the same remote URLs are only
+      # retrieved once in the lifetime of a single BuildFilesRetriever.
+      RetrievalProcess.new(config, node, input).retrieve
     end
 
     private
-
-    def retrieve_for_section(node, section)
-      file_hashes = node.config.files[section].map do |file|
-        file_hash_for(node.name, section, file)
-      end
-      [section, file_hashes]
-    end
-
-    def file_hash_for(node_name, section, identifier)
-      name = File.basename(identifier)
-      template = template_path(identifier)
-
-      if File.exist?(template)
-        success_file_hash(
-          identifier,
-          template_path: template,
-          url: DeploymentServer.build_file_url(node_name, section, name)
-        )
-      else
-        error_file_hash(
-          identifier,
-          error: "Template path '#{template}' for '#{identifier}' does not exist"
-        )
-      end
-    rescue StandardError => error
-      error_file_hash(
-        identifier,
-        error: "Retrieving '#{identifier}' gave error '#{error.message}'"
-      )
-    end
-
-    def success_file_hash(identifier, template_path:, url:)
-      base_file_hash(identifier).merge(
-        template_path: template_path,
-        url: url
-      )
-    end
-
-    def error_file_hash(identifier, error:)
-      MetalLog.warn("Build file: #{error}")
-      base_file_hash(identifier).merge(
-        error: error
-      )
-    end
-
-    def base_file_hash(identifier)
-      name = File.basename(identifier)
-      {
-        raw: identifier,
-        name: name,
-      }
-    end
-
-    def template_path(identifier)
-      name = File.basename(identifier)
-      if url?(identifier)
-        # Download the template to the Metalware cache; will render it from
-        # there.
-        cache_template_path(name).tap do |template|
-          input.download(identifier, template)
-        end
-      elsif absolute_path?(identifier)
-        # Path is an absolute path on the deployment server.
-        identifier
-      else
-        # Path is within the repo `files` directory.
-        repo_template_path(identifier)
-      end
-    end
 
     def input
       @input ||= Input::Cache.new
     end
 
-    def url?(identifier)
-      identifier =~ URI::DEFAULT_PARSER.make_regexp
-    end
+    RetrievalProcess = Struct.new(:metal_config, :node, :input) do
+      def retrieve
+        node.config.files&.to_h&.keys&.map do |section|
+          retrieve_for_section(section)
+        end.to_h
+      end
 
-    def absolute_path?(identifier)
-      Pathname.new(identifier).absolute?
-    end
+      private
 
-    def cache_template_path(template_name)
-      File.join(Constants::CACHE_PATH, 'templates', template_name)
-    end
+      def retrieve_for_section(section)
+        file_hashes = node.config.files[section].map do |file|
+          file_hash_for(section, file)
+        end
+        [section, file_hashes]
+      end
 
-    def repo_template_path(identifier)
-      File.join(config.repo_path, 'files', identifier)
+      def file_hash_for(section, identifier)
+        name = File.basename(identifier)
+        template = template_path(identifier)
+
+        if File.exist?(template)
+          success_file_hash(
+            identifier,
+            template_path: template,
+            url: DeploymentServer.build_file_url(node.name, section, name)
+          )
+        else
+          error_file_hash(
+            identifier,
+            error: "Template path '#{template}' for '#{identifier}' does not exist"
+          )
+        end
+      rescue StandardError => error
+        error_file_hash(
+          identifier,
+          error: "Retrieving '#{identifier}' gave error '#{error.message}'"
+        )
+      end
+
+      def success_file_hash(identifier, template_path:, url:)
+        base_file_hash(identifier).merge(
+          template_path: template_path,
+          url: url
+        )
+      end
+
+      def error_file_hash(identifier, error:)
+        MetalLog.warn("Build file: #{error}")
+        base_file_hash(identifier).merge(
+          error: error
+        )
+      end
+
+      def base_file_hash(identifier)
+        name = File.basename(identifier)
+        {
+          raw: identifier,
+          name: name,
+        }
+      end
+
+      def template_path(identifier)
+        name = File.basename(identifier)
+        if url?(identifier)
+          # Download the template to the Metalware cache; will render it from
+          # there.
+          cache_template_path(name).tap do |template|
+            input.download(identifier, template)
+          end
+        elsif absolute_path?(identifier)
+          # Path is an absolute path on the deployment server.
+          identifier
+        else
+          # Path is within the repo `files` directory.
+          repo_template_path(identifier)
+        end
+      end
+
+      def url?(identifier)
+        identifier =~ URI::DEFAULT_PARSER.make_regexp
+      end
+
+      def absolute_path?(identifier)
+        Pathname.new(identifier).absolute?
+      end
+
+      def cache_template_path(template_name)
+        File.join(Constants::CACHE_PATH, 'templates', template_name)
+      end
+
+      def repo_template_path(identifier)
+        File.join(metal_config.repo_path, 'files', identifier)
+      end
     end
   end
 end
