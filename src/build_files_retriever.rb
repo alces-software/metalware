@@ -27,6 +27,7 @@ require 'open-uri'
 
 require 'constants'
 require 'input'
+require 'keyword_struct'
 
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
@@ -35,7 +36,11 @@ module Metalware
       # it, which would still work) so that a shared cache is used for
       # retrieving files across nodes, and so the same remote URLs are only
       # retrieved once in the lifetime of a single BuildFilesRetriever.
-      RetrievalProcess.new(metal_config, node, input).retrieve
+      RetrievalProcess.new(
+        metal_config: metal_config,
+        input: input,
+        node: node,
+      ).retrieve
     end
 
     private
@@ -44,7 +49,7 @@ module Metalware
       @input ||= Input::Cache.new
     end
 
-    RetrievalProcess = Struct.new(:metal_config, :node, :input) do
+    RetrievalProcess = KeywordStruct.new(:metal_config, :input, :node) do
       def retrieve
         node.config.files&.to_h&.keys&.map do |section|
           retrieve_for_section(section)
