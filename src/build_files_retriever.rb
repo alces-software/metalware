@@ -29,19 +29,13 @@ require 'constants'
 require 'input'
 
 module Metalware
-  class BuildFilesRetriever
-    attr_reader :config
-
-    def initialize(config)
-      @config = config
-    end
-
+  BuildFilesRetriever = Struct.new(:metal_config) do
     def retrieve(node)
       # `input` is passed in to RetrievalProcess (rather than intialized within
       # it, which would still work) so that a shared cache is used for
       # retrieving files across nodes, and so the same remote URLs are only
       # retrieved once in the lifetime of a single BuildFilesRetriever.
-      RetrievalProcess.new(config, node, input).retrieve
+      RetrievalProcess.new(metal_config, node, input).retrieve
     end
 
     private
