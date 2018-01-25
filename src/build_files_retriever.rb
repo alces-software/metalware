@@ -37,21 +37,21 @@ module Metalware
     end
 
     def retrieve(node)
-      node.config.files&.to_h&.keys&.map do |namespace|
-        retrieve_for_namespace(node, namespace)
+      node.config.files&.to_h&.keys&.map do |section|
+        retrieve_for_section(node, section)
       end.to_h
     end
 
     private
 
-    def retrieve_for_namespace(node, namespace)
-      file_hashes = node.config.files[namespace].map do |file|
-        file_hash_for(node.name, namespace, file)
+    def retrieve_for_section(node, section)
+      file_hashes = node.config.files[section].map do |file|
+        file_hash_for(node.name, section, file)
       end
-      [namespace, file_hashes]
+      [section, file_hashes]
     end
 
-    def file_hash_for(node_name, namespace, identifier)
+    def file_hash_for(node_name, section, identifier)
       name = File.basename(identifier)
       template = template_path(identifier)
 
@@ -59,7 +59,7 @@ module Metalware
         success_file_hash(
           identifier,
           template_path: template,
-          url: DeploymentServer.build_file_url(node_name, namespace, name)
+          url: DeploymentServer.build_file_url(node_name, section, name)
         )
       else
         error_file_hash(

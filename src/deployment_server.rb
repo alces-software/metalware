@@ -46,8 +46,8 @@ module Metalware
         url "exec/kscomplete.php?name=#{node_name}" if node_name
       end
 
-      def build_file_url(node_name, namespace, file_name)
-        path = File.join(node_name, namespace.to_s, file_name)
+      def build_file_url(node_name, files_section, file_name)
+        path = File.join(node_name, files_section.to_s, file_name)
         url path
       end
 
