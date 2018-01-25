@@ -32,21 +32,22 @@ require 'keyword_struct'
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
     def retrieve_for_node(node)
-      retrieve(node, node.name)
+      repo_files_dir = File.join(metal_config.repo_path, 'files')
+      retrieve(node, repo_files_dir, node.name)
     end
 
     private
 
-    def retrieve(namespace, files_dir)
+    def retrieve(namespace, internal_templates_dir, rendered_dir)
       # `input` is passed in to RetrievalProcess (rather than intialized within
       # it, which would still work) so that a shared cache is used for
       # retrieving all files for this BuildFilesRetriever, to avoid duplicate
       # retrievals of the same remote URLs across different RetrievalProcesses.
       RetrievalProcess.new(
-        metal_config: metal_config,
         input: input,
         namespace: namespace,
-        files_dir: files_dir,
+        internal_templates_dir: internal_templates_dir,
+        rendered_dir: rendered_dir,
       ).retrieve
     end
 
@@ -55,10 +56,10 @@ module Metalware
     end
 
     RetrievalProcess = KeywordStruct.new(
-      :metal_config,
       :input,
       :namespace,
-      :files_dir
+      :internal_templates_dir,
+      :rendered_dir
     ) do
       def retrieve
         files.to_h.keys.map do |section|
@@ -87,7 +88,7 @@ module Metalware
           success_file_hash(
             identifier,
             template_path: template,
-            url: DeploymentServer.build_file_url(files_dir, section, name)
+            url: DeploymentServer.build_file_url(rendered_dir, section, name)
           )
         else
           error_file_hash(
@@ -136,8 +137,8 @@ module Metalware
           # Path is an absolute path on the deployment server.
           identifier
         else
-          # Path is within the repo `files` directory.
-          repo_template_path(identifier)
+          # Path is internal within the given templates directory.
+          internal_template_path(identifier)
         end
       end
 
@@ -153,8 +154,8 @@ module Metalware
         File.join(Constants::CACHE_PATH, 'templates', template_name)
       end
 
-      def repo_template_path(identifier)
-        File.join(metal_config.repo_path, 'files', identifier)
+      def internal_template_path(identifier)
+        File.join(internal_templates_dir, identifier)
       end
     end
   end
