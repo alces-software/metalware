@@ -76,4 +76,12 @@ RSpec.describe Metalware::Namespaces::Plugin do
       expect(subject.config.node_name).to eq(node.name)
     end
   end
+
+  describe '#files' do
+    it 'provides access to build file hashes for plugin' do
+      retriever = Metalware::BuildFilesRetriever.new(config)
+      expected_files = retriever.retrieve_for_plugin(subject)
+      expect(subject.files).to eq(expected_files)
+    end
+  end
 end
