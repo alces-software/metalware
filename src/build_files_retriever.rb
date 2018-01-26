@@ -32,31 +32,35 @@ require 'keyword_struct'
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
     def retrieve_for_node(node_namespace)
-      rendered_dir = File.join(
-        node_namespace.name,
-        'files/repo',
-      )
       retrieve(
         namespace: node_namespace,
         internal_templates_dir: files_dir_in(metal_config.repo_path),
-        rendered_dir:  rendered_dir,
+        rendered_dir:  rendered_repo_files_dir(node_namespace),
       )
     end
 
     def retrieve_for_plugin(plugin_namespace)
-      rendered_dir = File.join(
-        plugin_namespace.node_namespace.name,
-        'files/plugin',
-        plugin_namespace.name
-      )
       retrieve(
         namespace: plugin_namespace,
         internal_templates_dir: files_dir_in(plugin_namespace.plugin.path),
-        rendered_dir: rendered_dir,
+        rendered_dir: rendered_plugin_files_dir(plugin_namespace)
       )
     end
 
     private
+
+    def rendered_repo_files_dir(node)
+      rendered_files_dir(node: node, files_dir: 'repo')
+    end
+
+    def rendered_plugin_files_dir(plugin)
+      plugin_files_dir = File.join('plugin', plugin.name)
+      rendered_files_dir(node: plugin.node_namespace, files_dir: plugin_files_dir)
+    end
+
+    def rendered_files_dir(node:, files_dir:)
+      File.join(node.name, 'files', files_dir)
+    end
 
     def retrieve(**kwargs)
       # `input` is passed in to RetrievalProcess (rather than intialized within
