@@ -13,7 +13,7 @@ module Metalware
       staging = new
       yield staging if block_given?
     ensure
-      staging.save
+      staging&.save
     end
 
     def self.template(_remove_this_input = nil)
