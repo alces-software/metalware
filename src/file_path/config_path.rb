@@ -49,8 +49,8 @@ module Metalware
       # need different methods. Or maybe we should change configs to use same
       # file structure as answers, which is more structured and helps prevent
       # conflicts.
-      alias_method :group_config, :path
-      alias_method :node_config, :path
+      alias group_config path
+      alias node_config path
     end
   end
 end

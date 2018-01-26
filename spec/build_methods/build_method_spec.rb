@@ -32,9 +32,9 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
   let :config { Metalware::Config.cache = Metalware::Config.new }
   let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
   let :alces { Metalware::Namespaces::Alces.new(config) }
-  let :templater {
+  let :templater do
     Metalware::Staging.template
-  }
+  end
 
   let :template_path { '/path/to/template' }
   let :rendered_path { '/path/to/rendered' }
@@ -49,15 +49,15 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
       some_section: [{
         template_path: template_path,
         rendered_path: rendered_path,
-      }]
+      }],
     }
   end
 
   let :mock_files_with_errors do
     {
       some_section: [{
-        error: 'error'
-      }]
+        error: 'error',
+      }],
     }
   end
 

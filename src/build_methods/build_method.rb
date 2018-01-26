@@ -59,8 +59,8 @@ module Metalware
 
       BuildFilesRenderer = KeywordStruct.new(:templater, :namespace) do
         def render
-          namespace.files.each do |section, files|
-            files.select {|file| file[:error].nil? }.map do |file|
+          namespace.files.each do |_section, files|
+            files.select { |file| file[:error].nil? }.map do |file|
               templater.render(
                 namespace,
                 file[:template_path],

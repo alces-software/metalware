@@ -30,10 +30,10 @@ module Metalware
   class FilePath
     class << self
       delegate :domain_config,
-        :group_config,
-        :node_config,
-        :local_config,
-        to: :config_path
+               :group_config,
+               :node_config,
+               :local_config,
+               to: :config_path
 
       # TODO: Remove the new method. It only ensures backwards compatibility
       def new(*_args)

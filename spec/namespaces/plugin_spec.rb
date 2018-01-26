@@ -58,7 +58,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
         },
         plugin.node_config(node_name) => {
           node_parameter: 'node_value',
-        }
+        },
       }.each do |plugin_config, config_data|
         Metalware::Data.dump(plugin_config, config_data)
       end
@@ -69,9 +69,8 @@ RSpec.describe Metalware::Namespaces::Plugin do
     end
 
     it 'supports templating, with access to node namespace values' do
-      Metalware::Data.dump(plugin.domain_config, {
-        node_name: '<%= node.name %>',
-      })
+      Metalware::Data.dump(plugin.domain_config,
+                           node_name: '<%= node.name %>')
 
       expect(subject.config.node_name).to eq(node.name)
     end
