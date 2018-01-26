@@ -117,11 +117,8 @@ module Metalware
         )
       end
 
-      def success_file_hash(identifier, template_path:, url:)
-        base_file_hash(identifier).merge(
-          template_path: template_path,
-          url: url
-        )
+      def success_file_hash(identifier, **params)
+        base_file_hash(identifier).merge(params)
       end
 
       def error_file_hash(identifier, error:)
