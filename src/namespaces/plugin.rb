@@ -9,6 +9,8 @@ require 'namespaces/hash_merger_namespace'
 module Metalware
   module Namespaces
     class Plugin < HashMergerNamespace
+      attr_reader :node_namespace, :plugin
+
       delegate :name, to: :plugin
 
       # These methods are defined in HashMergerNamespace, but are not
@@ -27,8 +29,6 @@ module Metalware
       end
 
       private
-
-      attr_reader :node_namespace, :plugin
 
       def plugin_config_hash_merger
         HashMergers::PluginConfig.new(
