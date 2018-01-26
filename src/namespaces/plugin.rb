@@ -28,6 +28,10 @@ module Metalware
         @config ||= run_hash_merger(plugin_config_hash_merger)
       end
 
+      def files
+        @files ||= alces.build_files_retriever.retrieve_for_plugin(self)
+      end
+
       private
 
       def plugin_config_hash_merger
