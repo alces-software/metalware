@@ -85,5 +85,18 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
       expect(templater).not_to receive(:render)
       subject.render_staging_templates(templater)
     end
+
+    it 'renders plugin build files to staging' do
+      mock_plugin = OpenStruct.new
+      plugin_namespace =
+        Metalware::Namespaces::Plugin.new(mock_plugin, node: node)
+      allow(node).to receive(:plugins).and_return([plugin_namespace])
+      allow(plugin_namespace).to receive(:files).and_return(mock_files)
+
+      expect(templater).to receive(:render).with(
+        plugin_namespace, template_path, rendered_path, mkdir: true
+      )
+      subject.render_staging_templates(templater)
+    end
   end
 end
