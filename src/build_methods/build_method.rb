@@ -46,6 +46,9 @@ module Metalware
 
       def render_build_files_to_staging(templater)
         BuildFilesRenderer.new(templater: templater, namespace: node).render
+        node.plugins.map do |plugin|
+          BuildFilesRenderer.new(templater: templater, namespace: plugin).render
+        end
       end
 
       def render_to_staging(templater, template_type, sync: nil)
