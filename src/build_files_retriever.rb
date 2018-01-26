@@ -102,6 +102,7 @@ module Metalware
           success_file_hash(
             identifier,
             template_path: template,
+            rendered_path: FilePath.rendered_build_file_path(rendered_dir, section, name),
             url: DeploymentServer.build_file_url(rendered_dir, section, name)
           )
         else

@@ -80,16 +80,19 @@ RSpec.describe Metalware::BuildFilesRetriever do
         expect(retrieved_files[:namespace01][0]).to eq(raw: 'some/file_in_repo',
                                                        name: 'file_in_repo',
                                                        template_path: some_path,
+                                                       rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/file_in_repo',
                                                        url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo')
 
         expect(retrieved_files[:namespace01][1]).to eq(raw: '/some/other/path',
                                                        name: 'path',
                                                        template_path: other_path,
+                                                       rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/path',
                                                        url: 'http://1.2.3.4/metalware/testnode01/namespace01/path')
 
         expect(retrieved_files[:namespace01][2]).to eq(raw: 'http://example.com/url',
                                                        name: 'url',
                                                        template_path: url_path,
+                                                       rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/url',
                                                        url: 'http://1.2.3.4/metalware/testnode01/namespace01/url')
       end
 
@@ -192,12 +195,14 @@ RSpec.describe Metalware::BuildFilesRetriever do
       plugin_namespace = Metalware::Namespaces::Plugin.new(plugin, node: alces.node)
       retrieved_files = subject.retrieve_for_plugin(plugin_namespace)
 
+      relative_rendered_path = "testnode01/#{plugin_name}/some_section/#{plugin_file_name}"
       expect(retrieved_files).to eq({
         some_section: [{
           raw: plugin_file_path,
           name: plugin_file_name,
           template_path: absolute_plugin_file_path,
-          url: "http://1.2.3.4/metalware/testnode01/#{plugin_name}/some_section/#{plugin_file_name}",
+          rendered_path: "/var/lib/metalware/rendered/#{relative_rendered_path}",
+          url: "http://1.2.3.4/metalware/#{relative_rendered_path}",
         }]
       })
     end
