@@ -40,6 +40,16 @@ module Metalware
       )
     end
 
+    def retrieve_for_plugin(plugin_namespace)
+      plugin_files_dir = File.join(plugin_namespace.plugin.path, 'files')
+      rendered_dir = File.join(plugin_namespace.node_namespace.name, plugin_namespace.name)
+      retrieve(
+        namespace: plugin_namespace,
+        internal_templates_dir: plugin_files_dir,
+        rendered_dir: rendered_dir,
+      )
+    end
+
     private
 
     def retrieve(**kwargs)

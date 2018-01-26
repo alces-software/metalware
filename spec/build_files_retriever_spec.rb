@@ -51,15 +51,15 @@ RSpec.describe Metalware::BuildFilesRetriever do
   end
 
   before do
-    FileSystem.root_setup do |fs|
-      fs.with_clone_fixture('configs/unit-test.yaml')
-    end
     SpecUtils.use_mock_determine_hostip_script(self)
-    SpecUtils.use_unit_test_config(self)
   end
 
   describe '#retrieve_for_node' do
     before :each do
+      FileSystem.root_setup do |fs|
+        fs.with_clone_fixture('configs/unit-test.yaml')
+      end
+      SpecUtils.use_unit_test_config(self)
       allow(Metalware::Input).to receive(:download)
     end
 
@@ -153,6 +153,53 @@ RSpec.describe Metalware::BuildFilesRetriever do
         expect(url_file_entry.key?(:template_path)).to be false
         expect(url_file_entry.key?(:url)).to be false
       end
+    end
+  end
+
+  describe '#retrieve_for_plugin' do
+    let :plugin_name { 'some_plugin' }
+    let :plugin_path { File.join(file_path.plugins_dir, plugin_name) }
+
+    let :plugin do
+      FileUtils.mkdir_p(plugin_path)
+      Metalware::Plugins.all.find { |p| p.name == plugin_name }
+    end
+
+    before :each do
+      FileSystem.root_setup do |fs|
+        # This must exist so can attempt to get node groups.
+        fs.touch Metalware::Constants::GENDERS_PATH
+      end
+    end
+
+    it 'retrieves plugin files' do
+      # Create plugin file
+      plugin_files_dir = File.join(plugin_path, 'files/')
+      plugin_file_name = 'some_file'
+      plugin_file_path = File.join('path/to', plugin_file_name)
+      absolute_plugin_file_path = File.join(plugin_files_dir, plugin_file_path)
+      FileUtils.mkdir_p(File.dirname(absolute_plugin_file_path))
+      FileUtils.touch absolute_plugin_file_path
+
+      # Create plugin config specifying file.
+      plugin_config_dir = File.join(plugin_path, 'config')
+      FileUtils.mkdir_p(plugin_config_dir)
+      Metalware::Data.dump(
+        plugin.domain_config,
+        {files: {some_section: [plugin_file_path]}}
+      )
+
+      plugin_namespace = Metalware::Namespaces::Plugin.new(plugin, node: alces.node)
+      retrieved_files = subject.retrieve_for_plugin(plugin_namespace)
+
+      expect(retrieved_files).to eq({
+        some_section: [{
+          raw: plugin_file_path,
+          name: plugin_file_name,
+          template_path: absolute_plugin_file_path,
+          url: "http://1.2.3.4/metalware/testnode01/#{plugin_name}/some_section/#{plugin_file_name}",
+        }]
+      })
     end
   end
 end
