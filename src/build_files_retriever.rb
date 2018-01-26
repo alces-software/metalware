@@ -31,21 +31,22 @@ require 'keyword_struct'
 
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
-    def retrieve_for_node(node)
-      repo_files_dir = File.join(metal_config.repo_path, 'files')
+    def retrieve_for_node(node_namespace)
       retrieve(
-        namespace: node,
-        internal_templates_dir: repo_files_dir,
-        rendered_dir:  node.name,
+        namespace: node_namespace,
+        internal_templates_dir: files_dir_in(metal_config.repo_path),
+        rendered_dir:  node_namespace.name,
       )
     end
 
     def retrieve_for_plugin(plugin_namespace)
-      plugin_files_dir = File.join(plugin_namespace.plugin.path, 'files')
-      rendered_dir = File.join(plugin_namespace.node_namespace.name, plugin_namespace.name)
+      rendered_dir = File.join(
+        plugin_namespace.node_namespace.name,
+        plugin_namespace.name
+      )
       retrieve(
         namespace: plugin_namespace,
-        internal_templates_dir: plugin_files_dir,
+        internal_templates_dir: files_dir_in(plugin_namespace.plugin.path),
         rendered_dir: rendered_dir,
       )
     end
@@ -62,6 +63,10 @@ module Metalware
 
     def input
       @input ||= Input::Cache.new
+    end
+
+    def files_dir_in(dir)
+      File.join(dir, 'files')
     end
 
     RetrievalProcess = KeywordStruct.new(
