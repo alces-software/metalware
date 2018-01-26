@@ -77,23 +77,29 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
         retrieved_files = subject.retrieve_for_node(alces.node)
 
-        expect(retrieved_files[:namespace01][0]).to eq(raw: 'some/file_in_repo',
-                                                       name: 'file_in_repo',
-                                                       template_path: some_path,
-                                                       rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/file_in_repo',
-                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo')
+        expect(retrieved_files[:namespace01][0]).to eq(
+          raw: 'some/file_in_repo',
+          name: 'file_in_repo',
+          template_path: some_path,
+          rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/file_in_repo',
+          url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo'
+        )
 
-        expect(retrieved_files[:namespace01][1]).to eq(raw: '/some/other/path',
-                                                       name: 'path',
-                                                       template_path: other_path,
-                                                       rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/path',
-                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/path')
+        expect(retrieved_files[:namespace01][1]).to eq(
+          raw: '/some/other/path',
+          name: 'path',
+          template_path: other_path,
+          rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/path',
+          url: 'http://1.2.3.4/metalware/testnode01/namespace01/path'
+        )
 
-        expect(retrieved_files[:namespace01][2]).to eq(raw: 'http://example.com/url',
-                                                       name: 'url',
-                                                       template_path: url_path,
-                                                       rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/url',
-                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/url')
+        expect(retrieved_files[:namespace01][2]).to eq(
+          raw: 'http://example.com/url',
+          name: 'url',
+          template_path: url_path,
+          rendered_path: '/var/lib/metalware/rendered/testnode01/namespace01/url',
+          url: 'http://1.2.3.4/metalware/testnode01/namespace01/url'
+        )
       end
 
       it 'downloads any URL identifiers to cache' do
