@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'staging'
+require 'keyword_struct'
 
 module Metalware
   module BuildMethods
@@ -44,26 +45,32 @@ module Metalware
       end
 
       def render_build_files_to_staging(templater)
-        node.files.each do |section, files|
-          files.each do |file|
-            if file[:error]
-              next
-            else
-              templater.render(
-                node,
-                file[:template_path],
-                file[:rendered_path],
-                mkdir: true
-              )
-            end
-          end
-        end
+        BuildFilesRenderer.new(templater: templater, namespace: node).render
       end
 
       def render_to_staging(templater, template_type, sync: nil)
         template_type_path = FilePath.template_path(template_type, node: node)
         sync ||= FilePath.template_save_path(template_type, node: node)
         templater.render(node, template_type_path, sync)
+      end
+
+      BuildFilesRenderer = KeywordStruct.new(:templater, :namespace) do
+        def render
+          namespace.files.each do |section, files|
+            files.each do |file|
+              if file[:error]
+                next
+              else
+                templater.render(
+                  namespace,
+                  file[:template_path],
+                  file[:rendered_path],
+                  mkdir: true
+                )
+              end
+            end
+          end
+        end
       end
     end
   end
