@@ -32,16 +32,21 @@ require 'keyword_struct'
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
     def retrieve_for_node(node_namespace)
+      rendered_dir = File.join(
+        node_namespace.name,
+        'files/repo',
+      )
       retrieve(
         namespace: node_namespace,
         internal_templates_dir: files_dir_in(metal_config.repo_path),
-        rendered_dir:  node_namespace.name,
+        rendered_dir:  rendered_dir,
       )
     end
 
     def retrieve_for_plugin(plugin_namespace)
       rendered_dir = File.join(
         plugin_namespace.node_namespace.name,
+        'files/plugin',
         plugin_namespace.name
       )
       retrieve(
