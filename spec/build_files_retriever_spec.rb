@@ -195,7 +195,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
       FileUtils.mkdir_p(plugin_config_dir)
       Metalware::Data.dump(
         plugin.domain_config,
-        {files: {some_section: [plugin_file_path]}}
+        files: { some_section: [plugin_file_path] }
       )
 
       plugin_namespace = Metalware::Namespaces::Plugin.new(plugin, node: alces.node)
@@ -203,7 +203,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       relative_rendered_path =
         "testnode01/files/plugin/#{plugin_name}/some_section/#{plugin_file_name}"
-      expect(retrieved_files).to eq({
+      expect(retrieved_files).to eq(
         some_section: [{
           raw: plugin_file_path,
           name: plugin_file_name,
@@ -211,7 +211,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           rendered_path: "/var/lib/metalware/rendered/#{relative_rendered_path}",
           url: "http://1.2.3.4/metalware/#{relative_rendered_path}",
         }]
-      })
+      )
     end
   end
 end

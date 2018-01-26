@@ -56,7 +56,7 @@ RSpec.describe Metalware::Validation::Loader do
         top_level_question = {
           identifier: "example_plugin_#{section}_identifier",
           question: "example_plugin_#{section}_question",
-          dependent: [dependent_question]
+          dependent: [dependent_question],
         }
         [section, [top_level_question]]
       end.to_h
@@ -114,7 +114,6 @@ RSpec.describe Metalware::Validation::Loader do
 
     Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
       context "for #{section}" do
-
         context 'when no plugins activated' do
           include_examples 'loads_repo_configure_questions', section
         end

@@ -26,10 +26,10 @@ module Metalware
   module Plugins
     Plugin = Struct.new(:path) do
       delegate :domain_config,
-        :group_config,
-        :node_config,
-        :local_config,
-        to: :config_path
+               :group_config,
+               :node_config,
+               :local_config,
+               to: :config_path
 
       def name
         path.basename.to_s

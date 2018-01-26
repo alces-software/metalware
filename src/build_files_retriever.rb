@@ -35,7 +35,7 @@ module Metalware
       retrieve(
         namespace: node_namespace,
         internal_templates_dir: files_dir_in(metal_config.repo_path),
-        rendered_dir:  rendered_repo_files_dir(node_namespace),
+        rendered_dir:  rendered_repo_files_dir(node_namespace)
       )
     end
 
