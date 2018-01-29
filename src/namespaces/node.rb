@@ -66,8 +66,12 @@ module Metalware
       def files
         @files ||= begin
           data = alces.build_files_retriever.retrieve_for_node(self)
-          Constants::HASH_MERGER_DATA_STRUCTURE.new(data, &template_block)
+          finalize_build_files(data)
         end
+      end
+
+      def finalize_build_files(build_file_hashes)
+        Constants::HASH_MERGER_DATA_STRUCTURE.new(build_file_hashes, &template_block)
       end
 
       def events_dir
