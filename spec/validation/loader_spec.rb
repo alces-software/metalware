@@ -115,14 +115,14 @@ RSpec.describe Metalware::Validation::Loader do
     Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
       context "for #{section}" do
 
-        context 'when no plugins enabled' do
+        context 'when no plugins activated' do
           include_examples 'loads_repo_configure_questions', section
         end
 
-        context 'when plugin enabled' do
+        context 'when plugin activated' do
           before :each do
             FileSystem.root_setup do |fs|
-              fs.enable_plugin('example')
+              fs.activate_plugin('example')
             end
           end
 

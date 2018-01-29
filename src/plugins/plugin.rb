@@ -35,20 +35,24 @@ module Metalware
         path.basename.to_s
       end
 
-      def enabled?
-        Plugins.enabled?(name)
+      def activated?
+        Plugins.activated?(name)
       end
 
-      def enabled_identifier
-        if enabled?
-          '[ENABLED]'.green
+      def deactivated?
+        !activated?
+      end
+
+      def activated_identifier
+        if activated?
+          '[ACTIVATED]'.green
         else
-          '[DISABLED]'.red
+          '[DEACTIVATED]'.red
         end
       end
 
-      def enable!
-        Plugins.enable!(name)
+      def activate!
+        Plugins.activate!(name)
       end
 
       def configure_questions

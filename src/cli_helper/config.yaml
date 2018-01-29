@@ -119,21 +119,21 @@ subcommands:
 
   plugin_list: &plugin_list
     syntax: metal plugin list [options]
-    summary: List available and enabled plugins
+    summary: List available and activated plugins
     description: >
       List all available Metalware plugins, along with which of these are
-      currently enabled.
+      currently activated.
     action: Commands::Plugin::List
 
-  plugin_enable: &plugin_enable
-    syntax: metal plugin enable PLUGIN_NAME [options]
-    summary: Enable given plugin for domain
-    action: Commands::Plugin::Enable
+  plugin_activate: &plugin_activate
+    syntax: metal plugin activate PLUGIN_NAME [options]
+    summary: Activate given plugin for domain
+    action: Commands::Plugin::Activate
 
-  plugin_disable: &plugin_disable
-    syntax: metal plugin disable PLUGIN_NAME [options]
-    summary: Disable given plugin for domain
-    action: Commands::Plugin::Disable
+  plugin_deactivate: &plugin_deactivate
+    syntax: metal plugin deactivate PLUGIN_NAME [options]
+    summary: Deactivate given plugin for domain
+    action: Commands::Plugin::Deactivate
 
   view-answers_domain: &view-answers_domain
     syntax: metal view-answers domain [options]
@@ -305,11 +305,11 @@ commands:
 
   plugin:
     syntax: metal plugin [options]
-    summary: View and manage enabled plugins
+    summary: View and manage activated plugins
     subcommands:
       list: *plugin_list
-      enable: *plugin_enable
-      disable: *plugin_disable
+      activate: *plugin_activate
+      deactivate: *plugin_deactivate
 
   power:
     syntax: metal power NODE_IDENTIFIER [COMMAND] [options]

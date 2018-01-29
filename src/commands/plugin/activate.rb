@@ -28,11 +28,11 @@ require 'plugins'
 module Metalware
   module Commands
     module Plugin
-      class Disable < CommandHelpers::BaseCommand
+      class Activate < CommandHelpers::BaseCommand
         private
 
         def run
-          Plugins.disable!(plugin_name)
+          Plugins.activate!(plugin_name)
         end
 
         def plugin_name

@@ -25,12 +25,12 @@
 require 'filesystem'
 require 'alces_utils'
 
-RSpec.describe Metalware::Commands::Plugin::Disable do
+RSpec.describe Metalware::Commands::Plugin::Deactivate do
   include AlcesUtils
 
-  def run_plugin_disable(plugin_name)
+  def run_plugin_deactivate(plugin_name)
     Metalware::Utils.run_command(
-      Metalware::Commands::Plugin::Disable, plugin_name
+      Metalware::Commands::Plugin::Deactivate, plugin_name
     )
   end
 
@@ -50,13 +50,25 @@ RSpec.describe Metalware::Commands::Plugin::Disable do
     end
   end
 
-  it 'switches the plugin to be disabled' do
+  it 'switches the plugin to be deactivated' do
     filesystem.test do
-      example_plugin.enable!
+      expect(example_plugin).to be_activated
 
-      run_plugin_disable(example_plugin_name)
+      run_plugin_deactivate(example_plugin_name)
 
-      expect(example_plugin).not_to be_enabled
+      expect(example_plugin).not_to be_activated
+    end
+  end
+
+  it 'does not duplicate deactivated plugin if already deactivated' do
+    filesystem.test do
+      run_plugin_deactivate(example_plugin_name)
+      run_plugin_deactivate(example_plugin_name)
+
+      matching_deactivated_plugins = Metalware::Plugins.all.select do |plugin|
+        plugin.deactivated? && plugin.name == example_plugin_name
+      end
+      expect(matching_deactivated_plugins.length).to eq 1
     end
   end
 
@@ -66,7 +78,7 @@ RSpec.describe Metalware::Commands::Plugin::Disable do
 
       expect do
         AlcesUtils.redirect_std(:stderr) do
-          run_plugin_disable(unknown_plugin_name)
+          run_plugin_deactivate(unknown_plugin_name)
         end
       end.to raise_error Metalware::MetalwareError,
                          "Unknown plugin: #{unknown_plugin_name}"
