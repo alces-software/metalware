@@ -62,6 +62,7 @@ module Metalware
     VAR_NAMED_PATH = '/var/named'
 
     CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
+    CONFIGURE_INTERNAL_QUESTION_PREFIX = 'metalware_internal'
 
     HASH_MERGER_DATA_STRUCTURE =
       Metalware::HashMergers::MetalRecursiveOpenStruct

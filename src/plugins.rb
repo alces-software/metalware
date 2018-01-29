@@ -56,6 +56,14 @@ module Metalware
         update_enabled_plugins!(new_enabled_plugins)
       end
 
+      def enabled_question_identifier(plugin_name)
+        [
+          Constants::CONFIGURE_INTERNAL_QUESTION_PREFIX,
+          'plugin_enabled',
+          plugin_name,
+        ].join('--')
+      end
+
       private
 
       def validate_plugin_exists!(plugin_name)
@@ -121,6 +129,10 @@ module Metalware
     def configure_questions
       ConfigureQuestionsBuilder.build(self)
     end
+
+    def enabled_question_identifier
+      Plugins.enabled_question_identifier(name)
+    end
   end
 
   ConfigureQuestionsBuilder = Struct.new(:plugin) do
@@ -140,7 +152,7 @@ module Metalware
 
     def question_hash_for_section(section)
       {
-        identifier: "metalware_internal--plugin_enabled--#{plugin.name}",
+        identifier: plugin.enabled_question_identifier,
         question: "Should '#{plugin.name}' plugin be enabled for #{section}?",
         type: 'boolean',
         dependent: questions_for_section(section),

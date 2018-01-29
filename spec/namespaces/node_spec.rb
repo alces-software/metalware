@@ -210,4 +210,61 @@ RSpec.describe Metalware::Namespaces::Node do
       end
     end
   end
+
+  # Test `#plugins` without the rampant mocking above.
+  describe '#plugins' do
+    let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
+    let :alces { Metalware::Namespaces::Alces.new(config) }
+    let :config { Metalware::Config.new }
+
+    # XXX Need to handle situation of plugin being enabled for node but not
+    # available globally?
+    # XXX handle enabled but unconfigured plugin for node here
+    let :node_enabled_plugin { 'node_enabled_plugin' }
+    let :node_disabled_plugin { 'node_disabled_plugin' }
+    let :globally_disabled_plugin { 'globally_disabled_plugin' }
+
+    before :each do
+      Metalware::Config.cache = config
+
+      FileSystem.root_setup do |fs|
+        fs.with_minimal_repo
+
+        # Create all test plugins.
+        [node_enabled_plugin, node_disabled_plugin, globally_disabled_plugin].each do |plugin|
+          fs.mkdir_p File.join(Metalware::FilePath.plugins_dir, plugin)
+        end
+
+        fs.setup do
+          # Enable these plugins globally.
+          [node_enabled_plugin, node_disabled_plugin].each do |plugin|
+            Metalware::Plugins.enable!(plugin)
+          end
+
+          # Enable/disable plugins for node as needed.
+          # XXX internal identifiers duplicated here also
+          answers = {
+            Metalware::Plugins.enabled_question_identifier(node_enabled_plugin) => true,
+            Metalware::Plugins.enabled_question_identifier(node_disabled_plugin) => false,
+          }.to_json
+          Metalware::Utils.run_command(
+            Metalware::Commands::Configure::Node, node.name, answers: answers
+          )
+        end
+      end
+    end
+
+    after :each do
+      Metalware::Config.clear_cache
+    end
+
+    it 'only includes plugins enabled for node' do
+      node_plugin_names = []
+      node.plugins.each do |plugin|
+        node_plugin_names << plugin.name
+      end
+
+      expect(node_plugin_names).to eq [node_enabled_plugin]
+    end
+  end
 end
