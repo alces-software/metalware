@@ -8,6 +8,7 @@ module Metalware
         def to_h
           white_list_hash_methods
             .merge(recursive_white_list_hash_methods)
+            .merge(recursive_array_white_list_hash_methods)
         end
 
         private
@@ -19,6 +20,11 @@ module Metalware
         def recursive_white_list_hash_methods
           method_results_hash(recursive_white_list_for_hasher)
             .transform_values(&:to_h)
+        end
+
+        def recursive_array_white_list_hash_methods
+          method_results_hash(recursive_array_white_list_for_hasher)
+            .transform_values { |array| array.map(&:to_h) }
         end
 
         # Turn an array of method names into a hash of method names to the
@@ -34,6 +40,10 @@ module Metalware
         end
 
         def recursive_white_list_for_hasher
+          raise NotImplementedError
+        end
+
+        def recursive_array_white_list_for_hasher
           raise NotImplementedError
         end
       end
