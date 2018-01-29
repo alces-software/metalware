@@ -54,6 +54,10 @@ module Metalware
       def additional_dynamic_namespace
         { node: node_namespace }
       end
+
+      def recursive_white_list_for_hasher
+        [:config, :files]
+      end
     end
   end
 end

@@ -41,6 +41,10 @@ module Metalware
         [:config, :answer]
       end
 
+      def recursive_array_white_list_for_hasher
+        []
+      end
+
       def run_hash_merger(hash_obj)
         hash_obj.merge(**hash_merger_input, &template_block)
       end

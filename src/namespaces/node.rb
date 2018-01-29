@@ -101,6 +101,10 @@ module Metalware
         super.push(:files)
       end
 
+      def recursive_array_white_list_for_hasher
+        super.push(:plugins)
+      end
+
       def hash_merger_input
         { groups: genders, node: name }
       rescue NodeNotInGendersError
