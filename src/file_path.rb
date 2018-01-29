@@ -103,11 +103,11 @@ module Metalware
         event(node_namespace, 'complete')
       end
 
-      def rendered_build_file_path(node_name, namespace, file_name)
+      def rendered_build_file_path(node_name, section, file_name)
         File.join(
           config.rendered_files_path,
           node_name,
-          namespace.to_s,
+          section.to_s,
           file_name
         )
       end

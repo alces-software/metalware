@@ -44,12 +44,12 @@ module Metalware
       end
 
       def render_build_files_to_staging(templater)
-        node.files.each do |namespace, files|
+        node.files.each do |section, files|
           files.each do |file|
             next if file[:error]
             render_path = FilePath.rendered_build_file_path(
               node.name,
-              namespace,
+              section,
               file[:name]
             )
             templater.render(node, file[:template_path], render_path, mkdir: true)
