@@ -24,10 +24,17 @@
 
 require 'constants'
 require 'config'
+require 'file_path/config_path'
 
 module Metalware
   class FilePath
     class << self
+      delegate :domain_config,
+        :group_config,
+        :node_config,
+        :local_config,
+        to: :config_path
+
       # TODO: Remove the new method. It only ensures backwards compatibility
       def new(*_args)
         self
@@ -51,22 +58,6 @@ module Metalware
 
       def local_answers
         node_answers('local')
-      end
-
-      def domain_config
-        File.join(repo, 'config/domain.yaml')
-      end
-
-      def group_config(group)
-        File.join(repo, 'config', "#{group}.yaml")
-      end
-
-      def node_config(node)
-        File.join(repo, 'config', "#{node}.yaml")
-      end
-
-      def local_config
-        File.join(repo, 'config/local.yaml')
       end
 
       def server_config
@@ -162,6 +153,10 @@ module Metalware
 
       def answer_files
         config.answer_files_path
+      end
+
+      def config_path
+        @config_path ||= ConfigPath.new(base: repo)
       end
     end
   end

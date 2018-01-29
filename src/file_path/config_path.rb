@@ -23,47 +23,34 @@
 #==============================================================================
 
 module Metalware
-  module Plugins
-    Plugin = Struct.new(:path) do
-      delegate :domain_config,
-        :group_config,
-        :node_config,
-        :local_config,
-        to: :config_path
+  class FilePath
+    class ConfigPath
+      attr_reader :base
 
-      def name
-        path.basename.to_s
+      def initialize(base:)
+        @base = base
       end
 
-      def enabled?
-        Plugins.enabled?(name)
+      def domain_config
+        path 'domain'
       end
 
-      def enabled_identifier
-        if enabled?
-          '[ENABLED]'.green
-        else
-          '[DISABLED]'.red
-        end
+      def local_config
+        path 'local'
       end
 
-      def enable!
-        Plugins.enable!(name)
+      def path(name)
+        file_name = "#{name}.yaml"
+        File.join(base, 'config', file_name)
       end
 
-      def configure_questions
-        Plugins::ConfigureQuestionsBuilder.build(self)
-      end
-
-      def enabled_question_identifier
-        Plugins.enabled_question_identifier(name)
-      end
-
-      private
-
-      def config_path
-        @config_path ||= FilePath::ConfigPath.new(base: path)
-      end
+      # These are the names we currently expect to use to access the different
+      # config paths elsewhere. Since they all go the same place maybe we don't
+      # need different methods. Or maybe we should change configs to use same
+      # file structure as answers, which is more structured and helps prevent
+      # conflicts.
+      alias_method :group_config, :path
+      alias_method :node_config, :path
     end
   end
 end

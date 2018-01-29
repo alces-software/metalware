@@ -34,6 +34,8 @@ require 'data'
 
 module Metalware
   class Config
+    attr_reader :cli
+
     CACHE_WARNING = <<-EOF.squish
       Trying to cache a metal Config when a cached config already exists.
       The new Config will replace the old file. This may lead to unexpected
@@ -44,6 +46,19 @@ module Metalware
       A Config has not been previously cached. The cache can not implicitly
       create a new Config without the 'new_if_missing' flag.
     EOF
+
+    # XXX DRY these paths up.
+    # XXX Maybe move all these paths into Constants and then reference them here
+    KEYS_WITH_DEFAULTS = {
+      validation: true,
+      build_poll_sleep: 10,
+      answer_files_path: '/var/lib/metalware/answers',
+      rendered_files_path: '/var/lib/metalware/rendered',
+      pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
+      repo_path: '/var/lib/metalware/repo',
+      log_path: '/var/log/metalware',
+      log_severity: 'INFO',
+    }.freeze
 
     class << self
       def clear_cache
@@ -69,21 +84,6 @@ module Metalware
         end
       end
     end
-
-    # XXX DRY these paths up.
-    # XXX Maybe move all these paths into Constants and then reference them here
-    KEYS_WITH_DEFAULTS = {
-      validation: true,
-      build_poll_sleep: 10,
-      answer_files_path: '/var/lib/metalware/answers',
-      rendered_files_path: '/var/lib/metalware/rendered',
-      pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
-      repo_path: '/var/lib/metalware/repo',
-      log_path: '/var/log/metalware',
-      log_severity: 'INFO',
-    }.freeze
-
-    attr_reader :cli
 
     # TODO: Remove the file input for configs. Always use the default
     def initialize(_remove_this_file_input = nil, options = {})
