@@ -78,9 +78,17 @@ RSpec.describe Metalware::Namespaces::Plugin do
 
   describe '#files' do
     it 'provides access to build file hashes for plugin' do
-      retriever = Metalware::BuildFilesRetriever.new(config)
-      expected_files = retriever.retrieve_for_plugin(subject)
-      expect(subject.files).to eq(expected_files)
+      Metalware::Data.dump(plugin.domain_config, {
+        files: {
+          some_files_section: [
+            '/path/to/some/file',
+          ],
+        },
+      })
+
+      expect(subject.files).to be_a Metalware::HashMergers::MetalRecursiveOpenStruct
+      expected_files_hash = subject.files.some_files_section.first
+      expect(expected_files_hash.raw).to eq('/path/to/some/file')
     end
   end
 end

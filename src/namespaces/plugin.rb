@@ -13,9 +13,10 @@ module Metalware
 
       delegate :name, to: :plugin
 
-      # These methods are defined in HashMergerNamespace, but are not
-      # meaningful for this namespace.
-      undef :answer, :render_erb_template
+      # `answer` is defined in HashMergerNamespace, but is not meaningful for
+      # this namespace (plugin answers are included within those for the
+      # containing node namespace as a whole).
+      undef :answer
 
       def initialize(plugin, node:)
         @node_namespace = node
@@ -29,7 +30,10 @@ module Metalware
       end
 
       def files
-        @files ||= alces.build_files_retriever.retrieve_for_plugin(self)
+        @files ||= begin
+                     data = alces.build_files_retriever.retrieve_for_plugin(self)
+                     node_namespace.finalize_build_files(data)
+                   end
       end
 
       private
