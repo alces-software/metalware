@@ -28,15 +28,15 @@ require 'plugins'
 module Metalware
   module Commands
     module Plugin
-      class List < CommandHelpers::BaseCommand
+      class Deactivate < CommandHelpers::BaseCommand
         private
 
         def run
-          output = Plugins.all.map do |plugin|
-            "#{plugin.name} #{plugin.activated_identifier}"
-          end.join("\n")
+          Plugins.deactivate!(plugin_name)
+        end
 
-          puts output
+        def plugin_name
+          args.first
         end
       end
     end

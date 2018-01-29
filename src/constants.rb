@@ -37,6 +37,7 @@ module Metalware
     HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
     GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
     INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
+    RENDERED_DIR_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
     STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
     PLUGINS_CACHE_PATH = File.join(CACHE_PATH, 'plugins.yaml')
@@ -62,6 +63,7 @@ module Metalware
     VAR_NAMED_PATH = '/var/named'
 
     CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
+    CONFIGURE_INTERNAL_QUESTION_PREFIX = 'metalware_internal'
 
     HASH_MERGER_DATA_STRUCTURE =
       Metalware::HashMergers::MetalRecursiveOpenStruct

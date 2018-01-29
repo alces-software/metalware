@@ -22,23 +22,35 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/base_command'
-require 'plugins'
-
 module Metalware
-  module Commands
-    module Plugin
-      class Disable < CommandHelpers::BaseCommand
-        private
+  class FilePath
+    class ConfigPath
+      attr_reader :base
 
-        def run
-          Plugins.disable!(plugin_name)
-        end
-
-        def plugin_name
-          args.first
-        end
+      def initialize(base:)
+        @base = base
       end
+
+      def domain_config
+        path 'domain'
+      end
+
+      def local_config
+        path 'local'
+      end
+
+      def path(name)
+        file_name = "#{name}.yaml"
+        File.join(base, 'config', file_name)
+      end
+
+      # These are the names we currently expect to use to access the different
+      # config paths elsewhere. Since they all go the same place maybe we don't
+      # need different methods. Or maybe we should change configs to use same
+      # file structure as answers, which is more structured and helps prevent
+      # conflicts.
+      alias group_config path
+      alias node_config path
     end
   end
 end

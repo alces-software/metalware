@@ -13,7 +13,11 @@ RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
       recursive_hash_obj: recursive_hash_obj,
       do_not_hash_me: 'ohh snap',
       white_list_for_hasher: white_list,
-      recursive_white_list_for_hasher: recursive_white_list
+      recursive_white_list_for_hasher: recursive_white_list,
+      recursive_array_white_list_for_hasher: array_white_list,
+      array_method: [
+        OpenStruct.new(property: 'value_within_array_object'),
+      ]
     ).extend Metalware::Namespaces::Mixins::WhiteListHasher
   end
 
@@ -23,10 +27,15 @@ RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
 
   let :white_list { (1..3).map { |i| "white_method#{i}" } }
   let :recursive_white_list { ['recursive_hash_obj'] }
+  let :array_white_list { [:array_method] }
 
   let :test_hash { test_obj.to_h }
   let :expected_number_of_keys do
-    white_list.length + recursive_white_list.length
+    [
+      white_list,
+      recursive_white_list,
+      array_white_list,
+    ].map(&:length).reduce(&:+)
   end
 
   it 'has all the white listed methods' do
@@ -35,6 +44,13 @@ RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
 
   it 'has the recursive listed methods' do
     expect(test_hash.keys).to include(*recursive_white_list)
+  end
+
+  it 'has recursive array listed methods as array of hashes' do
+    expect(test_hash.keys).to include(*array_white_list)
+    expect(test_hash[:array_method]).to eq [
+      {property: 'value_within_array_object'}
+    ]
   end
 
   it 'has the correct number of keys' do

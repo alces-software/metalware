@@ -69,13 +69,7 @@ module Metalware
       def scope
         dynamic = current_dynamic_namespace || OpenStruct.new
         raise ScopeError, DOUBLE_SCOPE_ERROR if dynamic.group && dynamic.node
-        if dynamic.node
-          dynamic.node
-        elsif dynamic.group
-          dynamic.group
-        else
-          domain
-        end
+        dynamic.node || dynamic.group || domain
       end
 
       def render_erb_template(template_string, dynamic_namespace = {})

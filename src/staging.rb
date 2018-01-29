@@ -13,12 +13,17 @@ module Metalware
       staging = new
       yield staging if block_given?
     ensure
-      staging.save
+      staging&.save
     end
 
     def self.template(_remove_this_input = nil)
       update do |staging|
-        yield Templater.new(staging) if block_given?
+        templater = Templater.new(staging)
+        if block_given?
+          yield templater
+        else
+          templater
+        end
       end
     end
 

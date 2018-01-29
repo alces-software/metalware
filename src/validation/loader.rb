@@ -94,7 +94,7 @@ module Metalware
 
       def plugin_configure_questions
         @plugin_configure_questions ||=
-          Plugins.enabled.map(&:configure_questions)
+          Plugins.activated.map(&:configure_questions)
       end
     end
   end

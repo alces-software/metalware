@@ -24,10 +24,17 @@
 
 require 'constants'
 require 'config'
+require 'file_path/config_path'
 
 module Metalware
   class FilePath
     class << self
+      delegate :domain_config,
+               :group_config,
+               :node_config,
+               :local_config,
+               to: :config_path
+
       # TODO: Remove the new method. It only ensures backwards compatibility
       def new(*_args)
         self
@@ -53,22 +60,6 @@ module Metalware
         node_answers('local')
       end
 
-      def domain_config
-        File.join(repo, 'config/domain.yaml')
-      end
-
-      def group_config(group)
-        File.join(repo, 'config', "#{group}.yaml")
-      end
-
-      def node_config(node)
-        File.join(repo, 'config', "#{node}.yaml")
-      end
-
-      def local_config
-        File.join(repo, 'config/local.yaml')
-      end
-
       def server_config
         File.join(repo, 'server.yaml')
       end
@@ -78,7 +69,7 @@ module Metalware
       end
 
       def plugins_dir
-        File.join(repo, 'plugins')
+        File.join(Constants::METALWARE_DATA_PATH, 'plugins')
       end
 
       def repo_relative_path_to(path)
@@ -112,11 +103,11 @@ module Metalware
         event(node_namespace, 'complete')
       end
 
-      def rendered_build_file_path(node_name, namespace, file_name)
+      def rendered_build_file_path(rendered_dir, section, file_name)
         File.join(
           config.rendered_files_path,
-          node_name,
-          namespace.to_s,
+          rendered_dir,
+          section.to_s,
           file_name
         )
       end
@@ -144,8 +135,7 @@ module Metalware
         @new_if_missing = false
       end
 
-      # TODO: Remove mkdir input
-      def event(node_namespace, event = '', mkdir: true)
+      def event(node_namespace, event = '')
         File.join(events_dir, node_namespace.name, event)
       end
 
@@ -163,6 +153,10 @@ module Metalware
 
       def answer_files
         config.answer_files_path
+      end
+
+      def config_path
+        @config_path ||= ConfigPath.new(base: repo)
       end
     end
   end

@@ -51,15 +51,15 @@ RSpec.describe Metalware::BuildFilesRetriever do
   end
 
   before do
-    FileSystem.root_setup do |fs|
-      fs.with_clone_fixture('configs/unit-test.yaml')
-    end
     SpecUtils.use_mock_determine_hostip_script(self)
-    SpecUtils.use_unit_test_config(self)
   end
 
-  describe '#retrieve' do
+  describe '#retrieve_for_node' do
     before :each do
+      FileSystem.root_setup do |fs|
+        fs.with_clone_fixture('configs/unit-test.yaml')
+      end
+      SpecUtils.use_unit_test_config(self)
       allow(Metalware::Input).to receive(:download)
     end
 
@@ -75,22 +75,31 @@ RSpec.describe Metalware::BuildFilesRetriever do
         FileUtils.mkdir_p File.dirname(url_path)
         FileUtils.touch(url_path)
 
-        retrieved_files = subject.retrieve(alces.node)
+        retrieved_files = subject.retrieve_for_node(alces.node)
 
-        expect(retrieved_files[:namespace01][0]).to eq(raw: 'some/file_in_repo',
-                                                       name: 'file_in_repo',
-                                                       template_path: some_path,
-                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/file_in_repo')
+        expect(retrieved_files[:namespace01][0]).to eq(
+          raw: 'some/file_in_repo',
+          name: 'file_in_repo',
+          template_path: some_path,
+          rendered_path: '/var/lib/metalware/rendered/testnode01/files/repo/namespace01/file_in_repo',
+          url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/file_in_repo'
+        )
 
-        expect(retrieved_files[:namespace01][1]).to eq(raw: '/some/other/path',
-                                                       name: 'path',
-                                                       template_path: other_path,
-                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/path')
+        expect(retrieved_files[:namespace01][1]).to eq(
+          raw: '/some/other/path',
+          name: 'path',
+          template_path: other_path,
+          rendered_path: '/var/lib/metalware/rendered/testnode01/files/repo/namespace01/path',
+          url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/path'
+        )
 
-        expect(retrieved_files[:namespace01][2]).to eq(raw: 'http://example.com/url',
-                                                       name: 'url',
-                                                       template_path: url_path,
-                                                       url: 'http://1.2.3.4/metalware/testnode01/namespace01/url')
+        expect(retrieved_files[:namespace01][2]).to eq(
+          raw: 'http://example.com/url',
+          name: 'url',
+          template_path: url_path,
+          rendered_path: '/var/lib/metalware/rendered/testnode01/files/repo/namespace01/url',
+          url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/url'
+        )
       end
 
       it 'downloads any URL identifiers to cache' do
@@ -99,7 +108,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           '/var/lib/metalware/cache/templates/url'
         )
 
-        subject.retrieve(alces.node)
+        subject.retrieve_for_node(alces.node)
       end
     end
 
@@ -110,7 +119,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       describe 'for repo file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve(alces.node)
+          retrieved_files = subject.retrieve_for_node(alces.node)
 
           repo_file_entry = retrieved_files[:namespace01][0]
           template_path = "#{metal_config.repo_path}/files/some/file_in_repo"
@@ -124,7 +133,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       describe 'for absolute path file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve(alces.node)
+          retrieved_files = subject.retrieve_for_node(alces.node)
 
           absolute_file_entry = retrieved_files[:namespace01][1]
           template_path = '/some/other/path'
@@ -143,7 +152,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
       end
 
       it 'adds error to file entry' do
-        retrieved_files = subject.retrieve(alces.node)
+        retrieved_files = subject.retrieve_for_node(alces.node)
 
         url_file_entry = retrieved_files[:namespace01][2]
         url = 'http://example.com/url'
@@ -153,6 +162,56 @@ RSpec.describe Metalware::BuildFilesRetriever do
         expect(url_file_entry.key?(:template_path)).to be false
         expect(url_file_entry.key?(:url)).to be false
       end
+    end
+  end
+
+  describe '#retrieve_for_plugin' do
+    let :plugin_name { 'some_plugin' }
+    let :plugin_path { File.join(file_path.plugins_dir, plugin_name) }
+
+    let :plugin do
+      FileUtils.mkdir_p(plugin_path)
+      Metalware::Plugins.all.find { |p| p.name == plugin_name }
+    end
+
+    before :each do
+      FileSystem.root_setup do |fs|
+        # This must exist so can attempt to get node groups.
+        fs.touch Metalware::Constants::GENDERS_PATH
+      end
+    end
+
+    it 'retrieves plugin files' do
+      # Create plugin file
+      plugin_files_dir = File.join(plugin_path, 'files/')
+      plugin_file_name = 'some_file'
+      plugin_file_path = File.join('path/to', plugin_file_name)
+      absolute_plugin_file_path = File.join(plugin_files_dir, plugin_file_path)
+      FileUtils.mkdir_p(File.dirname(absolute_plugin_file_path))
+      FileUtils.touch absolute_plugin_file_path
+
+      # Create plugin config specifying file.
+      plugin_config_dir = File.join(plugin_path, 'config')
+      FileUtils.mkdir_p(plugin_config_dir)
+      Metalware::Data.dump(
+        plugin.domain_config,
+        files: { some_section: [plugin_file_path] }
+      )
+
+      plugin_namespace = Metalware::Namespaces::Plugin.new(plugin, node: alces.node)
+      retrieved_files = subject.retrieve_for_plugin(plugin_namespace)
+
+      relative_rendered_path =
+        "testnode01/files/plugin/#{plugin_name}/some_section/#{plugin_file_name}"
+      expect(retrieved_files).to eq(
+        some_section: [{
+          raw: plugin_file_path,
+          name: plugin_file_name,
+          template_path: absolute_plugin_file_path,
+          rendered_path: "/var/lib/metalware/rendered/#{relative_rendered_path}",
+          url: "http://1.2.3.4/metalware/#{relative_rendered_path}",
+        }]
+      )
     end
   end
 end

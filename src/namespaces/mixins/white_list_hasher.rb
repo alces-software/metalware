@@ -6,24 +6,33 @@ module Metalware
     module Mixins
       module WhiteListHasher
         def to_h
-          white_list_hash_methods.tap do |x|
-            merge_white_list_recursive_methods(x)
-          end
+          white_list_hash_methods
+            .merge(recursive_white_list_hash_methods)
+            .merge(recursive_array_white_list_hash_methods)
         end
 
         private
 
-        def white_list_hash_methods(h = {})
-          white_list_for_hasher.each_with_object(h) do |method, memo|
-            memo[method] = send(method)
-          end
+        def white_list_hash_methods
+          method_results_hash(white_list_for_hasher)
         end
 
-        def merge_white_list_recursive_methods(h = {})
-          recursive_white_list_for_hasher
-            .each_with_object(h) do |method, memo|
-            memo[method] = send(method).to_h
-          end
+        def recursive_white_list_hash_methods
+          method_results_hash(recursive_white_list_for_hasher)
+            .transform_values(&:to_h)
+        end
+
+        def recursive_array_white_list_hash_methods
+          method_results_hash(recursive_array_white_list_for_hasher)
+            .transform_values { |array| array.map(&:to_h) }
+        end
+
+        # Turn an array of method names into a hash of method names to the
+        # results of sending those methods to `self`.
+        def method_results_hash(method_names)
+          method_names.map do |method|
+            [method, send(method)]
+          end.to_h
         end
 
         def white_list_for_hasher
@@ -31,6 +40,10 @@ module Metalware
         end
 
         def recursive_white_list_for_hasher
+          raise NotImplementedError
+        end
+
+        def recursive_array_white_list_for_hasher
           raise NotImplementedError
         end
       end

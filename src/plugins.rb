@@ -22,6 +22,9 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'plugins/configure_questions_builder'
+require 'plugins/plugin'
+
 module Metalware
   module Plugins
     class << self
@@ -31,29 +34,37 @@ module Metalware
         end
       end
 
-      def enabled
-        all.select(&:enabled?)
+      def activated
+        all.select(&:activated?)
       end
 
-      def enabled?(plugin_name)
-        enabled_plugin_names.include?(plugin_name)
+      def activated?(plugin_name)
+        !deactivated_plugin_names.include?(plugin_name)
       end
 
-      def enable!(plugin_name)
+      def activate!(plugin_name)
         validate_plugin_exists!(plugin_name)
-        return if enabled?(plugin_name)
+        return if activated?(plugin_name)
 
-        new_enabled_plugins = enabled_plugin_names + [plugin_name]
-        update_enabled_plugins!(new_enabled_plugins)
-      end
-
-      def disable!(plugin_name)
-        validate_plugin_exists!(plugin_name)
-
-        new_enabled_plugins = enabled_plugin_names.reject do |name|
+        new_deactivated_plugins = deactivated_plugin_names.reject do |name|
           name == plugin_name
         end
-        update_enabled_plugins!(new_enabled_plugins)
+        update_deactivated_plugins!(new_deactivated_plugins)
+      end
+
+      def deactivate!(plugin_name)
+        validate_plugin_exists!(plugin_name)
+
+        new_deactivated_plugins = deactivated_plugin_names + [plugin_name]
+        update_deactivated_plugins!(new_deactivated_plugins)
+      end
+
+      def enabled_question_identifier(plugin_name)
+        [
+          Constants::CONFIGURE_INTERNAL_QUESTION_PREFIX,
+          'plugin_enabled',
+          plugin_name,
+        ].join('--')
       end
 
       private
@@ -65,8 +76,8 @@ module Metalware
         end
       end
 
-      def update_enabled_plugins!(new_enabled_plugins)
-        new_cache = cache.merge(enabled: new_enabled_plugins)
+      def update_deactivated_plugins!(new_deactivated_plugins)
+        new_cache = cache.merge(deactivated: new_deactivated_plugins)
         Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
       end
 
@@ -74,8 +85,8 @@ module Metalware
         all_plugin_names.include?(plugin_name)
       end
 
-      def enabled_plugin_names
-        cache[:enabled] || []
+      def deactivated_plugin_names
+        cache[:deactivated] || []
       end
 
       def all_plugin_names
@@ -94,98 +105,6 @@ module Metalware
       def cache
         Data.load(Constants::PLUGINS_CACHE_PATH)
       end
-    end
-  end
-
-  Plugin = Struct.new(:path) do
-    def name
-      path.basename.to_s
-    end
-
-    def enabled?
-      Plugins.enabled?(name)
-    end
-
-    def enabled_identifier
-      if enabled?
-        '[ENABLED]'.green
-      else
-        '[DISABLED]'.red
-      end
-    end
-
-    def enable!
-      Plugins.enable!(name)
-    end
-
-    def configure_questions
-      ConfigureQuestionsBuilder.build(self)
-    end
-  end
-
-  ConfigureQuestionsBuilder = Struct.new(:plugin) do
-    private_class_method :new
-
-    def self.build(plugin)
-      new(plugin).build
-    end
-
-    def build
-      Constants::CONFIGURE_SECTIONS.map do |section|
-        [section, question_hash_for_section(section)]
-      end.to_h
-    end
-
-    private
-
-    def question_hash_for_section(section)
-      {
-        identifier: "metalware_internal--plugin_enabled--#{plugin.name}",
-        question: "Should '#{plugin.name}' plugin be enabled for #{section}?",
-        type: 'boolean',
-        dependent: questions_for_section(section),
-      }
-    end
-
-    def questions_for_section(section)
-      configure_data[section].map { |q| namespace_question_hash(q) }
-    end
-
-    def configure_data
-      @configure_data ||= default_configure_data.merge(
-        Data.load(configure_file_path)
-      )
-    end
-
-    def default_configure_data
-      Constants::CONFIGURE_SECTIONS.map do |section|
-        [section, []]
-      end.to_h
-    end
-
-    def configure_file_path
-      File.join(plugin.path, 'configure.yaml')
-    end
-
-    def namespace_question_hash(question_hash)
-      # Prepend plugin name to question text, as well as recursively to all
-      # dependent questions, so source of plugin questions is clear when
-      # configuring.
-      question_hash.map do |k, v|
-        new_value = case k
-                    when :question
-                      "#{plugin_identifier} #{v}"
-                    when :dependent
-                      v.map { |q| namespace_question_hash(q) }
-                    else
-                      v
-                    end
-        [k, new_value]
-      end.to_h
-    end
-
-    def plugin_identifier
-      "[#{plugin.name}]"
     end
   end
 end

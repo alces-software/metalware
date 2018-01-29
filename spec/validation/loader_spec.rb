@@ -56,7 +56,7 @@ RSpec.describe Metalware::Validation::Loader do
         top_level_question = {
           identifier: "example_plugin_#{section}_identifier",
           question: "example_plugin_#{section}_question",
-          dependent: [dependent_question]
+          dependent: [dependent_question],
         }
         [section, [top_level_question]]
       end.to_h
@@ -114,25 +114,22 @@ RSpec.describe Metalware::Validation::Loader do
 
     Metalware::Constants::CONFIGURE_SECTIONS.each do |section|
       context "for #{section}" do
-
-        context 'when no plugins enabled' do
+        context 'when no plugins activated' do
           include_examples 'loads_repo_configure_questions', section
         end
 
-        context 'when plugin enabled' do
+        context 'when plugin activated' do
           before :each do
             FileSystem.root_setup do |fs|
-              fs.enable_plugin('example')
+              fs.activate_plugin('example')
             end
           end
-
-          # XXX Extract class for handling internal configure identifiers.
-          let :plugin_enabled_question_identifier { 'metalware_internal--plugin_enabled--example' }
 
           let :plugin_enabled_question do
             questions = sections_to_loaded_questions[section]
             questions.find do |question|
-              question.content.identifier == plugin_enabled_question_identifier
+              question.content.identifier ==
+                Metalware::Plugins.enabled_question_identifier('example')
             end
           end
 

@@ -22,22 +22,51 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'command_helpers/base_command'
-require 'plugins'
-
 module Metalware
-  module Commands
-    module Plugin
-      class Enable < CommandHelpers::BaseCommand
-        private
+  module Plugins
+    Plugin = Struct.new(:path) do
+      delegate :domain_config,
+               :group_config,
+               :node_config,
+               :local_config,
+               to: :config_path
 
-        def run
-          Plugins.enable!(plugin_name)
-        end
+      def name
+        path.basename.to_s
+      end
 
-        def plugin_name
-          args.first
+      def activated?
+        Plugins.activated?(name)
+      end
+
+      def deactivated?
+        !activated?
+      end
+
+      def activated_identifier
+        if activated?
+          '[ACTIVATED]'.green
+        else
+          '[DEACTIVATED]'.red
         end
+      end
+
+      def activate!
+        Plugins.activate!(name)
+      end
+
+      def configure_questions
+        Plugins::ConfigureQuestionsBuilder.build(self)
+      end
+
+      def enabled_question_identifier
+        Plugins.enabled_question_identifier(name)
+      end
+
+      private
+
+      def config_path
+        @config_path ||= FilePath::ConfigPath.new(base: path)
       end
     end
   end

@@ -210,4 +210,81 @@ RSpec.describe Metalware::Namespaces::Node do
       end
     end
   end
+
+  # Test `#plugins` without the rampant mocking above.
+  describe '#plugins' do
+    let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
+    let :alces { Metalware::Namespaces::Alces.new(config) }
+    let :config { Metalware::Config.new }
+
+    # XXX Need to handle situation of plugin being enabled for node but not
+    # available globally?
+    let :enabled_plugin { 'enabled_plugin' }
+    let :disabled_plugin { 'disabled_plugin' }
+    let :unconfigured_plugin { 'unconfigured_plugin' }
+    let :deactivated_plugin { 'deactivated_plugin' }
+
+    before :each do
+      Metalware::Config.cache = config
+
+      FileSystem.root_setup do |fs|
+        fs.with_minimal_repo
+
+        # Create all test plugins.
+        [
+          enabled_plugin,
+          disabled_plugin,
+          unconfigured_plugin,
+          deactivated_plugin,
+        ].each do |plugin|
+          fs.mkdir_p File.join(Metalware::FilePath.plugins_dir, plugin)
+        end
+
+        fs.setup do
+          # Activate these plugins.
+          [
+            enabled_plugin,
+            disabled_plugin,
+            unconfigured_plugin,
+          ].each do |plugin|
+            Metalware::Plugins.activate!(plugin)
+          end
+
+          # Enable/disable plugins for node as needed.
+          answers = {
+            Metalware::Plugins.enabled_question_identifier(enabled_plugin) => true,
+            Metalware::Plugins.enabled_question_identifier(disabled_plugin) => false,
+          }.to_json
+          Metalware::Utils.run_command(
+            Metalware::Commands::Configure::Node, node.name, answers: answers
+          )
+        end
+      end
+    end
+
+    after :each do
+      Metalware::Config.clear_cache
+    end
+
+    it 'only includes plugins enabled for node' do
+      node_plugin_names = []
+      node.plugins.each do |plugin|
+        node_plugin_names << plugin.name
+      end
+
+      expect(node_plugin_names).to eq [enabled_plugin]
+    end
+
+    it 'uses plugin namespace for each enabled plugin' do
+      first_plugin = node.plugins.first
+
+      expect(first_plugin).to be_a(Metalware::Namespaces::Plugin)
+    end
+
+    it 'provides access to plugin namespaces by plugin name' do
+      plugin = node.plugins.enabled_plugin
+
+      expect(plugin.name).to eq enabled_plugin
+    end
+  end
 end

@@ -3,6 +3,7 @@
 
 require 'build_methods'
 require 'build_files_retriever'
+require 'namespaces/plugin'
 
 module Metalware
   module Namespaces
@@ -64,13 +65,21 @@ module Metalware
 
       def files
         @files ||= begin
-          data = alces.build_files_retriever.retrieve(self)
-          Constants::HASH_MERGER_DATA_STRUCTURE.new(data, &template_block)
+          data = alces.build_files_retriever.retrieve_for_node(self)
+          finalize_build_files(data)
         end
+      end
+
+      def finalize_build_files(build_file_hashes)
+        Constants::HASH_MERGER_DATA_STRUCTURE.new(build_file_hashes, &template_block)
       end
 
       def events_dir
         FilePath.event self
+      end
+
+      def plugins
+        @plugins ||= MetalArray.new(enabled_plugin_namespaces)
       end
 
       private
@@ -92,13 +101,17 @@ module Metalware
         super.push(:files)
       end
 
+      def recursive_array_white_list_for_hasher
+        super.push(:plugins)
+      end
+
       def hash_merger_input
         { groups: genders, node: name }
       rescue NodeNotInGendersError
-        # The answer hash needs to be accessable by the Configurator
-        # Nodes in a group work fine as they appear in the genders file
-        # BUT local and orphan nodes DO NOT appear in the genders file and
-        # cause the above error
+        # The answer hash needs to be accessible by the Configurator. Nodes in
+        # a group work fine as they appear in the genders file BUT local and
+        # orphan nodes DO NOT appear in the genders file and cause the above
+        # error.
         return { groups: ['orphan'], node: name }
       end
 
@@ -118,6 +131,16 @@ module Metalware
         else
           BuildMethods::Kickstarts::Pxelinux
         end
+      end
+
+      def enabled_plugin_namespaces
+        Plugins.activated.map do |plugin|
+          Namespaces::Plugin.new(plugin, node: self) if plugin_enabled?(plugin)
+        end.compact
+      end
+
+      def plugin_enabled?(plugin)
+        answer.send(plugin.enabled_question_identifier)
       end
     end
   end

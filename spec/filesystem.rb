@@ -47,8 +47,24 @@ class FileSystem
     delegate :write, to: File
     delegate :dump, to: Metalware::Data
 
-    def enable_plugin(plugin_name)
-      Metalware::Plugins.enable!(plugin_name)
+    def activate_plugin(plugin_name)
+      Metalware::Plugins.activate!(plugin_name)
+    end
+
+    # Create an empty file given any path, by creating every needed parent
+    # directory and then the file itself.
+    def create(file_path)
+      dir_path = File.dirname(file_path)
+      FileUtils.mkdir_p(dir_path)
+      FileUtils.touch(file_path)
+    end
+
+    # Perform arbitrary other FileSystem setup.
+    # TODO Maybe everything/more things should be changed to just do this,
+    # rather than continuing to add new methods here every time we want to
+    # create a file in a new way?
+    def setup
+      yield
     end
   end
   include SetupMethods

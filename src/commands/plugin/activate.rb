@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 #==============================================================================
-# Copyright (C) 2007-2015 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -19,15 +21,24 @@
 # For more information on the Alces Metalware, please visit:
 # https://github.com/alces-software/metalware
 #==============================================================================
-nodegather() {
-  if [ -z $1 ]; then
-    echo "Please pass genders compatible node string as first parameter" >&2
-    exit 1
-  fi
-  if ((nodeattr -c $1) > /dev/null 2>&1); then
-    nodeattr -c $1 | sed 's/,/\n/g'
-  else
-    echo "Please pass valid genders compatible node string as first parameter" >&2
-    exit 1
-  fi
-}
+
+require 'command_helpers/base_command'
+require 'plugins'
+
+module Metalware
+  module Commands
+    module Plugin
+      class Activate < CommandHelpers::BaseCommand
+        private
+
+        def run
+          Plugins.activate!(plugin_name)
+        end
+
+        def plugin_name
+          args.first
+        end
+      end
+    end
+  end
+end
