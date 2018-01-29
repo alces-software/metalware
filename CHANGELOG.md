@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2018.1.0-pre1] - 2018-01-22
+## [2018.1.0-rc1] - 2018-01-29
 
 - Added support for conditional Metalware configuration questions.
 - Added `orchestrate` commands for orchestration of VMs via Libvirt in
@@ -12,6 +12,11 @@ All notable changes to this project will be documented in this file.
 - Improved error-handling in existing `ipmi`, `power`, and `console` commands.
 - Added `plugin` commands for Metalware plugin management.
 - Added support for configuration of Metalware plugins.
+- Added merging of plugin configs for node, and retrieving/rendering of plugin
+  files, by similar processes as currently used for repo configs and files for
+  node.
+- Added access to plugin namespaces for enabled plugins when templating for
+  nodes.
 - Various other small bug fixes and tweaks.
 
 ## [2017.2.1] - 2018-01-05
