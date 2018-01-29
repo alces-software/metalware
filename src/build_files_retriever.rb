@@ -31,16 +31,36 @@ require 'keyword_struct'
 
 module Metalware
   BuildFilesRetriever = Struct.new(:metal_config) do
-    def retrieve_for_node(node)
-      repo_files_dir = File.join(metal_config.repo_path, 'files')
+    def retrieve_for_node(node_namespace)
       retrieve(
-        namespace: node,
-        internal_templates_dir: repo_files_dir,
-        rendered_dir:  node.name,
+        namespace: node_namespace,
+        internal_templates_dir: files_dir_in(metal_config.repo_path),
+        rendered_dir:  rendered_repo_files_dir(node_namespace),
+      )
+    end
+
+    def retrieve_for_plugin(plugin_namespace)
+      retrieve(
+        namespace: plugin_namespace,
+        internal_templates_dir: files_dir_in(plugin_namespace.plugin.path),
+        rendered_dir: rendered_plugin_files_dir(plugin_namespace)
       )
     end
 
     private
+
+    def rendered_repo_files_dir(node)
+      rendered_files_dir(node: node, files_dir: 'repo')
+    end
+
+    def rendered_plugin_files_dir(plugin)
+      plugin_files_dir = File.join('plugin', plugin.name)
+      rendered_files_dir(node: plugin.node_namespace, files_dir: plugin_files_dir)
+    end
+
+    def rendered_files_dir(node:, files_dir:)
+      File.join(node.name, 'files', files_dir)
+    end
 
     def retrieve(**kwargs)
       # `input` is passed in to RetrievalProcess (rather than intialized within
@@ -52,6 +72,10 @@ module Metalware
 
     def input
       @input ||= Input::Cache.new
+    end
+
+    def files_dir_in(dir)
+      File.join(dir, 'files')
     end
 
     RetrievalProcess = KeywordStruct.new(
@@ -87,6 +111,7 @@ module Metalware
           success_file_hash(
             identifier,
             template_path: template,
+            rendered_path: FilePath.rendered_build_file_path(rendered_dir, section, name),
             url: DeploymentServer.build_file_url(rendered_dir, section, name)
           )
         else
@@ -102,11 +127,8 @@ module Metalware
         )
       end
 
-      def success_file_hash(identifier, template_path:, url:)
-        base_file_hash(identifier).merge(
-          template_path: template_path,
-          url: url
-        )
+      def success_file_hash(identifier, **params)
+        base_file_hash(identifier).merge(params)
       end
 
       def error_file_hash(identifier, error:)

@@ -51,6 +51,14 @@ class FileSystem
       Metalware::Plugins.activate!(plugin_name)
     end
 
+    # Create an empty file given any path, by creating every needed parent
+    # directory and then the file itself.
+    def create(file_path)
+      dir_path = File.dirname(file_path)
+      FileUtils.mkdir_p(dir_path)
+      FileUtils.touch(file_path)
+    end
+
     # Perform arbitrary other FileSystem setup.
     # TODO Maybe everything/more things should be changed to just do this,
     # rather than continuing to add new methods here every time we want to
