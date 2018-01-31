@@ -16,7 +16,11 @@ module Metalware
         private
 
         def require_files(require_directory)
-          Dir[File.join(calling_file_dir, require_directory, '**/*.rb')]
+          # Sorting files to require is needed so that we require files in a
+          # deterministic order (globbing by itself is non-deterministic), to
+          # prevent issues as described from
+          # https://alces.slack.com/archives/C5FL99R89/p1517402592000215.
+          Dir[File.join(calling_file_dir, require_directory, '**/*.rb')].sort
         end
 
         def calling_file_dir
