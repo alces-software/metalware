@@ -33,29 +33,10 @@ RSpec.describe Metalware::Config do
   # DO NOT test Metaware::Config with AlcesUtils. It relys on the Config to
   # be working correctly inorder to mock the other methods
 
-  it 'uses default config file' do
-    expect(YAML).to receive(:load_file).with(
-      Metalware::Constants::DEFAULT_CONFIG_PATH
-    )
-    Metalware::Config.new
-  end
-
-  it 'can have default values retrieved' do
-    FileSystem.root_setup do |fs|
-      fs.with_metal_config_fixture('configs/empty.yaml')
-    end
+  it 'can have config values retrieved from it' do
     config = Metalware::Config.new
     expect(config.rendered_files_path).to eq('/var/lib/metalware/rendered')
     expect(config.build_poll_sleep).to eq(10)
-  end
-
-  it 'can have set values retrieved over defaults' do
-    FileSystem.root_setup do |fs|
-      fs.with_metal_config_fixture('configs/non-empty.yaml')
-    end
-    config = Metalware::Config.new
-    expect(config.rendered_files_path).to eq('/rendered/files')
-    expect(config.build_poll_sleep).to eq(5)
   end
 
   describe '#cache' do

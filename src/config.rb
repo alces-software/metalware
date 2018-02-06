@@ -49,7 +49,7 @@ module Metalware
 
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
-    KEYS_WITH_DEFAULTS = {
+    KEYS_WITH_VALUES = {
       validation: true,
       build_poll_sleep: 10,
       answer_files_path: '/var/lib/metalware/answers',
@@ -90,14 +90,8 @@ module Metalware
       file = Constants::DEFAULT_CONFIG_PATH
       raise MetalwareError, "Config file '#{file}' does not exist" unless File.file?(file)
 
-      @config = YAML.load_file(file) || {}
       @cli = OpenStruct.new(options)
-      define_keys_with_defaults
-    end
-
-    def repo_config_path(config_name)
-      config_file = config_name + '.yaml'
-      File.join(repo_path, 'config', config_file)
+      define_keys_with_values
     end
 
     # TODO: Remove these methods as answer files should always be loaded through
@@ -123,11 +117,9 @@ module Metalware
 
     private
 
-    def define_keys_with_defaults
-      KEYS_WITH_DEFAULTS.each do |key, default|
-        define_singleton_method :"#{key}" do
-          @config[key.to_s].nil? ? default : @config[key.to_s]
-        end
+    def define_keys_with_values
+      KEYS_WITH_VALUES.each do |key, default|
+        define_singleton_method :"#{key}" { default }
       end
     end
   end
