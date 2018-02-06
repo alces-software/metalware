@@ -34,7 +34,7 @@ module Metalware
     private_class_method :new
 
     def initialize
-      @metal_config = Config.cache
+      @metal_config = Config.new
       @file_path = FilePath.new(metal_config)
     end
 

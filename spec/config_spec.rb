@@ -38,35 +38,4 @@ RSpec.describe Metalware::Config do
     expect(config.rendered_files_path).to eq('/var/lib/metalware/rendered')
     expect(config.build_poll_sleep).to eq(10)
   end
-
-  describe '#cache' do
-    def expect_return_cache_config(**opts)
-      cache_config = Metalware::Config.new
-      Metalware::Config.cache = cache_config
-      expect(Metalware::Config.cache(**opts)).to eq(cache_config)
-    end
-
-    context 'without new_if_missing flag' do
-      it 'error if the cache is not set' do
-        expect do
-          Metalware::Config.cache
-        end.to raise_error(Metalware::ConfigCacheError)
-      end
-
-      it 'returns the cached config' do
-        expect_return_cache_config
-      end
-    end
-
-    context 'with new_if_missing flag' do
-      it 'returns a new Config if cache is not set' do
-        config = Metalware::Config.cache(new_if_missing: true)
-        expect(config).to be_a(Metalware::Config)
-      end
-
-      it 'returns the cached config' do
-        expect_return_cache_config(new_if_missing: true)
-      end
-    end
-  end
 end

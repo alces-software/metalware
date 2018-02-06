@@ -36,17 +36,6 @@ module Metalware
   class Config
     attr_reader :cli
 
-    CACHE_WARNING = <<-EOF.squish
-      Trying to cache a metal Config when a cached config already exists.
-      The new Config will replace the old file. This may lead to unexpected
-      errors if the config has changed.
-    EOF
-
-    CACHE_MISSING = <<-EOF.squish
-      A Config has not been previously cached. The cache can not implicitly
-      create a new Config without the 'new_if_missing' flag.
-    EOF
-
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_VALUES = {
@@ -59,31 +48,6 @@ module Metalware
       log_path: '/var/log/metalware',
       log_severity: 'INFO',
     }.freeze
-
-    class << self
-      def clear_cache
-        @cache = nil
-      end
-
-      def cache=(config)
-        if @cache
-          MetalLog.warn CACHE_WARNING
-        else
-          MetalLog.info 'Caching new config'
-        end
-        @cache = config
-      end
-
-      def cache(new_if_missing: false)
-        if @cache
-          @cache
-        elsif new_if_missing
-          new
-        else
-          raise ConfigCacheError, CACHE_MISSING
-        end
-      end
-    end
 
     # TODO: Remove the file input for configs. Always use the default
     def initialize(_remove_this_file_input = nil, options = {})

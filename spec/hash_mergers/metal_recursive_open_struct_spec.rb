@@ -16,7 +16,7 @@ module Metalware
 end
 
 RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
-  let :metal_config { Metalware::Config.cache(new_if_missing: true) }
+  let :metal_config { Metalware::Config.new }
 
   let :alces do
     namespace = Metalware::Namespaces::Alces.new(metal_config)

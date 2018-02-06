@@ -33,7 +33,7 @@ module Metalware
     # TODO: Remove the input
     def initialize(_remove_this_input = nil, force_reload_file: false)
       @force_reload = force_reload_file
-      @config = Config.cache
+      @config = Config.new
     end
 
     def group?(group)

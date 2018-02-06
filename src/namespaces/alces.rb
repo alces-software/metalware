@@ -28,7 +28,6 @@ module Metalware
       GROUP_ERROR = 'Error, a Group is not in scope'
       DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
 
-      # TODO: Remove this method, use Config.cache instead
       attr_reader :metal_config
 
       delegate :config, :answer, to: :scope

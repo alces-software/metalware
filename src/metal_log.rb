@@ -56,7 +56,7 @@ module Metalware
     private
 
     def config
-      Config.cache(new_if_missing: true)
+      Config.new
     end
   end
 end

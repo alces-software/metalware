@@ -13,10 +13,6 @@ module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
-      AlcesUtils.mock example_group, :each do
-        cache_config
-      end
-
       example_group.instance_exec do
         let! :metal_config do
           AlcesUtils.check_and_raise_fakefs_error
@@ -199,11 +195,6 @@ module AlcesUtils
       group = alces.groups.find_by_name(name)
       with_blank_config_and_answer(group)
       allow(alces).to receive(:group).and_return(group)
-    end
-
-    def cache_config
-      cached_config = Metalware::Config.instance_variable_get(:@cache)
-      Metalware::Config.cache = Metalware::Config.new unless cached_config
     end
 
     private

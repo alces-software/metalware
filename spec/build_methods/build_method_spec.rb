@@ -29,7 +29,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     end
   end
 
-  let :config { Metalware::Config.cache = Metalware::Config.new }
+  let :config { Metalware::Config.new }
   let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
   let :alces { Metalware::Namespaces::Alces.new(config) }
   let :templater do
@@ -63,10 +63,6 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
 
   subject do
     TestBuildMethod.new(config, node)
-  end
-
-  after :each do
-    Metalware::Config.clear_cache
   end
 
   describe '#render_staging_templates' do

@@ -83,7 +83,7 @@ module Metalware
     )
       @alces = alces
       @highline = HighLine.new
-      @config = Config.cache
+      @config = Config.new
       @questions_section = questions_section
       @name = (questions_section == :local ? 'local' : name)
     end

@@ -22,8 +22,6 @@ RSpec.describe Metalware::Namespaces::Plugin do
   subject { described_class.new(plugin, node: node) }
 
   before :each do
-    Metalware::Config.cache = config
-
     FileSystem.root_setup do |fs|
       fs.setup do
         plugin_config_dir = File.join(file_path.plugins_dir, plugin_name, 'config')
@@ -32,10 +30,6 @@ RSpec.describe Metalware::Namespaces::Plugin do
         File.write(file_path.genders, "#{node_name} #{node_group_name}\n")
       end
     end
-  end
-
-  after :each do
-    Metalware::Config.clear_cache
   end
 
   describe '#name' do

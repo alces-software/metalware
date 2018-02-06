@@ -144,7 +144,7 @@ module Metalware
       attr_reader :new_if_missing
 
       def config
-        Config.cache(new_if_missing: new_if_missing)
+        Config.new
       end
 
       def template_file_name(template_type, node:)
