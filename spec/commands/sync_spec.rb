@@ -35,7 +35,7 @@ RSpec.describe Metalware::Commands::Sync do
     let :validate_file { '/tmp/validate-file' }
 
     before :each do
-      Metalware::Staging.update(metal_config) do |staging|
+      Metalware::Staging.update do |staging|
         good_validator = Metalware::Testing::GoodValidation.to_s
         staging.push_file(validate_file, '', validator: good_validator)
         files.each { |f| staging.push_file(f, '') }
@@ -63,7 +63,7 @@ RSpec.describe Metalware::Commands::Sync do
         allow(Metalware::Output).to \
           (receive(:stderr).and_wrap_original { |_m, *arg| warn arg })
 
-        Metalware::Staging.update(metal_config) do |staging|
+        Metalware::Staging.update do |staging|
           bad_validator = Metalware::Testing::BadValidation.to_s
           staging.push_file(bad_file, '', validator: bad_validator)
         end

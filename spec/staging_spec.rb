@@ -71,7 +71,7 @@ RSpec.describe Metalware::Staging do
     let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
 
     before :each do
-      Metalware::Staging.update(metal_config) do |staging|
+      Metalware::Staging.update do |staging|
         files.each { |f| staging.push_file(f, '') }
       end
     end
@@ -116,7 +116,7 @@ RSpec.describe Metalware::Staging do
       end
 
       before :each do
-        Metalware::Staging.update(metal_config) do |staging|
+        Metalware::Staging.update do |staging|
           staging.push_file(managed_file, managed_content, managed: true)
           staging.delete_file_if do |file|
             File.write file.sync, file.content

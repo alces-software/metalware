@@ -8,14 +8,14 @@ require 'managed_file'
 
 module Metalware
   class Staging
-    def self.update(_remove_this_input = nil)
+    def self.update
       staging = new
       yield staging if block_given?
     ensure
       staging&.save
     end
 
-    def self.template(_remove_this_input = nil)
+    def self.template
       update do |staging|
         templater = Templater.new(staging)
         if block_given?
@@ -26,7 +26,7 @@ module Metalware
       end
     end
 
-    def self.manifest(_remove_this_input = nil)
+    def self.manifest
       new.manifest
     end
 
