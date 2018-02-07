@@ -46,9 +46,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     config(alces.node, files: TEST_FILES_HASH)
   end
 
-  subject do
-    Metalware::BuildFilesRetriever.new(metal_config)
-  end
+  subject { Metalware::BuildFilesRetriever.new }
 
   before do
     SpecUtils.use_mock_determine_hostip_script(self)

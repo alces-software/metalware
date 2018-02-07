@@ -64,7 +64,7 @@ module Metalware
         end
 
         def build_files_retriever
-          @build_files_retriever ||= BuildFilesRetriever.new(metal_config)
+          @build_files_retriever ||= BuildFilesRetriever.new
         end
 
         def orphan_list

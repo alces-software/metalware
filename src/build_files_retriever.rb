@@ -30,7 +30,7 @@ require 'input'
 require 'keyword_struct'
 
 module Metalware
-  BuildFilesRetriever = Struct.new(:metal_config) do
+  class BuildFilesRetriever
     def retrieve_for_node(node_namespace)
       retrieve(
         namespace: node_namespace,
