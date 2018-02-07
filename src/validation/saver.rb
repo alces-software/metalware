@@ -30,10 +30,6 @@ require 'data'
 module Metalware
   module Validation
     class Saver
-      def initialize(metalware_config)
-        @config = metalware_config
-      end
-
       def respond_to_missing?(s, *_a)
         Methods.instance_methods.include?(s)
       end
@@ -43,7 +39,7 @@ module Metalware
         data = a[0]
         if respond_to_missing?(s)
           raise SaverNoData unless data
-          Methods.new(config, data).send(s, *a[1..-1], &b)
+          Methods.new(data).send(s, *a[1..-1], &b)
         else
           super
         end
@@ -51,25 +47,22 @@ module Metalware
 
       private
 
-      attr_reader :config
-
       def method_builder(data)
-        Methods.new(config, data)
+        Methods.new(data)
       end
 
       class Methods < LoadSaveBase
-        def initialize(config, data)
-          @config = config
+        def initialize(data)
           @path = FilePath
           @data = data
         end
 
         private
 
-        attr_reader :path, :config, :data
+        attr_reader :path, :data
 
         def answer(save_path, section)
-          valid = Validation::Answer.new(config, data, answer_section: section)
+          valid = Validation::Answer.new(Config.new, data, answer_section: section)
                                     .data
           Data.dump(save_path, valid)
         end

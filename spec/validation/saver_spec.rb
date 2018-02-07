@@ -46,11 +46,8 @@ Metalware::Validation::Saver::Methods.prepend(SaverSpec::TestingMethods)
 RSpec.describe Metalware::Validation::Saver do
   include AlcesUtils
 
-  let :config { metal_config }
   let :path { Metalware::FilePath }
-  let :saver do
-    Metalware::Validation::Saver.new(config)
-  end
+  let :saver { Metalware::Validation::Saver.new }
   let :stubbed_answer_load { OpenStruct.new(data: data) }
   let :data { { key: 'data' } }
 
@@ -83,7 +80,7 @@ RSpec.describe Metalware::Validation::Saver do
   it 'calls the answer validator with the domain and data' do
     filesystem.test do
       expect(Metalware::Validation::Answer).to \
-        receive(:new).with(config, data, answer_section: :domain)
+        receive(:new).with(instance_of(Metalware::Config), data, answer_section: :domain)
                      .and_return(stubbed_answer_load)
       saver.domain_answers(data)
       expect(Metalware::Data.load(path.domain_answers)).to eq(data)

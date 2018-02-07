@@ -119,7 +119,7 @@ module Metalware
     end
 
     def saver
-      @saver ||= Validation::Saver.new(config)
+      @saver ||= Validation::Saver.new
     end
 
     def group_cache
