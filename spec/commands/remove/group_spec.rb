@@ -45,7 +45,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
     end
   end
 
-  let :loader { Metalware::Validation::Loader.new(metal_config) }
+  let :loader { Metalware::Validation::Loader.new }
   let :cache { loader.group_cache[:primary_groups] }
 
   let :initial_files { answer_files }

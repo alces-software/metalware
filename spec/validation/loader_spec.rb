@@ -26,10 +26,6 @@ require 'validation/loader'
 
 RSpec.describe Metalware::Validation::Loader do
   describe '#configure_data' do
-    let! :config do
-      Metalware::Config.new
-    end
-
     let :configure_sections do
       Metalware::Constants::CONFIGURE_SECTIONS
     end
@@ -91,9 +87,7 @@ RSpec.describe Metalware::Validation::Loader do
       end
     end
 
-    subject do
-      described_class.new(config)
-    end
+    subject { described_class.new }
 
     before :each do
       FileSystem.root_setup do |fs|

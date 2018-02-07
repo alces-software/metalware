@@ -91,7 +91,7 @@ module Metalware
     attr_reader :config, :force_reload
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def file_path

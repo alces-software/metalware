@@ -27,7 +27,7 @@ class Configure::Questions < ApplicationModel
     end
 
     def loader
-      Metalware::Validation::Loader.new(config)
+      Metalware::Validation::Loader.new
     end
   end
 end

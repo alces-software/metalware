@@ -78,7 +78,7 @@ module Metalware
       end
 
       def loader
-        @loader ||= Validation::Loader.new(config)
+        @loader ||= Validation::Loader.new
       end
 
       def file_path

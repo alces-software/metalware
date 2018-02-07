@@ -85,7 +85,7 @@ module Metalware
       attr_reader :config, :section, :answers
 
       def loader
-        @loader ||= Validation::Loader.new(config)
+        @loader ||= Validation::Loader.new
       end
 
       def questions_in_section

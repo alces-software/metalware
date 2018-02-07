@@ -115,7 +115,7 @@ module Metalware
                 :name
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def saver

@@ -21,7 +21,7 @@ module Metalware
     private
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def configure_data

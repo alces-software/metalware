@@ -56,7 +56,7 @@ RSpec.describe Metalware::Configurator do
   let :higher_level_answer_files { [] }
 
   let :config { metal_config }
-  let :loader { Metalware::Validation::Loader.new(config) }
+  let :loader { Metalware::Validation::Loader.new }
 
   let :configurator do
     make_configurator
