@@ -6,8 +6,6 @@ require 'spec_utils'
 RSpec.describe Metalware::Namespaces::Plugin do
   include AlcesUtils
 
-  let :config { Metalware::Config.new }
-
   let :node do
     Metalware::Namespaces::Node.create(alces, node_name)
   end
