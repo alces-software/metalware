@@ -26,7 +26,6 @@ require 'tempfile'
 require 'yaml'
 require 'highline'
 
-require 'config'
 require 'configurator'
 require 'validation/loader'
 require 'alces_utils'
@@ -55,7 +54,6 @@ RSpec.describe Metalware::Configurator do
 
   let :higher_level_answer_files { [] }
 
-  let :config { metal_config }
   let :loader { Metalware::Validation::Loader.new }
 
   let :configurator do

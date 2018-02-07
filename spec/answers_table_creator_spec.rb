@@ -27,14 +27,13 @@ require 'spec_utils'
 
 require 'filesystem'
 require 'answers_table_creator'
-require 'config'
 require 'validation/loader'
 
 RSpec.describe Metalware::AnswersTableCreator do
   include AlcesUtils
 
   subject do
-    Metalware::AnswersTableCreator.new(metal_config, alces)
+    Metalware::AnswersTableCreator.new(alces)
   end
 
   let :configure_data do

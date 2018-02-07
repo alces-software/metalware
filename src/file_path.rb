@@ -148,10 +148,6 @@ module Metalware
 
       private
 
-      def config
-        Config.new
-      end
-
       def template_file_name(template_type, node:)
         node.config.templates&.send(template_type) || 'default'
       end

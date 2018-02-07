@@ -45,7 +45,6 @@ RSpec.describe Metalware::Repo do
       local: {},
     }
   end
-  let :config { Metalware::Config.new }
   let :loader { Metalware::Validation::Loader.new }
 
   # Spoofs the Loader to return the configure_data above. By-passes validation

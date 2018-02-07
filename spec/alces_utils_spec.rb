@@ -10,10 +10,6 @@ RSpec.describe AlcesUtils do
   let :group_cache { Metalware::GroupCache.new }
 
   describe '#new' do
-    it 'returns the mocked config' do
-      expect(metal_config.equal?(Metalware::Config.new)).to eq(true)
-    end
-
     it 'returns the mocked alces' do
       new_alces = Metalware::Namespaces::Alces.new
       expect(alces.equal?(new_alces)).to eq(true)

@@ -27,8 +27,6 @@ require 'constants'
 require 'file_path'
 
 RSpec.describe Metalware::FilePath do
-  let :config { Metalware::Config.new }
-
   describe 'dynamic constant paths' do
     let :file_path { Metalware::FilePath }
 

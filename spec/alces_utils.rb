@@ -14,13 +14,6 @@ module AlcesUtils
   class << self
     def start(example_group, config: nil)
       example_group.instance_exec do
-        let! :metal_config do
-          AlcesUtils.check_and_raise_fakefs_error
-          test_config = Metalware::Config.new(config)
-          allow(Metalware::Config).to receive(:new).and_return(test_config)
-          test_config
-        end
-
         let! :alces do
           test_alces = Metalware::Namespaces::Alces.new
           allow(Metalware::Namespaces::Alces).to \
@@ -131,7 +124,6 @@ module AlcesUtils
     def initialize(individual_spec_test)
       @test = individual_spec_test
       @alces = test.instance_exec { alces }
-      @metal_config = test.instance_exec { metal_config }
     end
 
     # Used to test basic templating features, avoid use if possible
@@ -191,7 +183,7 @@ module AlcesUtils
 
     private
 
-    attr_reader :alces, :metal_config, :test
+    attr_reader :alces, :test
 
     def raise_if_node_exists(name)
       return unless File.exist? Metalware::FilePath.genders

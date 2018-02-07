@@ -28,7 +28,6 @@ require 'dependency_specifications'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::DependencySpecifications do
-  let :config { Metalware::Config.new }
   let :alces { Metalware::Namespaces::Alces.new }
 
   subject do

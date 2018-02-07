@@ -36,8 +36,6 @@ RSpec.describe Metalware::Commands::Configure::Group do
     )
   end
 
-  let :config { Metalware::Config.new }
-
   def new_cache
     Metalware::GroupCache.new
   end

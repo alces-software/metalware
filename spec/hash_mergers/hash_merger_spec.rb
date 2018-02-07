@@ -16,7 +16,6 @@ RSpec.describe Metalware::HashMergers::HashMerger do
     validation_off
   end
 
-  let :config { metal_config }
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_repo_fixtures('merged_hash')
@@ -26,7 +25,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   def build_merged_hash(**hash_input)
-    Metalware::HashMergers.merge(config, **hash_input) do |template_string|
+    Metalware::HashMergers.merge(**hash_input) do |template_string|
       template_string
     end
   end
