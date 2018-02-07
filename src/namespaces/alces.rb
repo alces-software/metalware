@@ -4,7 +4,6 @@
 require 'exceptions'
 require 'templating/renderer'
 require 'templating/nil_detection_wrapper'
-require 'config'
 require 'utils/dynamic_require'
 require 'deployment_server'
 
@@ -28,8 +27,6 @@ module Metalware
       GROUP_ERROR = 'Error, a Group is not in scope'
       DOUBLE_SCOPE_ERROR = 'A node and group can not both be in scope'
 
-      attr_reader :metal_config
-
       delegate :config, :answer, to: :scope
 
       class << self
@@ -50,8 +47,7 @@ module Metalware
         end
       end
 
-      def initialize(metal_config)
-        @metal_config = metal_config
+      def initialize
         @stacks_hash = {}
       end
 

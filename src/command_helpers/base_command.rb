@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'metal_log'
-require 'config'
 require 'dependency'
 require 'exceptions'
 require 'dependency_specifications'
@@ -47,7 +46,7 @@ module Metalware
 
       private
 
-      attr_reader :config, :args, :options
+      attr_reader :args, :options
 
       def pre_setup(args, options)
         set_global_log_options(options)
@@ -96,7 +95,7 @@ module Metalware
       end
 
       def alces
-        @alces ||= Namespaces::Alces.new(config)
+        @alces ||= Namespaces::Alces.new
       end
 
       def log_command

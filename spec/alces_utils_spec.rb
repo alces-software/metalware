@@ -15,7 +15,7 @@ RSpec.describe AlcesUtils do
     end
 
     it 'returns the mocked alces' do
-      new_alces = Metalware::Namespaces::Alces.new(metal_config)
+      new_alces = Metalware::Namespaces::Alces.new
       expect(alces.equal?(new_alces)).to eq(true)
     end
   end

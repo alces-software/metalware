@@ -29,9 +29,8 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     end
   end
 
-  let :config { Metalware::Config.new }
   let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  let :alces { Metalware::Namespaces::Alces.new }
   let :templater do
     Metalware::Staging.template
   end

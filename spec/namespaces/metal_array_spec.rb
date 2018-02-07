@@ -12,8 +12,7 @@ require 'nodeattr_interface'
 # be ensured.
 #
 RSpec.describe Metalware::Namespaces::MetalArray do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  let :alces { Metalware::Namespaces::Alces.new }
 
   let :node_names { ['node1', 'node2', 'node3'] }
 

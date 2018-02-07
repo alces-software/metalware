@@ -19,7 +19,7 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
   let :metal_config { Metalware::Config.new }
 
   let :alces do
-    namespace = Metalware::Namespaces::Alces.new(metal_config)
+    namespace = Metalware::Namespaces::Alces.new
     allow(namespace).to receive(:testing).and_return(build_default_hash)
     namespace
   end

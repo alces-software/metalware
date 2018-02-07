@@ -22,7 +22,7 @@ module AlcesUtils
         end
 
         let! :alces do
-          test_alces = Metalware::Namespaces::Alces.new(metal_config)
+          test_alces = Metalware::Namespaces::Alces.new
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_return(test_alces)
           test_alces

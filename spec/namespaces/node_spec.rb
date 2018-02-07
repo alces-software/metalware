@@ -24,9 +24,8 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   context 'without AlcesUtils' do
-    let :config { Metalware::Config.new }
     let :alces do
-      a = Metalware::Namespaces::Alces.new(config)
+      a = Metalware::Namespaces::Alces.new
       allow(a).to receive(:groups).and_return(
         Metalware::Namespaces::MetalArray.new(
           [
@@ -208,8 +207,7 @@ RSpec.describe Metalware::Namespaces::Node do
   # Test `#plugins` without the rampant mocking above.
   describe '#plugins' do
     let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
-    let :alces { Metalware::Namespaces::Alces.new(config) }
-    let :config { Metalware::Config.new }
+    let :alces { Metalware::Namespaces::Alces.new }
 
     # XXX Need to handle situation of plugin being enabled for node but not
     # available globally?

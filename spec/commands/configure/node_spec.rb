@@ -12,8 +12,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
     )
   end
 
-  let :config { Metalware::Config.new }
-  let :initial_alces { Metalware::Namespaces::Alces.new(config) }
+  let :initial_alces { Metalware::Namespaces::Alces.new }
   let :alces do
     allow(initial_alces).to receive(:groups).and_return(
       double('groups', testnodes: test_group)
