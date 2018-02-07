@@ -62,7 +62,7 @@ module Metalware
         attr_reader :path, :data
 
         def answer(save_path, section)
-          valid = Validation::Answer.new(Config.new, data, answer_section: section)
+          valid = Validation::Answer.new(data, answer_section: section)
                                     .data
           Data.dump(save_path, valid)
         end

@@ -65,8 +65,7 @@ module Metalware
 
       def answer(absolute_path, section)
         yaml = Data.load(absolute_path)
-        validator = Validation::Answer.new(Config.new,
-                                           yaml,
+        validator = Validation::Answer.new(yaml,
                                            answer_section: section,
                                            configure_data: configure_data)
         validator.data

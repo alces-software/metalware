@@ -80,7 +80,7 @@ RSpec.describe Metalware::Validation::Saver do
   it 'calls the answer validator with the domain and data' do
     filesystem.test do
       expect(Metalware::Validation::Answer).to \
-        receive(:new).with(instance_of(Metalware::Config), data, answer_section: :domain)
+        receive(:new).with(data, answer_section: :domain)
                      .and_return(stubbed_answer_load)
       saver.domain_answers(data)
       expect(Metalware::Data.load(path.domain_answers)).to eq(data)
