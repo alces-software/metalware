@@ -47,7 +47,7 @@ RSpec.describe Metalware::Validation::Saver do
   include AlcesUtils
 
   let :config { metal_config }
-  let :path { Metalware::FilePath.new(config) }
+  let :path { Metalware::FilePath }
   let :saver do
     Metalware::Validation::Saver.new(config)
   end

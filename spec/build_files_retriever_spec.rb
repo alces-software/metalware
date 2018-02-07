@@ -167,7 +167,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
   describe '#retrieve_for_plugin' do
     let :plugin_name { 'some_plugin' }
-    let :plugin_path { File.join(file_path.plugins_dir, plugin_name) }
+    let :plugin_path { File.join(Metalware::FilePath.plugins_dir, plugin_name) }
 
     let :plugin do
       FileUtils.mkdir_p(plugin_path)

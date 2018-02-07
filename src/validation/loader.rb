@@ -33,7 +33,7 @@ module Metalware
     class Loader < LoadSaveBase
       def initialize(metalware_config)
         @config = metalware_config
-        @path = FilePath.new(config)
+        @path = FilePath
       end
 
       def configure_data

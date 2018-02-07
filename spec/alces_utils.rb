@@ -28,20 +28,16 @@ module AlcesUtils
           test_alces
         end
 
-        let! :file_path do
-          Metalware::FilePath.new(metal_config)
-        end
-
         #
         # Mocks nodeattr to use faked genders file
         #
         before :each do
-          File.open(file_path.genders, 'a') { |f| f.puts('local local') } unless File.exist?(file_path.genders)
+          File.open(Metalware::FilePath.genders, 'a') { |f| f.puts('local local') } unless File.exist?(Metalware::FilePath.genders)
 
           allow(Metalware::NodeattrInterface)
             .to receive(:nodeattr).and_wrap_original do |method, *args|
             AlcesUtils.check_and_raise_fakefs_error
-            path = AlcesUtils.nodeattr_genders_file_path(args[0], file_path)
+            path = AlcesUtils.nodeattr_genders_file_path(args[0])
             cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
             genders_data = File.read(path)
             tempfile = nil
@@ -65,8 +61,8 @@ module AlcesUtils
       start(base)
     end
 
-    def nodeattr_genders_file_path(command, file_path)
-      return file_path.genders unless command.include?('-f')
+    def nodeattr_genders_file_path(command)
+      return Metalware::FilePath.genders unless command.include?('-f')
       command.match(AlcesUtils::GENDERS_FILE_REGEX)[0].sub('-f ', '')
     end
 
@@ -210,7 +206,7 @@ module AlcesUtils
     def add_node_to_genders_file(name, *genders)
       genders = [AlcesUtils.default_group] if genders.empty?
       genders_entry = "#{name} #{genders.join(',')}\n"
-      File.write(file_path.genders, genders_entry, mode: 'a')
+      File.write(Metalware::FilePath.genders, genders_entry, mode: 'a')
     end
 
     # Allows the RSpec methods to be accessed

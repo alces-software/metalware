@@ -35,7 +35,7 @@ module Metalware
 
     def initialize
       @metal_config = Config.new
-      @file_path = FilePath.new(metal_config)
+      @file_path = FilePath
     end
 
     def save

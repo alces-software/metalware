@@ -12,7 +12,7 @@ module Metalware
     class HashMerger
       def initialize(metalware_config)
         @metalware_config = metalware_config
-        @file_path = FilePath.new(metalware_config)
+        @file_path = FilePath
         @loader = Validation::Loader.new(metalware_config)
         @cache = {}
       end

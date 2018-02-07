@@ -60,7 +60,7 @@ module Metalware
       class Methods < LoadSaveBase
         def initialize(config, data)
           @config = config
-          @path = FilePath.new(config)
+          @path = FilePath
           @data = data
         end
 

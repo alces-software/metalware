@@ -36,7 +36,7 @@ RSpec.describe Metalware::Validation::Configure do
   before :each { FileSystem.root_setup(&:with_validation_error_file) }
 
   let :config { metal_config }
-  let :file_path { Metalware::FilePath.new(config) }
+  let :file_path { Metalware::FilePath }
 
   let :correct_hash do
     {

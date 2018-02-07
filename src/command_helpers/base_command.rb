@@ -86,7 +86,7 @@ module Metalware
       end
 
       def file_path
-        @file_path ||= FilePath.new(config)
+        @file_path ||= FilePath
       end
 
       def command_name

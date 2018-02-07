@@ -24,10 +24,10 @@ RSpec.describe Metalware::Namespaces::Plugin do
   before :each do
     FileSystem.root_setup do |fs|
       fs.setup do
-        plugin_config_dir = File.join(file_path.plugins_dir, plugin_name, 'config')
+        plugin_config_dir = File.join(Metalware::FilePath.plugins_dir, plugin_name, 'config')
         FileUtils.mkdir_p plugin_config_dir
 
-        File.write(file_path.genders, "#{node_name} #{node_group_name}\n")
+        File.write(Metalware::FilePath.genders, "#{node_name} #{node_group_name}\n")
       end
     end
   end

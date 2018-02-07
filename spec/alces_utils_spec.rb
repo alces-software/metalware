@@ -6,7 +6,7 @@ require 'alces_utils'
 RSpec.describe AlcesUtils do
   include AlcesUtils
 
-  let :file_path { Metalware::FilePath.new(metal_config) }
+  let :file_path { Metalware::FilePath }
   let :group_cache { Metalware::GroupCache.new(metal_config) }
 
   describe '#new' do
