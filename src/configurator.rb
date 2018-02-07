@@ -123,7 +123,7 @@ module Metalware
     end
 
     def group_cache
-      @group_cache ||= GroupCache.new(config)
+      @group_cache ||= GroupCache.new
     end
 
     # Whether the answer is saved depends if it matches the default AND

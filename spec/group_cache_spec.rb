@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'group_cache'
 require 'filesystem'
 require 'alces_utils'
@@ -30,11 +29,10 @@ require 'alces_utils'
 RSpec.describe Metalware::GroupCache do
   include AlcesUtils
 
-  let :config { metal_config }
   let :cache { new_cache }
 
   def new_cache
-    Metalware::GroupCache.new(config)
+    Metalware::GroupCache.new
   end
 
   let :filesystem do

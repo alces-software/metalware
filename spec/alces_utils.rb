@@ -219,7 +219,7 @@ module AlcesUtils
     end
 
     def group_cache
-      @group_cache ||= Metalware::GroupCache.new(metal_config)
+      @group_cache ||= Metalware::GroupCache.new
     end
 
     def hash_object(h = {})

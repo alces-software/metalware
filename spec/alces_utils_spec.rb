@@ -7,7 +7,7 @@ RSpec.describe AlcesUtils do
   include AlcesUtils
 
   let :file_path { Metalware::FilePath }
-  let :group_cache { Metalware::GroupCache.new(metal_config) }
+  let :group_cache { Metalware::GroupCache.new }
 
   describe '#new' do
     it 'returns the mocked config' do
