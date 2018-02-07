@@ -10,8 +10,10 @@ require 'active_support/core_ext/object/deep_dup'
 module Metalware
   module HashMergers
     class HashMerger
-      def initialize(metalware_config)
-        @metalware_config = metalware_config
+      # NOTE: `_args` argument is needed so child classes can take arguments
+      # and then call `super`, though this class does not need arguments
+      # itself.
+      def initialize(*_args)
         @file_path = FilePath
         @loader = Validation::Loader.new
         @cache = {}
@@ -25,7 +27,7 @@ module Metalware
 
       private
 
-      attr_reader :metalware_config, :file_path, :loader, :cache
+      attr_reader :file_path, :loader, :cache
 
       ##
       # hash_array enforces the order in which the hashes are loaded, it is

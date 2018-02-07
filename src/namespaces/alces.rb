@@ -83,8 +83,8 @@ module Metalware
       #
       def hash_mergers
         @hash_mergers ||= begin
-          OpenStruct.new(config: HashMergers::Config.new(metal_config),
-                         answer: HashMergers::Answer.new(metal_config))
+          OpenStruct.new(config: HashMergers::Config.new,
+                         answer: HashMergers::Answer.new)
         end
       end
 

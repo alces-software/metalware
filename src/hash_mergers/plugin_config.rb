@@ -6,9 +6,9 @@ require 'hash_mergers/hash_merger'
 module Metalware
   module HashMergers
     class PluginConfig < HashMerger
-      def initialize(metal_config:, plugin:)
+      def initialize(plugin:)
         @plugin = plugin
-        super(metal_config)
+        super
       end
 
       private
