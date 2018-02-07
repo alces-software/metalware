@@ -61,7 +61,7 @@ module Metalware
     end
 
     def repo
-      @repo ||= Metalware::Repo.new(config)
+      @repo ||= Metalware::Repo.new
     end
 
     def domain_answer(question:)

@@ -28,9 +28,7 @@ require 'validation/loader'
 require 'config'
 
 RSpec.describe Metalware::Repo do
-  subject do
-    Metalware::Repo.new(Metalware::Config.new)
-  end
+  subject { Metalware::Repo.new }
 
   let :configure_data do
     {
