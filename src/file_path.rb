@@ -123,20 +123,11 @@ module Metalware
                  end
       end
 
-      def new_config_if_missing(&block)
-        @new_if_missing = true
-        instance_exec(&block)
-      ensure
-        @new_if_missing = false
-      end
-
       def event(node_namespace, event = '')
         File.join(events_dir, node_namespace.name, event)
       end
 
       private
-
-      attr_reader :new_if_missing
 
       def config
         Config.new
