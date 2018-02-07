@@ -38,9 +38,7 @@ module Metalware
 
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
-    KEYS_WITH_VALUES = {
-      log_severity: 'INFO',
-    }.freeze
+    KEYS_WITH_VALUES = {}.freeze
 
     # TODO: Remove the file input for configs. Always use the default
     def initialize(_remove_this_file_input = nil, options = {})

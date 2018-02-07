@@ -1,6 +1,5 @@
 
 build_poll_sleep: 0
-log_severity: "DEBUG"
 externaldns: '10.101.0.1'
 
 networks:

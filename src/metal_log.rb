@@ -45,7 +45,7 @@ module Metalware
       f = File.open(file, 'a')
       f.sync = true
       super(f)
-      self.level = config.log_severity
+      self.level = Constants::LOG_SEVERITY
     end
 
     def warn(msg)

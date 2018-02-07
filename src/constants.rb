@@ -74,5 +74,7 @@ module Metalware
     # skip validations; ideally we would handle wanting to test things without
     # running validations in a better way.
     SKIP_VALIDATION = false
+
+    LOG_SEVERITY = 'INFO'
   end
 end
