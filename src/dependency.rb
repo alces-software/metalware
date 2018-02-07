@@ -101,7 +101,7 @@ module Metalware
         validate_repo
         loader.configure_data
         unless valid_file?(:configure, '', true)
-          msg = "Could not locate answer files: #{config.answer_files_path}"
+          msg = "Could not locate answer files: #{FilePath.answer_files}"
           raise DependencyFailure, msg
         end
         true # Sets the @validate_configure value so it only runs once
@@ -112,9 +112,9 @@ module Metalware
       path = begin
         case dep
         when :repo
-          File.join(config.repo_path, value)
+          File.join(FilePath.repo, value)
         when :configure
-          File.join(config.answer_files_path, value)
+          File.join(FilePath.answer_files, value)
         else
           msg = "Could not generate file path for dependency #{dep}"
           raise DependencyInternalError, msg

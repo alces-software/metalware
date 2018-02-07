@@ -65,7 +65,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
     context 'when everything works' do
       it 'returns the correct files object' do
-        some_path = File.join(metal_config.repo_path, 'files/some/file_in_repo')
+        some_path = File.join(Metalware::FilePath.repo, 'files/some/file_in_repo')
         FileUtils.mkdir_p File.dirname(some_path)
         FileUtils.touch(some_path)
         other_path = '/some/other/path'
@@ -122,7 +122,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           retrieved_files = subject.retrieve_for_node(alces.node)
 
           repo_file_entry = retrieved_files[:namespace01][0]
-          template_path = "#{metal_config.repo_path}/files/some/file_in_repo"
+          template_path = "#{Metalware::FilePath.repo}/files/some/file_in_repo"
           expect(repo_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.

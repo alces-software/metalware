@@ -37,7 +37,7 @@ module Metalware
       attr_reader :metal_config, :node, :file_path
 
       def strip_leading_repo_path(path)
-        path.gsub(/^#{file_path.repo}\/?/, '')
+        path.gsub(/^#{FilePath.repo}\/?/, '')
       end
 
       def staging_templates

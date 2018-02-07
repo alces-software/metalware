@@ -264,7 +264,7 @@ module Metalware
 
         @type = type_for(
           properties[:type],
-          configure_file: config.configure_file,
+          configure_file: Metalware::FilePath.configure_file,
           questions_section: questions_section
         )
       end

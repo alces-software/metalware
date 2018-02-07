@@ -40,7 +40,7 @@ module Metalware
     end
 
     def initialize(log_name)
-      file = "#{config.log_path}/#{log_name}.log"
+      file = "#{FilePath.log}/#{log_name}.log"
       FileUtils.mkdir_p File.dirname(file)
       f = File.open(file, 'a')
       f.sync = true

@@ -68,7 +68,7 @@ module Metalware
       end
 
       def relative_answer_file
-        answer_file.sub("#{config.answer_files_path}/", '')
+        answer_file.sub("#{FilePath.answer_files}/", '')
       end
 
       def dependency_hash

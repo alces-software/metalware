@@ -57,7 +57,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   end
 
   def answer_files
-    Dir[File.join(metal_config.answer_files_path, '**/*.yaml')]
+    Dir[File.join(Metalware::FilePath.answer_files, '**/*.yaml')]
   end
 
   def expected_deleted_files(group)
@@ -65,7 +65,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
       .nodes_in_primary_group(group)
       .map { |node| "nodes/#{node}.yaml" }
       .unshift(["groups/#{group}.yaml"])
-      .map { |f| File.join(metal_config.answer_files_path, f) }
+      .map { |f| File.join(Metalware::FilePath.answer_files, f) }
   end
 
   def test_remove_group(group)

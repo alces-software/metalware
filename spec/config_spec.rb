@@ -35,7 +35,6 @@ RSpec.describe Metalware::Config do
 
   it 'can have config values retrieved from it' do
     config = Metalware::Config.new
-    expect(config.rendered_files_path).to eq('/var/lib/metalware/rendered')
     expect(config.build_poll_sleep).to eq(10)
   end
 end

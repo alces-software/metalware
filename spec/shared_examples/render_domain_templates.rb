@@ -81,7 +81,7 @@ RSpec.shared_examples :render_domain_templates do |test_command|
 
   context 'when invalid server config rendered' do
     let :server_config_template_path do
-      File.join(Metalware::Config.new.repo_path, 'server.yaml')
+      File.join(Metalware::FilePath.repo, 'server.yaml')
     end
 
     let :build_interface { 'eth2' }

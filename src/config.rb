@@ -41,11 +41,6 @@ module Metalware
     KEYS_WITH_VALUES = {
       validation: true,
       build_poll_sleep: 10,
-      answer_files_path: '/var/lib/metalware/answers',
-      rendered_files_path: '/var/lib/metalware/rendered',
-      pxelinux_cfg_path: '/var/lib/tftpboot/pxelinux.cfg',
-      repo_path: '/var/lib/metalware/repo',
-      log_path: '/var/log/metalware',
       log_severity: 'INFO',
     }.freeze
 
@@ -56,27 +51,6 @@ module Metalware
 
       @cli = OpenStruct.new(options)
       define_keys_with_values
-    end
-
-    # TODO: Remove these methods as answer files should always be loaded through
-    # the Loader so they can be validated. If for some reason the path is
-    # required, then the path can be accessed from the FilePath class
-    def configure_file
-      File.join(repo_path, 'configure.yaml')
-    end
-
-    def domain_answers_file
-      File.join(answer_files_path, 'domain.yaml')
-    end
-
-    def group_answers_file(group_name)
-      file_name = "#{group_name}.yaml"
-      File.join(answer_files_path, 'groups', file_name)
-    end
-
-    def node_answers_file(node_name)
-      file_name = "#{node_name}.yaml"
-      File.join(answer_files_path, 'nodes', file_name)
     end
 
     private
