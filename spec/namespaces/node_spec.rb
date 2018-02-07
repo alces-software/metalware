@@ -4,7 +4,6 @@
 require 'shared_examples/hash_merger_namespace'
 
 require 'namespaces/alces'
-require 'config'
 require 'constants'
 require 'hash_mergers'
 require 'recursive_open_struct'

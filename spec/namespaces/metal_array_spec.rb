@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'namespaces/alces'
-require 'config'
 require 'constants'
 require 'nodeattr_interface'
 

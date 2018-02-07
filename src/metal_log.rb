@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'logger'
-require 'config'
 require 'exceptions'
 require 'fileutils'
 require 'output'

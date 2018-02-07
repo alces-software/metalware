@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'hash_mergers'
-require 'config'
 require 'filesystem'
 require 'data'
 require 'constants'

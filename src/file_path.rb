@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'constants'
-require 'config'
 require 'file_path/config_path'
 
 module Metalware

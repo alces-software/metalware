@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'constants'
 require 'file_path'
 

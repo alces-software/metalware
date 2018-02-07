@@ -25,7 +25,6 @@
 
 require 'repo'
 require 'validation/loader'
-require 'config'
 
 RSpec.describe Metalware::Repo do
   subject { Metalware::Repo.new }

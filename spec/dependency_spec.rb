@@ -23,7 +23,6 @@
 #==============================================================================
 require 'exceptions'
 require 'dependency'
-require 'config'
 require 'constants'
 require 'validation/configure'
 require 'ostruct'

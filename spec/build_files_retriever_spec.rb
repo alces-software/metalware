@@ -25,7 +25,6 @@
 require 'build_files_retriever'
 require 'input'
 require 'spec_utils'
-require 'config'
 
 RSpec.describe Metalware::BuildFilesRetriever do
   include AlcesUtils

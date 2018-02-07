@@ -24,7 +24,6 @@
 
 require 'validation/saver'
 require 'validation/answer'
-require 'config'
 require 'filesystem'
 require 'file_path'
 require 'data'

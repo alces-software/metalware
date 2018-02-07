@@ -3,7 +3,6 @@
 
 require 'namespaces/alces'
 require 'hash_mergers'
-require 'config'
 require 'alces_utils'
 
 RSpec.describe Metalware::Namespaces::Alces do

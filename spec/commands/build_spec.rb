@@ -26,7 +26,6 @@ require 'timeout'
 
 require 'commands/build'
 require 'spec_utils'
-require 'config'
 require 'recursive_open_struct'
 require 'network'
 require 'alces_utils'

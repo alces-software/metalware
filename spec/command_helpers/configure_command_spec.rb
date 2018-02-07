@@ -1,7 +1,6 @@
 
 # frozen_string_literal: true
 
-require 'config'
 require 'filesystem'
 require 'spec_utils'
 require 'shared_examples/render_domain_templates'

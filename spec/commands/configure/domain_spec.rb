@@ -3,7 +3,6 @@
 
 require 'spec_utils'
 require 'filesystem'
-require 'config'
 
 RSpec.describe Metalware::Commands::Configure::Domain do
   def run_configure_domain

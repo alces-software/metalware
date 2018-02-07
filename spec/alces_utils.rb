@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'namespaces/alces'
-require 'config'
 require 'active_support/core_ext/module/delegation'
 require 'recursive_open_struct'
 require 'spec_utils'

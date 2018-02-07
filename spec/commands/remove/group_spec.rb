@@ -24,7 +24,6 @@
 require 'filesystem'
 require 'commands/remove/group'
 require 'nodeattr_interface'
-require 'config'
 require 'ostruct'
 require 'validation/loader'
 require 'spec_utils'
