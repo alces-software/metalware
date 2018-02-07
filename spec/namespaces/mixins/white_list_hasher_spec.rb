@@ -49,7 +49,7 @@ RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
   it 'has recursive array listed methods as array of hashes' do
     expect(test_hash.keys).to include(*array_white_list)
     expect(test_hash[:array_method]).to eq [
-      {property: 'value_within_array_object'}
+      { property: 'value_within_array_object' },
     ]
   end
 

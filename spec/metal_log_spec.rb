@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'command_helpers/base_command'
 require 'alces_utils'
 

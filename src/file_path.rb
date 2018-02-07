@@ -136,7 +136,6 @@ module Metalware
         File.join(events_dir, node_namespace.name, event)
       end
 
-
       def pxelinux_cfg
         '/var/lib/tftpboot/pxelinux.cfg'
       end
