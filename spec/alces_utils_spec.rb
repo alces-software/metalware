@@ -75,8 +75,7 @@ RSpec.describe AlcesUtils do
       end
 
       it 'turns the validation off' do
-        config = Metalware::Config.new
-        expect(config.validation).to be_a(FalseClass)
+        expect(Metalware::Constants::SKIP_VALIDATION).to be true
       end
 
       it 'strict matches what is set' do

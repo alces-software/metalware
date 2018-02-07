@@ -148,7 +148,7 @@ module AlcesUtils
     end
 
     def validation_off
-      allow(metal_config).to receive(:validation).and_return(false)
+      stub_const('Metalware::Constants::SKIP_VALIDATION', true)
     end
 
     def build_poll_sleep(time)

@@ -39,7 +39,6 @@ module Metalware
     # XXX DRY these paths up.
     # XXX Maybe move all these paths into Constants and then reference them here
     KEYS_WITH_VALUES = {
-      validation: true,
       log_severity: 'INFO',
     }.freeze
 

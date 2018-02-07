@@ -71,7 +71,7 @@ module Metalware
       end
 
       def success?
-        return true unless config.validation
+        return true if Constants::SKIP_VALIDATION
         validate if @validation_result.nil?
         @validation_result.success?
       end
