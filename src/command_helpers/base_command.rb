@@ -50,7 +50,7 @@ module Metalware
       attr_reader :config, :args, :options
 
       def pre_setup(args, options)
-        setup_config(options)
+        set_global_log_options(options)
         log_command
         @args = args
         @options = options
@@ -60,13 +60,9 @@ module Metalware
         enforce_dependency
       end
 
-      def setup_config(options)
-        cli_options = {
-          strict: !!options.strict,
-          quiet: !!options.quiet,
-        }
-        # Ensures it uses it's own config
-        @config = Config.new(options.config, cli_options)
+      def set_global_log_options(options)
+        MetalLog.strict = !!options.strict
+        MetalLog.quiet = !!options.quiet
       end
 
       def dependency_specifications
