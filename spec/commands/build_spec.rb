@@ -36,12 +36,12 @@ RSpec.describe Metalware::Commands::Build do
 
   before :each do
     # Shortens the wait times for the tests
-    allow(metal_config).to receive(:build_poll_sleep).and_return(0.1)
+    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
     # Makes sure there aren't any other threads
     AlcesUtils.kill_other_threads
   end
 
-  let :build_wait_time { metal_config.build_poll_sleep * 5 }
+  let :build_wait_time { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
 
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do

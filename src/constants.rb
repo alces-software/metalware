@@ -67,5 +67,7 @@ module Metalware
 
     HASH_MERGER_DATA_STRUCTURE =
       Metalware::HashMergers::MetalRecursiveOpenStruct
+
+    BUILD_POLL_SLEEP = 10
   end
 end
