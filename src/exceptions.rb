@@ -98,7 +98,7 @@ module Metalware
   class ValidationFailure < MetalwareError
   end
 
-  # XXXX, we need think about the future of the DependencyFailure,
+  # XXX, we need think about the future of the DependencyFailure,
   # It maybe completely replaced with Validation::Loader and a file cache.
   # If this is the case Dependency Failure/ InternalError will be replaced
   # with Validation Failure/ InternalError
