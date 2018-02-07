@@ -71,16 +71,10 @@ RSpec.describe AlcesUtils do
     context 'with a mocked config' do
       AlcesUtils.mock self, :each do
         validation_off
-        mock_strict(false)
       end
 
       it 'turns the validation off' do
         expect(Metalware::Constants::SKIP_VALIDATION).to be true
-      end
-
-      it 'strict matches what is set' do
-        expect(Metalware::Config.new(strict: true).cli.strict).to eq(false)
-        expect(Metalware::Config.new(strict: false).cli.strict).to eq(false)
       end
     end
 
