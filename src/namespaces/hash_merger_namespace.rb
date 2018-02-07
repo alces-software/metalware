@@ -13,7 +13,6 @@ module Metalware
 
       def initialize(alces, name = nil)
         @alces = alces
-        @metal_config = alces.send(:metal_config)
         @name = name
       end
 
@@ -31,7 +30,7 @@ module Metalware
 
       private
 
-      attr_reader :alces, :metal_config
+      attr_reader :alces
 
       def white_list_for_hasher
         respond_to?(:name) ? [:name] : []
