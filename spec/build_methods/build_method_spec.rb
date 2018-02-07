@@ -62,7 +62,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
   end
 
   subject do
-    TestBuildMethod.new(config, node)
+    TestBuildMethod.new(node)
   end
 
   describe '#render_staging_templates' do
