@@ -108,7 +108,6 @@ module Metalware
     private
 
     attr_reader :alces,
-                :config,
                 :highline,
                 :questions_section,
                 :name
@@ -215,7 +214,6 @@ module Metalware
       # properties object. The same can be done with the old_answer
       # TODO: Break out the Question object into seperate file
       Question.new(
-        config: config,
         default: default,
         properties: properties,
         questions_section: questions_section,
@@ -246,7 +244,6 @@ module Metalware
         :type
 
       def initialize(
-        config:,
         default:,
         old_answer: nil,
         progress_indicator:,
