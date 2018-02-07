@@ -27,8 +27,7 @@ require 'validation/loader'
 
 module Metalware
   class Dependency
-    def initialize(metal_config, command_input, dependency_hash = {})
-      @config = metal_config
+    def initialize(command_input, dependency_hash = {})
       @dependency_hash = dependency_hash
       @optional_dependency_hash = @dependency_hash.delete(:optional)
       @optional_dependency_hash ||= {}
@@ -42,7 +41,7 @@ module Metalware
 
     private
 
-    attr_reader :config, :command
+    attr_reader :command
 
     def run_dependencies(dep_hash, optional = false)
       dep_hash.each do |dep, values|

@@ -74,7 +74,7 @@ module Metalware
       end
 
       def enforce_dependency
-        Dependency.new(config, command_name, dependency_hash).enforce
+        Dependency.new(command_name, dependency_hash).enforce
       end
 
       def loader
