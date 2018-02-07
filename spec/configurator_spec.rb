@@ -70,7 +70,7 @@ RSpec.describe Metalware::Configurator do
   end
 
   def define_questions(**h)
-    v = Metalware::Validation::Configure.new(metal_config, h)
+    v = Metalware::Validation::Configure.new(h)
     allow(Metalware::Validation::Configure).to receive(:new).and_return(v)
   end
 

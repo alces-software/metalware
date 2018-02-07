@@ -38,7 +38,7 @@ module Metalware
       def configure_data
         # XXX Extract object for loading configure data?
         @configure_data ||=
-          Validation::Configure.new(Config.new, combined_configure_data).tree
+          Validation::Configure.new(combined_configure_data).tree
       end
 
       # Returns a tree
