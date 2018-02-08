@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'validation/loader'
 require 'data'
 
@@ -30,10 +29,8 @@ module Metalware
   class GroupCache
     include Enumerable
 
-    # TODO: Remove the input
-    def initialize(_remove_this_input = nil, force_reload_file: false)
+    def initialize(force_reload_file: false)
       @force_reload = force_reload_file
-      @config = Config.cache
     end
 
     def group?(group)
@@ -88,14 +85,14 @@ module Metalware
 
     private
 
-    attr_reader :config, :force_reload
+    attr_reader :force_reload
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def file_path
-      @file_path ||= FilePath.new(config)
+      @file_path ||= FilePath
     end
 
     def load

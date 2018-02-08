@@ -50,8 +50,7 @@ module Metalware
         end
       end
 
-      def initialize(config, questions_hash)
-        @config = config
+      def initialize(questions_hash)
         @questions_hash = questions_hash.freeze
         raise_error_if_validation_failed
       end
@@ -76,7 +75,7 @@ module Metalware
 
       private
 
-      attr_reader :config, :questions_hash
+      attr_reader :questions_hash
       attr_accessor :failed_validation
 
       def raise_error_if_validation_failed

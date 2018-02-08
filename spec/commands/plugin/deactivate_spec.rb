@@ -41,7 +41,7 @@ RSpec.describe Metalware::Commands::Plugin::Deactivate do
     end
   end
 
-  let :example_plugin_dir { File.join file_path.plugins_dir, example_plugin_name }
+  let :example_plugin_dir { File.join Metalware::FilePath.plugins_dir, example_plugin_name }
   let :example_plugin_name { 'example' }
 
   def example_plugin

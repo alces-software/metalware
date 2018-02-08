@@ -27,8 +27,7 @@ require 'validation/loader'
 
 module Metalware
   class Dependency
-    def initialize(metal_config, command_input, dependency_hash = {})
-      @config = metal_config
+    def initialize(command_input, dependency_hash = {})
       @dependency_hash = dependency_hash
       @optional_dependency_hash = @dependency_hash.delete(:optional)
       @optional_dependency_hash ||= {}
@@ -42,7 +41,7 @@ module Metalware
 
     private
 
-    attr_reader :config, :command
+    attr_reader :command
 
     def run_dependencies(dep_hash, optional = false)
       dep_hash.each do |dep, values|
@@ -101,7 +100,7 @@ module Metalware
         validate_repo
         loader.configure_data
         unless valid_file?(:configure, '', true)
-          msg = "Could not locate answer files: #{config.answer_files_path}"
+          msg = "Could not locate answer files: #{FilePath.answer_files}"
           raise DependencyFailure, msg
         end
         true # Sets the @validate_configure value so it only runs once
@@ -112,9 +111,9 @@ module Metalware
       path = begin
         case dep
         when :repo
-          File.join(config.repo_path, value)
+          File.join(FilePath.repo, value)
         when :configure
-          File.join(config.answer_files_path, value)
+          File.join(FilePath.answer_files, value)
         else
           msg = "Could not generate file path for dependency #{dep}"
           raise DependencyInternalError, msg
@@ -145,7 +144,7 @@ module Metalware
     end
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
   end
 end

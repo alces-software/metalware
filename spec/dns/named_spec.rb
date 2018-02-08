@@ -33,8 +33,7 @@ require 'alces_utils'
 RSpec.describe Metalware::DNS::Named do
   include AlcesUtils
 
-  let :config { metal_config }
-  let :file_path { Metalware::FilePath.new(config) }
+  let :file_path { Metalware::FilePath }
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo

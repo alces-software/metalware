@@ -22,15 +22,12 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'constants'
 require 'file_path'
 
 RSpec.describe Metalware::FilePath do
-  let :config { Metalware::Config.new }
-
   describe 'dynamic constant paths' do
-    let :file_path { Metalware::FilePath.new(config) }
+    let :file_path { Metalware::FilePath }
 
     it 'defines a constant file path' do
       expect(file_path.metalware_data).to eq(Metalware::Constants::METALWARE_DATA_PATH)

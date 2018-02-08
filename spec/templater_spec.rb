@@ -73,10 +73,6 @@ RSpec.describe Metalware::Templater do
 
   describe '#render' do
     context 'without a repo' do
-      before :each do
-        @config = Metalware::Config.new(EMPTY_REPO_PATH)
-      end
-
       it 'renders template with no extra parameters' do
         expected = <<-EOF
         This is a test template

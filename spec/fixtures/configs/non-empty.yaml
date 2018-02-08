@@ -1,4 +1,3 @@
 
 build_poll_sleep: 5
 built_nodes_storage_path: '/built/nodes'
-rendered_files_path: '/rendered/files'

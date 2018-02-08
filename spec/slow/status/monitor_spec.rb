@@ -27,7 +27,6 @@ require 'status/monitor'
 require 'status/job'
 require 'spec_utils'
 require 'timeout'
-require 'config'
 require 'filesystem'
 
 RSpec.describe Metalware::Status::Monitor do

@@ -6,10 +6,6 @@ require 'validation/loader'
 
 module Metalware
   class Repo
-    def initialize(config)
-      @config = config
-    end
-
     def configure_questions
       configure_data_sections.reduce(:merge)
     end
@@ -21,7 +17,7 @@ module Metalware
     private
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def configure_data

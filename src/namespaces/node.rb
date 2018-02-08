@@ -60,7 +60,7 @@ module Metalware
       end
 
       def build_method
-        @build_method ||= build_method_class.new(alces.metal_config, self)
+        @build_method ||= build_method_class.new(self)
       end
 
       def files

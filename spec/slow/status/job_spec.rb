@@ -26,7 +26,6 @@ require 'commands/status'
 require 'status/monitor'
 require 'status/job'
 require 'spec_utils'
-require 'config'
 require 'timeout'
 
 RSpec.describe Metalware::Status::Job do
@@ -41,7 +40,6 @@ RSpec.describe Metalware::Status::Job do
 
   before :example do
     SpecUtils.use_mock_genders(self)
-    @config = Metalware::Config.new
     @cmd = :busy_sleep
     @node = 'node_name_not_found'
     @time_limit = 2

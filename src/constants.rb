@@ -67,5 +67,14 @@ module Metalware
 
     HASH_MERGER_DATA_STRUCTURE =
       Metalware::HashMergers::MetalRecursiveOpenStruct
+
+    BUILD_POLL_SLEEP = 10
+
+    # This only exists for legacy purposes so we have a constant we can stub to
+    # skip validations; ideally we would handle wanting to test things without
+    # running validations in a better way.
+    SKIP_VALIDATION = false
+
+    LOG_SEVERITY = 'INFO'
   end
 end

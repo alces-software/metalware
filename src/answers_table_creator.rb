@@ -7,8 +7,7 @@ require 'repo'
 
 module Metalware
   class AnswersTableCreator
-    def initialize(config, alces)
-      @config = config
+    def initialize(alces)
       @alces = alces
     end
 
@@ -27,7 +26,7 @@ module Metalware
 
     private
 
-    attr_reader :config, :alces
+    attr_reader :alces
 
     def answers_table(group_name: nil, node_name: nil)
       Terminal::Table.new(
@@ -61,7 +60,7 @@ module Metalware
     end
 
     def repo
-      @repo ||= Metalware::Repo.new(config)
+      @repo ||= Metalware::Repo.new
     end
 
     def domain_answer(question:)

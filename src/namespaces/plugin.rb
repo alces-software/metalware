@@ -39,10 +39,7 @@ module Metalware
       private
 
       def plugin_config_hash_merger
-        HashMergers::PluginConfig.new(
-          metal_config: alces.send(:metal_config),
-          plugin: plugin
-        )
+        HashMergers::PluginConfig.new(plugin: plugin)
       end
 
       def hash_merger_input

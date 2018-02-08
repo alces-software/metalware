@@ -34,7 +34,7 @@ module Metalware
       class Group < CommandHelpers::BaseCommand
         def setup
           @primary_group = args[0]
-          @cache = GroupCache.new(config)
+          @cache = GroupCache.new
         end
 
         def run
@@ -63,8 +63,8 @@ module Metalware
 
         def list_of_answer_files
           NodeattrInterface.nodes_in_primary_group(primary_group)
-                           .map { |node| config.node_answers_file(node) }
-                           .unshift(config.group_answers_file(primary_group))
+                           .map { |node| FilePath.node_answers(node) }
+                           .unshift(FilePath.group_answers(primary_group))
         end
       end
     end

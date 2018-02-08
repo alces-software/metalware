@@ -23,11 +23,10 @@
 #==============================================================================
 
 require 'constants'
-require 'config'
 require 'file_path/config_path'
 
 module Metalware
-  class FilePath
+  module FilePath
     class << self
       delegate :domain_config,
                :group_config,
@@ -35,29 +34,30 @@ module Metalware
                :local_config,
                to: :config_path
 
-      # TODO: Remove the new method. It only ensures backwards compatibility
-      def new(*_args)
-        self
-      end
-
       def configure_file
-        config.configure_file
+        File.join(repo, 'configure.yaml')
       end
 
       def domain_answers
-        config.domain_answers_file
+        File.join(answer_files, 'domain.yaml')
       end
 
       def group_answers(group)
-        config.group_answers_file(group)
+        file_name = "#{group}.yaml"
+        File.join(answer_files, 'groups', file_name)
       end
 
       def node_answers(node)
-        config.node_answers_file(node)
+        file_name = "#{node}.yaml"
+        File.join(answer_files, 'nodes', file_name)
       end
 
       def local_answers
         node_answers('local')
+      end
+
+      def answer_files
+        '/var/lib/metalware/answers'
       end
 
       def server_config
@@ -65,7 +65,7 @@ module Metalware
       end
 
       def repo
-        config.repo_path
+        '/var/lib/metalware/repo'
       end
 
       def plugins_dir
@@ -80,7 +80,7 @@ module Metalware
       # TODO: Change input from node to namespace
       def template_path(template_type, node:)
         File.join(
-          config.repo_path,
+          repo,
           template_type.to_s,
           template_file_name(template_type, node: node)
         )
@@ -89,7 +89,7 @@ module Metalware
       def template_save_path(template_type, node: nil)
         node = Node.new(config, nil) if node.nil?
         File.join(
-          config.rendered_files_path,
+          rendered_files,
           template_type.to_s,
           node.name
         )
@@ -105,11 +105,15 @@ module Metalware
 
       def rendered_build_file_path(rendered_dir, section, file_name)
         File.join(
-          config.rendered_files_path,
+          rendered_files,
           rendered_dir,
           section.to_s,
           file_name
         )
+      end
+
+      def rendered_files
+        '/var/lib/metalware/rendered'
       end
 
       def staging(path)
@@ -128,31 +132,22 @@ module Metalware
                  end
       end
 
-      def new_config_if_missing(&block)
-        @new_if_missing = true
-        instance_exec(&block)
-      ensure
-        @new_if_missing = false
-      end
-
       def event(node_namespace, event = '')
         File.join(events_dir, node_namespace.name, event)
       end
 
-      private
-
-      attr_reader :new_if_missing
-
-      def config
-        Config.cache(new_if_missing: new_if_missing)
+      def pxelinux_cfg
+        '/var/lib/tftpboot/pxelinux.cfg'
       end
+
+      def log
+        '/var/log/metalware'
+      end
+
+      private
 
       def template_file_name(template_type, node:)
         node.config.templates&.send(template_type) || 'default'
-      end
-
-      def answer_files
-        config.answer_files_path
       end
 
       def config_path

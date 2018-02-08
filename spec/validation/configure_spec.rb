@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'validation/configure'
 require 'file_path'
 require 'data'
@@ -35,8 +34,7 @@ RSpec.describe Metalware::Validation::Configure do
 
   before :each { FileSystem.root_setup(&:with_validation_error_file) }
 
-  let :config { metal_config }
-  let :file_path { Metalware::FilePath.new(config) }
+  let :file_path { Metalware::FilePath }
 
   let :correct_hash do
     {
@@ -148,7 +146,7 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   def run_configure_validation(my_hash = {})
-    Metalware::Validation::Configure.new(config, my_hash).tree
+    Metalware::Validation::Configure.new(my_hash).tree
   end
 
   def expect_validation_failure(my_hash, msg_regex)

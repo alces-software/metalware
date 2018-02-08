@@ -23,7 +23,6 @@
 #==============================================================================
 require 'exceptions'
 require 'dependency'
-require 'config'
 require 'constants'
 require 'validation/configure'
 require 'ostruct'
@@ -40,7 +39,7 @@ RSpec.describe Metalware::Dependency do
 
   def enforce_dependencies(dependencies_hash = {})
     filesystem.test do |_fs|
-      Metalware::Dependency.new(metal_config, 'test', dependencies_hash).enforce
+      Metalware::Dependency.new('test', dependencies_hash).enforce
     end
   end
 

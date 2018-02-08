@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'hash_mergers'
-require 'config'
 require 'filesystem'
 require 'namespaces/alces'
 require 'alces_utils'
@@ -16,10 +15,8 @@ module Metalware
 end
 
 RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
-  let :metal_config { Metalware::Config.cache(new_if_missing: true) }
-
   let :alces do
-    namespace = Metalware::Namespaces::Alces.new(metal_config)
+    namespace = Metalware::Namespaces::Alces.new
     allow(namespace).to receive(:testing).and_return(build_default_hash)
     namespace
   end

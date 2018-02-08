@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'constants'
 require 'spec_utils'
 require 'commands/build'
@@ -46,9 +45,8 @@ RSpec.describe '`metal build`' do
 
   AlcesUtils.start(self)
 
-  TEST_CONFIG = Metalware::Config.new
-  TEST_KICKSTART_DIR = File.join(TEST_CONFIG.rendered_files_path, 'kickstart')
-  TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
+  TEST_KICKSTART_DIR = File.join(Metalware::FilePath.rendered_files, 'kickstart')
+  TEST_PXELINUX_DIR = Metalware::FilePath.pxelinux_cfg
 
   PXELINUX_TEMPLATE = '/var/lib/metalware/repo/pxelinux/default'
 
@@ -110,7 +108,7 @@ RSpec.describe '`metal build`' do
     kill_any_metal_processes
   end
 
-  let :file_path { Metalware::FilePath.new(metal_config) }
+  let :file_path { Metalware::FilePath }
 
   def touch_complete_file(name)
     path = file_path.build_complete(alces.nodes.find_by_name(name))

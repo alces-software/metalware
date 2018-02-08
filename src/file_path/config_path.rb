@@ -23,7 +23,7 @@
 #==============================================================================
 
 module Metalware
-  class FilePath
+  module FilePath
     class ConfigPath
       attr_reader :base
 

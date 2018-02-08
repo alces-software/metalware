@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'namespaces/alces'
-require 'config'
 require 'constants'
 require 'nodeattr_interface'
 
@@ -12,8 +11,7 @@ require 'nodeattr_interface'
 # be ensured.
 #
 RSpec.describe Metalware::Namespaces::MetalArray do
-  let :config { Metalware::Config.new }
-  let :alces { Metalware::Namespaces::Alces.new(config) }
+  let :alces { Metalware::Namespaces::Alces.new }
 
   let :node_names { ['node1', 'node2', 'node3'] }
 

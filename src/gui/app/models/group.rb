@@ -10,7 +10,7 @@ class Group < ApplicationModel
     private
 
     def group_cache
-      Metalware::GroupCache.new(config)
+      Metalware::GroupCache.new
     end
   end
 

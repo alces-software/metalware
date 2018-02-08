@@ -25,12 +25,9 @@
 
 require 'repo'
 require 'validation/loader'
-require 'config'
 
 RSpec.describe Metalware::Repo do
-  subject do
-    Metalware::Repo.new(Metalware::Config.new)
-  end
+  subject { Metalware::Repo.new }
 
   let :configure_data do
     {
@@ -47,8 +44,7 @@ RSpec.describe Metalware::Repo do
       local: {},
     }
   end
-  let :config { Metalware::Config.new }
-  let :loader { Metalware::Validation::Loader.new(config) }
+  let :loader { Metalware::Validation::Loader.new }
 
   # Spoofs the Loader to return the configure_data above. By-passes validation
   before :each do

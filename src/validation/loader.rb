@@ -31,15 +31,14 @@ require 'data'
 module Metalware
   module Validation
     class Loader < LoadSaveBase
-      def initialize(metalware_config)
-        @config = metalware_config
-        @path = FilePath.new(config)
+      def initialize
+        @path = FilePath
       end
 
       def configure_data
         # XXX Extract object for loading configure data?
         @configure_data ||=
-          Validation::Configure.new(config, combined_configure_data).tree
+          Validation::Configure.new(combined_configure_data).tree
       end
 
       # Returns a tree
@@ -62,12 +61,11 @@ module Metalware
 
       private
 
-      attr_reader :path, :config
+      attr_reader :path
 
       def answer(absolute_path, section)
         yaml = Data.load(absolute_path)
-        validator = Validation::Answer.new(config,
-                                           yaml,
+        validator = Validation::Answer.new(yaml,
                                            answer_section: section,
                                            configure_data: configure_data)
         validator.data

@@ -25,7 +25,6 @@
 require 'build_files_retriever'
 require 'input'
 require 'spec_utils'
-require 'config'
 
 RSpec.describe Metalware::BuildFilesRetriever do
   include AlcesUtils
@@ -46,9 +45,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     config(alces.node, files: TEST_FILES_HASH)
   end
 
-  subject do
-    Metalware::BuildFilesRetriever.new(metal_config)
-  end
+  subject { Metalware::BuildFilesRetriever.new }
 
   before do
     SpecUtils.use_mock_determine_hostip_script(self)
@@ -65,7 +62,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
     context 'when everything works' do
       it 'returns the correct files object' do
-        some_path = File.join(metal_config.repo_path, 'files/some/file_in_repo')
+        some_path = File.join(Metalware::FilePath.repo, 'files/some/file_in_repo')
         FileUtils.mkdir_p File.dirname(some_path)
         FileUtils.touch(some_path)
         other_path = '/some/other/path'
@@ -122,7 +119,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           retrieved_files = subject.retrieve_for_node(alces.node)
 
           repo_file_entry = retrieved_files[:namespace01][0]
-          template_path = "#{metal_config.repo_path}/files/some/file_in_repo"
+          template_path = "#{Metalware::FilePath.repo}/files/some/file_in_repo"
           expect(repo_file_entry[:error]).to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
@@ -167,7 +164,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
   describe '#retrieve_for_plugin' do
     let :plugin_name { 'some_plugin' }
-    let :plugin_path { File.join(file_path.plugins_dir, plugin_name) }
+    let :plugin_path { File.join(Metalware::FilePath.plugins_dir, plugin_name) }
 
     let :plugin do
       FileUtils.mkdir_p(plugin_path)

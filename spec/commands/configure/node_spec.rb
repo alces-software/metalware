@@ -12,8 +12,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
     )
   end
 
-  let :config { Metalware::Config.new }
-  let :initial_alces { Metalware::Namespaces::Alces.new(config) }
+  let :initial_alces { Metalware::Namespaces::Alces.new }
   let :alces do
     allow(initial_alces).to receive(:groups).and_return(
       double('groups', testnodes: test_group)
@@ -28,8 +27,8 @@ RSpec.describe Metalware::Commands::Configure::Node do
   let :filesystem do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
-      fs.dump(config.domain_answers_file, {})
-      fs.dump(config.group_answers_file('testnodes'), {})
+      fs.dump(Metalware::FilePath.domain_answers, {})
+      fs.dump(Metalware::FilePath.group_answers('testnodes'), {})
     end
   end
 

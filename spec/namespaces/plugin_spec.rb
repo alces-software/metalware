@@ -6,8 +6,6 @@ require 'spec_utils'
 RSpec.describe Metalware::Namespaces::Plugin do
   include AlcesUtils
 
-  let :config { Metalware::Config.new }
-
   let :node do
     Metalware::Namespaces::Node.create(alces, node_name)
   end
@@ -22,20 +20,14 @@ RSpec.describe Metalware::Namespaces::Plugin do
   subject { described_class.new(plugin, node: node) }
 
   before :each do
-    Metalware::Config.cache = config
-
     FileSystem.root_setup do |fs|
       fs.setup do
-        plugin_config_dir = File.join(file_path.plugins_dir, plugin_name, 'config')
+        plugin_config_dir = File.join(Metalware::FilePath.plugins_dir, plugin_name, 'config')
         FileUtils.mkdir_p plugin_config_dir
 
-        File.write(file_path.genders, "#{node_name} #{node_group_name}\n")
+        File.write(Metalware::FilePath.genders, "#{node_name} #{node_group_name}\n")
       end
     end
-  end
-
-  after :each do
-    Metalware::Config.clear_cache
   end
 
   describe '#name' do
@@ -78,13 +70,12 @@ RSpec.describe Metalware::Namespaces::Plugin do
 
   describe '#files' do
     it 'provides access to build file hashes for plugin' do
-      Metalware::Data.dump(plugin.domain_config, {
-        files: {
-          some_files_section: [
-            '/path/to/some/file',
-          ],
-        },
-      })
+      Metalware::Data.dump(plugin.domain_config,
+                           files: {
+                             some_files_section: [
+                               '/path/to/some/file',
+                             ],
+                           })
 
       expect(subject.files).to be_a Metalware::HashMergers::MetalRecursiveOpenStruct
       expected_files_hash = subject.files.some_files_section.first

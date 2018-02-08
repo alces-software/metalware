@@ -23,14 +23,11 @@
 #==============================================================================
 require 'validation/answer'
 require 'data'
-require 'config'
 require 'filesystem'
 require 'alces_utils'
 
 RSpec.describe Metalware::Validation::Answer do
   include AlcesUtils
-  let :config { metal_config }
-
   let :configure_data do
     {
       domain: [
@@ -66,9 +63,8 @@ RSpec.describe Metalware::Validation::Answer do
 
   def run_answer_validation(answers)
     FileSystem.test do
-      Metalware::Data.dump(config.configure_file, configure_data)
-      validator = Metalware::Validation::Answer.new(config,
-                                                    answers,
+      Metalware::Data.dump(Metalware::FilePath.configure_file, configure_data)
+      validator = Metalware::Validation::Answer.new(answers,
                                                     answer_section: :domain)
       [validator.validate, validator]
     end

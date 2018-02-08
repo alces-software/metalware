@@ -4,7 +4,6 @@
 require 'shared_examples/hash_merger_namespace'
 
 require 'namespaces/alces'
-require 'config'
 require 'constants'
 require 'hash_mergers'
 require 'recursive_open_struct'
@@ -24,9 +23,8 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   context 'without AlcesUtils' do
-    let :config { Metalware::Config.new }
     let :alces do
-      a = Metalware::Namespaces::Alces.new(config)
+      a = Metalware::Namespaces::Alces.new
       allow(a).to receive(:groups).and_return(
         Metalware::Namespaces::MetalArray.new(
           [
@@ -118,20 +116,14 @@ RSpec.describe Metalware::Namespaces::Node do
       expect(node.index).to eq(2)
     end
 
-    context 'with cache config' do
-      before :each do
-        Metalware::Config.cache = config
-      end
+    it 'has a kickstart_url' do
+      expected = "http://1.2.3.4/metalware/kickstart/#{node_name}"
+      expect(node.kickstart_url).to eq(expected)
+    end
 
-      it 'has a kickstart_url' do
-        expected = "http://1.2.3.4/metalware/kickstart/#{node_name}"
-        expect(node.kickstart_url).to eq(expected)
-      end
-
-      it 'has a build complete url' do
-        exp = "http://1.2.3.4/metalware/exec/kscomplete.php?name=#{node_name}"
-        expect(node.build_complete_url).to eq(exp)
-      end
+    it 'has a build complete url' do
+      exp = "http://1.2.3.4/metalware/exec/kscomplete.php?name=#{node_name}"
+      expect(node.build_complete_url).to eq(exp)
     end
 
     describe '#==' do
@@ -214,8 +206,7 @@ RSpec.describe Metalware::Namespaces::Node do
   # Test `#plugins` without the rampant mocking above.
   describe '#plugins' do
     let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
-    let :alces { Metalware::Namespaces::Alces.new(config) }
-    let :config { Metalware::Config.new }
+    let :alces { Metalware::Namespaces::Alces.new }
 
     # XXX Need to handle situation of plugin being enabled for node but not
     # available globally?
@@ -225,8 +216,6 @@ RSpec.describe Metalware::Namespaces::Node do
     let :deactivated_plugin { 'deactivated_plugin' }
 
     before :each do
-      Metalware::Config.cache = config
-
       FileSystem.root_setup do |fs|
         fs.with_minimal_repo
 
@@ -260,10 +249,6 @@ RSpec.describe Metalware::Namespaces::Node do
           )
         end
       end
-    end
-
-    after :each do
-      Metalware::Config.clear_cache
     end
 
     it 'only includes plugins enabled for node' do

@@ -83,7 +83,6 @@ module Metalware
     )
       @alces = alces
       @highline = HighLine.new
-      @config = Config.cache
       @questions_section = questions_section
       @name = (questions_section == :local ? 'local' : name)
     end
@@ -109,21 +108,20 @@ module Metalware
     private
 
     attr_reader :alces,
-                :config,
                 :highline,
                 :questions_section,
                 :name
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def saver
-      @saver ||= Validation::Saver.new(config)
+      @saver ||= Validation::Saver.new
     end
 
     def group_cache
-      @group_cache ||= GroupCache.new(config)
+      @group_cache ||= GroupCache.new
     end
 
     # Whether the answer is saved depends if it matches the default AND
@@ -216,7 +214,6 @@ module Metalware
       # properties object. The same can be done with the old_answer
       # TODO: Break out the Question object into seperate file
       Question.new(
-        config: config,
         default: default,
         properties: properties,
         questions_section: questions_section,
@@ -247,7 +244,6 @@ module Metalware
         :type
 
       def initialize(
-        config:,
         default:,
         old_answer: nil,
         progress_indicator:,
@@ -264,7 +260,7 @@ module Metalware
 
         @type = type_for(
           properties[:type],
-          configure_file: config.configure_file,
+          configure_file: Metalware::FilePath.configure_file,
           questions_section: questions_section
         )
       end

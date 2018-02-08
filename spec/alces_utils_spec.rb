@@ -6,16 +6,12 @@ require 'alces_utils'
 RSpec.describe AlcesUtils do
   include AlcesUtils
 
-  let :file_path { Metalware::FilePath.new(metal_config) }
-  let :group_cache { Metalware::GroupCache.new(metal_config) }
+  let :file_path { Metalware::FilePath }
+  let :group_cache { Metalware::GroupCache.new }
 
   describe '#new' do
-    it 'returns the mocked config' do
-      expect(metal_config.equal?(Metalware::Config.new)).to eq(true)
-    end
-
     it 'returns the mocked alces' do
-      new_alces = Metalware::Namespaces::Alces.new(metal_config)
+      new_alces = Metalware::Namespaces::Alces.new
       expect(alces.equal?(new_alces)).to eq(true)
     end
   end
@@ -71,17 +67,10 @@ RSpec.describe AlcesUtils do
     context 'with a mocked config' do
       AlcesUtils.mock self, :each do
         validation_off
-        mock_strict(false)
       end
 
       it 'turns the validation off' do
-        config = Metalware::Config.new
-        expect(config.validation).to be_a(FalseClass)
-      end
-
-      it 'strict matches what is set' do
-        expect(Metalware::Config.new(strict: true).cli.strict).to eq(false)
-        expect(Metalware::Config.new(strict: false).cli.strict).to eq(false)
+        expect(Metalware::Constants::SKIP_VALIDATION).to be true
       end
     end
 
