@@ -46,9 +46,8 @@ module Metalware
       end
 
       def run_vm(node)
-        command = args[1]
         libvirt = Metalware::Vm.new(node)
-        libvirt.send(command)
+        libvirt.send(original_command)
       end
 
       def run_baremetal(node)
@@ -60,7 +59,11 @@ module Metalware
       end
 
       def render_command
-        options.command
+        original_command
+      end
+
+      def original_command
+        args[1]
       end
 
       def render_credentials

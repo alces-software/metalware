@@ -291,10 +291,6 @@ commands:
     action: Commands::Ipmi
     options:
       - *group_option
-      - tags: [-c COMMAND, --command COMMAND]
-        type: String
-        description: >
-          The IPMI tool command to run, for example `sel list`
 
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]
