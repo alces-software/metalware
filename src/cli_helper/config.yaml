@@ -204,7 +204,7 @@ commands:
       - *group_option
 
   configure:
-    syntax: metal configure [options]
+    syntax: metal configure [SUB_COMMAND] [options]
     summary: Configure different aspects of this Metalware installation
     subcommands:
       domain: *configure_domain
@@ -297,14 +297,14 @@ commands:
           The IPMI tool command to run, for example `sel list`
 
   orchestrate:
-    syntax: metal orchestrate [COMMAND] [options]
+    syntax: metal orchestrate [SUB_COMMAND] [options]
     summary: Orchestrate virtual machines
     subcommands:
       create: *orchestrate_create
       destroy: *orchestrate_destroy
 
   plugin:
-    syntax: metal plugin [options]
+    syntax: metal plugin [SUB_COMMAND] [options]
     summary: View and manage activated plugins
     subcommands:
       list: *plugin_list
@@ -338,7 +338,7 @@ commands:
       - *group_option
 
   remove:
-    syntax: metal remove [options]
+    syntax: metal remove [SUB_COMMAND] [options]
     summary: Remove metalware controlled files/ objects
     # Description can be added for subcommand
     subcommands:
@@ -354,7 +354,7 @@ commands:
     action: Commands::Render
 
   repo:
-    syntax: metal repo [options]
+    syntax: metal repo [SUB_COMMAND] [options]
     summary: Manage template and config repository
     # description can also be used for subcommands
     subcommands:
@@ -409,7 +409,7 @@ commands:
       - *group_option
 
   view-answers:
-    syntax: metal view-answers [options]
+    syntax: metal view-answers [SUB_COMMAND] [options]
     summary: View configured answers
     subcommands:
       domain: *view-answers_domain
