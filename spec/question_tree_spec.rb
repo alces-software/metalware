@@ -72,5 +72,24 @@ RSpec.describe Metalware::QuestionTree do
       expect(subject.identifiers).to contain_exactly(*identifiers)
     end
   end
+
+  describe '#question?' do
+    # The root is not a question, it stores references to the sections
+    it "is false for the Tree's root" do
+      expect(subject).not_to be_question
+    end
+
+    it 'is false for all section nodes' do
+      subject.children.each do |section_node|
+        expect(section_node).not_to be_question
+      end
+    end
+
+    it 'is true for all other questions' do
+      subject.each do |question|
+        expect(question).to be_question
+      end
+    end
+  end
 end
 

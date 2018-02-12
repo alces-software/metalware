@@ -10,9 +10,13 @@ module Metalware
     # NOTE: This is depth_first ONLY, breadth_first will still be broken
     def each
       super do |question|
-        next if (question.is_root? || question.parent.is_root?)
+        next unless question.question?
         yield question
       end
+    end
+
+    def question?
+      !!identifier
     end
 
     def identifiers
@@ -22,7 +26,7 @@ module Metalware
     end
 
     def identifier
-      content.identifier
+      content[:identifier]
     end
   end
 end
