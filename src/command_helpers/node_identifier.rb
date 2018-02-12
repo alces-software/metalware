@@ -16,7 +16,10 @@ module Metalware
       def nodes
         @nodes ||= begin
           nodes = if options.group
-                    group&.nodes
+                    NodeattrInterface.nodes_in_gender(node_identifier)
+                                     .map do |node|
+                                       alces.nodes.find_by_name node
+                                     end
                   else
                     alces.nodes.find_by_name(node_identifier)
                   end
