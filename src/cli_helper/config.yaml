@@ -154,7 +154,7 @@ subcommands:
       Commands::ViewAnswers::Group
 
   view-answers_node: &view-answers_node
-    syntax: metal view-answers node NODE_NAME [options]
+    syntax: metal view-answers node NODE [options]
     summary: View configured answers for a node
     description: >
       View configuration questions along with configured answers for given
@@ -213,7 +213,7 @@ commands:
       local: *configure_local
 
   console:
-    syntax: metal console NODE_IDENTIFIER [options]
+    syntax: metal console NODE_NAME [options]
     summary: Display a node's console in the terminal
     description: >
       Displays the console of a node in the terminal. The console command
@@ -284,7 +284,7 @@ commands:
           node name in the hunter cache
 
   ipmi:
-    syntax: metal ipmi NODE_IDENTIFIER [COMMAND] [options]
+    syntax: metal ipmi NODE_IDENTIFIER COMMAND [options]
     summary: Perform ipmi commands on single or multiple machines
     description: >
        Perform ipmi commands on single or multiple machines
@@ -308,7 +308,7 @@ commands:
       deactivate: *plugin_deactivate
 
   power:
-    syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
+    syntax: metal power NODE_IDENTIFIER COMMAND [options]
     summary: Run power commands on a node.
     description: >
       Allows ipmi power commands to be run on a node or group
