@@ -4,7 +4,7 @@ require 'validation/configure'
 RSpec.describe Metalware::QuestionTree do
   let :identifier_hash do
     {
-      domain: 'domain_identifer',
+      domain: 'domain_identifier',
       domain2: 'second_domain_identifier',
       group: 'group_identifier',
       node: 'node_identifier',
@@ -57,7 +57,7 @@ RSpec.describe Metalware::QuestionTree do
 
   describe '#identifiers' do
     it 'returns all the identifiers' do
-      expect(subject.identifiers).to contain_exactly(**identifiers)
+      expect(subject.identifiers).to contain_exactly(*identifiers)
     end
   end
 end
