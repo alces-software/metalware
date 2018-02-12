@@ -91,5 +91,11 @@ RSpec.describe Metalware::QuestionTree do
       end
     end
   end
+
+  describe '#questions_length' do
+    it 'does not include the non questions in the length' do
+      expect(subject.questions_length).to eq(identifiers.length)
+    end
+  end
 end
 

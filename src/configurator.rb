@@ -227,7 +227,7 @@ module Metalware
     end
 
     def total_questions
-      section_question_tree.size - 1
+      section_question_tree.questions_length
     end
 
     class Question

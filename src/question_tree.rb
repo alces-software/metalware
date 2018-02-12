@@ -15,6 +15,12 @@ module Metalware
       end
     end
 
+    def questions_length
+      num = 0
+      each { |_q| num += 1 }
+      num
+    end
+
     def question?
       !!identifier
     end
