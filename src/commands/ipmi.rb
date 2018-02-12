@@ -37,6 +37,7 @@ module Metalware
       def run
         nodes.each do |node|
           ipmi(node)
+          sleep options.sleep if options.sleep
         end
       end
 

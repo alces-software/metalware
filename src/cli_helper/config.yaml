@@ -336,6 +336,11 @@ commands:
     action: Commands::Power
     options:
       - *group_option
+      - tags: [-s SECONDS, --sleep SECONDS]
+        type: Float
+        default: 0.5
+        description: >
+          Time to wait between running power command on each node.
 
   remove:
     syntax: metal remove [SUB_COMMAND] [options]
