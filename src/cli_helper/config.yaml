@@ -154,7 +154,7 @@ subcommands:
       Commands::ViewAnswers::Group
 
   view-answers_node: &view-answers_node
-    syntax: metal view-answers node NODE_NAME [options]
+    syntax: metal view-answers node NODE [options]
     summary: View configured answers for a node
     description: >
       View configuration questions along with configured answers for given
@@ -204,7 +204,7 @@ commands:
       - *group_option
 
   configure:
-    syntax: metal configure [options]
+    syntax: metal configure [SUB_COMMAND] [options]
     summary: Configure different aspects of this Metalware installation
     subcommands:
       domain: *configure_domain
@@ -213,7 +213,7 @@ commands:
       local: *configure_local
 
   console:
-    syntax: metal console NODE_IDENTIFIER [options]
+    syntax: metal console NODE_NAME [options]
     summary: Display a node's console in the terminal
     description: >
       Displays the console of a node in the terminal. The console command
@@ -284,27 +284,23 @@ commands:
           node name in the hunter cache
 
   ipmi:
-    syntax: metal ipmi NODE_IDENTIFIER [COMMAND] [options]
+    syntax: metal ipmi NODE_IDENTIFIER COMMAND [options]
     summary: Perform ipmi commands on single or multiple machines
     description: >
        Perform ipmi commands on single or multiple machines
     action: Commands::Ipmi
     options:
       - *group_option
-      - tags: [-c COMMAND, --command COMMAND]
-        type: String
-        description: >
-          The IPMI tool command to run, for example `sel list`
 
   orchestrate:
-    syntax: metal orchestrate [COMMAND] [options]
+    syntax: metal orchestrate [SUB_COMMAND] [options]
     summary: Orchestrate virtual machines
     subcommands:
       create: *orchestrate_create
       destroy: *orchestrate_destroy
 
   plugin:
-    syntax: metal plugin [options]
+    syntax: metal plugin [SUB_COMMAND] [options]
     summary: View and manage activated plugins
     subcommands:
       list: *plugin_list
@@ -312,7 +308,7 @@ commands:
       deactivate: *plugin_deactivate
 
   power:
-    syntax: metal power NODE_IDENTIFIER [COMMAND] [options]
+    syntax: metal power NODE_IDENTIFIER COMMAND [options]
     summary: Run power commands on a node.
     description: >
       Allows ipmi power commands to be run on a node or group
@@ -336,9 +332,14 @@ commands:
     action: Commands::Power
     options:
       - *group_option
+      - tags: [-s SECONDS, --sleep SECONDS]
+        type: Float
+        default: 0.5
+        description: >
+          Time to wait between running power command on each node.
 
   remove:
-    syntax: metal remove [options]
+    syntax: metal remove [SUB_COMMAND] [options]
     summary: Remove metalware controlled files/ objects
     # Description can be added for subcommand
     subcommands:
@@ -354,7 +355,7 @@ commands:
     action: Commands::Render
 
   repo:
-    syntax: metal repo [options]
+    syntax: metal repo [SUB_COMMAND] [options]
     summary: Manage template and config repository
     # description can also be used for subcommands
     subcommands:
@@ -409,7 +410,7 @@ commands:
       - *group_option
 
   view-answers:
-    syntax: metal view-answers [options]
+    syntax: metal view-answers [SUB_COMMAND] [options]
     summary: View configured answers
     subcommands:
       domain: *view-answers_domain
