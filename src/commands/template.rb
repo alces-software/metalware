@@ -42,7 +42,7 @@ module Metalware
       end
 
       def run
-        Staging.template(Config.cache) do |templater|
+        Staging.template do |templater|
           build_methods.each do |build_method|
             build_method.render_staging_templates(templater)
           end
