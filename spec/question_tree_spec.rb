@@ -55,6 +55,18 @@ RSpec.describe Metalware::QuestionTree do
 
   subject { Metalware::Validation::Configure.new(question_hash).tree }
 
+  describe '#each' do
+    let :skipped_nodes do
+      subject.children << subject
+    end
+
+    it 'does not include the skipped node' do
+      subject.each do |question|
+        expect(skipped_nodes).not_to include(question)
+      end
+    end
+  end
+
   describe '#identifiers' do
     it 'returns all the identifiers' do
       expect(subject.identifiers).to contain_exactly(*identifiers)
