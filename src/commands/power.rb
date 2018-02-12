@@ -29,8 +29,15 @@ module Metalware
     class Power < Ipmi
       private
 
-      def render_command
-        case args[1].to_s
+      def ipmi_command(node_name)
+        create_ipmitool_command(
+          host: "#{node_name}.bmc",
+          arguments: ipmi_command_arguments
+        )
+      end
+
+      def ipmi_command_arguments
+        case command_argument
         when 'on'
           'chassis power on'
         when 'off'
@@ -48,7 +55,7 @@ module Metalware
         when 'sensor'
           'sensor'
         else
-          raise MetalwareError, "Invalid power command: #{args[1]}"
+          raise MetalwareError, "Invalid power command: #{command_argument}"
         end
       end
     end

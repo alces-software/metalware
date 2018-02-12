@@ -47,22 +47,25 @@ module Metalware
 
       def run_vm(node)
         libvirt = Metalware::Vm.new(node)
-        libvirt.send(original_command)
+        libvirt.send(command_argument)
       end
 
       def run_baremetal(node)
-        puts "#{node.name}: #{SystemCommand.run(command(node.name))}"
+        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node.name))}"
       end
 
-      def command(host)
-        "ipmitool -H #{host}.bmc -I lanplus #{render_credentials} #{render_command}"
+      def ipmi_command(node_name)
+        create_ipmitool_command(
+          host: "#{node_name}.bmc",
+          arguments: command_argument
+        )
       end
 
-      def render_command
-        original_command
+      def create_ipmitool_command(host:, arguments:)
+        "ipmitool -H #{host} -I lanplus #{render_credentials} #{arguments}"
       end
 
-      def original_command
+      def command_argument
         args[1]
       end
 
