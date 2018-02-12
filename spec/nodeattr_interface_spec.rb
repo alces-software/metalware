@@ -50,22 +50,22 @@ RSpec.describe Metalware::NodeattrInterface do
       FileSystem.root_setup(&:with_genders_fixtures)
     end
 
-    describe '#nodes_in_group' do
+    describe '#nodes_in_gender' do
       it 'returns names of all nodes in the given gender group' do
         expect(
-          Metalware::NodeattrInterface.nodes_in_group('masters')
+          Metalware::NodeattrInterface.nodes_in_gender('masters')
         ).to eq(['login1'])
         expect(
-          Metalware::NodeattrInterface.nodes_in_group('nodes')
+          Metalware::NodeattrInterface.nodes_in_gender('nodes')
         ).to eq(['testnode01', 'testnode02', 'testnode03'])
         expect(
-          Metalware::NodeattrInterface.nodes_in_group('cluster')
+          Metalware::NodeattrInterface.nodes_in_gender('cluster')
         ).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
       end
 
       it 'raises if cannot find gender group' do
         expect do
-          Metalware::NodeattrInterface.nodes_in_group('non_existent')
+          Metalware::NodeattrInterface.nodes_in_gender('non_existent')
         end.to raise_error Metalware::NoGenderGroupError
       end
     end

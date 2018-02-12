@@ -15,7 +15,7 @@ module Metalware
 
       def nodes
         @nodes ||= begin
-          arr = NodeattrInterface.nodes_in_group(name).map do |node_name|
+          arr = NodeattrInterface.nodes_in_gender(name).map do |node_name|
             alces.nodes.send(node_name)
           end
           MetalArray.new(arr)

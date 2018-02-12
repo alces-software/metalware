@@ -35,7 +35,7 @@ module Metalware
         end.keys
       end
 
-      def nodes_in_group(group)
+      def nodes_in_gender(group)
         stdout = nodeattr("-c #{group}")
         raise NoGenderGroupError, "Could not find gender group: #{group}" if stdout.empty?
         stdout.chomp.split(',')
