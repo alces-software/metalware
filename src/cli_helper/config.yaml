@@ -1,9 +1,9 @@
 anchor_options:
-  group_option: &group_option
-    tags: [-g, --group]
+  gender_option: &gender_option
+    tags: [-g, --gender]
     type: String
     description: >
-          Switch NODE_IDENTIFIER to specify a gender group rather than a single
+          Switch NODE_IDENTIFIER to specify a gender, rather than a single
           node
   configure_answers_option: &configure_answers_option
     tags: [-a ANSWERS_MAPPING, --answers ANSWERS_MAPPING]
@@ -69,14 +69,14 @@ subcommands:
     summary: Creates a new virtual machine or group of machines
     action: Commands::Orchestrate::Create
     options:
-      - *group_option
+      - *gender_option
 
   orchestrate_destroy: &orchestrate_destroy
     syntax: metal orchestrate destroy NODE_IDENTIFIER [options]
     summary: Destroys a single or group of virtual machines
     action: Commands::Orchestrate::Destroy
     options:
-      - *group_option
+      - *gender_option
 
   remove_group: &remove_group
     syntax: metal remove group GROUP_NAME [options]
@@ -201,7 +201,7 @@ commands:
 
     action: Commands::Build
     options:
-      - *group_option
+      - *gender_option
 
   configure:
     syntax: metal configure [SUB_COMMAND] [options]
@@ -229,7 +229,7 @@ commands:
       by the templater and supports erb tags.
     action: Commands::Each
     options:
-      - *group_option
+      - *gender_option
 
   edit:
     syntax: metal edit FILE [options]
@@ -290,7 +290,7 @@ commands:
        Perform ipmi commands on single or multiple machines
     action: Commands::Ipmi
     options:
-      - *group_option
+      - *gender_option
 
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]
@@ -331,7 +331,7 @@ commands:
       reset     - Warm reset the node
     action: Commands::Power
     options:
-      - *group_option
+      - *gender_option
       - tags: [-s SECONDS, --sleep SECONDS]
         type: Float
         default: 0.5
@@ -370,7 +370,7 @@ commands:
       node(s).
     action: Commands::Status
     options:
-      - *group_option
+      - *gender_option
       - tags: [--wait-limit WAIT_LIMIT]
         type: Integer
         default: 10
@@ -407,7 +407,7 @@ commands:
       can be reviewed before the are moved into place using the sync command.
     action: Commands::Template
     options:
-      - *group_option
+      - *gender_option
 
   view-answers:
     syntax: metal view-answers [SUB_COMMAND] [options]
