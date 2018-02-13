@@ -2,8 +2,7 @@
 # frozen_string_literal: true
 
 require 'terminal-table'
-
-require 'repo'
+require 'validation/loader'
 
 module Metalware
   class AnswersTableCreator
@@ -45,22 +44,18 @@ module Metalware
     end
 
     def rows(group_name:, node_name:)
-      configure_questions.map do |question|
+      question_identifiers.map do |identifier|
         [
-          question,
-          domain_answer(question: question),
-          group_answer(question: question, group_name: group_name),
-          node_answer(question: question, node_name: node_name),
+          identifier,
+          domain_answer(identifier: identifier),
+          group_answer(identifier: identifier, group_name: group_name),
+          node_answer(identifier: identifier, node_name: node_name),
         ].reject(&:nil?)
       end
     end
 
-    def configure_questions
-      repo.configure_question_identifiers
-    end
-
-    def repo
-      @repo ||= Metalware::Repo.new
+    def question_identifiers
+      @question_identifiers ||= Metalware::Loader.question_tree.identifiers
     end
 
     def domain_answer(question:)
