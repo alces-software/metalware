@@ -10,6 +10,11 @@ module Metalware
       :preordered_each
     ]
 
+    BASE_TRAVERSALS.each do |base_method|
+      define_method(:"filtered_#{base_method}") do
+      end
+    end
+
     def questions_length
       num = 0
       each { |_q| num += 1 }
