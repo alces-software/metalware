@@ -104,10 +104,9 @@ RSpec.describe Metalware::QuestionTree do
       end
     end
 
-    it 'is true for all other questions' do
-      subject.each do |question|
-        expect(question).to be_question
-      end
+    it 'returns true if the identifier is defined' do
+      question = Metalware::QuestionTree.new('', identifier: 'some string')
+      expect(question).to be_question
     end
   end
 
