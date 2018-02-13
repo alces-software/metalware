@@ -58,6 +58,8 @@ module Metalware
       @question_identifiers ||= Metalware::Validation::Loader.new
                                                              .question_tree
                                                              .identifiers
+                                                             .sort
+                                                             .uniq
     end
 
     def domain_answer(question:)
