@@ -36,27 +36,49 @@ RSpec.describe Metalware::AnswersTableCreator do
     Metalware::AnswersTableCreator.new(alces)
   end
 
-  let :configure_data do
+  let :raw_configure_data do
     {
-      domain: {
-        question_1: { question: 'question 1' },
-      },
-      group: {
-        question_1: { question: 'question 1' },
-        question_2: { question: 'question 2', type: 'integer' },
-      },
-      node: {
-        question_1: { question: 'question 1' },
-        question_2: { question: 'question 2', type: 'integer' },
-        question_3: { question: 'question 3' },
-      },
-      local: {},
+      domain: [{
+          identifier: 'question_1',
+          question: 'question 1',
+      }],
+      group: [
+        {
+          identifier: 'question_1',
+          question: 'question 1'
+        },
+        {
+          identifier: 'question_2',
+          question: 'question 2',
+          type: 'integer'
+        },
+      ],
+      node: [
+        {
+          identifier: 'question_1',
+          question: 'question 1'
+        },
+        {
+          identifier: 'question_2',
+          question: 'question 2',
+          type: 'integer'
+        },
+        {
+          identifier: 'question_3',
+          question: 'question 3'
+        },
+      ],
+      local: [],
     }
+  end
+
+  let :question_tree do
+    Metalware::Validation::Configure.new(raw_configure_data).tree
   end
 
   let! :loader do
     l = Metalware::Validation::Loader.new
-    allow(l).to receive(:configure_data).and_return(configure_data)
+    allow(l).to receive(:question_tree).and_return(question_tree)
     allow(Metalware::Validation::Loader).to receive(:new).and_return(l)
     l
   end
