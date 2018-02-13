@@ -55,15 +55,26 @@ RSpec.describe Metalware::QuestionTree do
 
   subject { Metalware::Validation::Configure.new(question_hash).tree }
 
-  describe '#each' do
-    let :skipped_nodes do
-      subject.children << subject
+  shared_examples 'a filtered traversal' do |base_method|
+    let :filtered_method { :"filtered_#{base_method}" }
+    let :enum { subject.public_send(filtered_method) }
+
+    it 'is defined' do
+      expect(subject).to respond_to(filtered_method)
     end
 
-    it 'does not include the skipped node' do
-      subject.each do |question|
-        expect(skipped_nodes).not_to include(question)
-      end
+    it 'has the correct question length' do
+      expect(enum.length).to eq(identifier.length)
+    end
+
+    it 'only includes questions' do
+      enum.each { |q| expect(q).to be_question }
+    end
+  end
+
+  Metalware::QuestionTree::BASE_TRAVERSALS.each do |base_method|
+    describe "#filtered_#{base_method}" do
+      it_behaves_like "a filtered traversal", base_method
     end
   end
 
