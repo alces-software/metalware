@@ -2,6 +2,8 @@
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Ipmi do
+  include AlcesUtils
+
   def run_ipmi(node_identifier, command, **options)
     AlcesUtils.redirect_std(:stdout) do
       Metalware::Utils.run_command(
@@ -15,39 +17,30 @@ RSpec.describe Metalware::Commands::Ipmi do
     # DRY this up.
 
     let :node_names { ['node01', 'node02', 'node03'] }
+    let :group { 'nodes' }
+    let :node_config do
+      {
+        networks: {
+          bmc: {
+            defined: true,
+            bmcuser: 'bmcuser',
+            bmcpassword: 'bmcpassword',
+          }
+        }
+      }
+    end
+
+    AlcesUtils.mock self, :each do
+      mock_group(group)
+      node_names.each do |node|
+        mock_node(node, group)
+        config(alces.node, node_config)
+      end
+    end
 
     before :each do
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:genders_for_node).and_return(['nodes'])
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:all_nodes).and_return(node_names)
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:nodes_in_group).and_return(node_names)
-
       FileSystem.root_setup do |fs|
         fs.with_minimal_repo
-
-        domain_config_path = Metalware::FilePath.domain_config
-        fs.create(domain_config_path)
-
-        fs.setup do
-          Metalware::Data.dump(domain_config_path, {
-            networks: {
-              bmc: {
-                defined: true,
-                bmcuser: 'bmcuser',
-                bmcpassword: 'bmcpassword',
-              }
-            }
-          })
-
-          Metalware::Utils.run_command(
-            Metalware::Commands::Configure::Group, 'nodes'
-          )
-        end
       end
     end
 
