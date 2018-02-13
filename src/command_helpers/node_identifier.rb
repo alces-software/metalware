@@ -17,14 +17,11 @@ module Metalware
         @nodes ||= begin
           nodes = if options.gender
                     NodeattrInterface.nodes_in_gender(node_identifier)
-                                     .map do |node|
-                                       alces.nodes.find_by_name node
-                                     end
                   else
-                    alces.nodes.find_by_name(node_identifier)
+                    node_identifier
                   end
           raise_missing unless nodes
-          Array.wrap nodes
+          Array.wrap(nodes).map { |n| alces.nodes.find_by_name(n) }
         end
       end
 
