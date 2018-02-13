@@ -47,9 +47,9 @@ module Metalware
       question_identifiers.map do |identifier|
         [
           identifier,
-          domain_answer(identifier: identifier),
-          group_answer(identifier: identifier, group_name: group_name),
-          node_answer(identifier: identifier, node_name: node_name),
+          domain_answer(question: identifier),
+          group_answer(question: identifier, group_name: group_name),
+          node_answer(question: identifier, node_name: node_name),
         ].reject(&:nil?)
       end
     end
