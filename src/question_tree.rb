@@ -28,9 +28,7 @@ module Metalware
     end
 
     def identifiers
-      filtered_each.map do |question|
-        question.identifier
-      end
+      filtered_each.map { |q| q.identifier }
     end
 
     def identifier
