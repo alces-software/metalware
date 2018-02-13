@@ -86,7 +86,7 @@ RSpec.describe Metalware::Namespaces::Node do
     #
     before :each do
       allow(Metalware::NodeattrInterface).to \
-        receive(:groups_for_node).and_return(['primary_group'])
+        receive(:genders_for_node).and_return(['primary_group'])
       allow(Metalware::NodeattrInterface).to \
         receive(:nodes_in_gender).and_return(node_array)
       allow(Metalware::NodeattrInterface).to \

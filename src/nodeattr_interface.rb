@@ -29,9 +29,9 @@ require 'system_command'
 module Metalware
   module NodeattrInterface
     class << self
-      def nodes_in_group(primary_group)
-        nodes_to_groups.select do |_node, groups|
-          groups.first == primary_group
+      def nodes_in_group(group)
+        nodes_to_genders.select do |_node, genders|
+          genders.first == group
         end.keys
       end
 
@@ -41,7 +41,7 @@ module Metalware
         stdout.chomp.split(',')
       end
 
-      def groups_for_node(node)
+      def genders_for_node(node)
         # If no node passed then it has no groups; without this we would run
         # `nodeattr -l` without args, which would give all groups.
         return [] unless node
@@ -76,7 +76,7 @@ module Metalware
 
       private
 
-      def nodes_to_groups
+      def nodes_to_genders
         nodeattr('--expand')
           .split("\n")
           .map(&:split)

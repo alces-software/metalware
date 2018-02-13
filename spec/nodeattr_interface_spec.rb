@@ -70,20 +70,20 @@ RSpec.describe Metalware::NodeattrInterface do
       end
     end
 
-    describe '#groups_for_node' do
+    describe '#genders_for_node' do
       it 'returns groups for given node, ordered as in genders' do
         testnode_groups = ['testnodes', 'nodes', 'cluster']
         expect(
-          Metalware::NodeattrInterface.groups_for_node('testnode01')
+          Metalware::NodeattrInterface.genders_for_node('testnode01')
         ).to eq(testnode_groups)
         expect(
-          Metalware::NodeattrInterface.groups_for_node('testnode02')
+          Metalware::NodeattrInterface.genders_for_node('testnode02')
         ).to eq(['pregroup'] + testnode_groups + ['postgroup'])
       end
 
       it 'raises if cannot find node' do
         expect do
-          Metalware::NodeattrInterface.groups_for_node('non_existent')
+          Metalware::NodeattrInterface.genders_for_node('non_existent')
         end.to raise_error Metalware::NodeNotInGendersError
       end
     end
