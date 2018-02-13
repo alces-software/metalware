@@ -22,7 +22,7 @@ RSpec.describe Metalware::Commands::Power do
 
       allow(
         Metalware::NodeattrInterface
-      ).to receive(:groups_for_node).and_return(['nodes'])
+      ).to receive(:genders_for_node).and_return(['nodes'])
       allow(
         Metalware::NodeattrInterface
       ).to receive(:all_nodes).and_return(node_names)
