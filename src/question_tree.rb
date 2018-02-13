@@ -19,7 +19,7 @@ module Metalware
 
     def questions_length
       num = 0
-      each { |_q| num += 1 }
+      filtered_each { |_q| num += 1 }
       num
     end
 
@@ -28,7 +28,7 @@ module Metalware
     end
 
     def identifiers
-      map do |question|
+      filtered_each.map do |question|
         question.identifier
       end
     end
