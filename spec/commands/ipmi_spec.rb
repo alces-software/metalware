@@ -18,7 +18,7 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     let :node_names { ['node01', 'node02', 'node03'] }
     let :group { 'nodes' }
-    let :node_config do
+    let :namespace_config do
       {
         networks: {
           bmc: {
@@ -32,9 +32,10 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     AlcesUtils.mock self, :each do
       mock_group(group)
+      config(alces.group, namespace_config)
       node_names.each do |node|
         mock_node(node, group)
-        config(alces.node, node_config)
+        config(alces.node, namespace_config)
       end
     end
 
