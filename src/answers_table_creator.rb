@@ -85,7 +85,7 @@ module Metalware
     def format_answer(question:, namespace:)
       # `inspect` the answer to get it with an indication of its type, so e.g.
       # strings are wrapped in quotes, and can distinguish from integers etc.
-      namespace.answer.to_h[question].inspect
+      namespace.answer.to_h[question.to_sym].inspect
     end
   end
 end
