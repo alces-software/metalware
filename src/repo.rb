@@ -11,7 +11,7 @@ module Metalware
     end
 
     def configure_question_identifiers
-      configure_questions.keys.sort.uniq
+      configure_data.identifiers.sort.uniq
     end
 
     private
