@@ -25,12 +25,12 @@ module Metalware
         end
       end
 
-      MISSING_GROUP_WARNING = 'Could not find group: '
+      MISSING_GENDER_WARNING = 'Could not find nodes for gender: '
       MISSING_NODE_WARNING = 'Could not find node: '
 
       def raise_missing
         msg = if options.gender
-                MISSING_GROUP_WARNING.to_s + node_identifier
+                MISSING_GENDER_WARNING.to_s + node_identifier
               else
                 MISSING_NODE_WARNING.to_s + node_identifier
               end
