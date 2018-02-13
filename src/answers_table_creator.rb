@@ -55,7 +55,9 @@ module Metalware
     end
 
     def question_identifiers
-      @question_identifiers ||= Metalware::Loader.question_tree.identifiers
+      @question_identifiers ||= Metalware::Validation::Loader.new
+                                                             .question_tree
+                                                             .identifiers
     end
 
     def domain_answer(question:)
