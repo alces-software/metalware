@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'validation/configure'
 
 RSpec.describe Metalware::QuestionTree do
@@ -10,7 +12,7 @@ RSpec.describe Metalware::QuestionTree do
       node: 'node_identifier',
       local: 'local_identifier',
       dependent: 'dependent_identifier',
-      dependent2: 'second_dependent_identifier'
+      dependent2: 'second_dependent_identifier',
     }
   end
 
@@ -21,12 +23,12 @@ RSpec.describe Metalware::QuestionTree do
       domain: [
         {
           identifier: identifier_hash[:domain],
-          question: 'Am I a question for the domain?'
+          question: 'Am I a question for the domain?',
         },
         {
           identifier: identifier_hash[:domain2],
-          question: 'Can I have two questions in a section?'
-        }
+          question: 'Can I have two questions in a section?',
+        },
       ],
       group: [
         identifier: identifier_hash[:group],
@@ -34,22 +36,22 @@ RSpec.describe Metalware::QuestionTree do
         dependent: [
           {
             identifier: identifier_hash[:dependent],
-            question: 'Can I have a dependent question?'
+            question: 'Can I have a dependent question?',
           },
           {
             identifier: identifier_hash[:dependent2],
-            question: 'Can I have a second dependent question?'
-          }
-        ]
+            question: 'Can I have a second dependent question?',
+          },
+        ],
       ],
       node: [
         identifier: identifier_hash[:node],
-        question: 'Am I a question for the node?'
+        question: 'Am I a question for the node?',
       ],
       local: [
         identifier: identifier_hash[:local],
-        question: 'Am I a question for the local node?'
-      ]
+        question: 'Am I a question for the local node?',
+      ],
     }
   end
 
@@ -82,7 +84,7 @@ RSpec.describe Metalware::QuestionTree do
 
   Metalware::QuestionTree::BASE_TRAVERSALS.each do |base_method|
     describe "#filtered_#{base_method}" do
-      it_behaves_like "a filtered traversal", base_method
+      it_behaves_like 'a filtered traversal', base_method
     end
   end
 
@@ -116,4 +118,3 @@ RSpec.describe Metalware::QuestionTree do
     end
   end
 end
-

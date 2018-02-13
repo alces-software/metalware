@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'rubytree'
 
 module Metalware
@@ -7,8 +9,8 @@ module Metalware
       :each,
       :breadth_each,
       :postordered_each,
-      :preordered_each
-    ]
+      :preordered_each,
+    ].freeze
 
     BASE_TRAVERSALS.each do |base_method|
       define_method(:"filtered_#{base_method}") do |&block|
@@ -28,7 +30,7 @@ module Metalware
     end
 
     def identifiers
-      filtered_each.map { |q| q.identifier }
+      filtered_each.map(&:identifier)
     end
 
     def identifier
@@ -36,4 +38,3 @@ module Metalware
     end
   end
 end
-
