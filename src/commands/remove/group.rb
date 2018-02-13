@@ -62,7 +62,7 @@ module Metalware
         end
 
         def list_of_answer_files
-          NodeattrInterface.nodes_in_primary_group(primary_group)
+          NodeattrInterface.nodes_in_group(primary_group)
                            .map { |node| FilePath.node_answers(node) }
                            .unshift(FilePath.group_answers(primary_group))
         end

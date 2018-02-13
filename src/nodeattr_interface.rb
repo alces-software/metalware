@@ -29,7 +29,7 @@ require 'system_command'
 module Metalware
   module NodeattrInterface
     class << self
-      def nodes_in_primary_group(primary_group)
+      def nodes_in_group(primary_group)
         nodes_to_groups.select do |_node, groups|
           groups.first == primary_group
         end.keys

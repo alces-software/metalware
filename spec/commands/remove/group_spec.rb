@@ -61,7 +61,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
 
   def expected_deleted_files(group)
     Metalware::NodeattrInterface
-      .nodes_in_primary_group(group)
+      .nodes_in_group(group)
       .map { |node| "nodes/#{node}.yaml" }
       .unshift(["groups/#{group}.yaml"])
       .map { |f| File.join(Metalware::FilePath.answer_files, f) }

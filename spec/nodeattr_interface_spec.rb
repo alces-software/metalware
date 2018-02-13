@@ -37,9 +37,9 @@ RSpec.describe Metalware::NodeattrInterface do
       end
     end
 
-    describe '#nodes_in_primary_group' do
+    describe '#nodes_in_group' do
       it 'returns only the nodes in the primary group' do
-        nodes = Metalware::NodeattrInterface.nodes_in_primary_group('group1')
+        nodes = Metalware::NodeattrInterface.nodes_in_group('group1')
         expect(nodes).to contain_exactly('nodeA01', 'nodeA02')
       end
     end
