@@ -70,6 +70,18 @@ RSpec.describe Metalware::QuestionTree do
     it 'only includes questions' do
       enum.each { |q| expect(q).to be_question }
     end
+
+    it 'returns an enumerator when called without a block' do
+      expect(enum).to be_a Enumerator
+    end
+
+    it 'runs the block passed into the method' do
+      num = 0
+      subject.send filtered_method do |q|
+        num += 1
+      end
+      expect(num).to eq(identifiers.length)
+    end
   end
 
   Metalware::QuestionTree::BASE_TRAVERSALS.each do |base_method|

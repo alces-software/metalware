@@ -11,8 +11,9 @@ module Metalware
     ]
 
     BASE_TRAVERSALS.each do |base_method|
-      define_method(:"filtered_#{base_method}") do
-        public_send(base_method).find_all(&:question?)
+      define_method(:"filtered_#{base_method}") do |&block|
+        questions = public_send(base_method).find_all(&:question?)
+        block ? questions.each { |q| block.call(q) } : questions.to_enum
       end
     end
 
