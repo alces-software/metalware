@@ -69,8 +69,8 @@ RSpec.describe '`metal build`' do
     expect(files.empty?).to be true
   end
 
-  def build_node(name, group: false)
-    options = OpenStruct.new(group ? { group: true } : {})
+  def build_node(name, gender: false)
+    options = OpenStruct.new gender: gender
     filesystem.test do
       thr = Thread.new do
         begin
@@ -138,7 +138,7 @@ RSpec.describe '`metal build`' do
     let :nodes { ['testnode01', 'testnode02', 'testnode03'] }
 
     it 'works' do
-      build_node('nodes', group: true) do |thread|
+      build_node('nodes', gender: true) do |thread|
         wait_longer_than_build_poll
         expect(thread).to be_alive
 
@@ -215,7 +215,7 @@ RSpec.describe '`metal build`' do
       end
 
       it 'exits on second interrupt' do
-        build_node('nodes', group: true) do |thread|
+        build_node('nodes', gender: true) do |thread|
           touch_complete_file('testnode01')
 
           wait_longer_than_build_poll
@@ -239,7 +239,7 @@ RSpec.describe '`metal build`' do
         end
 
         it 'handles "yes" to interrupt prompt' do
-          build_node('nodes', group: true) do |thread|
+          build_node('nodes', gender: true) do |thread|
             stdin.puts('yes')
             stdin.rewind
 
@@ -262,7 +262,7 @@ RSpec.describe '`metal build`' do
         end
 
         it 'handles "no" to interrupt prompt' do
-          build_node('nodes', group: true) do |thread|
+          build_node('nodes', gender: true) do |thread|
             stdin.puts('no')
             stdin.rewind
 
