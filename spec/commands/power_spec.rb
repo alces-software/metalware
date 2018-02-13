@@ -2,6 +2,8 @@
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Power do
+  include AlcesUtils
+
   def run_power(node_identifier, command, **options)
     AlcesUtils.redirect_std(:stdout) do
       Metalware::Utils.run_command(
@@ -12,46 +14,33 @@ RSpec.describe Metalware::Commands::Power do
 
   describe 'when run on bare metal' do
     let :node_names { ['node01', 'node02', 'node03'] }
+    let :group { 'nodes' }
+    let :namespace_config do
+      {
+        networks: {
+          bmc: {
+            defined: true,
+            bmcuser: 'bmcuser',
+            bmcpassword: 'bmcpassword',
+          }
+        }
+      }
+    end
 
-    before :each do
-      # XXX Factor out this setup in a reusable but still clear form. An
-      # alternative approach would be to use AlcesUtils, but this seems
-      # convoluted and unclear and mocks too many things for me to trust it.
-      # This approach is at least explicit about the preconditions which must
-      # be met before this command can be run.
-
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:genders_for_node).and_return(['nodes'])
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:all_nodes).and_return(node_names)
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:nodes_in_group).and_return(node_names)
-
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-
-        domain_config_path = Metalware::FilePath.domain_config
-        fs.create(domain_config_path)
-
-        fs.setup do
-          Metalware::Data.dump(domain_config_path, {
-            networks: {
-              bmc: {
-                defined: true,
-                bmcuser: 'bmcuser',
-                bmcpassword: 'bmcpassword',
-              }
-            }
-          })
-
-          Metalware::Utils.run_command(
-            Metalware::Commands::Configure::Group, 'nodes'
-          )
-        end
+    AlcesUtils.mock self, :each do
+      mock_group(group)
+      config(alces.group, namespace_config)
+      node_names.each do |node|
+        mock_node(node, group)
+        config(alces.node, namespace_config)
       end
+    end
+
+    # Allow the system command to receive `nodeattr` commands
+    before :each do
+      with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
+      allow(Metalware::SystemCommand).to \
+        receive(:run).with(*with_args).and_call_original
     end
 
     describe 'when run for node' do
@@ -73,7 +62,7 @@ RSpec.describe Metalware::Commands::Power do
 
         end
 
-        run_power('nodes', 'on', group: true, sleep: 0.5)
+        run_power('nodes', 'on', gender: true, sleep: 0.5)
       end
     end
   end
