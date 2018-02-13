@@ -63,8 +63,8 @@ RSpec.describe Metalware::QuestionTree do
       expect(subject).to respond_to(filtered_method)
     end
 
-    it 'has the correct question length' do
-      expect(enum.length).to eq(identifier.length)
+    it 'has the correct question size' do
+      expect(enum.size).to eq(identifiers.length)
     end
 
     it 'only includes questions' do

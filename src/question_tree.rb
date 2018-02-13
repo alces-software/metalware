@@ -12,6 +12,7 @@ module Metalware
 
     BASE_TRAVERSALS.each do |base_method|
       define_method(:"filtered_#{base_method}") do
+        public_send(base_method).find_all(&:question?)
       end
     end
 
