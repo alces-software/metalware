@@ -39,33 +39,33 @@ RSpec.describe Metalware::AnswersTableCreator do
   let :raw_configure_data do
     {
       domain: [{
-          identifier: 'question_1',
-          question: 'question 1',
+        identifier: 'question_1',
+        question: 'question 1',
       }],
       group: [
         {
           identifier: 'question_1',
-          question: 'question 1'
+          question: 'question 1',
         },
         {
           identifier: 'question_2',
           question: 'question 2',
-          type: 'integer'
+          type: 'integer',
         },
       ],
       node: [
         {
           identifier: 'question_1',
-          question: 'question 1'
+          question: 'question 1',
         },
         {
           identifier: 'question_2',
           question: 'question 2',
-          type: 'integer'
+          type: 'integer',
         },
         {
           identifier: 'question_3',
-          question: 'question 3'
+          question: 'question 3',
         },
       ],
       local: [],
