@@ -63,10 +63,6 @@ RSpec.describe Metalware::QuestionTree do
       expect(subject).to respond_to(filtered_method)
     end
 
-    it 'has the correct question size' do
-      expect(enum.size).to eq(identifiers.length)
-    end
-
     it 'only includes questions' do
       enum.each { |q| expect(q).to be_question }
     end
@@ -75,9 +71,9 @@ RSpec.describe Metalware::QuestionTree do
       expect(enum).to be_a Enumerator
     end
 
-    it 'runs the block passed into the method' do
+    it 'runs the block for each valid question' do
       num = 0
-      subject.send filtered_method do |q|
+      subject.send filtered_method do |_q|
         num += 1
       end
       expect(num).to eq(identifiers.length)
