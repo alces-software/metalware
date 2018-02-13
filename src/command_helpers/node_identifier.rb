@@ -24,7 +24,7 @@ module Metalware
                     alces.nodes.find_by_name(node_identifier)
                   end
           raise_missing unless nodes
-          Array(nodes)
+          Array.wrap nodes
         end
       end
 
