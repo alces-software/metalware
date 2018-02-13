@@ -25,18 +25,11 @@ module Metalware
         end
       end
 
-      def group
-        @group ||= begin
-          return unless options.group
-          alces.groups.find_by_name(node_identifier)
-        end
-      end
-
       MISSING_GROUP_WARNING = 'Could not find group: '
       MISSING_NODE_WARNING = 'Could not find node: '
 
       def raise_missing
-        msg = if options.group
+        msg = if options.gender
                 MISSING_GROUP_WARNING.to_s + node_identifier
               else
                 MISSING_NODE_WARNING.to_s + node_identifier
