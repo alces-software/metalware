@@ -38,10 +38,11 @@ RSpec.describe Metalware::Commands::Ipmi do
       end
     end
 
+    # Allow the system command to receive `nodeattr` commands
     before :each do
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-      end
+      with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
+      allow(Metalware::SystemCommand).to \
+        receive(:run).with(*with_args).and_call_original
     end
 
     describe 'when run for node' do
@@ -62,7 +63,7 @@ RSpec.describe Metalware::Commands::Ipmi do
           ).ordered
         end
 
-        run_ipmi('nodes', 'sel list', group: true)
+        run_ipmi('nodes', 'sel list', gender: true)
       end
     end
   end
