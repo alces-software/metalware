@@ -54,12 +54,8 @@ module Metalware
       end
 
       def build_interface
-        # Default to first network interface if `build_interface` is not set
-        # yet. In practise this _should_ only occur prior to first render of
-        # server config, but this is needed so a valid interface is used when
-        # rendering the server config itself (the template shouldn't normally
-        # depend on values dependent on the `build_interface`, but if it's
-        # unspecified the `alces` namespace will fail to be created).
+        # Default to first network interface if `build_interface` is not
+        # defined in server config.
         server_config[:build_interface] || Metalware::Network.interfaces.first
       end
 
