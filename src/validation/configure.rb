@@ -27,7 +27,7 @@ require 'file_path'
 require 'data'
 require 'dry-validation'
 require 'constants'
-require 'rubytree'
+require 'question_tree'
 require 'stringio'
 
 module Metalware
@@ -61,7 +61,7 @@ module Metalware
             pass: true,
             result: TopLevelSchema.call(data: questions_hash),
           }
-          Tree::TreeNode.new('ROOT', root_hash).tap do |root|
+          QuestionTree.new('ROOT', root_hash).tap do |root|
             add_children(root, root) do
               Constants::CONFIGURE_SECTIONS.map do |section|
                 make_section_node(root, section)
@@ -106,7 +106,7 @@ module Metalware
           section: section,
           result: DependantSchema.call(dependent: question_data),
         }
-        node_s = Tree::TreeNode.new(section, data)
+        node_s = QuestionTree.new(section, data)
         add_children(root, node_s) do
           question_data.map { |q| make_question_node(root, q) }
         end
@@ -115,7 +115,7 @@ module Metalware
       def make_question_node(root, **question)
         result_h = { result: QuestionSchema.call(question: question) }
         data = (question.is_a?(Hash) ? question.merge(result_h) : result_h)
-        node_q = Tree::TreeNode.new(data[:identifier].to_s, data)
+        node_q = QuestionTree.new(data[:identifier].to_s, data)
         add_children(root, node_q) do
           question[:dependent]&.map do |sub_question|
             make_question_node(root, **sub_question)

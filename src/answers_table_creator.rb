@@ -2,8 +2,7 @@
 # frozen_string_literal: true
 
 require 'terminal-table'
-
-require 'repo'
+require 'validation/loader'
 
 module Metalware
   class AnswersTableCreator
@@ -45,22 +44,22 @@ module Metalware
     end
 
     def rows(group_name:, node_name:)
-      configure_questions.map do |question|
+      question_identifiers.map do |identifier|
         [
-          question,
-          domain_answer(question: question),
-          group_answer(question: question, group_name: group_name),
-          node_answer(question: question, node_name: node_name),
+          identifier,
+          domain_answer(question: identifier),
+          group_answer(question: identifier, group_name: group_name),
+          node_answer(question: identifier, node_name: node_name),
         ].reject(&:nil?)
       end
     end
 
-    def configure_questions
-      repo.configure_question_identifiers
-    end
-
-    def repo
-      @repo ||= Metalware::Repo.new
+    def question_identifiers
+      @question_identifiers ||= Metalware::Validation::Loader.new
+                                                             .question_tree
+                                                             .identifiers
+                                                             .sort
+                                                             .uniq
     end
 
     def domain_answer(question:)
@@ -86,7 +85,7 @@ module Metalware
     def format_answer(question:, namespace:)
       # `inspect` the answer to get it with an indication of its type, so e.g.
       # strings are wrapped in quotes, and can distinguish from integers etc.
-      namespace.answer.to_h[question].inspect
+      namespace.answer.to_h[question.to_sym].inspect
     end
   end
 end

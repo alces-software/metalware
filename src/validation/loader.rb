@@ -35,11 +35,13 @@ module Metalware
         @path = FilePath
       end
 
-      def configure_data
+      # TODO: Remove references to configure_data
+      def question_tree
         # XXX Extract object for loading configure data?
-        @configure_data ||=
+        @questions ||=
           Validation::Configure.new(combined_configure_data).tree
       end
+      alias configure_data question_tree
 
       # Returns a tree
       def configure_section(section)

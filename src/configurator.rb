@@ -144,8 +144,8 @@ module Metalware
     end
 
     def ask_question_based_on_parent_answer(node_q)
-      # Question nodes hang off a section node (eventually) and are thus asked
-      if node_q.parent.content.section
+      # Ask the question if it is a question but its parent is not
+      if node_q.question? && !node_q.parent.question?
         true
       # If the parent's answer is truthy the child is asked
       elsif node_q.parent.content.answer
@@ -227,7 +227,7 @@ module Metalware
     end
 
     def total_questions
-      section_question_tree.size - 1
+      section_question_tree.questions_length
     end
 
     class Question

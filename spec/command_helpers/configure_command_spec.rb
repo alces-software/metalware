@@ -3,7 +3,6 @@
 
 require 'filesystem'
 require 'spec_utils'
-require 'shared_examples/render_domain_templates'
 
 RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   TEST_COMMAND_NAME = :testcommand
@@ -31,8 +30,6 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
       )
     end
   end
-
-  include_examples :render_domain_templates, TestCommand
 
   describe 'option handling' do
     before :each do

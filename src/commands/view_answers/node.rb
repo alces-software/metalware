@@ -16,7 +16,7 @@ module Metalware
         end
 
         def run
-          atc = AnswersTableCreator.new(config, alces)
+          atc = AnswersTableCreator.new(alces)
           puts atc.node_table(node_name)
         end
 
