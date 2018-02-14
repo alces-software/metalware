@@ -27,7 +27,7 @@ module Metalware
       end
 
       def genders
-        @genders ||= NodeattrInterface.groups_for_node(name)
+        @genders ||= NodeattrInterface.genders_for_node(name)
       end
 
       def index

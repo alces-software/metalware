@@ -2,6 +2,8 @@
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Ipmi do
+  include AlcesUtils
+
   def run_ipmi(node_identifier, command, **options)
     AlcesUtils.redirect_std(:stdout) do
       Metalware::Utils.run_command(
@@ -15,40 +17,33 @@ RSpec.describe Metalware::Commands::Ipmi do
     # DRY this up.
 
     let :node_names { ['node01', 'node02', 'node03'] }
+    let :group { 'nodes' }
+    let :namespace_config do
+      {
+        networks: {
+          bmc: {
+            defined: true,
+            bmcuser: 'bmcuser',
+            bmcpassword: 'bmcpassword',
+          }
+        }
+      }
+    end
 
-    before :each do
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:groups_for_node).and_return(['nodes'])
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:all_nodes).and_return(node_names)
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:nodes_in_group).and_return(node_names)
-
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-
-        domain_config_path = Metalware::FilePath.domain_config
-        fs.create(domain_config_path)
-
-        fs.setup do
-          Metalware::Data.dump(domain_config_path, {
-            networks: {
-              bmc: {
-                defined: true,
-                bmcuser: 'bmcuser',
-                bmcpassword: 'bmcpassword',
-              }
-            }
-          })
-
-          Metalware::Utils.run_command(
-            Metalware::Commands::Configure::Group, 'nodes'
-          )
-        end
+    AlcesUtils.mock self, :each do
+      mock_group(group)
+      config(alces.group, namespace_config)
+      node_names.each do |node|
+        mock_node(node, group)
+        config(alces.node, namespace_config)
       end
+    end
+
+    # Allow the system command to receive `nodeattr` commands
+    before :each do
+      with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
+      allow(Metalware::SystemCommand).to \
+        receive(:run).with(*with_args).and_call_original
     end
 
     describe 'when run for node' do
@@ -69,7 +64,7 @@ RSpec.describe Metalware::Commands::Ipmi do
           ).ordered
         end
 
-        run_ipmi('nodes', 'sel list', group: true)
+        run_ipmi('nodes', 'sel list', gender: true)
       end
     end
   end

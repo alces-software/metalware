@@ -85,9 +85,6 @@ module Metalware
         {
           repo: repo_dependencies,
           configure: ['domain.yaml'],
-          optional: {
-            configure: ["groups/#{group&.name}.yaml"],
-          },
         }
       end
 

@@ -55,9 +55,9 @@ RSpec.describe Metalware::Commands::Each do
       receive(:new).and_return(double('answer', merge: {}))
   end
 
-  def run_command_echo(node, group = false)
+  def run_command_echo(node, gender = false)
     FakeFS.deactivate!
-    opt = OpenStruct.new(group: group)
+    opt = OpenStruct.new(gender: gender)
     file = Tempfile.new
     file.close
     cmd = "echo <%= node.name %> >> #{file.path}"
@@ -75,7 +75,7 @@ RSpec.describe Metalware::Commands::Each do
     expect(output).to eq("node01\n")
   end
 
-  it 'runs the command over a group' do
+  it 'runs the command over a gender' do
     expected = (1..3).inject('') { |str, num| "#{str}testnode0#{num}\n" }
     output = run_command_echo('nodes', true)
     expect(output).to eq(expected)

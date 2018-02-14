@@ -137,19 +137,19 @@ RSpec.describe Metalware::Commands::Build do
       testnodes.nodes do |node|
         expect(node).to receive(:start_hook).once
       end
-      run_build(testnodes, delay_report_built: delay_build, group: true)
+      run_build(testnodes, delay_report_built: delay_build, gender: true)
     end
 
     it 'completes all the nodes once built' do
       testnodes.nodes do |node|
         expect(node).to receive(:complete_hook).once
       end
-      run_build(testnodes, delay_report_built: delay_build, group: true)
+      run_build(testnodes, delay_report_built: delay_build, gender: true)
     end
 
     it 'finishes once all the nodes are built' do
       expect do
-        run_build(testnodes, delay_report_built: delay_build, group: true)
+        run_build(testnodes, delay_report_built: delay_build, gender: true)
       end.not_to raise_error
     end
 
@@ -158,7 +158,7 @@ RSpec.describe Metalware::Commands::Build do
         built_nodes = testnodes.nodes.dup
         built_nodes.shift # The first node will not be built
         th = Thread.new do
-          run_build(testnodes, group: true)
+          run_build(testnodes, gender: true)
           sleep(build_wait_time / 10)
           built_nodes.each { |n| FileUtils n.build_complete_path }
         end

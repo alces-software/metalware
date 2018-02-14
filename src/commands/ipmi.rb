@@ -70,22 +70,18 @@ module Metalware
       end
 
       def render_credentials
-        object = options.group ? group : node
+        object = options.gender ? group : node
         raise MetalwareError, "BMC network not defined for #{object.name}" unless object.config.networks.bmc.defined
         bmc_config = object.config.networks.bmc
         "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end
 
       def group
-        alces.groups.find_by_name(args[0])
+        alces.groups.find_by_name(node_identifier)
       end
 
       def node
-        alces.nodes.find_by_name(node_names[0])
-      end
-
-      def node_names
-        @node_names ||= nodes.map(&:name)
+        alces.nodes.find_by_name(node_identifier)
       end
 
       def vm?(node)
