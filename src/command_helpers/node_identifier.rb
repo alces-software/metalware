@@ -17,24 +17,25 @@ module Metalware
       end
 
       def nodes
-        @nodes ||= begin
-          nodes = if options.gender
-                    NodeattrInterface.nodes_in_gender(node_identifier)
-                  else
-                    node_identifier
-                  end
-          raise_missing unless nodes
-          Array.wrap(nodes).map { |n| alces.nodes.find_by_name(n) }
-        end
+        raise_missing unless node_names
+        @nodes ||= node_names.map { |n| alces.nodes.find_by_name(n) }
+      end
+
+      def node_names
+        @node_names ||= if options.gender
+                          NodeattrInterface.nodes_in_gender(node_identifier)
+                        else
+                          [node_identifier]
+                        end
       end
 
       def raise_missing
-        msg = if options.gender
-                MISSING_GENDER_WARNING + node_identifier
-              else
-                MISSING_NODE_WARNING + node_identifier
-              end
+        msg = warning + node_identifier
         raise InvalidInput, msg
+      end
+
+      def warning
+        options.gender ? MISSING_GENDER_WARNING : MISSING_NODE_WARNING
       end
     end
   end
