@@ -43,6 +43,8 @@ module Metalware
       program :version, '2017.2.1'
       program :description, 'Alces tools for the management and configuration of bare metal machines'
 
+      suppress_trace_classes MetalwareError
+
       CliHelper::Parser.new(self).parse_commands
 
       run!
