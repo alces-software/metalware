@@ -6,12 +6,15 @@ module Metalware
     module NodeIdentifier
       private
 
+      MISSING_GENDER_WARNING = 'Could not find nodes for gender: '
+      MISSING_NODE_WARNING = 'Could not find node: '
+
+      attr_reader :node_identifier
+
       def pre_setup(*a)
         super(*a)
         @node_identifier = args.first
       end
-
-      attr_reader :node_identifier
 
       def nodes
         @nodes ||= begin
@@ -24,9 +27,6 @@ module Metalware
           Array.wrap(nodes).map { |n| alces.nodes.find_by_name(n) }
         end
       end
-
-      MISSING_GENDER_WARNING = 'Could not find nodes for gender: '
-      MISSING_NODE_WARNING = 'Could not find node: '
 
       def raise_missing
         msg = if options.gender
