@@ -77,15 +77,11 @@ module Metalware
       end
 
       def group
-        alces.groups.find_by_name(args[0])
+        alces.groups.find_by_name(node_identifier)
       end
 
       def node
         alces.nodes.find_by_name(node_names[0])
-      end
-
-      def node_names
-        @node_names ||= nodes.map(&:name)
       end
 
       def vm?(node)
