@@ -33,15 +33,21 @@ module Metalware
         raise MetalwareError, 'Console not supported on virtual machines' if vm?(node)
         raise MetalwareError, "Unable to connect to #{node.name}" unless valid_connection?
         puts 'Establishing SOL connection, type &. to exit..'
-        system(command('activate'))
-      end
-
-      def command(type)
-        "ipmitool -H #{node.name} #{render_credentials} -e '&' -I lanplus sol #{type}"
+        system(console_command('activate'))
       end
 
       def valid_connection?
-        SystemCommand.run(command('info'))
+        SystemCommand.run(console_command('info'))
+      end
+
+      def console_command(type)
+        # XXX In Console we use `$node_name` as the host when running
+        # `ipmitool`, but in Ipmi and Power we use `$node_name.bmc` - is there
+        # any reason for this? Does this have any different effect?
+        create_ipmitool_command(
+          host: node.name,
+          arguments: "-e '&' sol #{type}"
+        )
       end
     end
   end

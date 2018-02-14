@@ -26,12 +26,6 @@ require 'validation/loader'
 
 RSpec.describe Metalware::Validation::Loader do
   describe '#configure_data' do
-    let! :config do
-      # Need to create and cache a config before each test as this is expected
-      # by FilePath.
-      Metalware::Config.cache = Metalware::Config.new
-    end
-
     let :configure_sections do
       Metalware::Constants::CONFIGURE_SECTIONS
     end
@@ -93,9 +87,7 @@ RSpec.describe Metalware::Validation::Loader do
       end
     end
 
-    subject do
-      described_class.new(config)
-    end
+    subject { described_class.new }
 
     before :each do
       FileSystem.root_setup do |fs|
@@ -106,10 +98,6 @@ RSpec.describe Metalware::Validation::Loader do
         example_plugin_configure_file = File.join(example_plugin_dir, 'configure.yaml')
         fs.dump(example_plugin_configure_file, example_plugin_configure_questions_hash)
       end
-    end
-
-    after :each do
-      Metalware::Config.clear_cache
     end
 
     Metalware::Constants::CONFIGURE_SECTIONS.each do |section|

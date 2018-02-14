@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'logger'
-require 'config'
 require 'exceptions'
 require 'fileutils'
 require 'output'
@@ -30,6 +29,14 @@ require 'output'
 module Metalware
   class MetalLog < Logger
     class << self
+      # Having these global properties on the MetalLog class is pretty ugly,
+      # but for legacy reasons we need to be able to call methods on the
+      # MetalLog class directly all over the place, and this is the best way I
+      # can see right now to share the values for `strict` and `quiet` set at
+      # the top level in BaseCommand with all MetalLog instances without having
+      # to completely refactor our use of MetalLog throughout Metalware.
+      attr_accessor :strict, :quiet
+
       def method_missing(s, *a, &b)
         metal_log.respond_to?(s) ? metal_log.public_send(s, *a, &b) : super
       end
@@ -40,23 +47,31 @@ module Metalware
     end
 
     def initialize(log_name)
-      file = "#{config.log_path}/#{log_name}.log"
+      file = "#{FilePath.log}/#{log_name}.log"
       FileUtils.mkdir_p File.dirname(file)
       f = File.open(file, 'a')
       f.sync = true
       super(f)
-      self.level = config.log_severity
+      self.level = Constants::LOG_SEVERITY
     end
 
     def warn(msg)
-      config.cli.strict ? raise(StrictWarningError, msg) : super(msg)
-      Output.warning "warning: #{msg}" unless config.cli.quiet
+      if strict?
+        raise StrictWarningError, msg
+      elsif !quiet?
+        Output.warning "warning: #{msg}" unless quiet?
+      end
+      super(msg)
     end
 
     private
 
-    def config
-      Config.cache(new_if_missing: true)
+    def strict?
+      self.class.strict
+    end
+
+    def quiet?
+      self.class.quiet
     end
   end
 end

@@ -27,7 +27,7 @@ module Metalware
       end
 
       def genders
-        @genders ||= NodeattrInterface.groups_for_node(name)
+        @genders ||= NodeattrInterface.genders_for_node(name)
       end
 
       def index
@@ -60,7 +60,7 @@ module Metalware
       end
 
       def build_method
-        @build_method ||= build_method_class.new(alces.metal_config, self)
+        @build_method ||= build_method_class.new(self)
       end
 
       def files

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'config'
 require 'libvirt'
 require 'metal_log'
 require 'namespaces/alces'

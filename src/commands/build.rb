@@ -25,7 +25,6 @@
 require 'active_support/core_ext/string/strip'
 
 require 'command_helpers/base_command'
-require 'config'
 require 'templater'
 require 'constants'
 require 'output'
@@ -72,7 +71,7 @@ module Metalware
             in_gui? ? record_gui_build_complete : break
           end
 
-          sleep config.build_poll_sleep
+          sleep Constants::BUILD_POLL_SLEEP
         end
 
         teardown
@@ -86,9 +85,6 @@ module Metalware
         {
           repo: repo_dependencies,
           configure: ['domain.yaml'],
-          optional: {
-            configure: ["groups/#{group&.name}.yaml"],
-          },
         }
       end
 

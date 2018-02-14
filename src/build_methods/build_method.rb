@@ -7,8 +7,7 @@ require 'keyword_struct'
 module Metalware
   module BuildMethods
     class BuildMethod
-      def initialize(metal_config, node)
-        @metal_config = metal_config
+      def initialize(node)
         @node = node
         @file_path = FilePath # Inherited class still require file_path
       end
@@ -34,10 +33,10 @@ module Metalware
 
       private
 
-      attr_reader :metal_config, :node, :file_path
+      attr_reader :node, :file_path
 
       def strip_leading_repo_path(path)
-        path.gsub(/^#{file_path.repo}\/?/, '')
+        path.gsub(/^#{FilePath.repo}\/?/, '')
       end
 
       def staging_templates

@@ -24,7 +24,6 @@
 require 'filesystem'
 require 'commands/remove/group'
 require 'nodeattr_interface'
-require 'config'
 require 'ostruct'
 require 'validation/loader'
 require 'spec_utils'
@@ -45,7 +44,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
     end
   end
 
-  let :loader { Metalware::Validation::Loader.new(metal_config) }
+  let :loader { Metalware::Validation::Loader.new }
   let :cache { loader.group_cache[:primary_groups] }
 
   let :initial_files { answer_files }
@@ -57,15 +56,15 @@ RSpec.describe Metalware::Commands::Remove::Group do
   end
 
   def answer_files
-    Dir[File.join(metal_config.answer_files_path, '**/*.yaml')]
+    Dir[File.join(Metalware::FilePath.answer_files, '**/*.yaml')]
   end
 
   def expected_deleted_files(group)
     Metalware::NodeattrInterface
-      .nodes_in_primary_group(group)
+      .nodes_in_group(group)
       .map { |node| "nodes/#{node}.yaml" }
       .unshift(["groups/#{group}.yaml"])
-      .map { |f| File.join(metal_config.answer_files_path, f) }
+      .map { |f| File.join(Metalware::FilePath.answer_files, f) }
   end
 
   def test_remove_group(group)

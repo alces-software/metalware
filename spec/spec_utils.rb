@@ -84,18 +84,6 @@ module SpecUtils
       http_error
     end
 
-    def create_mock_build_files_hash(example_group, config:, node_name:)
-      SpecUtils.fake_download_error(example_group)
-
-      example_group.instance_exec do
-        config = Metalware::Config.new
-        node = Metalware::Node.new(config, node_name)
-        Metalware::BuildFilesRetriever.new(
-          node_name, config
-        ).retrieve(node.build_files)
-      end
-    end
-
     # Other shared utils.
 
     def fixtures_config(config_file)

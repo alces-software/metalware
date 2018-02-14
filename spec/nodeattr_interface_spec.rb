@@ -37,9 +37,9 @@ RSpec.describe Metalware::NodeattrInterface do
       end
     end
 
-    describe '#nodes_in_primary_group' do
+    describe '#nodes_in_group' do
       it 'returns only the nodes in the primary group' do
-        nodes = Metalware::NodeattrInterface.nodes_in_primary_group('group1')
+        nodes = Metalware::NodeattrInterface.nodes_in_group('group1')
         expect(nodes).to contain_exactly('nodeA01', 'nodeA02')
       end
     end
@@ -50,40 +50,40 @@ RSpec.describe Metalware::NodeattrInterface do
       FileSystem.root_setup(&:with_genders_fixtures)
     end
 
-    describe '#nodes_in_group' do
+    describe '#nodes_in_gender' do
       it 'returns names of all nodes in the given gender group' do
         expect(
-          Metalware::NodeattrInterface.nodes_in_group('masters')
+          Metalware::NodeattrInterface.nodes_in_gender('masters')
         ).to eq(['login1'])
         expect(
-          Metalware::NodeattrInterface.nodes_in_group('nodes')
+          Metalware::NodeattrInterface.nodes_in_gender('nodes')
         ).to eq(['testnode01', 'testnode02', 'testnode03'])
         expect(
-          Metalware::NodeattrInterface.nodes_in_group('cluster')
+          Metalware::NodeattrInterface.nodes_in_gender('cluster')
         ).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
       end
 
       it 'raises if cannot find gender group' do
         expect do
-          Metalware::NodeattrInterface.nodes_in_group('non_existent')
+          Metalware::NodeattrInterface.nodes_in_gender('non_existent')
         end.to raise_error Metalware::NoGenderGroupError
       end
     end
 
-    describe '#groups_for_node' do
+    describe '#genders_for_node' do
       it 'returns groups for given node, ordered as in genders' do
         testnode_groups = ['testnodes', 'nodes', 'cluster']
         expect(
-          Metalware::NodeattrInterface.groups_for_node('testnode01')
+          Metalware::NodeattrInterface.genders_for_node('testnode01')
         ).to eq(testnode_groups)
         expect(
-          Metalware::NodeattrInterface.groups_for_node('testnode02')
+          Metalware::NodeattrInterface.genders_for_node('testnode02')
         ).to eq(['pregroup'] + testnode_groups + ['postgroup'])
       end
 
       it 'raises if cannot find node' do
         expect do
-          Metalware::NodeattrInterface.groups_for_node('non_existent')
+          Metalware::NodeattrInterface.genders_for_node('non_existent')
         end.to raise_error Metalware::NodeNotInGendersError
       end
     end

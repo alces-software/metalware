@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'config'
 require 'constants'
 require 'spec_utils'
 require 'commands/build'
@@ -46,9 +45,8 @@ RSpec.describe '`metal build`' do
 
   AlcesUtils.start(self)
 
-  TEST_CONFIG = Metalware::Config.new
-  TEST_KICKSTART_DIR = File.join(TEST_CONFIG.rendered_files_path, 'kickstart')
-  TEST_PXELINUX_DIR = TEST_CONFIG.pxelinux_cfg_path
+  TEST_KICKSTART_DIR = File.join(Metalware::FilePath.rendered_files, 'kickstart')
+  TEST_PXELINUX_DIR = Metalware::FilePath.pxelinux_cfg
 
   PXELINUX_TEMPLATE = '/var/lib/metalware/repo/pxelinux/default'
 
@@ -71,8 +69,8 @@ RSpec.describe '`metal build`' do
     expect(files.empty?).to be true
   end
 
-  def build_node(name, group: false)
-    options = OpenStruct.new(group ? { group: true } : {})
+  def build_node(name, gender: false)
+    options = OpenStruct.new gender: gender
     filesystem.test do
       thr = Thread.new do
         begin
@@ -110,7 +108,7 @@ RSpec.describe '`metal build`' do
     kill_any_metal_processes
   end
 
-  let :file_path { Metalware::FilePath.new(metal_config) }
+  let :file_path { Metalware::FilePath }
 
   def touch_complete_file(name)
     path = file_path.build_complete(alces.nodes.find_by_name(name))
@@ -140,7 +138,7 @@ RSpec.describe '`metal build`' do
     let :nodes { ['testnode01', 'testnode02', 'testnode03'] }
 
     it 'works' do
-      build_node('nodes', group: true) do |thread|
+      build_node('nodes', gender: true) do |thread|
         wait_longer_than_build_poll
         expect(thread).to be_alive
 
@@ -217,7 +215,7 @@ RSpec.describe '`metal build`' do
       end
 
       it 'exits on second interrupt' do
-        build_node('nodes', group: true) do |thread|
+        build_node('nodes', gender: true) do |thread|
           touch_complete_file('testnode01')
 
           wait_longer_than_build_poll
@@ -241,7 +239,7 @@ RSpec.describe '`metal build`' do
         end
 
         it 'handles "yes" to interrupt prompt' do
-          build_node('nodes', group: true) do |thread|
+          build_node('nodes', gender: true) do |thread|
             stdin.puts('yes')
             stdin.rewind
 
@@ -264,7 +262,7 @@ RSpec.describe '`metal build`' do
         end
 
         it 'handles "no" to interrupt prompt' do
-          build_node('nodes', group: true) do |thread|
+          build_node('nodes', gender: true) do |thread|
             stdin.puts('no')
             stdin.rewind
 

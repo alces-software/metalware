@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'namespaces/alces'
-require 'config'
 require 'active_support/core_ext/module/delegation'
 require 'recursive_open_struct'
 require 'spec_utils'
@@ -13,39 +12,24 @@ module AlcesUtils
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
     def start(example_group, config: nil)
-      AlcesUtils.mock example_group, :each do
-        cache_config
-      end
-
       example_group.instance_exec do
-        let! :metal_config do
-          AlcesUtils.check_and_raise_fakefs_error
-          test_config = Metalware::Config.new(config)
-          allow(Metalware::Config).to receive(:new).and_return(test_config)
-          test_config
-        end
-
         let! :alces do
-          test_alces = Metalware::Namespaces::Alces.new(metal_config)
+          test_alces = Metalware::Namespaces::Alces.new
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_return(test_alces)
           test_alces
-        end
-
-        let! :file_path do
-          Metalware::FilePath.new(metal_config)
         end
 
         #
         # Mocks nodeattr to use faked genders file
         #
         before :each do
-          File.open(file_path.genders, 'a') { |f| f.puts('local local') } unless File.exist?(file_path.genders)
+          File.open(Metalware::FilePath.genders, 'a') { |f| f.puts('local local') } unless File.exist?(Metalware::FilePath.genders)
 
           allow(Metalware::NodeattrInterface)
             .to receive(:nodeattr).and_wrap_original do |method, *args|
             AlcesUtils.check_and_raise_fakefs_error
-            path = AlcesUtils.nodeattr_genders_file_path(args[0], file_path)
+            path = AlcesUtils.nodeattr_genders_file_path(args[0])
             cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
             genders_data = File.read(path)
             tempfile = nil
@@ -69,8 +53,8 @@ module AlcesUtils
       start(base)
     end
 
-    def nodeattr_genders_file_path(command, file_path)
-      return file_path.genders unless command.include?('-f')
+    def nodeattr_genders_file_path(command)
+      return Metalware::FilePath.genders unless command.include?('-f')
       command.match(AlcesUtils::GENDERS_FILE_REGEX)[0].sub('-f ', '')
     end
 
@@ -139,7 +123,6 @@ module AlcesUtils
     def initialize(individual_spec_test)
       @test = individual_spec_test
       @alces = test.instance_exec { alces }
-      @metal_config = test.instance_exec { metal_config }
     end
 
     # Used to test basic templating features, avoid use if possible
@@ -156,15 +139,11 @@ module AlcesUtils
     end
 
     def validation_off
-      allow(metal_config).to receive(:validation).and_return(false)
+      stub_const('Metalware::Constants::SKIP_VALIDATION', true)
     end
 
     def build_poll_sleep(time)
-      allow(metal_config).to receive(:build_poll_sleep).and_return(time)
-    end
-
-    def mock_strict(bool)
-      metal_config.cli[:strict] = bool
+      stub_const('Metalware::Constants::BUILD_POLL_SLEEP', time)
     end
 
     def with_blank_config_and_answer(namespace)
@@ -201,14 +180,9 @@ module AlcesUtils
       allow(alces).to receive(:group).and_return(group)
     end
 
-    def cache_config
-      cached_config = Metalware::Config.instance_variable_get(:@cache)
-      Metalware::Config.cache = Metalware::Config.new unless cached_config
-    end
-
     private
 
-    attr_reader :alces, :metal_config, :test
+    attr_reader :alces, :test
 
     def raise_if_node_exists(name)
       return unless File.exist? Metalware::FilePath.genders
@@ -219,7 +193,7 @@ module AlcesUtils
     def add_node_to_genders_file(name, *genders)
       genders = [AlcesUtils.default_group] if genders.empty?
       genders_entry = "#{name} #{genders.join(',')}\n"
-      File.write(file_path.genders, genders_entry, mode: 'a')
+      File.write(Metalware::FilePath.genders, genders_entry, mode: 'a')
     end
 
     # Allows the RSpec methods to be accessed
@@ -232,7 +206,7 @@ module AlcesUtils
     end
 
     def group_cache
-      @group_cache ||= Metalware::GroupCache.new(metal_config)
+      @group_cache ||= Metalware::GroupCache.new
     end
 
     def hash_object(h = {})

@@ -40,11 +40,11 @@ module Metalware
 
         def run
           if options.force
-            FileUtils.rm_rf config.repo_path
+            FileUtils.rm_rf FilePath.repo
             MetalLog.info 'Force deleted old repo'
           end
 
-          Rugged::Repository.clone_at(@repo_url, config.repo_path)
+          Rugged::Repository.clone_at(@repo_url, FilePath.repo)
           MetalLog.info "Cloned repo from #{@repo_url}"
         rescue Rugged::NetworkError
           raise RuggedCloneError, "Could not find repo: #{@repo_url}"

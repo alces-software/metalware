@@ -24,7 +24,6 @@
 
 require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
-require 'config'
 require 'system_command'
 require 'vm'
 
@@ -38,6 +37,7 @@ module Metalware
       def run
         nodes.each do |node|
           ipmi(node)
+          sleep options.sleep if options.sleep
         end
       end
 
@@ -46,40 +46,42 @@ module Metalware
       end
 
       def run_vm(node)
-        command = args[1]
         libvirt = Metalware::Vm.new(node)
-        libvirt.send(command)
+        libvirt.send(command_argument)
       end
 
       def run_baremetal(node)
-        puts "#{node.name}: #{SystemCommand.run(command(node.name))}"
+        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node.name))}"
       end
 
-      def command(host)
-        "ipmitool -H #{host}.bmc -I lanplus #{render_credentials} #{render_command}"
+      def ipmi_command(node_name)
+        create_ipmitool_command(
+          host: "#{node_name}.bmc",
+          arguments: command_argument
+        )
       end
 
-      def render_command
-        options.command
+      def create_ipmitool_command(host:, arguments:)
+        "ipmitool -H #{host} -I lanplus #{render_credentials} #{arguments}"
+      end
+
+      def command_argument
+        args[1]
       end
 
       def render_credentials
-        object = options.group ? group : node
+        object = options.gender ? group : node
         raise MetalwareError, "BMC network not defined for #{object.name}" unless object.config.networks.bmc.defined
         bmc_config = object.config.networks.bmc
         "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end
 
       def group
-        alces.groups.find_by_name(args[0])
+        alces.groups.find_by_name(node_identifier)
       end
 
       def node
-        alces.nodes.find_by_name(node_names[0])
-      end
-
-      def node_names
-        @node_names ||= nodes.map(&:name)
+        alces.nodes.find_by_name(node_identifier)
       end
 
       def vm?(node)

@@ -26,7 +26,6 @@ require 'tempfile'
 require 'yaml'
 require 'highline'
 
-require 'config'
 require 'configurator'
 require 'validation/loader'
 require 'alces_utils'
@@ -55,8 +54,7 @@ RSpec.describe Metalware::Configurator do
 
   let :higher_level_answer_files { [] }
 
-  let :config { metal_config }
-  let :loader { Metalware::Validation::Loader.new(config) }
+  let :loader { Metalware::Validation::Loader.new }
 
   let :configurator do
     make_configurator
@@ -70,7 +68,7 @@ RSpec.describe Metalware::Configurator do
   end
 
   def define_questions(**h)
-    v = Metalware::Validation::Configure.new(metal_config, h)
+    v = Metalware::Validation::Configure.new(h)
     allow(Metalware::Validation::Configure).to receive(:new).and_return(v)
   end
 
@@ -414,7 +412,7 @@ RSpec.describe Metalware::Configurator do
     let :configure_orphan { Metalware::Configurator.for_node(alces, orphan) }
 
     def new_group_cache
-      Metalware::GroupCache.new(Metalware::Config.cache)
+      Metalware::GroupCache.new
     end
 
     before :each do

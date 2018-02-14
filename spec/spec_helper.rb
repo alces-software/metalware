@@ -47,8 +47,6 @@ SimpleCov.start 'metalware'
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../src')
-require 'config'
-Metalware::Config.new
 
 # Require main entry point to Metalware CLI so every file picked up by
 # simplecov, even entirely untested ones.
@@ -139,11 +137,6 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
-
-  # Resets the config cache each test
-  config.before :each do
-    Metalware::Config.clear_cache
-  end
 
   config.around :each do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file

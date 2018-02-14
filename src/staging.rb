@@ -5,18 +5,17 @@ require 'file_path'
 require 'recursive-open-struct'
 require 'templater'
 require 'managed_file'
-require 'config'
 
 module Metalware
   class Staging
-    def self.update(_remove_this_input = nil)
+    def self.update
       staging = new
       yield staging if block_given?
     ensure
       staging&.save
     end
 
-    def self.template(_remove_this_input = nil)
+    def self.template
       update do |staging|
         templater = Templater.new(staging)
         if block_given?
@@ -27,24 +26,19 @@ module Metalware
       end
     end
 
-    def self.manifest(_remove_this_input = nil)
+    def self.manifest
       new.manifest
     end
 
     private_class_method :new
 
-    def initialize
-      @metal_config = Config.cache
-      @file_path = FilePath.new(metal_config)
-    end
-
     def save
-      Data.dump(file_path.staging_manifest, manifest.to_h)
+      Data.dump(FilePath.staging_manifest, manifest.to_h)
     end
 
     def manifest
       @manifest ||= begin
-        Data.load(file_path.staging_manifest).tap do |x|
+        Data.load(FilePath.staging_manifest).tap do |x|
           x.merge! blank_manifest if x.empty?
           # Converts the file paths to strings
           x[:files] = x[:files].map { |key, data| [key.to_s, data] }.to_h
@@ -53,7 +47,7 @@ module Metalware
     end
 
     def push_file(sync, content, **options)
-      staging = file_path.staging(sync)
+      staging = FilePath.staging(sync)
       FileUtils.mkdir_p(File.dirname(staging))
       File.write(staging, content)
       manifest[:files][sync] = default_push_options.merge(options)
@@ -85,8 +79,6 @@ module Metalware
     end
 
     private
-
-    attr_reader :metal_config, :file_path
 
     def default_push_options
       {

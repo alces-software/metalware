@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'metal_log'
-require 'config'
 require 'dependency'
 require 'exceptions'
 require 'dependency_specifications'
@@ -50,7 +49,7 @@ module Metalware
       attr_reader :args, :options
 
       def pre_setup(args, options)
-        setup_config(options)
+        set_global_log_options(options)
         log_command
         @args = args
         @options = options
@@ -60,18 +59,9 @@ module Metalware
         enforce_dependency
       end
 
-      def setup_config(options)
-        cli_options = {
-          strict: !!options.strict,
-          quiet: !!options.quiet,
-        }
-        # Ensures it uses it's own config
-        Config.clear_cache
-        Config.cache = Config.new(options.config, cli_options)
-      end
-
-      def config
-        Config.cache
+      def set_global_log_options(options)
+        MetalLog.strict = !!options.strict
+        MetalLog.quiet = !!options.quiet
       end
 
       def dependency_specifications
@@ -83,15 +73,15 @@ module Metalware
       end
 
       def enforce_dependency
-        Dependency.new(config, command_name, dependency_hash).enforce
+        Dependency.new(command_name, dependency_hash).enforce
       end
 
       def loader
-        @loader ||= Validation::Loader.new(config)
+        @loader ||= Validation::Loader.new
       end
 
       def file_path
-        @file_path ||= FilePath.new(config)
+        @file_path ||= FilePath
       end
 
       def command_name
@@ -105,7 +95,7 @@ module Metalware
       end
 
       def alces
-        @alces ||= Namespaces::Alces.new(config)
+        @alces ||= Namespaces::Alces.new
       end
 
       def log_command

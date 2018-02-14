@@ -83,7 +83,6 @@ module Metalware
     )
       @alces = alces
       @highline = HighLine.new
-      @config = Config.cache
       @questions_section = questions_section
       @name = (questions_section == :local ? 'local' : name)
     end
@@ -109,21 +108,20 @@ module Metalware
     private
 
     attr_reader :alces,
-                :config,
                 :highline,
                 :questions_section,
                 :name
 
     def loader
-      @loader ||= Validation::Loader.new(config)
+      @loader ||= Validation::Loader.new
     end
 
     def saver
-      @saver ||= Validation::Saver.new(config)
+      @saver ||= Validation::Saver.new
     end
 
     def group_cache
-      @group_cache ||= GroupCache.new(config)
+      @group_cache ||= GroupCache.new
     end
 
     # Whether the answer is saved depends if it matches the default AND
@@ -146,8 +144,8 @@ module Metalware
     end
 
     def ask_question_based_on_parent_answer(node_q)
-      # Question nodes hang off a section node (eventually) and are thus asked
-      if node_q.parent.content.section
+      # Ask the question if it is a question but its parent is not
+      if node_q.question? && !node_q.parent.question?
         true
       # If the parent's answer is truthy the child is asked
       elsif node_q.parent.content.answer
@@ -216,7 +214,6 @@ module Metalware
       # properties object. The same can be done with the old_answer
       # TODO: Break out the Question object into seperate file
       Question.new(
-        config: config,
         default: default,
         properties: properties,
         questions_section: questions_section,
@@ -230,7 +227,7 @@ module Metalware
     end
 
     def total_questions
-      section_question_tree.size - 1
+      section_question_tree.questions_length
     end
 
     class Question
@@ -247,7 +244,6 @@ module Metalware
         :type
 
       def initialize(
-        config:,
         default:,
         old_answer: nil,
         progress_indicator:,
@@ -264,7 +260,7 @@ module Metalware
 
         @type = type_for(
           properties[:type],
-          configure_file: config.configure_file,
+          configure_file: Metalware::FilePath.configure_file,
           questions_section: questions_section
         )
       end

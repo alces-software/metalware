@@ -10,7 +10,7 @@ class Group < ApplicationModel
     private
 
     def group_cache
-      Metalware::GroupCache.new(config)
+      Metalware::GroupCache.new
     end
   end
 
@@ -26,7 +26,7 @@ class Group < ApplicationModel
     # use, e.g. when we build a group nodes in that group but without it as
     # their primary group will still be included, but they won't be included
     # here.
-    Metalware::NodeattrInterface.nodes_in_primary_group(name).map do |name|
+    Metalware::NodeattrInterface.nodes_in_group(name).map do |name|
       Metalware::Node.new(config, name)
     end
   end

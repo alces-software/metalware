@@ -36,7 +36,7 @@ module Metalware
 
         def setup
           @group_name = args.first
-          @cache = GroupCache.new(config)
+          @cache = GroupCache.new
         end
 
         def configurator
