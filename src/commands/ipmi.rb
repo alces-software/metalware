@@ -81,7 +81,7 @@ module Metalware
       end
 
       def node
-        alces.nodes.find_by_name(node_names[0])
+        alces.nodes.find_by_name(node_identifier)
       end
 
       def vm?(node)
