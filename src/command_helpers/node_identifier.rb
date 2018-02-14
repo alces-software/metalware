@@ -30,9 +30,9 @@ module Metalware
 
       def raise_missing
         msg = if options.gender
-                MISSING_GENDER_WARNING.to_s + node_identifier
+                MISSING_GENDER_WARNING + node_identifier
               else
-                MISSING_NODE_WARNING.to_s + node_identifier
+                MISSING_NODE_WARNING + node_identifier
               end
         raise InvalidInput, msg
       end
