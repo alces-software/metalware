@@ -2,6 +2,8 @@
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Console do
+  include AlcesUtils
+
   def run_console(node_name, **options)
     AlcesUtils.redirect_std(:stdout) do
       Metalware::Utils.run_command(
@@ -11,44 +13,22 @@ RSpec.describe Metalware::Commands::Console do
   end
 
   describe 'when run on bare metal' do
-    # XXX The setup for these tests is duplicated from those for power;
-    # should DRY this up.
+    let :node_name { 'node01' }
+    let :node_config do
+      {
+        networks: {
+          bmc: {
+            defined: true,
+            bmcuser: 'bmcuser',
+            bmcpassword: 'bmcpassword',
+          }
+        }
+      }
+    end
 
-    let :node_names { ['node01', 'node02', 'node03'] }
-
-    before :each do
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:genders_for_node).and_return(['nodes'])
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:all_nodes).and_return(node_names)
-      allow(
-        Metalware::NodeattrInterface
-      ).to receive(:nodes_in_group).and_return(node_names)
-
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-
-        domain_config_path = Metalware::FilePath.domain_config
-        fs.create(domain_config_path)
-
-        fs.setup do
-          Metalware::Data.dump(domain_config_path, {
-            networks: {
-              bmc: {
-                defined: true,
-                bmcuser: 'bmcuser',
-                bmcpassword: 'bmcpassword',
-              }
-            }
-          })
-
-          Metalware::Utils.run_command(
-            Metalware::Commands::Configure::Group, 'nodes'
-          )
-        end
-      end
+    AlcesUtils.mock self, :each do
+      mock_node(node_name)
+      config(alces.node, node_config)
     end
 
     describe 'when run for node' do
