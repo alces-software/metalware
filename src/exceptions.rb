@@ -23,29 +23,31 @@
 #==============================================================================
 
 module Metalware
-  class MetalwareError < StandardError
-  end
+  class MetalwareError < StandardError; end
+  class UserMetalwareError < MetalwareError; end
 
-  class ConfigCacheError < MetalwareError
-  end
+  # NOTE: Can these be condensed?
+  class NoGenderGroupError < UserMetalwareError; end
+  class NodeNotInGendersError < UserMetalwareError; end
 
-  class NoGenderGroupError < MetalwareError
-  end
+  class SystemCommandError < UserMetalwareError; end
+  class StrictWarningError < UserMetalwareError; end
+  class InvalidInput < UserMetalwareError; end
+  class InvalidConfigParameter < UserMetalwareError; end
+  class UnknownQuestionTypeError < UserMetalwareError; end
+  class FileDoesNotExistError < UserMetalwareError; end
+  class DataError < UserMetalwareError; end
+  class UninitializedLocalNode < UserMetalwareError; end
+  class InvalidLocalBuild < UserMetalwareError; end
 
-  class NodeNotInGendersError < MetalwareError
-  end
-
-  class SystemCommandError < MetalwareError
-  end
-
-  class StrictWarningError < MetalwareError
-  end
-
-  class NoRepoError < MetalwareError
-  end
-
-  class RecursiveConfigDepthExceededError < MetalwareError
+  class RecursiveConfigDepthExceededError < UserMetalwareError
     def initialize(msg = 'Input hash may contain infinitely recursive ERB')
+      super
+    end
+  end
+
+  class CombineHashError < UserMetalwareError
+    def initialize(msg = 'Could not combine config or answer hashes')
       super
     end
   end
@@ -62,46 +64,15 @@ module Metalware
     end
   end
 
-  class InvalidInput < MetalwareError
-  end
-
-  class InvalidConfigParameter < MetalwareError
-  end
-
-  class IterableRecursiveOpenStructPropertyError < MetalwareError
-  end
-
-  class CombineHashError < MetalwareError
-    def initialize(msg = 'Could not combine config or answer hashes')
-      super
-    end
-  end
-
-  class UnknownQuestionTypeError < MetalwareError
-  end
-
-  class UnknownDataTypeError < MetalwareError
-  end
-
-  class LoopErbError < MetalwareError
-    def initialize(msg = 'Input hash may contain infinitely recursive ERB')
-      super
-    end
-  end
-
-  class MissingParameterError < MetalwareError
-  end
-
-  class ValidationInternalError < MetalwareError
-  end
-
-  class ValidationFailure < MetalwareError
-  end
+  class InternalError < MetalwareError; end
+  class AnswerJSONSyntax < MetalwareError; end
+  class ScopeError < MetalwareError; end
+  class ValidationFailure < UserMetalwareError; end
 
   # XXX, we need think about the future of the DependencyFailure,
   # It maybe completely replaced with Validation::Loader and a file cache.
   # If this is the case Dependency Failure/ InternalError will be replaced
-  # with Validation Failure/ InternalError
+  # with Validation Failure
 
   # Use this error as the general catch all in Dependencies
   # The dependency can't be checked as the logic doesn't make sense
@@ -111,23 +82,11 @@ module Metalware
 
   # Use this error when the dependency is checked but isn't met
   # NOTE: This is the only dependency error we see in production
-  class DependencyFailure < MetalwareError
+  class DependencyFailure < UserMetalwareError
   end
 
-  # Error to be used when a file that should exist doesn't.
-  class FileDoesNotExistError < MetalwareError
-  end
-
-  # Error to be raised by Data class when invalid data loaded/attempted to be
-  # dumped.
-  class DataError < MetalwareError
-  end
-
-  class RuggedError < MetalwareError
-  end
-
-  class RuggedCloneError < RuggedError
-  end
+  class RuggedError < UserMetalwareError; end
+  class RuggedCloneError < RuggedError; end
 
   class LocalAheadOfRemote < RuggedError
     def initialize(num)
@@ -145,32 +104,8 @@ module Metalware
     end
   end
 
-  class EditModeError < MetalwareError
-  end
-
-  class MissingExternalDNS < MetalwareError
-  end
-
   class SaverNoData < MetalwareError
     def initialize(msg = 'No data provided to Validation::Saver'); end
-  end
-
-  class MissingExternalDNS < MetalwareError
-  end
-
-  class InvalidLocalBuild < MetalwareError
-  end
-
-  class UninitializedLocalNode < MetalwareError
-  end
-
-  class InternalError < MetalwareError
-  end
-
-  class AnswerJSONSyntax < MetalwareError
-  end
-
-  class ScopeError < MetalwareError
   end
 end
 
