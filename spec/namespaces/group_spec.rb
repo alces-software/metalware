@@ -1,6 +1,7 @@
 
 # frozen_string_literal: true
 
+require 'shared_examples/hash_merger_namespace'
 require 'namespaces/alces'
 require 'spec_utils'
 
@@ -15,6 +16,8 @@ RSpec.describe Metalware::Namespaces::Node do
       mock_node('random_node', test_group)
     end
 
-    include_examples Metalware::Namespaces::HashMergerNamespace, :group
+    include_examples Metalware::Namespaces::HashMergerNamespace,
+                     "alces.groups.first"
   end
 end
+
