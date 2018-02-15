@@ -156,6 +156,7 @@ module AlcesUtils
       allow(node).to receive(:hexadecimal_ip).and_return(hex)
     end
 
+    # TODO: Get the new node by reloading the genders file
     def mock_node(name, *genders)
       AlcesUtils.check_and_raise_fakefs_error
       raise_if_node_exists(name)
@@ -166,7 +167,6 @@ module AlcesUtils
         new_nodes = alces.nodes.reduce([node], &:push)
         metal_nodes = Metalware::Namespaces::MetalArray.new(new_nodes)
         allow(alces).to receive(:nodes).and_return(metal_nodes)
-        allow(alces).to receive(:node).and_return(node)
       end
     end
 
@@ -177,7 +177,7 @@ module AlcesUtils
       alces.instance_variable_set(:@group_cache, nil)
       group = alces.groups.find_by_name(name)
       with_blank_config_and_answer(group)
-      allow(alces).to receive(:group).and_return(group)
+      group
     end
 
     private
