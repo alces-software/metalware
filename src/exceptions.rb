@@ -23,6 +23,11 @@
 #==============================================================================
 
 module Metalware
+  # MetalwareError is the base error class to distinguish the custom errors
+  # from the built ins/ other libraries. The UserMetalwareError is a subset
+  # of the errors that result from a user action (as opposed to metalware
+  # failing). The user errors suppress the `--trace` prompt, which should
+  # make it clearer that it isn't an internal metalware error.
   class MetalwareError < StandardError; end
   class UserMetalwareError < MetalwareError; end
 
