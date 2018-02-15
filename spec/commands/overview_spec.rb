@@ -31,4 +31,20 @@ RSpec.describe Metalware::Commands::Overview do
       expect(body).to include(group.name)
     end
   end
+
+  context 'with a mismatch between no. headers/bodies in overview.yaml' do
+    before :each do
+      Metalware::Data.dump(Metalware::FilePath.overview, {
+        headers: ['I', 'have', '4', 'headers'],
+        fields: ['I', 'have', '5', 'body', 'parts'],
+      })
+    end
+
+    it 'errors' do
+      AlcesUtils.redirect_std(:stderr) do
+        expect { overview }.to raise_error(Metalware::DataError)
+      end
+    end
+  end
 end
+

@@ -29,9 +29,12 @@ module Metalware
     class Overview < CommandHelpers::BaseCommand
       private
 
+      OVERVIEW_ERROR = 'Can not construct table from overview.yaml'.freeze
+
       def setup; end
 
       def run
+        display_fields
         puts Terminal::Table.new(headings: headings, rows: rows)
       end
 
@@ -45,6 +48,16 @@ module Metalware
 
       def row(group)
         [group.name]
+      end
+
+      def display_fields
+        data = OpenStruct.new(Data.load(FilePath.overview))
+        data.headers ||= []
+        data.fields ||= []
+        unless data.headers.length == data.fields.length
+          raise DataError, OVERVIEW_ERROR
+        end
+        data
       end
     end
   end
