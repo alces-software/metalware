@@ -43,7 +43,7 @@ module Metalware
       end
 
       def headings
-        ['Group']
+        ['Group'] << display_fields.headers
       end
 
       def row(group)

@@ -7,7 +7,10 @@ RSpec.describe Metalware::Commands::Overview do
   include AlcesUtils
 
   AlcesUtils.mock self, :each do
-    ['group1', 'group2', 'group3'].map { |group| mock_group(group) }
+    ['group1', 'group2', 'group3'].map do |group|
+      mock_group(group)
+      config(alces.group, { key: 'config_value' })
+    end
   end
 
   def overview
@@ -44,6 +47,20 @@ RSpec.describe Metalware::Commands::Overview do
       AlcesUtils.redirect_std(:stderr) do
         expect { overview }.to raise_error(Metalware::DataError)
       end
+    end
+  end
+
+  context 'with a valid overview.yaml' do
+    let :headers { ['heading1', 'heading2', 'heading3'] }
+    let :fields { ['static', '<% group.config.value %>', nil] }
+
+    before :each do
+      Metalware::Data.dump Metalware::FilePath.overview,
+                           { headers: headers, fields: fields }
+    end
+
+    it 'includes the headers in the table' do
+      headers.each { |h| expect(header).to include(h) }
     end
   end
 end
