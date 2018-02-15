@@ -47,7 +47,7 @@ module Metalware
       end
 
       def row(group)
-        [group.name]
+        [group.name] << display_fields.fields
       end
 
       def display_fields

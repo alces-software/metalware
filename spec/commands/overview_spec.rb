@@ -51,8 +51,9 @@ RSpec.describe Metalware::Commands::Overview do
   end
 
   context 'with a valid overview.yaml' do
+    let :static { 'static' }
     let :headers { ['heading1', 'heading2', 'heading3'] }
-    let :fields { ['static', '<% group.config.value %>', nil] }
+    let :fields { [static, '<% group.config.value %>', nil] }
 
     before :each do
       Metalware::Data.dump Metalware::FilePath.overview,
@@ -61,6 +62,10 @@ RSpec.describe Metalware::Commands::Overview do
 
     it 'includes the headers in the table' do
       headers.each { |h| expect(header).to include(h) }
+    end
+
+    it 'includes the static field in the table' do
+      expect(body).to include(static)
     end
   end
 end
