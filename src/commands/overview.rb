@@ -35,12 +35,16 @@ module Metalware
         puts Terminal::Table.new(headings: headings, rows: rows)
       end
 
-      def headings
-        []
+      def rows
+        alces.groups.map { |group| row(group) }
       end
 
-      def rows
-        []
+      def headings
+        ['Group']
+      end
+
+      def row(group)
+        [group.name]
       end
     end
   end
