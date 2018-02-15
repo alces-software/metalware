@@ -27,8 +27,7 @@ RSpec.describe Metalware::Commands::Console do
     end
 
     AlcesUtils.mock self, :each do
-      mock_node(node_name)
-      config(alces.node, node_config)
+      config(mock_node(node_name), node_config)
     end
 
     describe 'when run for node' do

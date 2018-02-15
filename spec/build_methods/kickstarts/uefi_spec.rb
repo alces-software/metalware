@@ -34,16 +34,19 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
     FileSystem.root_setup(&:with_minimal_repo)
   end
 
+  let :node_name { 'nodeA01' }
+  let :node { alces.nodes.find_by_name node_name }
+
   AlcesUtils.mock self, :each do
-    mock_node('nodeA01')
-    allow(alces.node).to receive(:hexadecimal_ip).and_return('00000000')
-    config(alces.node, build_method: :'uefi-kickstart')
+    n = mock_node node_name
+    allow(n).to receive(:hexadecimal_ip).and_return('00000000')
+    config(n, build_method: :'uefi-kickstart')
   end
 
   it 'renders the pxelinux template with correct save_path' do
     save_path = File.join(Metalware::FilePath.uefi_save, 'grub.cfg-00000000')
     FileUtils.mkdir(File.dirname(save_path))
-    alces.node.build_method.start_hook
+    node.build_method.start_hook
     expect(File.exist?(save_path)).to eq(true)
   end
 end
