@@ -7,9 +7,9 @@ GIT
 
 GIT
   remote: https://github.com/alces-software/commander
-  revision: c99203ec5a747c91309b499a7eeb9df4ad36ac72
+  revision: 71bcf5dd108e7d608da1915dce108893297c1e68
   specs:
-    commander (4.5.3)
+    commander (4.4.3.pre.alces0)
       highline (~> 1.7.2)
 
 GIT
@@ -305,4 +305,4 @@ RUBY VERSION
    ruby 2.4.1p111
 
 BUNDLED WITH
-   1.16.0
+   1.16.1
