@@ -10,8 +10,7 @@ RSpec.describe Metalware::Commands::Overview do
 
   AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
-      mock_group(group)
-      config(alces.group, { key: config_value })
+      config(mock_group(group), { key: config_value })
     end
   end
 
