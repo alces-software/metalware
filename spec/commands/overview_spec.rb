@@ -54,7 +54,7 @@ RSpec.describe Metalware::Commands::Overview do
   context 'with a valid overview.yaml' do
     let :static { 'static' }
     let :headers { ['heading1', 'heading2', 'heading3'] }
-    let :fields { [static, '<% group.config.value %>', ''] }
+    let :fields { [static, '<%= group.config.key %>', ''] }
 
     before :each do
       Metalware::Data.dump Metalware::FilePath.overview,
