@@ -41,6 +41,10 @@ module Metalware
         stdout.chomp.split(',')
       end
 
+      def hostlist_nodes_in_gender(gender)
+        nodeattr("-q #{gender}").chomp
+      end
+
       def genders_for_node(node)
         # If no node passed then it has no groups; without this we would run
         # `nodeattr -l` without args, which would give all groups.
