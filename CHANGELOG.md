@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2018.1.0-rc3] - 2018-02-15
+
+- Suppressed output suggesting there might be a problem with Metalware when
+  displaying known user input errors
+  (https://github.com/alces-software/metalware/pull/314).
+
 ## [2018.1.0-rc3] - 2018-02-14
 
 - Improved commands which take `-g`/`--group` option so they can operate on any
@@ -9,7 +15,7 @@ All notable changes to this project will be documented in this file.
   option to `--gender` to reflect this change
   (https://github.com/alces-software/metalware/pull/306).
 - Fixed `view-answers` commands to work with latest `configure.yaml` format
-  (https://github.com/alces-software/metalware/pull/311)
+  (https://github.com/alces-software/metalware/pull/311).
 
 ## [2018.1.0-rc1] - 2018-01-29
 
