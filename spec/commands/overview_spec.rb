@@ -6,10 +6,12 @@ require 'alces_utils'
 RSpec.describe Metalware::Commands::Overview do
   include AlcesUtils
 
+  let :config_value { 'config_value' }
+
   AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
       mock_group(group)
-      config(alces.group, { key: 'config_value' })
+      config(alces.group, { key: config_value })
     end
   end
 
@@ -53,7 +55,7 @@ RSpec.describe Metalware::Commands::Overview do
   context 'with a valid overview.yaml' do
     let :static { 'static' }
     let :headers { ['heading1', 'heading2', 'heading3'] }
-    let :fields { [static, '<% group.config.value %>', nil] }
+    let :fields { [static, '<% group.config.value %>', ''] }
 
     before :each do
       Metalware::Data.dump Metalware::FilePath.overview,
@@ -66,6 +68,10 @@ RSpec.describe Metalware::Commands::Overview do
 
     it 'includes the static field in the table' do
       expect(body).to include(static)
+    end
+
+    it 'renders the fields' do
+      expect(body).to include(config_value)
     end
   end
 end

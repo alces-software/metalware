@@ -43,11 +43,13 @@ module Metalware
       end
 
       def headings
-        ['Group'] << display_fields.headers
+        ['Group'].concat display_fields.headers
       end
 
       def row(group)
-        [group.name] << display_fields.fields
+        (['<%= group.name %>'].concat display_fields.fields).map do |field|
+          group.render_erb_template(field)
+        end
       end
 
       def display_fields
