@@ -22,15 +22,25 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'terminal-table'
+
 module Metalware
   module Commands
     class Overview < CommandHelpers::BaseCommand
       private
 
-      def setup
-      end
+      def setup; end
 
       def run
+        puts Terminal::Table.new(headings: headings, rows: rows)
+      end
+
+      def headings
+        []
+      end
+
+      def rows
+        []
       end
     end
   end
