@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Console do
@@ -21,8 +23,8 @@ RSpec.describe Metalware::Commands::Console do
             defined: true,
             bmcuser: 'bmcuser',
             bmcpassword: 'bmcpassword',
-          }
-        }
+          },
+        },
       }
     end
 
@@ -46,4 +48,3 @@ RSpec.describe Metalware::Commands::Console do
     end
   end
 end
-

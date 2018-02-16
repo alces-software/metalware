@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 require 'commands'
 require 'alces_utils'
@@ -10,7 +10,7 @@ RSpec.describe Metalware::Commands::Overview do
 
   AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
-      config(mock_group(group), { key: config_value })
+      config(mock_group(group), key: config_value)
     end
   end
 
@@ -30,7 +30,7 @@ RSpec.describe Metalware::Commands::Overview do
   end
 
   it 'includes the group names' do
-    expect(header).to include("Group")
+    expect(header).to include('Group')
     alces.groups.each do |group|
       expect(body).to include(group.name)
     end
@@ -38,10 +38,9 @@ RSpec.describe Metalware::Commands::Overview do
 
   context 'with a mismatch between no. headers/bodies in overview.yaml' do
     before :each do
-      Metalware::Data.dump(Metalware::FilePath.overview, {
-        headers: ['I', 'have', '4', 'headers'],
-        fields: ['I', 'have', '5', 'body', 'parts'],
-      })
+      Metalware::Data.dump(Metalware::FilePath.overview,
+                           headers: ['I', 'have', '4', 'headers'],
+                           fields: ['I', 'have', '5', 'body', 'parts'])
     end
 
     it 'errors' do
@@ -58,7 +57,7 @@ RSpec.describe Metalware::Commands::Overview do
 
     before :each do
       Metalware::Data.dump Metalware::FilePath.overview,
-                           { headers: headers, fields: fields }
+                           headers: headers, fields: fields
     end
 
     it 'includes the headers in the table' do
@@ -74,4 +73,3 @@ RSpec.describe Metalware::Commands::Overview do
     end
   end
 end
-

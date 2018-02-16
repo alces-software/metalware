@@ -19,7 +19,7 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     include_examples Metalware::Namespaces::HashMergerNamespace,
-                     "alces.nodes.first"
+                     'alces.nodes.first'
   end
 
   context 'without AlcesUtils' do

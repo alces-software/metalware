@@ -17,7 +17,7 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     include_examples Metalware::Namespaces::HashMergerNamespace,
-                     "alces.groups.first"
+                     'alces.groups.first'
   end
 
   context 'with a mocked genders file' do
@@ -42,4 +42,3 @@ RSpec.describe Metalware::Namespaces::Node do
     end
   end
 end
-

@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Power do
@@ -22,8 +24,8 @@ RSpec.describe Metalware::Commands::Power do
             defined: true,
             bmcuser: 'bmcuser',
             bmcpassword: 'bmcpassword',
-          }
-        }
+          },
+        },
       }
     end
 
@@ -57,7 +59,6 @@ RSpec.describe Metalware::Commands::Power do
           expect(Metalware::SystemCommand).to receive(:run).with(
             "ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword chassis power on"
           ).ordered
-
         end
 
         run_power('nodes', 'on', gender: true, sleep: 0.5)

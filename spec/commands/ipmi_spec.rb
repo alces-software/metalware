@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Ipmi do
@@ -25,8 +27,8 @@ RSpec.describe Metalware::Commands::Ipmi do
             defined: true,
             bmcuser: 'bmcuser',
             bmcpassword: 'bmcpassword',
-          }
-        }
+          },
+        },
       }
     end
 
