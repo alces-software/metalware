@@ -122,6 +122,9 @@ module Metalware
 
       if validate_directory
         Dir.exist?(path)
+      # The orphan group's answer file is always optional
+      elsif (path == FilePath.group_answers('orphan')) && !File.file?(path)
+        true
       elsif File.file?(path)
         block.nil? ? true : !!(yield path)
       else
