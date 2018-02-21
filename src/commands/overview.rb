@@ -29,8 +29,6 @@ module Metalware
     class Overview < CommandHelpers::BaseCommand
       private
 
-      OVERVIEW_ERROR = 'Can not construct table from overview.yaml'
-
       attr_reader :display_group
 
       def setup
