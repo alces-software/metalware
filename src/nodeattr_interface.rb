@@ -41,6 +41,8 @@ module Metalware
         stdout.chomp.split(',')
       end
 
+
+      # The hostlist notation is: nodeA[01-10],nodeB
       def hostlist_nodes_in_gender(gender)
         nodeattr("-q #{gender}").chomp
       end
