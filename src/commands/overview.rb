@@ -31,10 +31,17 @@ module Metalware
 
       OVERVIEW_ERROR = 'Can not construct table from overview.yaml'
 
-      def setup; end
+      attr_reader :display_group
+
+      def setup
+        raw = Data.load FilePath.overview
+        @display_group = OpenStruct.new(
+          headers: raw[:group].map { |h| h[:header] || '' },
+          values: raw[:group].map { |h| h[:value] || '' }
+        )
+      end
 
       def run
-        display_fields
         puts Terminal::Table.new(headings: headings, rows: rows)
       end
 
@@ -43,22 +50,14 @@ module Metalware
       end
 
       def headings
-        ['Group'].concat display_fields.headers
+        ['Group'].concat display_group.headers
       end
 
       def row(group)
-        (['<%= group.name %>'].concat display_fields.fields).map do |field|
-          group.render_erb_template(field)
+        name = '<%= group.name %>'
+        ([name].concat display_group.values).map do |value|
+          group.render_erb_template(value)
         end
-      end
-
-      def display_fields
-        data = OpenStruct.new(Data.load(FilePath.overview))
-        data.headers ||= []
-        data.fields ||= []
-        correct_length = (data.headers.length == data.fields.length)
-        raise DataError, OVERVIEW_ERROR unless correct_length
-        data
       end
     end
   end
