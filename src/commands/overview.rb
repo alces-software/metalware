@@ -34,7 +34,7 @@ module Metalware
       attr_reader :display_group
 
       def setup
-        raw = Data.load FilePath.overview
+        raw = { group: [] }.merge(Data.load FilePath.overview)
         @display_group = OpenStruct.new(
           headers: raw[:group].map { |h| h[:header] || '' },
           values: raw[:group].map { |h| h[:value] || '' }
@@ -62,3 +62,4 @@ module Metalware
     end
   end
 end
+
