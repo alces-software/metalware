@@ -27,35 +27,49 @@ require 'terminal-table'
 module Metalware
   module Commands
     class Overview < CommandHelpers::BaseCommand
+      class Group
+        attr_reader :display
+        attr_reader :alces
+
+        def initialize(alces)
+          @alces = alces
+          raw = { group: [] }.merge(Data.load FilePath.overview)
+          @display = OpenStruct.new(
+            headers: raw[:group].map { |h| h[:header] || '' },
+            values: raw[:group].map { |h| h[:value] || '' }
+          )
+        end
+
+        def table
+          Terminal::Table.new(headings: headings, rows: rows)
+        end
+
+        private
+
+        def headings
+          ['Group'].concat display.headers
+        end
+
+        def rows
+          alces.groups.map { |group| row(group) }
+        end
+
+        def row(group)
+          name = '<%= group.name %>'
+          ([name].concat display.values).map do |value|
+            group.render_erb_template(value)
+          end
+        end
+      end
+
       private
 
-      attr_reader :display_group
+      attr_reader :element
 
-      def setup
-        raw = { group: [] }.merge(Data.load FilePath.overview)
-        @display_group = OpenStruct.new(
-          headers: raw[:group].map { |h| h[:header] || '' },
-          values: raw[:group].map { |h| h[:value] || '' }
-        )
-      end
+      def setup; end
 
       def run
-        puts Terminal::Table.new(headings: headings, rows: rows)
-      end
-
-      def rows
-        alces.groups.map { |group| row(group) }
-      end
-
-      def headings
-        ['Group'].concat display_group.headers
-      end
-
-      def row(group)
-        name = '<%= group.name %>'
-        ([name].concat display_group.values).map do |value|
-          group.render_erb_template(value)
-        end
+        puts Group.new(alces).table
       end
     end
   end

@@ -3,7 +3,7 @@
 require 'commands'
 require 'alces_utils'
 
-RSpec.describe Metalware::Commands::Overview do
+RSpec.describe Metalware::Commands::Overview::Group do
   include AlcesUtils
 
   let :config_value { 'config_value' }
@@ -14,24 +14,21 @@ RSpec.describe Metalware::Commands::Overview do
     end
   end
 
-  def overview
-    std = AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(Metalware::Commands::Overview)
-    end
-    std[:stdout].read
+  def table
+    Metalware::Commands::Overview::Group.new(alces).table.render
   end
 
   def header
-    overview.lines[1]
+    table.lines[1]
   end
 
   def body
-    overview.lines[3..-2].join("\n")
+    table.lines[3..-2].join("\n")
   end
 
   context 'without a configure.yaml' do
     it 'does not error' do
-      expect { overview }.not_to raise_error
+      expect { table }.not_to raise_error
     end
   end
 
