@@ -82,11 +82,11 @@ module Metalware
       path_arr = file.split(File::SEPARATOR)
       event = path_arr[-1]
       node_str = path_arr[-2]
-      puts "#{node_str}: #{event}"
       content = File.read(file).chomp
-      puts content unless content.empty?
-      puts
       FileUtils.rm file
+      print "#{node_str}: #{event}"
+      print " - #{content}" unless content.empty?
+      puts
     end
   end
 end
