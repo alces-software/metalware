@@ -27,13 +27,21 @@ require 'terminal-table'
 module Metalware
   module Commands
     class Overview < CommandHelpers::BaseCommand
+      class Domain
+        attr_reader :alces
+
+        def initialize(alces, overview_data)
+          @alces = alces
+        end
+      end
+
       class Group
         attr_reader :display
         attr_reader :alces
 
-        def initialize(alces)
+        def initialize(alces, overview_data)
           @alces = alces
-          raw = { group: [] }.merge(Data.load FilePath.overview)
+          raw = { group: [] }.merge(overview_data)
           @display = OpenStruct.new(
             headers: raw[:group].map { |h| h[:header] || '' },
             values: raw[:group].map { |h| h[:value] || '' }
@@ -64,12 +72,14 @@ module Metalware
 
       private
 
-      attr_reader :element
+      attr_reader :overview_data
 
-      def setup; end
+      def setup
+        @overview_data = Data.load FilePath.overview
+      end
 
       def run
-        puts Group.new(alces).table
+        puts Group.new(alces, overview_data).table
       end
     end
   end

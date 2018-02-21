@@ -7,6 +7,7 @@ RSpec.describe Metalware::Commands::Overview::Group do
   include AlcesUtils
 
   let :config_value { 'config_value' }
+  let :overview_data { Metalware::Data.load Metalware::FilePath.overview }
 
   AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
@@ -14,8 +15,8 @@ RSpec.describe Metalware::Commands::Overview::Group do
     end
   end
 
-  def table
-    Metalware::Commands::Overview::Group.new(alces).table.render
+  let :table do
+    Metalware::Commands::Overview::Group.new(alces, overview_data).table.render
   end
 
   def header
