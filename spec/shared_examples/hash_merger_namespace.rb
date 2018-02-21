@@ -5,9 +5,9 @@ require 'namespaces/alces'
 require 'alces_utils'
 
 RSpec.shared_examples \
-  Metalware::Namespaces::HashMergerNamespace do |alces_method|
+  Metalware::Namespaces::HashMergerNamespace do |test_obj_str|
 
-  let :test_obj { alces.send(alces_method) }
+  let :test_obj { eval(test_obj_str) }
 
   let :test_config do
     {

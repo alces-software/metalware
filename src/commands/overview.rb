@@ -22,31 +22,44 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'build_methods/kickstarts/uefi'
-require 'filesystem'
-require 'file_path'
-require 'alces_utils'
+require 'terminal-table'
 
-RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
-  include AlcesUtils
+module Metalware
+  module Commands
+    class Overview < CommandHelpers::BaseCommand
+      private
 
-  before :each do
-    FileSystem.root_setup(&:with_minimal_repo)
-  end
+      OVERVIEW_ERROR = 'Can not construct table from overview.yaml'
 
-  let :node_name { 'nodeA01' }
-  let :node { alces.nodes.find_by_name node_name }
+      def setup; end
 
-  AlcesUtils.mock self, :each do
-    n = mock_node node_name
-    allow(n).to receive(:hexadecimal_ip).and_return('00000000')
-    config(n, build_method: :'uefi-kickstart')
-  end
+      def run
+        display_fields
+        puts Terminal::Table.new(headings: headings, rows: rows)
+      end
 
-  it 'renders the pxelinux template with correct save_path' do
-    save_path = File.join(Metalware::FilePath.uefi_save, 'grub.cfg-00000000')
-    FileUtils.mkdir(File.dirname(save_path))
-    node.build_method.start_hook
-    expect(File.exist?(save_path)).to eq(true)
+      def rows
+        alces.groups.map { |group| row(group) }
+      end
+
+      def headings
+        ['Group'].concat display_fields.headers
+      end
+
+      def row(group)
+        (['<%= group.name %>'].concat display_fields.fields).map do |field|
+          group.render_erb_template(field)
+        end
+      end
+
+      def display_fields
+        data = OpenStruct.new(Data.load(FilePath.overview))
+        data.headers ||= []
+        data.fields ||= []
+        correct_length = (data.headers.length == data.fields.length)
+        raise DataError, OVERVIEW_ERROR unless correct_length
+        data
+      end
+    end
   end
 end

@@ -14,12 +14,12 @@ RSpec.describe Metalware::Namespaces::Node do
     include AlcesUtils
 
     AlcesUtils.mock self, :each do
-      mock_node('test_node')
-      hexadecimal_ip(alces.node)
+      hexadecimal_ip(mock_node('test_node'))
       mock_group(AlcesUtils.default_group)
     end
 
-    include_examples Metalware::Namespaces::HashMergerNamespace, :node
+    include_examples Metalware::Namespaces::HashMergerNamespace,
+                     'alces.nodes.first'
   end
 
   context 'without AlcesUtils' do
