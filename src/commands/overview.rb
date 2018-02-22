@@ -27,45 +27,36 @@ require 'terminal-table'
 module Metalware
   module Commands
     class Overview < CommandHelpers::BaseCommand
-      class Domain
-        attr_reader :alces
+      class Table
+        attr_reader :fields
+        attr_reader :namespaces
 
-        def initialize(alces, overview_data)
-          @alces = alces
-        end
-      end
-
-      class Group
-        attr_reader :display
-        attr_reader :alces
-
-        def initialize(alces, overview_data)
-          @alces = alces
-          raw = { group: [] }.merge(overview_data)
-          @display = OpenStruct.new(
-            headers: raw[:group].map { |h| h[:header] || '' },
-            values: raw[:group].map { |h| h[:value] || '' }
-          )
+        def initialize(namespaces, fields)
+          @fields = fields
+          @namespaces = namespaces
         end
 
-        def table
-          Terminal::Table.new(headings: headings, rows: rows)
+        def render
+          Terminal::Table.new(headings: headers, rows: rows).render
         end
 
         private
 
-        def headings
-          ['Group'].concat display.headers
+        def headers
+          fields.map { |f| f[:header] }
+        end
+
+        def unrendered_values
+          fields.map { |f| f[:value] || '' }
         end
 
         def rows
-          alces.groups.map { |group| row(group) }
+          namespaces.map { |namespace| row(namespace) }
         end
 
-        def row(group)
-          name = '<%= group.name %>'
-          ([name].concat display.values).map do |value|
-            group.render_erb_template(value)
+        def row(namespace)
+          unrendered_values.map do |value|
+            namespace.render_erb_template(value)
           end
         end
       end
