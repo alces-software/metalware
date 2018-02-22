@@ -75,7 +75,8 @@ module Metalware
       end
 
       def print_domain_table
-        puts Table.new([alces.domain], []).render
+        fields = overview_data[:domain] || []
+        puts Table.new([alces.domain], fields).render
       end
 
       def print_groups_table

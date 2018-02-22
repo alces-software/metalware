@@ -58,7 +58,12 @@ RSpec.describe Metalware::Commands::Overview do
   end
 
   context 'with a overview.yaml' do
-    let :overview_hash { { group: fields } }
+    let :overview_hash do
+      {
+        domain: [{ header: 'h1', value: 'v1' }, { header: 'h2', value: 'v2' }],
+        group: fields,
+      }
+    end
 
     before :each do
       Metalware::Data.dump Metalware::FilePath.overview, overview_hash
@@ -67,6 +72,11 @@ RSpec.describe Metalware::Commands::Overview do
     it 'includes the group name and additional fields' do
       combined_fields = [name_hash].concat fields
       expect_table_with alces.groups, combined_fields
+      run_command
+    end
+
+    it 'includes the additional domain table fields' do
+      expect_table_with [alces.domain], overview_hash[:domain]
       run_command
     end
   end
