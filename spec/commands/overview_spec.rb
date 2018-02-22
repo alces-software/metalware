@@ -3,17 +3,32 @@
 require 'commands'
 require 'alces_utils'
 
-RSpec.describe Metalware::Commands::Overview::Group do
+RSpec.shared_context 'overview setup' do
   include AlcesUtils
 
   let :config_value { 'config_value' }
   let :overview_data { Metalware::Data.load Metalware::FilePath.overview }
+  let :overview_yaml do
+    {
+      group: [
+        { header: 'heading1', value: static },
+        { header: 'heading2', value: '<%= group.config.key %>' },
+        { header: 'heading3', value: '' },
+        { header: 'missing-value' },
+        { value: 'missing-header' }
+      ]
+    }
+  end
 
   AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
       config(mock_group(group), key: config_value)
     end
   end
+end
+
+RSpec.describe Metalware::Commands::Overview::Group do
+  include_context 'overview setup'
 
   let :table do
     Metalware::Commands::Overview::Group.new(alces, overview_data).table.render
@@ -34,17 +49,6 @@ RSpec.describe Metalware::Commands::Overview::Group do
   end
 
   context 'with a configure.yaml' do
-    let :overview_yaml do
-      {
-        group: [
-          { header: 'heading1', value: static },
-          { header: 'heading2', value: '<%= group.config.key %>' },
-          { header: 'heading3', value: '' },
-          { header: 'missing-value' },
-          { value: 'missing-header' }
-        ]
-      }
-    end
     let :static { 'static' }
     let :headers { overview_yaml[:group].map { |h| h[:header] } }
 
@@ -73,5 +77,9 @@ RSpec.describe Metalware::Commands::Overview::Group do
       expect(body).to include(config_value)
     end
   end
+end
+
+RSpec.describe Metalware::Commands::Overview::Group do
+  include_context 'overview setup'
 end
 
