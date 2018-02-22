@@ -74,7 +74,7 @@ module Metalware
       end
 
       def print_groups_table
-        fields_from_yaml = []
+        fields_from_yaml = overview_data[:group] || []
         name_field = { header: 'Group Name', value: '<%= group.name %>' }
         fields = [name_field].concat fields_from_yaml
         puts Table.new(alces.groups, fields).render

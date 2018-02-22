@@ -6,6 +6,16 @@ require 'alces_utils'
 RSpec.shared_context 'mock overview namespaces' do
   include AlcesUtils
   let :config_value { 'config_value' }
+  let :static { 'static' }
+  let :fields do
+    [
+      { header: 'heading1', value: static },
+      { header: 'heading2', value: '<%= scope.config.key %>' },
+      { header: 'heading3', value: '' },
+      { header: 'missing-value' },
+      { value: 'missing-header' }
+    ]
+  end
 
   AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
@@ -17,17 +27,36 @@ end
 RSpec.describe Metalware::Commands::Overview do
   include_context 'mock overview namespaces'
 
+  let :name_hash { { header: 'Group Name', value: '<%= group.name %>' } }
+
   def run_command
     AlcesUtils.redirect_std(:stdout) do
       Metalware::Utils.run_command(Metalware::Commands::Overview)
     end
   end
 
+  def expect_table_with(*inputs)
+    expect(Metalware::Commands::Overview::Table).to \
+      receive(:new).with(*inputs).and_call_original
+  end
+
   context 'without overview.yaml' do
     it 'includes the name in the group table' do
-      name_hash = { header: 'Group Name', value: '<%= group.name %>' }
-      expect(Metalware::Commands::Overview::Table).to \
-        receive(:new).with(alces.groups, [name_hash]).and_call_original
+      expect_table_with alces.groups, [name_hash]
+      run_command
+    end
+  end
+
+  context 'with a overview.yaml' do
+    let :overview_hash { { group: fields } }
+
+    before :each do
+      Metalware::Data.dump Metalware::FilePath.overview, overview_hash
+    end
+
+    it 'includes the group name and additional fields' do
+      combined_fields = [name_hash].concat fields
+      expect_table_with alces.groups, combined_fields
       run_command
     end
   end
@@ -36,15 +65,6 @@ end
 RSpec.describe Metalware::Commands::Overview::Table do
   include_context 'mock overview namespaces'
 
-  let :fields do
-    [
-      { header: 'heading1', value: static },
-      { header: 'heading2', value: '<%= scope.config.key %>' },
-      { header: 'heading3', value: '' },
-      { header: 'missing-value' },
-      { value: 'missing-header' }
-    ]
-  end
   let :namespaces { alces.groups }
 
   let :table do
@@ -59,7 +79,6 @@ RSpec.describe Metalware::Commands::Overview::Table do
     table.lines[3..-2].join("\n")
   end
 
-  let :static { 'static' }
   let :headers { fields.map { |h| h[:header] } }
 
   it 'includes the headers in the table' do
