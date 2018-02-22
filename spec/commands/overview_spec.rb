@@ -3,10 +3,39 @@
 require 'commands'
 require 'alces_utils'
 
-RSpec.describe Metalware::Commands::Overview::Table do
+RSpec.shared_context 'mock overview namespaces' do
   include AlcesUtils
-
   let :config_value { 'config_value' }
+
+  AlcesUtils.mock self, :each do
+    ['group1', 'group2', 'group3'].map do |group|
+      config(mock_group(group), key: config_value)
+    end
+  end
+end
+
+RSpec.describe Metalware::Commands::Overview do
+  include_context 'mock overview namespaces'
+
+  def run_command
+    AlcesUtils.redirect_std(:stdout) do
+      Metalware::Utils.run_command(Metalware::Commands::Overview)
+    end
+  end
+
+  context 'without overview.yaml' do
+    it 'includes the name in the group table' do
+      name_hash = { header: 'Group Name', value: '<%= group.name %>' }
+      expect(Metalware::Commands::Overview::Table).to \
+        receive(:new).with(alces.groups, [name_hash]).and_call_original
+      run_command
+    end
+  end
+end
+
+RSpec.describe Metalware::Commands::Overview::Table do
+  include_context 'mock overview namespaces'
+
   let :fields do
     [
       { header: 'heading1', value: static },
@@ -17,12 +46,6 @@ RSpec.describe Metalware::Commands::Overview::Table do
     ]
   end
   let :namespaces { alces.groups }
-
-  AlcesUtils.mock self, :each do
-    ['group1', 'group2', 'group3'].map do |group|
-      config(mock_group(group), key: config_value)
-    end
-  end
 
   let :table do
     Metalware::Commands::Overview::Table.new(namespaces, fields).render
@@ -38,15 +61,6 @@ RSpec.describe Metalware::Commands::Overview::Table do
 
   let :static { 'static' }
   let :headers { fields.map { |h| h[:header] } }
-
-  # TODO: Make a Commands::Overview spec and move this into it
-  # This no longer is applicable here
-  xit 'includes the group names' do
-    expect(header).to include('Group')
-    alces.groups.each do |group|
-      expect(body).to include(group.name)
-    end
-  end
 
   it 'includes the headers in the table' do
     headers.each do |h|
