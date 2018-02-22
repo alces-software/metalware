@@ -70,7 +70,12 @@ module Metalware
       end
 
       def run
+        print_domain_table
         print_groups_table
+      end
+
+      def print_domain_table
+        puts Table.new([alces.domain], []).render
       end
 
       def print_groups_table

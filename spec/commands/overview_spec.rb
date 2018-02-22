@@ -35,14 +35,24 @@ RSpec.describe Metalware::Commands::Overview do
     end
   end
 
+  before :each do
+    allow(Metalware::Commands::Overview::Table).to \
+      receive(:new).with(any_args).and_call_original
+  end
+
   def expect_table_with(*inputs)
     expect(Metalware::Commands::Overview::Table).to \
-      receive(:new).with(*inputs).and_call_original
+      receive(:new).once.with(*inputs).and_call_original
   end
 
   context 'without overview.yaml' do
     it 'includes the name in the group table' do
       expect_table_with alces.groups, [name_hash]
+      run_command
+    end
+
+    it 'makes an empty domain table' do
+      expect_table_with [alces.domain], []
       run_command
     end
   end
