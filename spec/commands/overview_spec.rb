@@ -60,4 +60,3 @@ RSpec.describe Metalware::Commands::Overview do
     end
   end
 end
-

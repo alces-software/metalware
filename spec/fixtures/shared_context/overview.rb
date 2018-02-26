@@ -1,4 +1,4 @@
-# frozen_string_literal
+# frozen_string_literal: true
 
 require 'alces_utils'
 
@@ -13,7 +13,7 @@ RSpec.shared_context 'overview context' do
       { header: 'heading2', value: '<%= scope.config.key %>' },
       { header: 'heading3', value: '' },
       { header: 'missing-value' },
-      { value: 'missing-header' }
+      { value: 'missing-header' },
     ]
   end
 
@@ -23,4 +23,3 @@ RSpec.shared_context 'overview context' do
     end
   end
 end
-

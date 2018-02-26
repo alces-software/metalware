@@ -36,4 +36,3 @@ RSpec.describe Metalware::Overview::Table do
     expect(body).to include(config_value)
   end
 end
-
