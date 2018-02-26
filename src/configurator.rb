@@ -144,10 +144,14 @@ module Metalware
     end
 
     def ask_question_based_on_parent_answer(node_q)
-      # Ask the question if it is a question but its parent is not
+      # TODO: Use the filter methods on QuestionTree to remove the following
+      # logic. The old Tree::TreeNode structure has non-question structural
+      # nodes within it that needed to be manually filtered
+      # However the new QuestionTree object has filtered enumerators that
+      # remove the need for checking if a node is a question
       if node_q.question? && !node_q.parent.question?
         true
-      # If the parent's answer is truthy the child is asked
+      # Conditionally ask the question if the parent answer is truthy
       elsif node_q.parent.content.answer
         true
       # Otherwise don't ask the question
