@@ -22,8 +22,8 @@ class Configure::Questions < ApplicationModel
 
     private
 
-    def configure_data
-      loader.configure_data
+    def question_tree
+      loader.question_tree
     end
 
     def loader
