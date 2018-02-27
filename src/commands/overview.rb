@@ -23,42 +23,37 @@
 #==============================================================================
 
 require 'terminal-table'
+require 'overview/table'
 
 module Metalware
   module Commands
     class Overview < CommandHelpers::BaseCommand
       private
 
-      OVERVIEW_ERROR = 'Can not construct table from overview.yaml'
+      attr_reader :overview_data
 
-      def setup; end
+      def setup
+        unless File.exist? FilePath.overview
+          MetalLog.warn 'overview.yaml is missing from the repo'
+        end
+        @overview_data = Data.load FilePath.overview
+      end
 
       def run
-        display_fields
-        puts Terminal::Table.new(headings: headings, rows: rows)
+        print_domain_table
+        print_groups_table
       end
 
-      def rows
-        alces.groups.map { |group| row(group) }
+      def print_domain_table
+        fields = overview_data[:domain] || []
+        puts Metalware::Overview::Table.new([alces.domain], fields).render
       end
 
-      def headings
-        ['Group'].concat display_fields.headers
-      end
-
-      def row(group)
-        (['<%= group.name %>'].concat display_fields.fields).map do |field|
-          group.render_erb_template(field)
-        end
-      end
-
-      def display_fields
-        data = OpenStruct.new(Data.load(FilePath.overview))
-        data.headers ||= []
-        data.fields ||= []
-        correct_length = (data.headers.length == data.fields.length)
-        raise DataError, OVERVIEW_ERROR unless correct_length
-        data
+      def print_groups_table
+        fields_from_yaml = overview_data[:group] || []
+        name_field = { header: 'Group Name', value: '<%= group.name %>' }
+        fields = [name_field].concat fields_from_yaml
+        puts Metalware::Overview::Table.new(alces.groups, fields).render
       end
     end
   end

@@ -1,75 +1,62 @@
 # frozen_string_literal: true
 
 require 'commands'
-require 'alces_utils'
+require 'fixtures/shared_context/overview'
 
 RSpec.describe Metalware::Commands::Overview do
-  include AlcesUtils
+  include_context 'overview context'
 
-  let :config_value { 'config_value' }
+  let :name_hash { { header: 'Group Name', value: '<%= group.name %>' } }
 
-  AlcesUtils.mock self, :each do
-    ['group1', 'group2', 'group3'].map do |group|
-      config(mock_group(group), key: config_value)
-    end
-  end
-
-  def overview
-    std = AlcesUtils.redirect_std(:stdout) do
+  def run_command
+    AlcesUtils.redirect_std(:stdout) do
       Metalware::Utils.run_command(Metalware::Commands::Overview)
     end
-    std[:stdout].read
   end
 
-  def header
-    overview.lines[1]
+  before :each do
+    allow(Metalware::Overview::Table).to \
+      receive(:new).with(any_args).and_call_original
   end
 
-  def body
-    overview.lines[3..-2].join("\n")
+  def expect_table_with(*inputs)
+    expect(Metalware::Overview::Table).to \
+      receive(:new).once.with(*inputs).and_call_original
   end
 
-  it 'includes the group names' do
-    expect(header).to include('Group')
-    alces.groups.each do |group|
-      expect(body).to include(group.name)
+  context 'without overview.yaml' do
+    it 'includes the name in the group table' do
+      expect_table_with alces.groups, [name_hash]
+      run_command
+    end
+
+    it 'makes an empty domain table' do
+      expect_table_with [alces.domain], []
+      run_command
     end
   end
 
-  context 'with a mismatch between no. headers/bodies in overview.yaml' do
-    before :each do
-      Metalware::Data.dump(Metalware::FilePath.overview,
-                           headers: ['I', 'have', '4', 'headers'],
-                           fields: ['I', 'have', '5', 'body', 'parts'])
+  context 'with a overview.yaml' do
+    let :overview_hash do
+      {
+        domain: [{ header: 'h1', value: 'v1' }, { header: 'h2', value: 'v2' }],
+        group: fields,
+      }
     end
-
-    it 'errors' do
-      AlcesUtils.redirect_std(:stderr) do
-        expect { overview }.to raise_error(Metalware::DataError)
-      end
-    end
-  end
-
-  context 'with a valid overview.yaml' do
-    let :static { 'static' }
-    let :headers { ['heading1', 'heading2', 'heading3'] }
-    let :fields { [static, '<%= group.config.key %>', ''] }
 
     before :each do
-      Metalware::Data.dump Metalware::FilePath.overview,
-                           headers: headers, fields: fields
+      Metalware::Data.dump Metalware::FilePath.overview, overview_hash
     end
 
-    it 'includes the headers in the table' do
-      headers.each { |h| expect(header).to include(h) }
+    it 'includes the group name and additional fields' do
+      combined_fields = [name_hash].concat fields
+      expect_table_with alces.groups, combined_fields
+      run_command
     end
 
-    it 'includes the static field in the table' do
-      expect(body).to include(static)
-    end
-
-    it 'renders the fields' do
-      expect(body).to include(config_value)
+    it 'includes the additional domain table fields' do
+      expect_table_with [alces.domain], overview_hash[:domain]
+      run_command
     end
   end
 end
