@@ -30,10 +30,10 @@ module Metalware
     class Answer
       ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
-      def initialize(answers, answer_section: nil, configure_data: nil)
+      def initialize(answers, answer_section: nil, question_tree: nil)
         @answers = answers
         @section = answer_section
-        @configure_data = configure_data
+        @question_tree = question_tree
       end
 
       def validate

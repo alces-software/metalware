@@ -35,17 +35,15 @@ module Metalware
         @path = FilePath
       end
 
-      # TODO: Remove references to configure_data
       def question_tree
         # XXX Extract object for loading configure data?
         @questions ||=
           Validation::Configure.new(combined_configure_data).tree
       end
-      alias configure_data question_tree
 
       # Returns a tree
       def configure_section(section)
-        configure_data.children.find { |c| c.name == section }
+        question_tree.children.find { |c| c.name == section }
       end
 
       # Returns a hash of identifiers and questions
@@ -69,7 +67,7 @@ module Metalware
         yaml = Data.load(absolute_path)
         validator = Validation::Answer.new(yaml,
                                            answer_section: section,
-                                           configure_data: configure_data)
+                                           question_tree: question_tree)
         validator.data
       end
 

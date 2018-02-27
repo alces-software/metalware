@@ -128,7 +128,7 @@ RSpec.describe Metalware::AnswersTableCreator do
     end
   end
 
-  describe '#primary_group_table' do
+  describe '#group_table' do
     it 'creates table with questions, and domain and primary group answers' do
       expected_table = Terminal::Table.new(
         headings: ['Question', 'Domain', "Group: #{group_name}"],
@@ -140,7 +140,7 @@ RSpec.describe Metalware::AnswersTableCreator do
       )
 
       expect(
-        subject.primary_group_table(group_name).to_s
+        subject.group_table(group_name).to_s
       ).to eq expected_table.to_s
     end
   end

@@ -14,7 +14,7 @@ module Metalware
       answers_table
     end
 
-    def primary_group_table(group_name)
+    def group_table(group_name)
       answers_table(group_name: group_name)
     end
 

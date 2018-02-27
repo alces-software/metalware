@@ -25,7 +25,7 @@
 require 'validation/loader'
 
 RSpec.describe Metalware::Validation::Loader do
-  describe '#configure_data' do
+  describe '#question_tree' do
     let :configure_sections do
       Metalware::Constants::CONFIGURE_SECTIONS
     end
@@ -62,7 +62,7 @@ RSpec.describe Metalware::Validation::Loader do
 
     let :sections_to_loaded_questions do
       configure_sections.map do |section|
-        [section, subject.configure_data[section].children]
+        [section, subject.question_tree[section].children]
       end.to_h
     end
 
