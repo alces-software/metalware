@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Console do
@@ -21,14 +23,13 @@ RSpec.describe Metalware::Commands::Console do
             defined: true,
             bmcuser: 'bmcuser',
             bmcpassword: 'bmcpassword',
-          }
-        }
+          },
+        },
       }
     end
 
     AlcesUtils.mock self, :each do
-      mock_node(node_name)
-      config(alces.node, node_config)
+      config(mock_node(node_name), node_config)
     end
 
     describe 'when run for node' do
@@ -47,4 +48,3 @@ RSpec.describe Metalware::Commands::Console do
     end
   end
 end
-

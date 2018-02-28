@@ -40,9 +40,11 @@ RSpec.describe Metalware::BuildFilesRetriever do
     ],
   }.freeze
 
+  let :test_node_name { 'testnode01' }
+  let :test_node { alces.nodes.find_by_name(test_node_name) }
+
   AlcesUtils.mock self, :each do
-    mock_node('testnode01')
-    config(alces.node, files: TEST_FILES_HASH)
+    config(mock_node(test_node_name), files: TEST_FILES_HASH)
   end
 
   subject { Metalware::BuildFilesRetriever.new }
@@ -72,7 +74,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
         FileUtils.mkdir_p File.dirname(url_path)
         FileUtils.touch(url_path)
 
-        retrieved_files = subject.retrieve_for_node(alces.node)
+        retrieved_files = subject.retrieve_for_node(test_node)
 
         expect(retrieved_files[:namespace01][0]).to eq(
           raw: 'some/file_in_repo',
@@ -105,7 +107,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           '/var/lib/metalware/cache/templates/url'
         )
 
-        subject.retrieve_for_node(alces.node)
+        subject.retrieve_for_node(test_node)
       end
     end
 
@@ -116,7 +118,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       describe 'for repo file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve_for_node(alces.node)
+          retrieved_files = subject.retrieve_for_node(test_node)
 
           repo_file_entry = retrieved_files[:namespace01][0]
           template_path = "#{Metalware::FilePath.repo}/files/some/file_in_repo"
@@ -130,7 +132,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       describe 'for absolute path file identifier' do
         it 'adds error to file entry' do
-          retrieved_files = subject.retrieve_for_node(alces.node)
+          retrieved_files = subject.retrieve_for_node(test_node)
 
           absolute_file_entry = retrieved_files[:namespace01][1]
           template_path = '/some/other/path'
@@ -149,7 +151,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
       end
 
       it 'adds error to file entry' do
-        retrieved_files = subject.retrieve_for_node(alces.node)
+        retrieved_files = subject.retrieve_for_node(test_node)
 
         url_file_entry = retrieved_files[:namespace01][2]
         url = 'http://example.com/url'
@@ -195,7 +197,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
         files: { some_section: [plugin_file_path] }
       )
 
-      plugin_namespace = Metalware::Namespaces::Plugin.new(plugin, node: alces.node)
+      plugin_namespace = Metalware::Namespaces::Plugin.new(plugin, node: test_node)
       retrieved_files = subject.retrieve_for_plugin(plugin_namespace)
 
       relative_rendered_path =

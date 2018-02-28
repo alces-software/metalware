@@ -8,7 +8,8 @@ require 'spec_utils'
 RSpec.describe Metalware::Namespaces::Node do
   include AlcesUtils
 
-  include_examples Metalware::Namespaces::HashMergerNamespace, :domain
+  include_examples Metalware::Namespaces::HashMergerNamespace,
+                   'alces.domain'
 
   before :each { SpecUtils.use_mock_determine_hostip_script(self) }
 

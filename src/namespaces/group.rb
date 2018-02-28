@@ -22,10 +22,16 @@ module Metalware
         end
       end
 
+      def hostlist_nodes
+        @short_nodes_string ||= begin
+          NodeattrInterface.hostlist_nodes_in_gender(name)
+        end
+      end
+
       private
 
       def white_list_for_hasher
-        super.concat([:index, :nodes])
+        super.concat([:index, :nodes, :hostlist_nodes])
       end
 
       def hash_merger_input

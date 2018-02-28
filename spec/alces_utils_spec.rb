@@ -123,10 +123,6 @@ RSpec.describe AlcesUtils do
         expect(alces.groups.send(group).config.to_h).to be_empty
       end
 
-      it 'sets the group as the in scope group' do
-        expect(alces.group).to eq(alces.groups.send(group))
-      end
-
       # The mocking would otherwise alter the actual file
       it 'errors if FakeFS is off' do
         FakeFS.deactivate!
@@ -134,13 +130,20 @@ RSpec.describe AlcesUtils do
           AlcesUtils.mock(self) { mock_group(group2) }
         end.to raise_error(RuntimeError)
       end
+
+      it 'returns the new mocked group' do
+        name = 'my-super-new-group'
+        AlcesUtils.mock self do
+          expect(mock_group(name).name).to eq(name)
+        end
+      end
     end
 
     describe '#mock_node' do
       let :name { 'some_random_test_node3456734' }
 
       AlcesUtils.mock self, :each do
-        mock_node(name)
+        allow(alces).to receive(:node).and_return(mock_node(name))
       end
 
       it 'creates the mock node' do
@@ -173,13 +176,9 @@ RSpec.describe AlcesUtils do
 
         AlcesUtils.mock(self, :each) { mock_node(new_node, *genders) }
 
-        it 'sets the last mock node as alces.nodes' do
-          expect(alces.node.name).to eq(new_node)
-          expect(alces.nodes.length).to eq(3)
-        end
-
         it 'uses the genders input' do
-          expect(alces.node.genders).to eq(genders)
+          node = alces.nodes.find_by_name(new_node)
+          expect(node.genders).to eq(genders)
         end
       end
     end

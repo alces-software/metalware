@@ -98,7 +98,7 @@ module Metalware
     def validate_configure
       @validate_configure ||= begin
         validate_repo
-        loader.configure_data
+        loader.question_tree
         unless valid_file?(:configure, '', true)
           msg = "Could not locate answer files: #{FilePath.answer_files}"
           raise DependencyFailure, msg
@@ -122,6 +122,9 @@ module Metalware
 
       if validate_directory
         Dir.exist?(path)
+      # The orphan group's answer file is always optional
+      elsif (path == FilePath.group_answers('orphan')) && !File.file?(path)
+        true
       elsif File.file?(path)
         block.nil? ? true : !!(yield path)
       else

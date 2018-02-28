@@ -122,15 +122,15 @@ RSpec.describe Metalware::Commands::Build do
 
   context 'when called for group' do
     AlcesUtils.mock self, :each do
-      test_group = 'some_random_test_group'
+      test_group = test_group_name
       mock_group(test_group)
       ['nodeA00', 'nodeA01', 'nodeA02', 'nodeA03'].each do |node|
-        mock_node(node, test_group)
-        hexadecimal_ip(alces.node)
+        hexadecimal_ip(mock_node(node, test_group))
       end
     end
 
-    let :testnodes { alces.group }
+    let :test_group_name { 'some_random_test_group' }
+    let :testnodes { alces.groups.find_by_name test_group_name }
     let :delay_build { build_wait_time / 10 }
 
     it 'starts all the builds' do

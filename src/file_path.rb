@@ -68,6 +68,10 @@ module Metalware
         '/var/lib/metalware/repo'
       end
 
+      def overview
+        File.join(repo, 'overview.yaml')
+      end
+
       def plugins_dir
         File.join(Constants::METALWARE_DATA_PATH, 'plugins')
       end

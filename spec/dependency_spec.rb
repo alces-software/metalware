@@ -105,6 +105,17 @@ RSpec.describe Metalware::Dependency do
       end
     end
 
+    # The orphan group does not require an answer file
+    it 'does not validate groups/orphan.yaml' do
+      filesystem.test do
+        expect do
+          enforce_dependencies(
+            configure: ['groups/orphan.yaml']
+          )
+        end.not_to raise_error
+      end
+    end
+
     context 'when answer files exist' do
       before :each do
         filesystem.with_minimal_repo

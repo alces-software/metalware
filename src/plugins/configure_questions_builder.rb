@@ -49,11 +49,11 @@ module Metalware
       end
 
       def questions_for_section(section)
-        configure_data[section].map { |q| namespace_question_hash(q) }
+        question_tree[section].map { |q| namespace_question_hash(q) }
       end
 
-      def configure_data
-        @configure_data ||= default_configure_data.merge(
+      def question_tree
+        @question_tree ||= default_configure_data.merge(
           Data.load(configure_file_path)
         )
       end

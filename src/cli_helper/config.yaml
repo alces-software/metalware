@@ -299,6 +299,11 @@ commands:
       create: *orchestrate_create
       destroy: *orchestrate_destroy
 
+  overview:
+    syntax: metal overview [options]
+    summary: Gives an overview of the configured groups
+    action: Commands::Overview
+
   plugin:
     syntax: metal plugin [SUB_COMMAND] [options]
     summary: View and manage activated plugins

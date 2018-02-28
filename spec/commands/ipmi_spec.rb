@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Ipmi do
@@ -25,17 +27,15 @@ RSpec.describe Metalware::Commands::Ipmi do
             defined: true,
             bmcuser: 'bmcuser',
             bmcpassword: 'bmcpassword',
-          }
-        }
+          },
+        },
       }
     end
 
     AlcesUtils.mock self, :each do
-      mock_group(group)
-      config(alces.group, namespace_config)
+      config(mock_group(group), namespace_config)
       node_names.each do |node|
-        mock_node(node, group)
-        config(alces.node, namespace_config)
+        config(mock_node(node, group), namespace_config)
       end
     end
 
