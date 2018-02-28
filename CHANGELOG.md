@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2018.1.0-rc3] - 2018-02-15
+## [2018.1.0-rc5] - 2018-02-28
+
+- Added `overview` command to give overview of state of whole domain and
+  configured groups (https://github.com/alces-software/metalware/issues/284).
+  Note: this requires a new `overview.yaml` file to be present in the repo.
+- Condensed build event output to single line for clarity
+  (https://github.com/alces-software/metalware/issues/287).
+- Fixed issue where `view-answers` did not work for orphan nodes
+  (https://github.com/alces-software/metalware/issues/312).
+
+## [2018.1.0-rc4] - 2018-02-15
 
 - Suppressed output suggesting there might be a problem with Metalware when
   displaying known user input errors
