@@ -14,7 +14,7 @@ RSpec.describe Metalware::Commands::Ipmi do
     end
   end
 
-  describe 'when run on bare metal' do
+  context 'when run on bare metal' do
     # XXX The setup for these tests is duplicated from those for power; should
     # DRY this up.
 
@@ -48,7 +48,7 @@ RSpec.describe Metalware::Commands::Ipmi do
         receive(:run).with(*with_args).and_call_original
     end
 
-    describe 'when run for node' do
+    context 'when run for node' do
       it 'runs given ipmi command on node' do
         expect(Metalware::SystemCommand).to receive(:run).once.with(
           'ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword sel list'
@@ -58,7 +58,7 @@ RSpec.describe Metalware::Commands::Ipmi do
       end
     end
 
-    describe 'when run for group' do
+    context 'when run for group' do
       it 'runs given ipmi command on each node' do
         node_names.each do |name|
           expect(Metalware::SystemCommand).to receive(:run).with(
