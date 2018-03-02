@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2018.1.0-rc6] - 2018-03-02
+
+- Fix issue with non-group genders not working with `ipmi`-based commands
+  (https://github.com/alces-software/metalware/issues/323).
+
 ## [2018.1.0-rc5] - 2018-02-28
 
 - Added `overview` command to give overview of state of whole domain and
