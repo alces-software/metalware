@@ -51,18 +51,14 @@ module Metalware
       end
 
       def run_baremetal(node)
-        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node.name))}"
+        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node))}"
       end
 
-      def ipmi_command(node_name)
-        create_ipmitool_command(
-          host: "#{node_name}.bmc",
-          arguments: command_argument
-        )
-      end
-
-      def create_ipmitool_command(host:, arguments:)
-        "ipmitool -H #{host} -I lanplus #{render_credentials} #{arguments}"
+      def ipmi_command(node)
+        <<~EOF.squish
+          ipmitool -H #{node.name}.bmc -I lanplus #{render_credentials}
+          #{command_argument}
+        EOF
       end
 
       def command_argument
