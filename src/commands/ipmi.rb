@@ -56,8 +56,8 @@ module Metalware
 
       def ipmi_command(node)
         <<~EOF.squish
-          ipmitool -H #{node.name}.bmc -I lanplus #{render_credentials}
-          #{command_argument}
+          ipmitool -H #{node.name}.bmc -I lanplus
+          #{render_credentials(node)} #{command_argument}
         EOF
       end
 
@@ -65,10 +65,9 @@ module Metalware
         args[1]
       end
 
-      def render_credentials
-        object = options.gender ? group : node
-        raise MetalwareError, "BMC network not defined for #{object.name}" unless object.config.networks.bmc.defined
-        bmc_config = object.config.networks.bmc
+      def render_credentials(node)
+        bmc_config = node.config&.networks&.bmc
+        raise MetalwareError, "BMC network not defined for #{node.name}" unless bmc_config&.defined
         "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end
 
