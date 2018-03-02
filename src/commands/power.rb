@@ -29,9 +29,10 @@ module Metalware
     class Power < Ipmi
       private
 
-      def ipmi_command(node_name)
+      def ipmi_command(node)
         create_ipmitool_command(
-          host: "#{node_name}.bmc",
+          node,
+          host: "#{node.name}.bmc",
           arguments: ipmi_command_arguments
         )
       end
