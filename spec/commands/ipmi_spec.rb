@@ -20,6 +20,7 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     let :node_names { ['node01', 'node02', 'node03'] }
     let :group { 'nodes' }
+    let :gender { 'my_super_awesome_gender' }
     let :namespace_config do
       {
         networks: {
@@ -34,8 +35,9 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     AlcesUtils.mock self, :each do
       config(mock_group(group), namespace_config)
-      node_names.each do |node|
-        config(mock_node(node, group), namespace_config)
+      node_names.each do |name|
+        node = mock_node(name, group, gender)
+        config(node, namespace_config)
       end
     end
 
