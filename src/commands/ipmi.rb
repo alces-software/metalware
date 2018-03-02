@@ -60,10 +60,10 @@ module Metalware
       end
 
       def create_ipmitool_command(node, host:, arguments:)
-        <<~ECMD.squish
+        <<~COMMAND.squish
           ipmitool -H #{host} -I lanplus #{render_credentials(node)}
           #{arguments}
-        ECMD
+        COMMAND
       end
 
       def command_argument
