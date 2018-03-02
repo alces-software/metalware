@@ -51,28 +51,28 @@ module Metalware
       end
 
       def run_baremetal(node)
-        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node.name))}"
+        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node))}"
       end
 
-      def ipmi_command(node_name)
-        create_ipmitool_command(
-          host: "#{node_name}.bmc",
-          arguments: command_argument
-        )
+      def ipmi_command(node)
+        opt = { host: "#{node.name}.bmc", arguments: command_argument }
+        create_ipmitool_command(node, **opt)
       end
 
-      def create_ipmitool_command(host:, arguments:)
-        "ipmitool -H #{host} -I lanplus #{render_credentials} #{arguments}"
+      def create_ipmitool_command(node, host:, arguments:)
+        <<~COMMAND.squish
+          ipmitool -H #{host} -I lanplus #{render_credentials(node)}
+          #{arguments}
+        COMMAND
       end
 
       def command_argument
         args[1]
       end
 
-      def render_credentials
-        object = options.gender ? group : node
-        raise MetalwareError, "BMC network not defined for #{object.name}" unless object.config.networks.bmc.defined
-        bmc_config = object.config.networks.bmc
+      def render_credentials(node)
+        bmc_config = node.config&.networks&.bmc
+        raise MetalwareError, "BMC network not defined for #{node.name}" unless bmc_config&.defined
         "-U #{bmc_config.bmcuser} -P #{bmc_config.bmcpassword}"
       end
 

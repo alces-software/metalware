@@ -14,12 +14,13 @@ RSpec.describe Metalware::Commands::Ipmi do
     end
   end
 
-  describe 'when run on bare metal' do
+  context 'when run on bare metal' do
     # XXX The setup for these tests is duplicated from those for power; should
     # DRY this up.
 
     let :node_names { ['node01', 'node02', 'node03'] }
     let :group { 'nodes' }
+    let :gender { 'my_super_awesome_gender' }
     let :namespace_config do
       {
         networks: {
@@ -34,9 +35,18 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     AlcesUtils.mock self, :each do
       config(mock_group(group), namespace_config)
-      node_names.each do |node|
-        config(mock_node(node, group), namespace_config)
+      node_names.each do |name|
+        node = mock_node(name, group, gender)
+        config(node, namespace_config)
       end
+    end
+
+    def expect_ipmi_cmd(name)
+      cmd = <<~EOF.squish
+        ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword sel
+        list
+      EOF
+      expect(Metalware::SystemCommand).to receive(:run).with(cmd).ordered
     end
 
     # Allow the system command to receive `nodeattr` commands
@@ -46,26 +56,28 @@ RSpec.describe Metalware::Commands::Ipmi do
         receive(:run).with(*with_args).and_call_original
     end
 
-    describe 'when run for node' do
+    context 'when run for node' do
       it 'runs given ipmi command on node' do
-        expect(Metalware::SystemCommand).to receive(:run).once.with(
-          'ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword sel list'
-        )
-
+        expect_ipmi_cmd('node01')
         run_ipmi('node01', 'sel list')
       end
     end
 
-    describe 'when run for group' do
+    shared_examples 'runs on each node' do
       it 'runs given ipmi command on each node' do
-        node_names.each do |name|
-          expect(Metalware::SystemCommand).to receive(:run).with(
-            "ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword sel list"
-          ).ordered
-        end
-
-        run_ipmi('nodes', 'sel list', gender: true)
+        node_names.each { |name| expect_ipmi_cmd(name) }
+        run_ipmi(test_gender, 'sel list', gender: true)
       end
+    end
+
+    context 'when run for group' do
+      let :test_gender { group }
+      include_examples 'runs on each node'
+    end
+
+    context 'when run for a gender' do
+      let :test_gender { gender }
+      include_examples 'runs on each node'
     end
   end
 end

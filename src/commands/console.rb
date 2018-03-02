@@ -45,6 +45,7 @@ module Metalware
         # `ipmitool`, but in Ipmi and Power we use `$node_name.bmc` - is there
         # any reason for this? Does this have any different effect?
         create_ipmitool_command(
+          node,
           host: node.name,
           arguments: "-e '&' sol #{type}"
         )
