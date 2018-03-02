@@ -55,10 +55,10 @@ module Metalware
       end
 
       def ipmi_command(node)
-        <<~EOF.squish
+        <<~ECMD.squish
           ipmitool -H #{node.name}.bmc -I lanplus
           #{render_credentials(node)} #{command_argument}
-        EOF
+        ECMD
       end
 
       def command_argument
