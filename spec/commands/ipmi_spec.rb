@@ -41,6 +41,14 @@ RSpec.describe Metalware::Commands::Ipmi do
       end
     end
 
+    def expect_ipmi_cmd(name)
+      cmd = <<~EOF.squish
+        ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword sel
+        list
+      EOF
+      expect(Metalware::SystemCommand).to receive(:run).with(cmd).ordered
+    end
+
     # Allow the system command to receive `nodeattr` commands
     before :each do
       with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
@@ -50,22 +58,14 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     context 'when run for node' do
       it 'runs given ipmi command on node' do
-        expect(Metalware::SystemCommand).to receive(:run).once.with(
-          'ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword sel list'
-        )
-
+        expect_ipmi_cmd('node01')
         run_ipmi('node01', 'sel list')
       end
     end
 
     context 'when run for group' do
       it 'runs given ipmi command on each node' do
-        node_names.each do |name|
-          expect(Metalware::SystemCommand).to receive(:run).with(
-            "ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword sel list"
-          ).ordered
-        end
-
+        node_names.each { |name| expect_ipmi_cmd(name) }
         run_ipmi('nodes', 'sel list', gender: true)
       end
     end
