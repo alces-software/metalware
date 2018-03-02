@@ -63,11 +63,16 @@ RSpec.describe Metalware::Commands::Ipmi do
       end
     end
 
-    context 'when run for group' do
+    shared_examples 'runs on each node' do
       it 'runs given ipmi command on each node' do
         node_names.each { |name| expect_ipmi_cmd(name) }
-        run_ipmi('nodes', 'sel list', gender: true)
+        run_ipmi(test_gender, 'sel list', gender: true)
       end
+    end
+
+    context 'when run for group' do
+      let :test_gender { group }
+      include_examples 'runs on each node'
     end
   end
 end
