@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2018.1.0-rc7] - 2018-03-05
+
+- Fix issue where `console` used incorrect hostname in `ipmitool` command run
+  (https://github.com/alces-software/metalware/issues/326).
+
 ## [2018.1.0-rc6] - 2018-03-02
 
 - Fix issue with non-group genders not working with `ipmi`-based commands
