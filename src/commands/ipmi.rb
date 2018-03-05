@@ -51,14 +51,11 @@ module Metalware
       end
 
       def run_baremetal(node)
-        puts "#{node.name}: #{SystemCommand.run(ipmi_command(node))}"
+        command = ipmi_command(node, arguments: ipmi_command_arguments)
+        puts "#{node.name}: #{SystemCommand.run(command)}"
       end
 
-      def ipmi_command(node)
-        create_ipmitool_command(node,  arguments: command_argument)
-      end
-
-      def create_ipmitool_command(node, arguments:)
+      def ipmi_command(node, arguments:)
         <<~COMMAND.squish
           ipmitool -H #{node.name}.bmc -I lanplus #{render_credentials(node)}
           #{arguments}
@@ -68,6 +65,11 @@ module Metalware
       def command_argument
         args[1]
       end
+
+      # By default the arguments passed to `ipmitool` are the same as the
+      # argument passed to the `metal` command, but this may be overridden by
+      # commands descended from this.
+      alias ipmi_command_arguments command_argument
 
       def render_credentials(node)
         bmc_config = node.config&.networks&.bmc

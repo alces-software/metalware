@@ -29,10 +29,6 @@ module Metalware
     class Power < Ipmi
       private
 
-      def ipmi_command(node)
-        create_ipmitool_command(node, arguments: ipmi_command_arguments)
-      end
-
       def ipmi_command_arguments
         case command_argument
         when 'on'

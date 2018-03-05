@@ -41,7 +41,7 @@ module Metalware
       end
 
       def console_command(type)
-        create_ipmitool_command(node, arguments: "-e '&' sol #{type}")
+        ipmi_command(node, arguments: "-e '&' sol #{type}")
       end
     end
   end
