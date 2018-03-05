@@ -30,11 +30,7 @@ module Metalware
       private
 
       def ipmi_command(node)
-        create_ipmitool_command(
-          node,
-          host: "#{node.name}.bmc",
-          arguments: ipmi_command_arguments
-        )
+        create_ipmitool_command(node, arguments: ipmi_command_arguments)
       end
 
       def ipmi_command_arguments

@@ -55,13 +55,12 @@ module Metalware
       end
 
       def ipmi_command(node)
-        opt = { host: "#{node.name}.bmc", arguments: command_argument }
-        create_ipmitool_command(node, **opt)
+        create_ipmitool_command(node,  arguments: command_argument)
       end
 
-      def create_ipmitool_command(node, host:, arguments:)
+      def create_ipmitool_command(node, arguments:)
         <<~COMMAND.squish
-          ipmitool -H #{host} -I lanplus #{render_credentials(node)}
+          ipmitool -H #{node.name}.bmc -I lanplus #{render_credentials(node)}
           #{arguments}
         COMMAND
       end

@@ -41,11 +41,7 @@ module Metalware
       end
 
       def console_command(type)
-        create_ipmitool_command(
-          node,
-          host: "#{node.name}.bmc",
-          arguments: "-e '&' sol #{type}"
-        )
+        create_ipmitool_command(node, arguments: "-e '&' sol #{type}")
       end
     end
   end
