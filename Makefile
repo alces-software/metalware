@@ -35,6 +35,7 @@ watch-rsync:
 		--name 'Metalware' \
 		--pattern '**/*' \
 		--exit \
+		--no-notify \
 		make rsync
 
 # Note: need to become root for Metalware; -t option allows coloured output.
