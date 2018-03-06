@@ -139,8 +139,7 @@ module Metalware
                          else
                            raw_answer
                          end
-        identifier = content.identifier.to_sym
-        memo[identifier] = content.answer unless content.answer.nil?
+        memo[content.identifier] = content.answer unless content.answer.nil?
       end
     end
 
