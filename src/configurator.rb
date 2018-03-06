@@ -263,14 +263,14 @@ module Metalware
 
       def ask(highline)
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        send(ask_method, highline) do |highline_question|
-          highline_question.readline = true if use_readline?
+        send(ask_method, highline) { |q| configure_question(q) }
+      end
 
-          if default_input
-            highline_question.default = default_input
-          elsif validate_answer_given?
-            highline_question.validate = ensure_answer_given
-          end
+      def configure_question(highline_question)
+        highline_question.readline = use_readline?
+        highline_question.default = default_input
+        if validate_answer_given?
+          highline_question.validate = ensure_answer_given
         end
       end
 
