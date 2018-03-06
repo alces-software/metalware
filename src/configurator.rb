@@ -370,6 +370,7 @@ module Metalware
           !input.empty?
         end
       end
+
       class HighLinePrettyValidateProc < Proc
         def initialize(print_message, &b)
           # NOTE: print_message is prefaced with "must match" when used by
