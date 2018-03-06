@@ -295,7 +295,7 @@ module Metalware
       private
 
       def use_readline?
-        # Dont't provide readline bindings for boolean questions, in this case
+        # Don't provide readline bindings for boolean questions, in this case
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
         Metalware::Configurator.use_readline && !type.boolean?
