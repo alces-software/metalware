@@ -100,7 +100,7 @@ module Metalware
           content = node_q.content
           next if content.section
           content.identifier = content.identifier.to_sym
-          content.ask_question = create_question(content, (idx += 1))
+          content.question = create_question(content, (idx += 1))
           enum << [node_q, content]
         end
       end
@@ -133,7 +133,7 @@ module Metalware
     def ask_questions
       questions.with_object({}) do |(node_q, content), memo|
         next unless ask_question_based_on_parent_answer(node_q)
-        raw_answer = content.ask_question.ask(highline)
+        raw_answer = content.question.ask(highline)
         content.answer = if raw_answer == content.default
                            content.old_answer.nil? ? nil : answer
                          else
