@@ -220,7 +220,6 @@ module Metalware
       Question.new(
         default: default,
         properties: properties,
-        questions_section: questions_section,
         old_answer: old_answers[properties.identifier],
         progress_indicator: progress_indicator(index)
       )
@@ -235,8 +234,6 @@ module Metalware
     end
 
     class Question
-      VALID_TYPES = [:boolean, :choice, :integer, :string].freeze
-
       attr_reader \
         :choices,
         :default,
@@ -251,8 +248,7 @@ module Metalware
         default:,
         old_answer: nil,
         progress_indicator:,
-        properties:,
-        questions_section:
+        properties:
       )
         @choices = properties.choices
         @default = default
@@ -261,12 +257,7 @@ module Metalware
         @progress_indicator = progress_indicator
         @question = properties.question
         @required = !properties.optional
-
-        @type = type_for(
-          properties[:type],
-          configure_file: Metalware::FilePath.configure_file,
-          questions_section: questions_section
-        )
+        @type = type_for(properties[:type])
       end
 
       def ask(highline)
@@ -347,22 +338,13 @@ module Metalware
         "#{question.strip} #{progress_indicator}"
       end
 
-      def type_for(value, configure_file:, questions_section:)
+      def type_for(value)
         value = value&.to_sym
         if value.nil?
           :string
-        elsif valid_type?(value)
-          value
         else
-          message = \
-            "Unknown question type '#{value}' for " \
-            "#{questions_section}.#{identifier} in #{configure_file}"
-          raise UnknownQuestionTypeError, message
+          value
         end
-      end
-
-      def valid_type?(value)
-        VALID_TYPES.include?(value)
       end
 
       def ensure_answer_given
