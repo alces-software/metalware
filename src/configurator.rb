@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'active_support/core_ext/hash'
+require 'active_support/string_inquirer'
 require 'highline'
 require 'patches/highline'
 require 'validation/loader'
@@ -278,7 +279,7 @@ module Metalware
         # which will already cause the question to be re-prompted until a valid
         # answer is given (rather than just accepting any non-empty answer, as
         # our `ensure_answer_given` does).
-        return false if type == :boolean
+        return false if type.boolean?
 
         answer_required?
       end
@@ -297,11 +298,11 @@ module Metalware
         # Dont't provide readline bindings for boolean questions, in this case
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
-        Metalware::Configurator.use_readline && type != :boolean
+        Metalware::Configurator.use_readline && !type.boolean?
       end
 
       def default_input
-        if !current_answer_value.nil? && type == :boolean
+        if !current_answer_value.nil? && type.boolean?
           # Default for a boolean question needs to be set to the input
           # HighLine's `agree` expects, i.e. 'yes' or 'no'.
           current_answer_value ? 'yes' : 'no'
@@ -339,12 +340,7 @@ module Metalware
       end
 
       def type_for(value)
-        value = value&.to_sym
-        if value.nil?
-          :string
-        else
-          value
-        end
+        ActiveSupport::StringInquirer.new(value || 'string')
       end
 
       def ensure_answer_given
