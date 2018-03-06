@@ -375,7 +375,7 @@ RSpec.describe Metalware::Configurator do
                          },
                        ])
 
-      configure_with_answers(['foo', 1, true])
+      configure_with_answers(['foo', 1, 'yes'])
 
       output.rewind
       output_lines = output.read.split("\n")
