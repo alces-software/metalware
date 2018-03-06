@@ -298,7 +298,9 @@ module Metalware
         # Don't provide readline bindings for boolean questions, in this case
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
-        Metalware::Configurator.use_readline && !type.boolean?
+        return false if type.boolean?
+
+        Metalware::Configurator.use_readline
       end
 
       def default_input
