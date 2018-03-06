@@ -340,6 +340,22 @@ RSpec.describe Metalware::Configurator do
       expect(output.read.scan(/\?/).count).to eq(2)
     end
 
+    it 're-prompts for answer to boolean questions until valid answer given' do
+      define_questions(domain: [
+                         {
+                           identifier: 'boolean_q',
+                           type: 'boolean',
+                           question: 'Boolean question',
+                         },
+                       ])
+
+      configure_with_answers(['foo', 'yes'])
+
+      # Should be `true` (from the `yes`) rather than `false`, which 'foo' was
+      # previously accepted and interpreted as.
+      expect(answers).to eq(boolean_q: true)
+    end
+
     it 'allows optional questions to have empty answers' do
       define_questions(domain: [
                          {
