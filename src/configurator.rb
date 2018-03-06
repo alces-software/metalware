@@ -266,6 +266,8 @@ module Metalware
         send(ask_method, highline) { |q| configure_question(q) }
       end
 
+      private
+
       def configure_question(highline_question)
         highline_question.readline = use_readline?
         highline_question.default = default_input
@@ -291,8 +293,6 @@ module Metalware
       def answer_required?
         !default && required
       end
-
-      private
 
       def use_readline?
         # Don't provide readline bindings for boolean questions, in this case
