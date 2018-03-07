@@ -182,6 +182,29 @@ RSpec.describe AlcesUtils do
         end
       end
     end
+
+    describe '#reset_alces' do
+      before :each do
+        @old_alces = alces
+        AlcesUtils.mock(self) do
+          config(alces.domain, key: 'I should be deleted in the reset')
+        end
+        reset_alces
+      end
+
+      it 'resets alces to a new instance' do
+        expect(alces).not_to eq(@old_alces)
+      end
+
+      it 'removes the old config mocking' do
+        expect(alces.domain.config.keys).to be_nil
+      end
+
+      it 'sets the Alces.new method to return the new alces object' do
+        new_alces = Metalware::Namespaces::Alces.new
+        expect(new_alces).to eq(alces)
+      end
+    end
   end
 
   describe '#redirect_std' do

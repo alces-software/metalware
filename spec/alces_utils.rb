@@ -13,12 +13,19 @@ module AlcesUtils
   class << self
     def start(example_group, config: nil)
       example_group.instance_exec do
-        let! :alces do
-          test_alces = Metalware::Namespaces::Alces.new
+        # Cache the first version of alces to be created
+        # This allows it to be mocked during the spec
+        # It can also be reset in the test (see below)
+        before :each do
           allow(Metalware::Namespaces::Alces).to \
-            receive(:new).and_return(test_alces)
-          test_alces
+            receive(:new).and_wrap_original do |m, *a|
+              @spec_alces ? @spec_alces : (@spec_alces = m.call(*a))
+            end
         end
+
+        # `alces` is defined as a method so it can be reset
+        define_method :alces { Metalware::Namespaces::Alces.new }
+        define_method :reset_alces { @spec_alces = nil }
 
         #
         # Mocks nodeattr to use faked genders file
