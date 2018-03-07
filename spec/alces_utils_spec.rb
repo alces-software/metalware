@@ -204,6 +204,11 @@ RSpec.describe AlcesUtils do
         new_alces = Metalware::Namespaces::Alces.new
         expect(new_alces).to eq(alces)
       end
+
+      it 'returns the new version of alces' do
+        return_from_reset_alces = reset_alces
+        expect(return_from_reset_alces).to eq(alces)
+      end
     end
   end
 

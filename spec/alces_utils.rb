@@ -25,7 +25,10 @@ module AlcesUtils
 
         # `alces` is defined as a method so it can be reset
         define_method :alces { Metalware::Namespaces::Alces.new }
-        define_method :reset_alces { @spec_alces = nil }
+        define_method :reset_alces do
+          @spec_alces = nil
+          alces
+        end
 
         #
         # Mocks nodeattr to use faked genders file
