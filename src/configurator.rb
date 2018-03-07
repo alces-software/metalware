@@ -276,10 +276,20 @@ module Metalware
 
           if default_input
             highline_question.default = default_input
-          elsif answer_required?
+          elsif validate_answer_given?
             highline_question.validate = ensure_answer_given
           end
         end
+      end
+
+      def validate_answer_given?
+        # Do not override built-in HighLine validation for `agree` questions,
+        # which will already cause the question to be re-prompted until a valid
+        # answer is given (rather than just accepting any non-empty answer, as
+        # our `ensure_answer_given` does).
+        return false if type == :boolean
+
+        answer_required?
       end
 
       # Whether an answer to this question is required at this level; an answer
