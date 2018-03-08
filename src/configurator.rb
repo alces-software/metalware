@@ -123,10 +123,9 @@ module Metalware
       section_question_tree.filtered_each.with_object({}) do |node_q, memo|
         idx += 1
         next unless ask_question_based_on_parent_answer(node_q)
-        content = node_q.content
         question = create_question(node_q, idx)
         raw_answer = question.ask(highline)
-        node_q.answer = if raw_answer == content.default
+        node_q.answer = if raw_answer == node_q.default
                           nil # TODO workout whats going on here
                         else
                           raw_answer
