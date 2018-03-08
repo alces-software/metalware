@@ -100,7 +100,7 @@ module Metalware
         section_question_tree.filtered_each do |node_q|
           content = node_q.content
           content.identifier = content.identifier.to_sym
-          content.question = create_question(content, (idx += 1))
+          content.question = create_question(node_q, (idx += 1))
           enum << [node_q, content]
         end
       end
@@ -139,7 +139,7 @@ module Metalware
                          else
                            raw_answer
                          end
-        memo[content.identifier] = content.answer unless content.answer.nil?
+        memo[node_q.identifier] = content.answer unless content.answer.nil?
       end
     end
 
@@ -211,18 +211,15 @@ module Metalware
       saver.section_answers(answers, questions_section, name)
     end
 
-    def create_question(properties, index)
-      default = default_hash[properties.identifier]
+    def create_question(node_q, index)
+      default = default_hash[node_q.identifier]
+      indicator = progress_indicator(index)
+      old_answer = old_answers[node_q.identifier]
 
       # TODO: Remove default as an input and save the default in the
       # properties object. The same can be done with the old_answer
       # TODO: Break out the Question object into seperate file
-      Question.new(
-        default: default,
-        properties: properties,
-        old_answer: old_answers[properties.identifier],
-        progress_indicator: progress_indicator(index)
-      )
+      node_q.create_question(default, indicator, old_answer)
     end
 
     def progress_indicator(index)

@@ -34,7 +34,19 @@ module Metalware
     end
 
     def identifier
-      content[:identifier]
+      content[:identifier]&.to_sym
+    end
+
+    # TODO: Eventually change this to a `question` method once the index's
+    # and defaults are rationalised
+    def create_question(default, progress_indicator, old_answer)
+      Configurator::Question.new(
+        default: default,
+        properties: content,
+        old_answer: old_answer,
+        progress_indicator: progress_indicator,
+        identifier: identifier
+      )
     end
   end
 end

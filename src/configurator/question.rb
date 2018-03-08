@@ -18,11 +18,12 @@ module Metalware
         default:,
         old_answer: nil,
         progress_indicator:,
+        identifier:,
         properties:
       )
         @choices = properties.choices
         @default = default
-        @identifier = properties.identifier
+        @identifier = identifier
         @old_answer = old_answer
         @progress_indicator = progress_indicator
         @question = properties.question
