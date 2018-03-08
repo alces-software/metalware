@@ -8,6 +8,8 @@ module Metalware
   class QuestionTree < Tree::TreeNode
     delegate :choices, :optional, :type, to: :os_content
 
+    attr_accessor :answer
+
     BASE_TRAVERSALS = [
       :each,
       :breadth_each,

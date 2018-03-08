@@ -126,12 +126,12 @@ module Metalware
         content = node_q.content
         question = create_question(node_q, idx)
         raw_answer = question.ask(highline)
-        content.answer = if raw_answer == content.default
-                           content.old_answer.nil? ? nil : answer
-                         else
-                           raw_answer
-                         end
-        memo[node_q.identifier] = content.answer unless content.answer.nil?
+        node_q.answer = if raw_answer == content.default
+                          content.old_answer.nil? ? nil : answer
+                        else
+                          raw_answer
+                        end
+        memo[node_q.identifier] = node_q.answer unless node_q.answer.nil?
       end
     end
 
@@ -144,7 +144,7 @@ module Metalware
       if node_q.question? && !node_q.parent.question?
         true
       # Conditionally ask the question if the parent answer is truthy
-      elsif node_q.parent.content.answer
+      elsif node_q.parent.answer
         true
       # Otherwise don't ask the question
       else
