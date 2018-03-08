@@ -24,16 +24,11 @@
 
 require 'active_support/core_ext/hash'
 require 'active_support/string_inquirer'
-require 'highline'
-require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
 require 'group_cache'
 require 'configurator/question'
-
-HighLine::Question.prepend Metalware::Patches::HighLine::Question
-HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 
 module Metalware
   class Configurator
@@ -84,7 +79,6 @@ module Metalware
       name: nil
     )
       @alces = alces
-      @highline = HighLine.new
       @questions_section = questions_section
       @name = (questions_section == :local ? 'local' : name)
     end
@@ -97,7 +91,6 @@ module Metalware
     private
 
     attr_reader :alces,
-                :highline,
                 :questions_section,
                 :name
 
@@ -128,7 +121,7 @@ module Metalware
         question.progress_indicator = progress_indicator(idx)
         question.old_answer = old_answers[identifier]
 
-        raw_answer = question.ask(highline)
+        raw_answer = question.ask
         answer = if raw_answer == node_q.default
                    nil # TODO workout whats going on here
                  else

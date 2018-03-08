@@ -1,17 +1,23 @@
 
 # frozen_string_literal: true
 require 'active_support/core_ext/module/delegation'
+require 'highline'
+require 'patches/highline'
+
+HighLine::Question.prepend Metalware::Patches::HighLine::Question
+HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 
 module Metalware
   class Configurator
     class Question
       def initialize(question_node)
         @question_node = question_node
+        @highline = HighLine.new
       end
 
       attr_accessor :default, :old_answer, :progress_indicator
 
-      def ask(highline)
+      def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
         answer = send(ask_method, highline) { |q| configure_question(q) }
         answer.tap { |a| question_node.answer = a }
@@ -19,7 +25,7 @@ module Metalware
 
       private
 
-      attr_reader :question_node
+      attr_reader :question_node, :highline
 
       delegate :identifier, :choices, :optional, :text,
                to: :question_node
