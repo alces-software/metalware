@@ -130,12 +130,12 @@ module Metalware
 
         question = node_q.create_question(default, indicator, old_answer)
         raw_answer = question.ask(highline)
-        node_q.answer = if raw_answer == node_q.default
-                          nil # TODO workout whats going on here
-                        else
-                          raw_answer
-                        end
-        memo[node_q.identifier] = node_q.answer unless node_q.answer.nil?
+        answer = if raw_answer == node_q.default
+                   nil # TODO workout whats going on here
+                 else
+                   raw_answer
+                 end
+        memo[node_q.identifier] = answer unless answer.nil?
       end
     end
 
