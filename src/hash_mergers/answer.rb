@@ -13,14 +13,7 @@ module Metalware
       end
 
       def default_array(groups:, node:)
-        [default_hash(:domain)].tap do |x|
-          x.push(default_hash(:group)) if groups
-          if node == 'local'
-            x.push(default_hash(:local))
-          elsif node
-            x.push(default_hash(:node))
-          end
-        end
+        [default_hash(:domain)]
       end
 
       def default_hash(section)
