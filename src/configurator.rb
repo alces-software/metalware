@@ -127,7 +127,7 @@ module Metalware
         question = create_question(node_q, idx)
         raw_answer = question.ask(highline)
         node_q.answer = if raw_answer == content.default
-                          content.old_answer.nil? ? nil : answer
+                          nil # TODO workout whats going on here
                         else
                           raw_answer
                         end
