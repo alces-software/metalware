@@ -24,6 +24,13 @@ module Metalware
       end
     end
 
+    def ask_questions(&block)
+      self.filtered_each.with_index do |question, index|
+        next unless ask_conditional_question?(question)
+        block.call(question, index + 1)
+      end
+    end
+
     def questions_length
       num = 0
       filtered_each { |_q| num += 1 }
@@ -61,6 +68,21 @@ module Metalware
     # double wrap and OpenStruct, it just isn't required
     def os_content
       OpenStruct.new(content)
+    end
+
+    # NOTE: This method is used by the iterator and thus DOES NOT reference
+    # the "self" object. Instead it should use the question passed to it
+    def ask_conditional_question?(question)
+      # Ask the question if the parent has a truthy answer
+      if question.parent.answer
+        true
+      # Ask the question if the parent isn't a question (e.g. a section)
+      elsif !question.parent.question?
+        true
+      # Otherwise don't ask the question
+      else
+        false
+      end
     end
   end
 end

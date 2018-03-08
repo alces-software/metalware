@@ -119,15 +119,14 @@ module Metalware
     # saved. If there is an old_answer then it is the default. In this case
     # it needs to be saved again so it is not lost.
     def ask_questions
-      idx = 0
-      section_question_tree.filtered_each.with_object({}) do |node_q, memo|
-        idx += 1
-        next unless ask_question_based_on_parent_answer(node_q)
+      memo = {}
+      section_question_tree.ask_questions do |node_q, idx|
+        identifier = node_q.identifier
         question = node_q.create_question
 
-        question.default = default_hash[node_q.identifier]
+        question.default = default_hash[identifier]
         question.progress_indicator = progress_indicator(idx)
-        question.old_answer = old_answers[node_q.identifier]
+        question.old_answer = old_answers[identifier]
 
         raw_answer = question.ask(highline)
         answer = if raw_answer == node_q.default
@@ -135,25 +134,9 @@ module Metalware
                  else
                    raw_answer
                  end
-        memo[node_q.identifier] = answer unless answer.nil?
+        memo[identifier] = answer unless answer.nil?
       end
-    end
-
-    def ask_question_based_on_parent_answer(node_q)
-      # TODO: Use the filter methods on QuestionTree to remove the following
-      # logic. The old Tree::TreeNode structure has non-question structural
-      # nodes within it that needed to be manually filtered
-      # However the new QuestionTree object has filtered enumerators that
-      # remove the need for checking if a node is a question
-      if node_q.question? && !node_q.parent.question?
-        true
-      # Conditionally ask the question if the parent answer is truthy
-      elsif node_q.parent.answer
-        true
-      # Otherwise don't ask the question
-      else
-        false
-      end
+      memo
     end
 
     def section_question_tree
