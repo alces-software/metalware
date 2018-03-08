@@ -2,9 +2,14 @@
 # frozen_string_literal: true
 
 require 'rubytree'
+require 'ostruct'
 
 module Metalware
   class QuestionTree < Tree::TreeNode
+    # TODO: `question` isn't super descriptive as the is a QuestionTree
+    # object. Maybe `text` would be better?
+    delegate :question, :choices, :optional, :type, to: :os_content
+
     BASE_TRAVERSALS = [
       :each,
       :breadth_each,
@@ -34,19 +39,27 @@ module Metalware
     end
 
     def identifier
-      content[:identifier]&.to_sym
+      os_content.identifier&.to_sym
     end
 
     # TODO: Eventually change this to a `question` method once the index's
     # and defaults are rationalised
     def create_question(default, progress_indicator, old_answer)
       Configurator::Question.new(
+        self,
         default: default,
-        properties: content,
         old_answer: old_answer,
-        progress_indicator: progress_indicator,
-        identifier: identifier
+        progress_indicator: progress_indicator
       )
+    end
+
+    private
+
+    # TODO: Stop wrapping the content in the validator, that should really
+    # be done within the QuestionTree object. It doesn't hurt, as you can't
+    # double wrap and OpenStruct, it just isn't required
+    def os_content
+      OpenStruct.new(content)
     end
   end
 end

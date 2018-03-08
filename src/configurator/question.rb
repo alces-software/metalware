@@ -1,24 +1,22 @@
 
 # frozen_string_literal: true
+require 'active_support/core_ext/module/delegation'
 
 module Metalware
   class Configurator
     class Question
       def initialize(
+        question_node,
         default:,
         old_answer: nil,
-        progress_indicator:,
-        identifier:,
-        properties:
+        progress_indicator:
       )
-        @choices = properties.choices
+        @question_node = question_node
         @default = default
-        @identifier = identifier
         @old_answer = old_answer
         @progress_indicator = progress_indicator
-        @question = properties.question
-        @required = !properties.optional
-        @type = type_for(properties[:type])
+        @required = !optional
+        @type = type_for(question_node.type)
       end
 
       def ask(highline)
@@ -29,14 +27,15 @@ module Metalware
       private
 
       attr_reader \
-        :choices,
+        :question_node,
         :default,
-        :identifier,
         :old_answer,
         :progress_indicator,
-        :question,
         :required,
         :type
+
+      delegate :identifier, :choices, :optional, :question,
+               to: :question_node
 
       def configure_question(highline_question)
         highline_question.readline = use_readline?
