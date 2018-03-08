@@ -38,27 +38,21 @@ module Metalware
       def configure_question(highline_question)
         highline_question.readline = use_readline?
         highline_question.default = default_input
-        if validate_answer_given?
-          highline_question.validate = ensure_answer_given
-        end
+        validate_highline_answer_given(highline_question)
       end
 
-      def validate_answer_given?
+      def validate_highline_answer_given(highline_question)
         # Do not override built-in HighLine validation for `agree` questions,
-        # which will already cause the question to be re-prompted until a valid
-        # answer is given (rather than just accepting any non-empty answer, as
-        # our `ensure_answer_given` does).
+        # which will already cause the question to be re-prompted until
+        # a valid answer is given (rather than just accepting any non-empty
+        # answer, as our `ensure_answer_given` does).
         return false if type.boolean?
 
-        answer_required?
-      end
-
-      # Whether an answer to this question is required at this level; an answer
-      # will not be required if there is already an answer from the question
-      # default or a higher level answer file (the `default`), or if the
-      # question is not `required`.
-      def answer_required?
-        !(default || optional)
+        # The answer does not need to be given if there is a default or if
+        # it is optional
+        if !(default || optional)
+          highline_question.validate = ensure_answer_given
+        end
       end
 
       def use_readline?
