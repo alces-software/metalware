@@ -15,7 +15,6 @@ module Metalware
         @default = default
         @old_answer = old_answer
         @progress_indicator = progress_indicator
-        @required = !optional
         @type = type_for(question_node.type)
       end
 
@@ -31,7 +30,6 @@ module Metalware
         :default,
         :old_answer,
         :progress_indicator,
-        :required,
         :type
 
       delegate :identifier, :choices, :optional, :question,
@@ -60,7 +58,7 @@ module Metalware
       # default or a higher level answer file (the `default`), or if the
       # question is not `required`.
       def answer_required?
-        !default && required
+        !(default || optional)
       end
 
       def use_readline?
