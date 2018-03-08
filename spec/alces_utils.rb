@@ -172,8 +172,6 @@ module AlcesUtils
       raise_if_node_exists(name)
       add_node_to_genders_file(name, *genders)
       Metalware::Namespaces::Node.create(alces, name).tap do |node|
-        with_blank_config_and_answer(node)
-        hexadecimal_ip(node)
         new_nodes = alces.nodes.reduce([node], &:push)
         metal_nodes = Metalware::Namespaces::MetalArray.new(new_nodes)
         allow(alces).to receive(:nodes).and_return(metal_nodes)
@@ -186,7 +184,6 @@ module AlcesUtils
       alces.instance_variable_set(:@groups, nil)
       alces.instance_variable_set(:@group_cache, nil)
       group = alces.groups.find_by_name(name)
-      with_blank_config_and_answer(group)
       group
     end
 

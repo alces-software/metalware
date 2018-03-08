@@ -119,10 +119,6 @@ RSpec.describe AlcesUtils do
         expect(alces.groups.send(group2).name).to eq(group2)
       end
 
-      it 'sets the config to blank' do
-        expect(alces.groups.send(group).config.to_h).to be_empty
-      end
-
       # The mocking would otherwise alter the actual file
       it 'errors if FakeFS is off' do
         FakeFS.deactivate!
@@ -157,11 +153,6 @@ RSpec.describe AlcesUtils do
 
       it 'adds the node to default test group' do
         expect(alces.node.genders).to eq([AlcesUtils.default_group])
-      end
-
-      it 'creates the node with a blank config and answer' do
-        expect(alces.node.config.to_h).to be_empty
-        expect(alces.node.answer.to_h).to be_empty
       end
 
       it 'errors if the node already exists' do
