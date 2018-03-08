@@ -9,25 +9,18 @@ module Metalware
       private
 
       def hash_array(*a)
-        default_array(*a).concat super
+        super.unshift(domain_answers)
       end
 
-      def default_array(groups:, node:)
-        [default_hash(:domain)]
-      end
-
-      def default_hash(section)
-        section_default(section).each_with_object({}) do |(key, value), memo|
-          memo[key] = value.default unless value.default.nil?
-        end
+      def domain_answers
+        loader.flattened_configure_section(:domain)
+              .reject { |_k, value| value.default.nil? }
+              .map { |key, value| [key, value.default] }
+              .to_h
       end
 
       def load_yaml(section, section_name)
         loader.section_answers(section, section_name)
-      end
-
-      def section_default(section)
-        loader.flattened_configure_section(section)
       end
     end
   end
