@@ -94,14 +94,6 @@ module Metalware
       save_answers(answers)
     end
 
-    def questions
-      Enumerator.new do |enum|
-        section_question_tree.filtered_each do |node_q|
-          enum << node_q
-        end
-      end
-    end
-
     private
 
     attr_reader :alces,
@@ -128,7 +120,7 @@ module Metalware
     # it needs to be saved again so it is not lost.
     def ask_questions
       idx = 0
-      questions.with_object({}) do |node_q, memo|
+      section_question_tree.filtered_each.with_object({}) do |node_q, memo|
         idx += 1
         next unless ask_question_based_on_parent_answer(node_q)
         content = node_q.content
