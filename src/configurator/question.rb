@@ -4,16 +4,6 @@
 module Metalware
   class Configurator
     class Question
-      attr_reader \
-        :choices,
-        :default,
-        :identifier,
-        :old_answer,
-        :progress_indicator,
-        :question,
-        :required,
-        :type
-
       def initialize(
         default:,
         old_answer: nil,
@@ -37,6 +27,16 @@ module Metalware
       end
 
       private
+
+      attr_reader \
+        :choices,
+        :default,
+        :identifier,
+        :old_answer,
+        :progress_indicator,
+        :question,
+        :required,
+        :type
 
       def configure_question(highline_question)
         highline_question.readline = use_readline?
