@@ -123,7 +123,12 @@ module Metalware
       section_question_tree.filtered_each.with_object({}) do |node_q, memo|
         idx += 1
         next unless ask_question_based_on_parent_answer(node_q)
-        question = create_question(node_q, idx)
+
+        default = default_hash[node_q.identifier]
+        indicator = progress_indicator(idx)
+        old_answer = old_answers[node_q.identifier]
+
+        question = node_q.create_question(default, indicator, old_answer)
         raw_answer = question.ask(highline)
         node_q.answer = if raw_answer == node_q.default
                           nil # TODO workout whats going on here
@@ -200,17 +205,6 @@ module Metalware
 
     def save_answers(answers)
       saver.section_answers(answers, questions_section, name)
-    end
-
-    def create_question(node_q, index)
-      default = default_hash[node_q.identifier]
-      indicator = progress_indicator(index)
-      old_answer = old_answers[node_q.identifier]
-
-      # TODO: Remove default as an input and save the default in the
-      # properties object. The same can be done with the old_answer
-      # TODO: Break out the Question object into seperate file
-      node_q.create_question(default, indicator, old_answer)
     end
 
     def progress_indicator(index)
