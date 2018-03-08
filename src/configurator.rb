@@ -96,9 +96,8 @@ module Metalware
     def questions
       Enumerator.new do |enum|
         idx = 0
-        section_question_tree.each do |node_q|
+        section_question_tree.filtered_each do |node_q|
           content = node_q.content
-          next if content.section
           content.identifier = content.identifier.to_sym
           content.question = create_question(content, (idx += 1))
           enum << [node_q, content]
