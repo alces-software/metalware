@@ -5,17 +5,11 @@ require 'active_support/core_ext/module/delegation'
 module Metalware
   class Configurator
     class Question
-      def initialize(
-        question_node,
-        default:,
-        old_answer: nil,
-        progress_indicator:
-      )
+      def initialize(question_node)
         @question_node = question_node
-        @default = default
-        @old_answer = old_answer
-        @progress_indicator = progress_indicator
       end
+
+      attr_accessor :default, :old_answer, :progress_indicator
 
       def ask(highline)
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
@@ -25,11 +19,7 @@ module Metalware
 
       private
 
-      attr_reader \
-        :question_node,
-        :default,
-        :old_answer,
-        :progress_indicator
+      attr_reader :question_node
 
       delegate :identifier, :choices, :optional, :text,
                to: :question_node

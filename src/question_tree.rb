@@ -50,13 +50,8 @@ module Metalware
 
     # TODO: Eventually change this to a `question` method once the index's
     # and defaults are rationalised
-    def create_question(default, progress_indicator, old_answer)
-      Configurator::Question.new(
-        self,
-        default: default,
-        old_answer: old_answer,
-        progress_indicator: progress_indicator
-      )
+    def create_question
+      Configurator::Question.new(self)
     end
 
     private

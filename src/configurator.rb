@@ -123,12 +123,12 @@ module Metalware
       section_question_tree.filtered_each.with_object({}) do |node_q, memo|
         idx += 1
         next unless ask_question_based_on_parent_answer(node_q)
+        question = node_q.create_question
 
-        default = default_hash[node_q.identifier]
-        indicator = progress_indicator(idx)
-        old_answer = old_answers[node_q.identifier]
+        question.default = default_hash[node_q.identifier]
+        question.progress_indicator = progress_indicator(idx)
+        question.old_answer = old_answers[node_q.identifier]
 
-        question = node_q.create_question(default, indicator, old_answer)
         raw_answer = question.ask(highline)
         answer = if raw_answer == node_q.default
                    nil # TODO workout whats going on here
