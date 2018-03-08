@@ -23,6 +23,7 @@
 #==============================================================================
 
 require 'active_support/core_ext/hash'
+require 'active_support/string_inquirer'
 require 'highline'
 require 'patches/highline'
 require 'validation/loader'
@@ -99,7 +100,7 @@ module Metalware
           content = node_q.content
           next if content.section
           content.identifier = content.identifier.to_sym
-          content.ask_question = create_question(content, (idx += 1))
+          content.question = create_question(content, (idx += 1))
           enum << [node_q, content]
         end
       end
@@ -132,14 +133,13 @@ module Metalware
     def ask_questions
       questions.with_object({}) do |(node_q, content), memo|
         next unless ask_question_based_on_parent_answer(node_q)
-        raw_answer = content.ask_question.ask(highline)
+        raw_answer = content.question.ask(highline)
         content.answer = if raw_answer == content.default
                            content.old_answer.nil? ? nil : answer
                          else
                            raw_answer
                          end
-        identifier = content.identifier.to_sym
-        memo[identifier] = content.answer unless content.answer.nil?
+        memo[content.identifier] = content.answer unless content.answer.nil?
       end
     end
 
@@ -220,7 +220,6 @@ module Metalware
       Question.new(
         default: default,
         properties: properties,
-        questions_section: questions_section,
         old_answer: old_answers[properties.identifier],
         progress_indicator: progress_indicator(index)
       )
@@ -235,8 +234,6 @@ module Metalware
     end
 
     class Question
-      VALID_TYPES = [:boolean, :choice, :integer, :string].freeze
-
       attr_reader \
         :choices,
         :default,
@@ -251,8 +248,7 @@ module Metalware
         default:,
         old_answer: nil,
         progress_indicator:,
-        properties:,
-        questions_section:
+        properties:
       )
         @choices = properties.choices
         @default = default
@@ -261,25 +257,32 @@ module Metalware
         @progress_indicator = progress_indicator
         @question = properties.question
         @required = !properties.optional
-
-        @type = type_for(
-          properties[:type],
-          configure_file: Metalware::FilePath.configure_file,
-          questions_section: questions_section
-        )
+        @type = type_for(properties[:type])
       end
 
       def ask(highline)
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        send(ask_method, highline) do |highline_question|
-          highline_question.readline = true if use_readline?
+        send(ask_method, highline) { |q| configure_question(q) }
+      end
 
-          if default_input
-            highline_question.default = default_input
-          elsif answer_required?
-            highline_question.validate = ensure_answer_given
-          end
+      private
+
+      def configure_question(highline_question)
+        highline_question.readline = use_readline?
+        highline_question.default = default_input
+        if validate_answer_given?
+          highline_question.validate = ensure_answer_given
         end
+      end
+
+      def validate_answer_given?
+        # Do not override built-in HighLine validation for `agree` questions,
+        # which will already cause the question to be re-prompted until a valid
+        # answer is given (rather than just accepting any non-empty answer, as
+        # our `ensure_answer_given` does).
+        return false if type.boolean?
+
+        answer_required?
       end
 
       # Whether an answer to this question is required at this level; an answer
@@ -290,23 +293,25 @@ module Metalware
         !default && required
       end
 
-      private
-
       def use_readline?
-        # Dont't provide readline bindings for boolean questions, in this case
+        # Don't provide readline bindings for boolean questions, in this case
         # they cause an issue where the question is repeated twice if no/bad
         # input is entered, and they are not really necessary in this case.
-        Metalware::Configurator.use_readline && type != :boolean
+        return false if type.boolean?
+
+        Metalware::Configurator.use_readline
       end
 
       def default_input
-        if !current_answer_value.nil? && type == :boolean
-          # Default for a boolean question needs to be set to the input
-          # HighLine's `agree` expects, i.e. 'yes' or 'no'.
-          current_answer_value ? 'yes' : 'no'
-        else
-          current_answer_value
-        end
+        type.boolean? ? boolean_default_input : current_answer_value
+      end
+
+      def boolean_default_input
+        return nil if current_answer_value.nil?
+
+        # Default for a boolean question which has a previous answer should be
+        # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
+        current_answer_value ? 'yes' : 'no'
       end
 
       # The answer value this question at this level would currently take.
@@ -337,22 +342,8 @@ module Metalware
         "#{question.strip} #{progress_indicator}"
       end
 
-      def type_for(value, configure_file:, questions_section:)
-        value = value&.to_sym
-        if value.nil?
-          :string
-        elsif valid_type?(value)
-          value
-        else
-          message = \
-            "Unknown question type '#{value}' for " \
-            "#{questions_section}.#{identifier} in #{configure_file}"
-          raise UnknownQuestionTypeError, message
-        end
-      end
-
-      def valid_type?(value)
-        VALID_TYPES.include?(value)
+      def type_for(value)
+        ActiveSupport::StringInquirer.new(value || 'string')
       end
 
       def ensure_answer_given
@@ -360,6 +351,7 @@ module Metalware
           !input.empty?
         end
       end
+
       class HighLinePrettyValidateProc < Proc
         def initialize(print_message, &b)
           # NOTE: print_message is prefaced with "must match" when used by
