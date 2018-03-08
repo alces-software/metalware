@@ -30,7 +30,7 @@ module Metalware
         :old_answer,
         :progress_indicator
 
-      delegate :identifier, :choices, :optional, :question,
+      delegate :identifier, :choices, :optional, :text,
                to: :question_node
 
       def configure_question(highline_question)
@@ -99,7 +99,7 @@ module Metalware
       end
 
       def question_text
-        "#{question.strip} #{progress_indicator}"
+        "#{text.strip} #{progress_indicator}"
       end
 
       def type

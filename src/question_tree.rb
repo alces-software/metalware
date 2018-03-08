@@ -6,9 +6,7 @@ require 'ostruct'
 
 module Metalware
   class QuestionTree < Tree::TreeNode
-    # TODO: `question` isn't super descriptive as the is a QuestionTree
-    # object. Maybe `text` would be better?
-    delegate :question, :choices, :optional, :type, to: :os_content
+    delegate :choices, :optional, :type, to: :os_content
 
     BASE_TRAVERSALS = [
       :each,
@@ -40,6 +38,12 @@ module Metalware
 
     def identifier
       os_content.identifier&.to_sym
+    end
+
+    # In `configure.yaml` the text is stored under the `question` key
+    # However "question" isn't super meaningful in this class
+    def text
+      os_content.question
     end
 
     # TODO: Eventually change this to a `question` method once the index's
