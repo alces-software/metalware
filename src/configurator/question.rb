@@ -15,7 +15,6 @@ module Metalware
         @default = default
         @old_answer = old_answer
         @progress_indicator = progress_indicator
-        @type = type_for(question_node.type)
       end
 
       def ask(highline)
@@ -29,8 +28,7 @@ module Metalware
         :question_node,
         :default,
         :old_answer,
-        :progress_indicator,
-        :type
+        :progress_indicator
 
       delegate :identifier, :choices, :optional, :question,
                to: :question_node
@@ -104,7 +102,8 @@ module Metalware
         "#{question.strip} #{progress_indicator}"
       end
 
-      def type_for(value)
+      def type
+        value = question_node.type
         ActiveSupport::StringInquirer.new(value || 'string')
       end
 
