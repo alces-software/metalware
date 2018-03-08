@@ -19,7 +19,7 @@ module Metalware
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        answer = send(ask_method, highline) { |q| configure_question(q) }
+        answer = send(ask_method) { |q| configure_question(q) }
         answer.tap { |a| question_node.answer = a }
       end
 
@@ -76,22 +76,22 @@ module Metalware
         old_answer.nil? ? default : old_answer
       end
 
-      def ask_boolean_question(highline)
+      def ask_boolean_question
         highline.agree(question_text + ' [yes/no]') { |q| yield q }
       end
 
-      def ask_choice_question(highline)
+      def ask_choice_question
         highline.choose(*choices) do |menu|
           menu.prompt = question_text
           yield menu
         end
       end
 
-      def ask_integer_question(highline)
+      def ask_integer_question
         highline.ask(question_text, Integer) { |q| yield q }
       end
 
-      def ask_string_question(highline)
+      def ask_string_question
         highline.ask(question_text) { |q| yield q }
       end
 
