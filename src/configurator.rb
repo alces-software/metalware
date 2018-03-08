@@ -96,10 +96,7 @@ module Metalware
 
     def questions
       Enumerator.new do |enum|
-        idx = 0
         section_question_tree.filtered_each do |node_q|
-          content = node_q.content
-          content.question = create_question(node_q, (idx += 1))
           enum << node_q
         end
       end
@@ -130,9 +127,12 @@ module Metalware
     # saved. If there is an old_answer then it is the default. In this case
     # it needs to be saved again so it is not lost.
     def ask_questions
+      idx = 0
       questions.with_object({}) do |node_q, memo|
+        idx += 1
         next unless ask_question_based_on_parent_answer(node_q)
         content = node_q.content
+        content.question = create_question(node_q, idx)
         raw_answer = content.question.ask(highline)
         content.answer = if raw_answer == content.default
                            content.old_answer.nil? ? nil : answer
