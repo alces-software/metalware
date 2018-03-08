@@ -124,8 +124,8 @@ module Metalware
         idx += 1
         next unless ask_question_based_on_parent_answer(node_q)
         content = node_q.content
-        content.question = create_question(node_q, idx)
-        raw_answer = content.question.ask(highline)
+        question = create_question(node_q, idx)
+        raw_answer = question.ask(highline)
         content.answer = if raw_answer == content.default
                            content.old_answer.nil? ? nil : answer
                          else
