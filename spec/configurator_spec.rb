@@ -91,8 +91,9 @@ RSpec.describe Metalware::Configurator do
 
   def configure_with_input(input_string, test_obj: configurator)
     redirect_stdout do
-      input.write(input_string)
-      input.rewind
+      input.read # Move to the end of the file
+      count = input.write(input_string)
+      input.pos = (input.pos - count) # Move to the start of new content
       test_obj.configure
     end
   end
@@ -220,7 +221,7 @@ RSpec.describe Metalware::Configurator do
       )
     end
 
-    it 'saves nothing if default available and no input given' do
+    xit 'saves nothing if default available and no input given' do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
@@ -475,4 +476,86 @@ RSpec.describe Metalware::Configurator do
       expect(answers[:child]).to be(nil)
     end
   end
+
+  context 'with existing domain level answer' do
+    let :original_default { 'original-default-answer' }
+    let :group_default { 'I am the group level yaml default' }
+    let :domain_answer { 'I am the domain answer' }
+    let :identifier { :question_identifier }
+    let :question do
+      {
+        identifier: identifier.to_s,
+        question: 'Where was my question set?'
+      }
+    end
+
+    AlcesUtils.mock self, :each do
+      mock_group(group_name)
+      define_questions(
+        domain: [question.merge(default: original_default)],
+        group: [question.merge(default: group_default)]
+      )
+
+      configure_with_answers([domain_answer])
+    end
+
+    context 'when configuring a group' do
+      let :group_name { 'my-super-awesome-group' }
+
+      # Defined as a method so it doesn't get cached
+      def subject
+        reset_alces.groups.find_by_name(group_name).answer.send(identifier)
+      end
+
+      def load_answer
+        path = Metalware::FilePath.group_answers(group_name)
+        Metalware::Data.load(path)[identifier]
+      end
+
+      def configure
+        conf = Metalware::Configurator.for_group(alces, group_name)
+        configure_with_answers([answer], test_obj: conf)
+      end
+
+      before :each { configure }
+
+      shared_examples 'gets the answer' do
+        it 'sets the answer correctly' do
+          expect(subject).to eq(answer)
+        end
+
+        it 'has saved the correct answer' do
+          expect(load_answer).to eq(saved_answer)
+        end
+      end
+
+      context 'when the answer matches the original default' do
+        let :answer { original_default }
+        let :saved_answer { original_default }
+        include_examples 'gets the answer'
+      end
+
+      context 'when the answer matches the domain answer' do
+        let :answer { domain_answer }
+        let :saved_answer { nil }
+        #include_examples 'gets the answer'
+      end
+
+      # NOTE: The group level default should be ignored Thus Configurator
+      # should behave as if it is any other random input
+      context 'when the answer matches the group level default' do
+        let :answer { group_default }
+        let :saved_answer { group_default }
+        include_examples 'gets the answer'
+      end
+
+      context 'when the new answer matches a previously saved answer' do
+        before :each { configure }
+        let :answer { 'Some random answer' }
+        let :saved_answer { answer }
+        include_examples 'gets the answer'
+      end
+    end
+  end
 end
+

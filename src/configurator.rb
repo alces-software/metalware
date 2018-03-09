@@ -111,9 +111,7 @@ module Metalware
       section_question_tree.ask_questions do |question|
         identifier = question.identifier
         question.default = default_hash[identifier]
-
-        answer = question.ask
-        memo[identifier] = answer unless answer == root_defaults(identifier)
+        memo[identifier] = question.ask
       end
       memo
     end
