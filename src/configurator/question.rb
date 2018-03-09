@@ -73,7 +73,7 @@ module Metalware
 
       # The answer value this question at this level would currently take.
       def current_answer_value
-        old_answer.nil? ? default : old_answer
+        default
       end
 
       def ask_boolean_question
