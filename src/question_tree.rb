@@ -70,8 +70,10 @@ module Metalware
     end
 
     def root_defaults
-      section_tree(:domain).filtered_each.reduce({}) do |memo, question|
-        memo.merge(question.identifier => question.yaml_default)
+      @root_defaults ||= begin
+        section_tree(:domain).filtered_each.reduce({}) do |memo, question|
+          memo.merge(question.identifier => question.yaml_default)
+        end
       end
     end
 

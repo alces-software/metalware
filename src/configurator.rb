@@ -116,7 +116,7 @@ module Metalware
         question.progress_indicator = progress_indicator(idx)
 
         answer = question.ask
-        memo[identifier] = answer unless answer == node_q.yaml_default
+        memo[identifier] = answer unless answer == root_defaults(identifier)
       end
       memo
     end
@@ -138,6 +138,14 @@ module Metalware
           raise InternalError, "Unrecognised question section: #{questions_section}"
         end.answer.to_h
       end
+    end
+
+    def old_answers
+      @old_answers ||= loader.section_answers(questions_section, name)
+    end
+
+    def root_defaults(identifier)
+      alces.questions.root_defaults[identifier]
     end
 
     def orphan_warning
@@ -162,10 +170,6 @@ module Metalware
       MetalLog.warn orphan_warning unless questions_section == :local
       group_cache.push_orphan(name)
       Namespaces::Node.create(alces, name)
-    end
-
-    def old_answers
-      @old_answers ||= loader.section_answers(questions_section, name)
     end
 
     def save_answers(answers)
