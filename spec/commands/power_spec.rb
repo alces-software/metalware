@@ -11,7 +11,7 @@ RSpec.describe Metalware::Commands::Power do
       Metalware::Utils.run_command(
         Metalware::Commands::Power, node_identifier, command, **options
       )
-    end
+    end[:stdout].read
   end
 
   describe 'when run on bare metal' do
@@ -58,10 +58,15 @@ RSpec.describe Metalware::Commands::Power do
         node_names.each do |name|
           expect(Metalware::SystemCommand).to receive(:run).with(
             "ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword chassis power on"
-          ).ordered
+          ).ordered.and_return('output123')
         end
 
-        run_power('nodes', 'on', gender: true, sleep: 0.5)
+        output = run_power('nodes', 'on', gender: true, sleep: 0.5)
+
+        node_names.each do |name|
+          expect(output).to include("#{name}: output123")
+        end
+      end
       end
     end
   end
