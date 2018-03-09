@@ -7,13 +7,3 @@ require 'ostruct'
 
 Metalware::Utils::DynamicRequire.relative('hash_mergers')
 
-module Metalware
-  module HashMergers
-    class << self
-      def merge(**inputs, &templater_block)
-        OpenStruct.new(config: Config.new.merge(**inputs, &templater_block),
-                       answer: Answer.new.merge(**inputs, &templater_block))
-      end
-    end
-  end
-end
