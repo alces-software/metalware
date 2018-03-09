@@ -25,14 +25,16 @@ module Metalware
     def ask_questions
       filtered_each.with_index do |question, index|
         next unless ask_conditional_question?(question)
-        yield(question, index + 1)
+        yield question, "(#{index + 1}/#{questions_length})"
       end
     end
 
     def questions_length
-      num = 0
-      filtered_each { |_q| num += 1 }
-      num
+      questions_length ||= begin
+        num = 0
+        filtered_each { |_q| num += 1 }
+        num
+      end
     end
 
     def question?

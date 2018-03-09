@@ -108,12 +108,12 @@ module Metalware
 
     def ask_questions
       memo = {}
-      section_question_tree.ask_questions do |node_q, idx|
+      section_question_tree.ask_questions do |node_q, progress_indicator|
         identifier = node_q.identifier
         question = node_q.create_question
 
         question.default = default_hash[identifier]
-        question.progress_indicator = progress_indicator(idx)
+        question.progress_indicator = progress_indicator
 
         answer = question.ask
         memo[identifier] = answer unless answer == root_defaults(identifier)
@@ -140,6 +140,8 @@ module Metalware
       end
     end
 
+    # TODO: This isn't being used currently, if this doesn't change in the
+    # near future - remove it!
     def old_answers
       @old_answers ||= loader.section_answers(questions_section, name)
     end
@@ -174,10 +176,6 @@ module Metalware
 
     def save_answers(answers)
       saver.section_answers(answers, questions_section, name)
-    end
-
-    def progress_indicator(index)
-      "(#{index}/#{total_questions})"
     end
 
     def total_questions
