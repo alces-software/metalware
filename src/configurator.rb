@@ -133,7 +133,7 @@ module Metalware
     end
 
     def section_question_tree
-      @section_question_tree ||= loader.configure_section(questions_section)
+      alces.questions.section_tree(questions_section)
     end
 
     def default_hash

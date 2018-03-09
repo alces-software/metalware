@@ -4,6 +4,7 @@ require 'active_support/core_ext/string/strip'
 require 'nodeattr_interface'
 require 'group_cache'
 require 'hashie'
+require 'validation/loader'
 
 module Metalware
   module Namespaces
@@ -71,10 +72,18 @@ module Metalware
           @orphan_list ||= group_cache.orphans
         end
 
+        def questions
+          @questions ||= loader.question_tree
+        end
+
         private
 
         def group_cache
           @group_cache ||= GroupCache.new
+        end
+
+        def loader
+          @loader ||= Validation::Loader.new
         end
       end
     end
