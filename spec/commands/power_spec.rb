@@ -67,6 +67,21 @@ RSpec.describe Metalware::Commands::Power do
           expect(output).to include("#{name}: output123")
         end
       end
+
+      it 'does not error when individual ipmi commands error' do
+        allow(
+          Metalware::SystemCommand
+        ).to receive(:run)
+          .with(/ipmitool/)
+          .and_raise(Metalware::SystemCommandError, 'error123')
+
+        expect do
+          output = run_power('nodes', 'on', gender: true)
+
+          node_names.each do |name|
+            expect(output).to include("#{name}: error12")
+          end
+        end.not_to raise_error
       end
     end
   end

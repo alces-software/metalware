@@ -51,8 +51,14 @@ module Metalware
       end
 
       def run_baremetal(node)
+        puts "#{node.name}: #{ipmi_command_output(node)}"
+      end
+
+      def ipmi_command_output(node)
         command = ipmi_command(node, arguments: ipmi_command_arguments)
-        puts "#{node.name}: #{SystemCommand.run(command)}"
+        SystemCommand.run(command)
+      rescue SystemCommandError => e
+        e.message
       end
 
       def ipmi_command(node, arguments:)
