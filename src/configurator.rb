@@ -174,9 +174,5 @@ module Metalware
     def save_answers(answers)
       saver.section_answers(answers, questions_section, name)
     end
-
-    def total_questions
-      section_question_tree.questions_length
-    end
   end
 end
