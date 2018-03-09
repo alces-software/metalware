@@ -16,7 +16,7 @@ module Metalware
         @highline = HighLine.new
       end
 
-      attr_accessor :default, :old_answer, :progress_indicator
+      attr_accessor :default, :progress_indicator
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'

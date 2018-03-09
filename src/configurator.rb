@@ -119,7 +119,6 @@ module Metalware
 
         question.default = default_hash[identifier]
         question.progress_indicator = progress_indicator(idx)
-        question.old_answer = old_answers[identifier]
 
         raw_answer = question.ask
         answer = if raw_answer == node_q.yaml_default
