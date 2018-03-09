@@ -108,10 +108,8 @@ module Metalware
 
     def ask_questions
       memo = {}
-      section_question_tree.ask_questions do |node_q, progress_indicator|
-        identifier = node_q.identifier
-        question = node_q.create_question(progress_indicator)
-
+      section_question_tree.ask_questions do |question|
+        identifier = question.identifier
         question.default = default_hash[identifier]
 
         answer = question.ask

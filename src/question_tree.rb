@@ -25,7 +25,8 @@ module Metalware
     def ask_questions
       filtered_each.with_index do |question, index|
         next unless ask_conditional_question?(question)
-        yield question, "(#{index + 1}/#{questions_length})"
+        progress = "(#{index + 1}/#{questions_length})"
+        yield create_question(question, progress)
       end
     end
 
@@ -61,12 +62,6 @@ module Metalware
     end
     # END REMAPPING CONTENT
 
-    # TODO: Eventually change this to a `question` method once the index's
-    # and defaults are rationalised
-    def create_question(progress_indicator)
-      Configurator::Question.new(self, progress_indicator)
-    end
-
     def section_tree(section)
       root.children.find { |c| c.name == section }
     end
@@ -94,8 +89,8 @@ module Metalware
       OpenStruct.new(content)
     end
 
-    # NOTE: This method is used by the iterator and thus DOES NOT reference
-    # the "self" object. Instead it should use the question passed to it
+    # NOTE: The following methods are used by the iterator and thus do not
+    # reference the self object
     def ask_conditional_question?(question)
       # Ask the question if the parent has a truthy answer
       if question.parent.answer
@@ -107,6 +102,10 @@ module Metalware
       else
         false
       end
+    end
+
+    def create_question(question, progress_indicator)
+      Configurator::Question.new(question, progress_indicator)
     end
   end
 end

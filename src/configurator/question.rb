@@ -18,7 +18,7 @@ module Metalware
       end
 
       attr_accessor :default
-      attr_reader :progress_indicator
+      delegate :identifier, to: :question_node
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
@@ -28,10 +28,8 @@ module Metalware
 
       private
 
-      attr_reader :question_node, :highline
-
-      delegate :identifier, :choices, :optional, :text,
-               to: :question_node
+      attr_reader :question_node, :highline, :progress_indicator
+      delegate :choices, :optional, :text, to: :question_node
 
       def configure_question(highline_question)
         highline_question.readline = use_readline?
