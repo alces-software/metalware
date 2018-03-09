@@ -6,4 +6,3 @@ require 'hash_mergers/hash_merger'
 require 'ostruct'
 
 Metalware::Utils::DynamicRequire.relative('hash_mergers')
-

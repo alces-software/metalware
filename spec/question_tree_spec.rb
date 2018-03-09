@@ -142,14 +142,14 @@ RSpec.describe Metalware::QuestionTree do
         domain: make('domain_default', domain_question),
         group: make('group_default', domain_question, group_question),
         node: make('node_default',
-                          domain_question,
-                          group_question,
-                          node_question),
+                   domain_question,
+                   group_question,
+                   node_question),
         local: make('local_default',
-                           domain_question,
-                           group_question,
-                           node_question,
-                           local_question)
+                    domain_question,
+                    group_question,
+                    node_question,
+                    local_question),
       }
     end
 
