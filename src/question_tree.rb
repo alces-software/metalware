@@ -6,8 +6,6 @@ require 'ostruct'
 
 module Metalware
   class QuestionTree < Tree::TreeNode
-    delegate :choices, :optional, :type, to: :os_content
-
     attr_accessor :answer
 
     BASE_TRAVERSALS = [
@@ -46,6 +44,8 @@ module Metalware
     end
 
     # START REMAPPING 'content' to variable names
+    delegate :choices, :optional, :type, to: :os_content
+
     def identifier
       os_content.identifier&.to_sym
     end
@@ -69,11 +69,9 @@ module Metalware
       root.children.find { |c| c.name == section }
     end
 
-    # TODO: Should this be using node.name or node.identifier?
-    # TODO: Should this return the `content` OR a hashed version of self?
     def flatten
       filtered_each.reduce({}) do |memo, node|
-        memo.merge(node.name.to_sym => node.content)
+        memo.merge(node.name.to_sym => node)
       end
     end
 

@@ -23,8 +23,8 @@ module Metalware
         alces.questions
              .section_tree(:domain)
              .flatten
-             .reject { |_k, value| value.default.nil? }
-             .map { |key, value| [key, value.default] }
+             .reject { |_k, value| value.yaml_default.nil? }
+             .map { |key, value| [key, value.yaml_default] }
              .to_h
       end
 

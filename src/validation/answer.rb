@@ -103,7 +103,7 @@ module Metalware
                 {
                   question: question,
                   answer: answer,
-                  type: questions_in_section[question][:type],
+                  type: questions_in_section[question].type,
                 }.tap { |h| h[:type] = 'string' if h[:type].nil? }
               )
             else
