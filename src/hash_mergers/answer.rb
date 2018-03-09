@@ -6,17 +6,26 @@ require 'hash_mergers/hash_merger'
 module Metalware
   module HashMergers
     class Answer < HashMerger
+      def initialize(alces)
+        @alces = alces
+        super
+      end
+
       private
+
+      attr_reader :alces
 
       def hash_array(*a)
         super.unshift(domain_answers)
       end
 
       def domain_answers
-        loader.flattened_configure_section(:domain)
-              .reject { |_k, value| value.default.nil? }
-              .map { |key, value| [key, value.default] }
-              .to_h
+        alces.questions
+             .section_tree(:domain)
+             .flatten
+             .reject { |_k, value| value.default.nil? }
+             .map { |key, value| [key, value.default] }
+             .to_h
       end
 
       def load_yaml(section, section_name)
