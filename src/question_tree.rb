@@ -61,6 +61,10 @@ module Metalware
       Configurator::Question.new(self)
     end
 
+    def section_tree(section)
+      root.children.find { |c| c.name == section }
+    end
+
     private
 
     # TODO: Stop wrapping the content in the validator, that should really

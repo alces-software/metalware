@@ -43,7 +43,7 @@ module Metalware
 
       # Returns a tree
       def configure_section(section)
-        question_tree.children.find { |c| c.name == section }
+        question_tree.section_tree(section)
       end
 
       # Returns a hash of identifiers and questions
