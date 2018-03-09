@@ -32,7 +32,7 @@ RSpec.describe Metalware::HashMergers::Answer do
         question: 'Ask node question?',
         default: 'node-default', # Should be ignored
       }],
-      local: []
+      local: [],
     }
   end
 

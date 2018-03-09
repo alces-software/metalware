@@ -123,7 +123,7 @@ module Metalware
 
         raw_answer = question.ask
         answer = if raw_answer == node_q.default
-                   nil # TODO workout whats going on here
+                   nil # TODO: workout whats going on here
                  else
                    raw_answer
                  end

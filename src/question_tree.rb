@@ -24,10 +24,10 @@ module Metalware
       end
     end
 
-    def ask_questions(&block)
-      self.filtered_each.with_index do |question, index|
+    def ask_questions
+      filtered_each.with_index do |question, index|
         next unless ask_conditional_question?(question)
-        block.call(question, index + 1)
+        yield(question, index + 1)
       end
     end
 
