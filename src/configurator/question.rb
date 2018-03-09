@@ -41,13 +41,12 @@ module Metalware
         # which will already cause the question to be re-prompted until
         # a valid answer is given (rather than just accepting any non-empty
         # answer, as our `ensure_answer_given` does).
-        return false if type.boolean?
+        return if type.boolean?
 
         # The answer does not need to be given if there is a default or if
         # it is optional
-        if !(default || optional)
-          highline_question.validate = ensure_answer_given
-        end
+        return if default || optional
+        highline_question.validate = ensure_answer_given
       end
 
       def use_readline?
