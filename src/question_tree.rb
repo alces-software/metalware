@@ -6,7 +6,7 @@ require 'ostruct'
 
 module Metalware
   class QuestionTree < Tree::TreeNode
-    delegate :default, :choices, :optional, :type, to: :os_content
+    delegate :choices, :optional, :type, to: :os_content
 
     attr_accessor :answer
 
@@ -45,15 +45,19 @@ module Metalware
       filtered_each.map(&:identifier)
     end
 
+    # START REMAPPING 'content' to variable names
     def identifier
       os_content.identifier&.to_sym
     end
 
-    # In `configure.yaml` the text is stored under the `question` key
-    # However "question" isn't super meaningful in this class
     def text
       os_content.question
     end
+
+    def yaml_default
+      os_content.default
+    end
+    # END REMAPPING CONTENT
 
     # TODO: Eventually change this to a `question` method once the index's
     # and defaults are rationalised

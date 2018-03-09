@@ -122,7 +122,7 @@ module Metalware
         question.old_answer = old_answers[identifier]
 
         raw_answer = question.ask
-        answer = if raw_answer == node_q.default
+        answer = if raw_answer == node_q.yaml_default
                    nil # TODO: workout whats going on here
                  else
                    raw_answer
