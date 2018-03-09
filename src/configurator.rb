@@ -106,11 +106,6 @@ module Metalware
       @group_cache ||= GroupCache.new
     end
 
-    # Whether the answer is saved depends if it matches the default AND
-    # if it was previously saved. If there is no old_answer, then the
-    # default must be set at a higher level. In this case it shouldn't be
-    # saved. If there is an old_answer then it is the default. In this case
-    # it needs to be saved again so it is not lost.
     def ask_questions
       memo = {}
       section_question_tree.ask_questions do |node_q, idx|
@@ -120,13 +115,8 @@ module Metalware
         question.default = default_hash[identifier]
         question.progress_indicator = progress_indicator(idx)
 
-        raw_answer = question.ask
-        answer = if raw_answer == node_q.yaml_default
-                   nil # TODO: workout whats going on here
-                 else
-                   raw_answer
-                 end
-        memo[identifier] = answer unless answer.nil?
+        answer = question.ask
+        memo[identifier] = answer unless answer == node_q.yaml_default
       end
       memo
     end
