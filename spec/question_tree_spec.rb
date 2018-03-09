@@ -4,7 +4,7 @@
 require 'validation/configure'
 
 RSpec.describe Metalware::QuestionTree do
-  context 'with the first question setup' do
+  context 'with a nexted question hash' do
     let :identifier_hash do
       {
         domain: 'domain_identifier',
@@ -120,6 +120,56 @@ RSpec.describe Metalware::QuestionTree do
     end
   end
 
-  context 'with the second question setup' do
+  describe '#root_defaults' do
+    let :domain_question do
+      { identifier: 'domain_question' }
+    end
+
+    let :group_question do
+      { identifier: 'group_question' }
+    end
+
+    let :node_question do
+      { identifier: 'node_question' }
+    end
+
+    let :local_question do
+      { identifier: 'local_question' }
+    end
+
+    let :question_hash do
+      {
+        domain: make('domain_default', domain_question),
+        group: make('group_default', domain_question, group_question),
+        node: make('node_default',
+                          domain_question,
+                          group_question,
+                          node_question),
+        local: make('local_default',
+                           domain_question,
+                           group_question,
+                           node_question,
+                           local_question)
+      }
+    end
+
+    def make(default, *questions)
+      questions.map do |question|
+        question.merge default: default, question: 'not important'
+      end
+    end
+
+    let :tree { Metalware::Validation::Configure.new(question_hash).tree }
+
+    [:domain, :group, :node, :local].each do |section|
+      context "when called on the '#{section}' section" do
+        subject { tree.section_tree(section) }
+
+        it "only uses the domain question's default" do
+          defaults = { domain_question: 'domain_default' }
+          expect(subject.root_defaults).to eq(defaults)
+        end
+      end
+    end
   end
 end

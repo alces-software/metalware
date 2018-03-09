@@ -69,6 +69,12 @@ module Metalware
       root.children.find { |c| c.name == section }
     end
 
+    def root_defaults
+      section_tree(:domain).filtered_each.reduce({}) do |memo, question|
+        memo.merge(question.identifier => question.yaml_default)
+      end
+    end
+
     def flatten
       filtered_each.reduce({}) do |memo, node|
         memo.merge(node.identifier => node)
