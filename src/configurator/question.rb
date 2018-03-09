@@ -11,12 +11,14 @@ HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 module Metalware
   class Configurator
     class Question
-      def initialize(question_node)
+      def initialize(question_node, progress_indicator)
         @question_node = question_node
         @highline = HighLine.new
+        @progress_indicator = progress_indicator
       end
 
-      attr_accessor :default, :progress_indicator
+      attr_accessor :default
+      attr_reader :progress_indicator
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'

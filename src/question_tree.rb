@@ -63,8 +63,8 @@ module Metalware
 
     # TODO: Eventually change this to a `question` method once the index's
     # and defaults are rationalised
-    def create_question
-      Configurator::Question.new(self)
+    def create_question(progress_indicator)
+      Configurator::Question.new(self, progress_indicator)
     end
 
     def section_tree(section)
