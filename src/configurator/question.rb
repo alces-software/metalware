@@ -60,20 +60,15 @@ module Metalware
       end
 
       def default_input
-        type.boolean? ? boolean_default_input : current_answer_value
+        type.boolean? ? boolean_default_input : default
       end
 
       def boolean_default_input
-        return nil if current_answer_value.nil?
+        return nil if default.nil?
 
         # Default for a boolean question which has a previous answer should be
         # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
-        current_answer_value ? 'yes' : 'no'
-      end
-
-      # The answer value this question at this level would currently take.
-      def current_answer_value
-        default
+        default ? 'yes' : 'no'
       end
 
       def ask_boolean_question
