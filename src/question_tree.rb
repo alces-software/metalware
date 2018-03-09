@@ -71,7 +71,7 @@ module Metalware
 
     def flatten
       filtered_each.reduce({}) do |memo, node|
-        memo.merge(node.name.to_sym => node)
+        memo.merge(node.identifier => node)
       end
     end
 
