@@ -65,6 +65,14 @@ module Metalware
       root.children.find { |c| c.name == section }
     end
 
+    # TODO: Should this be using node.name or node.identifier?
+    # TODO: Should this return the `content` OR a hashed version of self?
+    def flatten
+      filtered_each.reduce({}) do |memo, node|
+        memo.merge(node.name.to_sym => node.content)
+      end
+    end
+
     private
 
     # TODO: Stop wrapping the content in the validator, that should really
