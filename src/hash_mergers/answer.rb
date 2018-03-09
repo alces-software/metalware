@@ -21,11 +21,8 @@ module Metalware
 
       def domain_answers
         alces.questions
-             .section_tree(:domain)
-             .flatten
-             .reject { |_k, value| value.yaml_default.nil? }
-             .map { |key, value| [key, value.yaml_default] }
-             .to_h
+             .root_defaults
+             .reject { |_k, value| value.nil? }
       end
 
       def load_yaml(section, section_name)
