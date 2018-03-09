@@ -60,12 +60,11 @@ module Metalware
       end
 
       def default_input
+        return nil if default.nil?
         type.boolean? ? boolean_default_input : default
       end
 
       def boolean_default_input
-        return nil if default.nil?
-
         # Default for a boolean question which has a previous answer should be
         # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
         default ? 'yes' : 'no'
