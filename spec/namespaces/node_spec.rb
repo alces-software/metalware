@@ -252,7 +252,7 @@ RSpec.describe Metalware::Namespaces::Node do
         Metalware::Plugins.enabled_question_identifier(disabled_plugin)
       answers = {
         enabled_identifier => true,
-        disabled_identitifer => false
+        disabled_identitifer => false,
       }.to_json
       Metalware::Utils.run_command(
         Metalware::Commands::Configure::Node, node.name, answers: answers

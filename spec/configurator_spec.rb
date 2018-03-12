@@ -488,7 +488,7 @@ RSpec.describe Metalware::Configurator do
     let :question do
       {
         identifier: identifier.to_s,
-        question: 'Where was my question set?'
+        question: 'Where was my question set?',
       }
     end
 
@@ -623,4 +623,3 @@ RSpec.describe Metalware::Configurator do
     end
   end
 end
-
