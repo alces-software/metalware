@@ -107,13 +107,13 @@ module Metalware
     end
 
     def ask_questions
-      memo = {}
-      section_question_tree.ask_questions do |question|
-        identifier = question.identifier
-        question.default = default_hash[identifier]
-        memo[identifier] = question.ask
+      {}.tap do |answers|
+        section_question_tree.ask_questions do |question|
+          identifier = question.identifier
+          question.default = default_hash[identifier]
+          answers[identifier] = question.ask
+        end
       end
-      memo
     end
 
     def save_answers(raw_answers)
@@ -136,8 +136,6 @@ module Metalware
           alces.domain.answer
         when Namespaces::Node
           group_for_node(configure_object).answer
-        else
-          {}
         end
       end
     end
