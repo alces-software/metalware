@@ -116,6 +116,28 @@ module Metalware
       memo
     end
 
+    def save_answers(raw_answers)
+      answers = reject_non_saved_answers(raw_answers)
+      saver.section_answers(answers, questions_section, name)
+    end
+
+    def reject_non_saved_answers(answers)
+      answers.reject do |identifier, answer|
+        higher_level_answers[identifier] == answer
+      end
+    end
+
+    def higher_level_answers
+      @higher_level_answers ||= begin
+        case configure_object
+        when Namespaces::Domain
+          alces.questions.root_defaults
+        else
+          {}
+        end
+      end
+    end
+
     def section_question_tree
       alces.questions.section_tree(questions_section)
     end
@@ -161,10 +183,6 @@ module Metalware
       MetalLog.warn orphan_warning unless questions_section == :local
       group_cache.push_orphan(name)
       Namespaces::Node.create(alces, name)
-    end
-
-    def save_answers(answers)
-      saver.section_answers(answers, questions_section, name)
     end
   end
 end

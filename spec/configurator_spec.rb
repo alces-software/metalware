@@ -221,7 +221,7 @@ RSpec.describe Metalware::Configurator do
       )
     end
 
-    xit 'saves nothing if default available and no input given' do
+    it 'saves nothing if default available and no input given' do
       str_ans = 'I am a little teapot!!'
       erb_ans = '<%= I_am_an_erb_tag %>'
 
