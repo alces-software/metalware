@@ -306,7 +306,6 @@ RSpec.describe Metalware::Configurator do
         first_run_configure = make_configurator
         first_run_configure.send(:save_answers, original_answers)
       end
-      expect(first_run_configure.send(:old_answers)).to eq(original_answers)
 
       configure_with_answers([''] * 5)
       expect(answers).to eq(original_answers)

@@ -139,16 +139,6 @@ module Metalware
       @default_hash ||= configure_object.answer.to_h
     end
 
-    # TODO: This isn't being used currently, if this doesn't change in the
-    # near future - remove it!
-    def old_answers
-      @old_answers ||= loader.section_answers(questions_section, name)
-    end
-
-    def root_defaults(identifier)
-      alces.questions.root_defaults[identifier]
-    end
-
     def orphan_warning
       msg = <<-EOF.squish
         Could not find node '#{name}' in genders file. The node will be added
