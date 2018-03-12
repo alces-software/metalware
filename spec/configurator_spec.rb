@@ -482,6 +482,7 @@ RSpec.describe Metalware::Configurator do
     let :group_name { 'my-super-awesome-group' }
     let :group_default { 'I am the group level yaml default' }
     let :node_default { 'I am the node level yaml default' }
+    let :local_default { 'I am the local level yaml default' }
     let :domain_answer { 'I am the domain answer' }
     let :identifier { :question_identifier }
     let :question do
@@ -496,7 +497,8 @@ RSpec.describe Metalware::Configurator do
       define_questions(
         domain: [question.merge(default: original_default)],
         group: [question.merge(default: group_default)],
-        node: [question.merge(default: node_default)]
+        node: [question.merge(default: node_default)],
+        local: [question.merge(default: local_default)]
       )
       configure_with_answers([domain_answer])
     end
@@ -566,14 +568,14 @@ RSpec.describe Metalware::Configurator do
         Metalware::Data.load(path)[identifier]
       end
 
-      def configure_node
-        conf = Metalware::Configurator.for_node(alces, node_name)
-        configure_with_answers([answer], test_obj: conf)
-      end
       AlcesUtils.mock self, :each do
         configure_group(answer_input: group_answer)
         mock_node(node_name, group_name)
-        configure_node
+      end
+
+      before :each do
+        conf = Metalware::Configurator.for_node(alces, node_name)
+        configure_with_answers([answer], test_obj: conf)
       end
 
       # The node yaml default should be ignored and saved like any other
@@ -587,6 +589,35 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the group level' do
         let :answer { group_answer }
         let :saved_answer { nil }
+        include_examples 'gets the answer'
+      end
+    end
+
+    context 'when configuring the local node' do
+      subject do
+        alces.local.answer[identifier]
+      end
+      let :load_answer do
+        path = Metalware::FilePath.local_answers
+        Metalware::Data.load(path)[identifier]
+      end
+
+      before :each do
+        conf = Metalware::Configurator.for_local(alces)
+        configure_with_answers([answer], test_obj: conf)
+      end
+
+      context 'when the answer matches the domain default' do
+        let :answer { domain_answer }
+        let :saved_answer { nil }
+        include_examples 'gets the answer'
+      end
+
+      # The local yaml defaults should be ignored and thus treated like
+      # any other answer
+      context 'when the answer matches the local level default' do
+        let :answer { local_default }
+        let :saved_answer { local_default }
         include_examples 'gets the answer'
       end
     end

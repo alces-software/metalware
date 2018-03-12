@@ -146,8 +146,11 @@ module Metalware
     # Thus the orphan group needs to be manually found
     # All other nodes should already appear in the genders file
     def group_for_node(node)
+      orphan_group = alces.groups.find_by_name 'orphan'
       if group_cache.orphans.include? node.name
-        alces.groups.find_by_name 'orphan'
+        orphan_group
+      elsif node.name == 'local'
+        orphan_group
       else
         node.group
       end
