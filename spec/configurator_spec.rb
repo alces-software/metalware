@@ -479,6 +479,7 @@ RSpec.describe Metalware::Configurator do
 
   context 'with existing domain level answer' do
     let :original_default { 'original-default-answer' }
+    let :group_name { 'my-super-awesome-group' }
     let :group_default { 'I am the group level yaml default' }
     let :domain_answer { 'I am the domain answer' }
     let :identifier { :question_identifier }
@@ -498,25 +499,21 @@ RSpec.describe Metalware::Configurator do
       configure_with_answers([domain_answer])
     end
 
-    context 'when configuring a group' do
-      let :group_name { 'my-super-awesome-group' }
+    def configure_group
+      conf = Metalware::Configurator.for_group(alces, group_name)
+      configure_with_answers([answer], test_obj: conf)
+    end
+    before :each { configure_group }
 
-      # Defined as a method so it doesn't get cached
-      def subject
+    context 'when configuring a group' do
+      subject do
         alces.groups.find_by_name(group_name).answer.send(identifier)
       end
 
-      def load_answer
+      let :load_answer do
         path = Metalware::FilePath.group_answers(group_name)
         Metalware::Data.load(path)[identifier]
       end
-
-      def configure
-        conf = Metalware::Configurator.for_group(alces, group_name)
-        configure_with_answers([answer], test_obj: conf)
-      end
-
-      before :each { configure }
 
       shared_examples 'gets the answer' do
         it 'sets the answer correctly' do
@@ -549,7 +546,7 @@ RSpec.describe Metalware::Configurator do
       end
 
       context 'when the new answer matches a previously saved answer' do
-        before :each { configure }
+        before :each { configure_group }
         let :answer { 'Some random answer' }
         let :saved_answer { answer }
         include_examples 'gets the answer'
