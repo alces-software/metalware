@@ -120,8 +120,8 @@ module Metalware
       alces.questions.section_tree(questions_section)
     end
 
-    def default_hash
-      @default_hash ||= begin
+    def configure_object
+      @configure_object ||= begin
         case questions_section
         when :domain
           alces.domain
@@ -131,8 +131,12 @@ module Metalware
           alces.nodes.find_by_name(name) || create_orphan_node
         else
           raise InternalError, "Unrecognised question section: #{questions_section}"
-        end.answer.to_h
+        end
       end
+    end
+
+    def default_hash
+      @default_hash ||= configure_object.answer.to_h
     end
 
     # TODO: This isn't being used currently, if this doesn't change in the
