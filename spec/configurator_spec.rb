@@ -95,6 +95,7 @@ RSpec.describe Metalware::Configurator do
       count = input.write(input_string)
       input.pos = (input.pos - count) # Move to the start of new content
       test_obj.configure
+      reset_alces
     end
   end
 
@@ -494,7 +495,6 @@ RSpec.describe Metalware::Configurator do
         domain: [question.merge(default: original_default)],
         group: [question.merge(default: group_default)]
       )
-
       configure_with_answers([domain_answer])
     end
 
@@ -503,7 +503,7 @@ RSpec.describe Metalware::Configurator do
 
       # Defined as a method so it doesn't get cached
       def subject
-        reset_alces.groups.find_by_name(group_name).answer.send(identifier)
+        alces.groups.find_by_name(group_name).answer.send(identifier)
       end
 
       def load_answer
@@ -537,7 +537,7 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the domain answer' do
         let :answer { domain_answer }
         let :saved_answer { nil }
-        #include_examples 'gets the answer'
+        include_examples 'gets the answer'
       end
 
       # NOTE: The group level default should be ignored Thus Configurator

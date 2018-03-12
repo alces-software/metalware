@@ -132,6 +132,8 @@ module Metalware
         case configure_object
         when Namespaces::Domain
           alces.questions.root_defaults
+        when Namespaces::Group
+          alces.domain.answer
         else
           {}
         end
