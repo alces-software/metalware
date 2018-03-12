@@ -134,9 +134,22 @@ module Metalware
           alces.questions.root_defaults
         when Namespaces::Group
           alces.domain.answer
+        when Namespaces::Node
+          group_for_node(configure_object).answer
         else
           {}
         end
+      end
+    end
+
+    # Orphan nodes will not appear in the genders file at this point
+    # Thus the orphan group needs to be manually found
+    # All other nodes should already appear in the genders file
+    def group_for_node(node)
+      if group_cache.orphans.include? node.name
+        alces.groups.find_by_name 'orphan'
+      else
+        node.group
       end
     end
 

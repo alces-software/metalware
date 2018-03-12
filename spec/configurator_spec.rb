@@ -501,11 +501,10 @@ RSpec.describe Metalware::Configurator do
       configure_with_answers([domain_answer])
     end
 
-    def configure_group
+    def configure_group(answer_input: answer)
       conf = Metalware::Configurator.for_group(alces, group_name)
-      configure_with_answers([answer], test_obj: conf)
+      configure_with_answers([answer_input], test_obj: conf)
     end
-    before :each { configure_group }
 
     shared_examples 'gets the answer' do
       it 'sets the answer correctly' do
@@ -521,6 +520,7 @@ RSpec.describe Metalware::Configurator do
       subject do
         alces.groups.find_by_name(group_name).answer.send(identifier)
       end
+      before :each { configure_group }
 
       let :load_answer do
         path = Metalware::FilePath.group_answers(group_name)
@@ -557,6 +557,7 @@ RSpec.describe Metalware::Configurator do
 
     context 'when configuring a node' do
       let :node_name { 'my_super_awesome_node' }
+      let :group_answer { 'I am the group level answer' }
       subject do
         alces.nodes.find_by_name(node_name).answer[identifier]
       end
@@ -570,6 +571,7 @@ RSpec.describe Metalware::Configurator do
         configure_with_answers([answer], test_obj: conf)
       end
       AlcesUtils.mock self, :each do
+        configure_group(answer_input: group_answer)
         mock_node(node_name, group_name)
         configure_node
       end
@@ -579,6 +581,12 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the node level default' do
         let :answer { node_default }
         let :saved_answer { node_default }
+        include_examples 'gets the answer'
+      end
+
+      context 'when the answer matches the group level' do
+        let :answer { group_answer }
+        let :saved_answer { nil }
         include_examples 'gets the answer'
       end
     end
