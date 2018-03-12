@@ -30,32 +30,7 @@ module AlcesUtils
           alces
         end
 
-        #
-        # Mocks nodeattr to use faked genders file
-        #
-        before :each do
-          File.open(Metalware::FilePath.genders, 'a') { |f| f.puts('local local') } unless File.exist?(Metalware::FilePath.genders)
-
-          allow(Metalware::NodeattrInterface)
-            .to receive(:nodeattr).and_wrap_original do |method, *args|
-            AlcesUtils.check_and_raise_fakefs_error
-            path = AlcesUtils.nodeattr_genders_file_path(args[0])
-            cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
-            genders_data = File.read(path)
-            tempfile = nil
-            begin
-              FakeFS.without do
-                tempfile = Tempfile.open('mock-genders')
-                tempfile.write(genders_data)
-                tempfile.close
-              end
-              mock_cmd = "nodeattr -f #{tempfile.path}"
-              method.call(cmd, mock_nodeattr: mock_cmd)
-            ensure
-              FakeFS.without { tempfile&.unlink }
-            end
-          end
-        end
+        before :each { AlcesUtils.spoof_nodeattr(self) }
       end
     end
 
@@ -70,6 +45,35 @@ module AlcesUtils
 
     def nodeattr_cmd_trim_f(command)
       command.sub(AlcesUtils::GENDERS_FILE_REGEX, '')
+    end
+
+    # Mocks nodeattr to use faked genders file
+    def spoof_nodeattr(context)
+      context.instance_exec do
+        genders_path = Metalware::FilePath.genders
+        genders_exist = File.exist? genders_path
+        File.write(genders_path, "local local\n") unless genders_exist
+
+        allow(Metalware::NodeattrInterface)
+          .to receive(:nodeattr).and_wrap_original do |method, *args|
+          AlcesUtils.check_and_raise_fakefs_error
+          path = AlcesUtils.nodeattr_genders_file_path(args[0])
+          cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
+          genders_data = File.read(path)
+          tempfile = nil
+          begin
+            FakeFS.without do
+              tempfile = Tempfile.open('mock-genders')
+              tempfile.write(genders_data)
+              tempfile.close
+            end
+            mock_cmd = "nodeattr -f #{tempfile.path}"
+            method.call(cmd, mock_nodeattr: mock_cmd)
+          ensure
+            FakeFS.without { tempfile&.unlink }
+          end
+        end
+      end
     end
 
     def redirect_std(*input, &_b)
