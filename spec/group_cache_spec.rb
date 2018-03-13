@@ -133,4 +133,12 @@ RSpec.describe Metalware::GroupCache do
       expect(new_cache.orphans).to eq([orphan])
     end
   end
+
+  describe '#update' do
+    it 'yields the group cache' do
+      Metalware::GroupCache.update do |cache|
+        expect(cache).to be_a(Metalware::GroupCache)
+      end
+    end
+  end
 end

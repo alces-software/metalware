@@ -29,6 +29,10 @@ module Metalware
   class GroupCache
     include Enumerable
 
+    def self.update
+      yield new
+    end
+
     def initialize(force_reload_file: false)
       @force_reload = force_reload_file
     end
