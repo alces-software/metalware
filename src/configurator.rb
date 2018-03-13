@@ -24,15 +24,11 @@
 
 require 'active_support/core_ext/hash'
 require 'active_support/string_inquirer'
-require 'highline'
-require 'patches/highline'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
 require 'group_cache'
-
-HighLine::Question.prepend Metalware::Patches::HighLine::Question
-HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
+require 'configurator/question'
 
 module Metalware
   class Configurator
@@ -83,7 +79,6 @@ module Metalware
       name: nil
     )
       @alces = alces
-      @highline = HighLine.new
       @questions_section = questions_section
       @name = (questions_section == :local ? 'local' : name)
     end
@@ -93,23 +88,9 @@ module Metalware
       save_answers(answers)
     end
 
-    def questions
-      Enumerator.new do |enum|
-        idx = 0
-        section_question_tree.each do |node_q|
-          content = node_q.content
-          next if content.section
-          content.identifier = content.identifier.to_sym
-          content.question = create_question(content, (idx += 1))
-          enum << [node_q, content]
-        end
-      end
-    end
-
     private
 
     attr_reader :alces,
-                :highline,
                 :questions_section,
                 :name
 
@@ -131,33 +112,24 @@ module Metalware
     # saved. If there is an old_answer then it is the default. In this case
     # it needs to be saved again so it is not lost.
     def ask_questions
-      questions.with_object({}) do |(node_q, content), memo|
-        next unless ask_question_based_on_parent_answer(node_q)
-        raw_answer = content.question.ask(highline)
-        content.answer = if raw_answer == content.default
-                           content.old_answer.nil? ? nil : answer
-                         else
-                           raw_answer
-                         end
-        memo[content.identifier] = content.answer unless content.answer.nil?
-      end
-    end
+      memo = {}
+      section_question_tree.ask_questions do |node_q, idx|
+        identifier = node_q.identifier
+        question = node_q.create_question
 
-    def ask_question_based_on_parent_answer(node_q)
-      # TODO: Use the filter methods on QuestionTree to remove the following
-      # logic. The old Tree::TreeNode structure has non-question structural
-      # nodes within it that needed to be manually filtered
-      # However the new QuestionTree object has filtered enumerators that
-      # remove the need for checking if a node is a question
-      if node_q.question? && !node_q.parent.question?
-        true
-      # Conditionally ask the question if the parent answer is truthy
-      elsif node_q.parent.content.answer
-        true
-      # Otherwise don't ask the question
-      else
-        false
+        question.default = default_hash[identifier]
+        question.progress_indicator = progress_indicator(idx)
+        question.old_answer = old_answers[identifier]
+
+        raw_answer = question.ask
+        answer = if raw_answer == node_q.default
+                   nil # TODO: workout whats going on here
+                 else
+                   raw_answer
+                 end
+        memo[identifier] = answer unless answer.nil?
       end
+      memo
     end
 
     def section_question_tree
@@ -211,160 +183,12 @@ module Metalware
       saver.section_answers(answers, questions_section, name)
     end
 
-    def create_question(properties, index)
-      default = default_hash[properties.identifier]
-
-      # TODO: Remove default as an input and save the default in the
-      # properties object. The same can be done with the old_answer
-      # TODO: Break out the Question object into seperate file
-      Question.new(
-        default: default,
-        properties: properties,
-        old_answer: old_answers[properties.identifier],
-        progress_indicator: progress_indicator(index)
-      )
-    end
-
     def progress_indicator(index)
       "(#{index}/#{total_questions})"
     end
 
     def total_questions
       section_question_tree.questions_length
-    end
-
-    class Question
-      attr_reader \
-        :choices,
-        :default,
-        :identifier,
-        :old_answer,
-        :progress_indicator,
-        :question,
-        :required,
-        :type
-
-      def initialize(
-        default:,
-        old_answer: nil,
-        progress_indicator:,
-        properties:
-      )
-        @choices = properties.choices
-        @default = default
-        @identifier = properties.identifier
-        @old_answer = old_answer
-        @progress_indicator = progress_indicator
-        @question = properties.question
-        @required = !properties.optional
-        @type = type_for(properties[:type])
-      end
-
-      def ask(highline)
-        ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        send(ask_method, highline) { |q| configure_question(q) }
-      end
-
-      private
-
-      def configure_question(highline_question)
-        highline_question.readline = use_readline?
-        highline_question.default = default_input
-        if validate_answer_given?
-          highline_question.validate = ensure_answer_given
-        end
-      end
-
-      def validate_answer_given?
-        # Do not override built-in HighLine validation for `agree` questions,
-        # which will already cause the question to be re-prompted until a valid
-        # answer is given (rather than just accepting any non-empty answer, as
-        # our `ensure_answer_given` does).
-        return false if type.boolean?
-
-        answer_required?
-      end
-
-      # Whether an answer to this question is required at this level; an answer
-      # will not be required if there is already an answer from the question
-      # default or a higher level answer file (the `default`), or if the
-      # question is not `required`.
-      def answer_required?
-        !default && required
-      end
-
-      def use_readline?
-        # Don't provide readline bindings for boolean questions, in this case
-        # they cause an issue where the question is repeated twice if no/bad
-        # input is entered, and they are not really necessary in this case.
-        return false if type.boolean?
-
-        Metalware::Configurator.use_readline
-      end
-
-      def default_input
-        type.boolean? ? boolean_default_input : current_answer_value
-      end
-
-      def boolean_default_input
-        return nil if current_answer_value.nil?
-
-        # Default for a boolean question which has a previous answer should be
-        # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
-        current_answer_value ? 'yes' : 'no'
-      end
-
-      # The answer value this question at this level would currently take.
-      def current_answer_value
-        old_answer.nil? ? default : old_answer
-      end
-
-      def ask_boolean_question(highline)
-        highline.agree(question_text + ' [yes/no]') { |q| yield q }
-      end
-
-      def ask_choice_question(highline)
-        highline.choose(*choices) do |menu|
-          menu.prompt = question_text
-          yield menu
-        end
-      end
-
-      def ask_integer_question(highline)
-        highline.ask(question_text, Integer) { |q| yield q }
-      end
-
-      def ask_string_question(highline)
-        highline.ask(question_text) { |q| yield q }
-      end
-
-      def question_text
-        "#{question.strip} #{progress_indicator}"
-      end
-
-      def type_for(value)
-        ActiveSupport::StringInquirer.new(value || 'string')
-      end
-
-      def ensure_answer_given
-        HighLinePrettyValidateProc.new('a non-empty input') do |input|
-          !input.empty?
-        end
-      end
-
-      class HighLinePrettyValidateProc < Proc
-        def initialize(print_message, &b)
-          # NOTE: print_message is prefaced with "must match" when used by
-          # HighLine validate
-          @print_message = print_message
-          super(&b)
-        end
-
-        # HighLine uses the result of inspect to generate the message to display
-        def inspect
-          @print_message
-        end
-      end
     end
   end
 end

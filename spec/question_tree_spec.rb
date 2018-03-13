@@ -16,7 +16,7 @@ RSpec.describe Metalware::QuestionTree do
     }
   end
 
-  let :identifiers { identifier_hash.values }
+  let :identifiers { identifier_hash.values.map(&:to_sym) }
 
   let :question_hash do
     {
