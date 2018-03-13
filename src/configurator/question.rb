@@ -22,8 +22,7 @@ module Metalware
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        answer = send(ask_method) { |q| configure_question(q) }
-        answer.tap { |a| question_node.answer = a }
+        question_node.answer = send(ask_method) { |q| configure_question(q) }
       end
 
       private
