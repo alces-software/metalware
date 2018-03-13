@@ -8,6 +8,8 @@ module Metalware
   class QuestionTree < Tree::TreeNode
     attr_accessor :answer
 
+    delegate :choices, :optional, :type, to: :content_struct
+
     BASE_TRAVERSALS = [
       :each,
       :breadth_each,
@@ -51,8 +53,6 @@ module Metalware
     def identifiers
       filtered_each.map(&:identifier)
     end
-
-    delegate :choices, :optional, :type, to: :content_struct
 
     def identifier
       content_struct.identifier&.to_sym
