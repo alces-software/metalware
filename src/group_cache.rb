@@ -87,6 +87,18 @@ module Metalware
       save
     end
 
+    def save
+      groups_hash = primary_groups_hash.dup.tap { |x| x.delete(:orphan) }
+      payload = {
+        next_index: next_available_index,
+        primary_groups: groups_hash,
+        orphans: orphans,
+      }
+      Data.dump(file_path.group_cache, payload)
+      @data = nil # Reloads the cached file
+      data
+    end
+
     private
 
     attr_reader :force_reload
@@ -122,18 +134,6 @@ module Metalware
 
     def bump_next_index
       data[:next_index] += 1
-    end
-
-    def save
-      groups_hash = primary_groups_hash.dup.tap { |x| x.delete(:orphan) }
-      payload = {
-        next_index: next_available_index,
-        primary_groups: groups_hash,
-        orphans: orphans,
-      }
-      Data.dump(file_path.group_cache, payload)
-      @data = nil # Reloads the cached file
-      data
     end
   end
 end
