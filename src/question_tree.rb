@@ -24,9 +24,22 @@ module Metalware
 
     def ask_questions
       filtered_each.with_index do |question, index|
-        next unless ask_conditional_question?(question)
+        next unless question.should_ask?
         progress = "(#{index + 1}/#{questions_length})"
         yield create_question(question, progress)
+      end
+    end
+
+    def should_ask?
+      # Ask dependent questions who's parent's answer is truthy
+      if parent.answer
+        true
+      # Do not ask dependent questions who's parent's answer is falsy
+      elsif parent.question?
+        false
+      # However always ask if the parent is not a question
+      else
+        true
       end
     end
 
@@ -91,18 +104,6 @@ module Metalware
 
     # NOTE: The following methods are used by the iterator and thus do not
     # reference the self object
-    def ask_conditional_question?(question)
-      # Ask the question if the parent has a truthy answer
-      if question.parent.answer
-        true
-      # Ask the question if the parent isn't a question (e.g. a section)
-      elsif !question.parent.question?
-        true
-      # Otherwise don't ask the question
-      else
-        false
-      end
-    end
 
     def create_question(question, progress_indicator)
       Configurator::Question.new(question, progress_indicator)
