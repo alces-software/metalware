@@ -15,11 +15,7 @@ module Metalware
 
       attr_reader :alces
 
-      def hash_array(*a)
-        super.unshift(domain_answers)
-      end
-
-      def domain_answers
+      def defaults
         alces.questions
              .root_defaults
              .reject { |_k, value| value.nil? }

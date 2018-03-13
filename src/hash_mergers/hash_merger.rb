@@ -29,13 +29,18 @@ module Metalware
 
       attr_reader :file_path, :loader, :cache
 
+      # Method to be overridden with the hash defaults
+      def defaults
+        {}
+      end
+
       ##
       # hash_array enforces the order in which the hashes are loaded, it is
       # not responsible for how the file is loaded as that is delegated to
       # load_yaml
       #
       def hash_array(groups:, node:)
-        [cached_yaml(:domain)].tap do |arr|
+        [defaults, cached_yaml(:domain)].tap do |arr|
           groups.reverse.each do |group|
             arr.push(cached_yaml(:group, group))
           end
