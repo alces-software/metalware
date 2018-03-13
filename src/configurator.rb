@@ -108,7 +108,7 @@ module Metalware
 
     def ask_questions
       {}.tap do |answers|
-        section_question_tree.ask_questions do |question|
+        section_question_tree.each_question do |question|
           identifier = question.identifier
           question.default = default_hash[identifier]
           answers[identifier] = question.ask

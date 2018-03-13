@@ -22,7 +22,7 @@ module Metalware
       end
     end
 
-    def ask_questions
+    def each_question
       filtered_each.with_index do |question, index|
         next unless question.should_ask?
         progress = "(#{index + 1}/#{questions_length})"
