@@ -91,9 +91,11 @@ RSpec.describe Metalware::Configurator do
 
   def configure_with_input(input_string, test_obj: configurator)
     redirect_stdout do
-      input.write(input_string)
-      input.rewind
+      input.read # Move to the end of the file
+      count = input.write(input_string)
+      input.pos = (input.pos - count) # Move to the start of new content
       test_obj.configure
+      reset_alces
     end
   end
 
@@ -305,7 +307,6 @@ RSpec.describe Metalware::Configurator do
         first_run_configure = make_configurator
         first_run_configure.send(:save_answers, original_answers)
       end
-      expect(first_run_configure.send(:old_answers)).to eq(original_answers)
 
       configure_with_answers([''] * 5)
       expect(answers).to eq(original_answers)
@@ -473,6 +474,152 @@ RSpec.describe Metalware::Configurator do
     it 'skips the child if the parent is false' do
       configure_with_answers(['no', 'yes'])
       expect(answers[:child]).to be(nil)
+    end
+  end
+
+  context 'with existing domain level answer' do
+    let :original_default { 'original-default-answer' }
+    let :group_name { 'my-super-awesome-group' }
+    let :group_default { 'I am the group level yaml default' }
+    let :node_default { 'I am the node level yaml default' }
+    let :local_default { 'I am the local level yaml default' }
+    let :domain_answer { 'I am the domain answer' }
+    let :identifier { :question_identifier }
+    let :question do
+      {
+        identifier: identifier.to_s,
+        question: 'Where was my question set?',
+      }
+    end
+
+    AlcesUtils.mock self, :each do
+      mock_group(group_name)
+      define_questions(
+        domain: [question.merge(default: original_default)],
+        group: [question.merge(default: group_default)],
+        node: [question.merge(default: node_default)],
+        local: [question.merge(default: local_default)]
+      )
+      configure_with_answers([domain_answer])
+    end
+
+    def configure_group(answer_input: answer)
+      conf = Metalware::Configurator.for_group(alces, group_name)
+      configure_with_answers([answer_input], test_obj: conf)
+    end
+
+    shared_examples 'gets the answer' do
+      it 'sets the answer correctly' do
+        expect(subject).to eq(answer)
+      end
+
+      it 'has saved the correct answer' do
+        expect(load_answer).to eq(saved_answer)
+      end
+    end
+
+    context 'when configuring a group' do
+      subject do
+        alces.groups.find_by_name(group_name).answer.send(identifier)
+      end
+      before :each { configure_group }
+
+      let :load_answer do
+        path = Metalware::FilePath.group_answers(group_name)
+        Metalware::Data.load(path)[identifier]
+      end
+
+      context 'when the answer matches the original default' do
+        let :answer { original_default }
+        let :saved_answer { original_default }
+        include_examples 'gets the answer'
+      end
+
+      context 'when the answer matches the domain answer' do
+        let :answer { domain_answer }
+        let :saved_answer { nil }
+        include_examples 'gets the answer'
+      end
+
+      # NOTE: The group level default should be ignored Thus Configurator
+      # should behave as if it is any other random input
+      context 'when the answer matches the group level default' do
+        let :answer { group_default }
+        let :saved_answer { group_default }
+        include_examples 'gets the answer'
+      end
+
+      context 'when the new answer matches a previously saved answer' do
+        before :each { configure_group }
+        let :answer { 'Some random answer' }
+        let :saved_answer { answer }
+        include_examples 'gets the answer'
+      end
+    end
+
+    context 'when configuring a node' do
+      let :node_name { 'my_super_awesome_node' }
+      let :group_answer { 'I am the group level answer' }
+      subject do
+        alces.nodes.find_by_name(node_name).answer[identifier]
+      end
+      let :load_answer do
+        path = Metalware::FilePath.node_answers(node_name)
+        Metalware::Data.load(path)[identifier]
+      end
+
+      AlcesUtils.mock self, :each do
+        configure_group(answer_input: group_answer)
+        mock_node(node_name, group_name)
+      end
+
+      before :each do
+        conf = Metalware::Configurator.for_node(alces, node_name)
+        configure_with_answers([answer], test_obj: conf)
+      end
+
+      # The node yaml default should be ignored and saved like any other
+      # answer
+      context 'when the answer matches the node level default' do
+        let :answer { node_default }
+        let :saved_answer { node_default }
+        include_examples 'gets the answer'
+      end
+
+      context 'when the answer matches the group level' do
+        let :answer { group_answer }
+        let :saved_answer { nil }
+        include_examples 'gets the answer'
+      end
+    end
+
+    context 'when configuring the local node' do
+      subject do
+        alces.local.answer[identifier]
+      end
+      let :load_answer do
+        path = Metalware::FilePath.local_answers
+        Metalware::Data.load(path)[identifier]
+      end
+
+      before :each do
+        conf = Metalware::Configurator.for_local(alces)
+        configure_with_answers([answer], test_obj: conf)
+      end
+
+      context 'when the answer matches the domain default' do
+        let :answer { domain_answer }
+        let :saved_answer { nil }
+        include_examples 'gets the answer'
+      end
+
+      # The local yaml defaults should be ignored and thus treated like
+      # any other answer
+      context 'when the answer matches the local level default' do
+        let :answer { local_default }
+        let :saved_answer { local_default }
+        include_examples 'gets the answer'
+      end
     end
   end
 end

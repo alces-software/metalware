@@ -107,23 +107,59 @@ module Metalware
     end
 
     def ask_questions
-      memo = {}
-      section_question_tree.ask_questions do |question|
-        identifier = question.identifier
-        question.default = default_hash[identifier]
-
-        answer = question.ask
-        memo[identifier] = answer unless answer == root_defaults(identifier)
+      {}.tap do |answers|
+        section_question_tree.ask_questions do |question|
+          identifier = question.identifier
+          question.default = default_hash[identifier]
+          answers[identifier] = question.ask
+        end
       end
-      memo
+    end
+
+    def save_answers(raw_answers)
+      answers = reject_non_saved_answers(raw_answers)
+      saver.section_answers(answers, questions_section, name)
+    end
+
+    def reject_non_saved_answers(answers)
+      answers.reject do |identifier, answer|
+        higher_level_answers[identifier] == answer
+      end
+    end
+
+    def higher_level_answers
+      @higher_level_answers ||= begin
+        case configure_object
+        when Namespaces::Domain
+          alces.questions.root_defaults
+        when Namespaces::Group
+          alces.domain.answer
+        when Namespaces::Node
+          group_for_node(configure_object).answer
+        end
+      end
+    end
+
+    # Orphan nodes will not appear in the genders file at this point
+    # Thus the orphan group needs to be manually found
+    # All other nodes should already appear in the genders file
+    def group_for_node(node)
+      orphan_group = alces.groups.find_by_name 'orphan'
+      if group_cache.orphans.include? node.name
+        orphan_group
+      elsif node.name == 'local'
+        orphan_group
+      else
+        node.group
+      end
     end
 
     def section_question_tree
       alces.questions.section_tree(questions_section)
     end
 
-    def default_hash
-      @default_hash ||= begin
+    def configure_object
+      @configure_object ||= begin
         case questions_section
         when :domain
           alces.domain
@@ -133,18 +169,12 @@ module Metalware
           alces.nodes.find_by_name(name) || create_orphan_node
         else
           raise InternalError, "Unrecognised question section: #{questions_section}"
-        end.answer.to_h
+        end
       end
     end
 
-    # TODO: This isn't being used currently, if this doesn't change in the
-    # near future - remove it!
-    def old_answers
-      @old_answers ||= loader.section_answers(questions_section, name)
-    end
-
-    def root_defaults(identifier)
-      alces.questions.root_defaults[identifier]
+    def default_hash
+      @default_hash ||= configure_object.answer.to_h
     end
 
     def orphan_warning
@@ -169,10 +199,6 @@ module Metalware
       MetalLog.warn orphan_warning unless questions_section == :local
       group_cache.push_orphan(name)
       Namespaces::Node.create(alces, name)
-    end
-
-    def save_answers(answers)
-      saver.section_answers(answers, questions_section, name)
     end
   end
 end

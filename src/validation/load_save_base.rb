@@ -38,8 +38,8 @@ module Metalware
         answer(path.domain_answers, :domain)
       end
 
-      def group_answers(file)
-        answer(path.group_answers(file), :group)
+      def group_answers(name)
+        answer(path.group_answers(name), :group)
       end
 
       def node_answers(name)
