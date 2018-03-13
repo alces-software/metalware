@@ -106,34 +106,20 @@ module Metalware
       @group_cache ||= GroupCache.new
     end
 
-    # Whether the answer is saved depends if it matches the default AND
-    # if it was previously saved. If there is no old_answer, then the
-    # default must be set at a higher level. In this case it shouldn't be
-    # saved. If there is an old_answer then it is the default. In this case
-    # it needs to be saved again so it is not lost.
     def ask_questions
       memo = {}
-      section_question_tree.ask_questions do |node_q, idx|
-        identifier = node_q.identifier
-        question = node_q.create_question
-
+      section_question_tree.ask_questions do |question|
+        identifier = question.identifier
         question.default = default_hash[identifier]
-        question.progress_indicator = progress_indicator(idx)
-        question.old_answer = old_answers[identifier]
 
-        raw_answer = question.ask
-        answer = if raw_answer == node_q.default
-                   nil # TODO: workout whats going on here
-                 else
-                   raw_answer
-                 end
-        memo[identifier] = answer unless answer.nil?
+        answer = question.ask
+        memo[identifier] = answer unless answer == root_defaults(identifier)
       end
       memo
     end
 
     def section_question_tree
-      @section_question_tree ||= loader.configure_section(questions_section)
+      alces.questions.section_tree(questions_section)
     end
 
     def default_hash
@@ -149,6 +135,16 @@ module Metalware
           raise InternalError, "Unrecognised question section: #{questions_section}"
         end.answer.to_h
       end
+    end
+
+    # TODO: This isn't being used currently, if this doesn't change in the
+    # near future - remove it!
+    def old_answers
+      @old_answers ||= loader.section_answers(questions_section, name)
+    end
+
+    def root_defaults(identifier)
+      alces.questions.root_defaults[identifier]
     end
 
     def orphan_warning
@@ -175,20 +171,8 @@ module Metalware
       Namespaces::Node.create(alces, name)
     end
 
-    def old_answers
-      @old_answers ||= loader.section_answers(questions_section, name)
-    end
-
     def save_answers(answers)
       saver.section_answers(answers, questions_section, name)
-    end
-
-    def progress_indicator(index)
-      "(#{index}/#{total_questions})"
-    end
-
-    def total_questions
-      section_question_tree.questions_length
     end
   end
 end

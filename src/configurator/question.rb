@@ -11,12 +11,14 @@ HighLine::Menu.prepend Metalware::Patches::HighLine::Menu
 module Metalware
   class Configurator
     class Question
-      def initialize(question_node)
+      def initialize(question_node, progress_indicator)
         @question_node = question_node
         @highline = HighLine.new
+        @progress_indicator = progress_indicator
       end
 
-      attr_accessor :default, :old_answer, :progress_indicator
+      attr_accessor :default
+      delegate :identifier, to: :question_node
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
@@ -26,10 +28,8 @@ module Metalware
 
       private
 
-      attr_reader :question_node, :highline
-
-      delegate :identifier, :choices, :optional, :text,
-               to: :question_node
+      attr_reader :question_node, :highline, :progress_indicator
+      delegate :choices, :optional, :text, to: :question_node
 
       def configure_question(highline_question)
         highline_question.readline = use_readline?
@@ -59,21 +59,12 @@ module Metalware
         Metalware::Configurator.use_readline
       end
 
+      # Default for a boolean question which has a previous answer should be
+      # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
       def default_input
-        type.boolean? ? boolean_default_input : current_answer_value
-      end
-
-      def boolean_default_input
-        return nil if current_answer_value.nil?
-
-        # Default for a boolean question which has a previous answer should be
-        # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
-        current_answer_value ? 'yes' : 'no'
-      end
-
-      # The answer value this question at this level would currently take.
-      def current_answer_value
-        old_answer.nil? ? default : old_answer
+        return nil if default.nil?
+        return (default ? 'yes' : 'no') if type.boolean?
+        default
       end
 
       def ask_boolean_question

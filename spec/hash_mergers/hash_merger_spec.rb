@@ -24,9 +24,12 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   def build_merged_hash(**hash_input)
-    Metalware::HashMergers.merge(**hash_input) do |template_string|
-      template_string
-    end
+    hm = Metalware::HashMergers
+    b = proc { |t| t }
+    OpenStruct.new(
+      config: hm::Config.new.merge(**hash_input, &b),
+      answer: hm::Answer.new(alces).merge(**hash_input, &b)
+    )
   end
 
   def expect_config_value(my_hash)

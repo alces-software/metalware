@@ -6,8 +6,6 @@ require 'ostruct'
 
 module Metalware
   class QuestionTree < Tree::TreeNode
-    delegate :default, :choices, :optional, :type, to: :os_content
-
     attr_accessor :answer
 
     BASE_TRAVERSALS = [
@@ -27,14 +25,17 @@ module Metalware
     def ask_questions
       filtered_each.with_index do |question, index|
         next unless ask_conditional_question?(question)
-        yield(question, index + 1)
+        progress = "(#{index + 1}/#{questions_length})"
+        yield create_question(question, progress)
       end
     end
 
     def questions_length
-      num = 0
-      filtered_each { |_q| num += 1 }
-      num
+      @questions_length ||= begin
+        num = 0
+        filtered_each { |_q| num += 1 }
+        num
+      end
     end
 
     def question?
@@ -45,20 +46,38 @@ module Metalware
       filtered_each.map(&:identifier)
     end
 
+    # START REMAPPING 'content' to variable names
+    delegate :choices, :optional, :type, to: :os_content
+
     def identifier
       os_content.identifier&.to_sym
     end
 
-    # In `configure.yaml` the text is stored under the `question` key
-    # However "question" isn't super meaningful in this class
     def text
       os_content.question
     end
 
-    # TODO: Eventually change this to a `question` method once the index's
-    # and defaults are rationalised
-    def create_question
-      Configurator::Question.new(self)
+    def yaml_default
+      os_content.default
+    end
+    # END REMAPPING CONTENT
+
+    def section_tree(section)
+      root.children.find { |c| c.name == section }
+    end
+
+    def root_defaults
+      @root_defaults ||= begin
+        section_tree(:domain).filtered_each.reduce({}) do |memo, question|
+          memo.merge(question.identifier => question.yaml_default)
+        end
+      end
+    end
+
+    def flatten
+      filtered_each.reduce({}) do |memo, node|
+        memo.merge(node.identifier => node)
+      end
     end
 
     private
@@ -70,8 +89,8 @@ module Metalware
       OpenStruct.new(content)
     end
 
-    # NOTE: This method is used by the iterator and thus DOES NOT reference
-    # the "self" object. Instead it should use the question passed to it
+    # NOTE: The following methods are used by the iterator and thus do not
+    # reference the self object
     def ask_conditional_question?(question)
       # Ask the question if the parent has a truthy answer
       if question.parent.answer
@@ -83,6 +102,10 @@ module Metalware
       else
         false
       end
+    end
+
+    def create_question(question, progress_indicator)
+      Configurator::Question.new(question, progress_indicator)
     end
   end
 end
