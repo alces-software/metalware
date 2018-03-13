@@ -88,7 +88,7 @@ module Metalware
       end
 
       def questions_in_section
-        loader.flattened_configure_section(section)
+        loader.section_tree(section).flatten
       end
 
       def validation_hash
