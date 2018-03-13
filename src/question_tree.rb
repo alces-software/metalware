@@ -52,7 +52,6 @@ module Metalware
       filtered_each.map(&:identifier)
     end
 
-    # START REMAPPING 'content' to variable names
     delegate :choices, :optional, :type, to: :content_struct
 
     def identifier
@@ -66,7 +65,6 @@ module Metalware
     def yaml_default
       content_struct.default
     end
-    # END REMAPPING CONTENT
 
     def section_tree(section)
       root.children.find { |c| c.name == section }
@@ -94,9 +92,6 @@ module Metalware
     def content_struct
       OpenStruct.new(content)
     end
-
-    # NOTE: The following methods are used by the iterator and thus do not
-    # reference the self object
 
     def create_question(question, progress_indicator)
       Configurator::Question.new(question, progress_indicator)
