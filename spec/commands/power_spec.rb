@@ -72,15 +72,25 @@ RSpec.describe Metalware::Commands::Power do
         allow(
           Metalware::SystemCommand
         ).to receive(:run)
-          .with(/ipmitool/)
+          .with(/ipmitool -H node01/)
+          .once
           .and_raise(Metalware::SystemCommandError, 'error123')
+        allow(
+          Metalware::SystemCommand
+        ).to receive(:run)
+          .twice
+          .with(/ipmitool -H node0[23]/)
+          .and_return('output123')
 
         expect do
           output = run_power('nodes', 'on', gender: true)
+          lines = output.lines.map(&:strip)
 
-          node_names.each do |name|
-            expect(output).to include("#{name}: error12")
-          end
+          expect(lines).to eq([
+            'node01: error123',
+            'node02: output123',
+            'node03: output123',
+          ])
         end.not_to raise_error
       end
     end
