@@ -84,15 +84,19 @@ module Metalware
     end
 
     def configure(answers = nil)
-      answers ||= ask_questions
-      save_answers(answers)
+      GroupCache.update do |cache|
+        @group_cache = cache
+        answers ||= ask_questions
+        save_answers(answers)
+      end
     end
 
     private
 
     attr_reader :alces,
                 :questions_section,
-                :name
+                :name,
+                :group_cache
 
     def loader
       @loader ||= Validation::Loader.new
@@ -100,10 +104,6 @@ module Metalware
 
     def saver
       @saver ||= Validation::Saver.new
-    end
-
-    def group_cache
-      @group_cache ||= GroupCache.new
     end
 
     def ask_questions
@@ -191,7 +191,7 @@ module Metalware
     end
 
     def create_new_group
-      idx = GroupCache.new.next_available_index
+      idx = group_cache.next_available_index
       Namespaces::Group.new(alces, name, index: idx)
     end
 

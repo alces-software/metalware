@@ -30,7 +30,9 @@ module Metalware
     include Enumerable
 
     def self.update
-      yield new
+      cache = new
+      yield cache
+      cache.save
     end
 
     def initialize(force_reload_file: false)
@@ -45,13 +47,11 @@ module Metalware
       return if group?(group)
       primary_groups_hash[group.to_sym] = next_available_index
       bump_next_index
-      save
     end
 
     def remove(group)
       pgh = primary_groups_hash
       pgh.delete(group.to_sym)
-      save
     end
 
     def each
@@ -84,7 +84,6 @@ module Metalware
     def push_orphan(name)
       return if orphans.include?(name)
       orphans.push(name)
-      save
     end
 
     def save

@@ -123,13 +123,15 @@ RSpec.describe Metalware::GroupCache do
       orphans.each do |orphan|
         cache.push_orphan(orphan)
       end
+      cache.save
       expect(new_cache.orphans).to eq(orphans)
     end
 
-    it 'siliently refuses to double add orphans' do
+    it 'silently refuses to double add orphans' do
       orphan = 'node1'
-      new_cache.push_orphan(orphan)
-      new_cache.push_orphan(orphan)
+      cache.push_orphan(orphan)
+      cache.push_orphan(orphan)
+      cache.save
       expect(new_cache.orphans).to eq([orphan])
     end
   end
