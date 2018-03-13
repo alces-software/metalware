@@ -53,18 +53,18 @@ module Metalware
     end
 
     # START REMAPPING 'content' to variable names
-    delegate :choices, :optional, :type, to: :os_content
+    delegate :choices, :optional, :type, to: :content_struct
 
     def identifier
-      os_content.identifier&.to_sym
+      content_struct.identifier&.to_sym
     end
 
     def text
-      os_content.question
+      content_struct.question
     end
 
     def yaml_default
-      os_content.default
+      content_struct.default
     end
     # END REMAPPING CONTENT
 
@@ -91,7 +91,7 @@ module Metalware
     # TODO: Stop wrapping the content in the validator, that should really
     # be done within the QuestionTree object. It doesn't hurt, as you can't
     # double wrap and OpenStruct, it just isn't required
-    def os_content
+    def content_struct
       OpenStruct.new(content)
     end
 
