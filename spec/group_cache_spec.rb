@@ -142,5 +142,16 @@ RSpec.describe Metalware::GroupCache do
         expect(cache).to be_a(Metalware::GroupCache)
       end
     end
+
+    it 'does not save if there is an error' do
+      group = 'my-new-group'
+      expect do
+        Metalware::GroupCache.update do |cache|
+          cache.add group
+          raise 'something has gone wrong'
+        end
+      end.to raise_error(RuntimeError)
+      expect(Metalware::GroupCache.new.group? group).to eq false
+    end
   end
 end
