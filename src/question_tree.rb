@@ -31,16 +31,9 @@ module Metalware
     end
 
     def should_ask?
-      # Ask dependent questions who's parent's answer is truthy
-      if parent.answer
-        true
-      # Do not ask dependent questions who's parent's answer is falsy
-      elsif parent.question?
-        false
-      # However always ask if the parent is not a question
-      else
-        true
-      end
+      top_level_question = !parent.question?
+      parent_is_truthy = parent.answer
+      top_level_question || parent_is_truthy
     end
 
     def questions_length
