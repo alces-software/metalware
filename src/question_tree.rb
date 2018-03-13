@@ -39,11 +39,7 @@ module Metalware
     end
 
     def questions_length
-      @questions_length ||= begin
-        num = 0
-        filtered_each { |_q| num += 1 }
-        num
-      end
+      @questions_length ||= filtered_each.to_a.length
     end
 
     def question?
