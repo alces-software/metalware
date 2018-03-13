@@ -13,39 +13,24 @@ module AlcesUtils
   class << self
     def start(example_group, config: nil)
       example_group.instance_exec do
-        let! :alces do
-          test_alces = Metalware::Namespaces::Alces.new
-          allow(Metalware::Namespaces::Alces).to \
-            receive(:new).and_return(test_alces)
-          test_alces
-        end
-
-        #
-        # Mocks nodeattr to use faked genders file
-        #
+        # Cache the first version of alces to be created
+        # This allows it to be mocked during the spec
+        # It can also be reset in the test (see below)
         before :each do
-          File.open(Metalware::FilePath.genders, 'a') { |f| f.puts('local local') } unless File.exist?(Metalware::FilePath.genders)
-
-          allow(Metalware::NodeattrInterface)
-            .to receive(:nodeattr).and_wrap_original do |method, *args|
-            AlcesUtils.check_and_raise_fakefs_error
-            path = AlcesUtils.nodeattr_genders_file_path(args[0])
-            cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
-            genders_data = File.read(path)
-            tempfile = nil
-            begin
-              FakeFS.without do
-                tempfile = Tempfile.open('mock-genders')
-                tempfile.write(genders_data)
-                tempfile.close
-              end
-              mock_cmd = "nodeattr -f #{tempfile.path}"
-              method.call(cmd, mock_nodeattr: mock_cmd)
-            ensure
-              FakeFS.without { tempfile&.unlink }
+          allow(Metalware::Namespaces::Alces).to \
+            receive(:new).and_wrap_original do |m, *a|
+              @spec_alces ? @spec_alces : (@spec_alces = m.call(*a))
             end
-          end
         end
+
+        # `alces` is defined as a method so it can be reset
+        define_method :alces { Metalware::Namespaces::Alces.new }
+        define_method :reset_alces do
+          @spec_alces = nil
+          alces
+        end
+
+        before :each { AlcesUtils.spoof_nodeattr(self) }
       end
     end
 
@@ -60,6 +45,35 @@ module AlcesUtils
 
     def nodeattr_cmd_trim_f(command)
       command.sub(AlcesUtils::GENDERS_FILE_REGEX, '')
+    end
+
+    # Mocks nodeattr to use faked genders file
+    def spoof_nodeattr(context)
+      context.instance_exec do
+        genders_path = Metalware::FilePath.genders
+        genders_exist = File.exist? genders_path
+        File.write(genders_path, "local local\n") unless genders_exist
+
+        allow(Metalware::NodeattrInterface)
+          .to receive(:nodeattr).and_wrap_original do |method, *args|
+          AlcesUtils.check_and_raise_fakefs_error
+          path = AlcesUtils.nodeattr_genders_file_path(args[0])
+          cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
+          genders_data = File.read(path)
+          tempfile = nil
+          begin
+            FakeFS.without do
+              tempfile = Tempfile.open('mock-genders')
+              tempfile.write(genders_data)
+              tempfile.close
+            end
+            mock_cmd = "nodeattr -f #{tempfile.path}"
+            method.call(cmd, mock_nodeattr: mock_cmd)
+          ensure
+            FakeFS.without { tempfile&.unlink }
+          end
+        end
+      end
     end
 
     def redirect_std(*input, &_b)
@@ -162,8 +176,6 @@ module AlcesUtils
       raise_if_node_exists(name)
       add_node_to_genders_file(name, *genders)
       Metalware::Namespaces::Node.create(alces, name).tap do |node|
-        with_blank_config_and_answer(node)
-        hexadecimal_ip(node)
         new_nodes = alces.nodes.reduce([node], &:push)
         metal_nodes = Metalware::Namespaces::MetalArray.new(new_nodes)
         allow(alces).to receive(:nodes).and_return(metal_nodes)
@@ -176,7 +188,6 @@ module AlcesUtils
       alces.instance_variable_set(:@groups, nil)
       alces.instance_variable_set(:@group_cache, nil)
       group = alces.groups.find_by_name(name)
-      with_blank_config_and_answer(group)
       group
     end
 
