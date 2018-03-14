@@ -68,7 +68,9 @@ module Metalware
 
     def root_defaults
       @root_defaults ||= begin
-        section_default_hash :domain
+        [:local, :node, :group, :domain].reduce({}) do |memo, section|
+          memo.merge(section_default_hash section)
+        end
       end
     end
 
