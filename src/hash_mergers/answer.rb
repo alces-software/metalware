@@ -16,9 +16,7 @@ module Metalware
       attr_reader :alces
 
       def defaults
-        alces.questions
-             .root_defaults
-             .reject { |_k, value| value.nil? }
+        alces.questions.root_defaults
       end
 
       def load_yaml(section, section_name)
