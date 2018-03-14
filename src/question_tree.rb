@@ -68,9 +68,7 @@ module Metalware
 
     def root_defaults
       @root_defaults ||= begin
-        section_tree(:domain).filtered_each.reduce({}) do |memo, question|
-          memo.merge(question.identifier => question.yaml_default)
-        end
+        section_default_hash :domain
       end
     end
 
@@ -81,6 +79,12 @@ module Metalware
     end
 
     private
+
+    def section_default_hash(section)
+      section_tree(section).filtered_each.reduce({}) do |memo, question|
+        memo.merge(question.identifier => question.yaml_default)
+      end
+    end
 
     # TODO: Stop wrapping the content in the validator, that should really
     # be done within the QuestionTree object. It doesn't hurt, as you can't
