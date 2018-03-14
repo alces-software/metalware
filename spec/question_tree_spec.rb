@@ -174,7 +174,7 @@ RSpec.describe Metalware::QuestionTree do
       context "when called on the '#{section}' section" do
         subject { tree.section_tree(section) }
 
-        it "only uses the domain question's default" do
+        it 'uses the merged default hash' do
           expect(subject.root_defaults).to eq(correct_defaults)
         end
       end
