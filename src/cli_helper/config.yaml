@@ -284,14 +284,15 @@ commands:
           node name in the hunter cache
 
   ipmi:
-    syntax: metal ipmi NODE_IDENTIFIER COMMAND [options]
+    syntax: metal ipmi NODE_IDENTIFIER [COMMAND] [options]
     summary: Perform ipmi commands on single or multiple machines
     description: >
        Perform ipmi commands on single or multiple machines
     action: Commands::Ipmi
     options:
       - *gender_option
-      - tags: [-c, -k, --command]
+      - tags: [-k, -c, --command LEGACY_COMMAND]
+        type: String
         description: >
           Legacy tags used to specify the input. Their use has been
           deprecated by the COMMAND input.
