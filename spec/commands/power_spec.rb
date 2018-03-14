@@ -87,10 +87,10 @@ RSpec.describe Metalware::Commands::Power do
           lines = output.lines.map(&:strip)
 
           expect(lines).to eq([
-            'node01: error123',
-            'node02: output123',
-            'node03: output123',
-          ])
+                                'node01: error123',
+                                'node02: output123',
+                                'node03: output123',
+                              ])
         end.not_to raise_error
       end
     end

@@ -137,6 +137,15 @@ RSpec.describe Metalware::QuestionTree do
       { identifier: 'local_question' }
     end
 
+    let :correct_defaults do
+      {
+        domain_question[:identifier].to_sym => 'domain_default',
+        group_question[:identifier].to_sym => 'group_default',
+        node_question[:identifier].to_sym => 'node_default',
+        local_question[:identifier].to_sym => 'local_default',
+      }
+    end
+
     let :question_hash do
       {
         domain: make('domain_default', domain_question),
@@ -165,9 +174,8 @@ RSpec.describe Metalware::QuestionTree do
       context "when called on the '#{section}' section" do
         subject { tree.section_tree(section) }
 
-        it "only uses the domain question's default" do
-          defaults = { domain_question: 'domain_default' }
-          expect(subject.root_defaults).to eq(defaults)
+        it 'uses the merged default hash' do
+          expect(subject.root_defaults).to eq(correct_defaults)
         end
       end
     end
