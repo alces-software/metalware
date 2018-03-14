@@ -22,8 +22,7 @@ module Metalware
 
       def ask
         ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        answer = send(ask_method) { |q| configure_question(q) }
-        answer.tap { |a| question_node.answer = a }
+        question_node.answer = send(ask_method) { |q| configure_question(q) }
       end
 
       private
@@ -59,12 +58,17 @@ module Metalware
         Metalware::Configurator.use_readline
       end
 
+      def default_input
+        return human_readable_boolean_default if type.boolean?
+        default
+      end
+
+
       # Default for a boolean question which has a previous answer should be
       # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
-      def default_input
+      def human_readable_boolean_default
         return nil if default.nil?
-        return (default ? 'yes' : 'no') if type.boolean?
-        default
+        default ? 'yes' : 'no'
       end
 
       def ask_boolean_question
