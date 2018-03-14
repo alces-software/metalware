@@ -32,12 +32,11 @@ module Metalware
     class Ipmi < CommandHelpers::BaseCommand
       class Command
         TWO_COMMANDS_ERROR = <<~EOF.squish
-          The regular COMMAND input can not be used with a LEGACY_COMMAND
-          flag
+          The COMMAND input can not be used with a LEGACY_COMMAND flag
         EOF
 
         NO_COMMAND_ERROR = <<~EOF.squish
-          No command given. Refer to 'metal ipmi -h' for assistance
+          No command given. Use --help for more information
         EOF
 
         def self.parse(args, options)
@@ -89,7 +88,7 @@ module Metalware
       end
 
       def command_argument
-        args[1]
+        Command.parse(args, options)
       end
 
       # By default the arguments passed to `ipmitool` are the same as the
