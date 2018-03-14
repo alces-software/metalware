@@ -137,7 +137,7 @@ module Metalware
         when Namespaces::Node
           group_for_node(configure_object).answer
         end
-      end.to_h # Ensure the un-rendered answer is used
+      end.to_h # Ensure the un-rendered answer are used
     end
 
     # Orphan nodes will not appear in the genders file at this point
