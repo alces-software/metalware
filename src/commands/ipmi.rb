@@ -43,9 +43,9 @@ module Metalware
           regular_command = (args.length > 1 ? args[1] : nil)
           two_commands = regular_command && options.command
           raise InvalidInput, TWO_COMMANDS_ERROR if two_commands
-          (regular_command || options.command).tap do |command|
-            raise InvalidInput, NO_COMMAND_ERROR unless command
-          end
+          command = (regular_command || options.command)
+          raise InvalidInput, NO_COMMAND_ERROR unless command
+          command
         end
       end
 
