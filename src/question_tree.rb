@@ -69,7 +69,7 @@ module Metalware
     def root_defaults
       @root_defaults ||= begin
         Constants::CONFIGURE_SECTIONS.reverse.reduce({}) do |memo, section|
-          memo.merge(section_default_hash section)
+          memo.merge(section_default_hash(section))
         end
       end
     end
