@@ -7,6 +7,10 @@
    merging all entries for its pre-releases/release candidates under a new
    heading).
 
+   When updating the CHANGELOG include a reference to the issue where each
+   bug/feature was initially reported/requested, or a reference to the pull
+   request which completed it for changes which were not reported by users.
+
 2. Merge everything which should be released into `master`, and push this.
 
 3. Appropriately tag this release on GitHub, in the format
