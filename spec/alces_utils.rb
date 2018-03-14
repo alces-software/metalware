@@ -184,7 +184,7 @@ module AlcesUtils
 
     def mock_group(name)
       AlcesUtils.check_and_raise_fakefs_error
-      group_cache.add(name)
+      group_cache { |c| c.add(name) }
       alces.instance_variable_set(:@groups, nil)
       alces.instance_variable_set(:@group_cache, nil)
       group = alces.groups.find_by_name(name)
@@ -217,7 +217,7 @@ module AlcesUtils
     end
 
     def group_cache
-      @group_cache ||= Metalware::GroupCache.new
+      Metalware::GroupCache.update { |c| yield c }
     end
 
     def hash_object(h = {})

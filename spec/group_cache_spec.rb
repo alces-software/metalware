@@ -123,14 +123,35 @@ RSpec.describe Metalware::GroupCache do
       orphans.each do |orphan|
         cache.push_orphan(orphan)
       end
+      cache.save
       expect(new_cache.orphans).to eq(orphans)
     end
 
-    it 'siliently refuses to double add orphans' do
+    it 'silently refuses to double add orphans' do
       orphan = 'node1'
-      new_cache.push_orphan(orphan)
-      new_cache.push_orphan(orphan)
+      cache.push_orphan(orphan)
+      cache.push_orphan(orphan)
+      cache.save
       expect(new_cache.orphans).to eq([orphan])
+    end
+  end
+
+  describe '#update' do
+    it 'yields the group cache' do
+      Metalware::GroupCache.update do |cache|
+        expect(cache).to be_a(Metalware::GroupCache)
+      end
+    end
+
+    it 'does not save if there is an error' do
+      group = 'my-new-group'
+      expect do
+        Metalware::GroupCache.update do |cache|
+          cache.add group
+          raise 'something has gone wrong'
+        end
+      end.to raise_error(RuntimeError)
+      expect(Metalware::GroupCache.new.group? group).to eq false
     end
   end
 end

@@ -36,7 +36,6 @@ module Metalware
 
         def setup
           @group_name = args.first
-          @cache = GroupCache.new
         end
 
         def configurator
@@ -49,7 +48,7 @@ module Metalware
         end
 
         def custom_configuration
-          cache.add(group_name)
+          GroupCache.update { |c| c.add group_name }
         end
       end
     end
