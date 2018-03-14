@@ -30,6 +30,26 @@ require 'vm'
 module Metalware
   module Commands
     class Ipmi < CommandHelpers::BaseCommand
+      class Command
+        TWO_COMMANDS_ERROR = <<~EOF.squish
+          The regular COMMAND input can not be used with a LEGACY_COMMAND
+          flag
+        EOF
+
+        NO_COMMAND_ERROR = <<~EOF.squish
+          No command given. Refer to 'metal ipmi -h' for assistance
+        EOF
+
+        def self.parse(args, options)
+          regular_command = (args.length > 1 ? args[1] : nil)
+          two_commands = regular_command && options.command
+          raise InvalidInput, TWO_COMMANDS_ERROR if two_commands
+          (regular_command || options.command).tap do |command|
+            raise InvalidInput, NO_COMMAND_ERROR unless command
+          end
+        end
+      end
+
       private
 
       prepend CommandHelpers::NodeIdentifier
