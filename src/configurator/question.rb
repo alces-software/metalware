@@ -63,7 +63,6 @@ module Metalware
         default
       end
 
-
       # Default for a boolean question which has a previous answer should be
       # set to the input HighLine's `agree` expects, i.e. 'yes' or 'no'.
       def human_readable_boolean_default
