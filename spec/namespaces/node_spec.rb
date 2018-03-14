@@ -238,17 +238,25 @@ RSpec.describe Metalware::Namespaces::Node do
           ].each do |plugin|
             Metalware::Plugins.activate!(plugin)
           end
-
-          # Enable/disable plugins for node as needed.
-          answers = {
-            Metalware::Plugins.enabled_question_identifier(enabled_plugin) => true,
-            Metalware::Plugins.enabled_question_identifier(disabled_plugin) => false,
-          }.to_json
-          Metalware::Utils.run_command(
-            Metalware::Commands::Configure::Node, node.name, answers: answers
-          )
         end
       end
+
+      # NOTE: Must be after fs setup otherwise the initially spoofed
+      # genders file will be deleted
+      AlcesUtils.spoof_nodeattr(self)
+
+      # Enable/disable plugins for node as needed.
+      enabled_identifier = \
+        Metalware::Plugins.enabled_question_identifier(enabled_plugin)
+      disabled_identitifer = \
+        Metalware::Plugins.enabled_question_identifier(disabled_plugin)
+      answers = {
+        enabled_identifier => true,
+        disabled_identitifer => false,
+      }.to_json
+      Metalware::Utils.run_command(
+        Metalware::Commands::Configure::Node, node.name, answers: answers
+      )
     end
 
     it 'only includes plugins enabled for node' do

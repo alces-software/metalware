@@ -11,7 +11,7 @@ RSpec.describe Metalware::Commands::Power do
       Metalware::Utils.run_command(
         Metalware::Commands::Power, node_identifier, command, **options
       )
-    end
+    end[:stdout].read
   end
 
   describe 'when run on bare metal' do
@@ -58,10 +58,40 @@ RSpec.describe Metalware::Commands::Power do
         node_names.each do |name|
           expect(Metalware::SystemCommand).to receive(:run).with(
             "ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword chassis power on"
-          ).ordered
+          ).ordered.and_return('output123')
         end
 
-        run_power('nodes', 'on', gender: true, sleep: 0.5)
+        output = run_power('nodes', 'on', gender: true, sleep: 0.5)
+
+        node_names.each do |name|
+          expect(output).to include("#{name}: output123")
+        end
+      end
+
+      it 'does not error when individual ipmi commands error' do
+        allow(
+          Metalware::SystemCommand
+        ).to receive(:run)
+          .with(/ipmitool -H node01/)
+          .once
+          .and_raise(Metalware::SystemCommandError, 'error123')
+        allow(
+          Metalware::SystemCommand
+        ).to receive(:run)
+          .twice
+          .with(/ipmitool -H node0[23]/)
+          .and_return('output123')
+
+        expect do
+          output = run_power('nodes', 'on', gender: true)
+          lines = output.lines.map(&:strip)
+
+          expect(lines).to eq([
+            'node01: error123',
+            'node02: output123',
+            'node03: output123',
+          ])
+        end.not_to raise_error
       end
     end
   end

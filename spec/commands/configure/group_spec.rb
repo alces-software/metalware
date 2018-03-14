@@ -36,6 +36,10 @@ RSpec.describe Metalware::Commands::Configure::Group do
     )
   end
 
+  def update_cache
+    Metalware::GroupCache.update { |c| yield c }
+  end
+
   def new_cache
     Metalware::GroupCache.new
   end
@@ -77,7 +81,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
     context 'when `cache/groups.yaml` exists' do
       it 'inserts primary group if new' do
         filesystem.test do
-          new_cache.add('first_group')
+          update_cache { |c| c.add('first_group') }
 
           run_configure_group 'second_group'
 
@@ -91,7 +95,9 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
       it 'does nothing if primary group already presnt' do
         filesystem.test do
-          ['first_group', 'second_group'].each { |g| new_cache.add(g) }
+          ['first_group', 'second_group'].each do |group|
+            update_cache { |c| c.add(group) }
+          end
 
           run_configure_group 'second_group'
 

@@ -41,18 +41,14 @@ module Metalware
           Validation::Configure.new(combined_configure_data).tree
       end
 
-      # Returns a tree
+      # TODO: Remove this method
       def configure_section(section)
-        question_tree.children.find { |c| c.name == section }
+        question_tree.section_tree(section)
       end
 
-      # Returns a hash of identifiers and questions
+      # TODO: Remove this method
       def flattened_configure_section(section)
-        section_root = configure_section(section)
-        section_root.each_with_object({}) do |node, memo|
-          next if section_root == node
-          memo[node.name.to_sym] = node.content
-        end
+        question_tree.section_tree(section).flatten
       end
 
       def group_cache

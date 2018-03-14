@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2018.1.0-rc7] - 2018-03-08
+## [2018.1.0-rc9] - 2018-03-14
+
+- Fixed various issues when `configure`ing where answers incorrectly
+  would/would not be saved depending on the current higher level answers and
+  defaults (https://github.com/alces-software/metalware/issues/330).
+- Fixed inconsistent and undocumented overriding of defaults at different
+  levels (https://github.com/alces-software/metalware/pull/335).
+- Fixed `power` and `ipmi` commands run on groups to not fail, and just report
+  the error, if any individual `ipmitool` command(s) run for individual nodes
+  fail (https://github.com/alces-software/metalware/issues/337).
+- Fixed issue where orphan nodes would be saved in the group cache even if the
+  `configure` command to add them is cancelled before completion
+  (https://github.com/alces-software/metalware/issues/341).
+
+## [2018.1.0-rc8] - 2018-03-08
 
 - Fixed issue where boolean questions would accept invalid answers the initial
   time a particular `configure` command was run
