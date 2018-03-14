@@ -291,6 +291,10 @@ commands:
     action: Commands::Ipmi
     options:
       - *gender_option
+      - tags: [-c, -k, --command]
+        description: >
+          Legacy tags used to specify the input. Their use has been
+          deprecated by the COMMAND input.
 
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]
