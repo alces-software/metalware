@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2018.1.0-rc10] - 2018-03-20
+
+- Fixed issue with defaults not being set for non-domain level questions
+  (https://github.com/alces-software/metalware/issues/345).
+- Support various options to `ipmi` command that were accepted in previous
+  versions of Metalware (`--command`/`-c`/`-k`)
+  (https://github.com/alces-software/metalware/issues/348).
+
 ## [2018.1.0-rc9] - 2018-03-14
 
 - Fixed various issues when `configure`ing where answers incorrectly
