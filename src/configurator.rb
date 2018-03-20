@@ -108,7 +108,7 @@ module Metalware
 
     def ask_questions
       {}.tap do |answers|
-        section_question_tree.ask_questions do |question|
+        section_question_tree.each_question do |question|
           identifier = question.identifier
           question.default = default_hash[identifier]
           answers[identifier] = question.ask
@@ -137,7 +137,7 @@ module Metalware
         when Namespaces::Node
           group_for_node(configure_object).answer
         end
-      end
+      end.to_h # Ensure the un-rendered answer are used
     end
 
     # Orphan nodes will not appear in the genders file at this point

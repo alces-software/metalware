@@ -483,7 +483,7 @@ RSpec.describe Metalware::Configurator do
     let :group_default { 'I am the group level yaml default' }
     let :node_default { 'I am the node level yaml default' }
     let :local_default { 'I am the local level yaml default' }
-    let :domain_answer { 'I am the domain answer' }
+    let :domain_answer { 'Domain answer with ERB, <%= node.name %>' }
     let :identifier { :question_identifier }
     let :question do
       {
@@ -520,7 +520,7 @@ RSpec.describe Metalware::Configurator do
 
     context 'when configuring a group' do
       subject do
-        alces.groups.find_by_name(group_name).answer.send(identifier)
+        alces.groups.find_by_name(group_name).answer.to_h[identifier]
       end
       before :each { configure_group }
 
@@ -561,7 +561,7 @@ RSpec.describe Metalware::Configurator do
       let :node_name { 'my_super_awesome_node' }
       let :group_answer { 'I am the group level answer' }
       subject do
-        alces.nodes.find_by_name(node_name).answer[identifier]
+        alces.nodes.find_by_name(node_name).answer.to_h[identifier]
       end
       let :load_answer do
         path = Metalware::FilePath.node_answers(node_name)
@@ -595,7 +595,7 @@ RSpec.describe Metalware::Configurator do
 
     context 'when configuring the local node' do
       subject do
-        alces.local.answer[identifier]
+        alces.local.answer.to_h[identifier]
       end
       let :load_answer do
         path = Metalware::FilePath.local_answers

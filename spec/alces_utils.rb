@@ -19,7 +19,7 @@ module AlcesUtils
         before :each do
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_wrap_original do |m, *a|
-              @spec_alces ? @spec_alces : (@spec_alces = m.call(*a))
+              @spec_alces ||= m.call(*a)
             end
         end
 

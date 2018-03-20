@@ -41,14 +41,8 @@ module Metalware
           Validation::Configure.new(combined_configure_data).tree
       end
 
-      # TODO: Remove this method
-      def configure_section(section)
+      def section_tree(section)
         question_tree.section_tree(section)
-      end
-
-      # TODO: Remove this method
-      def flattened_configure_section(section)
-        question_tree.section_tree(section).flatten
       end
 
       def group_cache

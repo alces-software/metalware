@@ -29,6 +29,11 @@ module Metalware
     class Console < Ipmi
       private
 
+      # Empty `setup` as we want to skip behaviour of `ipmi`'s `setup` method,
+      # which is not relevant for the custom behaviour of `console` (ideally we
+      # wouldn't inherit from it at all, but that's what we do for now).
+      def setup; end
+
       def run
         raise MetalwareError, 'Console not supported on virtual machines' if vm?(node)
         raise MetalwareError, "Unable to connect to #{node.name}" unless valid_connection?

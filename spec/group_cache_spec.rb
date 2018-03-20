@@ -151,7 +151,7 @@ RSpec.describe Metalware::GroupCache do
           raise 'something has gone wrong'
         end
       end.to raise_error(RuntimeError)
-      expect(Metalware::GroupCache.new.group? group).to eq false
+      expect(Metalware::GroupCache.new.group?(group)).to eq false
     end
   end
 end
