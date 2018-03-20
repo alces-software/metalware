@@ -71,7 +71,13 @@ module Metalware
 
       private
 
+      attr_reader :command_argument
+
       prepend CommandHelpers::NodeIdentifier
+
+      def setup
+        @command_argument = Command.parse(args, options)
+      end
 
       def run
         nodes.each do |node|
@@ -105,10 +111,6 @@ module Metalware
           ipmitool -H #{node.name}.bmc -I lanplus #{render_credentials(node)}
           #{arguments}
         COMMAND
-      end
-
-      def command_argument
-        Command.parse(args, options)
       end
 
       # By default the arguments passed to `ipmitool` are the same as the
