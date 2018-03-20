@@ -31,13 +31,13 @@ module Metalware
   module Commands
     class Ipmi < CommandHelpers::BaseCommand
       class Command
-        TWO_COMMANDS_ERROR = <<~EOF.squish
+        TWO_COMMANDS_ERROR = <<~ERROR.squish
           The COMMAND input can not be used with a LEGACY_COMMAND flag
-        EOF
+        ERROR
 
-        NO_COMMAND_ERROR = <<~EOF.squish
+        NO_COMMAND_ERROR = <<~ERROR.squish
           No command given. Use --help for more information
-        EOF
+        ERROR
 
         def self.parse(args, options)
           regular_command = (args.length > 1 ? args[1] : nil)
