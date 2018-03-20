@@ -30,7 +30,7 @@ require 'vm'
 module Metalware
   module Commands
     class Ipmi < CommandHelpers::BaseCommand
-      class Command
+      Command = Struct.new(:args, :options) do
         TWO_COMMANDS_ERROR = <<~ERROR.squish
           The COMMAND input can not be used with a LEGACY_COMMAND flag
         ERROR
@@ -40,12 +40,29 @@ module Metalware
         ERROR
 
         def self.parse(args, options)
-          regular_command = (args.length > 1 ? args[1] : nil)
-          two_commands = regular_command && options.command
-          raise InvalidInput, TWO_COMMANDS_ERROR if two_commands
-          command = (regular_command || options.command)
-          raise InvalidInput, NO_COMMAND_ERROR unless command
-          command
+          new(args, options).parse
+        end
+
+        def parse
+          raise InvalidInput, TWO_COMMANDS_ERROR if multiple_commands_given?
+          raise InvalidInput, NO_COMMAND_ERROR if no_command_given?
+          provided_commands.first
+        end
+
+        def multiple_commands_given?
+          provided_commands.length > 1
+        end
+
+        def no_command_given?
+          provided_commands.none?
+        end
+
+        def provided_commands
+          [command_argument, options.command].reject(&:nil?)
+        end
+
+        def command_argument
+          args[1]
         end
       end
 
