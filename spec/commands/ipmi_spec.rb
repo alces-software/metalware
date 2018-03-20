@@ -80,4 +80,34 @@ RSpec.describe Metalware::Commands::Ipmi do
       include_examples 'runs on each node'
     end
   end
+
+  describe Metalware::Commands::Ipmi::Command do
+    subject { Metalware::Commands::Ipmi::Command }
+    let :regular_command { 'regular_command' }
+    let :options_command { 'options_command' }
+    let :args { [nil, regular_command] }
+    let :options { OpenStruct.new(command: options_command) }
+
+    describe '::parse' do
+      it 'errors if both command inputs are used' do
+        expect do
+          subject.parse(args, options)
+        end.to raise_error Metalware::InvalidInput
+      end
+
+      it 'uses the regular COMMAND input' do
+        expect(subject.parse(args, OpenStruct.new)).to eq(regular_command)
+      end
+
+      it 'uses the options LEGACY_COMMAND input' do
+        expect(subject.parse([nil], options)).to eq(options_command)
+      end
+
+      it 'errors without a command input' do
+        expect do
+          subject.parse([], OpenStruct.new)
+        end.to raise_error Metalware::InvalidInput
+      end
+    end
+  end
 end

@@ -30,9 +30,54 @@ require 'vm'
 module Metalware
   module Commands
     class Ipmi < CommandHelpers::BaseCommand
+      Command = Struct.new(:args, :options) do
+        SEE_HELP = 'Use --help for more information'
+
+        MULTIPLE_COMMANDS_ERROR = <<~ERROR.squish
+          Both command option and argument given but only one may be provided.
+          #{SEE_HELP}
+        ERROR
+
+        NO_COMMAND_ERROR = <<~ERROR.squish
+          No command given. #{SEE_HELP}
+        ERROR
+
+        def self.parse(args, options)
+          new(args, options).parse
+        end
+
+        def parse
+          raise InvalidInput, MULTIPLE_COMMANDS_ERROR if multiple_commands_given?
+          raise InvalidInput, NO_COMMAND_ERROR if no_command_given?
+          provided_commands.first
+        end
+
+        def multiple_commands_given?
+          provided_commands.length > 1
+        end
+
+        def no_command_given?
+          provided_commands.none?
+        end
+
+        def provided_commands
+          [command_argument, options.command].reject(&:nil?)
+        end
+
+        def command_argument
+          args[1]
+        end
+      end
+
       private
 
+      attr_reader :command_argument
+
       prepend CommandHelpers::NodeIdentifier
+
+      def setup
+        @command_argument = Command.parse(args, options)
+      end
 
       def run
         nodes.each do |node|
@@ -66,10 +111,6 @@ module Metalware
           ipmitool -H #{node.name}.bmc -I lanplus #{render_credentials(node)}
           #{arguments}
         COMMAND
-      end
-
-      def command_argument
-        args[1]
       end
 
       # By default the arguments passed to `ipmitool` are the same as the
