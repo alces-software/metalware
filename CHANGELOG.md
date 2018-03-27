@@ -2,70 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2018.1.0-rc10] - 2018-03-20
-
-- Fixed issue with defaults not being set for non-domain level questions
-  (https://github.com/alces-software/metalware/issues/345).
-- Support various options to `ipmi` command that were accepted in previous
-  versions of Metalware (`--command`/`-c`/`-k`)
-  (https://github.com/alces-software/metalware/issues/348).
-
-## [2018.1.0-rc9] - 2018-03-14
-
-- Fixed various issues when `configure`ing where answers incorrectly
-  would/would not be saved depending on the current higher level answers and
-  defaults (https://github.com/alces-software/metalware/issues/330).
-- Fixed inconsistent and undocumented overriding of defaults at different
-  levels (https://github.com/alces-software/metalware/pull/335).
-- Fixed `power` and `ipmi` commands run on groups to not fail, and just report
-  the error, if any individual `ipmitool` command(s) run for individual nodes
-  fail (https://github.com/alces-software/metalware/issues/337).
-- Fixed issue where orphan nodes would be saved in the group cache even if the
-  `configure` command to add them is cancelled before completion
-  (https://github.com/alces-software/metalware/issues/341).
-
-## [2018.1.0-rc8] - 2018-03-08
-
-- Fixed issue where boolean questions would accept invalid answers the initial
-  time a particular `configure` command was run
-  (https://github.com/alces-software/metalware/issues/329).
-
-## [2018.1.0-rc7] - 2018-03-05
-
-- Fixed issue where `console` used incorrect hostname in `ipmitool` command run
-  (https://github.com/alces-software/metalware/issues/326).
-
-## [2018.1.0-rc6] - 2018-03-02
-
-- Fixed issue with non-group genders not working with `ipmi`-based commands
-  (https://github.com/alces-software/metalware/issues/323).
-
-## [2018.1.0-rc5] - 2018-02-28
-
-- Added `overview` command to give overview of state of whole domain and
-  configured groups (https://github.com/alces-software/metalware/issues/284).
-  Note: this requires a new `overview.yaml` file to be present in the repo.
-- Condensed build event output to single line for clarity
-  (https://github.com/alces-software/metalware/issues/287).
-- Fixed issue where `view-answers` did not work for orphan nodes
-  (https://github.com/alces-software/metalware/issues/312).
-
-## [2018.1.0-rc4] - 2018-02-15
-
-- Suppressed output suggesting there might be a problem with Metalware when
-  displaying known user input errors
-  (https://github.com/alces-software/metalware/pull/314).
-
-## [2018.1.0-rc3] - 2018-02-14
-
-- Improved commands which take `-g`/`--group` option so they can operate on any
-  gender specified in the genders file, and changed the long form of this
-  option to `--gender` to reflect this change
-  (https://github.com/alces-software/metalware/pull/306).
-- Fixed `view-answers` commands to work with latest `configure.yaml` format
-  (https://github.com/alces-software/metalware/pull/311).
-
-## [2018.1.0-rc1] - 2018-01-29
+## [2018.1.0] - 2018-03-27
 
 - Added support for conditional Metalware configuration questions.
 - Added `orchestrate` commands for orchestration of VMs via Libvirt in
@@ -80,6 +17,45 @@ All notable changes to this project will be documented in this file.
   node.
 - Added access to plugin namespaces for enabled plugins when templating for
   nodes.
+- Improved commands which take `-g`/`--group` option so they can operate on any
+  gender specified in the genders file, and changed the long form of this
+  option to `--gender` to reflect this change
+  (https://github.com/alces-software/metalware/pull/306).
+- Fixed `view-answers` commands to work with latest `configure.yaml` format
+  (https://github.com/alces-software/metalware/pull/311).
+- Suppressed output suggesting there might be a problem with Metalware when
+  displaying known user input errors
+  (https://github.com/alces-software/metalware/pull/314).
+- Added `overview` command to give overview of state of whole domain and
+  configured groups (https://github.com/alces-software/metalware/issues/284).
+  Note: this requires a new `overview.yaml` file to be present in the repo.
+- Condensed build event output to single line for clarity
+  (https://github.com/alces-software/metalware/issues/287).
+- Fixed issue where `view-answers` did not work for orphan nodes
+  (https://github.com/alces-software/metalware/issues/312).
+- Fixed issue with non-group genders not working with `ipmi`-based commands
+  (https://github.com/alces-software/metalware/issues/323).
+- Fixed issue where `console` used incorrect hostname in `ipmitool` command run
+  (https://github.com/alces-software/metalware/issues/326).
+- Fixed issue where boolean questions would accept invalid answers the initial
+  time a particular `configure` command was run
+  (https://github.com/alces-software/metalware/issues/329).
+- Fixed various issues when `configure`ing where answers incorrectly
+  would/would not be saved depending on the current higher level answers and
+  defaults (https://github.com/alces-software/metalware/issues/330).
+- Fixed inconsistent and undocumented overriding of defaults at different
+  levels (https://github.com/alces-software/metalware/pull/335).
+- Fixed `power` and `ipmi` commands run on groups to not fail, and just report
+  the error, if any individual `ipmitool` command(s) run for individual nodes
+  fail (https://github.com/alces-software/metalware/issues/337).
+- Fixed issue where orphan nodes would be saved in the group cache even if the
+  `configure` command to add them is cancelled before completion
+  (https://github.com/alces-software/metalware/issues/341).
+- Fixed issue with defaults not being set for non-domain level questions
+  (https://github.com/alces-software/metalware/issues/345).
+- Support various options to `ipmi` command that were accepted in previous
+  versions of Metalware (`--command`/`-c`/`-k`)
+  (https://github.com/alces-software/metalware/issues/348).
 - Various other small bug fixes and tweaks.
 
 ## [2017.2.1] - 2018-01-05
