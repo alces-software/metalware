@@ -6,8 +6,8 @@ module Metalware
   module Utils
     class Editor
       class << self
-        def open
-          
+        def open(file)
+          SystemCommand.run("#{editor} #{file}")
         end
 
         def editor

@@ -34,5 +34,22 @@ RSpec.describe Metalware::Utils::Editor do
         end
       end
     end
+
+    describe '#open' do
+      let :file { '/tmp/some-random-file' }
+
+      it 'opens the file in vi' do
+        vi_cmd = "vi #{file}"
+        expect(Metalware::SystemCommand).to \
+          receive(:run).with(vi_cmd).and_call_original
+        thr = Thread.new { subject.open(file) }
+        sleep 0.1
+        expect(thr).to be_alive
+        expect(`ps | grep vi`).to include('vi')
+        thr.kill
+        sleep 0.001 while thr.alive?
+      end
+    end
   end
 end
+
