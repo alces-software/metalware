@@ -4,6 +4,7 @@ require 'utils/editor'
 
 RSpec.describe Metalware::Utils::Editor do
   subject { Metalware::Utils::Editor }
+  let :default_editor { subject::DEFAULT_EDITOR }
 
   context 'with the environment variables unset' do
     before :each do |example|
@@ -12,8 +13,8 @@ RSpec.describe Metalware::Utils::Editor do
     end
 
     describe '#editor' do
-      it 'defaults to vi' do
-        expect(subject.editor).to eq('vi')
+      it 'uses the default editor' do
+        expect(subject.editor).to eq(default_editor)
       end
 
       context 'when $EDITOR is set' do
@@ -42,14 +43,14 @@ RSpec.describe Metalware::Utils::Editor do
 
       let :file { '/tmp/some-random-file' }
 
-      it 'opens the file in vi' do
-        vi_cmd = "vi #{file}"
+      it 'opens the file in the default editor' do
+        cmd = "#{default_editor} #{file}"
         expect(Metalware::SystemCommand).to \
-          receive(:run).with(vi_cmd).and_call_original
+          receive(:run).with(cmd).and_call_original
         thr = Thread.new { subject.open(file) }
         sleep 0.1
         expect(thr).to be_alive
-        expect(`ps | grep vi`).to include('vi')
+        expect(`ps | grep #{default_editor}`).to include(default_editor)
         thr.kill
         sleep 0.001 while thr.alive?
       end
@@ -57,7 +58,7 @@ RSpec.describe Metalware::Utils::Editor do
       it 'detects when the editor has ended' do
         thr = Thread.new { subject.open(file) }
         sleep 0.1
-        pid = `ps | grep vi`.split[0]
+        pid = `ps | grep #{default_editor}`.split[0]
         expect(pid).to match(/\d+/)
         expect do
           Process.kill(9, pid.to_i)
