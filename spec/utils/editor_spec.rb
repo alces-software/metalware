@@ -37,33 +37,15 @@ RSpec.describe Metalware::Utils::Editor do
     end
 
     describe '#open' do
-      after :each do
-        Thread.list.each { |t| t.kill unless t == Thread.current }
-      end
-
       let :file { '/tmp/some-random-file' }
 
       it 'opens the file in the default editor' do
         cmd = "#{default_editor} #{file}"
-        expect(Metalware::SystemCommand).to \
-          receive(:run).with(cmd).and_call_original
+        expect(Metalware::SystemCommand).to receive(:no_capture).with(cmd)
         thr = Thread.new { subject.open(file) }
         sleep 0.1
-        expect(thr).to be_alive
-        expect(`ps | grep #{default_editor}`).to include(default_editor)
         thr.kill
         sleep 0.001 while thr.alive?
-      end
-
-      it 'detects when the editor has ended' do
-        thr = Thread.new { subject.open(file) }
-        sleep 0.1
-        pid = `ps | grep #{default_editor}`.split[0]
-        expect(pid).to match(/\d+/)
-        expect do
-          Process.kill(9, pid.to_i)
-          Timeout::timeout(2) { sleep 0.001 while thr.alive? }
-        end.not_to raise_error
       end
     end
   end

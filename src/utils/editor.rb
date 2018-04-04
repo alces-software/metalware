@@ -9,7 +9,7 @@ module Metalware
 
       class << self
         def open(file)
-          SystemCommand.run("#{editor} #{file}")
+          SystemCommand.no_capture("#{editor} #{file}")
         end
 
         def editor
