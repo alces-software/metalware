@@ -11,7 +11,9 @@ module Metalware
         end
 
         def editor
-          if ENV['EDITOR'].present?
+          if ENV['VISUAL'].present?
+            ENV['VISUAL']
+          elsif ENV['EDITOR'].present?
             ENV['EDITOR']
           else
             'vi'

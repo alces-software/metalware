@@ -23,6 +23,15 @@ RSpec.describe Metalware::Utils::Editor do
         it 'uses the $EDITOR env var' do
           expect(subject.editor).to eq(editor)
         end
+
+        context 'when $VISUAL is set' do
+          let :visual { 'VISUAL-ENV-VAR' }
+          before :each { ENV['VISUAL'] = visual }
+
+          it 'uses the $VISUAL env var' do
+            expect(subject.editor).to eq(visual)
+          end
+        end
       end
     end
   end
