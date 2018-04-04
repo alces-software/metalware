@@ -7,8 +7,8 @@ RSpec.describe Metalware::Utils::Editor do
 
   context 'with the environment variables unset' do
     before :each do |example|
-      ENV['VISUAL'] = nil
-      ENV['EDITOR'] = nil
+      ENV.delete('VISUAL')
+      ENV.delete('EDITOR')
     end
 
     describe '#editor' do
