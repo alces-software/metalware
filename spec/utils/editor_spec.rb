@@ -15,6 +15,15 @@ RSpec.describe Metalware::Utils::Editor do
       it 'defaults to vi' do
         expect(subject.editor).to eq('vi')
       end
+
+      context 'when $EDITOR is set' do
+        let :editor { 'EDITOR-ENV-VAR' }
+        before :each { ENV['EDITOR'] = editor }
+
+        it 'uses the $EDITOR env var' do
+          expect(subject.editor).to eq(editor)
+        end
+      end
     end
   end
 end

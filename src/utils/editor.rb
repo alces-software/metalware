@@ -11,7 +11,11 @@ module Metalware
         end
 
         def editor
-          'vi'
+          if ENV['EDITOR'].present?
+            ENV['EDITOR']
+          else
+            'vi'
+          end
         end
       end
     end
