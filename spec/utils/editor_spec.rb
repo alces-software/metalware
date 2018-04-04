@@ -36,6 +36,10 @@ RSpec.describe Metalware::Utils::Editor do
     end
 
     describe '#open' do
+      after :each do
+        Thread.list.each { |t| t.kill unless t == Thread.current }
+      end
+
       let :file { '/tmp/some-random-file' }
 
       it 'opens the file in vi' do
@@ -48,6 +52,17 @@ RSpec.describe Metalware::Utils::Editor do
         expect(`ps | grep vi`).to include('vi')
         thr.kill
         sleep 0.001 while thr.alive?
+      end
+
+      it 'detects when the editor has ended' do
+        thr = Thread.new { subject.open(file) }
+        sleep 0.1
+        pid = `ps | grep vi`.split[0]
+        expect(pid).to match(/\d+/)
+        expect do
+          Process.kill(9, pid.to_i)
+          Timeout::timeout(2) { sleep 0.001 while thr.alive? }
+        end.not_to raise_error
       end
     end
   end
