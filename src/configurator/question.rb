@@ -60,7 +60,7 @@ module Metalware
 
       def default_input
         return human_readable_boolean_default if type.boolean?
-        default
+        default.to_s
       end
 
       # Default for a boolean question which has a previous answer should be
