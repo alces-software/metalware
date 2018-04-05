@@ -29,9 +29,9 @@ The template will then be opened using the system editor (see issues). Before
 being saved to the final location in `/var/lib/metalware/assets`. See
 `Editing` for more details on this process.
 
-In short, the validation will occur when the file is saved. This means the
-initial "templates" do not need to be valid `YAML`. Be careful of the file
-extension as it might not be `.yaml` (see issues).
+In short, the validation will occur when the file is saved. Currently the
+template file must be valid `YAML`. Blank fields will therefore need to be
+represented with `nill`.
 
 As this is a new record, the `type` is required for the command. This tells
 `metalware` which "template" should be used. The templates should be stored
@@ -52,15 +52,16 @@ been validated. This means the files can not be edited in place. Instead the
 existing record should be moved to a temporary file which is then edited.
 
 Once the user has finished editing the file and saves it, `metalware` should
-detect the editor has closed and continue on with the process. This should be
-the case when using `POpen.capture3`, however it might need to poll the
+detect the editor has closed and continue on with the process. This should 
+be the case when using `POpen.capture3`, however it might need to poll the
 editor `PID` until it is closed.
 
 At this stage, only basic validation of the file is required. The file is
 valid if it can be reloaded as a hash using `Data.load`. If the file is not
 valid, then the process should end with an error and point the user to the
 bad file's temp location. NOTE: Ruby does automatically delete temporary
-files, so special handling maybe required to prevent this.
+files, so special handling maybe required to prevent this. Validation can
+also occur on open.
 
 At this stage re-editing a previously bad file does not need to be supported.
 This can be added in the future.
@@ -102,13 +103,6 @@ NOTE: Should a single record, be able to link to multiple nodes?
   (instead of subdirectories). This is because all assets need a unique name
   so they can be listed under `alces`. Using the name as the `filename` will
   ensure uniqueness and make accessing the file easier.
-- TEMPLATE FILE EXTENSION: The templates aren't particularly useful if they
-  need to be pre-populated in order to make them valid `YAML`. Instead it is
-  intended to open the file in the editor and then check if it is valid once
-  it has been saved. This means the repo will contain invalid `YAML`. To
-  prevent our text editors, linters, and rubycop from having a heart attack;
-  a different file extension should be used. Possible `.yaml.raw`, however
-  this is open to suggestions.
 - HASH OR ROS: Through out this document the term 'hash' has been used
   loosely. When referring to the object loaded into the namespace, it needs
   to be at least a `RecursiveOpenStruct`. However if the tags also need to be
