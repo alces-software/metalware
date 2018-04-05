@@ -59,18 +59,14 @@ module AlcesUtils
           AlcesUtils.check_and_raise_fakefs_error
           path = AlcesUtils.nodeattr_genders_file_path(args[0])
           cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
-          genders_data = File.read(path)
-          tempfile = nil
+          genders_data = File.read(path).gsub('`', '"')
+          tempfile = `mktemp /tmp/genders.XXXXX`.chomp
           begin
-            FakeFS.without do
-              tempfile = Tempfile.open('mock-genders')
-              tempfile.write(genders_data)
-              tempfile.close
-            end
-            mock_cmd = "nodeattr -f #{tempfile.path}"
-            method.call(cmd, mock_nodeattr: mock_cmd)
+            `echo "#{genders_data}" > #{tempfile}`
+            nodeattr_cmd = "nodeattr -f #{tempfile}"
+            method.call(cmd, mock_nodeattr: nodeattr_cmd)
           ensure
-            FakeFS.without { tempfile&.unlink }
+            `rm #{tempfile} -f`
           end
         end
       end
