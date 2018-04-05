@@ -57,7 +57,7 @@ module Metalware
       end
 
       def answer_files
-	      File.join(metalware_data, 'answers')	
+        File.join(metalware_data, 'answers')
       end
 
       def server_config
@@ -148,10 +148,10 @@ module Metalware
         '/var/log/metalware'
       end
 
-      def asset_template(type) 
+      def asset_template(type)
         File.join('/var/lib/metalware/repo/assets', "#{type}.yaml")
       end
-    
+
       def asset_final(name)
         File.join('/var/lib/metalware/assets', "#{name}.yaml")
       end
