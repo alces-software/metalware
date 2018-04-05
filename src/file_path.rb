@@ -57,7 +57,7 @@ module Metalware
       end
 
       def answer_files
-        '/var/lib/metalware/answers'
+	      File.join(metalware_data, 'answers')	
       end
 
       def server_config
@@ -65,7 +65,7 @@ module Metalware
       end
 
       def repo
-        '/var/lib/metalware/repo'
+        File.join(metalware_data, 'repo')
       end
 
       def overview
@@ -73,7 +73,7 @@ module Metalware
       end
 
       def plugins_dir
-        File.join(Constants::METALWARE_DATA_PATH, 'plugins')
+        File.join(metalware_data, 'plugins')
       end
 
       def repo_relative_path_to(path)
@@ -117,7 +117,7 @@ module Metalware
       end
 
       def rendered_files
-        '/var/lib/metalware/rendered'
+        Constants::RENDERED_DIR_PATH
       end
 
       def staging(path)
@@ -146,6 +146,10 @@ module Metalware
 
       def log
         '/var/log/metalware'
+      end
+
+      def asset_final(name)
+        File.join('/var/lib/metalware/assets/', "#{name}.yaml")
       end
 
       private
