@@ -117,7 +117,7 @@ module Metalware
       end
 
       def rendered_files
-        Constants::RENDERED_DIR_PATH
+        rendered_dir
       end
 
       def staging(path)
