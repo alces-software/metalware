@@ -8,6 +8,10 @@ module Metalware
           @path = path
         end
 
+        def name
+          @name ||= File.basename(path, '.yaml')
+        end
+
         def data
           @data ||= Data.load(path)
         end
@@ -21,7 +25,9 @@ module Metalware
 
       def initialize
         @asset_loaders = Dir.glob(FilePath.asset('*')).map do |path|
-          AssetLoader.new(path)
+          AssetLoader.new(path).tap do |loader|
+            define_singleton_method(loader.name) { loader.data }
+          end
         end
       end
 

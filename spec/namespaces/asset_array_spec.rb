@@ -46,5 +46,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       subject[1]
     end
   end
+
+  describe 'asset name method' do
+    it 'can load the asset by name' do
+      asset = assets[1]
+      expect(subject.send(asset[:name])).to eq(asset[:data])
+    end
+  end
 end
 
