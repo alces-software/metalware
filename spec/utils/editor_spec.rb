@@ -48,6 +48,17 @@ RSpec.describe Metalware::Utils::Editor do
         sleep 0.001 while thr.alive?
       end
     end
+
+    describe '#open_copy' do
+      it 'creates and opens the temp file' do
+        copy = '/tmp/copy/some-random-copy'
+        cmd = "#{default_editor} #{copy}"
+
+        expect(Metalware::SystemCommand).to receive(:no_capture).with(cmd)
+        expect(subject).to receive(:open_copy) { subject.open(copy) }
+        subject.open_copy('/tmp/some-random-file', '/tmp/copy/')
+      end
+    end
   end
 end
 
