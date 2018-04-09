@@ -49,14 +49,23 @@ RSpec.describe Metalware::Utils::Editor do
       end
     end
 
-    describe '#open_copy' do
-      it 'creates and opens the temp file' do
-        copy = '/tmp/copy/some-random-copy'
-        cmd = "#{default_editor} #{copy}"
 
-        expect(Metalware::SystemCommand).to receive(:no_capture).with(cmd)
-        expect(subject).to receive(:open_copy) { subject.open(copy) }
-        subject.open_copy('/tmp/some-random-file', '/tmp/copy/')
+    describe '#open_copy' do
+      let :source { '/var/source-file.yaml' }
+      let :destination { '/var/destination-file.yaml' }
+      let :initial_content { { key: 'value' } }
+
+      before :each { Metalware::Data.dump(source, initial_content) }
+
+      it 'creates and opens the temp file' do
+        expect(subject).to receive(:open).once.with(/\A\/tmp\//)
+        subject.open_copy(source, destination)
+      end
+
+      it 'destination contains content' do
+        expect(subject).to receive(:open)
+        subject.open_copy(source, destination)
+        expect(Metalware::Data.load(destination)).to eq(initial_content)
       end
     end
   end
