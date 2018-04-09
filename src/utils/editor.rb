@@ -26,7 +26,7 @@ module Metalware
           FileUtils.cp file.path, destination
         ensure
           file.close
-          file.unlink 
+          file.unlink
         end
       end
     end
