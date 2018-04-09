@@ -149,11 +149,11 @@ module Metalware
       end
 
       def asset_template(type)
-        File.join('/var/lib/metalware/repo/assets', "#{type}.yaml")
+        File.join(repo, 'assets', type + 'yaml')
       end
 
       def asset(name)
-        File.join('/var/lib/metalware/assets', "#{name}.yaml")
+        File.join(metalware_data, 'assets', name + 'yaml')
       end
 
       private
