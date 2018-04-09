@@ -200,6 +200,7 @@ class FileSystem
       '/var/lib/metalware/repo',
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
+      '/var/lib/metalware/assets',
       '/var/named',
       '/var/log/metalware',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
