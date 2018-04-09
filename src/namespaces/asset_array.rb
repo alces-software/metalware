@@ -9,16 +9,12 @@ module Metalware
         end
 
         def data
-          @data ||= load
+          @data ||= Data.load(path)
         end
 
         private
 
         attr_reader :path
-
-        def load
-          Data.load(path)
-        end
       end
 
       include Enumerable
