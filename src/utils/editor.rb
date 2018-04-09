@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'utils'
+require 'fileutils'
+require 'tempfile'
 
 module Metalware
   module Utils
@@ -14,6 +16,17 @@ module Metalware
 
         def editor
           ENV['VISUAL'] || ENV['EDITOR'] || DEFAULT_EDITOR
+        end
+
+        def open_copy(source, destination)
+          name = File.basename(source, '.*')
+          file = Tempfile.new(name)
+          FileUtils.cp source, file.path
+          open(file.path)
+          FileUtils.cp file.path, destination
+        ensure
+          file.close
+          file.unlink
         end
       end
     end
