@@ -5,11 +5,13 @@ RSpec.describe Metalware::FilePath do
     let :file_path { Metalware::FilePath }
 
     it 'defines an asset template' do
-      expect(file_path.asset_template('rack')).to eq('/var/lib/metalware/repo/assets/rack.yaml')
+      path = File.join(file_path.repo, 'assets', 'rack.yaml')
+      expect(file_path.asset_template('rack')).to eq(path)
     end
 
     it 'defines an asset final save path' do
-      expect(file_path.asset_final('rack01')).to eq('/var/lib/metalware/assets/rack01.yaml')
+      path = File.join(file_path.metalware_data, 'assets', 'rack01.yaml')
+      expect(file_path.asset('rack01')).to eq(path)
     end
   end
 end
