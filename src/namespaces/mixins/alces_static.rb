@@ -76,6 +76,10 @@ module Metalware
           @questions ||= loader.question_tree
         end
 
+        def asset
+          @asset ||= AssetArray.new
+        end
+
         private
 
         def group_cache
