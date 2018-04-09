@@ -55,7 +55,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
     describe '#[]' do
       it 'loads the date' do
-        expect(subject[index]).to eq(asset[:data])
+        expect(subject[index].to_h).to eq(asset[:data])
       end
 
       it 'only loads the asset file once' do
@@ -63,11 +63,15 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         subject[index]
         subject[index]
       end
+
+      it 'returns a RecursiveOpenStruct' do
+        expect(subject[index]).to be_a(RecursiveOpenStruct)
+      end
     end
 
     describe '#find_by_name' do
       it 'returns the asset' do
-        expect(subject.find_by_name(asset[:name])).to eq(asset[:data])
+        expect(subject.find_by_name(asset[:name]).to_h).to eq(asset[:data])
       end
 
       it 'only loads the asset data once' do
@@ -81,7 +85,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   describe 'each' do
     it 'loops through all the asset data' do
       asset_data = assets.map { |a| a[:data] }
-      expect(subject.each.to_a).to eq(asset_data)
+      expect(subject.each.to_a.map(&:to_h)).to eq(asset_data)
     end
   end
 end

@@ -13,7 +13,7 @@ module Metalware
         end
 
         def data
-          @data ||= Data.load(path)
+          @data ||= RecursiveOpenStruct.new(Data.load(path))
         end
 
         private
