@@ -49,21 +49,31 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     let :index { 1 }
     let :asset { assets[index] }
 
+    def expect_to_only_load_asset_data_once
+      expect(Metalware::Data).to receive(:load).once.and_call_original
+    end
+
     describe '#[]' do
       it 'loads the date' do
         expect(subject[index]).to eq(asset[:data])
       end
 
       it 'only loads the asset file once' do
-        expect(Metalware::Data).to receive(:load).once.and_call_original
+        expect_to_only_load_asset_data_once
         subject[index]
         subject[index]
       end
     end
 
-    describe 'asset name method' do
-      it 'can load the asset by name' do
-        expect(subject.send(asset[:name])).to eq(asset[:data])
+    describe '#find_by_name' do
+      it 'returns the asset' do
+        expect(subject.find_by_name(asset[:name])).to eq(asset[:data])
+      end
+
+      it 'only loads the asset data once' do
+        expect_to_only_load_asset_data_once
+        subject.find_by_name(asset[:name])
+        subject.find_by_name(asset[:name])
       end
     end
   end
