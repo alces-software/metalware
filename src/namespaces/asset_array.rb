@@ -35,6 +35,10 @@ module Metalware
         asset_loaders[index].data
       end
 
+      def each
+        asset_loaders.map(&:data).each
+      end
+
       private
 
       attr_reader :asset_loaders

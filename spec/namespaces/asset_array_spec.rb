@@ -53,5 +53,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       expect(subject.send(asset[:name])).to eq(asset[:data])
     end
   end
+
+  describe 'each' do
+    it 'loops through all the asset data' do
+      asset_data = assets.map { |a| a[:data] }
+      expect(subject.each.to_a).to eq(asset_data)
+    end
+  end
 end
 
