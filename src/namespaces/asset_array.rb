@@ -9,7 +9,7 @@ module Metalware
         end
 
         def data
-          load
+          @data ||= load
         end
 
         private

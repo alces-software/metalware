@@ -40,8 +40,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       expect(subject[1]).to eq(assets[1][:data])
     end
 
-    it 'does not load all the other asset records' do
-      expect(Metalware::Data).to receive(:load).once
+    it 'only loads the asset file once' do
+      expect(Metalware::Data).to receive(:load).once.and_call_original
+      subject[1]
       subject[1]
     end
   end
