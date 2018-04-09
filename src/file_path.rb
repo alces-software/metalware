@@ -152,7 +152,7 @@ module Metalware
         File.join('/var/lib/metalware/repo/assets', "#{type}.yaml")
       end
 
-      def asset_final(name)
+      def asset(name)
         File.join('/var/lib/metalware/assets', "#{name}.yaml")
       end
 
