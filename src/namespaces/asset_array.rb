@@ -26,6 +26,7 @@ module Metalware
       def initialize
         @asset_loaders = Dir.glob(FilePath.asset('*')).map do |path|
           AssetLoader.new(path).tap do |loader|
+            raise_error_if_method_is_defined(loader.name)
             define_singleton_method(loader.name) { loader.data }
           end
         end
@@ -42,6 +43,14 @@ module Metalware
       private
 
       attr_reader :asset_loaders
+
+      def raise_error_if_method_is_defined(method)
+        return unless respond_to?(method)
+        raise DataError, <<-EOF.strip_heredoc
+          Asset can not be called key word: #{method}
+        EOF
+      end
     end
   end
 end
+

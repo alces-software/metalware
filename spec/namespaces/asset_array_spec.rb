@@ -26,12 +26,22 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   end 
 
   describe '#new' do
+    context 'when there is an asset called "each"' do
+      before :each do
+        each_path = Metalware::FilePath.asset('each')
+        Metalware::Data.dump(each_path, { data: 'some-data' })
+      end
+
+      it 'errors due to the existing method' do
+        expect do
+          Metalware::Namespaces::AssetArray.new
+        end.to raise_error(Metalware::DataError)
+      end
+    end
+
     it 'does not load the files when initially called' do
       expect(Metalware::Data).not_to receive(:load)
       Metalware::Namespaces::AssetArray.new
-    end
-
-    it 'it only loads the file when required' do
     end
   end
 
