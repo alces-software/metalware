@@ -45,22 +45,26 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
   end
 
-  describe '#[]' do
-    it 'loads the date' do
-      expect(subject[1]).to eq(assets[1][:data])
+  context 'when loading the second asset' do
+    let :index { 1 }
+    let :asset { assets[index] }
+
+    describe '#[]' do
+      it 'loads the date' do
+        expect(subject[index]).to eq(asset[:data])
+      end
+
+      it 'only loads the asset file once' do
+        expect(Metalware::Data).to receive(:load).once.and_call_original
+        subject[index]
+        subject[index]
+      end
     end
 
-    it 'only loads the asset file once' do
-      expect(Metalware::Data).to receive(:load).once.and_call_original
-      subject[1]
-      subject[1]
-    end
-  end
-
-  describe 'asset name method' do
-    it 'can load the asset by name' do
-      asset = assets[1]
-      expect(subject.send(asset[:name])).to eq(asset[:data])
+    describe 'asset name method' do
+      it 'can load the asset by name' do
+        expect(subject.send(asset[:name])).to eq(asset[:data])
+      end
     end
   end
 
