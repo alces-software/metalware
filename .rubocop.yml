@@ -46,3 +46,14 @@ Style/ClassAndModuleChildren:
 # to get this.
 Style/DoubleNegation:
   Enabled: false
+
+# Allow the following parameter names. The additional "s, a, b" are used commonly
+# with method missing
+Naming/UncommunicativeMethodParamName:
+  AllowedNames: [io, id, to, by, on, in, at, s, a, b, _a, _b, e, _e]
+
+# Turn off Heredoc delimiter check. EOF is used extensively and will continue
+# to be used
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+
