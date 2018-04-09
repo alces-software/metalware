@@ -19,14 +19,14 @@ module Metalware
         end
 
         def open_copy(source, destination)
-          file = Tempfile.new(['asset-copy', '.yaml'], destination)
-          begin
-            FileUtils.cp source file.path
-            open(file)
-          ensure
-            file.close
-            file.unlink 
-          end
+          name = File.basename(source, '.*')
+          file = Tempfile.new(name)
+          FileUtils.cp source, file.path
+          open(file.path)
+          FileUtils.cp file.path, destination
+        ensure
+          file.close
+          file.unlink 
         end
       end
     end
