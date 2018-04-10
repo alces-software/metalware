@@ -63,7 +63,7 @@ module Metalware
         [
           Constants::CONFIGURE_INTERNAL_QUESTION_PREFIX,
           'plugin_enabled',
-          plugin_name,
+          plugin_name
         ].join('--')
       end
 

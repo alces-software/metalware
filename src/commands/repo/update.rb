@@ -82,7 +82,7 @@ module Metalware
 
         def dependency_hash
           {
-            repo: [],
+            repo: []
           }
         end
       end

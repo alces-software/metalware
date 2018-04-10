@@ -62,7 +62,7 @@ module Metalware
       # ----- THREAD METHODS BELOW THIS LINE ------
       CMD_LIBRARY = {
         power: :job_power_status,
-        ping: :job_ping_node,
+        ping: :job_ping_node
       }.freeze
 
       def run_command

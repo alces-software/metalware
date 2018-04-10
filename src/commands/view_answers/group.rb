@@ -23,7 +23,7 @@ module Metalware
         def dependency_hash
           {
             repo: ['configure.yaml'],
-            configure: ['domain.yaml', "groups/#{group_name}.yaml"],
+            configure: ['domain.yaml', "groups/#{group_name}.yaml"]
           }
         end
       end

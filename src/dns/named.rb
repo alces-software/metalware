@@ -71,8 +71,8 @@ module Metalware
         {
           named: {
             zone: zone,
-            net: net,
-          },
+            net: net
+          }
         }
       end
 
@@ -97,7 +97,7 @@ module Metalware
       def staging_options
         {
           mkdir: true,
-          service: self.class.name,
+          service: self.class.name
         }
       end
     end

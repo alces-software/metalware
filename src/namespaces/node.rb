@@ -93,7 +93,7 @@ module Metalware
                        :build_complete_url,
                        :build_complete_path,
                        :hexadecimal_ip,
-                       :build_method,
+                       :build_method
                      ])
       end
 
@@ -112,7 +112,7 @@ module Metalware
         # a group work fine as they appear in the genders file BUT local and
         # orphan nodes DO NOT appear in the genders file and cause the above
         # error.
-        return { groups: ['orphan'], node: name }
+        { groups: ['orphan'], node: name }
       end
 
       def additional_dynamic_namespace

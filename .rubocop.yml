@@ -15,12 +15,6 @@ Style/SymbolArray:
 Style/WordArray:
   Enabled: false
 
-# Do not preder trailing commas in multi-line hash/array literals - better as
-# when something is added to a literal the previous last line does not also
-# need to be changed, which also makes diffs smaller
-Style/TrailingCommaInLiteral:
-  EnforcedStyleForMultiline: comma
-
 # Do not require documentation for top-level classes or modules - seems
 # unnecessary for the project at the moment.
 Style/Documentation:
@@ -44,3 +38,14 @@ Style/ClassAndModuleChildren:
 # to get this.
 Style/DoubleNegation:
   Enabled: false
+
+# Allow the following parameter names. The additional "s, a, b" are used commonly
+# with method missing
+Naming/UncommunicativeMethodParamName:
+  AllowedNames: [io, id, to, by, on, in, at, s, a, b, _a, _b, e, _e]
+
+# Turn off Heredoc delimiter check. EOF is used extensively and will continue
+# to be used
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+

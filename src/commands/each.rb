@@ -44,7 +44,7 @@ module Metalware
           rendered_cmd = node.render_erb_template(command)
           opt = {
             out: $stdout.fileno ? $stdout.fileno : 1,
-            err: $stderr.fileno ? $stderr.fileno : 2,
+            err: $stderr.fileno ? $stderr.fileno : 2
           }
           system(rendered_cmd, opt)
         end

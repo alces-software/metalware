@@ -44,7 +44,7 @@ module Metalware
           identifier: plugin.enabled_question_identifier,
           question: "Should '#{plugin.name}' plugin be enabled for #{section}?",
           type: 'boolean',
-          dependent: questions_for_section(section),
+          dependent: questions_for_section(section)
         }
       end
 

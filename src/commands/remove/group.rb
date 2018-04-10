@@ -51,7 +51,7 @@ module Metalware
 
         def dependency_hash
           {
-            configure: ["groups/#{primary_group}.yaml"],
+            configure: ["groups/#{primary_group}.yaml"]
           }
         end
 

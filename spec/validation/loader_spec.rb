@@ -35,7 +35,7 @@ RSpec.describe Metalware::Validation::Loader do
         [
           section, [{
             identifier: "#{section}_identifier",
-            question: "#{section}_question",
+            question: "#{section}_question"
           }]
         ]
       end.to_h
@@ -45,12 +45,12 @@ RSpec.describe Metalware::Validation::Loader do
       configure_sections.map do |section|
         dependent_question = {
           identifier: "example_plugin_#{section}_dependent_identifier",
-          question: "example_plugin_#{section}_dependent_question",
+          question: "example_plugin_#{section}_dependent_question"
         }
         top_level_question = {
           identifier: "example_plugin_#{section}_identifier",
           question: "example_plugin_#{section}_question",
-          dependent: [dependent_question],
+          dependent: [dependent_question]
         }
         [section, [top_level_question]]
       end.to_h

@@ -75,8 +75,8 @@ module Metalware
         {
           repo: ['configure.yaml'],
           optional: {
-            configure: [relative_answer_file],
-          },
+            configure: [relative_answer_file]
+          }
         }
       end
 

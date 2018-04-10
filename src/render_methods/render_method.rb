@@ -35,7 +35,7 @@ module Metalware
         def staging_opts
           {
             managed: managed?,
-            validator: name,
+            validator: name
           }
         end
 
