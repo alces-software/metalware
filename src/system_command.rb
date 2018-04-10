@@ -49,7 +49,7 @@ module Metalware
         {
           stdout: stdout,
           stderr: stderr,
-          status: status,
+          status: status
         }
       end
 

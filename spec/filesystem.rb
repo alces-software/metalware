@@ -203,7 +203,7 @@ class FileSystem
       '/var/lib/metalware/assets',
       '/var/named',
       '/var/log/metalware',
-      File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
+      File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates')
     ].each do |path|
       FileUtils.mkdir_p(path)
     end

@@ -33,23 +33,23 @@ RSpec.describe Metalware::Validation::Answer do
       domain: [
         {
           identifier: 'string_question',
-          question: 'Am I a string?',
+          question: 'Am I a string?'
         },
         {
           identifier: 'integer_question',
           question: 'Am I a integer',
-          type: 'integer',
+          type: 'integer'
         },
         {
           identifier: 'bool_question',
           question: 'Am I a boolean',
-          type: 'boolean',
-        },
+          type: 'boolean'
+        }
       ],
 
       group: [],
       node: [],
-      local: [],
+      local: []
     }
   end
 
@@ -57,7 +57,7 @@ RSpec.describe Metalware::Validation::Answer do
     {
       string_question: 'string',
       integer_question: 100,
-      bool_question: true,
+      bool_question: true
     }
   end
 
@@ -88,7 +88,7 @@ RSpec.describe Metalware::Validation::Answer do
   context 'with an invalid answer hash' do
     it 'contains an answer to a missing question' do
       answers = {
-        a_missing_question: 'I do not appear in configure.yaml',
+        a_missing_question: 'I do not appear in configure.yaml'
       }
       results, validator = run_answer_validation(answers)
       expect(results.errors.keys).to include(:missing_questions)

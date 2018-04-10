@@ -92,7 +92,7 @@ RSpec.describe Metalware::Status::Job do
 
       results = Metalware::Status::Job.results
       expect(results).to eq(@node => {
-                              @cmd => 'timeout',
+                              @cmd => 'timeout'
                             })
     end
 
@@ -110,7 +110,7 @@ RSpec.describe Metalware::Status::Job do
 
       expect(Metalware::Status::Job.results).to eq(@node => {
                                                      ping: 'PING_NODE',
-                                                     power: 'POWER_STATUS',
+                                                     power: 'POWER_STATUS'
                                                    })
     end
   end

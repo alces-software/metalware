@@ -14,7 +14,7 @@ module Metalware
       :each,
       :breadth_each,
       :postordered_each,
-      :preordered_each,
+      :preordered_each
     ].freeze
 
     BASE_TRAVERSALS.each do |base_method|

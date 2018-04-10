@@ -83,7 +83,7 @@ module Metalware
     def default_push_options
       {
         managed: false,
-        validator: nil,
+        validator: nil
       }
     end
 

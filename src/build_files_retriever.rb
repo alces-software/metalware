@@ -142,7 +142,7 @@ module Metalware
         name = File.basename(identifier)
         {
           raw: identifier,
-          name: name,
+          name: name
         }
       end
 
