@@ -6,12 +6,12 @@ require 'data'
 module Metalware
   module Cache
     class Asset
-      def initialize
-        data
-      end
-
       def data
-        @assets ||= Data.load(FilePath.asset_cache)
+        @assets ||= begin
+          Data.load(FilePath.asset_cache).tap do |a|
+            a.merge! blank_cache if a.empty?
+          end
+        end
       end
       
       def save
@@ -19,11 +19,17 @@ module Metalware
       end
 
       def assign_asset_to_node(asset_name, node)
-        @assets["node"][node.name] = asset_name  
+        data[:node][node.name] = asset_name  
       end
 
       def asset_for_node(node)
-        @assets["node"][node.name]
+        data[:node][node.name]
+      end
+
+      private
+
+      def blank_cache
+        { node: {} }  
       end
     end
   end
