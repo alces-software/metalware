@@ -16,7 +16,7 @@ module Metalware
 
       def save
         Data.dump(FilePath.asset_cache, data)
-     end
+      end
 
       def assign_asset_to_node(asset_name, node)
         data[:node][node.name] = asset_name
