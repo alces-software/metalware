@@ -42,6 +42,13 @@ RSpec.describe Metalware::Commands::Asset::Add do
                                       .with(template_path, save_path)
       run_command
     end
+
+    it 'errors if the asset already exists' do
+      run_command
+      expect do
+        run_command
+      end.to raise_error(Metalware::InvalidInput)
+    end
   end
 end
 
