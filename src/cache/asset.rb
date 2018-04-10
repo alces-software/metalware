@@ -13,13 +13,13 @@ module Metalware
           end
         end
       end
-      
+
       def save
-        Data.dump(FilePath.asset_cache, data) 
-      end
+        Data.dump(FilePath.asset_cache, data)
+     end
 
       def assign_asset_to_node(asset_name, node)
-        data[:node][node.name] = asset_name  
+        data[:node][node.name] = asset_name
       end
 
       def asset_for_node(node)
@@ -29,7 +29,7 @@ module Metalware
       private
 
       def blank_cache
-        { node: {} }  
+        { node: {} }
       end
     end
   end
