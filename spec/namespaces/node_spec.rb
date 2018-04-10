@@ -51,22 +51,11 @@ RSpec.describe Metalware::Namespaces::Node do
     let :node_name { 'node02' }
     let :node_array { ['some_other_node', node_name] }
 
-    ##
-    # Mocking the HashMerger to return a specified hash as the original
-    # block should still be used. It has been mocked by specifying a new
-    # block that references the original render_node_template block contained
-    # within Namespaces::Node
-    #
     let :config_hash do
       Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
         key: test_value,
         erb_value1: '<%= alces.node.config.key  %>'
-      ) { |template_string| render_node_template(template_string) }
-    end
-
-    def render_node_template(template)
-      template_lambda = node.send(:template_block)
-      template_lambda.call(template)
+      ) { |template_string| node.render_erb_template(template_string) }
     end
 
     let :node { Metalware::Namespaces::Node.create(alces, node_name) }

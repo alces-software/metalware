@@ -71,7 +71,11 @@ module Metalware
       end
 
       def finalize_build_files(build_file_hashes)
-        Constants::HASH_MERGER_DATA_STRUCTURE.new(build_file_hashes, &template_block)
+        Constants::HASH_MERGER_DATA_STRUCTURE.new(
+          build_file_hashes
+        ) do |template|
+          render_erb_template(template)
+        end
       end
 
       def events_dir
