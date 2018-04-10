@@ -23,12 +23,12 @@ global_options:
 
 subcommands:
   asset_add: &asset_add
-    syntax: metal asset add [options]
+    syntax: metal asset add ASSET_TYPE ASSET_NAME [options]
     summary: Add a new asset record
     action: Commands::Asset::Add
 
   asset_edit: &asset_edit
-    syntax: metal asset edit [options]
+    syntax: metal asset edit ASSET_NAME [options]
     summary: Edit an existing asset record
     action: Commands::Asset::Edit
 
