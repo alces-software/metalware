@@ -23,5 +23,6 @@
 #==============================================================================
 
 require 'utils/dynamic_require'
+require 'command_helpers/base_command'
 
 Metalware::Utils::DynamicRequire.relative('commands')
