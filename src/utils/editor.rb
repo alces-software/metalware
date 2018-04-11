@@ -32,6 +32,7 @@ module Metalware
         def create_temp_file(name, content)
           file = Tempfile.new(name)
           file.write(content)
+          file.flush
           yield file.path
         ensure
           file.close
