@@ -54,10 +54,13 @@ RSpec.describe Metalware::Utils::Editor do
       let :destination { '/var/destination-file.yaml' }
       let :initial_content { { key: 'value' } }
 
-      before :each { Metalware::Data.dump(source, initial_content) }
+      before :each do
+        allow(Metalware::Utils::Editor).to receive(:open)
+        Metalware::Data.dump(source, initial_content)
+      end
 
-      def run_open_copy
-        described_class.open_copy(source, destination)
+      def run_open_copy(&b)
+        described_class.open_copy(source, destination, &b)
       end
 
       it 'creates and opens the temp file' do
@@ -70,7 +73,21 @@ RSpec.describe Metalware::Utils::Editor do
         run_open_copy
         expect(Metalware::Data.load(destination)).to eq(initial_content)
       end
+
+      context 'with a validation block' do
+        it 'calls the validation block' do
+          expect { |b| run_open_copy(&b) }.to yield_control
+        end
+
+        it 'passes the temp file into the validation block' do
+          run_open_copy do |file|
+            content = Metalware::Data.load(file.path)
+            expect(file.path).not_to match(source)
+            expect(file.path).not_to match(destination)
+            expect(content).to eq(initial_content)
+          end
+        end
+      end
     end
   end
 end
-
