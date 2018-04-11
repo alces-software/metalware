@@ -156,6 +156,10 @@ module Metalware
         File.join(metalware_data, 'assets', name + '.yaml')
       end
 
+      def asset_cache
+        File.join(cache, 'assets.yaml')
+      end
+
       private
 
       def template_file_name(template_type, node:)
