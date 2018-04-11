@@ -32,8 +32,8 @@ module Metalware
 
         private
 
-        def raise_error_if_validation_fails(path, &validation)
-          return if validation.call(path)
+        def raise_error_if_validation_fails(path)
+          return if yield path
           raise ValidationFailure, <<-EOF.squish
             The edited file is invalid
           EOF
