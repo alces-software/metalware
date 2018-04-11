@@ -8,9 +8,8 @@ module Metalware
     class Asset
       def data
         @data ||= begin
-          Data.load(FilePath.asset_cache).tap do |a|
-            a.merge! blank_cache if a.empty?
-          end
+          raw_load = Data.load(FilePath.asset_cache)
+          raw_load.empty? ? blank_cache : raw_load
         end
       end
 
