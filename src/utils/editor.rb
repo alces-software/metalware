@@ -21,9 +21,9 @@ module Metalware
         def open_copy(source, destination)
           name = File.basename(source, '.*')
           file = Tempfile.new(name)
-          FileUtils.cp source, file.path
+          FileUtils.cp(source, file.path)
           open(file.path)
-          FileUtils.cp file.path, destination
+          FileUtils.cp(file.path, destination)
         ensure
           file.close
           file.unlink
