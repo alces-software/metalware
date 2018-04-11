@@ -6,6 +6,8 @@ module Metalware
   module Commands
     module Asset
       class Add < Metalware::CommandHelpers::BaseCommand
+        include CommandHelpers::AssetHelper
+
         private
 
         attr_reader :template_name, :template_path, :asset_path, :asset_name
@@ -20,7 +22,7 @@ module Metalware
         def run
           error_if_template_is_missing
           error_if_asset_exists
-          Utils::Editor.open_copy(template_path, asset_path)
+          copy_and_edit_asset_file(template_path, asset_path)
         end
 
         def error_if_template_is_missing

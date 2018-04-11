@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'utils/editor'
-
 module Metalware
   module Commands
     module Asset
       class Edit < Metalware::CommandHelpers::BaseCommand
+        include CommandHelpers::AssetHelper
+
         private
 
         attr_reader :asset_name, :asset_path
@@ -17,7 +17,7 @@ module Metalware
 
         def run
           error_if_asset_doesnt_exist
-          Utils::Editor.open_copy(asset_path, asset_path)
+          edit_asset_file(asset_path)
         end
 
         def error_if_asset_doesnt_exist
