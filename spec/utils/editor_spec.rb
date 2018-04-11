@@ -56,14 +56,18 @@ RSpec.describe Metalware::Utils::Editor do
 
       before :each { Metalware::Data.dump(source, initial_content) }
 
+      def run_open_copy
+        described_class.open_copy(source, destination)
+      end
+
       it 'creates and opens the temp file' do
         expect(described_class).to receive(:open).once.with(/\A\/tmp\//)
-        described_class.open_copy(source, destination)
+        run_open_copy
       end
 
       it 'saves the content to the destination' do
         expect(described_class).to receive(:open)
-        described_class.open_copy(source, destination)
+        run_open_copy
         expect(Metalware::Data.load(destination)).to eq(initial_content)
       end
     end
