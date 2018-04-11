@@ -22,6 +22,16 @@ global_options:
       Suppress any warnings from being displayed
 
 subcommands:
+  asset_add: &asset_add
+    syntax: metal asset add ASSET_TYPE ASSET_NAME [options]
+    summary: Add a new asset record
+    action: Commands::Asset::Add
+
+  asset_edit: &asset_edit
+    syntax: metal asset edit ASSET_NAME [options]
+    summary: Edit an existing asset record
+    action: Commands::Asset::Edit
+
   configure_domain: &configure_domain
     syntax: metal configure domain [options]
     summary: Configure Metalware domain
@@ -163,6 +173,13 @@ subcommands:
       Commands::ViewAnswers::Node
 
 commands:
+  asset:
+    syntax: metal asset [SUB_COMMAND] [options]
+    summary: Manage the asset record files
+    subcommands:
+      add: *asset_add
+      edit: *asset_edit
+
   build:
     syntax: metal build NODE_IDENTIFIER [options]
     summary: Renders the templates used to build the nodes
