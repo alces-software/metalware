@@ -59,8 +59,8 @@ RSpec.describe Metalware::Utils::Editor do
         Metalware::Data.dump(source, initial_content)
       end
 
-      def run_open_copy(&b)
-        described_class.open_copy(source, destination, &b)
+      def run_open_copy(&validation)
+        described_class.open_copy(source, destination, &validation)
       end
 
       it 'creates and opens the temp file' do
@@ -76,16 +76,34 @@ RSpec.describe Metalware::Utils::Editor do
 
       context 'with a validation block' do
         it 'calls the validation block' do
-          expect { |b| run_open_copy(&b) }.to yield_control
+          expect do |b|
+            # As the yield, 'b', does not return a value, the validation
+            # will fail and needs to be caught
+            expect do
+              run_open_copy(&b)
+            end.to raise_error(Metalware::ValidationFailure)
+          end.to yield_control
         end
 
         it 'passes the temp file into the validation block' do
-          run_open_copy do |file|
-            content = Metalware::Data.load(file.path)
-            expect(file.path).not_to match(source)
-            expect(file.path).not_to match(destination)
+          run_open_copy do |path|
+            content = Metalware::Data.load(path)
+            expect(path).not_to match(source)
+            expect(path).not_to match(destination)
             expect(content).to eq(initial_content)
           end
+        end
+
+        it 'saves the file if the validation passes' do
+          run_open_copy { |_path| true }
+          content = Metalware::Data.load(destination)
+          expect(content).to eq(initial_content)
+        end
+
+        it 'errors if the validation fails' do
+          expect do
+            run_open_copy { |_path| false }
+          end.to raise_error(Metalware::ValidationFailure)
         end
       end
     end
