@@ -46,7 +46,6 @@ RSpec.describe Metalware::Cache::Asset do
   describe '#asset_for_node' do
     it 'returns the corresponding nodes asset' do
       cache.assign_asset_to_node('asset_test', node)
-      cache.save
       expect(cache.asset_for_node(node)).to eq('asset_test')
     end
   end
