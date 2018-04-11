@@ -25,6 +25,9 @@ RSpec.describe Metalware::Commands::Asset::Edit do
 
     let :saved_asset { 'saved-asset' }
     let :asset_path { Metalware::FilePath.asset(saved_asset) }
+    let :test_content { { key: 'value' } }
+
+    before :each { Metalware::Data.dump(asset_path, test_content) }
 
     def run_command
       Metalware::Utils.run_command(described_class,
@@ -37,7 +40,5 @@ RSpec.describe Metalware::Commands::Asset::Edit do
                                       .with(asset_path, asset_path)
       run_command
     end
-    
-    i
   end
 end
