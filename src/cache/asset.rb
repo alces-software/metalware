@@ -18,11 +18,11 @@ module Metalware
       end
 
       def assign_asset_to_node(asset_name, node)
-        data[:node][node.name] = asset_name
+        data[:node][node.name.to_sym] = asset_name
       end
 
       def asset_for_node(node)
-        data[:node][node.name]
+        data[:node][node.name.to_sym]
       end
 
       private
