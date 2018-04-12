@@ -32,6 +32,11 @@ subcommands:
     summary: Edit an existing asset record
     action: Commands::Asset::Edit
 
+  asset_delete: &asset_delete
+    syntax: metal asset delete ASSET_NAME [options]
+    summary: Delete an existing asset record
+    action: Commands::Asset::Delete
+
   configure_domain: &configure_domain
     syntax: metal configure domain [options]
     summary: Configure Metalware domain
@@ -179,6 +184,7 @@ commands:
     subcommands:
       add: *asset_add
       edit: *asset_edit
+      delete: *asset_delete
 
   build:
     syntax: metal build NODE_IDENTIFIER [options]
