@@ -3,6 +3,7 @@
 require 'commands'
 require 'utils'
 require 'filesystem'
+require 'shared_examples/asset_command_that_assigns_a_node'
 
 RSpec.describe Metalware::Commands::Asset::Edit do
   before :each { allow(Metalware::Utils::Editor).to receive(:open) }
@@ -40,5 +41,16 @@ RSpec.describe Metalware::Commands::Asset::Edit do
                                       .with(asset_path, asset_path)
       run_command
     end
+  end
+
+  context 'with a node input' do
+    let :asset_name { 'asset1' }
+    let :command_arguments { [asset_name] }
+
+    before :each do
+      Metalware::Data.dump(Metalware::FilePath.asset(asset_name), {})
+    end
+
+    it_behaves_like 'asset command that assigns a node'
   end
 end

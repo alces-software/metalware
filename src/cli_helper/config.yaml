@@ -3,15 +3,19 @@ anchor_options:
     tags: [-g, --gender]
     type: String
     description: >
-          Switch NODE_IDENTIFIER to specify a gender, rather than a single
-          node
+      Switch NODE_IDENTIFIER to specify a gender, rather than a single node
   configure_answers_option: &configure_answers_option
     tags: [-a ANSWERS_MAPPING, --answers ANSWERS_MAPPING]
     type: String
     description: >
-      Given a JSON mapping of question identifiers to answer values, the given
-      answers will be saved instead of asking the configure questions and
-      saving user input.
+      Given a JSON mapping of question identifiers to answer values, the
+      given answers will be saved instead of asking the configure questions
+      and saving user input.
+  asset_node_option: &asset_node_option
+    tags: [-n NODE_NAME, --node NODE_NAME]
+    type: String
+    description: >
+      Assigns the asset to the node
 
 global_options:
   - tags: [--strict]
@@ -26,11 +30,15 @@ subcommands:
     syntax: metal asset add ASSET_TYPE ASSET_NAME [options]
     summary: Add a new asset record
     action: Commands::Asset::Add
+    options:
+      - *asset_node_option
 
   asset_edit: &asset_edit
     syntax: metal asset edit ASSET_NAME [options]
     summary: Edit an existing asset record
     action: Commands::Asset::Edit
+    options:
+      - *asset_node_option
 
   configure_domain: &configure_domain
     syntax: metal configure domain [options]

@@ -13,11 +13,13 @@ module Metalware
         def setup
           @asset_name = args[0]
           @asset_path = FilePath.asset(asset_name)
+          unpack_node_from_options
         end
 
         def run
           error_if_asset_doesnt_exist
           edit_asset_file(asset_path)
+          assign_asset_to_node_if_given(asset_name)
         end
 
         def error_if_asset_doesnt_exist
