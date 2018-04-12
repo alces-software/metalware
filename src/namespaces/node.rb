@@ -90,7 +90,7 @@ module Metalware
         @asset ||= begin
           asset_name = alces.asset_cache.asset_for_node(name)
           return unless asset_name
-          alces.asset.find_by_name(asset_name)  
+          alces.asset.find_by_name(asset_name)
         end
       end
 
