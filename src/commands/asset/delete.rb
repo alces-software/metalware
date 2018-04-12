@@ -8,7 +8,7 @@ module Metalware
     module Asset
       class Delete < Metalware::CommandHelpers::BaseCommand
         private
-      
+
         attr_reader :name, :path, :cache
 
         def setup
@@ -29,7 +29,7 @@ module Metalware
             The "#{name}" asset does not yet exist to delete.
           EOF
         end
-        
+
         def delete_asset
           FileUtils.rm path
         end
