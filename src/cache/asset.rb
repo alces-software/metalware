@@ -25,6 +25,10 @@ module Metalware
         data[:node][node.name]
       end
 
+      def unassign_asset(asset_name)
+        data.delete_if { |key, value| value == asset_name }
+      end
+
       private
 
       def blank_cache
