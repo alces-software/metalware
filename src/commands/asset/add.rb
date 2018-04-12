@@ -17,12 +17,14 @@ module Metalware
           @template_path = FilePath.asset_template(template_name)
           @asset_name = args[1]
           @asset_path = FilePath.asset(asset_name)
+          unpack_node_from_options
         end
 
         def run
           error_if_template_is_missing
           error_if_asset_exists
           copy_and_edit_asset_file(template_path, asset_path)
+          assign_asset_to_node_if_given(asset_name)
         end
 
         def error_if_template_is_missing

@@ -3,6 +3,7 @@
 require 'commands'
 require 'utils'
 require 'filesystem'
+require 'shared_examples/asset_command_that_assigns_a_node'
 
 RSpec.describe Metalware::Commands::Asset::Add do
   # Stops the editor from running the bash command
@@ -49,6 +50,15 @@ RSpec.describe Metalware::Commands::Asset::Add do
         run_command
       end.to raise_error(Metalware::InvalidInput)
     end
+  end
+
+  context 'with a node argument' do
+    before :each { FileSystem.root_setup(&:with_minimal_repo) }
+
+    let :asset_name { 'asset1' }
+    let :command_arguments { ['default', asset_name] }
+
+    it_behaves_like 'asset command that assigns a node'
   end
 end
 

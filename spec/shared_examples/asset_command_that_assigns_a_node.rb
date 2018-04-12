@@ -2,7 +2,8 @@
 require 'alces_utils'
 require 'cache/asset'
 
-# Requires `command_arguments` to be set by the calling spec
+# Requires `asset_name` and `command_arguments` to be set by the
+# calling spec
 RSpec.shared_examples 'asset command that assigns a node' do
   include AlcesUtils
 
