@@ -34,7 +34,7 @@ module Metalware
         Utils::Editor.open_copy(source, destination) do |edited_path|
           begin
             Metalware::Data.load(edited_path).is_a?(Hash)
-          rescue
+          rescue StandardError
             false
           end
         end
