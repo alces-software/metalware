@@ -26,7 +26,7 @@ module Metalware
       end
 
       def unassign_asset(asset_name)
-        data.delete_if { |key, value| value == asset_name }
+        data.delete_if { |_key, value| value == asset_name }
       end
 
       private
