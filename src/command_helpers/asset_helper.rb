@@ -15,7 +15,9 @@ module Metalware
       end
 
       def unpack_node_from_options
+        return unless options.node
         self.node = alces.nodes.find_by_name(options.node)
+        raise_error_if_node_is_missing
       end
 
       def assign_asset_to_node_if_given(asset_name)
@@ -36,6 +38,13 @@ module Metalware
             false
           end
         end
+      end
+
+      def raise_error_if_node_is_missing
+        return if node
+        raise InvalidInput, <<-EOF
+          Can not find node: #{options.node}
+        EOF
       end
     end
   end
