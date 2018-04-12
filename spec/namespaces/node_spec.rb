@@ -8,6 +8,7 @@ require 'constants'
 require 'hash_mergers'
 require 'recursive_open_struct'
 require 'spec_utils'
+require 'file_path'
 
 RSpec.describe Metalware::Namespaces::Node do
   context 'with AlcesUtils' do
@@ -187,6 +188,27 @@ RSpec.describe Metalware::Namespaces::Node do
         # Instead, always force the local node to use the local build
         it 'it ignores incorrect config values' do
           local_node_uses_local_build?(:pxelinux)
+        end
+      end
+    end
+
+    describe '#asset' do
+      let :content { { node: { node_name.to_sym => 'asset_test' } } }
+      let :cache { Metalware::Cache::Asset.new }
+      
+      context 'with an assigned asset' do
+        before :each { Metalware::Data.dump(Metalware::FilePath.asset('asset_test'), content) }
+
+        it 'can access the nodes asset' do
+          cache.assign_asset_to_node('asset_test', node)
+          cache.save
+          expect(node.asset.to_h).to eq(content)
+        end
+      end
+
+      context 'without an assigned asset' do
+        it 'returns nil' do
+          expect(node.asset).to eq(nil)
         end
       end
     end
