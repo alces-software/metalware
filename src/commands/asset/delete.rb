@@ -20,6 +20,7 @@ module Metalware
         def run
           error_if_asset_doesnt_exist
           cache.unassign_asset(name)
+          cache.save
           delete_asset
         end
 
