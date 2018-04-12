@@ -9,28 +9,29 @@ module Metalware
       class Delete < Metalware::CommandHelpers::BaseCommand
         private
       
-        attr_reader :asset_name, :asset_path
+        attr_reader :name, :path, :cache
 
         def setup
-          @asset_name = args[0]
-          @asset_path = FilePath.asset(asset_name)
+          @name = args[0]
+          @path = FilePath.asset(name)
+          @cache = Metalware::Cache::Asset.new
         end
 
         def run
           error_if_asset_doesnt_exist
-          unassign_asset(asset_name)
+          cache.unassign_asset(name)
           delete_asset
         end
 
         def error_if_asset_doesnt_exist
-          return if File.exist?(asset_path)
+          return if File.exist?(path)
           raise InvalidInput, <<-EOF.squish
-            The "#{asset_name}" asset does not yet exist to delete.
+            The "#{name}" asset does not yet exist to delete.
           EOF
         end
         
         def delete_asset
-          FileUtils.rm asset_path
+          FileUtils.rm path
         end
       end
     end
