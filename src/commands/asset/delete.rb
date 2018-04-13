@@ -8,6 +8,7 @@ module Metalware
     module Asset
       class Delete < Metalware::CommandHelpers::BaseCommand
         include CommandHelpers::AssetHelper
+
         private
 
         attr_reader :name, :path, :cache
