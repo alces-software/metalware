@@ -22,9 +22,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
 
   context 'when using a saved asset' do
     before do
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-      end
+      FileSystem.root_setup(&:with_minimal_repo)
     end
 
     let :asset_path { Metalware::FilePath.asset(asset) }
