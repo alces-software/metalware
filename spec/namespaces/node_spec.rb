@@ -8,7 +8,6 @@ require 'constants'
 require 'hash_mergers'
 require 'recursive_open_struct'
 require 'spec_utils'
-require 'file_path'
 
 RSpec.describe Metalware::Namespaces::Node do
   context 'with AlcesUtils' do
