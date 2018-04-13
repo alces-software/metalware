@@ -10,9 +10,9 @@ RSpec.describe Metalware::Commands::Asset::Delete do
   it 'errors if the asset doesnt exist' do
     expect do
       Metalware::Utils.run_command(described_class,
-                                    'missing-type',
-                                    'name',
-                                    stderr: StringIO.new)
+                                   'missing-type',
+                                   'name',
+                                   stderr: StringIO.new)
     end.to raise_error(Metalware::InvalidInput)
   end
 
@@ -31,12 +31,13 @@ RSpec.describe Metalware::Commands::Asset::Delete do
 
     def run_command
       Metalware::Utils.run_command(described_class,
-                                    asset,
-                                    stderr: StringIO.new)
+                                   asset,
+                                   stderr: StringIO.new)
     end
     
     it 'deletes the asset file' do
       run_command
+      expect(File.exist?(asset_path)).to eq(false)
     end
   end
 end
