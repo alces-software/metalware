@@ -11,6 +11,8 @@ module Metalware
 
       include CommandHelpers::AlcesCommand
 
+      ARRAY_TYPES = [Array, Namespaces::AssetArray].freeze
+
       def run
         pretty_print_json(cli_input_object.to_json)
       end
@@ -18,9 +20,10 @@ module Metalware
       def cli_input_object
         if alces_command.is_a?(Namespaces::MetalArray)
           alces_command
+        elsif ARRAY_TYPES.include?(alces_command.class)
+          alces_command.map(&:to_h)
         else
-          obj = alces_command
-          obj.is_a?(Array) ? obj.map(&:to_h) : obj.to_h
+          alces_command.to_h
         end
       end
 
