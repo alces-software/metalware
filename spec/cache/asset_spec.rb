@@ -59,4 +59,18 @@ RSpec.describe Metalware::Cache::Asset do
       expect(new_cache.asset_for_node(node)).to eq(asset_name)
     end
   end
+
+  describe '#unassign_asset' do
+    it 'unassigns the asset from the node' do
+      cache.unassign_asset('asset_test')
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.data).not_to eq(content)
+    end
+
+    it 'attempts to unassign a missing asset' do
+      cache.unassign_asset('missing_asset')
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.data).not_to eq(content) 
+    end
+  end
 end

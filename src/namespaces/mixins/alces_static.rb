@@ -5,6 +5,7 @@ require 'nodeattr_interface'
 require 'group_cache'
 require 'hashie'
 require 'validation/loader'
+require 'cache/asset'
 
 module Metalware
   module Namespaces
@@ -78,6 +79,10 @@ module Metalware
 
         def asset
           @asset ||= AssetArray.new
+        end
+
+        def asset_cache
+          @asset_cache ||= Metalware::Cache::Asset.new
         end
 
         private

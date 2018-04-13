@@ -190,6 +190,35 @@ RSpec.describe Metalware::Namespaces::Node do
         end
       end
     end
+
+    describe '#asset' do
+      let :content { { node: { node_name.to_sym => 'asset_test' } } }
+      let :asset_name { 'asset_test' }
+      let :asset_path { Metalware::FilePath.asset(asset_name) }
+      let :cache { Metalware::Cache::Asset.new }
+      
+      context 'with an assigned asset' do
+        before :each do
+          Metalware::Data.dump(asset_path, content)
+          cache.assign_asset_to_node(asset_name, node)
+          cache.save
+        end
+
+        it 'loads the asset data' do
+          expect(node.asset.data.to_h).to eq(content)
+        end
+
+        it 'loads the asset name' do
+          expect(node.asset.name).to eq(asset_name)
+        end
+      end
+
+      context 'without an assigned asset' do
+        it 'returns nil' do
+          expect(node.asset).to eq(nil)
+        end
+      end
+    end
   end
 
   # Test `#plugins` without the rampant mocking above.
