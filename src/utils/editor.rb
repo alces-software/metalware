@@ -18,15 +18,32 @@ module Metalware
           ENV['VISUAL'] || ENV['EDITOR'] || DEFAULT_EDITOR
         end
 
-        def open_copy(source, destination)
+        def open_copy(source, destination, &validator)
           name = File.basename(source, '.*')
+          create_temp_file(name, File.read(source)) do |path|
+            open(path)
+            raise_if_validation_fails(path, &validator) if validator
+            FileUtils.cp(path, destination)
+          end
+        end
+
+        private
+
+        def create_temp_file(name, content)
           file = Tempfile.new(name)
-          FileUtils.cp source, file.path
-          open(file.path)
-          FileUtils.cp file.path, destination
+          file.write(content)
+          file.flush
+          yield file.path
         ensure
           file.close
           file.unlink
+        end
+
+        def raise_if_validation_fails(path)
+          return if yield path
+          raise ValidationFailure, <<-EOF.squish
+            The edited file is invalid
+          EOF
         end
       end
     end
