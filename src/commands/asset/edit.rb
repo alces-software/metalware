@@ -17,7 +17,7 @@ module Metalware
         end
 
         def run
-          error_if_asset_file_doesnt_exist(asset_name, asset_path)
+          error_if_asset_file_doesnt_exist(asset_path)
           edit_asset_file(asset_path)
           assign_asset_to_node_if_given(asset_name)
         end
