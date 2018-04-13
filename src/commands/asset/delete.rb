@@ -11,23 +11,21 @@ module Metalware
 
         private
 
-        attr_reader :name, :path, :cache
+        attr_reader :asset_name, :asset_path
 
         def setup
-          @name = args[0]
-          @path = FilePath.asset(name)
-          @cache = Metalware::Cache::Asset.new
+          @asset_name = args[0]
+          @asset_path = FilePath.asset(asset_name)
         end
 
         def run
-          error_if_asset_file_doesnt_exist(path)
-          cache.unassign_asset(name)
-          cache.save
+          error_if_asset_file_doesnt_exist(asset_path)
+          unassign_asset_from_node_if_given(asset_name)
           delete_asset
         end
 
         def delete_asset
-          FileUtils.rm path
+          FileUtils.rm asset_path
         end
       end
     end
