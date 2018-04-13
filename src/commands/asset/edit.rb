@@ -17,17 +17,9 @@ module Metalware
         end
 
         def run
-          error_if_asset_doesnt_exist
+          error_if_asset_file_doesnt_exist(asset_name, asset_path)
           edit_asset_file(asset_path)
           assign_asset_to_node_if_given(asset_name)
-        end
-
-        def error_if_asset_doesnt_exist
-          return if File.exist?(asset_path)
-          raise InvalidInput, <<-EOF.squish
-            The "#{asset_name}" asset does not yet exist. Use 'metal
-            asset add' to create the asset
-          EOF
         end
       end
     end
