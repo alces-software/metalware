@@ -48,7 +48,7 @@ module Metalware
       end
 
       def error_if_asset_file_doesnt_exist(asset_path)
-        asset_name = File.basename(asset_path, '.*') 
+        asset_name = File.basename(asset_path, '.*')
         return if File.exist?(asset_path)
         raise InvalidInput, <<-EOF.squish
           The "#{asset_name}" asset does not exist
