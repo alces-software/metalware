@@ -36,8 +36,9 @@ module Metalware
         asset_loaders[index].data
       end
 
-      def each
-        asset_loaders.map(&:data).each
+      def each(&b)
+        enum = asset_loaders.map(&:data).each
+        block_given? ? enum.each(&b) : enum
       end
 
       def find_by_name(name)
