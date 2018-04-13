@@ -193,10 +193,11 @@ RSpec.describe Metalware::Namespaces::Node do
 
     describe '#asset' do
       let :content { { node: { node_name.to_sym => 'asset_test' } } }
+      let :asset_path { Metalware::FilePath.asset('asset_test') }
       let :cache { Metalware::Cache::Asset.new }
       
       context 'with an assigned asset' do
-        before :each { Metalware::Data.dump(Metalware::FilePath.asset('asset_test'), content) }
+        before :each { Metalware::Data.dump(asset_path, content) }
 
         it 'can access the nodes asset' do
           cache.assign_asset_to_node('asset_test', node)
