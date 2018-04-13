@@ -44,9 +44,19 @@ RSpec.describe Metalware::Cache::Asset do
   end
 
   describe '#asset_for_node' do
+    let :asset_name { 'test-asset' }
+    before :each do
+      cache.assign_asset_to_node(asset_name, node)
+      cache.save
+    end
+
     it 'returns the corresponding nodes asset' do
-      cache.assign_asset_to_node('asset_test', node)
-      expect(cache.asset_for_node(node)).to eq('asset_test')
+      expect(cache.asset_for_node(node)).to eq(asset_name)
+    end
+
+    it 'returns the asset after the cache has been reloaded' do
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.asset_for_node(node)).to eq(asset_name)
     end
   end
 end
