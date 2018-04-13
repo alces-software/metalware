@@ -92,7 +92,7 @@ module Metalware
           return unless asset_name
           OpenStruct.new(
             name: asset_name,
-            data: alces.asset.find_by_name(asset_name)
+            data: alces.assets.find_by_name(asset_name)
           )
         end
       end

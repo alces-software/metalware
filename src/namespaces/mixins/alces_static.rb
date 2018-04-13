@@ -77,7 +77,7 @@ module Metalware
           @questions ||= loader.question_tree
         end
 
-        def asset
+        def assets
           @asset ||= AssetArray.new
         end
 
