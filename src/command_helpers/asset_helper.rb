@@ -51,7 +51,7 @@ module Metalware
         asset_name = File.basename(asset_path, '.*') 
         return if File.exist?(asset_path)
         raise InvalidInput, <<-EOF.squish
-          The "#{asset_name}" asset does not yet exist
+          The "#{asset_name}" asset does not exist
         EOF
       end
     end
