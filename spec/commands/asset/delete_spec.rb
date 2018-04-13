@@ -6,13 +6,17 @@ require 'commands'
 require 'utils'
 
 RSpec.describe Metalware::Commands::Asset::Delete do
+  let :asset { 'saved-asset' }
 
-  it 'errors if the asset doesnt exist' do
-    expect do
+  def run_command
       Metalware::Utils.run_command(described_class,
-                                   'missing-type',
-                                   'name',
+                                   asset,
                                    stderr: StringIO.new)
+  end
+ 
+  it 'errors if the asset does not exist' do
+    expect do
+      run_command
     end.to raise_error(Metalware::InvalidInput)
   end
 
@@ -23,18 +27,11 @@ RSpec.describe Metalware::Commands::Asset::Delete do
       end
     end
 
-    let :asset { 'saved-asset' }
     let :asset_path { Metalware::FilePath.asset(asset) }
     let :asset_content { { key: 'value' } }
 
     before :each { Metalware::Data.dump(asset_path, asset_content) }
 
-    def run_command
-      Metalware::Utils.run_command(described_class,
-                                   asset,
-                                   stderr: StringIO.new)
-    end
-    
     it 'deletes the asset file' do
       run_command
       expect(File.exist?(asset_path)).to eq(false)
