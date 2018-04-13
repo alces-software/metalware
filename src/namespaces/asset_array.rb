@@ -44,7 +44,7 @@ module Metalware
       def find_by_name(name)
         asset_loaders.find do |asset|
           asset.name == name
-        end.data
+        end&.data
       end
 
       private

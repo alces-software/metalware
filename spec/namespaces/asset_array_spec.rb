@@ -79,6 +79,10 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         subject.find_by_name(asset[:name])
         subject.find_by_name(asset[:name])
       end
+
+      it 'returns nil if the asset is missing' do
+        expect(subject.find_by_name('missing-asset')).to eq(nil)
+      end
     end
   end
 
