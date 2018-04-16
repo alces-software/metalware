@@ -205,11 +205,7 @@ RSpec.describe Metalware::Namespaces::Node do
         end
 
         it 'loads the asset data' do
-          expect(node.asset.data.to_h).to include(**content)
-        end
-
-        it 'loads the asset name' do
-          expect(node.asset.name).to eq(asset_name)
+          expect(node.asset.to_h).to include(**content)
         end
       end
 

@@ -90,10 +90,7 @@ module Metalware
         @asset ||= begin
           asset_name = alces.asset_cache.asset_for_node(self)
           return unless asset_name
-          OpenStruct.new(
-            name: asset_name,
-            data: alces.assets.find_by_name(asset_name)
-          )
+          alces.assets.find_by_name(asset_name)
         end
       end
 
