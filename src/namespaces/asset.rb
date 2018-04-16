@@ -4,7 +4,7 @@ module Metalware
   module Namespaces
     class Asset < HashMergers::MetalRecursiveOpenStruct
       def self.new(table = {})
-        super
+        super(table) { |s| s }
       end
     end
   end
