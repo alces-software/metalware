@@ -146,7 +146,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       expect(asset1.to_h).to eq(asset1_data)
     end
 
-    it 'can find the referenced other asset' do
+    it 'can find the referenced asset' do
       expect(asset1.link).to eq(asset2)
     end
 
