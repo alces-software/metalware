@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'alces_utils'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::Namespaces::AssetArray do
@@ -107,6 +108,36 @@ RSpec.describe Metalware::Namespaces::AssetArray do
           subject.each(&b)
         end.to yield_successive_args(*asset_data)
       end
+    end
+  end
+
+  context 'when referencing other asset (":<asset_name>")' do
+    include AlcesUtils
+
+    let :asset1 { alces.assets.find_by_name(asset1_name) }
+    let :asset2 { alces.assets.find_by_name(asset2_name) }
+    let :asset1_name { 'test-asset1' }
+    let :asset2_name { 'test-asset2' }
+    let :asset1_data do
+      {
+        key: "#{asset1_name}-data",
+        link: ":#{asset2_name}",
+      }
+    end
+    let :asset2_data do
+      {
+        key: "#{asset2_name}-data",
+        link: ":#{asset1_name}",
+      }
+    end
+
+    AlcesUtils.mock(self, :each) do
+      create_asset(asset1_name, asset1_data)
+      create_asset(asset2_name, asset2_data)
+    end
+
+    it 'can still be converted to a hash' do
+      expect(asset1.to_h).to eq(asset1_data)
     end
   end
 end
