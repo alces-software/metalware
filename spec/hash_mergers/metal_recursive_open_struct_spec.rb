@@ -14,6 +14,12 @@ module Metalware
   end
 end
 
+module Metalware
+  class TestInheritedMetalRecursiveOpenStruct < \
+    Metalware::HashMergers::MetalRecursiveOpenStruct
+  end
+end
+
 RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
   let :alces do
     namespace = Metalware::Namespaces::Alces.new
@@ -82,6 +88,18 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
         expect(arg).to be_a(Metalware::HashMergers::MetalRecursiveOpenStruct)
         expect(arg.key).to eq('value')
       end
+    end
+  end
+
+  context 'when using an inherited class' do
+    let :data { { sub_hash: { key: 'value' } } }
+    let :inherited_class do
+      Metalware::TestInheritedMetalRecursiveOpenStruct
+    end
+    subject { inherited_class.new(data) }
+
+    it 'returns sub hashes of that class' do
+      expect(subject.sub_hash).to be_a(inherited_class)
     end
   end
 end
