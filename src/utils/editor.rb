@@ -3,6 +3,7 @@
 require 'utils'
 require 'fileutils'
 require 'tempfile'
+require 'highline'
 
 module Metalware
   module Utils
@@ -23,7 +24,7 @@ module Metalware
           create_temp_file(name, File.read(source)) do |path|
             open(path)
             raise_if_validation_fails(path, &validator) if validator
-            FileUtils.cp(path, destination)
+            FileUtils.cp(path, destination) if File.exist?(path)
           end
         end
 
@@ -39,11 +40,18 @@ module Metalware
           file.unlink
         end
 
-        def raise_if_validation_fails(path)
+        def raise_if_validation_fails(path, &validator)
           return if yield path
-          raise ValidationFailure, <<-EOF.squish
-            The edited file is invalid
-          EOF
+          cli = HighLine.new
+          if cli.agree('The file is invalid, would you like to reopen? (y/n)' \
+          "\nNote: Invalids files will be discarded")
+            open(path)
+            raise_if_validation_fails(path, &validator) if validator
+          else
+            raise ValidationFailure, <<-EOF.squish
+              The edited file is invalid
+            EOF
+          end
         end
       end
     end
