@@ -187,6 +187,11 @@ module AlcesUtils
       group
     end
 
+    def create_asset(asset_name, data)
+      path = Metalware::FilePath.asset(asset_name)
+      Metalware::Data.dump(path, data)
+    end
+
     private
 
     attr_reader :alces, :test

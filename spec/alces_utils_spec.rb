@@ -174,6 +174,21 @@ RSpec.describe AlcesUtils do
       end
     end
 
+    describe '#create_asset' do
+      let :asset_name { 'my-new-asset' }
+      let :asset_data { { key: "#{asset_name}-data" } }
+
+      AlcesUtils.mock(self, :each) do
+        create_asset(asset_name, asset_data)
+      end
+
+      it 'creates an new asset' do
+        asset = alces.assets.find_by_name(asset_name)
+        expect(asset).not_to eq(nil)
+        expect(asset.to_h).to eq(asset_data)
+      end
+    end
+
     describe '#reset_alces' do
       before :each do
         @old_alces = alces
