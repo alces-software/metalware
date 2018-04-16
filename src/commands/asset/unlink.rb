@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Metalware
   module Commands
     module Asset
