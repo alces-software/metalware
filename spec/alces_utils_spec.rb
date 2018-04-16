@@ -187,6 +187,20 @@ RSpec.describe AlcesUtils do
         expect(asset).not_to eq(nil)
         expect(asset.to_h).to eq(asset_data)
       end
+
+      it 'can add new assets after the asset array is loaded' do
+        new_asset_name = 'new-asset-name'
+        new_asset_data = { key: "#{new_asset_name}-data" }
+        alces.assets
+
+        AlcesUtils.mock(self) do
+          create_asset(new_asset_name, new_asset_data)
+        end
+        new_asset = alces.assets.find_by_name(new_asset_name)
+
+        expect(new_asset).not_to eq(nil)
+        expect(new_asset.to_h).to eq(new_asset_data)
+      end
     end
 
     describe '#reset_alces' do

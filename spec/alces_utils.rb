@@ -190,6 +190,8 @@ module AlcesUtils
     def create_asset(asset_name, data)
       path = Metalware::FilePath.asset(asset_name)
       Metalware::Data.dump(path, data)
+      alces.instance_variable_set(:@asset_cache, nil)
+      alces.instance_variable_set(:@assets, nil)
     end
 
     private
