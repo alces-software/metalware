@@ -23,7 +23,8 @@ module Metalware
 
       include Enumerable
 
-      def initialize
+      def initialize(alces)
+        @alces = alces
         @asset_loaders = Dir.glob(FilePath.asset('*')).map do |path|
           AssetLoader.new(path).tap do |loader|
             raise_error_if_method_is_defined(loader.name)
@@ -49,7 +50,7 @@ module Metalware
 
       private
 
-      attr_reader :asset_loaders
+      attr_reader :alces, :asset_loaders
 
       def raise_error_if_method_is_defined(method)
         return unless respond_to?(method)

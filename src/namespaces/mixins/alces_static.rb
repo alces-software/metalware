@@ -78,7 +78,7 @@ module Metalware
         end
 
         def assets
-          @assets ||= AssetArray.new
+          @assets ||= AssetArray.new(self)
         end
 
         def asset_cache
