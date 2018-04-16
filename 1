@@ -95,7 +95,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   describe 'each' do
     let :asset_data do
-      assets.map { |a| a[:data] }
+      assets.map { |a| metal_ros.new(a[:data]) }
     end
 
     it 'loops through all the asset data' do
@@ -146,8 +146,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       expect(asset1.to_h).to eq(asset1_data)
     end
 
-    it 'can find the referenced other asset' do
-      expect(asset1.link).to eq(asset2)
+    it 'returns the asset it references' do
+      expect(asset1.link.to_h).to eq(asset2_data)
     end
   end
 end
