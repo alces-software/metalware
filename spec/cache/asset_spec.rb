@@ -61,8 +61,22 @@ RSpec.describe Metalware::Cache::Asset do
   end
 
   describe '#unassign_asset' do
-    it 'unassigns the asset from the node' do
-      cache.unassign_asset('asset_test')
+    let :asset_name { 'asset_test' }
+    before :each do
+      cache.assign_asset_to_node(asset_name, node)
+      cache.save
+    end
+
+    it 'unassigns the asset from all found instances ' do
+      cache.unassign_asset(asset_name)
+      cache.save
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.data).not_to eq(content)
+    end
+
+    it 'unassigns an asset from a specific node' do
+      cache.unassign_asset(asset_name, node_name)
+      cache.save
       new_cache = Metalware::Cache::Asset.new
       expect(new_cache.data).not_to eq(content)
     end
@@ -70,7 +84,7 @@ RSpec.describe Metalware::Cache::Asset do
     it 'attempts to unassign a missing asset' do
       cache.unassign_asset('missing_asset')
       new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).not_to eq(content) 
+      expect(new_cache.data).to eq(content) 
     end
   end
 end
