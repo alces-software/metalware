@@ -17,8 +17,12 @@ module Metalware
           @data ||= begin
             raw = Data.load(path)
             Constants::HASH_MERGER_DATA_STRUCTURE.new(raw) do |str|
-              other_asset_name = str[1..-1]
-              alces.assets.find_by_name(other_asset_name)
+              if str[0] == ':'
+                other_asset_name = str[1..-1]
+                alces.assets.find_by_name(other_asset_name)
+              else
+                str
+              end
             end
           end
         end

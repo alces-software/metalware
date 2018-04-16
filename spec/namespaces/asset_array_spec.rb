@@ -149,6 +149,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     it 'can find the referenced other asset' do
       expect(asset1.link).to eq(asset2)
     end
+
+    it 'only converts strings starting with ":" to an assets' do
+      expect(asset1.key).to eq(asset1_data[:key])
+    end
   end
 end
-
