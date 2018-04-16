@@ -4,7 +4,8 @@ module Metalware
   module Namespaces
     class AssetArray
       class AssetLoader
-        def initialize(path)
+        def initialize(alces, path)
+          @alces = alces
           @path = path
         end
 
@@ -18,7 +19,7 @@ module Metalware
 
         private
 
-        attr_reader :path
+        attr_reader :alces, :path
       end
 
       include Enumerable
@@ -26,7 +27,7 @@ module Metalware
       def initialize(alces)
         @alces = alces
         @asset_loaders = Dir.glob(FilePath.asset('*')).map do |path|
-          AssetLoader.new(path).tap do |loader|
+          AssetLoader.new(alces, path).tap do |loader|
             raise_error_if_method_is_defined(loader.name)
             define_singleton_method(loader.name) { loader.data }
           end
