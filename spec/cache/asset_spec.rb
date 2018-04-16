@@ -5,7 +5,7 @@ RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
   
   let :cache { Metalware::Cache::Asset.new }
-  let :content { { node: { node_name.to_sym => 'asset_test' } } }
+  let :initial_content { { node: { node_name.to_sym => 'asset_test' } } }
   let :node_name { 'test_node' } 
   let :node { alces.nodes.find_by_name(node_name) }
 
@@ -21,8 +21,8 @@ RSpec.describe Metalware::Cache::Asset do
     end
 
     it 'returns populated cache' do
-      Metalware::Data.dump(Metalware::FilePath.asset_cache, content)
-      expect(cache.data).to eq(content)
+      Metalware::Data.dump(Metalware::FilePath.asset_cache, initial_content)
+      expect(cache.data).to eq(initial_content)
     end
   end
 
@@ -31,7 +31,7 @@ RSpec.describe Metalware::Cache::Asset do
       cache.assign_asset_to_node('asset_test', node)
       cache.save
       new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).to eq(content)
+      expect(new_cache.data).to eq(initial_content)
     end
   end
 
@@ -62,6 +62,7 @@ RSpec.describe Metalware::Cache::Asset do
 
   describe '#unassign_asset' do
     let :asset_name { 'asset_test' }
+    let :expected_content { { node: {} } }
     before :each do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
@@ -71,20 +72,20 @@ RSpec.describe Metalware::Cache::Asset do
       cache.unassign_asset(asset_name)
       cache.save
       new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).not_to eq(content)
+      expect(new_cache.data).to eq(expected_content)
     end
 
     it 'unassigns an asset from a specific node' do
       cache.unassign_asset(asset_name, node_name)
       cache.save
       new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).not_to eq(content)
+      expect(new_cache.data).to eq(expected_content)
     end
 
     it 'attempts to unassign a missing asset' do
       cache.unassign_asset('missing_asset')
       new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).to eq(content) 
+      expect(new_cache.data).to eq(initial_content) 
     end
   end
 end
