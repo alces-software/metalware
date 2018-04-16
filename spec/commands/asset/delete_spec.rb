@@ -9,9 +9,9 @@ RSpec.describe Metalware::Commands::Asset::Delete do
   let :asset { 'saved-asset' }
 
   def run_command
-      Metalware::Utils.run_command(described_class,
-                                   asset,
-                                   stderr: StringIO.new)
+    Metalware::Utils.run_command(described_class,
+                                 asset,
+                                 stderr: StringIO.new)
   end
  
   it 'errors if the asset does not exist' do
