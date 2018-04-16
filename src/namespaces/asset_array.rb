@@ -32,7 +32,7 @@ module Metalware
         attr_reader :alces, :path
 
         def load_file
-          Data.load(path)
+          Data.load(path).merge(metadata: { name: name })
         end
       end
 
