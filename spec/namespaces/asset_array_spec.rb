@@ -21,6 +21,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       },
     ]
   end
+  let :metal_ros do
+    Metalware::HashMergers::MetalRecursiveOpenStruct
+  end
 
   before :each do
     assets.each do |asset|
@@ -68,8 +71,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         subject[index]
       end
 
-      it 'returns a RecursiveOpenStruct' do
-        expect(subject[index]).to be_a(RecursiveOpenStruct)
+      it 'returns a MetalRecursiveOpenStruct' do
+        expect(subject[index]).to be_a(metal_ros)
       end
     end
 
@@ -92,11 +95,11 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   describe 'each' do
     let :asset_data do
-      assets.map { |a| RecursiveOpenStruct.new(a[:data]) }
+      assets.map { |a| a[:data] }
     end
 
     it 'loops through all the asset data' do
-      expect(subject.each.to_a).to eq(asset_data)
+      expect(subject.each.to_a.map(&:to_h)).to eq(asset_data)
     end
 
     context 'when called without a block' do
@@ -108,7 +111,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     context 'when called with a block' do
       it 'runs the block' do
         expect do |b|
-          subject.each(&b)
+          subject.map(&:to_h).each(&b)
         end.to yield_successive_args(*asset_data)
       end
     end

@@ -14,7 +14,10 @@ module Metalware
         end
 
         def data
-          @data ||= RecursiveOpenStruct.new(Data.load(path))
+          @data ||= begin
+            raw = Data.load(path)
+            Constants::HASH_MERGER_DATA_STRUCTURE.new(raw)
+          end
         end
 
         private
