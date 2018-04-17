@@ -42,17 +42,21 @@ module Metalware
 
         def raise_if_validation_fails(path, &validator)
           return if yield path
+          prompt_user
+          open(path)
+          raise_if_validation_fails(path, &validator) if validator
+        end
+
+        def prompt_user
           cli = HighLine.new
           if cli.agree(<<-EOF.squish
                 The file is invalid and will be discarded,
                 would you like to reopen? (y/n)
               EOF
-            )
-            open(path)
-            raise_if_validation_fails(path, &validator) if validator
+                      )
           else
             raise ValidationFailure, <<-EOF.squish
-              Failed to edit file, changes have been discarded  
+              Failed to edit file, changes have been discarded
             EOF
           end
         end
