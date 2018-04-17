@@ -57,3 +57,9 @@ Style/DoubleNegation:
 # continue to be used
 Naming/HeredocDelimiterNaming:
   Enabled: false
+
+# The status has a race condition when killing bash commands. Thus
+# it should ignore no process errors
+Lint/HandleExceptions:
+  Exclude:
+    - src/status/job.rb

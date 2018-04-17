@@ -77,13 +77,8 @@ RSpec.describe Metalware::Configurator do
     yield
     tmp.close
   rescue StandardError => e
-    begin
-      $stdout.rewind
-      STDERR.puts $stdout.read
-    rescue StandardError
-      # XXX Not handling this gives a Rubocop warning; should we do something
-      # here?
-    end
+    $stdout.rewind
+    STDERR.puts $stdout.read
     raise e
   ensure
     $stdout = STDOUT
