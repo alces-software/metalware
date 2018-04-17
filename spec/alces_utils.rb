@@ -24,8 +24,8 @@ module AlcesUtils
         end
 
         # `alces` is defined as a method so it can be reset
-        define_method :alces { Metalware::Namespaces::Alces.new }
-        define_method :reset_alces do
+        define_method(:alces) { Metalware::Namespaces::Alces.new }
+        define_method(:reset_alces) do
           @spec_alces = nil
           alces
         end
