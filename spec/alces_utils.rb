@@ -80,7 +80,7 @@ module AlcesUtils
       buffers = input.map { |k| [k, StringIO.new] }.to_h
       update_std_files buffers
       yield
-      buffers.each { |_k, v| v.rewind }
+      buffers.each_value { |v| v.rewind }
       buffers
     ensure
       update_std_files old

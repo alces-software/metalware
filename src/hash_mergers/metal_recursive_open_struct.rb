@@ -32,7 +32,7 @@ module Metalware
       end
 
       def each
-        table.keys.each { |key| yield(key, send(key)) }
+        table.each_key { |key| yield(key, send(key)) }
       end
 
       def to_h
