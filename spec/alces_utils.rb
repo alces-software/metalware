@@ -59,7 +59,7 @@ module AlcesUtils
           AlcesUtils.check_and_raise_fakefs_error
           path = AlcesUtils.nodeattr_genders_file_path(args[0])
           cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
-          genders_data = File.read(path).gsub('`', '"')
+          genders_data = File.read(path).tr('`', '"')
           tempfile = `mktemp /tmp/genders.XXXXX`.chomp
           begin
             `echo "#{genders_data}" > #{tempfile}`
