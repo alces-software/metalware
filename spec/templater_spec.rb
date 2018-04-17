@@ -88,7 +88,7 @@ RSpec.describe Metalware::Templater do
     end
 
     context 'with repo' do
-      before :each do
+      before(:each) do
         filesystem.with_repo_fixtures('repo')
       end
 
@@ -230,7 +230,7 @@ RSpec.describe Metalware::Templater do
         [existing_contents, "\n", rendered_file_section_regex].join
       end
 
-      before :each do
+      before(:each) do
         filesystem.write(output_path, existing_contents)
       end
 
@@ -259,7 +259,7 @@ RSpec.describe Metalware::Templater do
         "BEFORE\n\n" + rendered_file_section_regex + "\n\nAFTER"
       end
 
-      before :each do
+      before(:each) do
         filesystem.write(output_path, existing_contents)
       end
 

@@ -7,7 +7,7 @@ require 'shared_examples/asset_command_that_assigns_a_node'
 
 RSpec.describe Metalware::Commands::Asset::Add do
   # Stops the editor from running the bash command
-  before :each { allow(Metalware::Utils::Editor).to receive(:open) }
+  before(:each) { allow(Metalware::Utils::Editor).to receive(:open) }
 
   it 'errors if the template does not exist' do
     expect do
@@ -53,7 +53,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
   end
 
   context 'with a node argument' do
-    before :each { FileSystem.root_setup(&:with_minimal_repo) }
+    before(:each) { FileSystem.root_setup(&:with_minimal_repo) }
 
     let(:asset_name) { 'asset1' }
     let(:command_arguments) { ['default', asset_name] }

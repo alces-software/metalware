@@ -14,7 +14,7 @@ RSpec.describe Metalware::Commands::Overview do
     end
   end
 
-  before :each do
+  before(:each) do
     allow(Metalware::Overview::Table).to \
       receive(:new).with(any_args).and_call_original
   end
@@ -44,7 +44,7 @@ RSpec.describe Metalware::Commands::Overview do
       }
     end
 
-    before :each do
+    before(:each) do
       Metalware::Data.dump Metalware::FilePath.overview, overview_hash
     end
 

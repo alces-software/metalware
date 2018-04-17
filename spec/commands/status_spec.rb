@@ -33,7 +33,7 @@ require 'filesystem'
 RSpec.describe Metalware::Status::Monitor do
   include AlcesUtils
 
-  before :each do
+  before(:each) do
     FileSystem.root_setup do |fs|
       fs.with_genders_fixtures
       fs.with_clone_fixture('configs/unit-test.yaml')

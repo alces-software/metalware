@@ -48,7 +48,7 @@ RSpec.describe Metalware::Cache::Asset do
 
   describe '#asset_for_node' do
     let(:asset_name) { 'test-asset' }
-    before :each do
+    before(:each) do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
     end

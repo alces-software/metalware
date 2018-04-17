@@ -33,7 +33,7 @@ require 'alces_utils'
 RSpec.describe Metalware::Commands::Build do
   include AlcesUtils
 
-  before :each do
+  before(:each) do
     # Shortens the wait times for the tests
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
     # Makes sure there aren't any other threads
@@ -70,7 +70,7 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   # Sets up the filesystem
-  before :each do
+  before(:each) do
     FileSystem.root_setup do |fs|
       fs.with_repo_fixtures('repo')
       fs.with_genders_fixtures
@@ -84,7 +84,7 @@ RSpec.describe Metalware::Commands::Build do
     hexadecimal_ip(testnode)
   end
 
-  before :each do
+  before(:each) do
     SpecUtils.use_mock_dependency(self)
   end
 

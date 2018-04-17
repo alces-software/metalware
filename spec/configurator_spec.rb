@@ -106,7 +106,7 @@ RSpec.describe Metalware::Configurator do
 
   # Do not want to use readline to get input in tests as tests will then
   # hang waiting for input.
-  before :each do
+  before(:each) do
     allow(Metalware::Configurator).to receive(:use_readline).and_return(false)
   end
 
@@ -432,7 +432,7 @@ RSpec.describe Metalware::Configurator do
       Metalware::GroupCache.new
     end
 
-    before :each do
+    before(:each) do
       define_questions(node: [
                          {
                            identifier: 'string_q',
@@ -449,7 +449,7 @@ RSpec.describe Metalware::Configurator do
   end
 
   context 'with a dependent questions' do
-    before :each do
+    before(:each) do
       define_questions(domain: [
                          {
                            identifier: 'parent',
@@ -522,7 +522,7 @@ RSpec.describe Metalware::Configurator do
       subject do
         alces.groups.find_by_name(group_name).answer.to_h[identifier]
       end
-      before :each { configure_group }
+      before(:each) { configure_group }
 
       let(:load_answer) do
         path = Metalware::FilePath.group_answers(group_name)
@@ -550,7 +550,7 @@ RSpec.describe Metalware::Configurator do
       end
 
       context 'when the new answer matches a previously saved answer' do
-        before :each { configure_group }
+        before(:each) { configure_group }
         let(:answer) { 'Some random answer' }
         let(:saved_answer) { answer }
         include_examples 'gets the answer'
@@ -573,7 +573,7 @@ RSpec.describe Metalware::Configurator do
         mock_node(node_name, group_name)
       end
 
-      before :each do
+      before(:each) do
         conf = Metalware::Configurator.for_node(alces, node_name)
         configure_with_answers([answer], test_obj: conf)
       end
@@ -602,7 +602,7 @@ RSpec.describe Metalware::Configurator do
         Metalware::Data.load(path)[identifier]
       end
 
-      before :each do
+      before(:each) do
         conf = Metalware::Configurator.for_local(alces)
         configure_with_answers([answer], test_obj: conf)
       end

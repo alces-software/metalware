@@ -30,7 +30,7 @@ require 'alces_utils'
 RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
   include AlcesUtils
 
-  before :each do
+  before(:each) do
     FileSystem.root_setup(&:with_minimal_repo)
   end
 

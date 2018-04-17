@@ -15,7 +15,7 @@ RSpec.describe Metalware::Commands::Configure::Domain do
     FileSystem.setup(&:with_minimal_repo)
   end
 
-  before :each do
+  before(:each) do
     SpecUtils.mock_validate_genders_success(self)
   end
 

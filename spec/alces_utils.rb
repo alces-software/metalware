@@ -16,7 +16,7 @@ module AlcesUtils
         # Cache the first version of alces to be created
         # This allows it to be mocked during the spec
         # It can also be reset in the test (see below)
-        before :each do
+        before(:each) do
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_wrap_original do |m, *a|
               @spec_alces ||= m.call(*a)
@@ -30,7 +30,7 @@ module AlcesUtils
           alces
         end
 
-        before :each { AlcesUtils.spoof_nodeattr(self) }
+        before(:each) { AlcesUtils.spoof_nodeattr(self) }
       end
     end
 

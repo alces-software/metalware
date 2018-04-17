@@ -29,7 +29,7 @@ require 'spec_utils'
 require 'timeout'
 
 RSpec.describe Metalware::Status::Job do
-  before :all do
+  before(:all) do
     Metalware::Status::Job.send(:define_method, :busy_sleep, lambda {
       until 1 == 2; end
     })
@@ -38,7 +38,7 @@ RSpec.describe Metalware::Status::Job do
     })
   end
 
-  before :example do
+  before(:example) do
     SpecUtils.use_mock_genders(self)
     @cmd = :busy_sleep
     @node = 'node_name_not_found'

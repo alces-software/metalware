@@ -50,7 +50,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   let(:initial_files) { answer_files }
   let(:deleted_files) { initial_files - answer_files }
 
-  before :each do
+  before(:each) do
     SpecUtils.mock_validate_genders_success(self)
     filesystem.test { initial_files }
   end

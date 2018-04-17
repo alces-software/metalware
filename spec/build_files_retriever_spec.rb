@@ -54,7 +54,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
   end
 
   describe '#retrieve_for_node' do
-    before :each do
+    before(:each) do
       FileSystem.root_setup do |fs|
         fs.with_clone_fixture('configs/unit-test.yaml')
       end
@@ -112,7 +112,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     end
 
     context 'when template file path not present' do
-      before :each do
+      before(:each) do
         allow(File).to receive(:exist?).and_return(false)
       end
 
@@ -146,7 +146,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     end
 
     context 'when error retrieving URL file' do
-      before :each do
+      before(:each) do
         @http_error = SpecUtils.fake_download_error(self)
       end
 
@@ -173,7 +173,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
       Metalware::Plugins.all.find { |p| p.name == plugin_name }
     end
 
-    before :each do
+    before(:each) do
       FileSystem.root_setup do |fs|
         # This must exist so can attempt to get node groups.
         fs.touch Metalware::Constants::GENDERS_PATH

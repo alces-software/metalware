@@ -49,7 +49,7 @@ RSpec.describe Metalware::HashMergers::Answer do
     end
   end
 
-  before :each do
+  before(:each) do
     Metalware::Data.dump Metalware::FilePath.configure_file, questions
   end
 
@@ -80,7 +80,7 @@ RSpec.describe Metalware::HashMergers::Answer do
   end
 
   context 'with answer files' do
-    before :each do
+    before(:each) do
       Metalware::Data.dump(
         Metalware::FilePath.domain_answers,
         identifier => answers(alces.domain)

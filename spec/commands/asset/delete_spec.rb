@@ -28,7 +28,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
     let(:asset_path) { Metalware::FilePath.asset(asset) }
     let(:asset_content) { { key: 'value' } }
 
-    before :each { Metalware::Data.dump(asset_path, asset_content) }
+    before(:each) { Metalware::Data.dump(asset_path, asset_content) }
 
     it 'deletes the asset file' do
       run_command

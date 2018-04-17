@@ -6,7 +6,7 @@ RSpec.describe Metalware::Utils::Editor do
   let(:default_editor) { described_class::DEFAULT_EDITOR }
 
   context 'with the environment variables unset' do
-    before :each do |example|
+    before(:each) do |example|
       ENV.delete('VISUAL')
       ENV.delete('EDITOR')
     end
@@ -18,7 +18,7 @@ RSpec.describe Metalware::Utils::Editor do
 
       context 'when $EDITOR is set' do
         let(:editor) { 'EDITOR-ENV-VAR' }
-        before :each { ENV['EDITOR'] = editor }
+        before(:each) { ENV['EDITOR'] = editor }
 
         it 'uses the $EDITOR env var' do
           expect(described_class.editor).to eq(editor)
@@ -26,7 +26,7 @@ RSpec.describe Metalware::Utils::Editor do
 
         context 'when $VISUAL is set' do
           let(:visual) { 'VISUAL-ENV-VAR' }
-          before :each { ENV['VISUAL'] = visual }
+          before(:each) { ENV['VISUAL'] = visual }
 
           it 'uses the $VISUAL env var' do
             expect(described_class.editor).to eq(visual)
@@ -54,7 +54,7 @@ RSpec.describe Metalware::Utils::Editor do
       let(:destination) { '/var/destination-file.yaml' }
       let(:initial_content) { { key: 'value' } }
 
-      before :each do
+      before(:each) do
         allow(Metalware::Utils::Editor).to receive(:open)
         Metalware::Data.dump(source, initial_content)
       end

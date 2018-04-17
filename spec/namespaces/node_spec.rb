@@ -63,7 +63,7 @@ RSpec.describe Metalware::Namespaces::Node do
     ##
     # Mocks the HashMergers
     #
-    before :each do
+    before(:each) do
       allow(Metalware::HashMergers::Config).to receive(:new)
         .and_return(double('config', merge: config_hash))
       allow(Metalware::HashMergers::Answer).to receive(:new)
@@ -73,7 +73,7 @@ RSpec.describe Metalware::Namespaces::Node do
     ##
     # Spoofs the results of NodeattrInterface
     #
-    before :each do
+    before(:each) do
       allow(Metalware::NodeattrInterface).to \
         receive(:genders_for_node).and_return(['primary_group'])
       allow(Metalware::NodeattrInterface).to \
@@ -83,7 +83,7 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     # Spoofs the hostip
-    before :each { SpecUtils.use_mock_determine_hostip_script(self) }
+    before(:each) { SpecUtils.use_mock_determine_hostip_script(self) }
 
     it 'can access the node name' do
       expect(node.name).to eq(node_name)
@@ -198,7 +198,7 @@ RSpec.describe Metalware::Namespaces::Node do
       let(:cache) { Metalware::Cache::Asset.new }
       
       context 'with an assigned asset' do
-        before :each do
+        before(:each) do
           Metalware::Data.dump(asset_path, content)
           cache.assign_asset_to_node(asset_name, node)
           cache.save
@@ -229,7 +229,7 @@ RSpec.describe Metalware::Namespaces::Node do
     let(:unconfigured_plugin) { 'unconfigured_plugin' }
     let(:deactivated_plugin) { 'deactivated_plugin' }
 
-    before :each do
+    before(:each) do
       FileSystem.root_setup do |fs|
         fs.with_minimal_repo
 

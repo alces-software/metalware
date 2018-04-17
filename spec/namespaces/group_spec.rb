@@ -21,7 +21,7 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   context 'with a mocked genders file' do
-    before :each do
+    before(:each) do
       AlcesUtils.mock self do
         mock_group('group1')
         mock_group('group2')

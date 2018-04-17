@@ -88,7 +88,7 @@ RSpec.describe '`metal build`' do
     end
   end
 
-  before :each do
+  before(:each) do
     kill_any_metal_processes
 
     FileUtils.remove(TEST_DIR, force: true)
@@ -234,7 +234,7 @@ RSpec.describe '`metal build`' do
         let(:stdin) { StringIO.new }
         let(:highline) { HighLine.new(stdin) }
 
-        before :each do
+        before(:each) do
           allow(HighLine).to receive(:new).and_return(highline)
         end
 
