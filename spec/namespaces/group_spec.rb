@@ -5,19 +5,19 @@ require 'shared_examples/hash_merger_namespace'
 require 'namespaces/alces'
 require 'spec_utils'
 
-RSpec.describe Metalware::Namespaces::Node do
+RSpec.describe Metalware::Namespaces::Group do
   include AlcesUtils
 
   context 'with mocked group' do
     let(:test_group) { 'some_test_group' }
+    subject { alces.groups.first }
 
     AlcesUtils.mock self, :each do
       mock_group(test_group)
       mock_node('random_node', test_group)
     end
 
-    include_examples Metalware::Namespaces::HashMergerNamespace,
-                     'alces.groups.first'
+    include_examples Metalware::Namespaces::HashMergerNamespace
   end
 
   context 'with a mocked genders file' do

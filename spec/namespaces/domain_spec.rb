@@ -5,11 +5,11 @@ require 'shared_examples/hash_merger_namespace'
 require 'namespaces/alces'
 require 'spec_utils'
 
-RSpec.describe Metalware::Namespaces::Node do
+RSpec.describe Metalware::Namespaces::Domain do
   include AlcesUtils
 
-  include_examples Metalware::Namespaces::HashMergerNamespace,
-                   'alces.domain'
+  subject { alces.domain }
+  include_examples Metalware::Namespaces::HashMergerNamespace
 
   before { SpecUtils.use_mock_determine_hostip_script(self) }
 

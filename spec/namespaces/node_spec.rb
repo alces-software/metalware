@@ -18,8 +18,9 @@ RSpec.describe Metalware::Namespaces::Node do
       mock_group(AlcesUtils.default_group)
     end
 
-    include_examples Metalware::Namespaces::HashMergerNamespace,
-                     'alces.nodes.first'
+    subject { alces.nodes.first }
+
+    include_examples Metalware::Namespaces::HashMergerNamespace
   end
 
   context 'without AlcesUtils' do
