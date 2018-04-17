@@ -11,7 +11,7 @@ module AlcesUtils
   GENDERS_FILE_REGEX = /-f [[:graph:]]+/
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
-    def start(example_group, config: nil)
+    def start(example_group)
       example_group.instance_exec do
         # Cache the first version of alces to be created
         # This allows it to be mocked during the spec
