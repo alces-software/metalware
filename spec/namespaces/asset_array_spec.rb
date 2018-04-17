@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
+require 'alces_utils'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::Namespaces::AssetArray do
-  subject { Metalware::Namespaces::AssetArray.new }
+  subject { Metalware::Namespaces::AssetArray.new(alces_copy) }
 
+  # DO NOT use AlcesUtils in the section. It tests features required
+  # by the namespace itself.
+  let :alces_copy { Metalware::Namespaces::Alces.new }
   let :assets do
     [
       {
@@ -16,6 +20,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         data: { key: 'value2' },
       },
     ]
+  end
+  let :metal_ros do
+    Metalware::HashMergers::MetalRecursiveOpenStruct
   end
 
   before :each do
@@ -34,14 +41,14 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
       it 'errors due to the existing method' do
         expect do
-          Metalware::Namespaces::AssetArray.new
+          Metalware::Namespaces::AssetArray.new(alces_copy)
         end.to raise_error(Metalware::DataError)
       end
     end
 
     it 'does not load the files when initially called' do
       expect(Metalware::Data).not_to receive(:load)
-      Metalware::Namespaces::AssetArray.new
+      Metalware::Namespaces::AssetArray.new(alces_copy)
     end
   end
 
@@ -64,8 +71,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         subject[index]
       end
 
-      it 'returns a RecursiveOpenStruct' do
-        expect(subject[index]).to be_a(RecursiveOpenStruct)
+      it 'returns a MetalRecursiveOpenStruct' do
+        expect(subject[index]).to be_a(metal_ros)
       end
     end
 
@@ -88,11 +95,11 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   describe 'each' do
     let :asset_data do
-      assets.map { |a| RecursiveOpenStruct.new(a[:data]) }
+      assets.map { |a| a[:data] }
     end
 
     it 'loops through all the asset data' do
-      expect(subject.each.to_a).to eq(asset_data)
+      expect(subject.each.to_a.map(&:to_h)).to eq(asset_data)
     end
 
     context 'when called without a block' do
@@ -104,10 +111,47 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     context 'when called with a block' do
       it 'runs the block' do
         expect do |b|
-          subject.each(&b)
+          subject.map(&:to_h).each(&b)
         end.to yield_successive_args(*asset_data)
       end
     end
   end
-end
 
+  context 'when referencing other asset (":<asset_name>")' do
+    include AlcesUtils
+
+    let :asset1 { alces.assets.find_by_name(asset1_name) }
+    let :asset2 { alces.assets.find_by_name(asset2_name) }
+    let :asset1_name { 'test-asset1' }
+    let :asset2_name { 'test-asset2' }
+    let :asset1_data do
+      {
+        key: "#{asset1_name}-data",
+        link: ":#{asset2_name}",
+      }
+    end
+    let :asset2_data do
+      {
+        key: "#{asset2_name}-data",
+        link: ":#{asset1_name}",
+      }
+    end
+
+    AlcesUtils.mock(self, :each) do
+      create_asset(asset1_name, asset1_data)
+      create_asset(asset2_name, asset2_data)
+    end
+
+    it 'can still be converted to a hash' do
+      expect(asset1.to_h).to eq(asset1_data)
+    end
+
+    it 'can find the referenced asset' do
+      expect(asset1.link).to eq(asset2)
+    end
+
+    it 'only converts strings starting with ":" to an assets' do
+      expect(asset1.key).to eq(asset1_data[:key])
+    end
+  end
+end

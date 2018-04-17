@@ -4,7 +4,8 @@ module Metalware
   module Namespaces
     class AssetArray
       class AssetLoader
-        def initialize(path)
+        def initialize(alces, path)
+          @alces = alces
           @path = path
         end
 
@@ -13,19 +14,30 @@ module Metalware
         end
 
         def data
-          @data ||= RecursiveOpenStruct.new(Data.load(path))
+          @data ||= begin
+            raw = Data.load(path)
+            Constants::HASH_MERGER_DATA_STRUCTURE.new(raw) do |str|
+              if str[0] == ':'
+                other_asset_name = str[1..-1]
+                alces.assets.find_by_name(other_asset_name)
+              else
+                str
+              end
+            end
+          end
         end
 
         private
 
-        attr_reader :path
+        attr_reader :alces, :path
       end
 
       include Enumerable
 
-      def initialize
+      def initialize(alces)
+        @alces = alces
         @asset_loaders = Dir.glob(FilePath.asset('*')).map do |path|
-          AssetLoader.new(path).tap do |loader|
+          AssetLoader.new(alces, path).tap do |loader|
             raise_error_if_method_is_defined(loader.name)
             define_singleton_method(loader.name) { loader.data }
           end
@@ -49,7 +61,7 @@ module Metalware
 
       private
 
-      attr_reader :asset_loaders
+      attr_reader :alces, :asset_loaders
 
       def raise_error_if_method_is_defined(method)
         return unless respond_to?(method)
