@@ -5,6 +5,7 @@ RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
   
   let :cache { Metalware::Cache::Asset.new }
+  let :cache_path { Metalware::FilePath.asset_cache }
   let :initial_content { { node: { node_name.to_sym => 'asset_test' } } }
   let :node_name { 'test_node' } 
   let :node { alces.nodes.find_by_name(node_name) }
@@ -21,7 +22,7 @@ RSpec.describe Metalware::Cache::Asset do
     end
 
     it 'returns populated cache' do
-      Metalware::Data.dump(Metalware::FilePath.asset_cache, initial_content)
+      Metalware::Data.dump(cache_path, initial_content)
       expect(cache.data).to eq(initial_content)
     end
   end
@@ -68,11 +69,35 @@ RSpec.describe Metalware::Cache::Asset do
       cache.save
     end
 
-    it 'unassigns the asset from all found instances ' do
-      cache.unassign_asset(asset_name)
-      cache.save
-      new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).to eq(expected_content)
+    context 'with multiple assets in cache' do
+      let :initial_content do
+        node_data = expected_content[:node].merge( 
+          node_name.to_sym => asset_name,
+          node02: asset_name,
+        )
+        { node: node_data } 
+      end
+
+      let :expected_content do
+        {
+          node: {
+            node01: 'test-asset-01',
+            node03: 'test-asset-03'
+          }
+        }
+      end
+
+      before :each do
+        Metalware::Data.dump(cache_path, initial_content)
+      end
+
+      it 'unassigns the asset from all found instances ' do
+        cache = Metalware::Cache::Asset.new
+        cache.unassign_asset(asset_name)
+        cache.save
+        new_cache = Metalware::Cache::Asset.new
+        expect(new_cache.data).to eq(expected_content)
+      end
     end
 
     it 'unassigns an asset from a specific node' do
