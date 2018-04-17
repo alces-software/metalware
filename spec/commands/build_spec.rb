@@ -40,7 +40,7 @@ RSpec.describe Metalware::Commands::Build do
     AlcesUtils.kill_other_threads
   end
 
-  let :build_wait_time { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
+  let(:build_wait_time) { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
 
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do
@@ -78,7 +78,7 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   # Mocks the test node
-  let :testnode { alces.nodes.find_by_name('testnode01') }
+  let(:testnode) { alces.nodes.find_by_name('testnode01') }
   AlcesUtils.mock self, :each do
     config(testnode, build_method: :kickstart)
     hexadecimal_ip(testnode)
@@ -129,9 +129,9 @@ RSpec.describe Metalware::Commands::Build do
       end
     end
 
-    let :test_group_name { 'some_random_test_group' }
-    let :testnodes { alces.groups.find_by_name test_group_name }
-    let :delay_build { build_wait_time / 10 }
+    let(:test_group_name) { 'some_random_test_group' }
+    let(:testnodes) { alces.groups.find_by_name test_group_name }
+    let(:delay_build) { build_wait_time / 10 }
 
     it 'starts all the builds' do
       testnodes.nodes do |node|

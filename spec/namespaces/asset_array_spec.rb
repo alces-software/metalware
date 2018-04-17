@@ -8,8 +8,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   # DO NOT use AlcesUtils in the section. It tests features required
   # by the namespace itself.
-  let :alces_copy { Metalware::Namespaces::Alces.new }
-  let :assets do
+  let(:alces_copy) { Metalware::Namespaces::Alces.new }
+  let(:assets) do
     [
       {
         name: 'asset1',
@@ -22,12 +22,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     ]
   end
 
-  let :assets_data do
+  let(:assets_data) do
     assets.map do |asset|
       asset[:data].merge(metadata: { name: asset[:name] })
     end
   end
-  let :metal_ros do
+  let(:metal_ros) do
     Metalware::HashMergers::MetalRecursiveOpenStruct
   end
 
@@ -59,9 +59,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   end
 
   context 'when loading the second asset' do
-    let :index { 1 }
-    let :asset { assets[index] }
-    let :asset_data { assets_data[index] }
+    let(:index) { 1 }
+    let(:asset) { assets[index] }
+    let(:asset_data) { assets_data[index] }
 
     def expect_to_only_load_asset_data_once
       expect(Metalware::Data).to receive(:load).once.and_call_original
@@ -124,17 +124,17 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   context 'when referencing other asset (":<asset_name>")' do
     include AlcesUtils
 
-    let :asset1 { alces.assets.find_by_name(asset1_name) }
-    let :asset2 { alces.assets.find_by_name(asset2_name) }
-    let :asset1_name { 'test-asset1' }
-    let :asset2_name { 'test-asset2' }
-    let :asset1_raw_data do
+    let(:asset1) { alces.assets.find_by_name(asset1_name) }
+    let(:asset2) { alces.assets.find_by_name(asset2_name) }
+    let(:asset1_name) { 'test-asset1' }
+    let(:asset2_name) { 'test-asset2' }
+    let(:asset1_raw_data) do
       {
         key: "#{asset1_name}-data",
         link: ":#{asset2_name}",
       }
     end
-    let :asset2_raw_data do
+    let(:asset2_raw_data) do
       {
         key: "#{asset2_name}-data",
         link: ":#{asset1_name}",

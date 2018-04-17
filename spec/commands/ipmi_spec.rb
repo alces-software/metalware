@@ -18,10 +18,10 @@ RSpec.describe Metalware::Commands::Ipmi do
     # XXX The setup for these tests is duplicated from those for power; should
     # DRY this up.
 
-    let :node_names { ['node01', 'node02', 'node03'] }
-    let :group { 'nodes' }
-    let :gender { 'my_super_awesome_gender' }
-    let :namespace_config do
+    let(:node_names) { ['node01', 'node02', 'node03'] }
+    let(:group) { 'nodes' }
+    let(:gender) { 'my_super_awesome_gender' }
+    let(:namespace_config) do
       {
         networks: {
           bmc: {
@@ -71,22 +71,22 @@ RSpec.describe Metalware::Commands::Ipmi do
     end
 
     context 'when run for group' do
-      let :test_gender { group }
+      let(:test_gender) { group }
       include_examples 'runs on each node'
     end
 
     context 'when run for a gender' do
-      let :test_gender { gender }
+      let(:test_gender) { gender }
       include_examples 'runs on each node'
     end
   end
 
   describe Metalware::Commands::Ipmi::Command do
     subject { Metalware::Commands::Ipmi::Command }
-    let :regular_command { 'regular_command' }
-    let :options_command { 'options_command' }
-    let :args { [nil, regular_command] }
-    let :options { OpenStruct.new(command: options_command) }
+    let(:regular_command) { 'regular_command' }
+    let(:options_command) { 'options_command' }
+    let(:args) { [nil, regular_command] }
+    let(:options) { OpenStruct.new(command: options_command) }
 
     describe '::parse' do
       it 'errors if both command inputs are used' do

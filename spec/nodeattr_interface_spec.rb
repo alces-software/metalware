@@ -90,8 +90,8 @@ RSpec.describe Metalware::NodeattrInterface do
   end
 
   describe '#validate_genders_file' do
-    let :genders_file { Tempfile.new }
-    let :genders_path { genders_file.path }
+    let(:genders_file) { Tempfile.new }
+    let(:genders_path) { genders_file.path }
 
     subject do
       Metalware::NodeattrInterface.validate_genders_file(genders_path)

@@ -36,7 +36,7 @@ RSpec.describe Metalware::AnswersTableCreator do
     Metalware::AnswersTableCreator.new(alces)
   end
 
-  let :raw_configure_data do
+  let(:raw_configure_data) do
     {
       domain: [{
         identifier: 'question_1',
@@ -72,26 +72,26 @@ RSpec.describe Metalware::AnswersTableCreator do
     }
   end
 
-  let :question_tree do
+  let(:question_tree) do
     Metalware::Validation::Configure.new(raw_configure_data).tree
   end
 
-  let! :loader do
+  let!(:loader) do
     l = Metalware::Validation::Loader.new
     allow(l).to receive(:question_tree).and_return(question_tree)
     allow(Metalware::Validation::Loader).to receive(:new).and_return(l)
     l
   end
 
-  let :domain_answers do
+  let(:domain_answers) do
     { question_1: 'domain question 1' }
   end
 
-  let :group_answers do
+  let(:group_answers) do
     { question_1: 'group question 1', question_2: 11 }
   end
 
-  let :node_answers do
+  let(:node_answers) do
     {
       question_1: 'node question 1',
       question_2: 13,
@@ -99,8 +99,8 @@ RSpec.describe Metalware::AnswersTableCreator do
     }
   end
 
-  let :group_name { 'testnodes' }
-  let :node_name { 'testnode01' }
+  let(:group_name) { 'testnodes' }
+  let(:node_name) { 'testnode01' }
 
   AlcesUtils.mock self, :each do
     answer(alces.domain, domain_answers)

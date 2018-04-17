@@ -11,7 +11,7 @@ RSpec.describe Metalware::Commands::Configure::Domain do
     )
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup(&:with_minimal_repo)
   end
 

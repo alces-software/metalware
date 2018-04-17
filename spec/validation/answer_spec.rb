@@ -28,7 +28,7 @@ require 'alces_utils'
 
 RSpec.describe Metalware::Validation::Answer do
   include AlcesUtils
-  let :question_tree do
+  let(:question_tree) do
     {
       domain: [
         {
@@ -53,7 +53,7 @@ RSpec.describe Metalware::Validation::Answer do
     }
   end
 
-  let :valid_answers do
+  let(:valid_answers) do
     {
       string_question: 'string',
       integer_question: 100,

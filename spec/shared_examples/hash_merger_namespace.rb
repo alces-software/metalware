@@ -7,16 +7,16 @@ require 'alces_utils'
 RSpec.shared_examples \
   Metalware::Namespaces::HashMergerNamespace do |test_obj_str|
 
-  let :test_obj { eval(test_obj_str) }
+  let(:test_obj) { eval(test_obj_str) }
 
-  let :test_config do
+  let(:test_config) do
     {
       test_config: 'I am the config',
       files: [],
     }
   end
 
-  let :test_answer do
+  let(:test_answer) do
     { test_answer: 'I am the answer' }
   end
 

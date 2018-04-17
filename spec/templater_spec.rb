@@ -37,7 +37,7 @@ EMPTY_REPO_PATH = File.join(FIXTURES_PATH, 'configs/empty-repo.yaml')
 RSpec.describe Metalware::Templater do
   include AlcesUtils
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.write template_path, template.strip_heredoc
     end
@@ -46,7 +46,7 @@ RSpec.describe Metalware::Templater do
   # XXX Could adjust tests using this to only use template with parts they
   # need, to make them simpler and less dependent on changes to this or each
   # other.
-  let :template do
+  let(:template) do
     <<-EOF
     This is a test template
     some_passed_value: <%= domain.config.some_passed_value %>
@@ -57,7 +57,7 @@ RSpec.describe Metalware::Templater do
     EOF
   end
 
-  let :template_path { '/template' }
+  let(:template_path) { '/template' }
 
   def expect_renders(template_parameters, expected)
     filesystem.test do |_fs|
@@ -106,7 +106,7 @@ RSpec.describe Metalware::Templater do
       end
 
       context 'when template uses property of unset parameter' do
-        let :template do
+        let(:template) do
           'unset.parameter: <%= unset.parameter %>'
         end
 
@@ -122,9 +122,9 @@ RSpec.describe Metalware::Templater do
   end
 
   describe '#render_to_file' do
-    let :template { "simple template without ERB\n" }
-    let :output_path { '/output' }
-    let :output { File.read(output_path) }
+    let(:template) { "simple template without ERB\n" }
+    let(:output_path) { '/output' }
+    let(:output) { File.read(output_path) }
 
     def render_to_file_with_block(&block)
       Metalware::Templater.render_to_file(
@@ -165,11 +165,11 @@ RSpec.describe Metalware::Templater do
 
   describe '#render_managed_file' do
     # XXX Similar to above.
-    let :template { 'simple template without ERB' }
-    let :output_path { '/output' }
-    let :output { File.read(output_path) }
+    let(:template) { 'simple template without ERB' }
+    let(:output_path) { '/output' }
+    let(:output) { File.read(output_path) }
 
-    let :rendered_file_section_regex do
+    let(:rendered_file_section_regex) do
       [
         Metalware::Templater::MANAGED_START,
         Metalware::Templater::MANAGED_COMMENT,
@@ -224,9 +224,9 @@ RSpec.describe Metalware::Templater do
     end
 
     context 'when file exists without markers' do
-      let :existing_contents { "existing file contents\n" }
+      let(:existing_contents) { "existing file contents\n" }
 
-      let :rendered_file_regex do
+      let(:rendered_file_regex) do
         [existing_contents, "\n", rendered_file_section_regex].join
       end
 
@@ -243,7 +243,7 @@ RSpec.describe Metalware::Templater do
     end
 
     context 'when file exists with markers' do
-      let :existing_contents do
+      let(:existing_contents) do
         <<-EOF.strip_heredoc
         BEFORE
 
@@ -255,7 +255,7 @@ RSpec.describe Metalware::Templater do
         EOF
       end
 
-      let :rendered_file_regex do
+      let(:rendered_file_regex) do
         "BEFORE\n\n" + rendered_file_section_regex + "\n\nAFTER"
       end
 

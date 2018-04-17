@@ -25,11 +25,11 @@ RSpec.describe Metalware::Commands::Asset::Add do
       end
     end
 
-    let :template { 'default' }
-    let :save { 'saved-asset' }
+    let(:template) { 'default' }
+    let(:save) { 'saved-asset' }
 
-    let :template_path { Metalware::FilePath.asset_template(template) }
-    let :save_path { Metalware::FilePath.asset(save) }
+    let(:template_path) { Metalware::FilePath.asset_template(template) }
+    let(:save_path) { Metalware::FilePath.asset(save) }
 
     def run_command
       Metalware::Utils.run_command(described_class,
@@ -55,8 +55,8 @@ RSpec.describe Metalware::Commands::Asset::Add do
   context 'with a node argument' do
     before :each { FileSystem.root_setup(&:with_minimal_repo) }
 
-    let :asset_name { 'asset1' }
-    let :command_arguments { ['default', asset_name] }
+    let(:asset_name) { 'asset1' }
+    let(:command_arguments) { ['default', asset_name] }
 
     it_behaves_like 'asset command that assigns a node'
   end

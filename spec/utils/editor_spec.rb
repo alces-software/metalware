@@ -3,7 +3,7 @@
 require 'utils/editor'
 
 RSpec.describe Metalware::Utils::Editor do
-  let :default_editor { described_class::DEFAULT_EDITOR }
+  let(:default_editor) { described_class::DEFAULT_EDITOR }
 
   context 'with the environment variables unset' do
     before :each do |example|
@@ -17,7 +17,7 @@ RSpec.describe Metalware::Utils::Editor do
       end
 
       context 'when $EDITOR is set' do
-        let :editor { 'EDITOR-ENV-VAR' }
+        let(:editor) { 'EDITOR-ENV-VAR' }
         before :each { ENV['EDITOR'] = editor }
 
         it 'uses the $EDITOR env var' do
@@ -25,7 +25,7 @@ RSpec.describe Metalware::Utils::Editor do
         end
 
         context 'when $VISUAL is set' do
-          let :visual { 'VISUAL-ENV-VAR' }
+          let(:visual) { 'VISUAL-ENV-VAR' }
           before :each { ENV['VISUAL'] = visual }
 
           it 'uses the $VISUAL env var' do
@@ -36,7 +36,7 @@ RSpec.describe Metalware::Utils::Editor do
     end
 
     describe '#open' do
-      let :file { '/tmp/some-random-file' }
+      let(:file) { '/tmp/some-random-file' }
 
       it 'opens the file in the default editor' do
         cmd = "#{default_editor} #{file}"
@@ -50,9 +50,9 @@ RSpec.describe Metalware::Utils::Editor do
 
 
     describe '#open_copy' do
-      let :source { '/var/source-file.yaml' }
-      let :destination { '/var/destination-file.yaml' }
-      let :initial_content { { key: 'value' } }
+      let(:source) { '/var/source-file.yaml' }
+      let(:destination) { '/var/destination-file.yaml' }
+      let(:initial_content) { { key: 'value' } }
 
       before :each do
         allow(Metalware::Utils::Editor).to receive(:open)

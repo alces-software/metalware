@@ -45,12 +45,12 @@ Metalware::Validation::Saver::Methods.prepend(SaverSpec::TestingMethods)
 RSpec.describe Metalware::Validation::Saver do
   include AlcesUtils
 
-  let :path { Metalware::FilePath }
-  let :saver { Metalware::Validation::Saver.new }
-  let :stubbed_answer_load { OpenStruct.new(data: data) }
-  let :data { { key: 'data' } }
+  let(:path) { Metalware::FilePath }
+  let(:saver) { Metalware::Validation::Saver.new }
+  let(:stubbed_answer_load) { OpenStruct.new(data: data) }
+  let(:data) { { key: 'data' } }
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup(&:with_minimal_repo)
   end
 

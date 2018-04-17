@@ -6,9 +6,9 @@ require 'fixtures/shared_context/overview'
 RSpec.describe Metalware::Overview::Table do
   include_context 'overview context'
 
-  let :namespaces { alces.groups }
+  let(:namespaces) { alces.groups }
 
-  let :table do
+  let(:table) do
     Metalware::Overview::Table.new(namespaces, fields).render
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Metalware::Overview::Table do
     table.lines[3..-2].join("\n")
   end
 
-  let :headers { fields.map { |h| h[:header] } }
+  let(:headers) { fields.map { |h| h[:header] } }
 
   it 'includes the headers in the table' do
     headers.each do |h|

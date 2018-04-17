@@ -32,7 +32,7 @@ require 'filesystem'
 RSpec.describe Metalware::Status::Monitor do
   include AlcesUtils
 
-  let :nodes { alces.nodes.map(&:name) }
+  let(:nodes) { alces.nodes.map(&:name) }
 
   before :each do
     FileSystem.root_setup(&:with_genders_fixtures)

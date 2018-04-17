@@ -34,8 +34,8 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
     FileSystem.root_setup(&:with_minimal_repo)
   end
 
-  let :node_name { 'nodeA01' }
-  let :node { alces.nodes.find_by_name node_name }
+  let(:node_name) { 'nodeA01' }
+  let(:node) { alces.nodes.find_by_name node_name }
 
   AlcesUtils.mock self, :each do
     n = mock_node node_name

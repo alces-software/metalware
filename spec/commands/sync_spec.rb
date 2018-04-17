@@ -31,8 +31,8 @@ RSpec.describe Metalware::Commands::Sync do
   delegate :manifest, to: Metalware::Staging
 
   describe '#sync_files' do
-    let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
-    let :validate_file { '/tmp/validate-file' }
+    let(:files) { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
+    let(:validate_file) { '/tmp/validate-file' }
 
     before :each do
       Metalware::Staging.update do |staging|
@@ -55,8 +55,8 @@ RSpec.describe Metalware::Commands::Sync do
     end
 
     context 'with a validation error' do
-      let :bad_file { '/tmp/bad-validator-file' }
-      let :stderr { StringIO.new }
+      let(:bad_file) { '/tmp/bad-validator-file' }
+      let(:stderr) { StringIO.new }
 
       before :each do
         # Allows the error to be printed

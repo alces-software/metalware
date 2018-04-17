@@ -23,7 +23,7 @@ RSpec.describe Metalware::Namespaces::Node do
   end
 
   context 'without AlcesUtils' do
-    let :alces do
+    let(:alces) do
       a = Metalware::Namespaces::Alces.new
       allow(a).to receive(:groups).and_return(
         Metalware::Namespaces::MetalArray.new(
@@ -46,19 +46,19 @@ RSpec.describe Metalware::Namespaces::Node do
       node
     end
 
-    let :test_value { 'test value set in namespace/node_spec.rb' }
-    let :primary_group_index { 'primary_group_index' }
-    let :node_name { 'node02' }
-    let :node_array { ['some_other_node', node_name] }
+    let(:test_value) { 'test value set in namespace/node_spec.rb' }
+    let(:primary_group_index) { 'primary_group_index' }
+    let(:node_name) { 'node02' }
+    let(:node_array) { ['some_other_node', node_name] }
 
-    let :config_hash do
+    let(:config_hash) do
       Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
         key: test_value,
         erb_value1: '<%= alces.node.config.key  %>'
       ) { |template_string| node.render_erb_template(template_string) }
     end
 
-    let :node { Metalware::Namespaces::Node.create(alces, node_name) }
+    let(:node) { Metalware::Namespaces::Node.create(alces, node_name) }
 
     ##
     # Mocks the HashMergers
@@ -116,8 +116,8 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     describe '#==' do
-      let :foonode { Metalware::Namespaces::Node.create(alces, 'foonode') }
-      let :barnode { Metalware::Namespaces::Node.create(alces, 'barnode') }
+      let(:foonode) { Metalware::Namespaces::Node.create(alces, 'foonode') }
+      let(:barnode) { Metalware::Namespaces::Node.create(alces, 'barnode') }
 
       it 'returns false if other object is not a Node' do
         other_object = Struct.new(:name).new('foonode')
@@ -134,7 +134,7 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     describe '#build_method' do
-      let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
+      let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
 
       def mock_build_method(method, my_node = node)
         config = OpenStruct.new(build_method: method)
@@ -164,11 +164,11 @@ RSpec.describe Metalware::Namespaces::Node do
       end
 
       context "with the 'local' node" do
-        let :local do
+        let(:local) do
           Metalware::Namespaces::Node.create(alces, 'local')
         end
 
-        let :local_build { Metalware::BuildMethods::Local }
+        let(:local_build) { Metalware::BuildMethods::Local }
 
         def local_node_uses_local_build?(config_build_method)
           mock_build_method(config_build_method, local)
@@ -192,10 +192,10 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     describe '#asset' do
-      let :content { { node: { node_name.to_sym => 'asset_test' } } }
-      let :asset_name { 'asset_test' }
-      let :asset_path { Metalware::FilePath.asset(asset_name) }
-      let :cache { Metalware::Cache::Asset.new }
+      let(:content) { { node: { node_name.to_sym => 'asset_test' } } }
+      let(:asset_name) { 'asset_test' }
+      let(:asset_path) { Metalware::FilePath.asset(asset_name) }
+      let(:cache) { Metalware::Cache::Asset.new }
       
       context 'with an assigned asset' do
         before :each do
@@ -219,15 +219,15 @@ RSpec.describe Metalware::Namespaces::Node do
 
   # Test `#plugins` without the rampant mocking above.
   describe '#plugins' do
-    let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
-    let :alces { Metalware::Namespaces::Alces.new }
+    let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
+    let(:alces) { Metalware::Namespaces::Alces.new }
 
     # XXX Need to handle situation of plugin being enabled for node but not
     # available globally?
-    let :enabled_plugin { 'enabled_plugin' }
-    let :disabled_plugin { 'disabled_plugin' }
-    let :unconfigured_plugin { 'unconfigured_plugin' }
-    let :deactivated_plugin { 'deactivated_plugin' }
+    let(:enabled_plugin) { 'enabled_plugin' }
+    let(:disabled_plugin) { 'disabled_plugin' }
+    let(:unconfigured_plugin) { 'unconfigured_plugin' }
+    let(:deactivated_plugin) { 'deactivated_plugin' }
 
     before :each do
       FileSystem.root_setup do |fs|

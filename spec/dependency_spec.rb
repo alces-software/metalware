@@ -35,7 +35,7 @@ require 'alces_utils'
 RSpec.describe Metalware::Dependency do
   include AlcesUtils
 
-  let :filesystem { FileSystem.setup }
+  let(:filesystem) { FileSystem.setup }
 
   def enforce_dependencies(dependencies_hash = {})
     filesystem.test do |_fs|

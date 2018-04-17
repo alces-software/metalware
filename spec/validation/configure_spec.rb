@@ -34,9 +34,9 @@ RSpec.describe Metalware::Validation::Configure do
 
   before :each { FileSystem.root_setup(&:with_validation_error_file) }
 
-  let :file_path { Metalware::FilePath }
+  let(:file_path) { Metalware::FilePath }
 
-  let :correct_hash do
+  let(:correct_hash) do
     {
       ##
       # Questions are not part of the specification for a valid configure.yaml

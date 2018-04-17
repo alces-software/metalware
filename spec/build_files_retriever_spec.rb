@@ -40,8 +40,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
     ],
   }.freeze
 
-  let :test_node_name { 'testnode01' }
-  let :test_node { alces.nodes.find_by_name(test_node_name) }
+  let(:test_node_name) { 'testnode01' }
+  let(:test_node) { alces.nodes.find_by_name(test_node_name) }
 
   AlcesUtils.mock self, :each do
     config(mock_node(test_node_name), files: TEST_FILES_HASH)
@@ -165,10 +165,10 @@ RSpec.describe Metalware::BuildFilesRetriever do
   end
 
   describe '#retrieve_for_plugin' do
-    let :plugin_name { 'some_plugin' }
-    let :plugin_path { File.join(Metalware::FilePath.plugins_dir, plugin_name) }
+    let(:plugin_name) { 'some_plugin' }
+    let(:plugin_path) { File.join(Metalware::FilePath.plugins_dir, plugin_name) }
 
-    let :plugin do
+    let(:plugin) do
       FileUtils.mkdir_p(plugin_path)
       Metalware::Plugins.all.find { |p| p.name == plugin_name }
     end

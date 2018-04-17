@@ -26,11 +26,11 @@ require 'validation/loader'
 
 RSpec.describe Metalware::Validation::Loader do
   describe '#question_tree' do
-    let :configure_sections do
+    let(:configure_sections) do
       Metalware::Constants::CONFIGURE_SECTIONS
     end
 
-    let :configure_questions_hash do
+    let(:configure_questions_hash) do
       configure_sections.map do |section|
         [
           section, [{
@@ -41,7 +41,7 @@ RSpec.describe Metalware::Validation::Loader do
       end.to_h
     end
 
-    let :example_plugin_configure_questions_hash do
+    let(:example_plugin_configure_questions_hash) do
       configure_sections.map do |section|
         dependent_question = {
           identifier: "example_plugin_#{section}_dependent_identifier",
@@ -56,11 +56,11 @@ RSpec.describe Metalware::Validation::Loader do
       end.to_h
     end
 
-    let :example_plugin_dir do
+    let(:example_plugin_dir) do
       File.join(Metalware::FilePath.plugins_dir, 'example')
     end
 
-    let :sections_to_loaded_questions do
+    let(:sections_to_loaded_questions) do
       configure_sections.map do |section|
         [section, subject.question_tree[section].children]
       end.to_h
@@ -113,7 +113,7 @@ RSpec.describe Metalware::Validation::Loader do
             end
           end
 
-          let :plugin_enabled_question do
+          let(:plugin_enabled_question) do
             questions = sections_to_loaded_questions[section]
             questions.find do |question|
               question.content.identifier ==

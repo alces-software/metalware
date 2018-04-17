@@ -35,7 +35,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
     validation_off
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.with_answer_fixtures('setup1/answers')
@@ -44,11 +44,11 @@ RSpec.describe Metalware::Commands::Remove::Group do
     end
   end
 
-  let :loader { Metalware::Validation::Loader.new }
-  let :cache { loader.group_cache[:primary_groups] }
+  let(:loader) { Metalware::Validation::Loader.new }
+  let(:cache) { loader.group_cache[:primary_groups] }
 
-  let :initial_files { answer_files }
-  let :deleted_files { initial_files - answer_files }
+  let(:initial_files) { answer_files }
+  let(:deleted_files) { initial_files - answer_files }
 
   before :each do
     SpecUtils.mock_validate_genders_success(self)

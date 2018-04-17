@@ -24,9 +24,9 @@ RSpec.describe Metalware::Commands::Asset::Edit do
       end
     end
 
-    let :saved_asset { 'saved-asset' }
-    let :asset_path { Metalware::FilePath.asset(saved_asset) }
-    let :test_content { { key: 'value' } }
+    let(:saved_asset) { 'saved-asset' }
+    let(:asset_path) { Metalware::FilePath.asset(saved_asset) }
+    let(:test_content) { { key: 'value' } }
 
     before :each { Metalware::Data.dump(asset_path, test_content) }
 
@@ -44,8 +44,8 @@ RSpec.describe Metalware::Commands::Asset::Edit do
   end
 
   context 'with a node input' do
-    let :asset_name { 'asset1' }
-    let :command_arguments { [asset_name] }
+    let(:asset_name) { 'asset1' }
+    let(:command_arguments) { [asset_name] }
 
     before :each do
       Metalware::Data.dump(Metalware::FilePath.asset(asset_name), {})

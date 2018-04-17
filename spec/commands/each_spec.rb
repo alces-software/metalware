@@ -39,7 +39,7 @@ RSpec.describe Metalware::Commands::Each do
     SpecUtils.use_unit_test_config(self)
   end
 
-  let :groups do
+  let(:groups) do
     g = Metalware::Namespaces::Group.new(alces, 'nodes', index: 1)
     Metalware::Namespaces::MetalArray.new([g])
   end

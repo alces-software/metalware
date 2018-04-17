@@ -33,8 +33,8 @@ require 'alces_utils'
 RSpec.describe Metalware::DNS::Named do
   include AlcesUtils
 
-  let :file_path { Metalware::FilePath }
-  let :filesystem do
+  let(:file_path) { Metalware::FilePath }
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       named = 'named.conf.erb'
@@ -43,7 +43,7 @@ RSpec.describe Metalware::DNS::Named do
     end
   end
 
-  let :correct_base_named_conf do
+  let(:correct_base_named_conf) do
     externaldns = named.send(:repo_config)[:externaldns]
     "DNS: #{externaldns}"
   end

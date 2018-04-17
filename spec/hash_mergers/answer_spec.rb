@@ -9,13 +9,13 @@ require 'file_path'
 RSpec.describe Metalware::HashMergers::Answer do
   include AlcesUtils
 
-  let :group { AlcesUtils.mock(self) { mock_group('new_group') } }
-  let :node do
+  let(:group) { AlcesUtils.mock(self) { mock_group('new_group') } }
+  let(:node) do
     AlcesUtils.mock(self) { mock_node('new_node', group.name) }
   end
 
-  let :identifier { :question_identifier }
-  let :questions do
+  let(:identifier) { :question_identifier }
+  let(:questions) do
     {
       domain: [{
         identifier: identifier.to_s,

@@ -9,7 +9,7 @@ RSpec.describe Metalware::Namespaces::Node do
   include AlcesUtils
 
   context 'with mocked group' do
-    let :test_group { 'some_test_group' }
+    let(:test_group) { 'some_test_group' }
 
     AlcesUtils.mock self, :each do
       mock_group(test_group)

@@ -15,9 +15,9 @@ RSpec.describe Metalware::Commands::Power do
   end
 
   describe 'when run on bare metal' do
-    let :node_names { ['node01', 'node02', 'node03'] }
-    let :group { 'nodes' }
-    let :namespace_config do
+    let(:node_names) { ['node01', 'node02', 'node03'] }
+    let(:group) { 'nodes' }
+    let(:namespace_config) do
       {
         networks: {
           bmc: {
