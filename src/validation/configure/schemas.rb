@@ -36,8 +36,13 @@ module Metalware
           end
 
           def default?(value)
-            return true if value.is_a?(String)
-            value.respond_to?(:empty?) ? value.empty? : true
+            if value.is_a?(String)
+              true
+            elsif value.respond_to?(:empty?)
+              value.empty?
+            else
+              true
+            end
           end
         end
 
@@ -62,9 +67,13 @@ module Metalware
           end
 
           def choice_with_default?(value)
-            return true if value[:choice].nil? || value[:default].nil?
-            return false unless value[:choice].is_a?(Array)
-            value[:choice].include?(value[:default])
+            if [value[:choice], value[:default]].include?(nil)
+              true
+            elsif value[:choice].is_a?(Array)
+              value[:choice].include?(value[:default])
+            else
+              false
+            end
           end
 
           def choice_type?(value)
