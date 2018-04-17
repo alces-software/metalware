@@ -130,7 +130,7 @@ class FileSystem
   end
 
   def with_validation_error_file
-    FakeFS::FileSystem.clone(Metalware::Validation::Configure::ERROR_FILE)
+    FakeFS::FileSystem.clone(Metalware::FilePath.dry_validation_errors)
   end
 
   def with_repo_fixtures(repo_fixtures_dir)
