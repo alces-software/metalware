@@ -19,7 +19,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
 
   subject { described_class.new(plugin, node: node) }
 
-  before(:each) do
+  before do
     FileSystem.root_setup do |fs|
       fs.setup do
         plugin_config_dir = File.join(Metalware::FilePath.plugins_dir, plugin_name, 'config')

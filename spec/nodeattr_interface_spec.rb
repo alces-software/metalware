@@ -31,7 +31,7 @@ RSpec.describe Metalware::NodeattrInterface do
   include AlcesUtils
 
   context 'with setup1 genders' do
-    before(:each) do
+    before do
       FileSystem.root_setup do |fs|
         fs.with_genders_fixtures('setup1/genders')
       end
@@ -46,7 +46,7 @@ RSpec.describe Metalware::NodeattrInterface do
   end
 
   context 'using mock genders' do
-    before(:each) do
+    before do
       FileSystem.root_setup(&:with_genders_fixtures)
     end
 

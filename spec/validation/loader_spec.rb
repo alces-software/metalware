@@ -89,7 +89,7 @@ RSpec.describe Metalware::Validation::Loader do
 
     subject { described_class.new }
 
-    before(:each) do
+    before do
       FileSystem.root_setup do |fs|
         fs.dump(Metalware::FilePath.configure_file, configure_questions_hash)
 
@@ -107,7 +107,7 @@ RSpec.describe Metalware::Validation::Loader do
         end
 
         context 'when plugin activated' do
-          before(:each) do
+          before do
             FileSystem.root_setup do |fs|
               fs.activate_plugin('example')
             end
@@ -142,7 +142,7 @@ RSpec.describe Metalware::Validation::Loader do
           end
 
           context 'when no configure.yaml for plugin' do
-            before(:each) do
+            before do
               FileSystem.root_setup do |fs|
                 fs.rm_rf example_plugin_dir
                 fs.mkdir_p example_plugin_dir

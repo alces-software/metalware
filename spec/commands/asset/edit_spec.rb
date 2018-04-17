@@ -6,7 +6,7 @@ require 'filesystem'
 require 'shared_examples/asset_command_that_assigns_a_node'
 
 RSpec.describe Metalware::Commands::Asset::Edit do
-  before(:each) { allow(Metalware::Utils::Editor).to receive(:open) }
+  before { allow(Metalware::Utils::Editor).to receive(:open) }
 
   it 'errors if the asset doesnt exist' do
     expect do
@@ -28,7 +28,7 @@ RSpec.describe Metalware::Commands::Asset::Edit do
     let(:asset_path) { Metalware::FilePath.asset(saved_asset) }
     let(:test_content) { { key: 'value' } }
 
-    before(:each) { Metalware::Data.dump(asset_path, test_content) }
+    before { Metalware::Data.dump(asset_path, test_content) }
 
     def run_command
       Metalware::Utils.run_command(described_class,
@@ -47,7 +47,7 @@ RSpec.describe Metalware::Commands::Asset::Edit do
     let(:asset_name) { 'asset1' }
     let(:command_arguments) { [asset_name] }
 
-    before(:each) do
+    before do
       Metalware::Data.dump(Metalware::FilePath.asset(asset_name), {})
     end
 

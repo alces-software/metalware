@@ -33,7 +33,7 @@ require 'filesystem'
 RSpec.describe Metalware::Status::Monitor do
   include AlcesUtils
 
-  before(:each) do
+  before do
     FileSystem.root_setup do |fs|
       fs.with_genders_fixtures
       fs.with_clone_fixture('configs/unit-test.yaml')
@@ -54,7 +54,7 @@ RSpec.describe Metalware::Status::Monitor do
   end
 
   context 'create_jobs is ran' do
-    before(:each) do
+    before do
       @monitor.instance_eval { @started_jobs = 0 }
       @monitor.define_singleton_method(:start_next_job,
                                        ->(_idx) { @started_jobs += 1 })

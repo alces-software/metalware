@@ -26,7 +26,7 @@ RSpec.describe AlcesUtils do
   end
 
   context 'with the AlceUtils.mock method' do
-    before(:each) do
+    before do
       AlcesUtils::Mock.new(self)
                       .define_method_testing {} # Intentionally blank
     end
@@ -204,7 +204,7 @@ RSpec.describe AlcesUtils do
     end
 
     describe '#reset_alces' do
-      before(:each) do
+      before do
         @old_alces = alces
         AlcesUtils.mock(self) do
           config(alces.domain, key: 'I should be deleted in the reset')

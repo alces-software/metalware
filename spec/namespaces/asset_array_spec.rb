@@ -32,7 +32,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     Metalware::HashMergers::MetalRecursiveOpenStruct
   end
 
-  before(:each) do
+  before do
     assets.each do |asset|
       path = Metalware::FilePath.asset(asset[:name])
       Metalware::Data.dump(path, asset[:data])
@@ -41,7 +41,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   describe '#new' do
     context 'when there is an asset called "each"' do
-      before(:each) do
+      before do
         each_path = Metalware::FilePath.asset('each')
         Metalware::Data.dump(each_path, { data: 'some-data' })
       end

@@ -15,7 +15,7 @@ RSpec.describe Metalware::Namespaces::MetalArray do
 
   let(:node_names) { ['node1', 'node2', 'node3'] }
 
-  before(:each) do
+  before do
     allow(Metalware::NodeattrInterface).to \
       receive(:all_nodes).and_return(node_names)
   end

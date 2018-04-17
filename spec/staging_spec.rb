@@ -25,7 +25,7 @@ RSpec.describe Metalware::Staging do
     let(:test_sync) { '/etc/some-random-location' }
     let(:test_staging) { File.join('/var/lib/metalware/staging', test_sync) }
 
-    before(:each) do
+    before do
       update { |staging| staging.push_file(test_sync, test_content) }
     end
 
@@ -70,7 +70,7 @@ RSpec.describe Metalware::Staging do
   describe '#delete_file_if' do
     let(:files) { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
 
-    before(:each) do
+    before do
       Metalware::Staging.update do |staging|
         files.each { |f| staging.push_file(f, '') }
       end
@@ -115,7 +115,7 @@ RSpec.describe Metalware::Staging do
         File.read(file).gsub(/^$\n/, '').split("\n")
       end
 
-      before(:each) do
+      before do
         Metalware::Staging.update do |staging|
           staging.push_file(managed_file, managed_content, managed: true)
           staging.delete_file_if do |file|

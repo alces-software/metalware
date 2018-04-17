@@ -27,7 +27,7 @@ require 'network'
 
 RSpec.describe Metalware::Network do
   describe '#valid_interface?' do
-    before(:each) do
+    before do
       expect(NetworkInterface).to receive(:interfaces).and_return(
         ['eth0', 'eth1']
       )

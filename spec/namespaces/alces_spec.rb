@@ -176,7 +176,7 @@ RSpec.describe Metalware::Namespaces::Alces do
       d
     end
 
-    before(:each) do
+    before do
       allow(alces).to receive(:scope).and_return(scope)
     end
 

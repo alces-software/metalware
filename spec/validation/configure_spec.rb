@@ -32,7 +32,7 @@ require 'alces_utils'
 RSpec.describe Metalware::Validation::Configure do
   include AlcesUtils
 
-  before(:each) { FileSystem.root_setup(&:with_validation_error_file) }
+  before { FileSystem.root_setup(&:with_validation_error_file) }
 
   let(:file_path) { Metalware::FilePath }
 
