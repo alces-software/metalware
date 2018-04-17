@@ -21,6 +21,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       },
     ]
   end
+
+  let :assets_data do
+    assets.map do |asset|
+      asset[:data].merge(metadata: { name: asset[:name] })
+    end
+  end
   let :metal_ros do
     Metalware::HashMergers::MetalRecursiveOpenStruct
   end
@@ -55,6 +61,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   context 'when loading the second asset' do
     let :index { 1 }
     let :asset { assets[index] }
+    let :asset_data { assets_data[index] }
 
     def expect_to_only_load_asset_data_once
       expect(Metalware::Data).to receive(:load).once.and_call_original
@@ -62,7 +69,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
     describe '#[]' do
       it 'loads the date' do
-        expect(subject[index].to_h).to eq(asset[:data])
+        expect(subject[index].to_h).to eq(asset_data)
       end
 
       it 'only loads the asset file once' do
@@ -78,7 +85,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
     describe '#find_by_name' do
       it 'returns the asset' do
-        expect(subject.find_by_name(asset[:name]).to_h).to eq(asset[:data])
+        expect(subject.find_by_name(asset[:name]).to_h).to \
+          eq(asset_data)
       end
 
       it 'only loads the asset data once' do
@@ -94,12 +102,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   end
 
   describe 'each' do
-    let :asset_data do
-      assets.map { |a| a[:data] }
-    end
-
     it 'loops through all the asset data' do
-      expect(subject.each.to_a.map(&:to_h)).to eq(asset_data)
+      expect(subject.each.to_a.map(&:to_h)).to eq(assets_data)
     end
 
     context 'when called without a block' do
@@ -112,7 +116,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       it 'runs the block' do
         expect do |b|
           subject.map(&:to_h).each(&b)
-        end.to yield_successive_args(*asset_data)
+        end.to yield_successive_args(*assets_data)
       end
     end
   end
@@ -124,13 +128,13 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     let :asset2 { alces.assets.find_by_name(asset2_name) }
     let :asset1_name { 'test-asset1' }
     let :asset2_name { 'test-asset2' }
-    let :asset1_data do
+    let :asset1_raw_data do
       {
         key: "#{asset1_name}-data",
         link: ":#{asset2_name}",
       }
     end
-    let :asset2_data do
+    let :asset2_raw_data do
       {
         key: "#{asset2_name}-data",
         link: ":#{asset1_name}",
@@ -138,12 +142,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
 
     AlcesUtils.mock(self, :each) do
-      create_asset(asset1_name, asset1_data)
-      create_asset(asset2_name, asset2_data)
+      create_asset(asset1_name, asset1_raw_data)
+      create_asset(asset2_name, asset2_raw_data)
     end
 
     it 'can still be converted to a hash' do
-      expect(asset1.to_h).to eq(asset1_data)
+      expect(asset1.to_h).to include(**asset1_raw_data)
     end
 
     it 'can find the referenced asset' do
@@ -151,7 +155,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
 
     it 'only converts strings starting with ":" to an assets' do
-      expect(asset1.key).to eq(asset1_data[:key])
+      expect(asset1.key).to eq(asset1_raw_data[:key])
     end
   end
 end

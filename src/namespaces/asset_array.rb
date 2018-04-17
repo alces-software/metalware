@@ -15,8 +15,8 @@ module Metalware
 
         def data
           @data ||= begin
-            raw = Data.load(path)
-            Constants::HASH_MERGER_DATA_STRUCTURE.new(raw) do |str|
+            data_class = Constants::HASH_MERGER_DATA_STRUCTURE
+            data_class.new(load_file) do |str|
               if str[0] == ':'
                 other_asset_name = str[1..-1]
                 alces.assets.find_by_name(other_asset_name)
@@ -30,6 +30,10 @@ module Metalware
         private
 
         attr_reader :alces, :path
+
+        def load_file
+          Data.load(path).merge(metadata: { name: name })
+        end
       end
 
       include Enumerable
