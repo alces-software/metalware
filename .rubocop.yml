@@ -44,3 +44,8 @@ Style/ClassAndModuleChildren:
 # to get this.
 Style/DoubleNegation:
   Enabled: false
+
+# Turn off Heredoc delimiter check. EOF is used extensively and will
+# continue to be used
+Naming/HeredocDelimiterNaming:
+  Enabled: false
