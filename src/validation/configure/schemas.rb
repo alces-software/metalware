@@ -63,7 +63,7 @@ module Metalware
             default = value[:default]
             type = value[:type]
             return true if default.nil?
-            ::Metalware::Validation::Configure.type_check(type, default)
+            Configure.type_check(type, default)
           end
 
           def choice_with_default?(value)
