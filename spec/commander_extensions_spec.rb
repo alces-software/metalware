@@ -42,7 +42,7 @@ RSpec.describe CommanderExtensions do
       c.example 'description', 'command'
       c.option '-o', '--some-option', 'Some option that does things'
       c.when_called do |args, _options|
-        format('test %s', args.join(' '))
+        format('test %<foo>s', foo: args.join(' '))
       end
     end
     @command = command :test
@@ -52,7 +52,7 @@ RSpec.describe CommanderExtensions do
     command :'test do' do |c|
       c.syntax = 'metal test do ARG1 ARG2 [options]'
       c.when_called do |args, _options|
-        format('test do %s', args.join(' '))
+        format('test do %<foo>s', foo: args.join(' '))
       end
     end
     @command = command :'test do'
