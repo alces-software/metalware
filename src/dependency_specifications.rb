@@ -16,8 +16,8 @@ module Metalware
         repo: ['configure.yaml'],
         configure: ['domain.yaml', "groups/#{group.name}.yaml"],
         optional: {
-          configure: ["nodes/#{name}.yaml"]
-        }
+          configure: ["nodes/#{name}.yaml"],
+        },
       }
     end
 

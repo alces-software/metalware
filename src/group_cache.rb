@@ -91,7 +91,7 @@ module Metalware
       payload = {
         next_index: next_available_index,
         primary_groups: groups_hash,
-        orphans: orphans
+        orphans: orphans,
       }
       Data.dump(file_path.group_cache, payload)
       @data = nil # Reloads the cached file

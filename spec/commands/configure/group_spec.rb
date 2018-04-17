@@ -72,7 +72,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
           expect(new_cache.primary_groups).to eq [
             'testnodes',
-            'orphan'
+            'orphan',
           ]
         end
       end
@@ -88,7 +88,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
           expect(new_cache.primary_groups).to eq [
             'first_group',
             'second_group',
-            'orphan'
+            'orphan',
           ]
         end
       end
@@ -104,7 +104,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
           expect(new_cache.primary_groups).to eq [
             'first_group',
             'second_group',
-            'orphan'
+            'orphan',
           ]
         end
       end

@@ -70,7 +70,7 @@ module Metalware
       def all_questions_for_section(section)
         [
           repo_configure_questions,
-          *plugin_configure_questions
+          *plugin_configure_questions,
         ].flat_map do |question_group|
           question_group[section]
         end

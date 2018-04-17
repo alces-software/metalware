@@ -196,7 +196,7 @@ RSpec.describe Metalware::Namespaces::Node do
       let(:asset_name) { 'asset_test' }
       let(:asset_path) { Metalware::FilePath.asset(asset_name) }
       let(:cache) { Metalware::Cache::Asset.new }
-      
+
       context 'with an assigned asset' do
         before do
           Metalware::Data.dump(asset_path, content)

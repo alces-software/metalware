@@ -20,9 +20,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
 
   context 'when using the default template' do
     before do
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-      end
+      FileSystem.root_setup(&:with_minimal_repo)
     end
 
     let(:template) { 'default' }
@@ -40,7 +38,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
 
     it 'calls for the template to be opened and copyed' do
       expect(Metalware::Utils::Editor).to receive(:open_copy)
-                                      .with(template_path, save_path)
+        .with(template_path, save_path)
       run_command
     end
 
@@ -61,4 +59,3 @@ RSpec.describe Metalware::Commands::Asset::Add do
     it_behaves_like 'asset command that assigns a node'
   end
 end
-

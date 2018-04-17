@@ -37,13 +37,13 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       path = Metalware::FilePath.asset(asset[:name])
       Metalware::Data.dump(path, asset[:data])
     end
-  end 
+  end
 
   describe '#new' do
     context 'when there is an asset called "each"' do
       before do
         each_path = Metalware::FilePath.asset('each')
-        Metalware::Data.dump(each_path, { data: 'some-data' })
+        Metalware::Data.dump(each_path, data: 'some-data')
       end
 
       it 'errors due to the existing method' do

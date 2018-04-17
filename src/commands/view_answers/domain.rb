@@ -16,7 +16,7 @@ module Metalware
         def dependency_hash
           {
             repo: ['configure.yaml'],
-            configure: ['domain.yaml']
+            configure: ['domain.yaml'],
           }
         end
       end

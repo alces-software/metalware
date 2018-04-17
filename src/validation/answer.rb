@@ -43,7 +43,7 @@ module Metalware
           end],
           [:AnswerTypeSchema, proc do
             AnswerTypeSchema.call(validation_hash)
-          end]
+          end],
         ]
         tests.each do |(test_name, test_proc)|
           @validation_result = test_proc.call
@@ -95,7 +95,7 @@ module Metalware
         @validation_hash ||= begin
           payload = {
             answers: [],
-            missing_questions: []
+            missing_questions: [],
           }
           answers.each_with_object(payload) do |(question, answer), pay|
             if questions_in_section&.key?(question)
@@ -103,7 +103,7 @@ module Metalware
                 {
                   question: question,
                   answer: answer,
-                  type: questions_in_section[question].type
+                  type: questions_in_section[question].type,
                 }.tap { |h| h[:type] = 'string' if h[:type].nil? }
               )
             else

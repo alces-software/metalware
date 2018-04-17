@@ -59,7 +59,7 @@ module Metalware
         @tree ||= begin
           root_hash = {
             pass: true,
-            result: TopLevelSchema.call(data: questions_hash)
+            result: TopLevelSchema.call(data: questions_hash),
           }
           QuestionTree.new('ROOT', root_hash).tap do |root|
             add_children(root, root) do
@@ -104,7 +104,7 @@ module Metalware
         question_data = questions_hash[section] || []
         data = {
           section: section,
-          result: DependantSchema.call(dependent: question_data)
+          result: DependantSchema.call(dependent: question_data),
         }
         node_s = QuestionTree.new(section, data)
         add_children(root, node_s) do

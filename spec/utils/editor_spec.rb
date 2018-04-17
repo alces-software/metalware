@@ -6,7 +6,7 @@ RSpec.describe Metalware::Utils::Editor do
   let(:default_editor) { described_class::DEFAULT_EDITOR }
 
   context 'with the environment variables unset' do
-    before do |example|
+    before do |_example|
       ENV.delete('VISUAL')
       ENV.delete('EDITOR')
     end
@@ -47,7 +47,6 @@ RSpec.describe Metalware::Utils::Editor do
         sleep 0.001 while thr.alive?
       end
     end
-
 
     describe '#open_copy' do
       let(:source) { '/var/source-file.yaml' }

@@ -15,6 +15,14 @@ Style/SymbolArray:
 Style/WordArray:
   Enabled: false
 
+# Do not prefer trailing commas in multi-line hash/array literals - better as
+# when something is added to a literal the previous last line does not also
+# need to be changed, which also makes diffs smaller
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
 # Do not require documentation for top-level classes or modules - seems
 # unnecessary for the project at the moment.
 Style/Documentation:

@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'alces_utils'
 require 'cache/asset'
 
 RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
-  
+
   let(:cache) { Metalware::Cache::Asset.new }
   let(:cache_path) { Metalware::FilePath.asset_cache }
   let(:initial_content) do
@@ -13,9 +15,9 @@ RSpec.describe Metalware::Cache::Asset do
   let(:node) { alces.nodes.find_by_name(node_name) }
 
   AlcesUtils.mock(self, :each) do
-    mock_node(node_name) 
+    mock_node(node_name)
   end
-  
+
   describe '#data' do
     it 'handles empty cache' do
       expect do
@@ -43,7 +45,7 @@ RSpec.describe Metalware::Cache::Asset do
       expect do
         cache.assign_asset_to_node('asset_test', node)
       end.not_to raise_error
-    end 
+    end
   end
 
   describe '#asset_for_node' do

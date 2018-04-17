@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 require 'cache/asset'
 

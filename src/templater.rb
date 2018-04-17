@@ -143,7 +143,7 @@ module Metalware
           MANAGED_START,
           MANAGED_COMMENT,
           rendered_template,
-          MANAGED_END
+          MANAGED_END,
         ].join("\n") + "\n"
       end
 

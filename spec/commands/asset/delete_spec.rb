@@ -13,7 +13,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
                                  asset,
                                  stderr: StringIO.new)
   end
- 
+
   it 'errors if the asset does not exist' do
     expect do
       run_command

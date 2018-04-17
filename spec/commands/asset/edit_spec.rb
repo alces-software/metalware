@@ -11,17 +11,15 @@ RSpec.describe Metalware::Commands::Asset::Edit do
   it 'errors if the asset doesnt exist' do
     expect do
       Metalware::Utils.run_command(described_class,
-                                    'missing-type',
-                                    'name',
-                                    stderr: StringIO.new)
+                                   'missing-type',
+                                   'name',
+                                   stderr: StringIO.new)
     end.to raise_error(Metalware::InvalidInput)
   end
-  
+
   context 'when using a saved asset' do
     before do
-      FileSystem.root_setup do |fs|
-        fs.with_minimal_repo
-      end
+      FileSystem.root_setup(&:with_minimal_repo)
     end
 
     let(:saved_asset) { 'saved-asset' }
@@ -32,13 +30,13 @@ RSpec.describe Metalware::Commands::Asset::Edit do
 
     def run_command
       Metalware::Utils.run_command(described_class,
-                                    saved_asset,
-                                    stderr: StringIO.new)
+                                   saved_asset,
+                                   stderr: StringIO.new)
     end
 
     it 'calls for the saved asset to be opened and copied into a temp file' do
       expect(Metalware::Utils::Editor).to receive(:open_copy)
-                                      .with(asset_path, asset_path)
+        .with(asset_path, asset_path)
       run_command
     end
   end
