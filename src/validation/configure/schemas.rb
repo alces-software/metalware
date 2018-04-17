@@ -77,14 +77,16 @@ module Metalware
           end
 
           def choice_type?(value)
-            return true if value[:choice].nil?
-            return false unless value[:choice].is_a?(Array)
-            value[:choice].each do |choice|
-              type = value[:type]
-              r = ::Metalware::Validation::Configure.type_check(type, choice)
-              return false unless r
+            if value[:choice].is_a?(Array)
+              value[:choice].all? do |choice|
+                type = value[:type]
+                Configure.type_check(type, choice)
+              end
+            elsif value[:choice].nil?
+              true
+            else
+              false
             end
-            true
           end
         end
 
