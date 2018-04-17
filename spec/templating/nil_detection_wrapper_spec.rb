@@ -67,8 +67,8 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     let(:object) do
       RecursiveOpenStruct.new(
         nil: nil,
-        true: true,
-        false: false,
+        true_key: true,
+        false_key: false,
         key1: {
           key2: {
             key3: {
@@ -92,13 +92,13 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     end
 
     it 'false is still a FalseClass' do
-      expect(wrapped_object.false).to be_a(FalseClass)
-      expect(wrapped_object.false).to be_falsey
+      expect(wrapped_object.false_key).to be_a(FalseClass)
+      expect(wrapped_object.false_key).to be_falsey
     end
 
     it 'true is still a TrueClass' do
-      expect(wrapped_object.true).to be_a(TrueClass)
-      expect(wrapped_object.true).to be_truthy
+      expect(wrapped_object.true_key).to be_a(TrueClass)
+      expect(wrapped_object.true_key).to be_truthy
     end
   end
 
