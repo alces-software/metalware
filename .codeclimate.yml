@@ -1,0 +1,18 @@
+engines:
+  rubocop:
+    enabled: true
+    #checks:
+    #  Rubocop/Metrics/ClassLength:
+    #    enabled: false
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - ruby:
+      - javascript:
+ratings:
+  paths:
+  - src/**/*
+  - spec/**/*
+exclude_paths:
+- "**/vendor/**/*"
