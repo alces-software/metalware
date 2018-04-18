@@ -42,6 +42,7 @@ RSpec.describe Metalware::Commands::Build do
       fs.with_genders_fixtures
     end
   end
+  let(:file_path) { Metalware::FilePath }
 
   AlcesUtils.start(self)
 
@@ -108,8 +109,6 @@ RSpec.describe Metalware::Commands::Build do
   after do
     kill_any_metal_processes
   end
-
-  let(:file_path) { Metalware::FilePath }
 
   def touch_complete_file(name)
     path = file_path.build_complete(alces.nodes.find_by_name(name))
