@@ -80,6 +80,7 @@ RSpec/ExampleLength:
   Exclude:
     - spec/configurator_spec.rb
     - spec/slow/**/*
+    - spec/integration/**/*
 
 # It isn't feasible to set up spies in the following specs as they
 # are coupled to the original implementation
