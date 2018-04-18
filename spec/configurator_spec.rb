@@ -504,9 +504,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     shared_examples 'gets the answer' do
-      it 'sets the answer correctly' do
-        expect(subject).to eq(answer)
-      end
+      it { is_expected.to eq(answer) }
 
       it 'has saved the correct answer' do
         expect(load_answer).to eq(saved_answer)
