@@ -69,3 +69,7 @@ Lint/HandleExceptions:
 # prevent proliferation of specs
 RSpec/MultipleExpectations:
   Max: 3
+
+# Quite a few specs are nested 4 deep, however the default is 3
+RSpec/NestedGroups:
+  Max: 4
