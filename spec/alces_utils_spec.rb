@@ -41,11 +41,7 @@ RSpec.describe AlcesUtils do
         allow(alces).to receive(:testing).and_return(100)
       end
 
-      it 'gets the value once' do
-        expect(alces.testing).to eq(100)
-      end
-
-      it 'gets the value twice' do
+      it 'gets the value' do
         expect(alces.testing).to eq(100)
       end
     end
