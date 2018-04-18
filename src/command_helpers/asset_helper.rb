@@ -26,6 +26,11 @@ module Metalware
         asset_cache.save
       end
 
+      def unassign_asset_from_node_if_given(asset_name, node_name = nil)
+        asset_cache.unassign_asset(asset_name, node_name)
+        asset_cache.save
+      end
+
       def edit_asset_file(file)
         copy_and_edit_asset_file(file, file)
       end

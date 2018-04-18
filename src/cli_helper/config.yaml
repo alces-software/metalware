@@ -45,6 +45,16 @@ subcommands:
     summary: Delete an existing asset record
     action: Commands::Asset::Delete
 
+  asset_link: &asset_link
+    syntax: metal asset link ASSET_NAME NODE_NAME [options]
+    summary: Add a relationship between an asset and a node
+    action: Commands::Asset::Link
+
+  asset_unlink: &asset_unlink
+    syntax: metal asset unlink ASSET_NAME NODE_NAME [options]
+    summary: Remove a relationship between an asset and a node
+    action: Commands::Asset::Unlink
+
   configure_domain: &configure_domain
     syntax: metal configure domain [options]
     summary: Configure Metalware domain
@@ -193,6 +203,8 @@ commands:
       add: *asset_add
       edit: *asset_edit
       delete: *asset_delete
+      link: *asset_link
+      unlink: *asset_unlink
 
   build:
     syntax: metal build NODE_IDENTIFIER [options]

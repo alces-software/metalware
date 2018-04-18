@@ -25,11 +25,18 @@ module Metalware
         data[:node][node.name.to_sym]
       end
 
-      def unassign_asset(asset_name)
-        data.delete_if { |_key, value| value == asset_name }
+      def unassign_asset(asset_name, node_name = nil)
+        data[:node].delete_if do |node, asset|
+          next unless asset == asset_name
+          check_node_name_if_given(node, node_name)
+        end
       end
 
       private
+
+      def check_node_name_if_given(node, node_name)
+        node_name ? (node == node_name.to_sym) : true
+      end
 
       def blank_cache
         { node: {} }
