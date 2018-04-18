@@ -22,7 +22,7 @@ Metrics/CyclomaticComplexity:
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
 Metrics/LineLength:
-  Max: 100
+  Max: 90
 
 # Offense count: 22
 # Configuration parameters: CountComments.

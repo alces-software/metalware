@@ -46,7 +46,10 @@ RSpec.describe Metalware::Commands::Power do
     describe 'when run for node' do
       it 'runs appropriate ipmi command for given command and node' do
         expect(Metalware::SystemCommand).to receive(:run).once.with(
-          'ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword chassis power on'
+          <<-EOF.squish
+            ipmitool -H node01.bmc -I lanplus -U bmcuser -P
+            bmcpassword chassis power on
+          EOF
         )
 
         run_power('node01', 'on')
@@ -57,7 +60,10 @@ RSpec.describe Metalware::Commands::Power do
       it 'runs appropriate ipmi command followed by sleep for each node' do
         node_names.each do |name|
           expect(Metalware::SystemCommand).to receive(:run).with(
-            "ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword chassis power on"
+            <<-EOF.squish
+              ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P
+              bmcpassword chassis power on
+            EOF
           ).ordered.and_return('output123')
         end
 

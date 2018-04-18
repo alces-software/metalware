@@ -63,8 +63,9 @@ module Metalware
               c.action eval(v)
             when 'options'
               v.each do |opt|
-                decimal_integer = 'OptionParser::DecimalInteger'
-                opt['type'] = decimal_integer if [:Integer, 'Integer'].include? opt['type']
+                if [:Integer, 'Integer'].include? opt['type']
+                  opt['type'] = 'OptionParser::DecimalInteger'
+                end
                 c.option(*opt['tags'],
                          eval(opt['type'].to_s),
                          { default: parse_default(opt) },

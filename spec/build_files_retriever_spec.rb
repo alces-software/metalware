@@ -65,6 +65,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
     context 'when everything works' do
       it 'returns the correct files object' do
+        file_path = '/rendered/testnode01/files/repo/namespace01/file_in_repo'
         some_path = File.join(Metalware::FilePath.repo, 'files/some/file_in_repo')
         FileUtils.mkdir_p File.dirname(some_path)
         FileUtils.touch(some_path)
@@ -81,7 +82,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           raw: 'some/file_in_repo',
           name: 'file_in_repo',
           template_path: some_path,
-          rendered_path: data_path + '/rendered/testnode01/files/repo/namespace01/file_in_repo',
+          rendered_path: data_path + file_path,
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/file_in_repo'
         )
 

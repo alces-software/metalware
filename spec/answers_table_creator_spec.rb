@@ -150,7 +150,8 @@ RSpec.describe Metalware::AnswersTableCreator do
       expected_table = Terminal::Table.new(
         headings: ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
         rows: [
-          ['question_1', '"domain question 1"', '"group question 1"', '"node question 1"'],
+          ['question_1', '"domain question 1"',
+           '"group question 1"', '"node question 1"'],
           ['question_2', 'nil', '11', '13'],
           ['question_3', 'nil', 'nil', '"node question 3"'],
         ]

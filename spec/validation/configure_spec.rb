@@ -263,10 +263,11 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with invalid string questions' do
+    question = "Do I fail because my default isn't a string?"
     it 'fails with a non-string default with no type specified' do
       h = correct_hash.deep_merge(domain: [{
                                     identifier: 'bad_string_question',
-                                    question: "Do I fail because my default isn't a string?",
+                                    question: question,
                                     default: 10,
                                   }])
       expect_validation_failure(h, /question type/)
@@ -275,7 +276,7 @@ RSpec.describe Metalware::Validation::Configure do
     it 'fails with a non-string default with a type specified' do
       h = correct_hash.deep_merge(group: [{
                                     identifier: 'bad_string_question',
-                                    question: "Do I fail because my default isn't a string?",
+                                    question: question,
                                     type: 'string',
                                     default: 10,
                                   }])

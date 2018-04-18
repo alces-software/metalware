@@ -124,7 +124,7 @@ RSpec.describe Metalware::Validation::Loader do
           include_examples 'loads_repo_configure_questions', section
           include_examples 'includes_generated_plugin_enabled_question', section
 
-          it "generated question includes plugin questions for #{section} as dependents" do
+          it "generated question has plugin questions for #{section} as dependents" do
             plugin_question = plugin_enabled_question.children.first
             content = plugin_question.content
             expect(content.identifier).to eq "example_plugin_#{section}_identifier"

@@ -69,7 +69,9 @@ RSpec.describe Metalware::Status::Monitor do
     end
 
     it 'start_next_job is ran' do
-      expect(@monitor.instance_variable_get(:@started_jobs)).to eq(@m_input[:thread_limit])
+      expect(@monitor.instance_variable_get(:@started_jobs)).to eq(
+        @m_input[:thread_limit]
+      )
     end
 
     it 'adds commands then nodes' do

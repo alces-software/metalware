@@ -73,7 +73,9 @@ module Metalware
       end
 
       def load_error(data_file)
-        raise DataError, "Attempted to load invalid data from #{data_file}; should contain a hash"
+        raise DataError, <<-EOF.squish
+          Attempted to load invalid data from #{data_file}; should contain a hash
+        EOF
       end
 
       def dump_error(data)
