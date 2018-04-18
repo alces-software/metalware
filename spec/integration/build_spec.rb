@@ -32,7 +32,7 @@ require 'minimal_repo'
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
-RSpec.describe '`metal build`' do
+RSpec.describe Metalware::Commands::Build do
   TEST_DIR = 'tmp/integration-test'
 
   let(:filesystem) do
