@@ -4,6 +4,7 @@ require 'utils/editor'
 
 RSpec.describe Metalware::Utils::Editor do
   let(:default_editor) { described_class::DEFAULT_EDITOR }
+  before { allow_any_instance_of(HighLine).to receive(:agree) }
 
   context 'with the environment variables unset' do
     before do |_example|
