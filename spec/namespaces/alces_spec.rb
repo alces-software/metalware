@@ -50,16 +50,23 @@ RSpec.describe Metalware::Namespaces::Alces do
       expect(render_template(template)).to eq(false)
     end
 
-    it 'preserve the scope when threaded' do
-      template = '<% sleep 0.2 %><%= key %>'
-      long_sleep = '<% sleep 0.3 %>'
-      t = Thread.new do
-        rendered = alces.render_erb_template(template, key: 'correct')
-        expect(rendered).to eq('correct')
+    context 'with a delay whilst rendering templates' do
+      let(:template) { '<% sleep 0.2 %><%= key %>' }
+      let(:long_sleep) { '<% sleep 0.3 %>' }
+
+      def render_delay_template_in_thread
+        Thread.new do
+          rendered = alces.render_erb_template(template, key: 'correct')
+          expect(rendered).to eq('correct')
+        end
       end
-      sleep 0.1
-      alces.render_erb_template(long_sleep, key: 'incorrect scope')
-      t.join
+
+      it 'preserve the scope when threaded' do
+        t = render_delay_template_in_thread
+        sleep 0.1
+        alces.render_erb_template(long_sleep, key: 'incorrect scope')
+        t.join
+      end
     end
   end
 
@@ -75,7 +82,7 @@ RSpec.describe Metalware::Namespaces::Alces do
 
     it 'returns the local node' do
       local = Metalware::Namespaces::Node.create(alces, 'local')
-      nodes = double('nodes', local: local)
+      nodes = double(Metalware::Namespaces::MetalArray, local: local)
       allow(alces).to receive(:nodes).and_return(nodes)
 
       expect(alces.local).to be_a(Metalware::Namespaces::Local)
@@ -122,13 +129,16 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
   end
 
-  it 'templates have nil detection' do
-    AlcesUtils.mock self do
+  context 'when a template returns nil' do
+    AlcesUtils.mock(self, :each) do
       config(alces.domain, nil: nil)
     end
-    expect(Metalware::MetalLog.metal_log).to \
-      receive(:warn).once.with(/.*domain.config.nil\Z/)
-    render_template('<%= domain.config.nil %>')
+
+    it 'templates have nil detection' do
+      expect(Metalware::MetalLog.metal_log).to \
+        receive(:warn).once.with(/.*domain.config.nil\Z/)
+      render_template('<%= domain.config.nil %>')
+    end
   end
 
   # Note scope is tested by rendering a template containing alces.scope
