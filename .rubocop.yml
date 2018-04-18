@@ -79,3 +79,10 @@ RSpec/NestedGroups:
 RSpec/ExampleLength:
   Exclude:
     - spec/configurator_spec.rb
+
+# It isn't feasible to set up spies in the following specs as they
+# are coupled to the original implementation
+RSpec/MessageSpies:
+  Exclude:
+    - spec/configurator_spec.rb
+
