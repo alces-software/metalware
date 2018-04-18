@@ -202,8 +202,9 @@ RSpec.describe AlcesUtils do
     end
 
     describe '#reset_alces' do
+      let!(:old_alces) { alces }
+
       before do
-        @old_alces = alces
         described_class.mock(self) do
           config(alces.domain, key: 'I should be deleted in the reset')
         end
@@ -211,7 +212,7 @@ RSpec.describe AlcesUtils do
       end
 
       it 'resets alces to a new instance' do
-        expect(alces).not_to eq(@old_alces)
+        expect(alces).not_to eq(old_alces)
       end
 
       it 'removes the old config mocking' do
