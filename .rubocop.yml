@@ -91,3 +91,8 @@ RSpec/MessageSpies:
 RSpec/ExpectOutput:
   Exclude:
     - spec/configurator_spec.rb
+
+# Requiring that the subject is explicitly named in order to use it
+# doesn't isn't that much clearer IMO.
+RSpec/NamedSubject:
+  Enabled: false
