@@ -23,6 +23,10 @@ RSpec.describe Metalware::MetalLog do
       end
     end
 
+    let(:output) do
+      class_double('Metalware::Output').as_stubbed_const
+    end
+
     after do
       # Reset global options passed to MetalLog by command.
       described_class.strict = false
@@ -30,15 +34,13 @@ RSpec.describe Metalware::MetalLog do
     end
 
     it 'gives warning output by default' do
-      expect(Metalware::Output).to receive(:warning).with('warning: message')
-
+      expect(output).to receive(:warning).with('warning: message')
       run_test_command
     end
 
     it 'does not give warning and raises when --strict passed' do
       expect_any_instance_of(Logger).not_to receive(:warn)
-      expect(Metalware::Output).not_to receive(:warning)
-        .with('warning: message')
+      expect(output).not_to receive(:warning).with('warning: message')
 
       expect do
         run_test_command(strict: true)
@@ -46,8 +48,7 @@ RSpec.describe Metalware::MetalLog do
     end
 
     it 'does not give warning output when --quiet passed' do
-      expect(Metalware::Output).not_to receive(:warning)
-        .with('warning: message')
+      expect(output).not_to receive(:warning).with('warning: message')
 
       run_test_command(quiet: true)
     end
