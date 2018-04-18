@@ -48,7 +48,8 @@ RSpec.describe Metalware::HunterUpdater do
 
     context 'with existing hunter content' do
       before do
-        Metalware::Data.dump(hunter_file, somenode01: 'some_mac_address')
+        Metalware::Data.dump(hunter_file,
+                             somenode01: 'some_mac_address')
       end
 
       it 'outputs info if replacing node name' do
