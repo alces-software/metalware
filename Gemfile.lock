@@ -203,6 +203,8 @@ GEM
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
+    rubocop-rspec (1.23.0)
+      rubocop (>= 0.52.1)
     ruby-libvirt (0.7.1)
     ruby-prof (0.17.0)
     ruby-progressbar (1.9.0)
@@ -286,6 +288,7 @@ DEPENDENCIES
   recursive-open-struct
   rspec
   rubocop (~> 0.52.1)
+  rubocop-rspec
   ruby-libvirt
   ruby-prof
   rubytree!

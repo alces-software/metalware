@@ -5,6 +5,8 @@ require 'validation/configure'
 
 RSpec.describe Metalware::QuestionTree do
   context 'with a nexted question hash' do
+    subject { Metalware::Validation::Configure.new(question_hash).tree }
+
     let(:identifier_hash) do
       {
         domain: 'domain_identifier',
@@ -56,8 +58,6 @@ RSpec.describe Metalware::QuestionTree do
       }
     end
 
-    subject { Metalware::Validation::Configure.new(question_hash).tree }
-
     shared_examples 'a filtered traversal' do |base_method|
       let(:filtered_method) { :"filtered_#{base_method}" }
       let(:enum) { subject.public_send(filtered_method) }
@@ -108,7 +108,7 @@ RSpec.describe Metalware::QuestionTree do
       end
 
       it 'returns true if the identifier is defined' do
-        question = Metalware::QuestionTree.new('', identifier: 'some string')
+        question = described_class.new('', identifier: 'some string')
         expect(question).to be_question
       end
     end

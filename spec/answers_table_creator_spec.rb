@@ -33,7 +33,7 @@ RSpec.describe Metalware::AnswersTableCreator do
   include AlcesUtils
 
   subject do
-    Metalware::AnswersTableCreator.new(alces)
+    described_class.new(alces)
   end
 
   let(:raw_configure_data) do

@@ -39,10 +39,10 @@ RSpec.describe Metalware::Status::Monitor do
     SpecUtils.use_mock_genders(self)
     @cmds = [:ping, :power]
     @m_input = { nodes: nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
-    @monitor = Metalware::Status::Monitor.new(@m_input)
+    @monitor = described_class.new(@m_input)
   end
 
-  after(:each) do
+  after do
     Thread.list.each do |t|
       unless t == Thread.current
         t.kill

@@ -6,7 +6,7 @@ require 'cache/asset'
 RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
 
-  let(:cache) { Metalware::Cache::Asset.new }
+  let(:cache) { described_class.new }
   let(:cache_path) { Metalware::FilePath.asset_cache }
   let(:initial_content) do
     { node: { node_name.to_sym => 'asset_test' } }
@@ -35,7 +35,7 @@ RSpec.describe Metalware::Cache::Asset do
     it 'saves the cache to yaml' do
       cache.assign_asset_to_node('asset_test', node)
       cache.save
-      new_cache = Metalware::Cache::Asset.new
+      new_cache = described_class.new
       expect(new_cache.data).to eq(initial_content)
     end
   end
@@ -50,6 +50,7 @@ RSpec.describe Metalware::Cache::Asset do
 
   describe '#asset_for_node' do
     let(:asset_name) { 'test-asset' }
+
     before do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
@@ -60,7 +61,7 @@ RSpec.describe Metalware::Cache::Asset do
     end
 
     it 'returns the asset after the cache has been reloaded' do
-      new_cache = Metalware::Cache::Asset.new
+      new_cache = described_class.new
       expect(new_cache.asset_for_node(node)).to eq(asset_name)
     end
   end
@@ -68,6 +69,7 @@ RSpec.describe Metalware::Cache::Asset do
   describe '#unassign_asset' do
     let(:asset_name) { 'asset_test' }
     let(:expected_content) { { node: {} } }
+
     before do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
@@ -96,10 +98,10 @@ RSpec.describe Metalware::Cache::Asset do
       end
 
       it 'unassigns the asset from all found instances ' do
-        cache = Metalware::Cache::Asset.new
+        cache = described_class.new
         cache.unassign_asset(asset_name)
         cache.save
-        new_cache = Metalware::Cache::Asset.new
+        new_cache = described_class.new
         expect(new_cache.data).to eq(expected_content)
       end
     end
@@ -107,13 +109,13 @@ RSpec.describe Metalware::Cache::Asset do
     it 'unassigns an asset from a specific node' do
       cache.unassign_asset(asset_name, node_name)
       cache.save
-      new_cache = Metalware::Cache::Asset.new
+      new_cache = described_class.new
       expect(new_cache.data).to eq(expected_content)
     end
 
     it 'attempts to unassign a missing asset' do
       cache.unassign_asset('missing_asset')
-      new_cache = Metalware::Cache::Asset.new
+      new_cache = described_class.new
       expect(new_cache.data).to eq(initial_content)
     end
   end

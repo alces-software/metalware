@@ -41,7 +41,7 @@ RSpec.describe Metalware::Commands::Console do
           EOF
         ).ordered.and_return(true)
         expect_any_instance_of(
-          Metalware::Commands::Console
+          described_class
         ).to receive(:system).with(
           <<-EOF.squish
             ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword -e

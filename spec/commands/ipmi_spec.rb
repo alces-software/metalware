@@ -72,17 +72,20 @@ RSpec.describe Metalware::Commands::Ipmi do
 
     context 'when run for group' do
       let(:test_gender) { group }
+
       include_examples 'runs on each node'
     end
 
     context 'when run for a gender' do
       let(:test_gender) { gender }
+
       include_examples 'runs on each node'
     end
   end
 
   describe Metalware::Commands::Ipmi::Command do
     subject { Metalware::Commands::Ipmi::Command }
+
     let(:regular_command) { 'regular_command' }
     let(:options_command) { 'options_command' }
     let(:args) { [nil, regular_command] }

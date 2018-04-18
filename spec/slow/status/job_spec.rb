@@ -30,30 +30,30 @@ require 'timeout'
 
 RSpec.describe Metalware::Status::Job do
   before(:all) do
-    Metalware::Status::Job.send(:define_method, :busy_sleep, lambda {
+    described_class.send(:define_method, :busy_sleep, lambda {
       until 1 == 2; end
     })
-    Metalware::Status::Job.send(:define_method, :bash_sleep, lambda {
+    described_class.send(:define_method, :bash_sleep, lambda {
       run_bash('sleep 100')
     })
   end
 
-  before(:example) do
+  before do
     SpecUtils.use_mock_genders(self)
     @cmd = :busy_sleep
     @node = 'node_name_not_found'
     @time_limit = 2
-    @job = Metalware::Status::Job.new(@node, @cmd, @time_limit)
+    @job = described_class.new(@node, @cmd, @time_limit)
   end
 
-  after(:each) do
+  after do
     Thread.list.each do |t|
       unless t == Thread.current
         t.kill
         t.join
       end
     end
-    Metalware::Status::Job.instance_variable_set(:@results, nil)
+    described_class.instance_variable_set(:@results, nil)
   end
 
   it 'initializes the instance variables' do
@@ -90,7 +90,7 @@ RSpec.describe Metalware::Status::Job do
         @job.thread.join
       end
 
-      results = Metalware::Status::Job.results
+      results = described_class.results
       expect(results).to eq(@node => {
                               @cmd => 'timeout',
                             })
@@ -108,10 +108,10 @@ RSpec.describe Metalware::Status::Job do
       @job.start
       @job.thread.join
 
-      expect(Metalware::Status::Job.results).to eq(@node => {
-                                                     ping: 'PING_NODE',
-                                                     power: 'POWER_STATUS',
-                                                   })
+      expect(described_class.results).to eq(@node => {
+                                              ping: 'PING_NODE',
+                                              power: 'POWER_STATUS',
+                                            })
     end
   end
 end

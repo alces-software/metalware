@@ -46,7 +46,7 @@ RSpec.describe Metalware::Validation::Saver do
   include AlcesUtils
 
   let(:path) { Metalware::FilePath }
-  let(:saver) { Metalware::Validation::Saver.new }
+  let(:saver) { described_class.new }
   let(:stubbed_answer_load) { OpenStruct.new(data: data) }
   let(:data) { { key: 'data' } }
 

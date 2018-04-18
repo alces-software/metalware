@@ -40,6 +40,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
     ],
   }.freeze
 
+  subject { described_class.new }
+
   let(:test_node_name) { 'testnode01' }
   let(:test_node) { alces.nodes.find_by_name(test_node_name) }
   let(:data_path) { Metalware::FilePath.metalware_data }
@@ -47,8 +49,6 @@ RSpec.describe Metalware::BuildFilesRetriever do
   AlcesUtils.mock self, :each do
     config(mock_node(test_node_name), files: TEST_FILES_HASH)
   end
-
-  subject { Metalware::BuildFilesRetriever.new }
 
   before do
     SpecUtils.use_mock_determine_hostip_script(self)

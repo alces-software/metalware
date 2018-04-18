@@ -6,6 +6,8 @@ require 'spec_utils'
 RSpec.describe Metalware::Namespaces::Plugin do
   include AlcesUtils
 
+  subject { described_class.new(plugin, node: node) }
+
   let(:node) do
     Metalware::Namespaces::Node.create(alces, node_name)
   end
@@ -16,8 +18,6 @@ RSpec.describe Metalware::Namespaces::Plugin do
   let(:plugin) do
     Metalware::Plugins.all.find { |plugin| plugin.name == plugin_name }
   end
-
-  subject { described_class.new(plugin, node: node) }
 
   before do
     FileSystem.root_setup do |fs|

@@ -29,7 +29,7 @@ require 'output'
 
 RSpec.describe Metalware::HunterUpdater do
   let(:hunter_file) { Tempfile.new.path }
-  let(:updater) { Metalware::HunterUpdater.new(hunter_file) }
+  let(:updater) { described_class.new(hunter_file) }
 
   def hunter_yaml
     Metalware::Data.load(hunter_file)

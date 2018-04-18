@@ -27,20 +27,20 @@ require 'system_command'
 RSpec.describe Metalware::SystemCommand do
   it 'runs the command and returns stdout' do
     expect(
-      Metalware::SystemCommand.run('echo something')
+      described_class.run('echo something')
     ).to eq "something\n"
   end
 
   context 'when command fails' do
     it 'raises' do
       expect do
-        Metalware::SystemCommand.run('false')
+        described_class.run('false')
       end.to raise_error Metalware::SystemCommandError
     end
 
     it 'formats the error displayed to users when `format_error` is true' do
       begin
-        Metalware::SystemCommand.run('false', format_error: true)
+        described_class.run('false', format_error: true)
       rescue Metalware::SystemCommandError => e
         expect(e.message).to match(/produced error/)
       end
@@ -48,7 +48,7 @@ RSpec.describe Metalware::SystemCommand do
 
     it 'does not format the error when `format_error` is false' do
       begin
-        Metalware::SystemCommand.run('false', format_error: false)
+        described_class.run('false', format_error: false)
       rescue Metalware::SystemCommandError => e
         expect(e.message).not_to match(/produced error/)
       end

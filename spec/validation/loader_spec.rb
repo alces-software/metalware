@@ -26,6 +26,8 @@ require 'validation/loader'
 
 RSpec.describe Metalware::Validation::Loader do
   describe '#question_tree' do
+    subject { described_class.new }
+
     let(:configure_sections) do
       Metalware::Constants::CONFIGURE_SECTIONS
     end
@@ -83,8 +85,6 @@ RSpec.describe Metalware::Validation::Loader do
         expect(question_content.type).to eq 'boolean'
       end
     end
-
-    subject { described_class.new }
 
     before do
       FileSystem.root_setup do |fs|

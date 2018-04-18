@@ -34,6 +34,7 @@ end
 group :development do
   gem 'pry'
   gem 'rubocop', '~> 0.52.1', require: false
+  gem 'rubocop-rspec'
 end
 
 # Gems added for GUI app.

@@ -113,7 +113,7 @@ RSpec.describe Metalware::Templater do
         it 'raises' do
           filesystem.test do
             expect do
-              Metalware::Templater.render(alces, template_path, {})
+              described_class.render(alces, template_path, {})
             end.to raise_error NameError
           end
         end

@@ -23,10 +23,10 @@ RSpec.describe Metalware::MetalLog do
       end
     end
 
-    after :each do
+    after do
       # Reset global options passed to MetalLog by command.
-      Metalware::MetalLog.strict = false
-      Metalware::MetalLog.quiet = false
+      described_class.strict = false
+      described_class.quiet = false
     end
 
     it 'gives warning output by default' do

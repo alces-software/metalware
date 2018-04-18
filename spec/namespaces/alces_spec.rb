@@ -29,7 +29,7 @@ RSpec.describe Metalware::Namespaces::Alces do
       end
     end
 
-    it 'it can template a simple value' do
+    it 'can template a simple value' do
       expect(render_template('<%= alces.testing.key %>')).to eq('value')
     end
 

@@ -138,7 +138,7 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-  config.around :each do |example|
+  config.around do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file
     # system
     FileSystem.test(FileSystem.root_file_system_config) do
@@ -147,7 +147,7 @@ RSpec.configure do |config|
   end
 
   # Resets the filesystem after each test
-  config.after :each do
+  config.after do
     FileSystem.root_file_system_config(reset: true)
   end
 end
