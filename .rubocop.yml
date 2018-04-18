@@ -64,3 +64,8 @@ Naming/HeredocDelimiterNaming:
 Lint/HandleExceptions:
   Exclude:
     - src/status/job.rb
+
+# Allow up to 3 expectations per spec. This is done commonly to
+# prevent proliferation of specs
+RSpec/MultipleExpectations:
+  Max: 3
