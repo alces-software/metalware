@@ -60,11 +60,7 @@ RSpec.describe Metalware::HunterUpdater do
       end
 
       context 'when updating a nodes mac address' do
-        before do
-          updater.add(node_name, new_mac)
-          # Reassigns the initial mac
-          updater.add(other_node, initial_mac)
-        end
+        before { updater.add(node_name, new_mac) }
 
         it 'issues a error when replacing a node' do
           expect(output).to have_received(:stderr).once
@@ -74,6 +70,13 @@ RSpec.describe Metalware::HunterUpdater do
 
         it 'updates the nodes mac address' do
           expect(hunter_yaml[node_name.to_sym]).to eq(new_mac)
+        end
+
+        it 'can re-assign the old mac to another node' do
+          updater.add(other_node, initial_mac)
+          expect(output).not_to have_received(:stderr)
+            .with(/#{other_node}/)
+          expect(hunter_yaml[other_node.to_sym]).to eq(initial_mac)
         end
       end
 
