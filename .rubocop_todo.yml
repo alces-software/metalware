@@ -97,3 +97,7 @@ Style/NumericPredicate:
 Naming/BinaryOperatorParameterName:
   Exclude:
     - 'src/node.rb'
+
+# Move the spec file locations into a metalware directory
+RSpec/FilePath:
+  Enabled: false
