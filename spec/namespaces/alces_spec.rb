@@ -79,14 +79,6 @@ RSpec.describe Metalware::Namespaces::Alces do
         alces.local
       end.to raise_error(Metalware::UninitializedLocalNode)
     end
-
-    it 'returns the local node' do
-      local = Metalware::Namespaces::Node.create(alces, 'local')
-      nodes = double(Metalware::Namespaces::MetalArray, local: local)
-      allow(alces).to receive(:nodes).and_return(nodes)
-
-      expect(alces.local).to be_a(Metalware::Namespaces::Local)
-    end
   end
 
   # NOTE: Trailing/ (leading) white space should be ignored for the
