@@ -50,12 +50,10 @@ module Metalware
 
           if @force
             if ahead_behind[0] > 0
-              MetalLog.warn \
-                "Deleted #{ahead_behind[0]} local commit(s)"
+              MetalLog.warn "Deleted #{ahead_behind[0]} local commit(s)"
             end
             if uncommited > 0
-              MetalLog.warn \
-                "Deleted #{uncommited} local change(s)"
+              MetalLog.warn "Deleted #{uncommited} local change(s)"
             end
           else
             raise LocalAheadOfRemote, ahead_behind[0] if ahead_behind[0] > 0
@@ -68,7 +66,9 @@ module Metalware
           elsif ahead_behind[0] + ahead_behind[1] + uncommited > 0
             repo.reset(remote_commit, :hard)
             puts 'Repo has successfully been updated'
-            puts '(Removed local commits/changes)' if ahead_behind[0] + uncommited > 0
+            if ahead_behind[0] + uncommited > 0
+              puts '(Removed local commits/changes)'
+            end
             diff = local_commit.diff(remote_commit).stat
             str = "#{diff[0]} file#{diff[0] == 1 ? '' : 's'} changed, " \
                   "#{diff[1]} insertion#{diff[1] == 1 ? '' : 's'}(+), " \

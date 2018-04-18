@@ -26,7 +26,9 @@ require 'hash_mergers/metal_recursive_open_struct'
 
 module Metalware
   module Constants
-    METALWARE_INSTALL_PATH = File.absolute_path(File.join(File.dirname(__FILE__), '..'))
+    METALWARE_INSTALL_PATH = File.absolute_path(
+      File.join(File.dirname(__FILE__), '..')
+    )
     METAL_EXECUTABLE_PATH = File.join(METALWARE_INSTALL_PATH, 'bin/metal')
 
     METALWARE_CONFIGS_PATH = File.join(METALWARE_INSTALL_PATH, 'etc')
@@ -58,7 +60,9 @@ module Metalware
 
     UEFI_SAVE_PATH = '/var/lib/tftpboot/efi'
 
-    NAMED_TEMPLATE_PATH = File.join(METALWARE_INSTALL_PATH, 'templates/named.conf.erb')
+    NAMED_TEMPLATE_PATH = File.join(
+      METALWARE_INSTALL_PATH, 'templates/named.conf.erb'
+    )
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 

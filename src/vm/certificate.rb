@@ -51,7 +51,9 @@ module Metalware
       end
 
       def generate_certificate_key
-        SystemCommand.run("certtool --generate-privkey > #{certificate_key_path}")
+        SystemCommand.run(
+          "certtool --generate-privkey > #{certificate_key_path}"
+        )
       end
 
       def generate_certificate_info

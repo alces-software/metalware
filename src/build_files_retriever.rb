@@ -55,7 +55,10 @@ module Metalware
 
     def rendered_plugin_files_dir(plugin)
       plugin_files_dir = File.join('plugin', plugin.name)
-      rendered_files_dir(node: plugin.node_namespace, files_dir: plugin_files_dir)
+      rendered_files_dir(
+        node: plugin.node_namespace,
+        files_dir: plugin_files_dir
+      )
     end
 
     def rendered_files_dir(node:, files_dir:)
@@ -109,13 +112,17 @@ module Metalware
           success_file_hash(
             identifier,
             template_path: template,
-            rendered_path: FilePath.rendered_build_file_path(rendered_dir, section, name),
+            rendered_path: FilePath.rendered_build_file_path(
+              rendered_dir, section, name
+            ),
             url: DeploymentServer.build_file_url(rendered_dir, section, name)
           )
         else
           error_file_hash(
             identifier,
-            error: "Template path '#{template}' for '#{identifier}' does not exist"
+            error: <<-EOF
+              Template path '#{template}' for '#{identifier}' does not exist
+            EOF
           )
         end
       rescue StandardError => error

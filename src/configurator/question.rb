@@ -21,8 +21,8 @@ module Metalware
       delegate :identifier, to: :question_node
 
       def ask
-        ask_method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
-        question_node.answer = send(ask_method) { |q| configure_question(q) }
+        method = choices.nil? ? "ask_#{type}_question" : 'ask_choice_question'
+        question_node.answer = send(method) { |q| configure_question(q) }
       end
 
       private

@@ -38,7 +38,7 @@ RSpec.describe Metalware::SystemCommand do
       end.to raise_error Metalware::SystemCommandError
     end
 
-    it 'formats the error for displaying to users when `format_error` is true' do
+    it 'formats the error displayed to users when `format_error` is true' do
       begin
         Metalware::SystemCommand.run('false', format_error: true)
       rescue Metalware::SystemCommandError => e

@@ -33,7 +33,7 @@ module Metalware
       Command = Struct.new(:args, :options) do
         SEE_HELP = 'Use --help for more information'
 
-        MULTIPLE_COMMANDS_ERROR = <<~ERROR.squish
+        MULTIPLE_CMDS_ERROR = <<~ERROR.squish
           Both command option and argument given but only one may be provided.
           #{SEE_HELP}
         ERROR
@@ -47,7 +47,7 @@ module Metalware
         end
 
         def parse
-          raise InvalidInput, MULTIPLE_COMMANDS_ERROR if multiple_commands_given?
+          raise InvalidInput, MULTIPLE_CMDS_ERROR if multiple_commands_given?
           raise InvalidInput, NO_COMMAND_ERROR if no_command_given?
           provided_commands.first
         end

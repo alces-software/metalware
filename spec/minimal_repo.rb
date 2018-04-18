@@ -30,7 +30,8 @@ module MinimalRepo
     FILES = {
       '.git/': nil,
       'files/': nil,
-      'pxelinux/default': "<%= alces.firstboot ? 'FIRSTBOOT' : 'NOT_FIRSTBOOT' %>\n",
+      'pxelinux/default':
+        "<%= alces.firstboot ? 'FIRSTBOOT' : 'NOT_FIRSTBOOT' %>\n",
       'kickstart/default': '',
       'uefi-kickstart/default': '',
       'basic/default': '',
@@ -49,7 +50,9 @@ module MinimalRepo
                                   local: []),
       # Define the build interface to be whatever the first interface is; this
       # should always be sufficient for testing purposes.
-      'server.yaml': YAML.dump(build_interface: NetworkInterface.interfaces.first),
+      'server.yaml': YAML.dump(
+        build_interface: NetworkInterface.interfaces.first
+      ),
     }.freeze
 
     ABSOLUTE_FILES = {

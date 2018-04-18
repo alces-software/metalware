@@ -157,12 +157,16 @@ RSpec.describe Metalware::Validation::Configure do
 
   context 'with a valid input' do
     it 'passes with questions key' do
-      expect(run_configure_validation(correct_hash)).to be_a(Metalware::QuestionTree)
+      expect(run_configure_validation(correct_hash)).to be_a(
+        Metalware::QuestionTree
+      )
     end
 
     it 'passes without questions key' do
       correct_hash.delete(:questions)
-      expect(run_configure_validation(correct_hash)).to be_a(Metalware::QuestionTree)
+      expect(run_configure_validation(correct_hash)).to be_a(
+        Metalware::QuestionTree
+      )
     end
   end
 
@@ -181,7 +185,9 @@ RSpec.describe Metalware::Validation::Configure do
   context 'with invalid question fields' do
     context 'with invalid identifier' do
       it 'fails when missing' do
-        h = correct_hash.deep_merge(local: [{ question: 'I have no identifier' }])
+        h = correct_hash.deep_merge(
+          local: [{ question: 'I have no identifier' }]
+        )
         expect_validation_failure(h, /is missing/)
       end
 
@@ -255,7 +261,8 @@ RSpec.describe Metalware::Validation::Configure do
     it 'fails if the optional input is not true or false' do
       h = correct_hash.deep_merge(group: [{
                                     identifier: 'invalid_optional_flag',
-                                    question: 'Do I have a boolean optional input?',
+                                    question:
+                                      'Do I have a boolean optional input?',
                                     optional: 'I should be true or false',
                                   }])
       expect_validation_failure(h, /must be boolean/)
@@ -285,10 +292,11 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with invalid integer questions' do
+    question = 'Do I fail because my default is a string?'
     it 'fails with non-integer default' do
       h = correct_hash.deep_merge(node: [{
                                     identifier: 'bad_integer_question',
-                                    question: 'Do I fail because my default is a string?',
+                                    question: question,
                                     type: 'integer',
                                     default: '10',
                                   }])
@@ -297,10 +305,11 @@ RSpec.describe Metalware::Validation::Configure do
   end
 
   context 'with invalid boolean questions' do
+    question = 'Do I fail because my default is a string?'
     it 'fails with non-boolean default' do
       h = correct_hash.deep_merge(node: [{
                                     identifier: 'bad_integer_question',
-                                    question: 'Do I fail because my default is a string?',
+                                    question: question,
                                     type: 'boolean',
                                     default: 'I am not valid',
                                   }])
@@ -311,7 +320,8 @@ RSpec.describe Metalware::Validation::Configure do
   context 'with invalid choice options' do
     it 'fail when the default is not in the choice list' do
       h = correct_hash.deep_merge(local: [{
-                                    identifier: 'choice_question_no_bad_default',
+                                    identifier:
+                                      'choice_question_no_bad_default',
                                     question: 'Is my default valid?',
                                     choice: [
                                       'choice1',

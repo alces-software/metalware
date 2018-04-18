@@ -74,13 +74,13 @@ RSpec.describe Metalware::Validation::Loader do
       end
     end
 
-    RSpec.shared_examples 'includes_generated_plugin_enabled_question' do |section|
+    RSpec.shared_examples 'includes_generated_plugin_enabled_question' do |sect|
       it 'includes generated plugin enabled question' do
         question_content = plugin_enabled_question.content
 
         expect(
           question_content.question
-        ).to eq "Should 'example' plugin be enabled for #{section}?"
+        ).to eq "Should 'example' plugin be enabled for #{sect}?"
         expect(
           question_content.type
         ).to eq 'boolean'
@@ -95,8 +95,12 @@ RSpec.describe Metalware::Validation::Loader do
 
         # Create example plugin.
         fs.mkdir_p example_plugin_dir
-        example_plugin_configure_file = File.join(example_plugin_dir, 'configure.yaml')
-        fs.dump(example_plugin_configure_file, example_plugin_configure_questions_hash)
+        example_plugin_configure_file = File.join(
+          example_plugin_dir, 'configure.yaml'
+        )
+        fs.dump(
+          example_plugin_configure_file, example_plugin_configure_questions_hash
+        )
       end
     end
 
@@ -124,14 +128,17 @@ RSpec.describe Metalware::Validation::Loader do
           include_examples 'loads_repo_configure_questions', section
           include_examples 'includes_generated_plugin_enabled_question', section
 
-          it "generated question has plugin questions for #{section} as dependents" do
+          it "question has plugin questions for #{section} as dependents" do
             plugin_question = plugin_enabled_question.children.first
             content = plugin_question.content
-            expect(content.identifier).to eq "example_plugin_#{section}_identifier"
-
+            expect(content.identifier).to eq(
+              "example_plugin_#{section}_identifier"
+            )
             # NOTE: plugin name has been prepended to question to indicate
             # where this question comes from.
-            expect(content.question).to eq "[example] example_plugin_#{section}_question"
+            expect(content.question).to eq(
+              "[example] example_plugin_#{section}_question"
+            )
 
             plugin_dependent_question = plugin_question.children.first
 
@@ -149,7 +156,8 @@ RSpec.describe Metalware::Validation::Loader do
               end
             end
 
-            include_examples 'includes_generated_plugin_enabled_question', section
+            include_examples 'includes_generated_plugin_enabled_question' \
+              , section
 
             it 'generated question has no dependents' do
               expect(plugin_enabled_question.children).to be_empty

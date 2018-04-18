@@ -74,8 +74,10 @@ module CommanderExtensions
         raise CommandDefinitionError,
               "Command name(s) should come after CLI name e.g. '#{name}'"
       elsif syntax_parts.last != '[options]'
-        raise CommandDefinitionError,
-              "Last word in 'syntax' should be '[options]', got '#{syntax_parts.last}'"
+        raise CommandDefinitionError, <<-EOF.squish
+              Last word in 'syntax' should be '[options]',
+              got '#{syntax_parts.last}'
+        EOF
       end
     end
 

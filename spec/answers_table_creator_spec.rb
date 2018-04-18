@@ -146,9 +146,10 @@ RSpec.describe Metalware::AnswersTableCreator do
   end
 
   describe '#node_table' do
-    it 'creates table with questions, and domain, primary group, and node answers' do
+    it 'creates table with answers for domain, primary group and node' do
       expected_table = Terminal::Table.new(
-        headings: ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
+        headings:
+          ['Question', 'Domain', "Group: #{group_name}", "Node: #{node_name}"],
         rows: [
           ['question_1', '"domain question 1"',
            '"group question 1"', '"node question 1"'],
