@@ -133,8 +133,15 @@ RSpec.describe AlcesUtils do
 
     describe '#mock_node' do
       let(:name) { 'some_random_test_node3456734' }
+      let(:second_node_name) { 'some_random_new_node4362346' }
+      let(:second_node_genders) { ['_some_group_1', '_some_group_2'] }
       let!(:node) do
         described_class.mock(self) { mock_node(name) }
+      end
+      let(:second_node) do
+        described_class.mock(self) do
+          mock_node(second_node_name, *second_node_genders)
+        end
       end
 
       it 'creates the mock node' do
@@ -156,16 +163,8 @@ RSpec.describe AlcesUtils do
         end.to raise_error(Metalware::InternalError)
       end
 
-      context 'with a new node' do
-        let(:new_node) { 'some_random_new_node4362346' }
-        let(:genders) { ['_some_group_1', '_some_group_2'] }
-
-        described_class.mock(self, :each) { mock_node(new_node, *genders) }
-
-        it 'uses the genders input' do
-          node = alces.nodes.find_by_name(new_node)
-          expect(node.genders).to eq(genders)
-        end
+      it 'uses the genders input' do
+        expect(second_node.genders).to eq(second_node_genders)
       end
     end
 
