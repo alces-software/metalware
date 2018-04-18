@@ -145,7 +145,7 @@ RSpec.describe Metalware::Namespaces::Node do
         my_node.instance_variable_set(:@build_method, nil)
       end
 
-      context 'regular node' do
+      context 'with a regular node' do
         it 'defaults to kickstart if not specified' do
           mock_build_method(nil)
           exp = Metalware::BuildMethods::Kickstarts::Pxelinux
