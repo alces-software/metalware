@@ -116,7 +116,7 @@ RSpec.describe Metalware::Commands::Build do
     FileUtils.touch(path)
   end
 
-  context 'for single node' do
+  context 'with a single node' do
     let(:node) { 'testnode01' }
 
     it 'works' do
@@ -134,7 +134,7 @@ RSpec.describe Metalware::Commands::Build do
     end
   end
 
-  context 'for gender group' do
+  context 'with a gender group' do
     let(:nodes) { ['testnode01', 'testnode02', 'testnode03'] }
 
     it 'works' do
