@@ -152,8 +152,12 @@ RSpec.describe Metalware::Namespaces::Alces do
     let(:scope_template) { '<%= alces.scope.class %>' }
     let(:node_class) { Metalware::Namespaces::Node }
     let(:group_class) { Metalware::Namespaces::Group }
-    let(:node_double) { double(node_class, class: node_class) }
-    let(:group_double) { double(group_class, class: group_class) }
+    let(:node_double) do
+      instance_double(node_class, class: node_class)
+    end
+    let(:group_double) do
+      instance_double(group_class, class: group_class)
+    end
 
     def render_scope_template(**dynamic)
       alces.render_erb_template(scope_template, **dynamic).constantize
@@ -180,10 +184,10 @@ RSpec.describe Metalware::Namespaces::Alces do
 
   shared_examples 'scope method tests' do |scope_class|
     let(:scope_str) { scope_class.to_s }
-    let(:test_h) { double(test: scope_str) }
+    let(:test_h) { instance_double(OpenStruct, test: scope_str) }
 
     let(:scope) do
-      d = double(scope_class, class: scope_str, config: test_h, answer: test_h)
+      d = instance_double(scope_class, class: scope_str, config: test_h, answer: test_h)
       d.define_singleton_method(:is_a?) do |input|
         input == scope_class
       end
