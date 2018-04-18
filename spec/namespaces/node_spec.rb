@@ -37,16 +37,6 @@ RSpec.describe Metalware::Namespaces::Node do
       a
     end
 
-    def build_groups_hash(node_array)
-      node_array.each_with_object({}) do |name, memo|
-        memo[name.to_sym] = { name: name }
-      end
-    end
-
-    def return_node_at_runtime
-      node
-    end
-
     let(:test_value) { 'test value set in namespace/node_spec.rb' }
     let(:primary_group_index) { 'primary_group_index' }
     let(:node_name) { 'node02' }
@@ -60,6 +50,16 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     let(:node) { described_class.create(alces, node_name) }
+
+    def build_groups_hash(node_array)
+      node_array.each_with_object({}) do |name, memo|
+        memo[name.to_sym] = { name: name }
+      end
+    end
+
+    def return_node_at_runtime
+      node
+    end
 
     ##
     # Mocks the HashMergers
