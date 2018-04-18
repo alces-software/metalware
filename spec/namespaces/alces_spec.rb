@@ -130,14 +130,18 @@ RSpec.describe Metalware::Namespaces::Alces do
   end
 
   context 'when a template returns nil' do
+    let(:metal_log) { instance_spy(Metalware::MetalLog) }
+
     AlcesUtils.mock(self, :each) do
+      allow(Metalware::MetalLog).to \
+        receive(:metal_log).and_return(metal_log)
       config(alces.domain, nil: nil)
     end
 
     it 'templates have nil detection' do
-      expect(Metalware::MetalLog.metal_log).to \
-        receive(:warn).once.with(/.*domain.config.nil\Z/)
       render_template('<%= domain.config.nil %>')
+      expect(metal_log).to \
+        have_received(:warn).once.with(/.*domain.config.nil\Z/)
     end
   end
 
