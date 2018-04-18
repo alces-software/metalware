@@ -65,10 +65,14 @@ RSpec.describe Metalware::Namespaces::Node do
     # Mocks the HashMergers
     #
     before do
+      config_double = instance_double(Metalware::HashMergers::Config,
+                                      merge: config_hash)
+      answer_double = instance_double(Metalware::HashMergers::Answer,
+                                      merge: {})
       allow(Metalware::HashMergers::Config).to receive(:new)
-        .and_return(double('config', merge: config_hash))
+        .and_return(config_double)
       allow(Metalware::HashMergers::Answer).to receive(:new)
-        .and_return(double('answer', merge: {}))
+        .and_return(answer_double)
     end
 
     ##
