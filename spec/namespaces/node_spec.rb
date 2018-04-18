@@ -73,22 +73,20 @@ RSpec.describe Metalware::Namespaces::Node do
         .and_return(config_double)
       allow(Metalware::HashMergers::Answer).to receive(:new)
         .and_return(answer_double)
-    end
 
-    ##
-    # Spoofs the results of NodeattrInterface
-    #
-    before do
+      ##
+      # Spoofs the results of NodeattrInterface
+      #
       allow(Metalware::NodeattrInterface).to \
         receive(:genders_for_node).and_return(['primary_group'])
       allow(Metalware::NodeattrInterface).to \
         receive(:nodes_in_gender).and_return(node_array)
       allow(Metalware::NodeattrInterface).to \
         receive(:all_nodes).and_return(node_array)
-    end
 
-    # Spoofs the hostip
-    before { SpecUtils.use_mock_determine_hostip_script(self) }
+      # Spoofs the hostip
+      SpecUtils.use_mock_determine_hostip_script(self)
+    end
 
     it 'can access the node name' do
       expect(node.name).to eq(node_name)
