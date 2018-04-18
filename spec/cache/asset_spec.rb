@@ -11,7 +11,7 @@ RSpec.describe Metalware::Cache::Asset do
   let(:initial_content) do
     { node: { node_name.to_sym => 'asset_test' } }
   end
-  let(:node_name) { 'test_node' } 
+  let(:node_name) { 'test_node' }
   let(:node) { alces.nodes.find_by_name(node_name) }
 
   AlcesUtils.mock(self, :each) do
@@ -75,19 +75,19 @@ RSpec.describe Metalware::Cache::Asset do
 
     context 'with multiple assets in cache' do
       let(:initial_content) do
-        node_data = expected_content[:node].merge( 
+        node_data = expected_content[:node].merge(
           node_name.to_sym => asset_name,
-          node02: asset_name,
+          node02: asset_name
         )
-        { node: node_data } 
+        { node: node_data }
       end
 
       let(:expected_content) do
         {
           node: {
             node01: 'test-asset-01',
-            node03: 'test-asset-03'
-          }
+            node03: 'test-asset-03',
+          },
         }
       end
 
@@ -114,7 +114,7 @@ RSpec.describe Metalware::Cache::Asset do
     it 'attempts to unassign a missing asset' do
       cache.unassign_asset('missing_asset')
       new_cache = Metalware::Cache::Asset.new
-      expect(new_cache.data).to eq(initial_content) 
+      expect(new_cache.data).to eq(initial_content)
     end
   end
 end
