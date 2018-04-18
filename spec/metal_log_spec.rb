@@ -23,8 +23,8 @@ RSpec.describe Metalware::MetalLog do
       end
     end
 
-    let(:output) do
-      class_double('Metalware::Output').as_stubbed_const
+    let!(:output) do
+      class_spy(Metalware::Output).as_stubbed_const
     end
 
     after do
@@ -34,23 +34,25 @@ RSpec.describe Metalware::MetalLog do
     end
 
     it 'gives warning output by default' do
-      expect(output).to receive(:warning).with('warning: message')
       run_test_command
+      expect(output).to \
+        have_received(:warning).with('warning: message')
     end
 
     it 'does not give warning and raises when --strict passed' do
       expect_any_instance_of(Logger).not_to receive(:warn)
-      expect(output).not_to receive(:warning).with('warning: message')
-
       expect do
         run_test_command(strict: true)
       end.to raise_error(Metalware::StrictWarningError)
+
+      expect(output).not_to \
+        have_received(:warning).with('warning: message')
     end
 
     it 'does not give warning output when --quiet passed' do
-      expect(output).not_to receive(:warning).with('warning: message')
-
       run_test_command(quiet: true)
+      expect(output).not_to \
+        have_received(:warning).with('warning: message')
     end
 
     [true, false].each do |quiet|
