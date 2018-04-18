@@ -62,7 +62,7 @@ module Metalware
       # ----- THREAD METHODS BELOW THIS LINE ------
       CMD_LIBRARY = {
         power: :job_power_status,
-        ping: :job_ping_node
+        ping: :job_ping_node,
       }.freeze
 
       def run_command
@@ -81,8 +81,6 @@ module Metalware
       rescue Timeout::Error
         _send_signal_and_wait(9)
       rescue Errno::ESRCH
-        # XXX Not handling this gives a Rubocop warning; should we do something
-        # here?
       end
 
       def _send_signal_and_wait(signum)

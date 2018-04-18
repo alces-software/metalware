@@ -33,14 +33,14 @@ require 'alces_utils'
 RSpec.describe Metalware::Commands::Build do
   include AlcesUtils
 
-  before :each do
+  before do
     # Shortens the wait times for the tests
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
     # Makes sure there aren't any other threads
     AlcesUtils.kill_other_threads
   end
 
-  let :build_wait_time { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
+  let(:build_wait_time) { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
 
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do
@@ -70,7 +70,7 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   # Sets up the filesystem
-  before :each do
+  before do
     FileSystem.root_setup do |fs|
       fs.with_repo_fixtures('repo')
       fs.with_genders_fixtures
@@ -78,13 +78,13 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   # Mocks the test node
-  let :testnode { alces.nodes.find_by_name('testnode01') }
+  let(:testnode) { alces.nodes.find_by_name('testnode01') }
   AlcesUtils.mock self, :each do
     config(testnode, build_method: :kickstart)
     hexadecimal_ip(testnode)
   end
 
-  before :each do
+  before do
     SpecUtils.use_mock_dependency(self)
   end
 
@@ -129,9 +129,9 @@ RSpec.describe Metalware::Commands::Build do
       end
     end
 
-    let :test_group_name { 'some_random_test_group' }
-    let :testnodes { alces.groups.find_by_name test_group_name }
-    let :delay_build { build_wait_time / 10 }
+    let(:test_group_name) { 'some_random_test_group' }
+    let(:testnodes) { alces.groups.find_by_name test_group_name }
+    let(:delay_build) { build_wait_time / 10 }
 
     it 'starts all the builds' do
       testnodes.nodes do |node|

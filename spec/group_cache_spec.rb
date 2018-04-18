@@ -29,13 +29,13 @@ require 'alces_utils'
 RSpec.describe Metalware::GroupCache do
   include AlcesUtils
 
-  let :cache { new_cache }
+  let(:cache) { new_cache }
 
   def new_cache
     Metalware::GroupCache.new
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_group_cache_fixture('cache/groups.yaml')
     end

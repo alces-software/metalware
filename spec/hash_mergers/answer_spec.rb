@@ -9,13 +9,13 @@ require 'file_path'
 RSpec.describe Metalware::HashMergers::Answer do
   include AlcesUtils
 
-  let :group { AlcesUtils.mock(self) { mock_group('new_group') } }
-  let :node do
+  let(:group) { AlcesUtils.mock(self) { mock_group('new_group') } }
+  let(:node) do
     AlcesUtils.mock(self) { mock_node('new_node', group.name) }
   end
 
-  let :identifier { :question_identifier }
-  let :questions do
+  let(:identifier) { :question_identifier }
+  let(:questions) do
     {
       domain: [{
         identifier: identifier.to_s,
@@ -49,7 +49,7 @@ RSpec.describe Metalware::HashMergers::Answer do
     end
   end
 
-  before :each do
+  before do
     Metalware::Data.dump Metalware::FilePath.configure_file, questions
   end
 
@@ -80,7 +80,7 @@ RSpec.describe Metalware::HashMergers::Answer do
   end
 
   context 'with answer files' do
-    before :each do
+    before do
       Metalware::Data.dump(
         Metalware::FilePath.domain_answers,
         identifier => answers(alces.domain)

@@ -44,11 +44,11 @@ RSpec.describe Metalware::Commands::Configure::Group do
     Metalware::GroupCache.new
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup(&:with_minimal_repo)
   end
 
-  before :each do
+  before do
     SpecUtils.mock_validate_genders_success(self)
   end
 
@@ -72,7 +72,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
 
           expect(new_cache.primary_groups).to eq [
             'testnodes',
-            'orphan'
+            'orphan',
           ]
         end
       end
@@ -88,7 +88,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
           expect(new_cache.primary_groups).to eq [
             'first_group',
             'second_group',
-            'orphan'
+            'orphan',
           ]
         end
       end
@@ -104,7 +104,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
           expect(new_cache.primary_groups).to eq [
             'first_group',
             'second_group',
-            'orphan'
+            'orphan',
           ]
         end
       end

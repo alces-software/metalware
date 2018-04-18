@@ -15,9 +15,9 @@ RSpec.describe Metalware::Commands::Power do
   end
 
   describe 'when run on bare metal' do
-    let :node_names { ['node01', 'node02', 'node03'] }
-    let :group { 'nodes' }
-    let :namespace_config do
+    let(:node_names) { ['node01', 'node02', 'node03'] }
+    let(:group) { 'nodes' }
+    let(:namespace_config) do
       {
         networks: {
           bmc: {
@@ -37,7 +37,7 @@ RSpec.describe Metalware::Commands::Power do
     end
 
     # Allow the system command to receive `nodeattr` commands
-    before :each do
+    before do
       with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
       allow(Metalware::SystemCommand).to \
         receive(:run).with(*with_args).and_call_original

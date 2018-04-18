@@ -33,7 +33,7 @@ end
 
 group :development do
   gem 'pry'
-  gem 'rubocop', require: false
+  gem 'rubocop', '~> 0.52.1', require: false
 end
 
 # Gems added for GUI app.

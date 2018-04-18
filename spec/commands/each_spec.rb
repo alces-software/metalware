@@ -31,7 +31,7 @@ require 'namespaces/alces'
 RSpec.describe Metalware::Commands::Each do
   include AlcesUtils
 
-  before :each do
+  before do
     FileSystem.root_setup do |fs|
       fs.with_genders_fixtures
       fs.with_clone_fixture('configs/unit-test.yaml')
@@ -39,18 +39,18 @@ RSpec.describe Metalware::Commands::Each do
     SpecUtils.use_unit_test_config(self)
   end
 
-  let :groups do
+  let(:groups) do
     g = Metalware::Namespaces::Group.new(alces, 'nodes', index: 1)
     Metalware::Namespaces::MetalArray.new([g])
   end
 
   # Spoofs the nodes group
-  before :each do
+  before do
     allow(alces).to receive(:groups).and_return(groups)
   end
 
   # Turns off loading of answers as they are not needed
-  before :each do
+  before do
     allow(Metalware::HashMergers::Answer).to \
       receive(:new).and_return(double('answer', merge: {}))
   end

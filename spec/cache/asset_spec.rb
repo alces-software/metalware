@@ -1,19 +1,23 @@
+# frozen_string_literal: true
+
 require 'alces_utils'
 require 'cache/asset'
 
 RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
-  
-  let :cache { Metalware::Cache::Asset.new }
-  let :cache_path { Metalware::FilePath.asset_cache }
-  let :initial_content { { node: { node_name.to_sym => 'asset_test' } } }
-  let :node_name { 'test_node' } 
-  let :node { alces.nodes.find_by_name(node_name) }
+
+  let(:cache) { Metalware::Cache::Asset.new }
+  let(:cache_path) { Metalware::FilePath.asset_cache }
+  let(:initial_content) do
+    { node: { node_name.to_sym => 'asset_test' } }
+  end
+  let(:node_name) { 'test_node' } 
+  let(:node) { alces.nodes.find_by_name(node_name) }
 
   AlcesUtils.mock(self, :each) do
-    mock_node(node_name) 
+    mock_node(node_name)
   end
-  
+
   describe '#data' do
     it 'handles empty cache' do
       expect do
@@ -41,12 +45,12 @@ RSpec.describe Metalware::Cache::Asset do
       expect do
         cache.assign_asset_to_node('asset_test', node)
       end.not_to raise_error
-    end 
+    end
   end
 
   describe '#asset_for_node' do
-    let :asset_name { 'test-asset' }
-    before :each do
+    let(:asset_name) { 'test-asset' }
+    before do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
     end
@@ -62,15 +66,15 @@ RSpec.describe Metalware::Cache::Asset do
   end
 
   describe '#unassign_asset' do
-    let :asset_name { 'asset_test' }
-    let :expected_content { { node: {} } }
+    let(:asset_name) { 'asset_test' }
+    let(:expected_content) { { node: {} } }
     before :each do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
     end
 
     context 'with multiple assets in cache' do
-      let :initial_content do
+      let(:initial_content) do
         node_data = expected_content[:node].merge( 
           node_name.to_sym => asset_name,
           node02: asset_name,
@@ -78,7 +82,7 @@ RSpec.describe Metalware::Cache::Asset do
         { node: node_data } 
       end
 
-      let :expected_content do
+      let(:expected_content) do
         {
           node: {
             node01: 'test-asset-01',

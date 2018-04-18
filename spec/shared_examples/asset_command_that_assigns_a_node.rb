@@ -1,4 +1,6 @@
 
+# frozen_string_literal: true
+
 require 'alces_utils'
 require 'cache/asset'
 
@@ -7,8 +9,8 @@ require 'cache/asset'
 RSpec.shared_examples 'asset command that assigns a node' do
   include AlcesUtils
 
-  let :asset_cache { Metalware::Cache::Asset.new }
-  let :node_name { 'test-node' }
+  let(:asset_cache) { Metalware::Cache::Asset.new }
+  let(:node_name) { 'test-node' }
 
   def run_command
     Metalware::Utils.run_command(described_class,
@@ -24,7 +26,7 @@ RSpec.shared_examples 'asset command that assigns a node' do
   end
 
   context 'when the node exists' do
-    let! :node { AlcesUtils.mock(self) { mock_node(node_name) } }
+    let!(:node) { AlcesUtils.mock(self) { mock_node(node_name) } }
 
     it 'assigns the asset to the node' do
       run_command

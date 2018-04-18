@@ -5,7 +5,7 @@ require 'namespaces/mixins/white_list_hasher'
 require 'ostruct'
 
 RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
-  let :test_obj do
+  let(:test_obj) do
     double(
       white_method1: 1,
       white_method2: 2,
@@ -21,16 +21,16 @@ RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
     ).extend Metalware::Namespaces::Mixins::WhiteListHasher
   end
 
-  let :recursive_hash_obj do
+  let(:recursive_hash_obj) do
     OpenStruct.new(am_i_a_ostuct: 'no, I should be a hash')
   end
 
-  let :white_list { (1..3).map { |i| "white_method#{i}" } }
-  let :recursive_white_list { ['recursive_hash_obj'] }
-  let :array_white_list { [:array_method] }
+  let(:white_list) { (1..3).map { |i| "white_method#{i}" } }
+  let(:recursive_white_list) { ['recursive_hash_obj'] }
+  let(:array_white_list) { [:array_method] }
 
-  let :test_hash { test_obj.to_h }
-  let :expected_number_of_keys do
+  let(:test_hash) { test_obj.to_h }
+  let(:expected_number_of_keys) do
     [
       white_list,
       recursive_white_list,

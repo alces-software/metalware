@@ -32,7 +32,7 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
   end
 
   describe 'option handling' do
-    before :each do
+    before do
       SpecUtils.use_mock_genders(self)
       SpecUtils.mock_validate_genders_success(self)
     end

@@ -35,7 +35,7 @@ require 'alces_utils'
 RSpec.describe Metalware::Dependency do
   include AlcesUtils
 
-  let :filesystem { FileSystem.setup }
+  let(:filesystem) { FileSystem.setup }
 
   def enforce_dependencies(dependencies_hash = {})
     filesystem.test do |_fs|
@@ -58,7 +58,7 @@ RSpec.describe Metalware::Dependency do
   end
 
   context 'with repo dependencies' do
-    before :each do
+    before do
       filesystem.with_repo_fixtures('repo')
     end
 
@@ -91,7 +91,7 @@ RSpec.describe Metalware::Dependency do
   end
 
   context 'with blank configure.yaml dependencies' do
-    before :each do
+    before do
       filesystem.with_repo_fixtures('repo')
     end
 
@@ -117,7 +117,7 @@ RSpec.describe Metalware::Dependency do
     end
 
     context 'when answer files exist' do
-      before :each do
+      before do
         filesystem.with_minimal_repo
         filesystem.with_answer_fixtures('answers/basic_structure')
       end
@@ -132,7 +132,7 @@ RSpec.describe Metalware::Dependency do
     end
 
     context 'with optional dependencies' do
-      before :each do
+      before do
         filesystem.with_minimal_repo
         filesystem.with_answer_fixtures('answers/basic_structure')
       end

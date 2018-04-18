@@ -31,7 +31,7 @@ module Metalware
           {
             managed: managed?,
             validator: name,
-            service: name
+            service: name,
           }
         end
 

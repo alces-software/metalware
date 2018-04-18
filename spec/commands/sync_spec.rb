@@ -31,10 +31,10 @@ RSpec.describe Metalware::Commands::Sync do
   delegate :manifest, to: Metalware::Staging
 
   describe '#sync_files' do
-    let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
-    let :validate_file { '/tmp/validate-file' }
+    let(:files) { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
+    let(:validate_file) { '/tmp/validate-file' }
 
-    before :each do
+    before do
       Metalware::Staging.update do |staging|
         good_validator = Metalware::Testing::GoodValidation.to_s
         staging.push_file(validate_file, '', validator: good_validator)
@@ -43,7 +43,7 @@ RSpec.describe Metalware::Commands::Sync do
     end
 
     context 'with valid files (aka no errors expected)' do
-      before :each { run_sync }
+      before { run_sync }
 
       it 'moves the files into place' do
         files.each { |f| expect(File.exist?(f)).to eq(true) }
@@ -55,10 +55,10 @@ RSpec.describe Metalware::Commands::Sync do
     end
 
     context 'with a validation error' do
-      let :bad_file { '/tmp/bad-validator-file' }
-      let :stderr { StringIO.new }
+      let(:bad_file) { '/tmp/bad-validator-file' }
+      let(:stderr) { StringIO.new }
 
-      before :each do
+      before do
         # Allows the error to be printed
         allow(Metalware::Output).to \
           (receive(:stderr).and_wrap_original { |_m, *arg| warn arg })

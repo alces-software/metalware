@@ -30,12 +30,13 @@ require 'constants'
 require 'question_tree'
 require 'stringio'
 
+require 'validation/configure/schemas'
+
 module Metalware
   module Validation
     class Configure
       # NOTE: Supported types in error.yaml message must be updated manually
       SUPPORTED_TYPES = ['string', 'integer', 'boolean'].freeze
-      ERROR_FILE = File.join(File.dirname(__FILE__), 'errors.yaml').freeze
 
       def self.type_check(type, value)
         case type
@@ -59,7 +60,7 @@ module Metalware
         @tree ||= begin
           root_hash = {
             pass: true,
-            result: TopLevelSchema.call(data: questions_hash)
+            result: TopLevelSchema.call(data: questions_hash),
           }
           QuestionTree.new('ROOT', root_hash).tap do |root|
             add_children(root, root) do
@@ -104,7 +105,7 @@ module Metalware
         question_data = questions_hash[section] || []
         data = {
           section: section,
-          result: DependantSchema.call(dependent: question_data)
+          result: DependantSchema.call(dependent: question_data),
         }
         node_s = QuestionTree.new(section, data)
         add_children(root, node_s) do
@@ -145,91 +146,6 @@ module Metalware
             end
           end
         end
-      end
-
-      DependantSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure
-        end
-
-        optional(:dependent) { array? && (each { hash? }) }
-      end
-
-      QuestionFieldSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure
-
-          def supported_type?(value)
-            SUPPORTED_TYPES.include?(value)
-          end
-
-          def default?(value)
-            return true if value.is_a?(String)
-            value.respond_to?(:empty?) ? value.empty? : true
-          end
-        end
-
-        required(:identifier) { filled? & str? }
-        required(:question) { filled? & str? }
-        optional(:optional) { bool? }
-        optional(:type) { supported_type? }
-        optional(:default) { default? }
-        optional(:choice) { array? }
-      end
-
-      QuestionSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure
-
-          def default_type?(value)
-            default = value[:default]
-            type = value[:type]
-            return true if default.nil?
-            ::Metalware::Validation::Configure.type_check(type, default)
-          end
-
-          def choice_with_default?(value)
-            return true if value[:choice].nil? || value[:default].nil?
-            return false unless value[:choice].is_a?(Array)
-            value[:choice].include?(value[:default])
-          end
-
-          def choice_type?(value)
-            return true if value[:choice].nil?
-            return false unless value[:choice].is_a?(Array)
-            value[:choice].each do |choice|
-              type = value[:type]
-              r = ::Metalware::Validation::Configure.type_check(type, choice)
-              return false unless r
-            end
-            true
-          end
-        end
-
-        required(:question) do
-          default_type? & \
-            choice_with_default? & \
-            choice_type? & \
-            schema(DependantSchema) & \
-            schema(QuestionFieldSchema)
-        end
-      end
-
-      TopLevelSchema = Dry::Validation.Schema do
-        configure do
-          config.messages_file = ERROR_FILE
-          config.namespace = :configure
-
-          def top_level_keys?(data)
-            section = Constants::CONFIGURE_SECTIONS.dup.push(:questions)
-            (data.keys - section).empty?
-          end
-        end
-
-        required(:data) { top_level_keys? }
       end
     end
   end

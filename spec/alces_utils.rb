@@ -11,12 +11,12 @@ module AlcesUtils
   GENDERS_FILE_REGEX = /-f [[:graph:]]+/
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
-    def start(example_group, config: nil)
+    def start(example_group)
       example_group.instance_exec do
         # Cache the first version of alces to be created
         # This allows it to be mocked during the spec
         # It can also be reset in the test (see below)
-        before :each do
+        before do
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_wrap_original do |m, *a|
               @spec_alces ||= m.call(*a)
@@ -24,13 +24,13 @@ module AlcesUtils
         end
 
         # `alces` is defined as a method so it can be reset
-        define_method :alces { Metalware::Namespaces::Alces.new }
-        define_method :reset_alces do
+        define_method(:alces) { Metalware::Namespaces::Alces.new }
+        define_method(:reset_alces) do
           @spec_alces = nil
           alces
         end
 
-        before :each { AlcesUtils.spoof_nodeattr(self) }
+        before { AlcesUtils.spoof_nodeattr(self) }
       end
     end
 
@@ -59,7 +59,7 @@ module AlcesUtils
           AlcesUtils.check_and_raise_fakefs_error
           path = AlcesUtils.nodeattr_genders_file_path(args[0])
           cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
-          genders_data = File.read(path).gsub('`', '"')
+          genders_data = File.read(path).tr('`', '"')
           tempfile = `mktemp /tmp/genders.XXXXX`.chomp
           begin
             `echo "#{genders_data}" > #{tempfile}`
@@ -80,7 +80,7 @@ module AlcesUtils
       buffers = input.map { |k| [k, StringIO.new] }.to_h
       update_std_files buffers
       yield
-      buffers.each { |_k, v| v.rewind }
+      buffers.each_value(&:rewind)
       buffers
     ensure
       update_std_files old

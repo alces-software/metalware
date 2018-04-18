@@ -57,6 +57,7 @@ module Metalware
       def parse_command_attributes(command, attributes)
         @calling_obj.command command do |c|
           attributes.each do |a, v|
+            next if a == 'autocomplete'
             case a
             when 'action'
               c.action eval(v)
@@ -75,8 +76,6 @@ module Metalware
                 subcommand = "#{command} #{subcommand}"
                 parse_command_attributes(subcommand, subattributes)
               end
-            when 'autocomplete'
-              # Intentionally left blank as it is used by autocomplete only
             else
               c.send("#{a}=", v.respond_to?(:chomp) ? v.chomp : v)
             end

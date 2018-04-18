@@ -29,7 +29,7 @@ require 'spec_utils'
 require 'timeout'
 
 RSpec.describe Metalware::Status::Job do
-  before :all do
+  before(:all) do
     Metalware::Status::Job.send(:define_method, :busy_sleep, lambda {
       until 1 == 2; end
     })
@@ -38,7 +38,7 @@ RSpec.describe Metalware::Status::Job do
     })
   end
 
-  before :example do
+  before(:example) do
     SpecUtils.use_mock_genders(self)
     @cmd = :busy_sleep
     @node = 'node_name_not_found'
@@ -92,7 +92,7 @@ RSpec.describe Metalware::Status::Job do
 
       results = Metalware::Status::Job.results
       expect(results).to eq(@node => {
-                              @cmd => 'timeout'
+                              @cmd => 'timeout',
                             })
     end
 
@@ -110,7 +110,7 @@ RSpec.describe Metalware::Status::Job do
 
       expect(Metalware::Status::Job.results).to eq(@node => {
                                                      ping: 'PING_NODE',
-                                                     power: 'POWER_STATUS'
+                                                     power: 'POWER_STATUS',
                                                    })
     end
   end

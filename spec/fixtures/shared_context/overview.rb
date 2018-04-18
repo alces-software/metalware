@@ -5,9 +5,9 @@ require 'alces_utils'
 RSpec.shared_context 'overview context' do
   include AlcesUtils
 
-  let :config_value { 'config_value' }
-  let :static { 'static' }
-  let :fields do
+  let(:config_value) { 'config_value' }
+  let(:static) { 'static' }
+  let(:fields) do
     [
       { header: 'heading1', value: static },
       { header: 'heading2', value: '<%= scope.config.key %>' },

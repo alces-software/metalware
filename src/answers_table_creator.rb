@@ -39,7 +39,7 @@ module Metalware
         'Question',
         'Domain',
         group_name ? "Group: #{group_name}" : nil,
-        node_name ?  "Node: #{node_name}" : nil
+        node_name ?  "Node: #{node_name}" : nil,
       ].reject(&:nil?)
     end
 
@@ -49,7 +49,7 @@ module Metalware
           identifier,
           domain_answer(question: identifier),
           group_answer(question: identifier, group_name: group_name),
-          node_answer(question: identifier, node_name: node_name)
+          node_answer(question: identifier, node_name: node_name),
         ].reject(&:nil?)
       end
     end

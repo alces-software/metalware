@@ -27,9 +27,9 @@ require 'data'
 require 'filesystem'
 
 RSpec.describe Metalware::Data do
-  let :data_file_path { '/path/to/some_data.yaml' }
+  let(:data_file_path) { '/path/to/some_data.yaml' }
 
-  let :string_keyed_data do
+  let(:string_keyed_data) do
     {
       'a_key' => 'foo',
       'another_key' => {
@@ -38,7 +38,7 @@ RSpec.describe Metalware::Data do
     }
   end
 
-  let :symbol_keyed_data do
+  let(:symbol_keyed_data) do
     {
       a_key: 'foo',
       another_key: {
@@ -47,9 +47,9 @@ RSpec.describe Metalware::Data do
     }
   end
 
-  let :invalid_yaml { '[half an array' }
+  let(:invalid_yaml) { '[half an array' }
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.mkdir_p(File.dirname(data_file_path))
     end

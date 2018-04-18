@@ -5,7 +5,7 @@ require 'validation/configure'
 
 RSpec.describe Metalware::QuestionTree do
   context 'with a nexted question hash' do
-    let :identifier_hash do
+    let(:identifier_hash) do
       {
         domain: 'domain_identifier',
         domain2: 'second_domain_identifier',
@@ -17,9 +17,9 @@ RSpec.describe Metalware::QuestionTree do
       }
     end
 
-    let :identifiers { identifier_hash.values.map(&:to_sym) }
+    let(:identifiers) { identifier_hash.values.map(&:to_sym) }
 
-    let :question_hash do
+    let(:question_hash) do
       {
         domain: [
           {
@@ -59,8 +59,8 @@ RSpec.describe Metalware::QuestionTree do
     subject { Metalware::Validation::Configure.new(question_hash).tree }
 
     shared_examples 'a filtered traversal' do |base_method|
-      let :filtered_method { :"filtered_#{base_method}" }
-      let :enum { subject.public_send(filtered_method) }
+      let(:filtered_method) { :"filtered_#{base_method}" }
+      let(:enum) { subject.public_send(filtered_method) }
 
       it 'is defined' do
         expect(subject).to respond_to(filtered_method)
@@ -121,23 +121,23 @@ RSpec.describe Metalware::QuestionTree do
   end
 
   describe '#root_defaults' do
-    let :domain_question do
+    let(:domain_question) do
       { identifier: 'domain_question' }
     end
 
-    let :group_question do
+    let(:group_question) do
       { identifier: 'group_question' }
     end
 
-    let :node_question do
+    let(:node_question) do
       { identifier: 'node_question' }
     end
 
-    let :local_question do
+    let(:local_question) do
       { identifier: 'local_question' }
     end
 
-    let :correct_defaults do
+    let(:correct_defaults) do
       {
         domain_question[:identifier].to_sym => 'domain_default',
         group_question[:identifier].to_sym => 'group_default',
@@ -146,7 +146,7 @@ RSpec.describe Metalware::QuestionTree do
       }
     end
 
-    let :question_hash do
+    let(:question_hash) do
       {
         domain: make('domain_default', domain_question),
         group: make('group_default', domain_question, group_question),
@@ -168,7 +168,7 @@ RSpec.describe Metalware::QuestionTree do
       end
     end
 
-    let :tree { Metalware::Validation::Configure.new(question_hash).tree }
+    let(:tree) { Metalware::Validation::Configure.new(question_hash).tree }
 
     [:domain, :group, :node, :local].each do |section|
       context "when called on the '#{section}' section" do

@@ -33,30 +33,30 @@ require 'alces_utils'
 RSpec.describe Metalware::Configurator do
   include AlcesUtils
 
-  let :input do
+  let(:input) do
     Tempfile.new
   end
 
-  let :output do
+  let(:output) do
     Tempfile.new
   end
 
   # Spoofs HighLine to always return the testing version of highline
-  let! :highline do
+  let!(:highline) do
     hl = HighLine.new(input, output)
     allow(HighLine).to receive(:new).and_return(hl)
     hl
   end
 
-  let :answers do
+  let(:answers) do
     loader.domain_answers
   end
 
-  let :higher_level_answer_files { [] }
+  let(:higher_level_answer_files) { [] }
 
-  let :loader { Metalware::Validation::Loader.new }
+  let(:loader) { Metalware::Validation::Loader.new }
 
-  let :configurator do
+  let(:configurator) do
     make_configurator
   end
 
@@ -77,13 +77,8 @@ RSpec.describe Metalware::Configurator do
     yield
     tmp.close
   rescue StandardError => e
-    begin
-      $stdout.rewind
-      STDERR.puts $stdout.read
-    rescue StandardError
-      # XXX Not handling this gives a Rubocop warning; should we do something
-      # here?
-    end
+    $stdout.rewind
+    STDERR.puts $stdout.read
     raise e
   ensure
     $stdout = STDOUT
@@ -106,7 +101,7 @@ RSpec.describe Metalware::Configurator do
 
   # Do not want to use readline to get input in tests as tests will then
   # hang waiting for input.
-  before :each do
+  before do
     allow(Metalware::Configurator).to receive(:use_readline).and_return(false)
   end
 
@@ -425,14 +420,14 @@ RSpec.describe Metalware::Configurator do
   end
 
   context 'with an orphan node' do
-    let :orphan { 'i_am_a_orphan_node' }
-    let :configure_orphan { Metalware::Configurator.for_node(alces, orphan) }
+    let(:orphan) { 'i_am_a_orphan_node' }
+    let(:configure_orphan) { Metalware::Configurator.for_node(alces, orphan) }
 
     def new_group_cache
       Metalware::GroupCache.new
     end
 
-    before :each do
+    before do
       define_questions(node: [
                          {
                            identifier: 'string_q',
@@ -449,7 +444,7 @@ RSpec.describe Metalware::Configurator do
   end
 
   context 'with a dependent questions' do
-    before :each do
+    before do
       define_questions(domain: [
                          {
                            identifier: 'parent',
@@ -478,14 +473,14 @@ RSpec.describe Metalware::Configurator do
   end
 
   context 'with existing domain level answer' do
-    let :original_default { 'original-default-answer' }
-    let :group_name { 'my-super-awesome-group' }
-    let :group_default { 'I am the group level yaml default' }
-    let :node_default { 'I am the node level yaml default' }
-    let :local_default { 'I am the local level yaml default' }
-    let :domain_answer { 'Domain answer with ERB, <%= node.name %>' }
-    let :identifier { :question_identifier }
-    let :question do
+    let(:original_default) { 'original-default-answer' }
+    let(:group_name) { 'my-super-awesome-group' }
+    let(:group_default) { 'I am the group level yaml default' }
+    let(:node_default) { 'I am the node level yaml default' }
+    let(:local_default) { 'I am the local level yaml default' }
+    let(:domain_answer) { 'Domain answer with ERB, <%= node.name %>' }
+    let(:identifier) { :question_identifier }
+    let(:question) do
       {
         identifier: identifier.to_s,
         question: 'Where was my question set?',
@@ -522,48 +517,48 @@ RSpec.describe Metalware::Configurator do
       subject do
         alces.groups.find_by_name(group_name).answer.to_h[identifier]
       end
-      before :each { configure_group }
+      before { configure_group }
 
-      let :load_answer do
+      let(:load_answer) do
         path = Metalware::FilePath.group_answers(group_name)
         Metalware::Data.load(path)[identifier]
       end
 
       context 'when the answer matches the original default' do
-        let :answer { original_default }
-        let :saved_answer { original_default }
+        let(:answer) { original_default }
+        let(:saved_answer) { original_default }
         include_examples 'gets the answer'
       end
 
       context 'when the answer matches the domain answer' do
-        let :answer { domain_answer }
-        let :saved_answer { nil }
+        let(:answer) { domain_answer }
+        let(:saved_answer) { nil }
         include_examples 'gets the answer'
       end
 
       # NOTE: The group level default should be ignored Thus Configurator
       # should behave as if it is any other random input
       context 'when the answer matches the group level default' do
-        let :answer { group_default }
-        let :saved_answer { group_default }
+        let(:answer) { group_default }
+        let(:saved_answer) { group_default }
         include_examples 'gets the answer'
       end
 
       context 'when the new answer matches a previously saved answer' do
-        before :each { configure_group }
-        let :answer { 'Some random answer' }
-        let :saved_answer { answer }
+        before { configure_group }
+        let(:answer) { 'Some random answer' }
+        let(:saved_answer) { answer }
         include_examples 'gets the answer'
       end
     end
 
     context 'when configuring a node' do
-      let :node_name { 'my_super_awesome_node' }
-      let :group_answer { 'I am the group level answer' }
+      let(:node_name) { 'my_super_awesome_node' }
+      let(:group_answer) { 'I am the group level answer' }
       subject do
         alces.nodes.find_by_name(node_name).answer.to_h[identifier]
       end
-      let :load_answer do
+      let(:load_answer) do
         path = Metalware::FilePath.node_answers(node_name)
         Metalware::Data.load(path)[identifier]
       end
@@ -573,7 +568,7 @@ RSpec.describe Metalware::Configurator do
         mock_node(node_name, group_name)
       end
 
-      before :each do
+      before do
         conf = Metalware::Configurator.for_node(alces, node_name)
         configure_with_answers([answer], test_obj: conf)
       end
@@ -581,14 +576,14 @@ RSpec.describe Metalware::Configurator do
       # The node yaml default should be ignored and saved like any other
       # answer
       context 'when the answer matches the node level default' do
-        let :answer { node_default }
-        let :saved_answer { node_default }
+        let(:answer) { node_default }
+        let(:saved_answer) { node_default }
         include_examples 'gets the answer'
       end
 
       context 'when the answer matches the group level' do
-        let :answer { group_answer }
-        let :saved_answer { nil }
+        let(:answer) { group_answer }
+        let(:saved_answer) { nil }
         include_examples 'gets the answer'
       end
     end
@@ -597,27 +592,27 @@ RSpec.describe Metalware::Configurator do
       subject do
         alces.local.answer.to_h[identifier]
       end
-      let :load_answer do
+      let(:load_answer) do
         path = Metalware::FilePath.local_answers
         Metalware::Data.load(path)[identifier]
       end
 
-      before :each do
+      before do
         conf = Metalware::Configurator.for_local(alces)
         configure_with_answers([answer], test_obj: conf)
       end
 
       context 'when the answer matches the domain default' do
-        let :answer { domain_answer }
-        let :saved_answer { nil }
+        let(:answer) { domain_answer }
+        let(:saved_answer) { nil }
         include_examples 'gets the answer'
       end
 
       # The local yaml defaults should be ignored and thus treated like
       # any other answer
       context 'when the answer matches the local level default' do
-        let :answer { local_default }
-        let :saved_answer { local_default }
+        let(:answer) { local_default }
+        let(:saved_answer) { local_default }
         include_examples 'gets the answer'
       end
     end

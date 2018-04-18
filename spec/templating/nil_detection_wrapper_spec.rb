@@ -17,7 +17,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     expect(metal_log).to receive(:warn).once.with(/.*#{msg}\Z/)
   end
 
-  let :metal_log { Metalware::MetalLog.metal_log }
+  let(:metal_log) { Metalware::MetalLog.metal_log }
 
   it 'the wrap command returns a binding' do
     expect(Metalware::Templating::NilDetectionWrapper.wrap(nil)).to \
@@ -25,7 +25,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
   end
 
   context 'with a falsey result' do
-    let :false_obj do
+    let(:false_obj) do
       build_wrapper_object(OpenStruct.new(nil_key: nil, false_key: false))
     end
 
@@ -43,15 +43,15 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
   end
 
   context 'with a wrapped integer' do
-    let :object { 100 }
-    let :wrapped_object { build_wrapper_object(object) }
+    let(:object) { 100 }
+    let(:wrapped_object) { build_wrapper_object(object) }
 
     it 'the wrapped object is equal to the object' do
       expect(wrapped_object).to eq(object)
     end
 
     context 'when multipled by 0' do
-      let :zero_object { wrapped_object * 0 }
+      let(:zero_object) { wrapped_object * 0 }
 
       it 'equals the correct value' do
         expect(zero_object).to eq(0)
@@ -64,11 +64,11 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
   end
 
   context 'with a recursive_open_struct object' do
-    let :object do
+    let(:object) do
       RecursiveOpenStruct.new(
         nil: nil,
-        true: true,
-        false: false,
+        true_key: true,
+        false_key: false,
         key1: {
           key2: {
             key3: {
@@ -79,7 +79,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
       )
     end
 
-    let :wrapped_object { build_wrapper_object(object) }
+    let(:wrapped_object) { build_wrapper_object(object) }
 
     it 'issues for a simple nil return value' do
       expect_warning('nil')
@@ -92,18 +92,18 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
     end
 
     it 'false is still a FalseClass' do
-      expect(wrapped_object.false).to be_a(FalseClass)
-      expect(wrapped_object.false).to be_falsey
+      expect(wrapped_object.false_key).to be_a(FalseClass)
+      expect(wrapped_object.false_key).to be_falsey
     end
 
     it 'true is still a TrueClass' do
-      expect(wrapped_object.true).to be_a(TrueClass)
-      expect(wrapped_object.true).to be_truthy
+      expect(wrapped_object.true_key).to be_a(TrueClass)
+      expect(wrapped_object.true_key).to be_truthy
     end
   end
 
   context 'with multiple input arguments' do
-    let :wrapped_object do
+    let(:wrapped_object) do
       d = double('object', test: nil, :[] => nil)
       build_wrapper_object(d)
     end

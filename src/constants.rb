@@ -62,6 +62,10 @@ module Metalware
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 
+    DRY_VALIDATION_ERRORS_PATH = File.join(METALWARE_INSTALL_PATH,
+                                           'src/validation',
+                                           'errors.yaml')
+
     CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
     CONFIGURE_INTERNAL_QUESTION_PREFIX = 'metalware_internal'
 

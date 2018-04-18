@@ -26,41 +26,41 @@ require 'validation/loader'
 
 RSpec.describe Metalware::Validation::Loader do
   describe '#question_tree' do
-    let :configure_sections do
+    let(:configure_sections) do
       Metalware::Constants::CONFIGURE_SECTIONS
     end
 
-    let :configure_questions_hash do
+    let(:configure_questions_hash) do
       configure_sections.map do |section|
         [
           section, [{
             identifier: "#{section}_identifier",
-            question: "#{section}_question"
+            question: "#{section}_question",
           }]
         ]
       end.to_h
     end
 
-    let :example_plugin_configure_questions_hash do
+    let(:example_plugin_configure_questions_hash) do
       configure_sections.map do |section|
         dependent_question = {
           identifier: "example_plugin_#{section}_dependent_identifier",
-          question: "example_plugin_#{section}_dependent_question"
+          question: "example_plugin_#{section}_dependent_question",
         }
         top_level_question = {
           identifier: "example_plugin_#{section}_identifier",
           question: "example_plugin_#{section}_question",
-          dependent: [dependent_question]
+          dependent: [dependent_question],
         }
         [section, [top_level_question]]
       end.to_h
     end
 
-    let :example_plugin_dir do
+    let(:example_plugin_dir) do
       File.join(Metalware::FilePath.plugins_dir, 'example')
     end
 
-    let :sections_to_loaded_questions do
+    let(:sections_to_loaded_questions) do
       configure_sections.map do |section|
         [section, subject.question_tree[section].children]
       end.to_h
@@ -89,7 +89,7 @@ RSpec.describe Metalware::Validation::Loader do
 
     subject { described_class.new }
 
-    before :each do
+    before do
       FileSystem.root_setup do |fs|
         fs.dump(Metalware::FilePath.configure_file, configure_questions_hash)
 
@@ -107,13 +107,13 @@ RSpec.describe Metalware::Validation::Loader do
         end
 
         context 'when plugin activated' do
-          before :each do
+          before do
             FileSystem.root_setup do |fs|
               fs.activate_plugin('example')
             end
           end
 
-          let :plugin_enabled_question do
+          let(:plugin_enabled_question) do
             questions = sections_to_loaded_questions[section]
             questions.find do |question|
               question.content.identifier ==
@@ -142,7 +142,7 @@ RSpec.describe Metalware::Validation::Loader do
           end
 
           context 'when no configure.yaml for plugin' do
-            before :each do
+            before do
               FileSystem.root_setup do |fs|
                 fs.rm_rf example_plugin_dir
                 fs.mkdir_p example_plugin_dir

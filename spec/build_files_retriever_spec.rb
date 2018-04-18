@@ -40,8 +40,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
     ],
   }.freeze
 
-  let :test_node_name { 'testnode01' }
-  let :test_node { alces.nodes.find_by_name(test_node_name) }
+  let(:test_node_name) { 'testnode01' }
+  let(:test_node) { alces.nodes.find_by_name(test_node_name) }
 
   AlcesUtils.mock self, :each do
     config(mock_node(test_node_name), files: TEST_FILES_HASH)
@@ -54,7 +54,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
   end
 
   describe '#retrieve_for_node' do
-    before :each do
+    before do
       FileSystem.root_setup do |fs|
         fs.with_clone_fixture('configs/unit-test.yaml')
       end
@@ -112,7 +112,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     end
 
     context 'when template file path not present' do
-      before :each do
+      before do
         allow(File).to receive(:exist?).and_return(false)
       end
 
@@ -146,7 +146,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     end
 
     context 'when error retrieving URL file' do
-      before :each do
+      before do
         @http_error = SpecUtils.fake_download_error(self)
       end
 
@@ -165,15 +165,15 @@ RSpec.describe Metalware::BuildFilesRetriever do
   end
 
   describe '#retrieve_for_plugin' do
-    let :plugin_name { 'some_plugin' }
-    let :plugin_path { File.join(Metalware::FilePath.plugins_dir, plugin_name) }
+    let(:plugin_name) { 'some_plugin' }
+    let(:plugin_path) { File.join(Metalware::FilePath.plugins_dir, plugin_name) }
 
-    let :plugin do
+    let(:plugin) do
       FileUtils.mkdir_p(plugin_path)
       Metalware::Plugins.all.find { |p| p.name == plugin_name }
     end
 
-    before :each do
+    before do
       FileSystem.root_setup do |fs|
         # This must exist so can attempt to get node groups.
         fs.touch Metalware::Constants::GENDERS_PATH

@@ -6,20 +6,20 @@ require 'spec_utils'
 RSpec.describe Metalware::Namespaces::Plugin do
   include AlcesUtils
 
-  let :node do
+  let(:node) do
     Metalware::Namespaces::Node.create(alces, node_name)
   end
-  let :node_name { 'some_node' }
-  let :node_group_name { 'some_group' }
+  let(:node_name) { 'some_node' }
+  let(:node_group_name) { 'some_group' }
 
-  let :plugin_name { 'my_plugin' }
-  let :plugin do
+  let(:plugin_name) { 'my_plugin' }
+  let(:plugin) do
     Metalware::Plugins.all.find { |plugin| plugin.name == plugin_name }
   end
 
   subject { described_class.new(plugin, node: node) }
 
-  before :each do
+  before do
     FileSystem.root_setup do |fs|
       fs.setup do
         plugin_config_dir = File.join(Metalware::FilePath.plugins_dir, plugin_name, 'config')

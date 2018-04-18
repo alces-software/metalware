@@ -6,7 +6,7 @@ require 'fixtures/shared_context/overview'
 RSpec.describe Metalware::Commands::Overview do
   include_context 'overview context'
 
-  let :name_hash { { header: 'Group Name', value: '<%= group.name %>' } }
+  let(:name_hash) { { header: 'Group Name', value: '<%= group.name %>' } }
 
   def run_command
     AlcesUtils.redirect_std(:stdout) do
@@ -14,7 +14,7 @@ RSpec.describe Metalware::Commands::Overview do
     end
   end
 
-  before :each do
+  before do
     allow(Metalware::Overview::Table).to \
       receive(:new).with(any_args).and_call_original
   end
@@ -37,14 +37,14 @@ RSpec.describe Metalware::Commands::Overview do
   end
 
   context 'with a overview.yaml' do
-    let :overview_hash do
+    let(:overview_hash) do
       {
         domain: [{ header: 'h1', value: 'v1' }, { header: 'h2', value: 'v2' }],
         group: fields,
       }
     end
 
-    before :each do
+    before do
       Metalware::Data.dump Metalware::FilePath.overview, overview_hash
     end
 

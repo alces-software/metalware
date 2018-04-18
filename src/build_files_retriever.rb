@@ -90,8 +90,6 @@ module Metalware
         end.to_h
       end
 
-      private
-
       def retrieve_for_section(section)
         file_hashes = files[section].map do |file|
           file_hash_for(section, file)
@@ -142,7 +140,7 @@ module Metalware
         name = File.basename(identifier)
         {
           raw: identifier,
-          name: name
+          name: name,
         }
       end
 
