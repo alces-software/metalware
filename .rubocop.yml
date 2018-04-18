@@ -86,3 +86,8 @@ RSpec/MessageSpies:
   Exclude:
     - spec/configurator_spec.rb
 
+# This cop needs to be ignored for configurator due to the mutation of
+# $stderr
+RSpec/ExpectOutput:
+  Exclude:
+    - spec/configurator_spec.rb
