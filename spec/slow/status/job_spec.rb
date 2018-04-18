@@ -34,16 +34,15 @@ RSpec.describe Metalware::Status::Job do
   let(:node) { 'node_name_not_found' }
   let(:time_limit) { 2 }
 
-  before(:all) do
+  before do
     described_class.send(:define_method, :busy_sleep, lambda {
       until 1 == 2; end
     })
     described_class.send(:define_method, :bash_sleep, lambda {
       run_bash('sleep 100')
     })
+    SpecUtils.use_mock_genders(self)
   end
-
-  before { SpecUtils.use_mock_genders(self) }
 
   after do
     Thread.list.each do |t|
