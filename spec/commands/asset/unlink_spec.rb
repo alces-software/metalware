@@ -37,7 +37,7 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
     let(:asset_content) { { key: 'value' } }
     let(:cache_content) { { node: { node_name.to_sym => asset_name } } }
 
-    before :each do 
+    before do
       Metalware::Data.dump(asset_path, asset_content)
       Metalware::Data.dump(Metalware::FilePath.asset_cache, cache_content)
     end

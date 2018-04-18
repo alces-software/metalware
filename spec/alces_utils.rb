@@ -128,7 +128,7 @@ module AlcesUtils
   end
 
   # The following methods have to be initialized with a individual test
-  # Example, when using: 'before :each { AlcesUtils::Mock.new(self) }'
+  # Example, when using: 'before { AlcesUtils::Mock.new(self) }'
   class Mock
     def initialize(individual_spec_test)
       @test = individual_spec_test
