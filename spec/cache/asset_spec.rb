@@ -68,7 +68,7 @@ RSpec.describe Metalware::Cache::Asset do
   describe '#unassign_asset' do
     let(:asset_name) { 'asset_test' }
     let(:expected_content) { { node: {} } }
-    before :each do
+    before do
       cache.assign_asset_to_node(asset_name, node)
       cache.save
     end
@@ -91,7 +91,7 @@ RSpec.describe Metalware::Cache::Asset do
         }
       end
 
-      before :each do
+      before do
         Metalware::Data.dump(cache_path, initial_content)
       end
 
