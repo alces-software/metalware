@@ -133,13 +133,12 @@ RSpec.describe AlcesUtils do
 
     describe '#mock_node' do
       let(:name) { 'some_random_test_node3456734' }
-
-      described_class.mock self, :each do
-        allow(alces).to receive(:node).and_return(mock_node(name))
+      let!(:node) do
+        described_class.mock(self) { mock_node(name) }
       end
 
       it 'creates the mock node' do
-        expect(alces.node.name).to eq(name)
+        expect(node.name).to eq(name)
       end
 
       it 'appears in the nodes list' do
@@ -148,7 +147,7 @@ RSpec.describe AlcesUtils do
       end
 
       it 'adds the node to default test group' do
-        expect(alces.node.genders).to eq([described_class.default_group])
+        expect(node.genders).to eq([described_class.default_group])
       end
 
       it 'errors if the node already exists' do
