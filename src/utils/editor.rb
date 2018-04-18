@@ -24,7 +24,7 @@ module Metalware
           create_temp_file(name, File.read(source)) do |path|
             open(path)
             raise_if_validation_fails(path, &validator) if validator
-            FileUtils.cp(path, destination) if File.exist?(path)
+            FileUtils.cp(path, destination)
           end
         end
 
