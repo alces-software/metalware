@@ -65,7 +65,9 @@ module Metalware
       # Returns whether the given file is a valid genders file, along with any
       # validation error.
       def validate_genders_file(genders_path)
-        raise FileDoesNotExistError, "File does not exist: #{genders_path}" unless File.exist?(genders_path)
+        unless File.exist?(genders_path)
+          raise FileDoesNotExistError, "File does not exist: #{genders_path}"
+        end
 
         nodeattr("-f #{genders_path} --parse-check", format_error: false)
         true

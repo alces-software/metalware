@@ -42,6 +42,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
   let(:test_node_name) { 'testnode01' }
   let(:test_node) { alces.nodes.find_by_name(test_node_name) }
+  let(:data_path) { Metalware::FilePath.metalware_data }
 
   AlcesUtils.mock self, :each do
     config(mock_node(test_node_name), files: TEST_FILES_HASH)
@@ -70,7 +71,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
         other_path = '/some/other/path'
         FileUtils.mkdir_p File.dirname(other_path)
         FileUtils.touch(other_path)
-        url_path = '/var/lib/metalware/cache/templates/url'
+        url_path = data_path + '/cache/templates/url'
         FileUtils.mkdir_p File.dirname(url_path)
         FileUtils.touch(url_path)
 
@@ -80,7 +81,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           raw: 'some/file_in_repo',
           name: 'file_in_repo',
           template_path: some_path,
-          rendered_path: '/var/lib/metalware/rendered/testnode01/files/repo/namespace01/file_in_repo',
+          rendered_path: data_path + '/rendered/testnode01/files/repo/namespace01/file_in_repo',
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/file_in_repo'
         )
 
@@ -88,7 +89,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           raw: '/some/other/path',
           name: 'path',
           template_path: other_path,
-          rendered_path: '/var/lib/metalware/rendered/testnode01/files/repo/namespace01/path',
+          rendered_path: data_path + '/rendered/testnode01/files/repo/namespace01/path',
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/path'
         )
 
@@ -96,7 +97,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           raw: 'http://example.com/url',
           name: 'url',
           template_path: url_path,
-          rendered_path: '/var/lib/metalware/rendered/testnode01/files/repo/namespace01/url',
+          rendered_path: data_path + '/rendered/testnode01/files/repo/namespace01/url',
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/url'
         )
       end
@@ -104,7 +105,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
       it 'downloads any URL identifiers to cache' do
         expect(Metalware::Input).to receive(:download).with(
           'http://example.com/url',
-          '/var/lib/metalware/cache/templates/url'
+          data_path + '/cache/templates/url'
         )
 
         subject.retrieve_for_node(test_node)
@@ -207,7 +208,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
           raw: plugin_file_path,
           name: plugin_file_name,
           template_path: absolute_plugin_file_path,
-          rendered_path: "/var/lib/metalware/rendered/#{relative_rendered_path}",
+          rendered_path: data_path + "/rendered/#{relative_rendered_path}",
           url: "http://1.2.3.4/metalware/#{relative_rendered_path}",
         }]
       )
