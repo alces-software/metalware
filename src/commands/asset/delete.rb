@@ -20,7 +20,7 @@ module Metalware
 
         def run
           error_if_asset_file_doesnt_exist(asset_path)
-          unassign_asset_from_node_if_given(asset_name)
+          unassign_asset_from_cache(asset_name)
           delete_asset
         end
 
