@@ -37,9 +37,8 @@ RSpec.describe Metalware::MetalLog do
 
     it 'does not give warning and raises when --strict passed' do
       expect_any_instance_of(Logger).not_to receive(:warn)
-      expect(Metalware::Output).not_to receive(:warning).with(
-        'warning: message'
-      )
+      expect(Metalware::Output).not_to receive(:warning)
+        .with('warning: message')
 
       expect do
         run_test_command(strict: true)
@@ -47,9 +46,8 @@ RSpec.describe Metalware::MetalLog do
     end
 
     it 'does not give warning output when --quiet passed' do
-      expect(Metalware::Output).not_to receive(:warning).with(
-        'warning: message'
-      )
+      expect(Metalware::Output).not_to receive(:warning)
+        .with('warning: message')
 
       run_test_command(quiet: true)
     end

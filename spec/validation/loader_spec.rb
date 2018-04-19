@@ -78,12 +78,9 @@ RSpec.describe Metalware::Validation::Loader do
       it 'includes generated plugin enabled question' do
         question_content = plugin_enabled_question.content
 
-        expect(
-          question_content.question
-        ).to eq "Should 'example' plugin be enabled for #{sect}?"
-        expect(
-          question_content.type
-        ).to eq 'boolean'
+        expect(question_content.question)
+          .to eq "Should 'example' plugin be enabled for #{sect}?"
+        expect(question_content.type).to eq 'boolean'
       end
     end
 
@@ -95,9 +92,8 @@ RSpec.describe Metalware::Validation::Loader do
 
         # Create example plugin.
         fs.mkdir_p example_plugin_dir
-        example_plugin_configure_file = File.join(
-          example_plugin_dir, 'configure.yaml'
-        )
+        example_plugin_configure_file =
+          File.join(example_plugin_dir, 'configure.yaml')
         fs.dump(
           example_plugin_configure_file, example_plugin_configure_questions_hash
         )
@@ -131,21 +127,18 @@ RSpec.describe Metalware::Validation::Loader do
           it "question has plugin questions for #{section} as dependents" do
             plugin_question = plugin_enabled_question.children.first
             content = plugin_question.content
-            expect(content.identifier).to eq(
-              "example_plugin_#{section}_identifier"
-            )
+            expect(content.identifier)
+              .to eq("example_plugin_#{section}_identifier")
             # NOTE: plugin name has been prepended to question to indicate
             # where this question comes from.
-            expect(content.question).to eq(
-              "[example] example_plugin_#{section}_question"
-            )
+            expect(content.question)
+              .to eq("[example] example_plugin_#{section}_question")
 
             plugin_dependent_question = plugin_question.children.first
 
             # As above, plugin name has been prepended to dependent question.
-            expect(
-              plugin_dependent_question.content.question
-            ).to eq "[example] example_plugin_#{section}_dependent_question"
+            expect(plugin_dependent_question.content.question)
+              .to eq "[example] example_plugin_#{section}_dependent_question"
           end
 
           context 'when no configure.yaml for plugin' do

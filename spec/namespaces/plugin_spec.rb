@@ -80,9 +80,8 @@ RSpec.describe Metalware::Namespaces::Plugin do
                              ],
                            })
 
-      expect(subject.files).to be_a(
-        Metalware::HashMergers::MetalRecursiveOpenStruct
-      )
+      expect(subject.files)
+        .to be_a(Metalware::HashMergers::MetalRecursiveOpenStruct)
       expected_files_hash = subject.files.some_files_section.first
       expect(expected_files_hash.raw).to eq('/path/to/some/file')
     end

@@ -157,16 +157,14 @@ RSpec.describe Metalware::Validation::Configure do
 
   context 'with a valid input' do
     it 'passes with questions key' do
-      expect(run_configure_validation(correct_hash)).to be_a(
-        Metalware::QuestionTree
-      )
+      expect(run_configure_validation(correct_hash))
+        .to be_a(Metalware::QuestionTree)
     end
 
     it 'passes without questions key' do
       correct_hash.delete(:questions)
-      expect(run_configure_validation(correct_hash)).to be_a(
-        Metalware::QuestionTree
-      )
+      expect(run_configure_validation(correct_hash))
+        .to be_a(Metalware::QuestionTree)
     end
   end
 
@@ -185,9 +183,8 @@ RSpec.describe Metalware::Validation::Configure do
   context 'with invalid question fields' do
     context 'with invalid identifier' do
       it 'fails when missing' do
-        h = correct_hash.deep_merge(
-          local: [{ question: 'I have no identifier' }]
-        )
+        h = correct_hash
+            .deep_merge(local: [{ question: 'I have no identifier' }])
         expect_validation_failure(h, /is missing/)
       end
 

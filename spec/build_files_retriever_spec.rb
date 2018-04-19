@@ -66,9 +66,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
     context 'when everything works' do
       it 'returns the correct files object' do
         file_path = '/rendered/testnode01/files/repo/namespace01/file_in_repo'
-        some_path = File.join(
-          Metalware::FilePath.repo, 'files/some/file_in_repo'
-        )
+        some_path = File
+                    .join(Metalware::FilePath.repo, 'files/some/file_in_repo')
         FileUtils.mkdir_p File.dirname(some_path)
         FileUtils.touch(some_path)
         other_path = '/some/other/path'
@@ -128,9 +127,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
           repo_file_entry = retrieved_files[:namespace01][0]
           template_path = "#{Metalware::FilePath.repo}/files/some/file_in_repo"
-          expect(repo_file_entry[:error]).to match(
-            /#{template_path}.*does not exist/
-          )
+          expect(repo_file_entry[:error])
+            .to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
           expect(repo_file_entry.key?(:template_path)).to be false
@@ -144,9 +142,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
           absolute_file_entry = retrieved_files[:namespace01][1]
           template_path = '/some/other/path'
-          expect(absolute_file_entry[:error]).to match(
-            /#{template_path}.*does not exist/
-          )
+          expect(absolute_file_entry[:error])
+            .to match(/#{template_path}.*does not exist/)
 
           # Does not make sense to have these keys if file does not exist.
           expect(absolute_file_entry.key?(:template_path)).to be false
@@ -209,9 +206,8 @@ RSpec.describe Metalware::BuildFilesRetriever do
         files: { some_section: [plugin_file_path] }
       )
 
-      plugin_namespace = Metalware::Namespaces::Plugin.new(
-        plugin, node: test_node
-      )
+      plugin_namespace = Metalware::Namespaces::Plugin
+                         .new(plugin, node: test_node)
       retrieved_files = subject.retrieve_for_plugin(plugin_namespace)
 
       relative_rendered_path = <<-EOF.squish

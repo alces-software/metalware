@@ -50,9 +50,8 @@ module MinimalRepo
                                   local: []),
       # Define the build interface to be whatever the first interface is; this
       # should always be sufficient for testing purposes.
-      'server.yaml': YAML.dump(
-        build_interface: NetworkInterface.interfaces.first
-      ),
+      'server.yaml': YAML
+            .dump(build_interface: NetworkInterface.interfaces.first),
     }.freeze
 
     ABSOLUTE_FILES = {
@@ -71,9 +70,7 @@ module MinimalRepo
 
     def make_file(abs_file, content)
       just_dir = content.nil?
-      FileUtils.mkdir_p(
-        dir_path(abs_file, just_dir: just_dir)
-      )
+      FileUtils.mkdir_p(dir_path(abs_file, just_dir: just_dir))
       File.write(abs_file, content) unless just_dir
     end
 

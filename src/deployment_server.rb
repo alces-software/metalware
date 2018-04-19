@@ -47,13 +47,11 @@ module Metalware
       end
 
       def build_file_url(*args)
-        rendered_files_path = Pathname.new(
-          FilePath.rendered_build_file_path(*args)
-        )
+        rendered_files_path =
+          Pathname.new(FilePath.rendered_build_file_path(*args))
         rendered_files_root = Pathname.new(Constants::RENDERED_DIR_PATH)
-        relative_path = rendered_files_path.relative_path_from(
-          rendered_files_root
-        )
+        relative_path =
+          rendered_files_path.relative_path_from(rendered_files_root)
         url relative_path
       end
 
