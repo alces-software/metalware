@@ -11,9 +11,9 @@ module Metalware
         attr_reader :asset_name, :asset_path
 
         def setup
-          @asset_name = args[0]
+          @asset_name = args[1]
           @asset_path = FilePath.asset(asset_name)
-          @node = alces.nodes.find_by_name(args[1])
+          @node = alces.nodes.find_by_name(args[0])
         end
 
         def run

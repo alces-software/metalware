@@ -46,7 +46,7 @@ subcommands:
     action: Commands::Asset::Delete
 
   asset_link: &asset_link
-    syntax: metal asset link ASSET_NAME NODE_NAME [options]
+    syntax: metal asset link NODE_NAME ASSET_NAME [options]
     summary: Add a relationship between an asset and a node
     action: Commands::Asset::Link
 

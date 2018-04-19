@@ -18,8 +18,8 @@ RSpec.describe Metalware::Commands::Asset::Link do
 
   def run_command
     Metalware::Utils.run_command(described_class,
-                                 asset_name,
                                  node_name,
+                                 asset_name,
                                  stderr: StringIO.new)
   end
 
