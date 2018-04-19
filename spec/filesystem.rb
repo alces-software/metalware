@@ -181,7 +181,9 @@ class FileSystem
   def with_templates_fixtures(template_path, target)
     with_fixtures(
       template_path,
-      at: File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target)
+      at: File.join(
+        Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target
+      )
     )
   end
 

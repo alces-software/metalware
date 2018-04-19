@@ -43,9 +43,15 @@ RSpec.describe Metalware::Commands::Plugin::List do
     end
   end
 
-  let(:example_plugin_dir_1) { File.join Metalware::FilePath.plugins_dir, 'example01' }
-  let(:example_plugin_dir_2) { File.join Metalware::FilePath.plugins_dir, 'example02' }
-  let(:junk_other_plugins_dir_file) { File.join Metalware::FilePath.plugins_dir, 'junk' }
+  let(:example_plugin_dir_1) do
+    File.join Metalware::FilePath.plugins_dir, 'example01'
+  end
+  let(:example_plugin_dir_2) do
+    File.join Metalware::FilePath.plugins_dir, 'example02'
+  end
+  let(:junk_other_plugins_dir_file) do
+    File.join Metalware::FilePath.plugins_dir, 'junk'
+  end
 
   it 'outputs line for each plugin subdirectory' do
     filesystem.test do

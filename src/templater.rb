@@ -84,7 +84,9 @@ module Metalware
           rendered_template,
           &validation_block
         ).tap do |valid|
-          write_rendered_template(rendered_template, save_file: save_file) if valid
+          if valid
+            write_rendered_template(rendered_template, save_file: save_file)
+          end
         end
       end
 

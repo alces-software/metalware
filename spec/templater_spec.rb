@@ -153,7 +153,7 @@ RSpec.describe Metalware::Templater do
       end
     end
 
-    it 'does not render template to the file if passed a block with falsy output' do
+    it 'does not render template to file if passed a block with falsy output' do
       filesystem.test do
         template_rendered = render_to_file_with_block(&:empty?)
 

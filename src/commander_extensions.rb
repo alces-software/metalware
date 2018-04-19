@@ -69,13 +69,15 @@ module CommanderExtensions
 
       if syntax_parts.first != cli_name
         raise CommandDefinitionError,
-              "First word in 'syntax' should be CLI name ('#{cli_name}'), got '#{syntax_parts.first}'"
+              "Expected CLI name first ('#{cli_name}')"
       elsif command_syntax != name
         raise CommandDefinitionError,
-              "After CLI name in syntax should come command name(s) ('#{name}'), got '#{command_syntax}'"
+              "Command name(s) should come after CLI name e.g. '#{name}'"
       elsif syntax_parts.last != '[options]'
-        raise CommandDefinitionError,
-              "Last word in 'syntax' should be '[options]', got '#{syntax_parts.last}'"
+        raise CommandDefinitionError, <<-EOF.squish
+              Last word in 'syntax' should be '[options]',
+              got '#{syntax_parts.last}'
+        EOF
       end
     end
 

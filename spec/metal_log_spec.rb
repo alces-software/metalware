@@ -8,7 +8,8 @@ RSpec.describe Metalware::MetalLog do
   describe '#warn' do
     # MetalLog receives `strict`/`quiet` from the command, so need to create a
     # 'real' command to use in tests.
-    class Metalware::Commands::TestCommand < Metalware::CommandHelpers::BaseCommand
+    base_command = Metalware::CommandHelpers::BaseCommand
+    class Metalware::Commands::TestCommand < base_command
       def run
         Metalware::MetalLog.warn 'message'
       end
@@ -36,7 +37,8 @@ RSpec.describe Metalware::MetalLog do
 
     it 'does not give warning and raises when --strict passed' do
       expect_any_instance_of(Logger).not_to receive(:warn)
-      expect(Metalware::Output).not_to receive(:warning).with('warning: message')
+      expect(Metalware::Output).not_to receive(:warning)
+        .with('warning: message')
 
       expect do
         run_test_command(strict: true)
@@ -44,7 +46,8 @@ RSpec.describe Metalware::MetalLog do
     end
 
     it 'does not give warning output when --quiet passed' do
-      expect(Metalware::Output).not_to receive(:warning).with('warning: message')
+      expect(Metalware::Output).not_to receive(:warning)
+        .with('warning: message')
 
       run_test_command(quiet: true)
     end

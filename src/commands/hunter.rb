@@ -37,7 +37,7 @@ require 'hunter_updater'
 module Metalware
   module Commands
     class Hunter < CommandHelpers::BaseCommand
-      NEW_DETECTED_MACS_KEY = :new_detected_macs
+      NEW_MACS_KEY = :new_detected_macs
 
       private
 
@@ -62,7 +62,7 @@ module Metalware
           options.start ||= 1
 
           Thread.current.thread_variable_set(
-            NEW_DETECTED_MACS_KEY,
+            NEW_MACS_KEY,
             Concurrent::Array.new
           )
         end
@@ -122,8 +122,8 @@ module Metalware
       end
 
       def pxe_client?(o)
-        o.is_a?(DHCP::VendorClassIDOption) && o.payload.pack('C*').tap do |vendor|
-          hunter_log.info "Detected vendor: #{vendor}"
+        o.is_a?(DHCP::VendorClassIDOption) && o.payload.pack('C*').tap do |vend|
+          hunter_log.info "Detected vendor: #{vend}"
         end =~ /^PXEClient/
       end
 
@@ -162,7 +162,7 @@ module Metalware
 
         if Utils.in_gui?
           STDERR.puts "Detected: #{hwaddr}" # XXX Remove this?
-          new_detected_macs = Thread.current.thread_variable_get(NEW_DETECTED_MACS_KEY)
+          new_detected_macs = Thread.current.thread_variable_get(NEW_MACS_KEY)
           new_detected_macs << hwaddr
         else
           name_node_question = \

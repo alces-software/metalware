@@ -35,12 +35,18 @@ RSpec.describe Metalware::Commands::Console do
     describe 'when run for node' do
       it 'runs console info then activate commands for node' do
         expect(Metalware::SystemCommand).to receive(:run).with(
-          "ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword -e '&' sol info"
+          <<-EOF.squish
+            ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword -e
+            '&' sol info
+          EOF
         ).ordered.and_return(true)
         expect_any_instance_of(
           Metalware::Commands::Console
         ).to receive(:system).with(
-          "ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword -e '&' sol activate"
+          <<-EOF.squish
+            ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword -e
+            '&' sol activate
+          EOF
         )
 
         run_console('node01')

@@ -22,10 +22,13 @@ RSpec.describe Metalware::Namespaces::Plugin do
   before do
     FileSystem.root_setup do |fs|
       fs.setup do
-        plugin_config_dir = File.join(Metalware::FilePath.plugins_dir, plugin_name, 'config')
+        plugins_path = Metalware::FilePath.plugins_dir
+        plugin_config_dir = File.join(plugins_path, plugin_name, 'config')
         FileUtils.mkdir_p plugin_config_dir
 
-        File.write(Metalware::FilePath.genders, "#{node_name} #{node_group_name}\n")
+        File.write(
+          Metalware::FilePath.genders, "#{node_name} #{node_group_name}\n"
+        )
       end
     end
   end
@@ -77,7 +80,8 @@ RSpec.describe Metalware::Namespaces::Plugin do
                              ],
                            })
 
-      expect(subject.files).to be_a Metalware::HashMergers::MetalRecursiveOpenStruct
+      expect(subject.files)
+        .to be_a(Metalware::HashMergers::MetalRecursiveOpenStruct)
       expected_files_hash = subject.files.some_files_section.first
       expect(expected_files_hash.raw).to eq('/path/to/some/file')
     end
