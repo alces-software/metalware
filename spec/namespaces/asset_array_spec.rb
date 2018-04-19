@@ -122,7 +122,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
   end
 
-  context 'when referencing other asset (":<asset_name>")' do
+  context 'when referencing other asset ("^<asset_name>")' do
     include AlcesUtils
 
     let(:asset1) { alces.assets.find_by_name(asset1_name) }
@@ -132,13 +132,13 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     let(:asset1_raw_data) do
       {
         key: "#{asset1_name}-data",
-        link: ":#{asset2_name}",
+        link: "^#{asset2_name}",
       }
     end
     let(:asset2_raw_data) do
       {
         key: "#{asset2_name}-data",
-        link: ":#{asset1_name}",
+        link: "^#{asset1_name}",
       }
     end
 
@@ -155,7 +155,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       expect(asset1.link).to eq(asset2)
     end
 
-    it 'only converts strings starting with ":" to an assets' do
+    it 'only converts strings starting with "^" to an assets' do
       expect(asset1.key).to eq(asset1_raw_data[:key])
     end
   end
