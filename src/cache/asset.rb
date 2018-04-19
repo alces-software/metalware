@@ -26,7 +26,7 @@ module Metalware
       end
 
       def unassign_asset(asset_name)
-        data[:node].delete_if do |node, asset|
+        data[:node].delete_if do |_node, asset|
           asset == asset_name
         end
       end
