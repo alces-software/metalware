@@ -51,7 +51,7 @@ subcommands:
     action: Commands::Asset::Link
 
   asset_unlink: &asset_unlink
-    syntax: metal asset unlink ASSET_NAME NODE_NAME [options]
+    syntax: metal asset unlink NODE_NAME [options]
     summary: Remove a relationship between an asset and a node
     action: Commands::Asset::Unlink
 
