@@ -1,4 +1,3 @@
-
 inherit_from: .rubocop_todo.yml
 require: rubocop-rspec
 
@@ -65,11 +64,6 @@ Lint/HandleExceptions:
   Exclude:
     - src/status/job.rb
 
-# Allow up to 3 expectations per spec. This is done commonly to
-# prevent proliferation of specs
-RSpec/MultipleExpectations:
-  Max: 3
-
 # Quite a few specs are nested 4 deep, however the default is 3
 RSpec/NestedGroups:
   Max: 4
@@ -85,12 +79,6 @@ RSpec/ExampleLength:
 # It isn't feasible to set up spies in the following specs as they
 # are coupled to the original implementation
 RSpec/MessageSpies:
-  Exclude:
-    - spec/configurator_spec.rb
-
-# This cop needs to be ignored for configurator due to the mutation of
-# $stderr
-RSpec/ExpectOutput:
   Exclude:
     - spec/configurator_spec.rb
 
