@@ -104,8 +104,15 @@ RSpec.describe Metalware::Cache::Asset do
       end
     end
 
-    it 'unassigns an asset from a specific node' do
-      cache.unassign_asset(asset_name, node_name)
+    it 'unassigns an asset from the cache' do
+      cache.unassign_asset(asset_name)
+      cache.save
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.data).to eq(expected_content)
+    end
+
+    it 'unassigns a node from the cache' do
+      cache.unassign_node(node_name)
       cache.save
       new_cache = Metalware::Cache::Asset.new
       expect(new_cache.data).to eq(expected_content)
