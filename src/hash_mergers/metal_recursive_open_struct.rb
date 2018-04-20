@@ -8,8 +8,8 @@ module Metalware
     class MetalRecursiveOpenStruct
       include Enumerable
 
-      def initialize(table = {}, &convert_string_block)
-        @convert_string_block = convert_string_block
+      def initialize(table = {}, &input_block)
+        @convert_string_block = input_block || Proc.new { |s| s }
         @table = table
       end
 
@@ -33,6 +33,10 @@ module Metalware
 
       def each
         table.each_key { |key| yield(key, send(key)) }
+      end
+
+      def each_value
+        each { |_s, value| yield value }
       end
 
       def to_h
