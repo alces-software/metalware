@@ -11,12 +11,12 @@ module AlcesUtils
   GENDERS_FILE_REGEX = /-f [[:graph:]]+/
   # Causes the testing version of alces (/config) to be used by metalware
   class << self
-    def start(example_group, config: nil)
+    def start(example_group)
       example_group.instance_exec do
         # Cache the first version of alces to be created
         # This allows it to be mocked during the spec
         # It can also be reset in the test (see below)
-        before :each do
+        before do
           allow(Metalware::Namespaces::Alces).to \
             receive(:new).and_wrap_original do |m, *a|
               @spec_alces ||= m.call(*a)
@@ -24,13 +24,13 @@ module AlcesUtils
         end
 
         # `alces` is defined as a method so it can be reset
-        define_method :alces { Metalware::Namespaces::Alces.new }
-        define_method :reset_alces do
+        define_method(:alces) { Metalware::Namespaces::Alces.new }
+        define_method(:reset_alces) do
           @spec_alces = nil
           alces
         end
 
-        before :each { AlcesUtils.spoof_nodeattr(self) }
+        before { AlcesUtils.spoof_nodeattr(self) }
       end
     end
 
@@ -59,18 +59,14 @@ module AlcesUtils
           AlcesUtils.check_and_raise_fakefs_error
           path = AlcesUtils.nodeattr_genders_file_path(args[0])
           cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
-          genders_data = File.read(path)
-          tempfile = nil
+          genders_data = File.read(path).tr('`', '"')
+          tempfile = `mktemp /tmp/genders.XXXXX`.chomp
           begin
-            FakeFS.without do
-              tempfile = Tempfile.open('mock-genders')
-              tempfile.write(genders_data)
-              tempfile.close
-            end
-            mock_cmd = "nodeattr -f #{tempfile.path}"
-            method.call(cmd, mock_nodeattr: mock_cmd)
+            `echo "#{genders_data}" > #{tempfile}`
+            nodeattr_cmd = "nodeattr -f #{tempfile}"
+            method.call(cmd, mock_nodeattr: nodeattr_cmd)
           ensure
-            FakeFS.without { tempfile&.unlink }
+            `rm #{tempfile} -f`
           end
         end
       end
@@ -84,7 +80,7 @@ module AlcesUtils
       buffers = input.map { |k| [k, StringIO.new] }.to_h
       update_std_files buffers
       yield
-      buffers.each { |_k, v| v.rewind }
+      buffers.each_value(&:rewind)
       buffers
     ensure
       update_std_files old
@@ -132,7 +128,7 @@ module AlcesUtils
   end
 
   # The following methods have to be initialized with a individual test
-  # Example, when using: 'before :each { AlcesUtils::Mock.new(self) }'
+  # Example, when using: 'before { AlcesUtils::Mock.new(self) }'
   class Mock
     def initialize(individual_spec_test)
       @test = individual_spec_test
@@ -189,6 +185,13 @@ module AlcesUtils
       alces.instance_variable_set(:@group_cache, nil)
       group = alces.groups.find_by_name(name)
       group
+    end
+
+    def create_asset(asset_name, data)
+      path = Metalware::FilePath.asset(asset_name)
+      Metalware::Data.dump(path, data)
+      alces.instance_variable_set(:@asset_cache, nil)
+      alces.instance_variable_set(:@assets, nil)
     end
 
     private

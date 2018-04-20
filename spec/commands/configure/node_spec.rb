@@ -12,19 +12,19 @@ RSpec.describe Metalware::Commands::Configure::Node do
     )
   end
 
-  let :initial_alces { Metalware::Namespaces::Alces.new }
-  let :alces do
+  let(:initial_alces) { Metalware::Namespaces::Alces.new }
+  let(:alces) do
     allow(initial_alces).to receive(:groups).and_return(
       double('groups', testnodes: test_group)
     )
     initial_alces
   end
 
-  let :test_group do
+  let(:test_group) do
     Metalware::Namespaces::Group.new(initial_alces, 'testnodes', index: 1)
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.dump(Metalware::FilePath.domain_answers, {})
@@ -32,7 +32,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
     end
   end
 
-  before :each do
+  before do
     SpecUtils.use_mock_genders(self)
     SpecUtils.mock_validate_genders_success(self)
     allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)

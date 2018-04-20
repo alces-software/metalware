@@ -34,15 +34,15 @@ RSpec.describe Metalware::Commands::Plugin::Deactivate do
     )
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.mkdir_p example_plugin_dir
     end
   end
 
-  let :example_plugin_dir { File.join Metalware::FilePath.plugins_dir, example_plugin_name }
-  let :example_plugin_name { 'example' }
+  let(:example_plugin_dir) { File.join Metalware::FilePath.plugins_dir, example_plugin_name }
+  let(:example_plugin_name) { 'example' }
 
   def example_plugin
     Metalware::Plugins.all.find do |plugin|

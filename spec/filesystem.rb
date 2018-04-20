@@ -130,7 +130,7 @@ class FileSystem
   end
 
   def with_validation_error_file
-    FakeFS::FileSystem.clone(Metalware::Validation::Configure::ERROR_FILE)
+    FakeFS::FileSystem.clone(Metalware::FilePath.dry_validation_errors)
   end
 
   def with_repo_fixtures(repo_fixtures_dir)
@@ -200,6 +200,7 @@ class FileSystem
       '/var/lib/metalware/repo',
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
+      '/var/lib/metalware/assets',
       '/var/named',
       '/var/log/metalware',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),

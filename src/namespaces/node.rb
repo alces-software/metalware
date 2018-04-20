@@ -71,7 +71,11 @@ module Metalware
       end
 
       def finalize_build_files(build_file_hashes)
-        Constants::HASH_MERGER_DATA_STRUCTURE.new(build_file_hashes, &template_block)
+        Constants::HASH_MERGER_DATA_STRUCTURE.new(
+          build_file_hashes
+        ) do |template|
+          render_erb_template(template)
+        end
       end
 
       def events_dir
@@ -80,6 +84,14 @@ module Metalware
 
       def plugins
         @plugins ||= MetalArray.new(enabled_plugin_namespaces)
+      end
+
+      def asset
+        @asset ||= begin
+          asset_name = alces.asset_cache.asset_for_node(self)
+          return unless asset_name
+          alces.assets.find_by_name(asset_name)
+        end
       end
 
       private
@@ -112,7 +124,7 @@ module Metalware
         # a group work fine as they appear in the genders file BUT local and
         # orphan nodes DO NOT appear in the genders file and cause the above
         # error.
-        return { groups: ['orphan'], node: name }
+        { groups: ['orphan'], node: name }
       end
 
       def additional_dynamic_namespace

@@ -35,7 +35,7 @@ require 'minimal_repo'
 RSpec.describe '`metal build`' do
   TEST_DIR = 'tmp/integration-test'
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_minimal_repo
       fs.with_answer_fixtures('answers/integration-test')
@@ -88,7 +88,7 @@ RSpec.describe '`metal build`' do
     end
   end
 
-  before :each do
+  before do
     kill_any_metal_processes
 
     FileUtils.remove(TEST_DIR, force: true)
@@ -108,7 +108,7 @@ RSpec.describe '`metal build`' do
     kill_any_metal_processes
   end
 
-  let :file_path { Metalware::FilePath }
+  let(:file_path) { Metalware::FilePath }
 
   def touch_complete_file(name)
     path = file_path.build_complete(alces.nodes.find_by_name(name))
@@ -117,7 +117,7 @@ RSpec.describe '`metal build`' do
   end
 
   context 'for single node' do
-    let :node { 'testnode01' }
+    let(:node) { 'testnode01' }
 
     it 'works' do
       build_node(node) do |thread|
@@ -135,7 +135,7 @@ RSpec.describe '`metal build`' do
   end
 
   context 'for gender group' do
-    let :nodes { ['testnode01', 'testnode02', 'testnode03'] }
+    let(:nodes) { ['testnode01', 'testnode02', 'testnode03'] }
 
     it 'works' do
       build_node('nodes', gender: true) do |thread|
@@ -231,10 +231,10 @@ RSpec.describe '`metal build`' do
       end
 
       context 'with mocked highline' do
-        let :stdin { StringIO.new }
-        let :highline { HighLine.new(stdin) }
+        let(:stdin) { StringIO.new }
+        let(:highline) { HighLine.new(stdin) }
 
-        before :each do
+        before do
           allow(HighLine).to receive(:new).and_return(highline)
         end
 

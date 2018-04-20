@@ -11,11 +11,11 @@ RSpec.describe Metalware::Commands::Configure::Domain do
     )
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup(&:with_minimal_repo)
   end
 
-  before :each do
+  before do
     SpecUtils.mock_validate_genders_success(self)
   end
 

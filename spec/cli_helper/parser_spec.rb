@@ -12,7 +12,7 @@ RSpec.describe Metalware::CliHelper::Parser do
     stub_const('Metalware::CliHelper::CONFIG_PATH', test_config_path)
   end
 
-  let :test_config_path { '/tmp/config.yaml' }
+  let(:test_config_path) { '/tmp/config.yaml' }
 
   describe 'default parsing' do
     def define_config_with_default(default_value)

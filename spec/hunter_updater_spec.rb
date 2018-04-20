@@ -28,8 +28,8 @@ require 'hunter_updater'
 require 'output'
 
 RSpec.describe Metalware::HunterUpdater do
-  let :hunter_file { Tempfile.new.path }
-  let :updater { Metalware::HunterUpdater.new(hunter_file) }
+  let(:hunter_file) { Tempfile.new.path }
+  let(:updater) { Metalware::HunterUpdater.new(hunter_file) }
 
   def hunter_yaml
     Metalware::Data.load(hunter_file)
@@ -46,7 +46,7 @@ RSpec.describe Metalware::HunterUpdater do
     end
 
     context 'with existing hunter content' do
-      before :each do
+      before do
         Metalware::Data.dump(hunter_file, somenode01: 'some_mac_address')
       end
 
@@ -78,7 +78,7 @@ RSpec.describe Metalware::HunterUpdater do
     end
 
     context 'when hunter file does not exist yet' do
-      before :each do
+      before do
         File.delete(hunter_file)
       end
 

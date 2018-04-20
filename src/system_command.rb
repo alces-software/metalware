@@ -53,6 +53,11 @@ module Metalware
         }
       end
 
+      def no_capture(command)
+        MetalLog.info("SystemCommand: #{command}")
+        system(command)
+      end
+
       private
 
       def capture3(command)

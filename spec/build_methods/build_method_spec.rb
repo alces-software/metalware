@@ -29,16 +29,16 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     end
   end
 
-  let :node { Metalware::Namespaces::Node.create(alces, 'node01') }
-  let :alces { Metalware::Namespaces::Alces.new }
-  let :templater do
+  let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
+  let(:alces) { Metalware::Namespaces::Alces.new }
+  let(:templater) do
     Metalware::Staging.template
   end
 
-  let :template_path { '/path/to/template' }
-  let :rendered_path { '/path/to/rendered' }
+  let(:template_path) { '/path/to/template' }
+  let(:rendered_path) { '/path/to/rendered' }
 
-  let :mock_files do
+  let(:mock_files) do
     FileSystem.root_setup do |fs|
       fs.create template_path
       fs.create rendered_path
@@ -52,7 +52,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     }
   end
 
-  let :mock_files_with_errors do
+  let(:mock_files_with_errors) do
     {
       some_section: [{
         error: 'error',

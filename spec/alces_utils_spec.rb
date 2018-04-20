@@ -6,8 +6,8 @@ require 'alces_utils'
 RSpec.describe AlcesUtils do
   include AlcesUtils
 
-  let :file_path { Metalware::FilePath }
-  let :group_cache { Metalware::GroupCache.new }
+  let(:file_path) { Metalware::FilePath }
+  let(:group_cache) { Metalware::GroupCache.new }
 
   describe '#new' do
     it 'returns the mocked alces' do
@@ -26,7 +26,7 @@ RSpec.describe AlcesUtils do
   end
 
   context 'with the AlceUtils.mock method' do
-    before :each do
+    before do
       AlcesUtils::Mock.new(self)
                       .define_method_testing {} # Intentionally blank
     end
@@ -51,7 +51,7 @@ RSpec.describe AlcesUtils do
     end
 
     context 'with the config mocked' do
-      let :domain_config do
+      let(:domain_config) do
         { key: 'domain' }
       end
 
@@ -97,8 +97,8 @@ RSpec.describe AlcesUtils do
     end
 
     describe '#mock_group' do
-      let :group { 'some random group' }
-      let :group2 { 'some other group' }
+      let(:group) { 'some random group' }
+      let(:group2) { 'some other group' }
 
       AlcesUtils.mock self, :each do
         expect(File.exist?(file_path.group_cache)).to eq(false)
@@ -136,7 +136,7 @@ RSpec.describe AlcesUtils do
     end
 
     describe '#mock_node' do
-      let :name { 'some_random_test_node3456734' }
+      let(:name) { 'some_random_test_node3456734' }
 
       AlcesUtils.mock self, :each do
         allow(alces).to receive(:node).and_return(mock_node(name))
@@ -162,8 +162,8 @@ RSpec.describe AlcesUtils do
       end
 
       context 'with a new node' do
-        let :new_node { 'some_random_new_node4362346' }
-        let :genders { ['_some_group_1', '_some_group_2'] }
+        let(:new_node) { 'some_random_new_node4362346' }
+        let(:genders) { ['_some_group_1', '_some_group_2'] }
 
         AlcesUtils.mock(self, :each) { mock_node(new_node, *genders) }
 
@@ -174,8 +174,37 @@ RSpec.describe AlcesUtils do
       end
     end
 
+    describe '#create_asset' do
+      let(:asset_name) { 'my-new-asset' }
+      let(:asset_data) { { key: "#{asset_name}-data" } }
+
+      AlcesUtils.mock(self, :each) do
+        create_asset(asset_name, asset_data)
+      end
+
+      it 'creates an new asset' do
+        asset = alces.assets.find_by_name(asset_name)
+        expect(asset).not_to eq(nil)
+        expect(asset.to_h).to include(:metadata, **asset_data)
+      end
+
+      it 'can add new assets after the asset array is loaded' do
+        new_name = 'new-asset-name'
+        new_data = { key: "#{new_name}-data" }
+        alces.assets
+
+        AlcesUtils.mock(self) do
+          create_asset(new_name, new_data)
+        end
+        new_asset = alces.assets.find_by_name(new_name)
+
+        expect(new_asset).not_to eq(nil)
+        expect(new_asset.to_h).to include(:metadata, **new_data)
+      end
+    end
+
     describe '#reset_alces' do
-      before :each do
+      before do
         @old_alces = alces
         AlcesUtils.mock(self) do
           config(alces.domain, key: 'I should be deleted in the reset')
@@ -204,7 +233,7 @@ RSpec.describe AlcesUtils do
   end
 
   describe '#redirect_std' do
-    let :test_str { 'Testing' }
+    let(:test_str) { 'Testing' }
 
     it 'can redirect stdout' do
       io = AlcesUtils.redirect_std(:stdout) do

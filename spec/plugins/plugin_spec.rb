@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Metalware::Plugins::Plugin do
-  let :plugin_dir_path { Pathname.new('/path/to/some-plugin') }
+  let(:plugin_dir_path) { Pathname.new('/path/to/some-plugin') }
   subject { described_class.new(plugin_dir_path) }
 
   describe '#enabled_question_identifier' do

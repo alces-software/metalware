@@ -14,9 +14,9 @@ end
 RSpec.describe Metalware::BuildEvent do
   include AlcesUtils
 
-  let :nodes { ['node01', 'node02', 'node03', 'nodes4'] }
-  let :build_event { Metalware::BuildEvent.new(alces.nodes) }
-  let :empty_build_event { Metalware::BuildEvent.new([]) }
+  let(:nodes) { ['node01', 'node02', 'node03', 'nodes4'] }
+  let(:build_event) { Metalware::BuildEvent.new(alces.nodes) }
+  let(:empty_build_event) { Metalware::BuildEvent.new([]) }
 
   AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
@@ -68,8 +68,8 @@ RSpec.describe Metalware::BuildEvent do
     end
 
     context 'with a single node built' do
-      let :built_node { alces.nodes[2] }
-      before :each { build_node(built_node) }
+      let(:built_node) { alces.nodes[2] }
+      before { build_node(built_node) }
 
       it 'runs the complete_hook for the node' do
         expect(built_node.build_method).to receive(:complete_hook)
@@ -95,7 +95,7 @@ RSpec.describe Metalware::BuildEvent do
     end
 
     context 'with all the nodes built' do
-      before :each { alces.nodes.each { |node| build_node(node) } }
+      before { alces.nodes.each { |node| build_node(node) } }
 
       it 'runs all the complete hooks' do
         alces.nodes.each do |node|
@@ -118,12 +118,12 @@ RSpec.describe Metalware::BuildEvent do
     end
 
     context 'with an event trigger' do
-      let :node { alces.nodes[3] }
-      let :event { '__trigger_without_a_build_method_hook__' }
-      let :event_file { Metalware::FilePath.event(node, event) }
+      let(:node) { alces.nodes[3] }
+      let(:event) { '__trigger_without_a_build_method_hook__' }
+      let(:event_file) { Metalware::FilePath.event(node, event) }
 
       context 'with basic features only (no hooks nor messages)' do
-        before :each { touch_file event_file }
+        before { touch_file event_file }
 
         it 'reports the event and node names to stdout' do
           expect(process[:stdout].read).to include(node.name, event)
@@ -136,11 +136,11 @@ RSpec.describe Metalware::BuildEvent do
       end
 
       context 'with a message' do
-        let :message_arr do
+        let(:message_arr) do
           ['I am a little message', 'With multiple lines', 'potato']
         end
 
-        before :each do
+        before do
           FileUtils.mkdir_p File.dirname(event_file)
           File.write(event_file, message_arr.join("\n"))
         end

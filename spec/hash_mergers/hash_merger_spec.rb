@@ -15,7 +15,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
     validation_off
   end
 
-  let :filesystem do
+  let(:filesystem) do
     FileSystem.setup do |fs|
       fs.with_repo_fixtures('merged_hash')
       fs.with_answer_fixtures('merged_hash/answers')
@@ -40,7 +40,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   context 'with domain scope' do
-    let :merged_hash { build_merged_hash }
+    let(:merged_hash) { build_merged_hash }
 
     it 'returns the domain config' do
       filesystem.test do
@@ -50,7 +50,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   context 'with single group' do
-    let :merged_hash do
+    let(:merged_hash) do
       build_merged_hash(groups: ['group2'])
     end
 
@@ -69,7 +69,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   context 'with multiple groups' do
-    let :merged_hash do
+    let(:merged_hash) do
       build_merged_hash(groups: ['group1', 'group2'])
     end
 
@@ -90,7 +90,7 @@ RSpec.describe Metalware::HashMergers::HashMerger do
   end
 
   context 'with multiple groups and a node' do
-    let :merged_hash do
+    let(:merged_hash) do
       build_merged_hash(
         groups: ['group1', 'group2'],
         node: 'node3'

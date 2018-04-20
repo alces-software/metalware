@@ -25,7 +25,11 @@ module Metalware
       end
 
       def render_erb_template(template, **user_dynamic_namespace)
-        template_block(user_dynamic_namespace).call(template)
+        alces.render_erb_template(
+          template,
+          **additional_dynamic_namespace,
+          **user_dynamic_namespace
+        )
       end
 
       private
@@ -45,21 +49,13 @@ module Metalware
       end
 
       def run_hash_merger(hash_obj)
-        hash_obj.merge(**hash_merger_input, &template_block)
+        hash_obj.merge(**hash_merger_input) do |template|
+          render_erb_template(template)
+        end
       end
 
       def hash_merger_input
         raise NotImplementedError
-      end
-
-      def template_block(user_dynamic_namespace = {})
-        lambda do |template|
-          alces.render_erb_template(
-            template,
-            **additional_dynamic_namespace,
-            **user_dynamic_namespace
-          )
-        end
       end
 
       def additional_dynamic_namespace

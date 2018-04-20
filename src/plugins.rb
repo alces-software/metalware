@@ -70,10 +70,8 @@ module Metalware
       private
 
       def validate_plugin_exists!(plugin_name)
-        unless exists?(plugin_name)
-          raise MetalwareError,
-                "Unknown plugin: #{plugin_name}"
-        end
+        return if exists?(plugin_name)
+        raise MetalwareError, "Unknown plugin: #{plugin_name}"
       end
 
       def update_deactivated_plugins!(new_deactivated_plugins)

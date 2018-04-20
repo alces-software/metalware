@@ -32,9 +32,9 @@ require 'filesystem'
 RSpec.describe Metalware::Status::Monitor do
   include AlcesUtils
 
-  let :nodes { alces.nodes.map(&:name) }
+  let(:nodes) { alces.nodes.map(&:name) }
 
-  before :each do
+  before do
     FileSystem.root_setup(&:with_genders_fixtures)
     SpecUtils.use_mock_genders(self)
     @cmds = [:ping, :power]
@@ -52,7 +52,7 @@ RSpec.describe Metalware::Status::Monitor do
   end
 
   context 'when threading jobs' do
-    before :each do
+    before do
       allow_any_instance_of(Metalware::Status::Job).to receive(:start) {
         t = Thread.new { sleep }
         t.define_singleton_method(:thread, -> { self })

@@ -7,10 +7,10 @@ require 'alces_utils'
 RSpec.describe Metalware::CommandHelpers::AlcesCommand do
   include AlcesUtils
 
-  let :domain_config { Hash.new(key: 'I am the domain config') }
+  let(:domain_config) { Hash.new(key: 'I am the domain config') }
 
-  let :node { 'node01' }
-  let :group { 'group1' }
+  let(:node) { 'node01' }
+  let(:group) { 'group1' }
 
   AlcesUtils.mock self, :each do
     config(alces.domain, domain_config)

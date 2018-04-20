@@ -15,8 +15,8 @@ RSpec.describe Metalware::Commands::Console do
   end
 
   describe 'when run on bare metal' do
-    let :node_name { 'node01' }
-    let :node_config do
+    let(:node_name) { 'node01' }
+    let(:node_config) do
       {
         networks: {
           bmc: {

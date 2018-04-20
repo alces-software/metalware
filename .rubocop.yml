@@ -3,6 +3,8 @@ inherit_from: .rubocop_todo.yml
 
 AllCops:
   TargetRubyVersion: 2.4
+  Exclude:
+    - src/gui/**/*
 
 # Do not prefer various `%` ways of specifying things in Ruby - I
 # think these are less clear and unnecessary
@@ -30,6 +32,12 @@ Style/Documentation:
 Metrics/BlockLength:
   Enabled: false
 
+# Ignore the number of methods in FilePath, the class is design to
+# collect all the file path methods.
+Metrics/ModuleLength:
+  Exclude:
+    - src/file_path.rb
+
 # We trust the YAML we're loading, so don't warn if we don't use
 # `YAML.safe_load` instead of `YAML.load`.
 Security/YAMLLoad:
@@ -44,3 +52,14 @@ Style/ClassAndModuleChildren:
 # to get this.
 Style/DoubleNegation:
   Enabled: false
+
+# Turn off Heredoc delimiter check. EOF is used extensively and will
+# continue to be used
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+
+# The status has a race condition when killing bash commands. Thus
+# it should ignore no process errors
+Lint/HandleExceptions:
+  Exclude:
+    - src/status/job.rb

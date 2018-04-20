@@ -21,11 +21,11 @@ RSpec.describe Metalware::Staging do
   end
 
   describe '#push_file' do
-    let :test_content { 'I am a test file' }
-    let :test_sync { '/etc/some-random-location' }
-    let :test_staging { File.join('/var/lib/metalware/staging', test_sync) }
+    let(:test_content) { 'I am a test file' }
+    let(:test_sync) { '/etc/some-random-location' }
+    let(:test_staging) { File.join('/var/lib/metalware/staging', test_sync) }
 
-    before :each do
+    before do
       update { |staging| staging.push_file(test_sync, test_content) }
     end
 
@@ -68,9 +68,9 @@ RSpec.describe Metalware::Staging do
   end
 
   describe '#delete_file_if' do
-    let :files { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
+    let(:files) { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
 
-    before :each do
+    before do
       Metalware::Staging.update do |staging|
         files.each { |f| staging.push_file(f, '') }
       end
@@ -108,14 +108,14 @@ RSpec.describe Metalware::Staging do
     end
 
     context 'with a managed file' do
-      let :managed_file { '/tmp/managed' }
-      let :managed_content { 'Managed Content' }
+      let(:managed_file) { '/tmp/managed' }
+      let(:managed_content) { 'Managed Content' }
 
       def read_managed_content(file = managed_file)
         File.read(file).gsub(/^$\n/, '').split("\n")
       end
 
-      before :each do
+      before do
         Metalware::Staging.update do |staging|
           staging.push_file(managed_file, managed_content, managed: true)
           staging.delete_file_if do |file|

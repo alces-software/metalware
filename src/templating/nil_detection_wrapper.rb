@@ -55,7 +55,7 @@ module Metalware
         if s == '[]'
           key = a.shift
           key = (key.is_a?(Symbol) ? ":#{key}" : "'#{key}'")
-          s = "[#{key}]".dup
+          s = '[' + key + ']'
         end
         return s if a.empty? && b.nil?
         s << '('

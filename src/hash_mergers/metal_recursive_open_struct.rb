@@ -8,8 +8,8 @@ module Metalware
     class MetalRecursiveOpenStruct
       include Enumerable
 
-      def initialize(table = {}, &templater_block)
-        @templater_block = templater_block
+      def initialize(table = {}, &convert_string_block)
+        @convert_string_block = convert_string_block
         @table = table
       end
 
@@ -32,7 +32,7 @@ module Metalware
       end
 
       def each
-        table.keys.each { |key| yield(key, send(key)) }
+        table.each_key { |key| yield(key, send(key)) }
       end
 
       def to_h
@@ -41,14 +41,14 @@ module Metalware
 
       private
 
-      attr_reader :table, :templater_block
+      attr_reader :table, :convert_string_block
 
       def convert_value(value)
         case value
         when String
-          templater_block.call(value)
+          convert_string_block.call(value)
         when Hash
-          MetalRecursiveOpenStruct.new(value, &templater_block)
+          self.class.new(value, &convert_string_block)
         when Array
           value.map { |arg| convert_value(arg) }
         else
