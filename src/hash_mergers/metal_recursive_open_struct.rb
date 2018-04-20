@@ -9,7 +9,7 @@ module Metalware
       include Enumerable
 
       def initialize(table = {}, &input_block)
-        @convert_string_block = input_block || Proc.new { |s| s }
+        @convert_string_block = input_block || proc { |s| s }
         @table = table
       end
 
@@ -36,7 +36,7 @@ module Metalware
       end
 
       def each_value
-        each { |_s, value| yield value }
+        each { |_s, value| yield value } # rubocop:disable Performance/HashEachMethods
       end
 
       def to_h
