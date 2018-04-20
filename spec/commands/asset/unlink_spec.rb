@@ -6,7 +6,6 @@ require 'alces_utils'
 RSpec.describe Metalware::Commands::Asset::Unlink do
   include AlcesUtils
 
-  let(:asset_name) { 'asset_test' }
   let(:node_name) { 'test_node' }
   let(:node) { alces.nodes.find_by_name(node_name) }
   let(:content) { { node: { node_name.to_sym => asset_name } } }
@@ -17,22 +16,18 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
 
   def run_command
     Metalware::Utils.run_command(described_class,
-                                 asset_name,
                                  node_name,
                                  stderr: StringIO.new)
   end
 
-  it 'error when the asset does not exist' do
-    expect do
-      run_command
-    end.to raise_error(Metalware::InvalidInput)
-  end
+  let(:cache) { Metalware::Cache::Asset.new }
 
   context 'when using a saved asset' do
     before do
       FileSystem.root_setup(&:with_minimal_repo)
     end
 
+    let(:asset_name) { 'asset_test' }
     let(:asset_path) { Metalware::FilePath.asset(asset_name) }
     let(:asset_content) { { key: 'value' } }
     let(:cache_content) { { node: { node_name.to_sym => asset_name } } }
@@ -44,8 +39,18 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
 
     it 'unlinks the asset from a node' do
       run_command
-      cache = Metalware::Cache::Asset.new
-      expect(cache.data).not_to eq(cache_content)
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.data).not_to eq(cache_content)
+    end
+  end
+
+  context 'when using a node that has no relationships' do
+    let(:node_name) { 'lonely_node' }
+
+    it 'does not change the cache when attempting to unlink' do
+      run_command
+      new_cache = Metalware::Cache::Asset.new
+      expect(new_cache.data).to eq(cache.data)
     end
   end
 end
