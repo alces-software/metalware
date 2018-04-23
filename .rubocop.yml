@@ -1,5 +1,5 @@
-
 inherit_from: .rubocop_todo.yml
+require: rubocop-rspec
 
 AllCops:
   TargetRubyVersion: 2.4
@@ -63,3 +63,26 @@ Naming/HeredocDelimiterNaming:
 Lint/HandleExceptions:
   Exclude:
     - src/status/job.rb
+
+# Quite a few specs are nested 4 deep, however the default is 3
+RSpec/NestedGroups:
+  Max: 4
+
+# The following specs have super long blocks which will not be
+# refactored
+RSpec/ExampleLength:
+  Exclude:
+    - spec/configurator_spec.rb
+    - spec/slow/**/*
+    - spec/integration/**/*
+
+# It isn't feasible to set up spies in the following specs as they
+# are coupled to the original implementation
+RSpec/MessageSpies:
+  Exclude:
+    - spec/configurator_spec.rb
+
+# Requiring that the subject is explicitly named in order to use it
+# doesn't isn't that much clearer IMO.
+RSpec/NamedSubject:
+  Enabled: false

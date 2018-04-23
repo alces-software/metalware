@@ -32,7 +32,9 @@ module Metalware
   module DNS
     class Hosts
       def self.restart_service
-        MetalLog.warn 'DNS::Hosts does not currently support restarting services'
+        MetalLog.warn <<-EOF.squish
+          DNS::Hosts does not currently support restarting services
+        EOF
       end
 
       def initialize(alces, templater)

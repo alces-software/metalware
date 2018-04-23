@@ -113,7 +113,7 @@ RSpec.describe CommanderExtensions do
           end.to raise_error(
             CommanderExtensions::CommandDefinitionError
           ).with_message(
-            "After CLI name in syntax should come command name(s) ('test do'), got 'test not_do'"
+            "Command name(s) should come after CLI name e.g. 'test do'"
           )
         end
       end

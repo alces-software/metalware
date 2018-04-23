@@ -9,6 +9,7 @@ RSpec.describe Metalware::Namespaces::Domain do
   include AlcesUtils
 
   subject { alces.domain }
+
   include_examples Metalware::Namespaces::HashMergerNamespace
 
   before { SpecUtils.use_mock_determine_hostip_script(self) }

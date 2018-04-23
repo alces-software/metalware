@@ -37,16 +37,6 @@ RSpec.describe Metalware::Namespaces::Node do
       a
     end
 
-    def build_groups_hash(node_array)
-      node_array.each_with_object({}) do |name, memo|
-        memo[name.to_sym] = { name: name }
-      end
-    end
-
-    def return_node_at_runtime
-      node
-    end
-
     let(:test_value) { 'test value set in namespace/node_spec.rb' }
     let(:primary_group_index) { 'primary_group_index' }
     let(:node_name) { 'node02' }
@@ -59,32 +49,44 @@ RSpec.describe Metalware::Namespaces::Node do
       ) { |template_string| node.render_erb_template(template_string) }
     end
 
-    let(:node) { Metalware::Namespaces::Node.create(alces, node_name) }
+    let(:node) { described_class.create(alces, node_name) }
+
+    def build_groups_hash(node_array)
+      node_array.each_with_object({}) do |name, memo|
+        memo[name.to_sym] = { name: name }
+      end
+    end
+
+    def return_node_at_runtime
+      node
+    end
 
     ##
     # Mocks the HashMergers
     #
     before do
+      config_double = instance_double(Metalware::HashMergers::Config,
+                                      merge: config_hash)
+      answer_double = instance_double(Metalware::HashMergers::Answer,
+                                      merge: {})
       allow(Metalware::HashMergers::Config).to receive(:new)
-        .and_return(double('config', merge: config_hash))
+        .and_return(config_double)
       allow(Metalware::HashMergers::Answer).to receive(:new)
-        .and_return(double('answer', merge: {}))
-    end
+        .and_return(answer_double)
 
-    ##
-    # Spoofs the results of NodeattrInterface
-    #
-    before do
+      ##
+      # Spoofs the results of NodeattrInterface
+      #
       allow(Metalware::NodeattrInterface).to \
         receive(:genders_for_node).and_return(['primary_group'])
       allow(Metalware::NodeattrInterface).to \
         receive(:nodes_in_gender).and_return(node_array)
       allow(Metalware::NodeattrInterface).to \
         receive(:all_nodes).and_return(node_array)
-    end
 
-    # Spoofs the hostip
-    before { SpecUtils.use_mock_determine_hostip_script(self) }
+      # Spoofs the hostip
+      SpecUtils.use_mock_determine_hostip_script(self)
+    end
 
     it 'can access the node name' do
       expect(node.name).to eq(node_name)
@@ -117,8 +119,8 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     describe '#==' do
-      let(:foonode) { Metalware::Namespaces::Node.create(alces, 'foonode') }
-      let(:barnode) { Metalware::Namespaces::Node.create(alces, 'barnode') }
+      let(:foonode) { described_class.create(alces, 'foonode') }
+      let(:barnode) { described_class.create(alces, 'barnode') }
 
       it 'returns false if other object is not a Node' do
         other_object = Struct.new(:name).new('foonode')
@@ -135,7 +137,7 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     describe '#build_method' do
-      let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
+      let(:node) { described_class.create(alces, 'node01') }
 
       def mock_build_method(method, my_node = node)
         config = OpenStruct.new(build_method: method)
@@ -143,7 +145,7 @@ RSpec.describe Metalware::Namespaces::Node do
         my_node.instance_variable_set(:@build_method, nil)
       end
 
-      context 'regular node' do
+      context 'with a regular node' do
         it 'defaults to kickstart if not specified' do
           mock_build_method(nil)
           exp = Metalware::BuildMethods::Kickstarts::Pxelinux
@@ -166,7 +168,7 @@ RSpec.describe Metalware::Namespaces::Node do
 
       context "with the 'local' node" do
         let(:local) do
-          Metalware::Namespaces::Node.create(alces, 'local')
+          described_class.create(alces, 'local')
         end
 
         let(:local_build) { Metalware::BuildMethods::Local }
@@ -186,7 +188,7 @@ RSpec.describe Metalware::Namespaces::Node do
 
         # Their is no point adding additional ways metalware can fail
         # Instead, always force the local node to use the local build
-        it 'it ignores incorrect config values' do
+        it 'ignores incorrect config values' do
           local_node_uses_local_build?(:pxelinux)
         end
       end
@@ -220,7 +222,7 @@ RSpec.describe Metalware::Namespaces::Node do
 
   # Test `#plugins` without the rampant mocking above.
   describe '#plugins' do
-    let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
+    let(:node) { described_class.create(alces, 'node01') }
     let(:alces) { Metalware::Namespaces::Alces.new }
 
     # XXX Need to handle situation of plugin being enabled for node but not

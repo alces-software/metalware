@@ -56,16 +56,19 @@ RSpec.describe Metalware::HashMergers::Answer do
   shared_examples 'run contexts with shared' do |spec_group|
     context 'when loading domain answers' do
       subject { alces.domain }
+
       include_examples spec_group
     end
 
     context 'when loading group answers' do
       subject { group }
+
       include_examples spec_group
     end
 
     context 'when loading node answers' do
       subject { node }
+
       include_examples spec_group
     end
   end

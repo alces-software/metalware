@@ -71,7 +71,7 @@ RSpec.describe Metalware::Staging do
     let(:files) { ['first', 'second', 'third'].map { |f| "/tmp/#{f}" } }
 
     before do
-      Metalware::Staging.update do |staging|
+      described_class.update do |staging|
         files.each { |f| staging.push_file(f, '') }
       end
     end
@@ -116,7 +116,7 @@ RSpec.describe Metalware::Staging do
       end
 
       before do
-        Metalware::Staging.update do |staging|
+        described_class.update do |staging|
           staging.push_file(managed_file, managed_content, managed: true)
           staging.delete_file_if do |file|
             File.write file.sync, file.content
@@ -142,7 +142,7 @@ RSpec.describe Metalware::Staging do
         File.write(managed_file, start_content)
 
         new_content = 'NEW CONTENT'
-        Metalware::Staging.update do |staging|
+        described_class.update do |staging|
           staging.push_file(managed_file, new_content, managed: true)
           staging.delete_file_if do |file|
             expect(file.content.first).to eq(file_start)

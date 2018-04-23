@@ -29,7 +29,8 @@ require 'output'
 
 RSpec.describe Metalware::HunterUpdater do
   let(:hunter_file) { Tempfile.new.path }
-  let(:updater) { Metalware::HunterUpdater.new(hunter_file) }
+  let(:updater) { described_class.new(hunter_file) }
+  let!(:output) { class_spy(Metalware::Output).as_stubbed_const }
 
   def hunter_yaml
     Metalware::Data.load(hunter_file)
@@ -46,34 +47,57 @@ RSpec.describe Metalware::HunterUpdater do
     end
 
     context 'with existing hunter content' do
+      let(:node_name) { 'somenode01' }
+      let(:other_node) { 'somenode02' }
+      let(:initial_mac) { 'some_mac_address' }
+      let(:new_mac) { 'another_mac_address' }
+
       before do
-        Metalware::Data.dump(hunter_file, somenode01: 'some_mac_address')
+        Metalware::Data.dump(
+          hunter_file,
+          node_name.to_sym => initial_mac
+        )
       end
 
-      it 'outputs info if replacing node name' do
-        # Replaces existing entry with node name.
-        expect(Metalware::Output).to receive(:stderr).with(
-          /Replacing.*somenode01.*some_mac_address/
-        )
-        updater.add('somenode01', 'another_mac_address')
-        expect(hunter_yaml).to eq(somenode01: 'another_mac_address')
+      context 'when updating a nodes mac address' do
+        before { updater.add(node_name, new_mac) }
 
-        # Does not replace when new node name.
-        expect(Metalware::Output).not_to receive(:stderr)
-        updater.add('somenode02', 'some_mac_address')
+        it 'issues an error message' do
+          expect(output).to have_received(:stderr).once
+          expect(output).to have_received(:stderr)
+            .with(/Replacing.*#{node_name}.*#{initial_mac}/)
+        end
+
+        it 'updates the nodes mac address' do
+          expect(hunter_yaml[node_name.to_sym]).to eq(new_mac)
+        end
+
+        it 'can re-assign the old mac to another node' do
+          updater.add(other_node, initial_mac)
+          expect(output).not_to have_received(:stderr)
+            .with(/#{other_node}/)
+          expect(hunter_yaml[other_node.to_sym]).to eq(initial_mac)
+        end
       end
 
-      it 'outputs info if replacing MAC address' do
-        # Replaces existing entry with MAC address.
-        expect(Metalware::Output).to receive(:stderr).with(
-          /Replacing.*some_mac_address.*somenode01/
-        )
-        updater.add('somenode02', 'some_mac_address')
-        expect(hunter_yaml).to eq(somenode02: 'some_mac_address')
+      context 'when assigning a new node to an existing mac' do
+        before { updater.add(other_node, initial_mac) }
 
-        # Does not replace when new MAC address.
-        expect(Metalware::Output).not_to receive(:stderr)
-        updater.add('somenode01', 'another_mac_address')
+        it 'issues an error message' do
+          expect(output).to have_received(:stderr).once
+          expect(output).to have_received(:stderr)
+            .with(/Replacing.*#{initial_mac}.*#{node_name}/)
+        end
+
+        it 'reassigns the mac in the cache' do
+          expect(hunter_yaml).to eq(other_node.to_sym => initial_mac)
+        end
+
+        it 'does not warn when the old node gets a new mac' do
+          updater.add(node_name, new_mac)
+          expect(output).not_to have_received(:stderr)
+            .with(/#{new_mac}/)
+        end
       end
     end
 

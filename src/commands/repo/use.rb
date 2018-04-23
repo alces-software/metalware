@@ -49,7 +49,9 @@ module Metalware
         rescue Rugged::NetworkError
           raise RuggedCloneError, "Could not find repo: #{@repo_url}"
         rescue Rugged::InvalidError
-          raise RuggedCloneError, 'Repository already exists. Use -f to force clone a new one'
+          raise RuggedCloneError, <<-EOF.squish
+            Repository already exists. Use -f to force clone a new one
+          EOF
         end
       end
     end

@@ -27,10 +27,11 @@ require 'file_path'
 
 RSpec.describe Metalware::FilePath do
   describe 'dynamic constant paths' do
-    let(:file_path) { Metalware::FilePath }
+    let(:file_path) { described_class }
+    let(:data_path) { Metalware::Constants::METALWARE_DATA_PATH }
 
     it 'defines a constant file path' do
-      expect(file_path.metalware_data).to eq(Metalware::Constants::METALWARE_DATA_PATH)
+      expect(file_path.metalware_data).to eq(data_path)
     end
 
     it 'does not define non-paths' do

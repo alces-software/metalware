@@ -79,6 +79,7 @@ RSpec.describe Metalware::Commands::Build do
 
   # Mocks the test node
   let(:testnode) { alces.nodes.find_by_name('testnode01') }
+
   AlcesUtils.mock self, :each do
     config(testnode, build_method: :kickstart)
     hexadecimal_ip(testnode)

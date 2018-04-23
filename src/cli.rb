@@ -41,7 +41,9 @@ module Metalware
     def run
       program :name, 'metal'
       program :version, '2017.2.1'
-      program :description, 'Alces tools for the management and configuration of bare metal machines'
+      program :description, <<-EOF.squish
+        Alces tools for the management and configuration of bare metal machines
+      EOF
 
       suppress_trace_class UserMetalwareError
 

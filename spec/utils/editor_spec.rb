@@ -4,6 +4,7 @@ require 'utils/editor'
 
 RSpec.describe Metalware::Utils::Editor do
   let(:default_editor) { described_class::DEFAULT_EDITOR }
+
   before { allow_any_instance_of(HighLine).to receive(:agree) }
 
   context 'with the environment variables unset' do
@@ -19,6 +20,7 @@ RSpec.describe Metalware::Utils::Editor do
 
       context 'when $EDITOR is set' do
         let(:editor) { 'EDITOR-ENV-VAR' }
+
         before { ENV['EDITOR'] = editor }
 
         it 'uses the $EDITOR env var' do
@@ -27,6 +29,7 @@ RSpec.describe Metalware::Utils::Editor do
 
         context 'when $VISUAL is set' do
           let(:visual) { 'VISUAL-ENV-VAR' }
+
           before { ENV['VISUAL'] = visual }
 
           it 'uses the $VISUAL env var' do
@@ -55,7 +58,7 @@ RSpec.describe Metalware::Utils::Editor do
       let(:initial_content) { { key: 'value' } }
 
       before do
-        allow(Metalware::Utils::Editor).to receive(:open)
+        allow(described_class).to receive(:open)
         Metalware::Data.dump(source, initial_content)
       end
 

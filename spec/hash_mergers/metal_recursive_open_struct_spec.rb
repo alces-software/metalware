@@ -60,7 +60,7 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
 
   it 'can loop through the entire structure' do
     struct.each do |key, value|
-      next if value.is_a? Metalware::HashMergers::MetalRecursiveOpenStruct
+      next if value.is_a? described_class
       exp = struct.send(key)
       msg = "#{key} was not rendered, expected: '#{exp}', got: '#{value}'"
       expect(exp).to eq(value), msg
@@ -85,18 +85,19 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
     it 'converts the hashes to own class' do
       expect(array_of_hashes.array).to be_a(Array)
       array_of_hashes.array.each do |arg|
-        expect(arg).to be_a(Metalware::HashMergers::MetalRecursiveOpenStruct)
+        expect(arg).to be_a(described_class)
         expect(arg.key).to eq('value')
       end
     end
   end
 
   context 'when using an inherited class' do
+    subject { inherited_class.new(data) }
+
     let(:data) { { sub_hash: { key: 'value' } } }
     let(:inherited_class) do
       Metalware::TestInheritedMetalRecursiveOpenStruct
     end
-    subject { inherited_class.new(data) }
 
     it 'returns sub hashes of that class' do
       expect(subject.sub_hash).to be_a(inherited_class)

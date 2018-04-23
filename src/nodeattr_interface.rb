@@ -37,7 +37,9 @@ module Metalware
 
       def nodes_in_gender(gender)
         stdout = nodeattr("-c #{gender}")
-        raise NoGenderGroupError, "Could not find gender: #{gender}" if stdout.empty?
+        if stdout.empty?
+          raise NoGenderGroupError, "Could not find gender: #{gender}"
+        end
         stdout.chomp.split(',')
       end
 
@@ -65,7 +67,9 @@ module Metalware
       # Returns whether the given file is a valid genders file, along with any
       # validation error.
       def validate_genders_file(genders_path)
-        raise FileDoesNotExistError, "File does not exist: #{genders_path}" unless File.exist?(genders_path)
+        unless File.exist?(genders_path)
+          raise FileDoesNotExistError, "File does not exist: #{genders_path}"
+        end
 
         nodeattr("-f #{genders_path} --parse-check", format_error: false)
         true

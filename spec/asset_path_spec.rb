@@ -4,7 +4,7 @@ require 'file_path'
 
 RSpec.describe Metalware::FilePath do
   describe 'asset files' do
-    let(:file_path) { Metalware::FilePath }
+    let(:file_path) { described_class }
 
     it 'defines an asset template' do
       path = File.join(file_path.repo, 'assets', 'rack.yaml')

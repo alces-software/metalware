@@ -39,7 +39,7 @@ RSpec.describe Metalware::NodeattrInterface do
 
     describe '#nodes_in_group' do
       it 'returns only the nodes in the primary group' do
-        nodes = Metalware::NodeattrInterface.nodes_in_group('group1')
+        nodes = described_class.nodes_in_group('group1')
         expect(nodes).to contain_exactly('nodeA01', 'nodeA02')
       end
     end
@@ -53,19 +53,19 @@ RSpec.describe Metalware::NodeattrInterface do
     describe '#nodes_in_gender' do
       it 'returns names of all nodes in the given gender group' do
         expect(
-          Metalware::NodeattrInterface.nodes_in_gender('masters')
+          described_class.nodes_in_gender('masters')
         ).to eq(['login1'])
         expect(
-          Metalware::NodeattrInterface.nodes_in_gender('nodes')
+          described_class.nodes_in_gender('nodes')
         ).to eq(['testnode01', 'testnode02', 'testnode03'])
         expect(
-          Metalware::NodeattrInterface.nodes_in_gender('cluster')
+          described_class.nodes_in_gender('cluster')
         ).to eq(['login1', 'testnode01', 'testnode02', 'testnode03'])
       end
 
       it 'raises if cannot find gender group' do
         expect do
-          Metalware::NodeattrInterface.nodes_in_gender('non_existent')
+          described_class.nodes_in_gender('non_existent')
         end.to raise_error Metalware::NoGenderGroupError
       end
     end
@@ -74,28 +74,28 @@ RSpec.describe Metalware::NodeattrInterface do
       it 'returns groups for given node, ordered as in genders' do
         testnode_groups = ['testnodes', 'nodes', 'cluster']
         expect(
-          Metalware::NodeattrInterface.genders_for_node('testnode01')
+          described_class.genders_for_node('testnode01')
         ).to eq(testnode_groups)
         expect(
-          Metalware::NodeattrInterface.genders_for_node('testnode02')
+          described_class.genders_for_node('testnode02')
         ).to eq(['pregroup'] + testnode_groups + ['postgroup'])
       end
 
       it 'raises if cannot find node' do
         expect do
-          Metalware::NodeattrInterface.genders_for_node('non_existent')
+          described_class.genders_for_node('non_existent')
         end.to raise_error Metalware::NodeNotInGendersError
       end
     end
   end
 
   describe '#validate_genders_file' do
+    subject do
+      described_class.validate_genders_file(genders_path)
+    end
+
     let(:genders_file) { Tempfile.new }
     let(:genders_path) { genders_file.path }
-
-    subject do
-      Metalware::NodeattrInterface.validate_genders_file(genders_path)
-    end
 
     it 'returns true and no error when given a valid genders file' do
       File.write(genders_path, "node01 nodes,other,groups\n")
@@ -118,7 +118,7 @@ RSpec.describe Metalware::NodeattrInterface do
       genders_file.delete
 
       expect do
-        Metalware::NodeattrInterface.validate_genders_file(path)
+        described_class.validate_genders_file(path)
       end.to raise_error(Metalware::FileDoesNotExistError)
     end
   end

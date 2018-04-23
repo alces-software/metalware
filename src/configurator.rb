@@ -128,7 +128,9 @@ module Metalware
         when :node, :local
           alces.nodes.find_by_name(name) || create_orphan_node
         else
-          raise InternalError, "Unrecognised question section: #{questions_section}"
+          raise InternalError, <<-EOF
+            Unrecognised question section: #{questions_section}
+          EOF
         end
       end
     end

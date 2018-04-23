@@ -77,7 +77,9 @@ class AutoComplete
     # Currently only a single command-dependent auto-complete definition is
     # supported, to auto-complete file paths relative to a given root path.
     relative_paths_root = autocomplete_definition['files_relative_to']
-    auto_complete_relative_file_paths(relative_paths_root) if relative_paths_root
+    if relative_paths_root
+      auto_complete_relative_file_paths(relative_paths_root)
+    end
   end
 
   def auto_complete_relative_file_paths(relative_paths_root)

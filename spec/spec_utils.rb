@@ -44,7 +44,8 @@ module SpecUtils
       genders_path = File.join(FIXTURES_PATH, genders_file)
 
       example_group.instance_exec do
-        stub_const('Metalware::Constants::NODEATTR_COMMAND', "nodeattr -f #{genders_path}")
+        nodeattr_command = 'Metalware::Constants::NODEATTR_COMMAND'
+        stub_const(nodeattr_command, "nodeattr -f #{genders_path}")
       end
     end
 

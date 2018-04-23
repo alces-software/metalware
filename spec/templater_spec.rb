@@ -113,7 +113,7 @@ RSpec.describe Metalware::Templater do
         it 'raises' do
           filesystem.test do
             expect do
-              Metalware::Templater.render(alces, template_path, {})
+              described_class.render(alces, template_path, {})
             end.to raise_error NameError
           end
         end
@@ -153,7 +153,7 @@ RSpec.describe Metalware::Templater do
       end
     end
 
-    it 'does not render template to the file if passed a block with falsy output' do
+    it 'does not render template to file if passed a block with falsy output' do
       filesystem.test do
         template_rendered = render_to_file_with_block(&:empty?)
 

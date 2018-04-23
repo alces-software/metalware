@@ -32,7 +32,7 @@ require 'minimal_repo'
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
-RSpec.describe '`metal build`' do
+RSpec.describe Metalware::Commands::Build do
   TEST_DIR = 'tmp/integration-test'
 
   let(:filesystem) do
@@ -42,10 +42,12 @@ RSpec.describe '`metal build`' do
       fs.with_genders_fixtures
     end
   end
+  let(:file_path) { Metalware::FilePath }
 
   AlcesUtils.start(self)
 
-  TEST_KICKSTART_DIR = File.join(Metalware::FilePath.rendered_files, 'kickstart')
+  TEST_KICKSTART_DIR = File
+                       .join(Metalware::FilePath.rendered_files, 'kickstart')
   TEST_PXELINUX_DIR = Metalware::FilePath.pxelinux_cfg
 
   PXELINUX_TEMPLATE = '/var/lib/metalware/repo/pxelinux/default'
@@ -108,15 +110,13 @@ RSpec.describe '`metal build`' do
     kill_any_metal_processes
   end
 
-  let(:file_path) { Metalware::FilePath }
-
   def touch_complete_file(name)
     path = file_path.build_complete(alces.nodes.find_by_name(name))
     FileUtils.mkdir_p File.dirname(path)
     FileUtils.touch(path)
   end
 
-  context 'for single node' do
+  context 'with a single node' do
     let(:node) { 'testnode01' }
 
     it 'works' do
@@ -134,7 +134,7 @@ RSpec.describe '`metal build`' do
     end
   end
 
-  context 'for gender group' do
+  context 'with a gender group' do
     let(:nodes) { ['testnode01', 'testnode02', 'testnode03'] }
 
     it 'works' do

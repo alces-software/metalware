@@ -73,7 +73,8 @@ RSpec.describe Metalware::Dependency do
         enforce_dependencies(repo: ['dependency-test1/default'])
       end.not_to raise_error
       expect do
-        enforce_dependencies(repo: ['dependency-test1/default', 'dependency-test2/default'])
+        template = ['dependency-test1/default', 'dependency-test2/default']
+        enforce_dependencies(repo: template)
       end.not_to raise_error
     end
 

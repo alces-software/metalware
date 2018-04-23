@@ -9,7 +9,7 @@ RSpec.describe Metalware::Overview::Table do
   let(:namespaces) { alces.groups }
 
   let(:table) do
-    Metalware::Overview::Table.new(namespaces, fields).render
+    described_class.new(namespaces, fields).render
   end
 
   def header
