@@ -13,7 +13,7 @@ actual assets. A `layout` is a partially filled asset which is to be
 generated from a `type`. An `asset` can then be made from the `layout`.
 
 The other key feature of a `layout` is its ability to automatically
-trigger the creation of additional assets (discussed below).
+trigger the creation of sub assets (discussed below).
 
 
 # Command Changes:
@@ -30,6 +30,10 @@ layout instead of an asset.
 Also, `metal asset add -l LAYOUT NAME`, will switch the `TYPE` input
 to be a `LAYOUT` input. This way the `asset add` command can create a
 new asset from both a `type` or `layout`.
+
+NOTE: The `-l` may not be needed for the `add` command if `types` and
+`layouts` have unique names. The implementation of this has not been
+finalised.
 
 # Refactoring of Assets Types
 
@@ -51,7 +55,7 @@ structure.
    its asset `type`,
    * When should the subdirectories be made?
 2. Each asset needs its `type` loaded into the metadata,
-3. Each asset needs to be assessable by name ONLY. The type should not
+3. Each asset needs to be accessible by name ONLY. The type should not
    be required.
    * This will require each `name` to be unique
 4. Assets can not share a name with an existing asset `type` OR the
@@ -60,8 +64,9 @@ structure.
 5. The assets need to be iterable by `type`
    * The plural of each `type` should be defined as a method on
    `AssetArray`. These method should return a new `AssetArray` like
-   object (without the type methods). That shares the original asset
-   loaders. This way the asset files are still only loaded once.
+   object (without the type methods). The sub array object should
+   share the original asset loaders. This way the asset files are
+   still only loaded once.
 
 # Implementation of layouts:
 
@@ -69,7 +74,7 @@ structure.
 
 Creating an asset `layout` is the same in many ways to the creation of
 an `asset`. It still is created from a `type` and goes through the
-editor like an `asset`. It should also be stored in in subdirectories
+editor like an `asset`. It should also be stored in subdirectories
 by type BUT the layout name should also be unique.
 
 The asset `layouts` will however be stored in a different base
@@ -88,22 +93,23 @@ The primary purpose of the `layouts` is the ability to rapidly generate
 assets from them. The [`-l`, `--layout`] flag needs to be added to the
 `metal asset add` command. This will tell the command to add a new
 asset from the `layout`. As each `layout` has a type, this will be the
-type of the asset.
+type of the asset. This may not be required if `types` and `layouts`
+have unique names.
 
 ### Generation of Sub Assets
 
 The `^name` notation in the `layouts` is going to be slightly different
-then `assets`. In the assets, `^name` denotes an asset that is to be
-referenced to. In the layouts, the notation going to be:
+then `assets`. In the assets, `^name` denotes a link to another 
+asset. In the layouts, the notation going to be:
 `type_or_layout_name^base_asset_name`.
 
-Once the asset has been edited, it parse the document for the above
-notation. This notation tells metalware to create an asset of type:
-`type_or_layout_name`. Asset layouts and types have unique names, it
-is possible to tell which one should be used.
+Once the asset (from a layout) has been edited, the `yaml` is parsed
+for the above notation. This notation tells metalware to create an 
+asset of type: `type_or_layout_name`. Asset layouts and types have
+unique names, it is possible to tell which one should be used.
 
-Then the `base_asset_name` tells metalware how to construct to 
-translate the asset name. As layouts are going to be used multiple 
+Then the `base_asset_name` tells metalware how to construct the
+translated asset name. As layouts are going to be used multiple 
 times, they can not all use the same name. Thus the syntax for the
 sub asset name will be: `#{parent_asset_name}_#{base_asset_name}`.
 
@@ -113,7 +119,7 @@ replace `type_or_layout_name^base_asset_name` with
 creates the link between the asset and sub assets.
 
 The final step is then to prompt the user if they want to create each
-sub asset, if so the process is repeated for it.
+sub asset, if so the process is repeated.
 
 ### Key questions:
 
@@ -126,8 +132,8 @@ sub asset, if so the process is repeated for it.
 4. In a layout, should there be special handling of `^asset_name`
    notation? There has been discussion of using the hash key that
    contains it as the `type` for the auto generation of sub assets.
-   This, however, removes the ability to statically reference an asset
-   from a `layout`.
+   This, however, removes the ability to statically reference an
+   asset from a `layout`.
 
 
 ## Side Issue - Temp Filename
