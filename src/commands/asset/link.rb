@@ -3,10 +3,13 @@
 module Metalware
   module Commands
     module Asset
-      class Link < Metalware::CommandHelpers::RecordEditor
+      class Link < CommandHelpers::BaseCommand
+        include CommandHelpers::EnsureAssetExists
+        include CommandHelpers::AssetCache
+
         private
 
-        attr_reader :asset_name, :asset_path
+        attr_reader :asset_name, :asset_path, :node
 
         def setup
           @asset_name = args[1]
@@ -15,8 +18,8 @@ module Metalware
         end
 
         def run
-          error_if_record_file_does_not_exist(asset_path)
-          assign_asset_to_node_if_given(asset_name)
+          asset_cache.assign_asset_to_node(asset_name, node)
+          asset_cache.save           
         end
       end
     end

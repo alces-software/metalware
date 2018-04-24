@@ -6,7 +6,9 @@ require 'fileutils'
 module Metalware
   module Commands
     module Asset
-      class Delete < Metalware::CommandHelpers::RecordEditor
+      class Delete < CommandHelpers::BaseCommand
+        include CommandHelpers::EnsureAssetExists
+
         private
 
         attr_reader :asset_name, :asset_path, :cache
@@ -18,7 +20,6 @@ module Metalware
         end
 
         def run
-          error_if_record_file_does_not_exist(asset_path)
           unassign_asset_from_cache
           delete_asset
         end
