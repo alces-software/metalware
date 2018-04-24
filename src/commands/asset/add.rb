@@ -6,7 +6,6 @@ module Metalware
   module Commands
     module Asset
       class Add < Metalware::CommandHelpers::RecordEditor
-
         private
 
         attr_reader :template_name, :template_path, :asset_path, :asset_name

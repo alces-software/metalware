@@ -4,7 +4,6 @@ module Metalware
   module Commands
     module Asset
       class Unlink < Metalware::CommandHelpers::RecordEditor
-
         private
 
         attr_reader :node_name, :cache
@@ -20,7 +19,7 @@ module Metalware
 
         def unassign_node_from_cache
           cache.unassign_node(node_name)
-          cache.save  
+          cache.save
         end
       end
     end
