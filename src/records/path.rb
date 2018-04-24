@@ -11,14 +11,10 @@ module Metalware
         # Records::Path will contain all the file globing and thus
         # will only require the name
         def asset(name)
-          glob_asset_paths.find do |path|
-            name == File.basename(path, '.yaml')
-          end
+          assets.find { |path| name == File.basename(path, '.yaml') }
         end
 
-        private
-
-        def glob_asset_paths
+        def assets
           Dir.glob(FilePath.asset('**/*'))
         end
       end
