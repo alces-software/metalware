@@ -3,8 +3,7 @@
 module Metalware
   module Commands
     module Asset
-      class Edit < Metalware::CommandHelpers::BaseCommand
-        include CommandHelpers::AssetHelper
+      class Edit < Metalware::CommandHelpers::RecordEditor
 
         private
 
@@ -17,9 +16,17 @@ module Metalware
         end
 
         def run
-          error_if_asset_file_doesnt_exist(asset_path)
-          edit_asset_file(asset_path)
+          error_if_record_file_does_not_exist(asset_path)
+          copy_and_edit_record_file
           assign_asset_to_node_if_given(asset_name)
+        end
+
+        def source
+          asset_path
+        end
+
+        def destination
+          source
         end
       end
     end
