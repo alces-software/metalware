@@ -7,7 +7,7 @@ RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
 
   def update(&b)
-    Metalware::Cache::Asset.update(&b)
+    described_class.update(&b)
   end
 
   let(:cache) { described_class.new }
