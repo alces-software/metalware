@@ -6,6 +6,13 @@ require 'data'
 module Metalware
   module Cache
     class Asset
+      def self.update
+        cache = new
+        yield cache if block_given?
+      ensure
+        cache&.save
+      end
+
       def data
         @data ||= begin
           raw_load = Data.load(FilePath.asset_cache)
