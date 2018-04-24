@@ -9,12 +9,12 @@ module Metalware
       end 
 
       def error_if_asset_file_does_not_exist(asset_name)
-        record_name = File.basename(asset_path, '.*')
+        asset_name = File.basename(asset_path, '.*')
         return if File.exist?(asset_path)
         raise InvalidInput, <<-EOF.squish
           The "#{asset_name}" record does not exist
         EOF
       end
-    end   
+    end
   end
 end
