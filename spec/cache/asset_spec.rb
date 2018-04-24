@@ -6,6 +6,10 @@ require 'cache/asset'
 RSpec.describe Metalware::Cache::Asset do
   include AlcesUtils
 
+  def update(&b)
+    Metalware::Cache::Asset.update(&b)
+  end
+
   let(:cache) { described_class.new }
   let(:cache_path) { Metalware::FilePath.asset_cache }
   let(:initial_content) do
@@ -124,6 +128,25 @@ RSpec.describe Metalware::Cache::Asset do
       cache.unassign_asset('missing_asset')
       new_cache = described_class.new
       expect(new_cache.data).to eq(initial_content)
+    end
+  end
+
+  describe '#update' do
+    it 'ensures it saves the cache after an error' do
+      expect do
+        update do |cache|
+          cache.assign_asset_to_node('asset_test', node)
+          raise RuntimeError
+        end
+      end.to raise_error(RuntimeError)
+      expect(cache.data).to eq(initial_content)
+    end
+
+    it 'updates the cache' do
+      update do |cache|
+        cache.assign_asset_to_node('asset_test', node)
+      end
+      expect(cache.data).to eq(initial_content)
     end
   end
 end
