@@ -5,7 +5,7 @@ require 'utils/editor'
 module Metalware
   module Commands
     module Asset
-      class Add < Metalware::CommandHelpers::RecordEditor
+      class Add < CommandHelpers::RecordEditor
         private
 
         attr_reader :template_name, :template_path, :asset_path, :asset_name

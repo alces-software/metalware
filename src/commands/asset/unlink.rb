@@ -3,7 +3,7 @@
 module Metalware
   module Commands
     module Asset
-      class Unlink < Metalware::CommandHelpers::RecordEditor
+      class Unlink < CommandHelpers::BaseCommand
         private
 
         attr_reader :node_name, :cache
