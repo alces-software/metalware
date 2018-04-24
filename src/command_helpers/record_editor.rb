@@ -38,14 +38,6 @@ module Metalware
         EOF
       end
 
-      def error_if_record_file_does_not_exist(record_path)
-        record_name = File.basename(record_path, '.*')
-        return if File.exist?(record_path)
-        raise InvalidInput, <<-EOF.squish
-          The "#{record_name}" record does not exist
-        EOF
-      end
-
       def source
         raise NotImplementedError
       end
