@@ -23,7 +23,7 @@ RSpec.describe Metalware::Commands::Asset::Edit do
     end
 
     let(:saved_asset) { 'saved-asset' }
-    let(:asset_path) { Metalware::FilePath.asset(saved_asset) }
+    let(:asset_path) { Metalware::Records::Path.asset(saved_asset) }
     let(:test_content) { { key: 'value' } }
 
     before { Metalware::Data.dump(asset_path, test_content) }
@@ -46,7 +46,7 @@ RSpec.describe Metalware::Commands::Asset::Edit do
     let(:command_arguments) { [asset_name] }
 
     before do
-      Metalware::Data.dump(Metalware::FilePath.asset(asset_name), {})
+      Metalware::Data.dump(Metalware::Records::Path.asset(asset_name), {})
     end
 
     it_behaves_like 'asset command that assigns a node'

@@ -197,7 +197,7 @@ RSpec.describe Metalware::Namespaces::Node do
     describe '#asset' do
       let(:content) { { node: { node_name.to_sym => 'asset_test' } } }
       let(:asset_name) { 'asset_test' }
-      let(:asset_path) { Metalware::FilePath.asset(asset_name) }
+      let(:asset_path) { Metalware::Records::Path.asset(asset_name) }
       let(:cache) { Metalware::Cache::Asset.new }
 
       context 'with an assigned asset' do

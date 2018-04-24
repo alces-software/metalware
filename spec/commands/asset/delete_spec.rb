@@ -25,7 +25,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
       FileSystem.root_setup(&:with_minimal_repo)
     end
 
-    let(:asset_path) { Metalware::FilePath.asset(asset) }
+    let(:asset_path) { Metalware::Records::Path.asset(asset) }
     let(:asset_content) { { key: 'value' } }
 
     before { Metalware::Data.dump(asset_path, asset_content) }

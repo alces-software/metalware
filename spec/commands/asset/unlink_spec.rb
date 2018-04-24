@@ -28,7 +28,7 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
     end
 
     let(:asset_name) { 'asset_test' }
-    let(:asset_path) { Metalware::FilePath.asset(asset_name) }
+    let(:asset_path) { Metalware::Records::Path.asset(asset_name) }
     let(:asset_content) { { key: 'value' } }
     let(:cache_content) { { node: { node_name.to_sym => asset_name } } }
 

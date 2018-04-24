@@ -27,7 +27,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
     let(:save) { 'saved-asset' }
 
     let(:template_path) { Metalware::FilePath.asset_template(template) }
-    let(:save_path) { Metalware::FilePath.asset(save) }
+    let(:save_path) { Metalware::Records::Path.asset(save) }
 
     def run_command
       Metalware::Utils.run_command(described_class,

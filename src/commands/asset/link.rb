@@ -12,7 +12,7 @@ module Metalware
 
         def setup
           @asset_name = args[1]
-          @asset_path = FilePath.asset(asset_name)
+          @asset_path = Records::Path.asset(asset_name)
           @node = alces.nodes.find_by_name(args[0])
           ensure_asset_exists
         end
