@@ -148,7 +148,7 @@ module Metalware
         '/var/log/metalware'
       end
 
-      def asset_template(type)
+      def asset_type(type)
         File.join(repo, 'assets', type + '.yaml')
       end
 

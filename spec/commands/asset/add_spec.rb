@@ -9,7 +9,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
   # Stops the editor from running the bash command
   before { allow(Metalware::Utils::Editor).to receive(:open) }
 
-  it 'errors if the template does not exist' do
+  it 'errors if the type does not exist' do
     expect do
       Metalware::Utils.run_command(described_class,
                                    'missing-type',
@@ -18,27 +18,27 @@ RSpec.describe Metalware::Commands::Asset::Add do
     end.to raise_error(Metalware::InvalidInput)
   end
 
-  context 'when using the default template' do
+  context 'when using the default type' do
     before do
       FileSystem.root_setup(&:with_minimal_repo)
     end
 
-    let(:template) { 'default' }
+    let(:type) { 'default' }
     let(:save) { 'saved-asset' }
 
-    let(:template_path) { Metalware::FilePath.asset_template(template) }
+    let(:type_path) { Metalware::FilePath.asset_type(type) }
     let(:save_path) { Metalware::FilePath.asset(save) }
 
     def run_command
       Metalware::Utils.run_command(described_class,
-                                   template,
+                                   type,
                                    save,
                                    stderr: StringIO.new)
     end
 
-    it 'calls for the template to be opened and copyed' do
+    it 'calls for the type to be opened and copyed' do
       expect(Metalware::Utils::Editor).to receive(:open_copy)
-        .with(template_path, save_path)
+        .with(type_path, save_path)
       run_command
     end
 
