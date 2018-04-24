@@ -17,7 +17,7 @@ module Metalware
           @template_name = args[0]
           @template_path = FilePath.asset_template(template_name)
           @asset_name = args[1]
-          @asset_path = Records::Path.asset(asset_name)
+          @asset_path = FilePath.asset(asset_name)
           unpack_node_from_options
         end
 

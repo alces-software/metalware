@@ -30,14 +30,10 @@ RSpec.describe Metalware::Commands::Asset::Link do
   end
 
   context 'when using a saved asset' do
-    before do
+    AlcesUtils.mock(self, :each) do
       FileSystem.root_setup(&:with_minimal_repo)
+      create_asset(asset_name, {})
     end
-
-    let(:asset_path) { Metalware::Records::Path.asset(asset_name) }
-    let(:asset_content) { { key: 'value' } }
-
-    before { Metalware::Data.dump(asset_path, asset_content) }
 
     it 'links the asset to a node' do
       run_command

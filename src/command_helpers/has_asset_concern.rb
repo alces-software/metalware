@@ -7,10 +7,11 @@ module Metalware
         @asset_cache ||= Cache::Asset.new
       end
 
-      def ensure_asset_exists
-        return if File.exist?(asset_path)
+      def asset_path_or_error_if_missing(name)
+        path = Records::Path.asset(name)
+        return path if path
         raise InvalidInput, <<-EOF.squish
-          The "#{asset_name}" record does not exist
+          The "#{name}" record does not exist
         EOF
       end
     end

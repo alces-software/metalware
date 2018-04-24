@@ -13,9 +13,8 @@ module Metalware
 
         def setup
           @asset_name = args[0]
-          @asset_path = Records::Path.asset(asset_name)
+          @asset_path = asset_path_or_error_if_missing(asset_name)
           unpack_node_from_options
-          ensure_asset_exists
         end
 
         def run

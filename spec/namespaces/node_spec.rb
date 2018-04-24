@@ -195,14 +195,15 @@ RSpec.describe Metalware::Namespaces::Node do
     end
 
     describe '#asset' do
-      let(:content) { { node: { node_name.to_sym => 'asset_test' } } }
+      let(:content) do
+        { node: { node_name.to_sym => 'asset_test' } }
+      end
       let(:asset_name) { 'asset_test' }
-      let(:asset_path) { Metalware::Records::Path.asset(asset_name) }
       let(:cache) { Metalware::Cache::Asset.new }
 
       context 'with an assigned asset' do
-        before do
-          Metalware::Data.dump(asset_path, content)
+        AlcesUtils.mock(self, :each) do
+          create_asset(asset_name, content)
           cache.assign_asset_to_node(asset_name, node)
           cache.save
         end
