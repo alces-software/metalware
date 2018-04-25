@@ -10,6 +10,9 @@ module Metalware
 
         attr_reader :template_name, :template_path, :asset_path, :asset_name
 
+        alias_method :source, :template_path
+        alias_method :destination, :asset_path
+
         def setup
           @template_name = args[0]
           @template_path = FilePath.asset_template(template_name)
@@ -23,14 +26,6 @@ module Metalware
           error_if_asset_exists
           copy_and_edit_record_file
           assign_asset_to_node_if_given(asset_name)
-        end
-
-        def source
-          template_path
-        end
-
-        def destination
-          asset_path
         end
 
         def error_if_template_is_missing

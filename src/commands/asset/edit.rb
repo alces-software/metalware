@@ -8,6 +8,9 @@ module Metalware
 
         attr_reader :asset_name, :asset_path
 
+        alias_method :source, :asset_path
+        alias_method :destination, :source
+
         def setup
           @asset_name = args[0]
           @asset_path = FilePath.asset(asset_name)
@@ -18,14 +21,6 @@ module Metalware
         def run
           copy_and_edit_record_file
           assign_asset_to_node_if_given(asset_name)
-        end
-
-        def source
-          asset_path
-        end
-
-        def destination
-          source
         end
       end
     end
