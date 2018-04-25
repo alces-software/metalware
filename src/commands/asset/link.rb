@@ -6,8 +6,6 @@ module Metalware
       class Link < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::HasAssetConcern
-
         attr_reader :asset_name, :asset_path, :node
 
         def setup

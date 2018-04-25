@@ -6,8 +6,6 @@ module Metalware
       class Edit < CommandHelpers::RecordEditor
         private
 
-        include CommandHelpers::HasAssetConcern
-
         attr_reader :asset_name, :asset_path
 
         alias source asset_path

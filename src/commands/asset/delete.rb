@@ -9,8 +9,6 @@ module Metalware
       class Delete < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::HasAssetConcern
-
         attr_reader :asset_name, :asset_path
 
         def setup
