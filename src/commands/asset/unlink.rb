@@ -6,11 +6,12 @@ module Metalware
       class Unlink < CommandHelpers::BaseCommand
         private
 
-        attr_reader :node_name, :cache
+        include CommandHelpers::AssetCache
+
+        attr_reader :node_name
 
         def setup
           @node_name = args[0]
-          @cache = Cache::Asset.new
         end
 
         def run
@@ -18,8 +19,8 @@ module Metalware
         end
 
         def unassign_node_from_cache
-          cache.unassign_node(node_name)
-          cache.save
+          asset_cache.unassign_node(node_name)
+          asset_cache.save
         end
       end
     end

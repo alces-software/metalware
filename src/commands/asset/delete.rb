@@ -10,13 +10,13 @@ module Metalware
         private
 
         include CommandHelpers::EnsureAssetExists
+        include CommandHelpers::AssetCache
 
-        attr_reader :asset_name, :asset_path, :cache
+        attr_reader :asset_name, :asset_path
 
         def setup
           @asset_name = args[0]
           @asset_path = FilePath.asset(asset_name)
-          @cache = Cache::Asset.new
         end
 
         def run
@@ -25,8 +25,8 @@ module Metalware
         end
 
         def unassign_asset_from_cache
-          cache.unassign_asset(asset_name)
-          cache.save
+          asset_cache.unassign_asset(asset_name)
+          asset_cache.save
         end
 
         def delete_asset
