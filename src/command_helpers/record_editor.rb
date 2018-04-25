@@ -15,7 +15,7 @@ module Metalware
 
       def assign_asset_to_node_if_given(asset_name)
         return unless node
-        Cache::Asset.update do |cache| 
+        Cache::Asset.update do |cache|
           cache.assign_asset_to_node(asset_name, node)
         end
       end
