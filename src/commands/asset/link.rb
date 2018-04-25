@@ -18,8 +18,9 @@ module Metalware
         end
 
         def run
-          asset_cache.assign_asset_to_node(asset_name, node)
-          asset_cache.save
+          Cache::Asset.update do |cache|  
+            cache.assign_asset_to_node(asset_name, node)
+          end
         end
       end
     end

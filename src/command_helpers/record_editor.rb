@@ -5,8 +5,6 @@ module Metalware
     class RecordEditor < BaseCommand
       private
 
-      include HasAssetConcern
-
       attr_accessor :node
 
       def unpack_node_from_options
@@ -17,8 +15,9 @@ module Metalware
 
       def assign_asset_to_node_if_given(asset_name)
         return unless node
-        asset_cache.assign_asset_to_node(asset_name, node)
-        asset_cache.save
+        Cache::Asset.update do |cache| 
+          cache.assign_asset_to_node(asset_name, node)
+        end
       end
 
       def copy_and_edit_record_file

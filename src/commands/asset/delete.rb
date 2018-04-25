@@ -25,8 +25,7 @@ module Metalware
         end
 
         def unassign_asset_from_cache
-          asset_cache.unassign_asset(asset_name)
-          asset_cache.save
+          Cache::Asset.update { |cache| cache.unassign_asset(asset_name) }
         end
 
         def delete_asset
