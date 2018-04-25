@@ -26,7 +26,7 @@ RSpec.describe Metalware::Commands::Asset::Link do
   it 'errors when the asset does not exist' do
     expect do
       run_command
-    end.to raise_error(Metalware::InvalidInput)
+    end.to raise_error(Metalware::MissingRecordError)
   end
 
   context 'when using a saved asset' do

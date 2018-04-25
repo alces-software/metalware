@@ -44,6 +44,7 @@ module Metalware
   class DataError < UserMetalwareError; end
   class UninitializedLocalNode < UserMetalwareError; end
   class InvalidLocalBuild < UserMetalwareError; end
+  class MissingRecordError < UserMetalwareError; end
 
   class RecursiveConfigDepthExceededError < UserMetalwareError
     def initialize(msg = 'Input hash may contain infinitely recursive ERB')

@@ -12,7 +12,8 @@ module Metalware
 
         def setup
           @asset_name = args[1]
-          @asset_path = asset_path_or_error_if_missing(asset_name)
+          @asset_path = Records::Path.asset(asset_name,
+                                            missing_error: true)
           @node = alces.nodes.find_by_name(args[0])
         end
 

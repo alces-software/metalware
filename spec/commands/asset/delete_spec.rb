@@ -19,7 +19,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
   it 'errors if the asset does not exist' do
     expect do
       run_command
-    end.to raise_error(Metalware::InvalidInput)
+    end.to raise_error(Metalware::MissingRecordError)
   end
 
   context 'when using a saved asset' do

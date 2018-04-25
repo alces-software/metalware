@@ -16,7 +16,7 @@ RSpec.describe Metalware::Commands::Asset::Edit do
                                    'missing-type',
                                    'name',
                                    stderr: StringIO.new)
-    end.to raise_error(Metalware::InvalidInput)
+    end.to raise_error(Metalware::MissingRecordError)
   end
 
   context 'when using a saved asset' do

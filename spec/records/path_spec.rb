@@ -20,7 +20,7 @@ RSpec.describe Metalware::Records::Path do
   end
 
   # Creates the asset files
-  before :each do
+  before do
     all_assets = []
     asset_hash.each do |types_dir, names|
       names.each do |name|
@@ -43,15 +43,34 @@ RSpec.describe Metalware::Records::Path do
     expect(described_class.asset(name)).to eq(path)
   end
 
-  it 'can find an asset within a type directory' do
-    type = asset_hash.keys.last
-    name = asset_hash[type].last
-    path = Metalware::FilePath.asset(File.join(type.to_s, name))
-    expect(described_class.asset(name)).to eq(path)
+  context 'with an asset within a type directory' do
+    let(:type) { asset_hash.keys.last }
+    let(:name) { asset_hash[type].last }
+    let(:expected_path) do
+      Metalware::FilePath.asset(File.join(type.to_s, name))
+    end
+
+    it 'finds the asset' do
+      expect(described_class.asset(name)).to eq(expected_path)
+    end
+
+    it 'finds the asset with the missing_error flag' do
+      path = described_class.asset(name, missing_error: true)
+      expect(path).to eq(expected_path)
+    end
   end
 
-  it 'returns nil if the asset is missing' do
-    name = 'missing-asset'
-    expect(described_class.asset(name)).to eq(nil)
+  context 'with a missing asset' do
+    let(:missing) { 'missing-asset' }
+
+    it 'returns nil by default' do
+      expect(described_class.asset(missing)).to eq(nil)
+    end
+
+    it 'errors with the missing_error flag' do
+      expect do
+        described_class.asset(missing, missing_error: true)
+      end.to raise_error(Metalware::MissingRecordError)
+    end
   end
 end
