@@ -17,7 +17,8 @@ module Metalware
           @type_name = args[0]
           @type_path = FilePath.asset_type(type_name)
           @asset_name = args[1]
-          @asset_path = FilePath.asset(asset_name)
+          @asset_path = FilePath.asset(type_name.pluralize,
+                                       asset_name)
           unpack_node_from_options
         end
 

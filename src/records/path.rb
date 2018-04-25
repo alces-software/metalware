@@ -18,7 +18,7 @@ module Metalware
         end
 
         def assets
-          Dir.glob(FilePath.asset('**/*'))
+          Dir.glob(FilePath.asset('**', '*'))
         end
 
         private

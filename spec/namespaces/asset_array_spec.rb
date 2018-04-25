@@ -13,10 +13,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     [
       {
         name: 'asset1',
+        types_dir: 'pdus',
         data: { key: 'value1' },
       },
       {
         name: 'asset2',
+        types_dir: 'racks',
         data: { key: 'value2' },
       },
     ]
@@ -34,7 +36,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   before do
     assets.each do |asset|
-      path = Metalware::FilePath.asset(asset[:name])
+      path = Metalware::FilePath.asset(asset[:types_dir],
+                                       asset[:name])
+      FileUtils.mkdir_p(File.dirname(path))
       Metalware::Data.dump(path, asset[:data])
     end
   end
@@ -42,7 +46,8 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   describe '#new' do
     context 'when there is an asset called "each"' do
       before do
-        each_path = Metalware::FilePath.asset('each')
+        each_path = Metalware::FilePath.asset('racks', 'each')
+        FileUtils.mkdir_p(File.dirname(each_path))
         Metalware::Data.dump(each_path, data: 'some-data')
       end
 

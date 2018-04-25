@@ -21,15 +21,16 @@ RSpec.describe Metalware::Records::Path do
 
   # Creates the asset files
   before do
-    all_assets = []
+    paths = []
     asset_hash.each do |types_dir, names|
       names.each do |name|
-        all_assets << File.join(types_dir.to_s, name)
+        paths << Metalware::FilePath.asset(types_dir.to_s, name)
       end
     end
-    legacy_assets.each { |n| all_assets << n }
-    all_assets.each do |asset|
-      path = Metalware::FilePath.asset(asset)
+    legacy_assets.each do |legacy|
+      paths << File.expand_path(Metalware::FilePath.asset('.', legacy))
+    end
+    paths.each do |path|
       FileUtils.mkdir_p(File.dirname(path))
       FileUtils.touch(path)
     end
@@ -39,15 +40,15 @@ RSpec.describe Metalware::Records::Path do
   # invisible
   it 'can find a legacy assets' do
     name = legacy_assets.last
-    path = Metalware::FilePath.asset(name)
+    path = File.expand_path(Metalware::FilePath.asset('.', name))
     expect(described_class.asset(name)).to eq(path)
   end
 
   context 'with an asset within a type directory' do
-    let(:type) { asset_hash.keys.last }
-    let(:name) { asset_hash[type].last }
+    let(:types_dir) { asset_hash.keys.last }
+    let(:name) { asset_hash[types_dir].last }
     let(:expected_path) do
-      Metalware::FilePath.asset(File.join(type.to_s, name))
+      Metalware::FilePath.asset(types_dir.to_s, name)
     end
 
     it 'finds the asset' do

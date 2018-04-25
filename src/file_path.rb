@@ -152,8 +152,9 @@ module Metalware
         File.join(repo, 'assets', type + '.yaml')
       end
 
-      def asset(name)
-        File.join(metalware_data, 'assets', name + '.yaml')
+      def asset(types_dir, name)
+        File.join(metalware_data, 'assets',
+                  types_dir, name + '.yaml')
       end
 
       def asset_cache
