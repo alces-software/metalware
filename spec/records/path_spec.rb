@@ -36,12 +36,8 @@ RSpec.describe Metalware::Records::Path do
     end
   end
 
-  # NOTE: Once FilePath is updated, the legacy assets should become
-  # invisible
-  it 'can find a legacy assets' do
-    name = legacy_assets.last
-    path = File.expand_path(Metalware::FilePath.asset('.', name))
-    expect(described_class.asset(name)).to eq(path)
+  it 'can not find a legacy assets' do
+    expect(described_class.asset(legacy_assets.last)).to eq(nil)
   end
 
   context 'with an asset within a type directory' do
