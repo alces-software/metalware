@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'records/path'
+
 module Metalware
   module Namespaces
     class AssetArray
@@ -40,7 +42,7 @@ module Metalware
 
       def initialize(alces)
         @alces = alces
-        @asset_loaders = Dir.glob(FilePath.asset('*')).map do |path|
+        @asset_loaders = Records::Path.assets.map do |path|
           AssetLoader.new(alces, path).tap do |loader|
             raise_error_if_method_is_defined(loader.name)
             define_singleton_method(loader.name) { loader.data }

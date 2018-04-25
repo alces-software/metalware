@@ -15,8 +15,8 @@ module Metalware
 
         def setup
           @asset_name = args[0]
-          @asset_path = FilePath.asset(asset_name)
-          ensure_asset_exists
+          @asset_path = Records::Path.asset(asset_name,
+                                            missing_error: true)
         end
 
         def run

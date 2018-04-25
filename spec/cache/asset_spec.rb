@@ -113,7 +113,7 @@ RSpec.describe Metalware::Cache::Asset do
     it 'unassigns an asset from the cache' do
       cache.unassign_asset(asset_name)
       cache.save
-      new_cache = Metalware::Cache::Asset.new
+      new_cache = described_class.new
       expect(new_cache.data).to eq(expected_content)
     end
 

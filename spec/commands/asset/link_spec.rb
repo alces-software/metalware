@@ -26,18 +26,14 @@ RSpec.describe Metalware::Commands::Asset::Link do
   it 'errors when the asset does not exist' do
     expect do
       run_command
-    end.to raise_error(Metalware::InvalidInput)
+    end.to raise_error(Metalware::MissingRecordError)
   end
 
   context 'when using a saved asset' do
-    before do
+    AlcesUtils.mock(self, :each) do
       FileSystem.root_setup(&:with_minimal_repo)
+      create_asset(asset_name, {})
     end
-
-    let(:asset_path) { Metalware::FilePath.asset(asset_name) }
-    let(:asset_content) { { key: 'value' } }
-
-    before { Metalware::Data.dump(asset_path, asset_content) }
 
     it 'links the asset to a node' do
       run_command
