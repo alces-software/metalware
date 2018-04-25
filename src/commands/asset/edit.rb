@@ -8,8 +8,8 @@ module Metalware
 
         attr_reader :asset_name, :asset_path
 
-        alias_method :source, :asset_path
-        alias_method :destination, :source
+        alias source asset_path
+        alias destination source
 
         def setup
           @asset_name = args[0]

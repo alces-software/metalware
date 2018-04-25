@@ -10,8 +10,8 @@ module Metalware
 
         attr_reader :template_name, :template_path, :asset_path, :asset_name
 
-        alias_method :source, :template_path
-        alias_method :destination, :asset_path
+        alias source template_path
+        alias destination asset_path
 
         def setup
           @template_name = args[0]
