@@ -6,8 +6,6 @@ module Metalware
       class Link < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::HasAssetConcern
-
         attr_reader :asset_name, :asset_path, :node
 
         def setup
@@ -18,8 +16,9 @@ module Metalware
         end
 
         def run
-          asset_cache.assign_asset_to_node(asset_name, node)
-          asset_cache.save
+          Cache::Asset.update do |cache|
+            cache.assign_asset_to_node(asset_name, node)
+          end
         end
       end
     end

@@ -9,8 +9,6 @@ module Metalware
       class Delete < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::HasAssetConcern
-
         attr_reader :asset_name, :asset_path
 
         def setup
@@ -25,8 +23,7 @@ module Metalware
         end
 
         def unassign_asset_from_cache
-          asset_cache.unassign_asset(asset_name)
-          asset_cache.save
+          Cache::Asset.update { |cache| cache.unassign_asset(asset_name) }
         end
 
         def delete_asset

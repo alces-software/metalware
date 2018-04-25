@@ -6,8 +6,6 @@ module Metalware
       class Unlink < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::HasAssetConcern
-
         attr_reader :node_name
 
         def setup
@@ -19,8 +17,7 @@ module Metalware
         end
 
         def unassign_node_from_cache
-          asset_cache.unassign_node(node_name)
-          asset_cache.save
+          Cache::Asset.update { |cache| cache.unassign_node(node_name) }
         end
       end
     end
