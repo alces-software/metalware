@@ -27,6 +27,7 @@ $LOAD_PATH.unshift File.dirname(__FILE__)
 require 'rubygems'
 require 'bundler/setup'
 require 'commander'
+require 'config'
 require 'colorize'
 
 require 'commander_extensions'
