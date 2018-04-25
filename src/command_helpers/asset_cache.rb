@@ -3,8 +3,6 @@
 module Metalware
   module CommandHelpers
     module AssetCache
-      private
-
       def asset_cache
         @asset_cache ||= Cache::Asset.new
       end
