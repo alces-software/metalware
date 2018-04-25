@@ -6,7 +6,7 @@ module Metalware
       class Unlink < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::AssetCache
+        include CommandHelpers::HasAssetConcern
 
         attr_reader :node_name
 

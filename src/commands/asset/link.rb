@@ -6,8 +6,7 @@ module Metalware
       class Link < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::EnsureAssetExists
-        include CommandHelpers::AssetCache
+        include CommandHelpers::HasAssetConcern
 
         attr_reader :asset_name, :asset_path, :node
 
@@ -15,6 +14,7 @@ module Metalware
           @asset_name = args[1]
           @asset_path = FilePath.asset(asset_name)
           @node = alces.nodes.find_by_name(args[0])
+          ensure_asset_exists
         end
 
         def run

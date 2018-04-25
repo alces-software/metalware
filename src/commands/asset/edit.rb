@@ -6,14 +6,13 @@ module Metalware
       class Edit < CommandHelpers::RecordEditor
         private
 
-        include CommandHelpers::EnsureAssetExists
-
         attr_reader :asset_name, :asset_path
 
         def setup
           @asset_name = args[0]
           @asset_path = FilePath.asset(asset_name)
           unpack_node_from_options
+          ensure_asset_exists
         end
 
         def run

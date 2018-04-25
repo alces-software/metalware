@@ -9,14 +9,14 @@ module Metalware
       class Delete < CommandHelpers::BaseCommand
         private
 
-        include CommandHelpers::EnsureAssetExists
-        include CommandHelpers::AssetCache
+        include CommandHelpers::HasAssetConcern
 
         attr_reader :asset_name, :asset_path
 
         def setup
           @asset_name = args[0]
           @asset_path = FilePath.asset(asset_name)
+          ensure_asset_exists
         end
 
         def run

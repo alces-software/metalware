@@ -5,7 +5,7 @@ module Metalware
     class RecordEditor < BaseCommand
       private
 
-      include AssetCache
+      include HasAssetConcern
 
       attr_accessor :node
 
