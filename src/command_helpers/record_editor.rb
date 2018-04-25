@@ -1,18 +1,13 @@
 # frozen_string_literal: true
 
-require 'utils/editor'
-require 'cache/asset'
-
 module Metalware
   module CommandHelpers
-    module AssetHelper
+    class RecordEditor < BaseCommand
       private
 
-      attr_accessor :node
+      include HasAssetConcern
 
-      def asset_cache
-        @asset_cache ||= Cache::Asset.new
-      end
+      attr_accessor :node
 
       def unpack_node_from_options
         return unless options.node
@@ -26,21 +21,7 @@ module Metalware
         asset_cache.save
       end
 
-      def unassign_asset_from_cache(asset_name)
-        asset_cache.unassign_asset(asset_name)
-        asset_cache.save
-      end
-
-      def unassign_node_from_cache(node_name)
-        asset_cache.unassign_node(node_name)
-        asset_cache.save
-      end
-
-      def edit_asset_file(file)
-        copy_and_edit_asset_file(file, file)
-      end
-
-      def copy_and_edit_asset_file(source, destination)
+      def copy_and_edit_record_file
         Utils::Editor.open_copy(source, destination) do |edited_path|
           begin
             Metalware::Data.load(edited_path).is_a?(Hash)
@@ -57,12 +38,12 @@ module Metalware
         EOF
       end
 
-      def error_if_asset_file_doesnt_exist(asset_path)
-        asset_name = File.basename(asset_path, '.*')
-        return if File.exist?(asset_path)
-        raise InvalidInput, <<-EOF.squish
-          The "#{asset_name}" asset does not exist
-        EOF
+      def source
+        raise NotImplementedError
+      end
+
+      def destination
+        raise NotImplementedError
       end
     end
   end

@@ -3,10 +3,10 @@
 module Metalware
   module Commands
     module Asset
-      class Unlink < Metalware::CommandHelpers::BaseCommand
-        include CommandHelpers::AssetHelper
-
+      class Unlink < CommandHelpers::BaseCommand
         private
+
+        include CommandHelpers::HasAssetConcern
 
         attr_reader :node_name
 
@@ -15,7 +15,12 @@ module Metalware
         end
 
         def run
-          unassign_node_from_cache(node_name)
+          unassign_node_from_cache
+        end
+
+        def unassign_node_from_cache
+          asset_cache.unassign_node(node_name)
+          asset_cache.save
         end
       end
     end

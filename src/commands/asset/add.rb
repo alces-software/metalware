@@ -5,12 +5,13 @@ require 'utils/editor'
 module Metalware
   module Commands
     module Asset
-      class Add < Metalware::CommandHelpers::BaseCommand
-        include CommandHelpers::AssetHelper
-
+      class Add < CommandHelpers::RecordEditor
         private
 
         attr_reader :template_name, :template_path, :asset_path, :asset_name
+
+        alias source template_path
+        alias destination asset_path
 
         def setup
           @template_name = args[0]
@@ -23,7 +24,7 @@ module Metalware
         def run
           error_if_template_is_missing
           error_if_asset_exists
-          copy_and_edit_asset_file(template_path, asset_path)
+          copy_and_edit_record_file
           assign_asset_to_node_if_given(asset_name)
         end
 
