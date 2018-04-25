@@ -4,9 +4,9 @@ module Metalware
   module Commands
     module Asset
       class Edit < CommandHelpers::RecordEditor
-        include CommandHelpers::EnsureAssetExists
-
         private
+
+        include CommandHelpers::EnsureAssetExists
 
         attr_reader :asset_name, :asset_path
 

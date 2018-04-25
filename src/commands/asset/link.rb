@@ -4,10 +4,10 @@ module Metalware
   module Commands
     module Asset
       class Link < CommandHelpers::BaseCommand
+        private
+
         include CommandHelpers::EnsureAssetExists
         include CommandHelpers::AssetCache
-
-        private
 
         attr_reader :asset_name, :asset_path, :node
 
