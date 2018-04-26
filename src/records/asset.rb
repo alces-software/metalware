@@ -5,6 +5,12 @@ require 'file_path'
 module Metalware
   module Records
     class Asset
+      TYPES = begin
+        Dir.glob(Metalware::FilePath.asset_type('*')).map do |path|
+          File.basename(path, '.yaml')
+        end
+      end.freeze
+
       class << self
         def path(name, missing_error: false)
           paths.find { |path| name == File.basename(path, '.yaml') }
