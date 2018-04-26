@@ -24,7 +24,11 @@ module Metalware
         end
 
         def available?(name)
-          !path(name)
+          if TYPES.include?(name) || TYPES.map(&:pluralize).include?(name)
+            false
+          else
+            !path(name)
+          end
         end
 
         private
