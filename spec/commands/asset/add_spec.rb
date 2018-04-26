@@ -20,10 +20,10 @@ RSpec.describe Metalware::Commands::Asset::Add do
 
   context 'when using the default type' do
     before do
-      FileSystem.root_setup(&:with_minimal_repo)
+      FileSystem.root_setup(&:with_asset_types)
     end
 
-    let(:type) { 'default' }
+    let(:type) { 'rack' }
     let(:save) { 'saved-asset' }
 
     let(:type_path) { Metalware::FilePath.asset_type(type) }
@@ -36,7 +36,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
                                    stderr: StringIO.new)
     end
 
-    it 'calls for the type to be opened and copyed' do
+    it 'calls for the type to be opened and copied' do
       expect(Metalware::Utils::Editor).to receive(:open_copy)
         .with(type_path, save_path)
       run_command
@@ -51,10 +51,10 @@ RSpec.describe Metalware::Commands::Asset::Add do
   end
 
   context 'with a node argument' do
-    before { FileSystem.root_setup(&:with_minimal_repo) }
+    before { FileSystem.root_setup(&:with_asset_types) }
 
     let(:asset_name) { 'asset1' }
-    let(:command_arguments) { ['default', asset_name] }
+    let(:command_arguments) { ['rack', asset_name] }
 
     it_behaves_like 'asset command that assigns a node'
   end
