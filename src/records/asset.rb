@@ -4,17 +4,21 @@ require 'file_path'
 
 module Metalware
   module Records
-    class Path
+    class Asset
       class << self
-        def asset(name, missing_error: false)
-          assets.find { |path| name == File.basename(path, '.yaml') }
-                .tap do |path|
+        def path(name, missing_error: false)
+          paths.find { |path| name == File.basename(path, '.yaml') }
+               .tap do |path|
             raise_missing_asset(name) if missing_error && !path
           end
         end
 
-        def assets
+        def paths
           Dir.glob(FilePath.asset('[a-z]*', '*'))
+        end
+
+        def available?(name)
+          !path(name)
         end
 
         private

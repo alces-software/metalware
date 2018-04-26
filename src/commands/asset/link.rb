@@ -10,7 +10,7 @@ module Metalware
 
         def setup
           @asset_name = args[1]
-          @asset_path = Records::Path.asset(asset_name,
+          @asset_path = Records::Asset.path(asset_name,
                                             missing_error: true)
           @node = alces.nodes.find_by_name(args[0])
         end

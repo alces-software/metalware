@@ -13,7 +13,7 @@ module Metalware
 
         def setup
           @asset_name = args[0]
-          @asset_path = Records::Path.asset(asset_name,
+          @asset_path = Records::Asset.path(asset_name,
                                             missing_error: true)
         end
 
