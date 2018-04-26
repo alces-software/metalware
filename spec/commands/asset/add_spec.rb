@@ -49,14 +49,14 @@ RSpec.describe Metalware::Commands::Asset::Add do
       expect do
         run_command
       end.to raise_error(Metalware::InvalidInput)
-               .with_message(/already exists/)
+        .with_message(/already exists/)
     end
 
     it 'errors if the asset name is an asset type' do
       expect do
         run_command(type)
       end.to raise_error(Metalware::InvalidInput)
-               .with_message(/is not a valid/)
+        .with_message(/is not a valid/)
     end
   end
 

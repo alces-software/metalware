@@ -37,7 +37,7 @@ module Metalware
         private
 
         def raise_missing_record(name)
-          klass = self.to_s.gsub(/^.*::/, '').downcase
+          klass = to_s.gsub(/^.*::/, '').downcase
           raise MissingRecordError, <<-EOF.squish
             The "#{name}" #{klass} does not exist
           EOF
