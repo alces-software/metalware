@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'file_path'
+require 'namespaces/asset_array'
 
 module Metalware
   module Records
@@ -26,7 +27,7 @@ module Metalware
         def available?(name)
           if TYPES.include?(name) || TYPES.map(&:pluralize).include?(name)
             false
-          elsif Namespaces::AssetArray.respond_to?(name, true)
+          elsif reserved_methods.include?(name)
             false
           else
             !path(name)
@@ -39,6 +40,14 @@ module Metalware
           raise MissingRecordError, <<-EOF.squish
             The "#{name}" asset does not exist
           EOF
+        end
+
+        def reserved_methods
+          @reserved_methods ||= begin
+            Namespaces::AssetArray.instance_methods.concat(
+              Namespaces::AssetArray.private_instance_methods
+            ).uniq.map(&:to_s)
+          end
         end
       end
     end
