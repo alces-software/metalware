@@ -16,7 +16,7 @@ module Metalware
         def path(name, missing_error: false)
           paths.find { |path| name == File.basename(path, '.yaml') }
                .tap do |path|
-            raise_missing_asset(name) if missing_error && !path
+            raise_missing_record(name) if missing_error && !path
           end
         end
 
@@ -36,9 +36,10 @@ module Metalware
 
         private
 
-        def raise_missing_asset(name)
+        def raise_missing_record(name)
+          klass = self.to_s.gsub(/^.*::/, '').downcase
           raise MissingRecordError, <<-EOF.squish
-            The "#{name}" asset does not exist
+            The "#{name}" #{klass} does not exist
           EOF
         end
 
