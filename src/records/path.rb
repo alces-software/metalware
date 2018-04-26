@@ -6,10 +6,6 @@ module Metalware
   module Records
     class Path
       class << self
-        # NOTE: Currently this method wraps the FilePath method
-        # Eventually FilePath.asset will take a type input however
-        # Records::Path will contain all the file globing and thus
-        # will only require the name
         def asset(name, missing_error: false)
           assets.find { |path| name == File.basename(path, '.yaml') }
                 .tap do |path|
@@ -18,7 +14,7 @@ module Metalware
         end
 
         def assets
-          Dir.glob(FilePath.asset('**/*'))
+          Dir.glob(FilePath.asset('[a-z]*', '*'))
         end
 
         private
