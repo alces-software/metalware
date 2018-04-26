@@ -26,7 +26,10 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   let(:assets_data) do
     assets.map do |asset|
-      asset[:data].merge(metadata: { name: asset[:name] })
+      asset[:data].merge(metadata: {
+                           name: asset[:name],
+                           type: asset[:types_dir].singularize,
+                         })
     end
   end
 
