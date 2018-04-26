@@ -21,7 +21,7 @@ module Metalware
         end
 
         def paths
-          Dir.glob(FilePath.asset('[a-z]*', '*'))
+          raise NotImplementedError
         end
 
         def available?(name)
