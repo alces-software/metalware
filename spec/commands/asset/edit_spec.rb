@@ -22,7 +22,7 @@ RSpec.describe Metalware::Commands::Asset::Edit do
   context 'when using a saved asset' do
     let(:saved_asset) { 'saved-asset' }
     let(:test_content) { { key: 'value' } }
-    let(:asset_path) { Metalware::Records::Path.asset(saved_asset) }
+    let(:asset_path) { Metalware::Records::Asset.path(saved_asset) }
 
     AlcesUtils.mock(self, :each) do
       FileSystem.root_setup(&:with_minimal_repo)

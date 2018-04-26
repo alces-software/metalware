@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_utils'
-require 'records/path'
 
-RSpec.describe Metalware::Records::Path do
+RSpec.describe Metalware::Records::Asset do
   let(:asset_hash) do
     {
       pdus: ['pdu1', 'pdu2'],
@@ -36,9 +35,9 @@ RSpec.describe Metalware::Records::Path do
     end
   end
 
-  describe '#asset' do
+  describe '#path' do
     it 'can not find a legacy assets' do
-      expect(described_class.asset(legacy_assets.last)).to eq(nil)
+      expect(described_class.path(legacy_assets.last)).to eq(nil)
     end
 
     context 'with an asset within a type directory' do
@@ -49,11 +48,11 @@ RSpec.describe Metalware::Records::Path do
       end
 
       it 'finds the asset' do
-        expect(described_class.asset(name)).to eq(expected_path)
+        expect(described_class.path(name)).to eq(expected_path)
       end
 
       it 'finds the asset with the missing_error flag' do
-        path = described_class.asset(name, missing_error: true)
+        path = described_class.path(name, missing_error: true)
         expect(path).to eq(expected_path)
       end
     end
@@ -62,12 +61,12 @@ RSpec.describe Metalware::Records::Path do
       let(:missing) { 'missing-asset' }
 
       it 'returns nil by default' do
-        expect(described_class.asset(missing)).to eq(nil)
+        expect(described_class.path(missing)).to eq(nil)
       end
 
       it 'errors with the missing_error flag' do
         expect do
-          described_class.asset(missing, missing_error: true)
+          described_class.path(missing, missing_error: true)
         end.to raise_error(Metalware::MissingRecordError)
       end
     end

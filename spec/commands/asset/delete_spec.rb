@@ -30,7 +30,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
 
     it 'deletes the asset file' do
       run_command
-      expect(Metalware::Records::Path.asset(asset)).to be_nil
+      expect(Metalware::Records::Asset.path(asset)).to be_nil
     end
   end
 end
