@@ -42,7 +42,6 @@ module MinimalRepo
       'genders/default': '',
       'dhcp/default': '',
       'config/domain.yaml': '',
-      'assets/default.yaml': '',
       'configure.yaml': YAML.dump(questions: [],
                                   domain: [],
                                   group: [],

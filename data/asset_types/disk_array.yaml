@@ -1,0 +1,8 @@
+oob:
+  ip: null
+  netmask: null
+  user: null
+  password: null
+location:
+  rack: null
+  slot: null

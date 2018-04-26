@@ -1,0 +1,6 @@
+#port_name: cable_colour
+ports:
+  em1: null
+  em2: null
+  em3: null
+  em4: null

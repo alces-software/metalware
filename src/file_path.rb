@@ -149,7 +149,7 @@ module Metalware
       end
 
       def asset_type(type)
-        File.join(repo, 'assets', type + '.yaml')
+        File.join(metalware_install, 'data/asset_types', type + '.yaml')
       end
 
       def asset(types_dir, name)

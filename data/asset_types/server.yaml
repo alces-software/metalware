@@ -1,0 +1,12 @@
+manufacturer: null
+oob:
+  ip: null
+  netmask: null
+  user: null
+  password: null
+psus: null
+network_adapters: null
+location:
+  rack: null
+  chassis: null
+  slot: null

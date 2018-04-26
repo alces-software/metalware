@@ -1,0 +1,11 @@
+manufacturer: null
+slots: 4
+oob:
+  ip: null
+  netmask: null
+  user: null
+  password: null
+psus: null
+location:
+  rack: null
+  slot: null

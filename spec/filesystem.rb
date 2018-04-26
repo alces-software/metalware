@@ -187,6 +187,11 @@ class FileSystem
     )
   end
 
+  def with_asset_types
+    asset_types_dir_path = File.dirname(Metalware::FilePath.asset_type(''))
+    FakeFS::FileSystem.clone(asset_types_dir_path, asset_types_dir_path)
+  end
+
   # Create same directory hierarchy that would be created by a Metalware
   # install.
   def create_initial_directory_hierarchy
