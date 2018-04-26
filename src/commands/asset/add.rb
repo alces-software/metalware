@@ -25,6 +25,7 @@ module Metalware
         def run
           error_if_type_is_missing
           error_if_asset_exists
+          FileUtils.mkdir_p File.dirname(destination)
           copy_and_edit_record_file
           assign_asset_to_node_if_given(asset_name)
         end
