@@ -3,30 +3,30 @@
 require 'spec_utils'
 
 RSpec.shared_examples 'record' do
-  let(:asset_hash) do
+  let(:record_hash) do
     {
       pdus: ['pdu1', 'pdu2'],
       racks: ['rack1', 'rack2'],
     }
   end
 
-  let(:legacy_assets) { ['legacy1', 'legacy2'] }
+  let(:legacy_records) { ['legacy1', 'legacy2'] }
 
-  let(:assets) do
-    asset_hash.reduce(legacy_assets) do |memo, (_k, name)|
+  let(:records) do
+    record_hash.reduce(legacy_records) do |memo, (_k, name)|
       memo.dup.concat(name)
     end
   end
 
-  # Creates the asset files
+  # Creates the record files
   before do
     paths = []
-    asset_hash.each do |types_dir, names|
+    record_hash.each do |types_dir, names|
       names.each do |name|
         paths << Metalware::FilePath.asset(types_dir.to_s, name)
       end
     end
-    legacy_assets.each do |legacy|
+    legacy_records.each do |legacy|
       paths << File.expand_path(Metalware::FilePath.asset('.', legacy))
     end
     paths.each do |path|
@@ -36,29 +36,29 @@ RSpec.shared_examples 'record' do
   end
 
   describe '#path' do
-    it 'can not find a legacy assets' do
-      expect(described_class.path(legacy_assets.last)).to eq(nil)
+    it 'can not find a legacy records' do
+      expect(described_class.path(legacy_records.last)).to eq(nil)
     end
 
-    context 'with an asset within a type directory' do
-      let(:types_dir) { asset_hash.keys.last }
-      let(:name) { asset_hash[types_dir].last }
+    context 'with an record within a type directory' do
+      let(:types_dir) { record_hash.keys.last }
+      let(:name) { record_hash[types_dir].last }
       let(:expected_path) do
         Metalware::FilePath.asset(types_dir.to_s, name)
       end
 
-      it 'finds the asset' do
+      it 'finds the record' do
         expect(described_class.path(name)).to eq(expected_path)
       end
 
-      it 'finds the asset with the missing_error flag' do
+      it 'finds the record with the missing_error flag' do
         path = described_class.path(name, missing_error: true)
         expect(path).to eq(expected_path)
       end
     end
 
-    context 'with a missing asset' do
-      let(:missing) { 'missing-asset' }
+    context 'with a missing record' do
+      let(:missing) { 'missing-record' }
 
       it 'returns nil by default' do
         expect(described_class.path(missing)).to eq(nil)
@@ -73,12 +73,12 @@ RSpec.shared_examples 'record' do
   end
 
   describe '#available?' do
-    it 'returns true if the asset is missing' do
-      expect(described_class.available?('missing-asset')).to eq(true)
+    it 'returns true if the record is missing' do
+      expect(described_class.available?('missing-record')).to eq(true)
     end
 
-    it 'returns false if the asset exists' do
-      name = asset_hash.values.last.last
+    it 'returns false if the record exists' do
+      name = record_hash.values.last.last
       expect(described_class.available?(name)).to eq(false)
     end
 
