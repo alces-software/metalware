@@ -82,6 +82,16 @@ RSpec.describe Metalware::Records::Asset do
       expect(described_class.available?(name)).to eq(false)
     end
 
+    asset_array = Metalware::Namespaces::AssetArray
+    {
+      'public' => asset_array.instance_methods.sort.first,
+      'private' => asset_array.private_instance_methods.sort.first
+    }.each do |type, method|
+      it "returns false for #{type} methods on AssetArray" do
+        expect(described_class.available?(method)).to eq(false)
+      end
+    end
+
     context 'when using a reserved type name' do
       let(:type) { 'rack' }
 

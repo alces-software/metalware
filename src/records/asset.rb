@@ -26,6 +26,8 @@ module Metalware
         def available?(name)
           if TYPES.include?(name) || TYPES.map(&:pluralize).include?(name)
             false
+          elsif Namespaces::AssetArray.respond_to?(name, true)
+            false
           else
             !path(name)
           end
