@@ -72,14 +72,14 @@ RSpec.describe Metalware::Records::Asset do
     end
   end
 
-  describe '#avaliable?' do
+  describe '#available?' do
     it 'returns true if the asset is missing' do
-      expect(described_class.avaliable?('missing-asset')).to eq(true)
+      expect(described_class.available?('missing-asset')).to eq(true)
     end
 
     it 'returns false if the asset exists' do
       name = asset_hash.values.last.last
-      expect(described_class.avaliable?(name)).to eq(false)
+      expect(described_class.available?(name)).to eq(false)
     end
   end
 end

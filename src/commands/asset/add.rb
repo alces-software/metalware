@@ -38,7 +38,7 @@ module Metalware
         end
 
         def error_if_asset_exists
-          return if Records::Asset.avaliable?(asset_name)
+          return if Records::Asset.available?(asset_name)
           raise InvalidInput, <<-EOF.squish
             The "#{asset_name}" asset already exists. Please use `metal
             asset edit` instead

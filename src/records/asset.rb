@@ -17,7 +17,7 @@ module Metalware
           Dir.glob(FilePath.asset('[a-z]*', '*'))
         end
 
-        def avaliable?(name)
+        def available?(name)
           !path(name)
         end
 
