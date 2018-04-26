@@ -17,6 +17,10 @@ module Metalware
           Dir.glob(FilePath.asset('[a-z]*', '*'))
         end
 
+        def avaliable?(name)
+          !asset(name)
+        end
+
         private
 
         def raise_missing_asset(name)
