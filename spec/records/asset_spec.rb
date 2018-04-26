@@ -81,5 +81,23 @@ RSpec.describe Metalware::Records::Asset do
       name = asset_hash.values.last.last
       expect(described_class.available?(name)).to eq(false)
     end
+
+    { 'public' => 'each', 'private' => 'alces' }.each do |type, method|
+      it "returns false for #{type} methods on AssetArray" do
+        expect(described_class.available?(method)).to eq(false)
+      end
+    end
+
+    context 'when using a reserved type name' do
+      let(:type) { 'rack' }
+
+      it 'returns false' do
+        expect(described_class.available?(type)).to eq(false)
+      end
+
+      it 'is false for the plural' do
+        expect(described_class.available?(type.pluralize)).to eq(false)
+      end
+    end
   end
 end
