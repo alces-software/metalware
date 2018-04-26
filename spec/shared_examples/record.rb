@@ -2,7 +2,7 @@
 
 require 'spec_utils'
 
-RSpec.shared_examples 'record' do
+RSpec.shared_examples 'record' do |file_path_proc|
   let(:record_hash) do
     {
       pdus: ['pdu1', 'pdu2'],
@@ -23,11 +23,11 @@ RSpec.shared_examples 'record' do
     paths = []
     record_hash.each do |types_dir, names|
       names.each do |name|
-        paths << Metalware::FilePath.asset(types_dir.to_s, name)
+        paths << file_path_proc.call(types_dir.to_s, name)
       end
     end
     legacy_records.each do |legacy|
-      paths << File.expand_path(Metalware::FilePath.asset('.', legacy))
+      paths << File.expand_path(file_path_proc.call('.', legacy))
     end
     paths.each do |path|
       FileUtils.mkdir_p(File.dirname(path))
@@ -44,7 +44,7 @@ RSpec.shared_examples 'record' do
       let(:types_dir) { record_hash.keys.last }
       let(:name) { record_hash[types_dir].last }
       let(:expected_path) do
-        Metalware::FilePath.asset(types_dir.to_s, name)
+        file_path_proc.call(types_dir.to_s, name)
       end
 
       it 'finds the record' do
