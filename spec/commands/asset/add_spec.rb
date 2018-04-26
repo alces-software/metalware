@@ -31,10 +31,10 @@ RSpec.describe Metalware::Commands::Asset::Add do
       Metalware::FilePath.asset(type.pluralize, save)
     end
 
-    def run_command
+    def run_command(asset_name = save)
       Metalware::Utils.run_command(described_class,
                                    type,
-                                   save,
+                                   asset_name,
                                    stderr: StringIO.new)
     end
 
@@ -49,6 +49,14 @@ RSpec.describe Metalware::Commands::Asset::Add do
       expect do
         run_command
       end.to raise_error(Metalware::InvalidInput)
+               .with_message(/already exists/)
+    end
+
+    it 'errors if the asset name is an asset type' do
+      expect do
+        run_command(type)
+      end.to raise_error(Metalware::InvalidInput)
+               .with_message(/is not a valid/)
     end
   end
 
