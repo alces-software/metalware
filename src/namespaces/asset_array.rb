@@ -47,11 +47,9 @@ module Metalware
       def initialize(alces)
         @alces = alces
         @asset_loaders = Records::Asset.paths.map do |path|
-          AssetLoader.new(alces, path).tap do |loader|
-            raise_error_if_method_is_defined(loader.name)
-            define_singleton_method(loader.name) { loader.data }
-          end
+          AssetLoader.new(alces, path)
         end
+        asset_loaders.each { |l| define_asset_method_from_loader(l) }
       end
 
       def [](index)
@@ -78,6 +76,11 @@ module Metalware
         raise DataError, <<-EOF.strip_heredoc
           Asset can not be called key word: #{method}
         EOF
+      end
+
+      def define_asset_method_from_loader(loader)
+        raise_error_if_method_is_defined(loader.name)
+        define_singleton_method(loader.name) { loader.data }
       end
     end
   end
