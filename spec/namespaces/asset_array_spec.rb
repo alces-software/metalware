@@ -183,8 +183,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   describe 'asset types methods' do
     it 'defines all the type methods as the plural' do
-      Metalware::Records::Asset::TYPES.each do |type|
-        expect(subject).to respond_to(type.pluralize)
+      Metalware::Records::Asset::TYPES.map(&:pluralize).each do |type|
+        expect(subject).to respond_to(type)
+        expect(subject.send(type)).to be_a(subject.class)
       end
     end
   end

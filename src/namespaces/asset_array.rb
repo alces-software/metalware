@@ -89,8 +89,13 @@ module Metalware
       end
 
       def define_type_methods
-        Records::Asset::TYPES.map(&:pluralize).each do |type|
-          define_singleton_method(type) {}
+        Records::Asset::TYPES.map(&:pluralize).each do |type_plural|
+          type_variable = :"@#{type_plural}"
+          sub_array = self.class.new(alces, loaders_input: [])
+          instance_variable_set(type_variable, sub_array)
+          define_singleton_method(type_plural) do
+            instance_variable_get(type_variable)
+          end
         end
       end
     end
