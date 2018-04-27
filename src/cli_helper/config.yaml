@@ -102,6 +102,11 @@ subcommands:
     summary: Add a new layout record
     action: Commands::Layout::Add
 
+  layout_edit: &layout_edit
+    syntax: metal layout edit LAYOUT_NAME [options]
+    summary: Edit an existing layout record
+    action: Commands::Layout::Edit
+
   orchestrate_create: &orchestrate_create
     syntax: metal orchestrate create NODE_IDENTIFIER [options]
     summary: Creates a new virtual machine or group of machines
@@ -350,6 +355,7 @@ commands:
     summary: Manage the layout record files
     subcommands:
       add: *layout_add
+      edit: *layout_edit
 
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]
