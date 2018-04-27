@@ -46,9 +46,7 @@ module Metalware
 
       def initialize(alces, loaders: nil)
         @alces = alces
-        @asset_loaders = loaders || Records::Asset.paths.map do |path|
-          AssetLoader.new(alces, path)
-        end
+        @asset_loaders = loaders || create_asset_loaders
         asset_loaders.each { |l| define_asset_method_from_loader(l) }
       end
 
@@ -81,6 +79,12 @@ module Metalware
       def define_asset_method_from_loader(loader)
         raise_error_if_method_is_defined(loader.name)
         define_singleton_method(loader.name) { loader.data }
+      end
+
+      def create_asset_loaders
+        Records::Asset.paths.map do |path|
+          AssetLoader.new(alces, path)
+        end
       end
     end
   end
