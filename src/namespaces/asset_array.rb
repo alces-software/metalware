@@ -44,9 +44,9 @@ module Metalware
 
       include Enumerable
 
-      def initialize(alces, loaders: nil)
+      def initialize(alces, loaders_input: nil)
         @alces = alces
-        @asset_loaders = loaders || create_asset_loaders
+        @asset_loaders = loaders_input || create_asset_loaders
         asset_loaders.each { |l| define_asset_method_from_loader(l) }
       end
 

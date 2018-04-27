@@ -67,7 +67,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
 
     context 'with a loaders input' do
-      subject { described_class.new(alces, loaders: loaders) }
+      subject { described_class.new(alces, loaders_input: loaders) }
 
       let(:type) { Metalware::Records::Asset::TYPES.first }
       let(:asset_names) { ['asset1', 'asset2'] }
