@@ -29,6 +29,8 @@ module Metalware
             false
           elsif reserved_methods.include?(name)
             false
+          elsif name.include?('/')
+            false
           else
             !path(name)
           end
