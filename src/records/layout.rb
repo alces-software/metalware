@@ -11,7 +11,7 @@ module Metalware
         end
 
         def base_path(base_name)
-          if types.include?(base_name)
+          if self::TYPES.include?(base_name)
             FilePath.asset_type(base_name)
           elsif path(base_name)
             type = File.basename(File.dirname(path(base_name))).pluralize
