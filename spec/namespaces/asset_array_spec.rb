@@ -12,14 +12,19 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   let(:assets) do
     [
       {
-        name: 'asset1',
+        name: 'pdu1',
         types_dir: 'pdus',
         data: { key: 'value1' },
       },
       {
-        name: 'asset2',
-        types_dir: 'racks',
+        name: 'pdu2',
+        types_dir: 'pdus',
         data: { key: 'value2' },
+      },
+      {
+        name: 'rack1',
+        types_dir: 'racks',
+        data: { key: 'value3' },
       },
     ]
   end
