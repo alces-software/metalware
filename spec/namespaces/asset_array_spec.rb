@@ -94,6 +94,12 @@ RSpec.describe Metalware::Namespaces::AssetArray do
           expect(subject).to respond_to(name)
         end
       end
+
+      it 'does not respond to the asset type methods' do
+        Metalware::Records::Asset::TYPES.map(&:pluralize).each do |type|
+          expect(subject).not_to respond_to(type)
+        end
+      end
     end
   end
 
