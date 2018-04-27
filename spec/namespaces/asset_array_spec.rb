@@ -67,9 +67,22 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
 
     context 'with a loaders input' do
+      subject { described_class.new(alces, loaders: loaders) }
+
+      let(:type) { Metalware::Records::Asset::TYPES.first }
+      let(:asset_names) { ['asset1', 'asset2'] }
+      let(:loaders) do
+        asset_names.map do |name|
+          path = Metalware::FilePath.asset(type.pluralize, name)
+          Metalware::Namespaces::AssetArray::AssetLoader.new(alces, path)
+        end
+      end
+      let!(:dir) { class_spy(Dir).as_stubbed_const }
+
+      before { subject }
+
       it 'does not glob the file system' do
-        expect(Dir).not_to receive(:glob)
-        described_class.new(alces, loaders: [])
+        expect(dir).not_to have_received(:glob)
       end
     end
   end
