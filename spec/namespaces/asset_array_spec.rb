@@ -166,6 +166,14 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
   end
 
+  describe 'asset types methods' do
+    it 'defines all the type methods as the plural' do
+      Metalware::Records::Asset::TYPES.each do |type|
+        expect(subject).to respond_to(type.pluralize)
+      end
+    end
+  end
+
   context 'when referencing other asset ("^<asset_name>")' do
     include AlcesUtils
 
