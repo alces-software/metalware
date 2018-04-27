@@ -152,9 +152,12 @@ module Metalware
         File.join(metalware_install, 'data/asset_types', type + '.yaml')
       end
 
-      def asset(types_dir, name)
-        File.join(metalware_data, 'assets',
-                  types_dir, name + '.yaml')
+      def asset(*a)
+        record('assets', *a)
+      end
+
+      def layout(*a)
+        record('layouts', *a)
       end
 
       def asset_cache
@@ -162,6 +165,11 @@ module Metalware
       end
 
       private
+
+      def record(record_dir, types_dir, name)
+        File.join(metalware_data, record_dir,
+                  types_dir, name + '.yaml')
+      end
 
       def template_file_name(template_type, node:)
         node.config.templates&.send(template_type) || 'default'

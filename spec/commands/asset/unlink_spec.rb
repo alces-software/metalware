@@ -9,6 +9,7 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
   let(:node_name) { 'test_node' }
   let(:node) { alces.nodes.find_by_name(node_name) }
   let(:content) { { node: { node_name.to_sym => asset_name } } }
+  let(:cache) { Metalware::Cache::Asset.new }
 
   AlcesUtils.mock(self, :each) do
     mock_node(node_name)
@@ -19,8 +20,6 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
                                  node_name,
                                  stderr: StringIO.new)
   end
-
-  let(:cache) { Metalware::Cache::Asset.new }
 
   context 'when using a saved asset' do
     before do

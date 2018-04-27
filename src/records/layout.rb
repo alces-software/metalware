@@ -4,10 +4,10 @@ require 'records/record'
 
 module Metalware
   module Records
-    class Asset < Record
+    class Layout < Record
       class << self
         def paths
-          Dir.glob(FilePath.asset('[a-z]*', '*'))
+          Dir.glob(FilePath.layout('[a-z]*', '*'))
         end
       end
     end
