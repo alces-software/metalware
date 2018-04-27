@@ -91,7 +91,10 @@ module Metalware
       def define_type_methods
         Records::Asset::TYPES.map(&:pluralize).each do |type_plural|
           type_variable = :"@#{type_plural}"
-          sub_array = self.class.new(alces, loaders_input: [])
+          loaders = asset_loaders.select do |loader|
+            loader.type == type_plural.singularize
+          end
+          sub_array = self.class.new(alces, loaders_input: loaders)
           instance_variable_set(type_variable, sub_array)
           define_singleton_method(type_plural) do
             instance_variable_get(type_variable)

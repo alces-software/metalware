@@ -188,6 +188,14 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         expect(subject.send(type)).to be_a(subject.class)
       end
     end
+
+    it 'can find the assets under its type' do
+      pdu_assets.each do |asset|
+        name = asset[:name]
+        data = asset[:data]
+        expect(subject.pdus.find_by_name(name).to_h).to include(data)
+      end
+    end
   end
 
   context 'when referencing other asset ("^<asset_name>")' do
