@@ -98,6 +98,11 @@ RSpec.shared_examples 'record' do |file_path_proc|
       it 'is false for the plural' do
         expect(described_class.available?(type.pluralize)).to eq(false)
       end
+
+      # File paths will break how the type is worked out
+      it 'is false for file paths' do
+        expect(described_class.available?('some/path')).to eq(false)
+      end
     end
   end
 end

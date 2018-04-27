@@ -44,14 +44,11 @@ module Metalware
 
       include Enumerable
 
-      def initialize(alces)
+      def initialize(alces, loaders_input: nil)
         @alces = alces
-        @asset_loaders = Records::Asset.paths.map do |path|
-          AssetLoader.new(alces, path).tap do |loader|
-            raise_error_if_method_is_defined(loader.name)
-            define_singleton_method(loader.name) { loader.data }
-          end
-        end
+        @asset_loaders = loaders_input || create_asset_loaders
+        define_type_methods unless loaders_input
+        define_asset_methods
       end
 
       def [](index)
@@ -78,6 +75,33 @@ module Metalware
         raise DataError, <<-EOF.strip_heredoc
           Asset can not be called key word: #{method}
         EOF
+      end
+
+      def create_asset_loaders
+        Records::Asset.paths.map do |path|
+          AssetLoader.new(alces, path)
+        end
+      end
+
+      def define_asset_methods
+        asset_loaders.each do |loader|
+          raise_error_if_method_is_defined(loader.name)
+          define_singleton_method(loader.name) { loader.data }
+        end
+      end
+
+      def define_type_methods
+        Records::Asset::TYPES.map.each do |type|
+          type_variable = :"@#{type.pluralize}"
+          loaders = asset_loaders.select do |loader|
+            loader.type == type
+          end
+          sub_array = self.class.new(alces, loaders_input: loaders)
+          instance_variable_set(type_variable, sub_array)
+          define_singleton_method(type.pluralize) do
+            instance_variable_get(type_variable)
+          end
+        end
       end
     end
   end
