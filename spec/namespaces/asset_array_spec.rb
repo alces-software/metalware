@@ -4,11 +4,11 @@ require 'alces_utils'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::Namespaces::AssetArray do
-  subject { described_class.new(alces_copy) }
+  subject { described_class.new(alces) }
 
   # DO NOT use AlcesUtils in the section. It tests features required
   # by the namespace itself.
-  let(:alces_copy) { Metalware::Namespaces::Alces.new }
+  let(:alces) { Metalware::Namespaces::Alces.new }
   let(:assets) do
     [
       {
@@ -56,20 +56,20 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
       it 'errors due to the existing method' do
         expect do
-          described_class.new(alces_copy)
+          described_class.new(alces)
         end.to raise_error(Metalware::DataError)
       end
     end
 
     it 'does not load the files when initially called' do
       expect(Metalware::Data).not_to receive(:load)
-      described_class.new(alces_copy)
+      described_class.new(alces)
     end
 
     context 'with a loaders input' do
       it 'does not glob the file system' do
         expect(Dir).not_to receive(:glob)
-        described_class.new(alces_copy, loaders: [])
+        described_class.new(alces, loaders: [])
       end
     end
   end
