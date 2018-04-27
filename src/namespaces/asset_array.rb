@@ -47,8 +47,8 @@ module Metalware
       def initialize(alces, loaders_input: nil)
         @alces = alces
         @asset_loaders = loaders_input || create_asset_loaders
-        asset_loaders.each { |l| define_asset_method_from_loader(l) }
         define_type_methods unless loaders_input
+        asset_loaders.each { |l| define_asset_method_from_loader(l) }
       end
 
       def [](index)
