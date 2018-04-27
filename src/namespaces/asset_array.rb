@@ -15,6 +15,10 @@ module Metalware
           @name ||= File.basename(path, '.yaml')
         end
 
+        def type
+          @type ||= File.basename(File.dirname(path)).singularize
+        end
+
         def data
           @data ||= begin
             data_class = Constants::HASH_MERGER_DATA_STRUCTURE
@@ -34,7 +38,7 @@ module Metalware
         attr_reader :alces, :path
 
         def load_file
-          Data.load(path).merge(metadata: { name: name })
+          Data.load(path).merge(metadata: { name: name, type: type })
         end
       end
 
