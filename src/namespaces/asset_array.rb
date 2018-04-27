@@ -48,7 +48,7 @@ module Metalware
         @alces = alces
         @asset_loaders = loaders_input || create_asset_loaders
         define_type_methods unless loaders_input
-        asset_loaders.each { |l| define_asset_method_from_loader(l) }
+        define_asset_methods
       end
 
       def [](index)
@@ -77,14 +77,16 @@ module Metalware
         EOF
       end
 
-      def define_asset_method_from_loader(loader)
-        raise_error_if_method_is_defined(loader.name)
-        define_singleton_method(loader.name) { loader.data }
-      end
-
       def create_asset_loaders
         Records::Asset.paths.map do |path|
           AssetLoader.new(alces, path)
+        end
+      end
+
+      def define_asset_methods
+        asset_loaders.each do |loader|
+          raise_error_if_method_is_defined(loader.name)
+          define_singleton_method(loader.name) { loader.data }
         end
       end
 
