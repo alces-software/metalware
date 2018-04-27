@@ -21,7 +21,7 @@ module Metalware
 
         def run
           error_if_type_is_missing
-          ensure_asset_name_is_available
+          Records::Asset.error_if_unavailable(asset_name)
           FileUtils.mkdir_p File.dirname(destination)
           copy_and_edit_record_file
           assign_asset_to_node_if_given(asset_name)
@@ -36,19 +36,6 @@ module Metalware
           raise InvalidInput, <<-EOF.squish
             Cannot find asset type: "#{type_name}"
           EOF
-        end
-
-        def ensure_asset_name_is_available
-          return if Records::Asset.available?(asset_name)
-          msg = if Records::Asset.path(asset_name)
-                  <<-EOF.squish
-                    The "#{asset_name}" asset already exists. Please use
-                    `metal asset edit` instead
-                  EOF
-                else
-                  "\"#{asset_name}\" is not a valid asset name"
-                end
-          raise InvalidInput, msg
         end
       end
     end

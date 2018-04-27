@@ -21,7 +21,7 @@ module Metalware
 
         def run
           error_if_type_is_missing
-          ensure_layout_name_is_available
+          Records::Layout.error_if_unavailable(layout_name)
           FileUtils.mkdir_p File.dirname(destination)
           copy_and_edit_record_file
         end
@@ -35,19 +35,6 @@ module Metalware
           raise InvalidInput, <<-EOF.squish
             Cannot find layout type: "#{type_name}"
           EOF
-        end
-
-        def ensure_layout_name_is_available
-          return if Records::Layout.available?(layout_name)
-          msg = if Records::Layout.path(layout_name)
-                  <<-EOF.squish
-                    The "#{layout_name}" layout already exists. Please use
-                    'metal layout edit' instead
-                  EOF
-                else
-                  "\"#{layout_name}\" is not a valid layout name"
-                end
-          raise InvalidInput, msg
         end
       end
     end

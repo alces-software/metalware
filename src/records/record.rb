@@ -34,12 +34,28 @@ module Metalware
           end
         end
 
+        def error_if_unavailable(name)
+          return if available?(name)
+          msg = if path(name)
+                  <<-EOF.squish
+                    The "#{name}" #{class_name} already exists. Please use
+                    `metal #{class_name} edit` instead
+                  EOF
+                else
+                  "\"#{name}\" is not a valid #{class_name} name"
+                end
+          raise InvalidInput, msg
+        end
+
         private
 
+        def class_name
+          to_s.gsub(/^.*::/, '').downcase
+        end
+
         def raise_missing_record(name)
-          klass = to_s.gsub(/^.*::/, '').downcase
           raise MissingRecordError, <<-EOF.squish
-            The "#{name}" #{klass} does not exist
+            The "#{name}" #{class_name} does not exist
           EOF
         end
 
