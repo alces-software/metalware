@@ -9,7 +9,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   # DO NOT use AlcesUtils in the section. It tests features required
   # by the namespace itself.
   let(:alces) { Metalware::Namespaces::Alces.new }
-  let(:assets) do
+  let(:pdu_assets) do
     [
       {
         name: 'pdu1',
@@ -21,12 +21,22 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         types_dir: 'pdus',
         data: { key: 'value2' },
       },
+    ]
+  end
+  let(:rack_assets) do
+    [
       {
         name: 'rack1',
         types_dir: 'racks',
         data: { key: 'value3' },
       },
     ]
+  end
+  let(:assets) do
+    [].tap do |arr|
+      arr.concat pdu_assets
+      arr.concat rack_assets
+    end
   end
 
   let(:assets_data) do
