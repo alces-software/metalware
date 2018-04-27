@@ -20,10 +20,10 @@ RSpec.describe Metalware::Records::Layout do
       expect do
         described_class.base_path('clown-fiesta')
       end.to raise_error(Metalware::InvalidInput)
-    end 
+    end
 
     it 'returns a type path' do
-      expect(described_class.base_path(type)) 
+      expect(described_class.base_path(type))
         .to eq(type_path)
     end
 

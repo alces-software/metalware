@@ -15,8 +15,8 @@ module Metalware
             FilePath.asset_type(base_name)
           elsif path(base_name)
             type = File.basename(File.dirname(path(base_name))).pluralize
-            FilePath.layout(type, base_name) 
-          else 
+            FilePath.layout(type, base_name)
+          else
             raise InvalidInput, <<-EOF.squish
               There is no '#{base_name}' type or layout
             EOF
