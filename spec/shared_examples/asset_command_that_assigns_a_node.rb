@@ -9,6 +9,9 @@ require 'cache/asset'
 RSpec.shared_examples 'asset command that assigns a node' do
   include AlcesUtils
 
+  # Stops the editor from running the bash command
+  before { allow(Metalware::Utils::Editor).to receive(:open) }
+
   let(:asset_cache) { Metalware::Cache::Asset.new }
   let(:node_name) { 'test-node' }
 
