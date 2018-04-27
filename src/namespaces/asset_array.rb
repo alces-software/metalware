@@ -44,9 +44,9 @@ module Metalware
 
       include Enumerable
 
-      def initialize(alces)
+      def initialize(alces, loaders: nil)
         @alces = alces
-        @asset_loaders = Records::Asset.paths.map do |path|
+        @asset_loaders = loaders || Records::Asset.paths.map do |path|
           AssetLoader.new(alces, path)
         end
         asset_loaders.each { |l| define_asset_method_from_loader(l) }

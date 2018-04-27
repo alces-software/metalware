@@ -65,6 +65,13 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       expect(Metalware::Data).not_to receive(:load)
       described_class.new(alces_copy)
     end
+
+    context 'with a loaders input' do
+      it 'does not glob the file system' do
+        expect(Dir).not_to receive(:glob)
+        described_class.new(alces_copy, loaders: [])
+      end
+    end
   end
 
   context 'when loading the second asset' do
