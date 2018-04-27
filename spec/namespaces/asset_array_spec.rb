@@ -84,6 +84,16 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       it 'does not glob the file system' do
         expect(dir).not_to have_received(:glob)
       end
+
+      it 'has the correct number of assets' do
+        expect(subject.count).to eq(loaders.length)
+      end
+
+      it 'has defined the asset methods' do
+        asset_names.each do |name|
+          expect(subject).to respond_to(name)
+        end
+      end
     end
   end
 
