@@ -9,6 +9,10 @@ module Metalware
         def paths
           Dir.glob(FilePath.asset('[a-z]*', '*'))
         end
+
+        def record_dir
+          FilePath.asset_dir
+        end
       end
     end
   end

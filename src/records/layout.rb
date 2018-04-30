@@ -10,6 +10,10 @@ module Metalware
           Dir.glob(FilePath.layout('[a-z]*', '*'))
         end
 
+        def record_dir
+          FilePath.layout_dir
+        end
+
         def path_with_types(base_name)
           if self::TYPES.include?(base_name)
             FilePath.asset_type(base_name)
