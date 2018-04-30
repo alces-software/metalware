@@ -17,6 +17,7 @@ module Metalware
         end
 
         def run
+          source # This ensures that the source type is valid
           Records::Layout.error_if_unavailable(layout_name)
           FileUtils.mkdir_p File.dirname(destination)
           copy_and_edit_record_file
