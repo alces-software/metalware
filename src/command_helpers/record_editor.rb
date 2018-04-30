@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'validation/asset'
+
 module Metalware
   module CommandHelpers
     class RecordEditor < BaseCommand
@@ -22,11 +24,7 @@ module Metalware
 
       def copy_and_edit_record_file
         Utils::Editor.open_copy(source, destination) do |edited_path|
-          begin
-            Metalware::Data.load(edited_path).is_a?(Hash)
-          rescue StandardError
-            false
-          end
+          Validation::Asset.valid_file?(edited_path)
         end
       end
 
