@@ -97,6 +97,11 @@ subcommands:
       the system environment. This command is intended to only be ran once.
     action: Commands::Configure::Local
 
+  layout_add: &layout_add
+    syntax: metal layout add ASSET_TYPE LAYOUT_NAME [options]
+    summary: Add a new layout record
+    action: Commands::Layout::Add
+
   orchestrate_create: &orchestrate_create
     syntax: metal orchestrate create NODE_IDENTIFIER [options]
     summary: Creates a new virtual machine or group of machines
@@ -339,6 +344,12 @@ commands:
         description: >
           Legacy tags used to specify the input. Their use has been
           deprecated by the COMMAND input.
+
+  layout:
+    syntax: metal layout [SUB_COMMAND] [options]
+    summary: Manage the layout record files
+    subcommands:
+      add: *layout_add
 
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]
