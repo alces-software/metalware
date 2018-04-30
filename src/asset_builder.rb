@@ -23,7 +23,14 @@ module Metalware
     end
 
     def pop_asset
-      stack.pop
+      asset = stack.pop
+      if asset.nil?
+        nil
+      elsif Records::Asset.available?(asset.name)
+        asset
+      else
+        pop_asset
+      end
     end
 
     private

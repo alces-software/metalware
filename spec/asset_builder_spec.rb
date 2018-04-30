@@ -2,6 +2,7 @@
 
 require 'spec_utils'
 require 'asset_builder'
+require 'alces_utils'
 
 RSpec.shared_examples 'pushes the asset' do
   it 'pushes the asset onto the stack' do
@@ -12,6 +13,8 @@ RSpec.shared_examples 'pushes the asset' do
 end
 
 RSpec.describe Metalware::AssetBuilder do
+  include AlcesUtils
+
   subject { described_class.new }
 
   let(:test_asset) { 'type-asset-name' }
@@ -96,6 +99,12 @@ RSpec.describe Metalware::AssetBuilder do
       subject.push_asset(type, 'some-random-other-asset')
       push_test_asset
       expect(subject.pop_asset.name).to eq(test_asset)
+    end
+
+    it 'does not return assets that already exist' do
+      push_test_asset
+      AlcesUtils.mock(self) { create_asset(test_asset, {}, type: type) }
+      expect(subject.pop_asset).to be_nil
     end
   end
 end
