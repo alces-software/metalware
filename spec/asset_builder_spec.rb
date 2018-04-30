@@ -16,7 +16,10 @@ RSpec.describe Metalware::AssetBuilder do
     let(:type_asset) { 'type-asset-name' }
     let(:type) { 'rack' }
 
-    before { subject.push_asset(type_asset, type) }
+    before do
+      SpecUtils.enable_output_to_stderr
+      subject.push_asset(type_asset, type)
+    end
 
     context 'when adding an asset from a type' do
       it 'pushes the asset onto the queue' do
@@ -39,6 +42,14 @@ RSpec.describe Metalware::AssetBuilder do
         Metalware::Data.dump(layout_path, {})
         push_layout_asset
         expect(subject.queue.last.name).to eq(layout_asset)
+      end
+
+      it 'warns then does nothing if the layout does not exist' do
+        original_queue = subject.queue.dup
+        expect do
+          push_layout_asset
+        end.to output(/Failed to add "#{layout_asset}"/).to_stderr
+        expect(subject.queue).to eq(original_queue)
       end
     end
   end

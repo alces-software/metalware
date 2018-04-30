@@ -12,20 +12,24 @@ module Metalware
     end
 
     def push_asset(name, layout)
-      queue.push(Asset.new(name, layout))
+      if layout_or_type_path(layout)
+        queue.push(Asset.new(name, layout))
+      else
+        MetalLog.warn <<-EOF.squish
+          Failed to add "#{name}". Could not find layout: "#{layout}"
+        EOF
+      end
     end
 
     private
 
     Asset = Struct.new(:name, :layout)
 
-    def layout_path_with_types(base_name)
-      if Records::Asset::TYPES.include?(base_name)
-        FilePath.asset_type(base_name)
-      elsif (layout_path = Records::Layout.path(base_name))
-        layout_path
+    def layout_or_type_path(layout_or_type)
+      if Records::Asset::TYPES.include?(layout_or_type)
+        FilePath.asset_type(layout_or_type)
       else
-        nil
+        Records::Layout.path(layout_or_type)
       end
     end
   end
