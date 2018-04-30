@@ -12,18 +12,18 @@ RSpec.describe Metalware::Records::Layout do
     Metalware::FilePath.layout(types_dir, name)
   end
 
-  describe '#base_path' do
+  describe '#path_with_types' do
     let(:type) { 'rack' }
     let(:type_path) { Metalware::FilePath.asset_type(type) }
 
     it 'errors when given an invalid type or layout' do
       expect do
-        described_class.base_path('clown-fiesta')
+        described_class.path_with_types('clown-fiesta')
       end.to raise_error(Metalware::InvalidInput)
     end
 
     it 'returns a type path' do
-      expect(described_class.base_path(type))
+      expect(described_class.path_with_types(type))
         .to eq(type_path)
     end
 
@@ -44,7 +44,7 @@ RSpec.describe Metalware::Records::Layout do
       end
 
       it 'returns a layout path' do
-        expect(described_class.base_path(layout))
+        expect(described_class.path_with_types(layout))
           .to eq(layout_path)
       end
     end
