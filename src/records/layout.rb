@@ -13,19 +13,6 @@ module Metalware
         def record_dir
           FilePath.layout_dir
         end
-
-        def path_with_types(base_name)
-          if self::TYPES.include?(base_name)
-            FilePath.asset_type(base_name)
-          elsif path(base_name)
-            type = File.basename(File.dirname(path(base_name))).pluralize
-            FilePath.layout(type, base_name)
-          else
-            raise InvalidInput, <<-EOF.squish
-              There is no '#{base_name}' type or layout
-            EOF
-          end
-        end
       end
     end
   end
