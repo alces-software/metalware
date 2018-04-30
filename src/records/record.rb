@@ -49,7 +49,23 @@ module Metalware
           raise InvalidInput, msg
         end
 
+        def type_from_path(path)
+          if path.include? record_dir
+            type = ((path.gsub(record_dir, '')).split('/')[1]).singularize
+          else
+            raise InvalidInput, <<-EOF.squish
+              Path does not start with the correct path.
+              Can only find the type if the record is in the correct directory.
+              Got: #{path}, Expected: #{record_dir}
+            EOF
+          end
+        end
+
         private
+
+        def record_dir
+          raise NotImplementedError
+        end
 
         def class_name
           to_s.gsub(/^.*::/, '').downcase
