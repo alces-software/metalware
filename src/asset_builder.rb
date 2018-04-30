@@ -25,6 +25,7 @@ module Metalware
     end
 
     def pop_asset
+      queue.pop
     end
 
     private

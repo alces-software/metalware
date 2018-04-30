@@ -84,5 +84,17 @@ RSpec.describe Metalware::AssetBuilder do
     it 'returns nil if there are no more assets' do
       expect(subject.pop_asset).to eq(nil)
     end
+
+    it 'returns the asset to be built' do
+      push_test_asset
+      expect(subject.pop_asset.name).to eq(test_asset)
+    end
+
+    it 'removes the asset from the queue' do
+      length = subject.queue.length
+      push_test_asset
+      subject.pop_asset
+      expect(subject.queue.length).to eq(length)
+    end
   end
 end
