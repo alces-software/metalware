@@ -10,5 +10,13 @@ module Metalware
     def initialize
       @queue ||= []
     end
+
+    def push_asset(name, layout)
+      queue.push(Asset.new(name, layout))
+    end
+
+    private
+
+    Asset = Struct.new(:name, :layout)
   end
 end
