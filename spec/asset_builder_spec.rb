@@ -6,6 +6,14 @@ require 'asset_builder'
 RSpec.describe Metalware::AssetBuilder do
   subject { described_class.new }
 
+  let(:type_asset) { 'type-asset-name' }
+  let(:type) { 'rack' }
+  let(:type_path) { Metalware::FilePath.asset_type(type) }
+
+  def push_type_asset
+    subject.push_asset(type_asset, type)
+  end
+
   describe '#queue' do
     it 'initially returns an empty array' do
       expect(subject.queue).to eq([])
@@ -13,13 +21,9 @@ RSpec.describe Metalware::AssetBuilder do
   end
 
   describe '#push_asset' do
-    let(:type_asset) { 'type-asset-name' }
-    let(:type) { 'rack' }
-    let(:type_path) { Metalware::FilePath.asset_type(type) }
-
     before do
       SpecUtils.enable_output_to_stderr
-      subject.push_asset(type_asset, type)
+      push_type_asset
     end
 
     context 'when adding an asset from a type' do
@@ -62,6 +66,17 @@ RSpec.describe Metalware::AssetBuilder do
         end.to output(/Failed to add asset: "#{layout_asset}"/).to_stderr
         expect(subject.queue).to eq(original_queue)
       end
+    end
+  end
+
+  describe '#empty?' do
+    it 'returns true when the queue is empty' do
+      expect(subject.empty?).to be true
+    end
+
+    it 'returns false when there is an asset on the queue' do
+      push_type_asset
+      expect(subject.empty?).to be false
     end
   end
 end

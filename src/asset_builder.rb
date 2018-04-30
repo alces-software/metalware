@@ -7,6 +7,8 @@ module Metalware
   class AssetBuilder
     attr_reader :queue
 
+    delegate :empty?, to: :queue
+
     def initialize
       @queue ||= []
     end
