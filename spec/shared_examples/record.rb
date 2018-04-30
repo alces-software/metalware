@@ -105,4 +105,19 @@ RSpec.shared_examples 'record' do |file_path_proc|
       end
     end
   end
+
+  describe '#type_from_path' do
+    let(:type) { 'rack' }
+
+    it 'errors if given a path not matching record_dir' do
+      expect do
+        described_class.type_from_path(invalid_path)
+      end.to raise_error(Metalware::InvalidInput)
+    end 
+
+    it 'returns the correct type' do
+      expect(described_class.type_from_path(valid_path))
+        .to eq(type)
+    end 
+  end
 end
