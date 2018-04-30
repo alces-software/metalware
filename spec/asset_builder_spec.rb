@@ -6,12 +6,12 @@ require 'asset_builder'
 RSpec.describe Metalware::AssetBuilder do
   subject { described_class.new }
 
-  let(:type_asset) { 'type-asset-name' }
+  let(:test_asset) { 'type-asset-name' }
   let(:type) { 'rack' }
   let(:type_path) { Metalware::FilePath.asset_type(type) }
 
-  def push_type_asset
-    subject.push_asset(type_asset, type)
+  def push_test_asset
+    subject.push_asset(test_asset, type)
   end
 
   describe '#queue' do
@@ -23,12 +23,12 @@ RSpec.describe Metalware::AssetBuilder do
   describe '#push_asset' do
     before do
       SpecUtils.enable_output_to_stderr
-      push_type_asset
+      push_test_asset
     end
 
     context 'when adding an asset from a type' do
       it 'pushes the asset onto the queue' do
-        expect(subject.queue.last.name).to eq(type_asset)
+        expect(subject.queue.last.name).to eq(test_asset)
         expect(subject.queue.last.source_path).to eq(type_path)
         expect(subject.queue.last.type).to eq(type)
       end
@@ -75,7 +75,7 @@ RSpec.describe Metalware::AssetBuilder do
     end
 
     it 'returns false when there is an asset on the queue' do
-      push_type_asset
+      push_test_asset
       expect(subject.empty?).to be false
     end
   end
