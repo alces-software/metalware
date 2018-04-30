@@ -37,8 +37,6 @@ module Metalware
           type: Records::Layout.type_from_path(path),
           path: path
         )
-      else
-        nil
       end
     end
   end
