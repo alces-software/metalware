@@ -40,12 +40,17 @@ RSpec.describe Metalware::AssetBuilder do
         subject.push_asset(layout_asset, layout)
       end
 
-      it 'pushes the asset if the layout exists' do
-        FileUtils.mkdir_p(File.dirname(layout_path))
-        Metalware::Data.dump(layout_path, {})
-        push_layout_asset
-        expect(subject.queue.last.name).to eq(layout_asset)
-        expect(subject.queue.last.source_path).to eq(layout_path)
+      context 'when the layout exists' do
+        before do
+          FileUtils.mkdir_p(File.dirname(layout_path))
+          Metalware::Data.dump(layout_path, {})
+          push_layout_asset
+        end
+
+        it 'pushes the asset if the layout exists' do
+          expect(subject.queue.last.name).to eq(layout_asset)
+          expect(subject.queue.last.source_path).to eq(layout_path)
+        end
       end
 
       it 'warns and does nothing if the layout does not exist' do
