@@ -11,13 +11,14 @@ module Metalware
       @queue ||= []
     end
 
-    def push_asset(name, layout)
-      if (path = layout_or_type_path(layout))
+    def push_asset(name, layout_or_type)
+      if (path = layout_or_type_path(layout_or_type))
         # TODO: Store the type in the Struct
         queue.push(Asset.new(name, path, 'type - TBD'))
       else
         MetalLog.warn <<-EOF.squish
-          Failed to add "#{name}". Could not find layout: "#{layout}"
+          Failed to add asset: "#{name}". Could not find layout:
+          "#{layout_or_type}"
         EOF
       end
     end

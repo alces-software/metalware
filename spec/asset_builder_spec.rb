@@ -57,7 +57,7 @@ RSpec.describe Metalware::AssetBuilder do
         original_queue = subject.queue.dup
         expect do
           push_layout_asset
-        end.to output(/Failed to add "#{layout_asset}"/).to_stderr
+        end.to output(/Failed to add asset: "#{layout_asset}"/).to_stderr
         expect(subject.queue).to eq(original_queue)
       end
     end
