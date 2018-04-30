@@ -14,9 +14,7 @@ RSpec.shared_examples 'record add command' do
   end
 
   context 'when using the rack type' do
-    before do
-      FileSystem.root_setup(&:with_asset_types)
-    end
+    before { FileSystem.root_setup(&:with_asset_types) }
 
     let(:type) { 'rack' }
     let(:saved_record_name) { 'saved-record' }
