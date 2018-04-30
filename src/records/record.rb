@@ -49,7 +49,19 @@ module Metalware
           raise InvalidInput, msg
         end
 
+        def type_from_path(path)
+          return (path.gsub(record_dir, '').split('/')[1]).singularize if
+            path.include? record_dir
+          raise InvalidInput, <<-EOF.squish
+            Expected path to start with #{record_dir} for #{class_name} type
+          EOF
+        end
+
         private
+
+        def record_dir
+          raise NotImplementedError
+        end
 
         def class_name
           to_s.gsub(/^.*::/, '').downcase

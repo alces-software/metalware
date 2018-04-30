@@ -153,11 +153,19 @@ module Metalware
       end
 
       def asset(*a)
-        record('assets', *a)
+        record(asset_dir, *a)
+      end
+
+      def asset_dir
+        File.join(metalware_data, 'assets')
       end
 
       def layout(*a)
-        record('layouts', *a)
+        record(layout_dir, *a)
+      end
+
+      def layout_dir
+        File.join(metalware_data, 'layouts')
       end
 
       def asset_cache
@@ -167,8 +175,7 @@ module Metalware
       private
 
       def record(record_dir, types_dir, name)
-        File.join(metalware_data, record_dir,
-                  types_dir, name + '.yaml')
+        File.join(record_dir, types_dir, name + '.yaml')
       end
 
       def template_file_name(template_type, node:)

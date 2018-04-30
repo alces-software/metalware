@@ -16,7 +16,7 @@ module Metalware
         end
 
         def type
-          @type ||= File.basename(File.dirname(path)).singularize
+          @type ||= Records::Asset.type_from_path(path)
         end
 
         def data

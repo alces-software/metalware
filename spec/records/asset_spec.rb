@@ -8,5 +8,8 @@ RSpec.describe Metalware::Records::Asset do
     Metalware::FilePath.asset(types_dir, name)
   end
 
+  let(:valid_path) { Metalware::FilePath.asset('rack', 'saved-asset') }
+  let(:invalid_path) { Metalware::FilePath.layout('server', 'saved-layout') }
+
   it_behaves_like 'record', file_path_proc
 end
