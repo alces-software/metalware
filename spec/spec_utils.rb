@@ -91,6 +91,10 @@ module SpecUtils
       File.join(FIXTURES_PATH, 'configs', config_file)
     end
 
+    def enable_output_to_stderr
+      $rspec_suppress_output_to_stderr = false
+    end
+
     private
 
     def mock_validate_genders(example_group, valid, error)

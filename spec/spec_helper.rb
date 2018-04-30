@@ -137,6 +137,8 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+  # Do not print stderr Output in rspec by default
+  config.before { $rspec_suppress_output_to_stderr = true }
 
   config.around do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file
