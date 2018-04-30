@@ -2,32 +2,46 @@
 
 require 'spec_utils'
 require 'asset_builder'
+require 'alces_utils'
+
+RSpec.shared_examples 'pushes the asset' do
+  it 'pushes the asset onto the stack' do
+    expect(subject.stack.last.name).to eq(pushed_asset_name)
+    expect(subject.stack.last.source_path).to eq(pushed_source_path)
+    expect(subject.stack.last.type).to eq(type)
+  end
+end
 
 RSpec.describe Metalware::AssetBuilder do
+  include AlcesUtils
+
   subject { described_class.new }
 
-  describe '#queue' do
+  let(:test_asset) { 'type-asset-name' }
+  let(:type) { 'rack' }
+  let(:type_path) { Metalware::FilePath.asset_type(type) }
+
+  def push_test_asset
+    subject.push_asset(test_asset, type)
+  end
+
+  describe '#stack' do
     it 'initially returns an empty array' do
-      expect(subject.queue).to eq([])
+      expect(subject.stack).to eq([])
     end
   end
 
   describe '#push_asset' do
-    let(:type_asset) { 'type-asset-name' }
-    let(:type) { 'rack' }
-    let(:type_path) { Metalware::FilePath.asset_type(type) }
-
     before do
       SpecUtils.enable_output_to_stderr
-      subject.push_asset(type_asset, type)
+      push_test_asset
     end
 
     context 'when adding an asset from a type' do
-      it 'pushes the asset onto the queue' do
-        expect(subject.queue.last.name).to eq(type_asset)
-        expect(subject.queue.last.source_path).to eq(type_path)
-        expect(subject.queue.last.type).to eq(type)
-      end
+      let(:pushed_asset_name) { test_asset }
+      let(:pushed_source_path) { type_path }
+
+      include_examples 'pushes the asset'
     end
 
     context 'when adding an asset from a layout' do
@@ -48,20 +62,49 @@ RSpec.describe Metalware::AssetBuilder do
           push_layout_asset
         end
 
-        it 'pushes the asset if the layout exists' do
-          expect(subject.queue.last.name).to eq(layout_asset)
-          expect(subject.queue.last.source_path).to eq(layout_path)
-          expect(subject.queue.last.type).to eq(type)
-        end
+        let(:pushed_asset_name) { layout_asset }
+        let(:pushed_source_path) { layout_path }
+
+        include_examples 'pushes the asset'
       end
 
       it 'warns and does nothing if the layout does not exist' do
-        original_queue = subject.queue.dup
+        original_stack = subject.stack.dup
         expect do
           push_layout_asset
         end.to output(/Failed to add asset: "#{layout_asset}"/).to_stderr
-        expect(subject.queue).to eq(original_queue)
+        expect(subject.stack).to eq(original_stack)
       end
+    end
+  end
+
+  describe '#pop_asset' do
+    it 'returns nil if there are no more assets' do
+      expect(subject.pop_asset).to eq(nil)
+    end
+
+    it 'returns the asset to be built' do
+      push_test_asset
+      expect(subject.pop_asset.name).to eq(test_asset)
+    end
+
+    it 'removes the asset from the stack' do
+      length = subject.stack.length
+      push_test_asset
+      subject.pop_asset
+      expect(subject.stack.length).to eq(length)
+    end
+
+    it 'removes assets in a FIFO order' do
+      subject.push_asset(type, 'some-random-other-asset')
+      push_test_asset
+      expect(subject.pop_asset.name).to eq(test_asset)
+    end
+
+    it 'does not return assets that already exist' do
+      push_test_asset
+      AlcesUtils.mock(self) { create_asset(test_asset, {}, type: type) }
+      expect(subject.pop_asset).to be_nil
     end
   end
 end
