@@ -113,11 +113,11 @@ RSpec.shared_examples 'record' do |file_path_proc|
       expect do
         described_class.type_from_path(invalid_path)
       end.to raise_error(Metalware::InvalidInput)
-    end 
+    end
 
     it 'returns the correct type' do
       expect(described_class.type_from_path(valid_path))
         .to eq(type)
-    end 
+    end
   end
 end

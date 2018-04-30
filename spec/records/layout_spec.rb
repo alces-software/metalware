@@ -12,6 +12,9 @@ RSpec.describe Metalware::Records::Layout do
     Metalware::FilePath.layout(types_dir, name)
   end
 
+  let(:valid_path) { Metalware::FilePath.layout('rack', 'saved-layout') }
+  let(:invalid_path) { Metalware::FilePath.asset('server', 'saved-asset') }
+
   describe '#path_with_types' do
     let(:type) { 'rack' }
     let(:type_path) { Metalware::FilePath.asset_type(type) }
@@ -49,9 +52,6 @@ RSpec.describe Metalware::Records::Layout do
       end
     end
   end
-
-  let(:valid_path) { Metalware::FilePath.layout('rack', 'saved-layout') }
-  let(:invalid_path) { Metalware::FilePath.asset('server', 'saved-asset') }
 
   it_behaves_like 'record', file_path_proc
 end

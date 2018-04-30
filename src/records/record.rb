@@ -50,15 +50,13 @@ module Metalware
         end
 
         def type_from_path(path)
-          if path.include? record_dir
-            type = ((path.gsub(record_dir, '')).split('/')[1]).singularize
-          else
-            raise InvalidInput, <<-EOF.squish
-              Path does not start with the correct path.
-              Can only find the type if the record is in the correct directory.
-              Got: #{path}, Expected: #{record_dir}
-            EOF
-          end
+          return (path.gsub(record_dir, '').split('/')[1]).singularize if
+            path.include? record_dir
+          raise InvalidInput, <<-EOF.squish
+            Path does not start with the correct path.
+            Can only find the type if the record is in the correct directory.
+            Got: #{path}, Expected: #{record_dir}
+          EOF
         end
 
         private

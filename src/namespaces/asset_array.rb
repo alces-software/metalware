@@ -16,7 +16,7 @@ module Metalware
         end
 
         def type
-          @type ||= Records::Asset.type_from_path(path) 
+          @type ||= Records::Asset.type_from_path(path)
         end
 
         def data
