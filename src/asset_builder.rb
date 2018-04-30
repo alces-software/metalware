@@ -12,9 +12,8 @@ module Metalware
     end
 
     def push_asset(name, layout_or_type)
-      if (path = layout_or_type_path(layout_or_type))
-        # TODO: Store the type in the Struct
-        queue.push(Asset.new(name, path, 'type - TBD'))
+      if (details = source_file_details(layout_or_type))
+        queue.push(Asset.new(name, details.path, details.type))
       else
         MetalLog.warn <<-EOF.squish
           Failed to add asset: "#{name}". Could not find layout:
@@ -27,11 +26,19 @@ module Metalware
 
     Asset = Struct.new(:name, :source_path, :type)
 
-    def layout_or_type_path(layout_or_type)
+    def source_file_details(layout_or_type)
       if Records::Asset::TYPES.include?(layout_or_type)
-        FilePath.asset_type(layout_or_type)
+        OpenStruct.new(
+          type: layout_or_type,
+          path: FilePath.asset_type(layout_or_type)
+        )
+      elsif (path = Records::Layout.path(layout_or_type))
+        OpenStruct.new(
+          type: Records::Layout.type_from_path(path),
+          path: path
+        )
       else
-        Records::Layout.path(layout_or_type)
+        nil
       end
     end
   end

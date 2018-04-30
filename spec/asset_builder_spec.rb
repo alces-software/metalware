@@ -26,6 +26,7 @@ RSpec.describe Metalware::AssetBuilder do
       it 'pushes the asset onto the queue' do
         expect(subject.queue.last.name).to eq(type_asset)
         expect(subject.queue.last.source_path).to eq(type_path)
+        expect(subject.queue.last.type).to eq(type)
       end
     end
 
@@ -50,6 +51,7 @@ RSpec.describe Metalware::AssetBuilder do
         it 'pushes the asset if the layout exists' do
           expect(subject.queue.last.name).to eq(layout_asset)
           expect(subject.queue.last.source_path).to eq(layout_path)
+          expect(subject.queue.last.type).to eq(type)
         end
       end
 
