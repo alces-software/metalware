@@ -15,6 +15,7 @@ RSpec.describe Metalware::AssetBuilder do
   describe '#push_asset' do
     let(:type_asset) { 'type-asset-name' }
     let(:type) { 'rack' }
+    let(:type_path) { Metalware::FilePath.asset_type(type) }
 
     before do
       SpecUtils.enable_output_to_stderr
@@ -24,14 +25,16 @@ RSpec.describe Metalware::AssetBuilder do
     context 'when adding an asset from a type' do
       it 'pushes the asset onto the queue' do
         expect(subject.queue.last.name).to eq(type_asset)
-        expect(subject.queue.last.layout).to eq(type)
+        expect(subject.queue.last.source_path).to eq(type_path)
       end
     end
 
     context 'when adding an asset from a layout' do
       let(:layout) { 'new-layout' }
       let(:layout_asset) { 'layout-asset-name' }
-      let(:layout_path) { Metalware::FilePath.layout(type, layout) }
+      let(:layout_path) do
+        Metalware::FilePath.layout(type.pluralize, layout)
+      end
 
       def push_layout_asset
         subject.push_asset(layout_asset, layout)
@@ -42,9 +45,10 @@ RSpec.describe Metalware::AssetBuilder do
         Metalware::Data.dump(layout_path, {})
         push_layout_asset
         expect(subject.queue.last.name).to eq(layout_asset)
+        expect(subject.queue.last.source_path).to eq(layout_path)
       end
 
-      it 'warns then does nothing if the layout does not exist' do
+      it 'warns and does nothing if the layout does not exist' do
         original_queue = subject.queue.dup
         expect do
           push_layout_asset
