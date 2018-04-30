@@ -9,18 +9,14 @@ module Metalware
       class Add < CommandHelpers::RecordEditor
         private
 
-        attr_reader :type_name, :type_path, :layout_name
-
-        alias source type_path
+        attr_reader :type_name, :layout_name
 
         def setup
           @type_name = args[0]
-          @type_path = FilePath.asset_type(type_name)
           @layout_name = args[1]
         end
 
         def run
-          error_if_type_is_missing
           Records::Layout.error_if_unavailable(layout_name)
           FileUtils.mkdir_p File.dirname(destination)
           copy_and_edit_record_file
@@ -30,10 +26,15 @@ module Metalware
           FilePath.layout(type_name.pluralize, layout_name)
         end
 
-        def error_if_type_is_missing
-          return if File.exist?(type_path)
+        def source
+          FilePath.asset_type(type_name).tap do |path|
+            raise_missing_asset_type unless File.exist?(path)
+          end
+        end
+
+        def raise_missing_asset_type
           raise InvalidInput, <<-EOF.squish
-            Cannot find layout type: "#{type_name}"
+            Cannot find asset type: "#{type_name}"
           EOF
         end
       end
