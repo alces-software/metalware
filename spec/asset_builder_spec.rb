@@ -3,6 +3,14 @@
 require 'spec_utils'
 require 'asset_builder'
 
+RSpec.shared_examples 'pushes the asset' do
+  it 'pushes the asset onto the stack' do
+    expect(subject.stack.last.name).to eq(pushed_asset_name)
+    expect(subject.stack.last.source_path).to eq(pushed_source_path)
+    expect(subject.stack.last.type).to eq(type)
+  end
+end
+
 RSpec.describe Metalware::AssetBuilder do
   subject { described_class.new }
 
@@ -27,11 +35,10 @@ RSpec.describe Metalware::AssetBuilder do
     end
 
     context 'when adding an asset from a type' do
-      it 'pushes the asset onto the stack' do
-        expect(subject.stack.last.name).to eq(test_asset)
-        expect(subject.stack.last.source_path).to eq(type_path)
-        expect(subject.stack.last.type).to eq(type)
-      end
+      let(:pushed_asset_name) { test_asset }
+      let(:pushed_source_path) { type_path }
+
+      include_examples 'pushes the asset'
     end
 
     context 'when adding an asset from a layout' do
@@ -52,11 +59,10 @@ RSpec.describe Metalware::AssetBuilder do
           push_layout_asset
         end
 
-        it 'pushes the asset if the layout exists' do
-          expect(subject.stack.last.name).to eq(layout_asset)
-          expect(subject.stack.last.source_path).to eq(layout_path)
-          expect(subject.stack.last.type).to eq(type)
-        end
+        let(:pushed_asset_name) { layout_asset }
+        let(:pushed_source_path) { layout_path }
+
+        include_examples 'pushes the asset'
       end
 
       it 'warns and does nothing if the layout does not exist' do
