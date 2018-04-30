@@ -24,6 +24,9 @@ module Metalware
       end
     end
 
+    def pop_asset
+    end
+
     private
 
     Asset = Struct.new(:name, :source_path, :type)

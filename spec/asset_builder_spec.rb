@@ -79,4 +79,10 @@ RSpec.describe Metalware::AssetBuilder do
       expect(subject.empty?).to be false
     end
   end
+
+  describe '#pop_asset' do
+    it 'returns nil if there are no more assets' do
+      expect(subject.pop_asset).to eq(nil)
+    end
+  end
 end
