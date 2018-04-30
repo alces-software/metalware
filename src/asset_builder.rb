@@ -7,8 +7,6 @@ module Metalware
   class AssetBuilder
     attr_reader :stack
 
-    delegate :empty?, to: :stack
-
     def initialize
       @stack ||= []
     end

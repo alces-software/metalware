@@ -75,17 +75,6 @@ RSpec.describe Metalware::AssetBuilder do
     end
   end
 
-  describe '#empty?' do
-    it 'returns true when the stack is empty' do
-      expect(subject.empty?).to be true
-    end
-
-    it 'returns false when there is an asset on the stack' do
-      push_test_asset
-      expect(subject.empty?).to be false
-    end
-  end
-
   describe '#pop_asset' do
     it 'returns nil if there are no more assets' do
       expect(subject.pop_asset).to eq(nil)
