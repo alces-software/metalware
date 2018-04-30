@@ -107,4 +107,27 @@ RSpec.describe Metalware::AssetBuilder do
       expect(subject.pop_asset).to be_nil
     end
   end
+
+  describe '#save' do
+    let(:asset) { subject.pop_asset }
+    let(:source_content) { Metalware::Data.load(asset.source_path) }
+
+    before do
+      FileSystem.root_setup(&:with_asset_types)
+      push_test_asset
+    end
+
+    it 'saves the asset' do
+      asset.save
+      content = alces.assets.find_by_name(test_asset).to_h.tap do |c|
+        c.delete(:metadata)
+      end
+      expect(content).to eq(source_content)
+    end
+
+    it 'errors if the source file is invalid' do
+      allow(Metalware::Data).to receive(:load).and_return([])
+      expect { asset.save }.to raise_error(Metalware::InvalidInput)
+    end
+  end
 end
