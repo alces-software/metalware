@@ -14,9 +14,9 @@ RSpec.describe Metalware::AssetBuilder do
     subject.push_asset(test_asset, type)
   end
 
-  describe '#queue' do
+  describe '#stack' do
     it 'initially returns an empty array' do
-      expect(subject.queue).to eq([])
+      expect(subject.stack).to eq([])
     end
   end
 
@@ -27,10 +27,10 @@ RSpec.describe Metalware::AssetBuilder do
     end
 
     context 'when adding an asset from a type' do
-      it 'pushes the asset onto the queue' do
-        expect(subject.queue.last.name).to eq(test_asset)
-        expect(subject.queue.last.source_path).to eq(type_path)
-        expect(subject.queue.last.type).to eq(type)
+      it 'pushes the asset onto the stack' do
+        expect(subject.stack.last.name).to eq(test_asset)
+        expect(subject.stack.last.source_path).to eq(type_path)
+        expect(subject.stack.last.type).to eq(type)
       end
     end
 
@@ -53,28 +53,28 @@ RSpec.describe Metalware::AssetBuilder do
         end
 
         it 'pushes the asset if the layout exists' do
-          expect(subject.queue.last.name).to eq(layout_asset)
-          expect(subject.queue.last.source_path).to eq(layout_path)
-          expect(subject.queue.last.type).to eq(type)
+          expect(subject.stack.last.name).to eq(layout_asset)
+          expect(subject.stack.last.source_path).to eq(layout_path)
+          expect(subject.stack.last.type).to eq(type)
         end
       end
 
       it 'warns and does nothing if the layout does not exist' do
-        original_queue = subject.queue.dup
+        original_stack = subject.stack.dup
         expect do
           push_layout_asset
         end.to output(/Failed to add asset: "#{layout_asset}"/).to_stderr
-        expect(subject.queue).to eq(original_queue)
+        expect(subject.stack).to eq(original_stack)
       end
     end
   end
 
   describe '#empty?' do
-    it 'returns true when the queue is empty' do
+    it 'returns true when the stack is empty' do
       expect(subject.empty?).to be true
     end
 
-    it 'returns false when there is an asset on the queue' do
+    it 'returns false when there is an asset on the stack' do
       push_test_asset
       expect(subject.empty?).to be false
     end
@@ -90,11 +90,17 @@ RSpec.describe Metalware::AssetBuilder do
       expect(subject.pop_asset.name).to eq(test_asset)
     end
 
-    it 'removes the asset from the queue' do
-      length = subject.queue.length
+    it 'removes the asset from the stack' do
+      length = subject.stack.length
       push_test_asset
       subject.pop_asset
-      expect(subject.queue.length).to eq(length)
+      expect(subject.stack.length).to eq(length)
+    end
+
+    it 'removes assets in a FIFO order' do
+      subject.push_asset(type, 'some-random-other-asset')
+      push_test_asset
+      expect(subject.pop_asset.name).to eq(test_asset)
     end
   end
 end

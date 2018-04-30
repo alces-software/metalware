@@ -5,17 +5,17 @@ require 'records/asset'
 
 module Metalware
   class AssetBuilder
-    attr_reader :queue
+    attr_reader :stack
 
-    delegate :empty?, to: :queue
+    delegate :empty?, to: :stack
 
     def initialize
-      @queue ||= []
+      @stack ||= []
     end
 
     def push_asset(name, layout_or_type)
       if (details = source_file_details(layout_or_type))
-        queue.push(Asset.new(name, details.path, details.type))
+        stack.push(Asset.new(name, details.path, details.type))
       else
         MetalLog.warn <<-EOF.squish
           Failed to add asset: "#{name}". Could not find layout:
@@ -25,7 +25,7 @@ module Metalware
     end
 
     def pop_asset
-      queue.pop
+      stack.pop
     end
 
     private
