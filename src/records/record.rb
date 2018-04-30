@@ -53,9 +53,7 @@ module Metalware
           return (path.gsub(record_dir, '').split('/')[1]).singularize if
             path.include? record_dir
           raise InvalidInput, <<-EOF.squish
-            Path does not start with the correct path.
-            Can only find the type if the record is in the correct directory.
-            Got: #{path}, Expected: #{record_dir}
+            Expected path to start with #{record_dir} for #{class_name} type
           EOF
         end
 
