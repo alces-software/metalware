@@ -16,7 +16,6 @@ module Metalware
           @type_name = args[0]
           @type_path = FilePath.asset_type(type_name)
           @asset_name = args[1]
-          unpack_node_from_options
           error_if_type_is_missing
           Records::Asset.error_if_unavailable(asset_name)
           FileUtils.mkdir_p File.dirname(destination)

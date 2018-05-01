@@ -15,7 +15,6 @@ module Metalware
           @asset_name = args[0]
           @asset_path = Records::Asset.path(asset_name,
                                             missing_error: true)
-          unpack_node_from_options
         end
       end
     end
