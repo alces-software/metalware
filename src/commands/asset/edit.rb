@@ -17,9 +17,8 @@ module Metalware
                                             missing_error: true)
         end
 
-        def run
+        def edit_first_asset
           copy_and_edit_record_file
-          build_asset_and_assign_node
         end
       end
     end

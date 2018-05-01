@@ -10,7 +10,12 @@ module Metalware
 
       attr_reader :asset_name
 
-      def build_asset_and_assign_node
+      def edit_first_asset
+        raise NotImplementedError
+      end
+
+      def run
+        edit_first_asset
         assign_asset_to_node_if_given
       end
 

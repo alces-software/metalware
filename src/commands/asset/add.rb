@@ -21,11 +21,6 @@ module Metalware
           FileUtils.mkdir_p File.dirname(destination)
         end
 
-        def run
-          edit_first_asset
-          build_asset_and_assign_node
-        end
-
         def edit_first_asset
           asset_builder.push_asset(asset_name, type_name)
           asset_builder.pop_asset.edit_and_save
