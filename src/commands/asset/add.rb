@@ -18,7 +18,7 @@ module Metalware
 
         def edit_first_asset
           asset_builder.push_asset(asset_name, type_name)
-          asset_builder.pop_asset.edit_and_save
+          asset_builder.pop_asset&.edit_and_save
         end
       end
     end
