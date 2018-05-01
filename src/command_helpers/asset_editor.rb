@@ -20,6 +20,9 @@ module Metalware
       end
 
       def build_sub_assets
+        while (asset = asset_builder.pop_asset)
+          asset.save
+        end
       end
 
       def asset_builder
