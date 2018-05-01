@@ -21,6 +21,11 @@ module Metalware
           FileUtils.mkdir_p File.dirname(destination)
         end
 
+        def run
+          copy_and_edit_record_file
+          build_asset_and_assign_node
+        end
+
         def destination
           FilePath.asset(type_name.pluralize, asset_name)
         end

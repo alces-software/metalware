@@ -10,8 +10,7 @@ module Metalware
 
       attr_reader :asset_name
 
-      def run
-        copy_and_edit_record_file
+      def build_asset_and_assign_node
         assign_asset_to_node_if_given
       end
 
