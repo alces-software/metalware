@@ -58,9 +58,7 @@ module Metalware
 
       def save
         Utils.copy_via_temp_file(source_path, asset_path) do |path|
-          unless validate_and_generate_sub_assets(path)
-            raise_invalid_source
-          end
+          raise_invalid_source unless validate_and_generate_sub_assets(path)
         end
       end
 
@@ -91,7 +89,7 @@ module Metalware
         when Array
           value.map { |v| convert_sub_assets(v) }
         when Hash
-          value.deep_merge(value) { |_,_, v| convert_sub_assets(v) }
+          value.deep_merge(value) { |_, _, v| convert_sub_assets(v) }
         else
           value
         end
@@ -103,7 +101,7 @@ module Metalware
         append_name = str.match(/(?<=\^).+\Z/).to_s
         sub_asset_name = "#{name}_#{append_name}"
         builder.push_asset(sub_asset_name, sub_type_layout)
-        '^' +  sub_asset_name
+        '^' + sub_asset_name
       end
     end
   end

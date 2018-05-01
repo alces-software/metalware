@@ -155,11 +155,11 @@ RSpec.describe Metalware::AssetBuilder do
 
       def content_generator(server_value, pdu_value)
         {
-          :'no_double_^' => 'does-not^replace-double^chevron',
+          'no_double_^': 'does-not^replace-double^chevron',
           server: server_value,
           some_key: {
-            pdus: ['^pdu-existing-asset-do-not-touch', pdu_value]
-          }
+            pdus: ['^pdu-existing-asset-do-not-touch', pdu_value],
+          },
         }
       end
 
