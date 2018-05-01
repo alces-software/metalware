@@ -35,8 +35,6 @@ module Metalware
 
     private
 
-    Asset = Struct.new(:name, :source_path, :type)
-
     def source_file_details(layout_or_type)
       if Records::Asset::TYPES.include?(layout_or_type)
         OpenStruct.new(
@@ -48,6 +46,33 @@ module Metalware
           type: Records::Layout.type_from_path(path),
           path: path
         )
+      end
+    end
+
+    Asset = Struct.new(:name, :source_path, :type) do
+      def edit_and_save
+        Utils::Editor.open_copy(source_path, asset_path) do |temp_path|
+          Validation::Asset.valid_file?(temp_path)
+        end
+      end
+
+      def save
+        raise_if_source_invalid(source_path)
+        Utils.copy_via_temp_file(source_path, asset_path) {}
+      end
+
+      def asset_path
+        FilePath.asset(type.pluralize, name)
+      end
+
+      private
+
+      def raise_if_source_invalid(source_path)
+        return if Validation::Asset.valid_file?(source_path)
+        raise ValidationFailure, <<-EOF.squish
+          Failed to add asset: "#{name}". Please check the layout is valid:
+          "#{source_path}"
+        EOF
       end
     end
   end

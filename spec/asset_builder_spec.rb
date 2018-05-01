@@ -107,4 +107,49 @@ RSpec.describe Metalware::AssetBuilder do
       expect(subject.pop_asset).to be_nil
     end
   end
+
+  shared_examples 'save asset methods' do
+    let(:asset) { subject.pop_asset }
+    let(:source_content) { Metalware::Data.load(asset.source_path) }
+
+    before do
+      FileSystem.root_setup(&:with_asset_types)
+      push_test_asset
+    end
+
+    it 'saves the asset' do
+      run_save.call
+      content = alces.assets.find_by_name(test_asset).to_h.tap do |c|
+        c.delete(:metadata)
+      end
+      expect(content).to eq(source_content)
+    end
+
+    it 'errors if the file is invalid' do
+      allow(Metalware::Data).to receive(:load).and_return([])
+      expect { run_save.call }.to raise_error(Metalware::ValidationFailure)
+    end
+  end
+
+  describe '#save' do
+    let(:run_save) { proc { asset.save } }
+
+    include_examples 'save asset methods'
+  end
+
+  describe '#edit_and_save' do
+    let(:run_save) { proc { asset.edit_and_save } }
+    let(:mock_highline) do
+      instance_double(HighLine).tap do |h|
+        allow(h).to receive(:agree).and_return(false)
+      end
+    end
+
+    before do
+      allow(HighLine).to receive(:new).and_return(mock_highline)
+      allow(Metalware::Utils::Editor).to receive(:open)
+    end
+
+    include_examples 'save asset methods'
+  end
 end
