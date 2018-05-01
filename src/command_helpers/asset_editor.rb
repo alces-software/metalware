@@ -26,8 +26,8 @@ module Metalware
       end
 
       def ask_edit_asset(name)
-        highline.agree <<-EOF
-          Do you wish to edit asset "#{name}"?
+        highline.agree <<-EOF.squish
+          Do you wish to edit asset "#{name}"? [yes/no]
         EOF
       end
 
