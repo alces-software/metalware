@@ -5,7 +5,7 @@ require 'asset_builder'
 
 module Metalware
   module CommandHelpers
-    class AssetEditor < LayoutEditor
+    class AssetEditor < BaseCommand
       private
 
       attr_reader :asset_name
