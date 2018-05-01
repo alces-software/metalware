@@ -25,11 +25,11 @@ module Metalware
 
       def node
         @node ||= begin
-          if options.node
-            alces.nodes.find_by_name(options.node).tap do |n|
-              raise_error_if_node_is_missing(n)
-            end
-          end
+           if options.node
+             alces.nodes.find_by_name(options.node).tap do |n|
+               raise_error_if_node_is_missing(n)
+             end
+           end
          end
       end
 
