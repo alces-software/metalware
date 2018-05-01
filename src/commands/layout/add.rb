@@ -6,7 +6,7 @@ require 'records/layout'
 module Metalware
   module Commands
     module Layout
-      class Add < CommandHelpers::RecordEditor
+      class Add < CommandHelpers::LayoutEditor
         private
 
         attr_reader :type_name, :layout_name

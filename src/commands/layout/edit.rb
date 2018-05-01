@@ -3,7 +3,7 @@
 module Metalware
   module Commands
     module Layout
-      class Edit < CommandHelpers::RecordEditor
+      class Edit < CommandHelpers::LayoutEditor
         private
 
         attr_reader :layout_name, :layout_path

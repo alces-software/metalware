@@ -4,7 +4,7 @@ require 'validation/asset'
 
 module Metalware
   module CommandHelpers
-    class RecordEditor < BaseCommand
+    class LayoutEditor < BaseCommand
       private
 
       attr_accessor :node
