@@ -35,11 +35,10 @@ RSpec.describe Metalware::Commands::Asset::Add do
     let(:sub_asset_name) do
       "#{parent_asset_name}_#{sub_asset_name_fragment}"
     end
-    let(:editor) { class_spy(Metalware::Utils::Editor).as_stubbed_const }
 
     AlcesUtils.mock(self, :each) do
-      FileSystem.root_setup { |fs| fs.with_asset_types }
-      allow(Metalware::SystemCommand).to receive(:no_capture)
+      FileSystem.root_setup(&:with_asset_types)
+      allow(Metalware::Utils::Editor).to receive(:open)
       allow(HighLine).to receive(:new).and_return(mocked_highline)
       create_layout(layout_name, layout_content)
     end
@@ -51,10 +50,11 @@ RSpec.describe Metalware::Commands::Asset::Add do
     end
 
     shared_examples 'creates the sub asset' do |editor_count|
-      it "only opens the editor #{editor_count} times" do
-        editor # Activates the spy
+      it "opens the editor #{editor_count} times" do
+        expect(Metalware::Utils::Editor).to receive(:open_copy)
+          .exactly(editor_count)
+          .and_call_original
         run_sub_asseting_command
-        expect(editor).to have_received(:open_copy).exactly(editor_count)
       end
 
       it 'creates the sub asset' do
@@ -67,6 +67,12 @@ RSpec.describe Metalware::Commands::Asset::Add do
       let(:highline_answer) { false }
 
       include_examples 'creates the sub asset', 1
+    end
+
+    context 'when editing the sub asset' do
+      let(:highline_answer) { true }
+
+      include_examples 'creates the sub asset', 2
     end
   end
 end

@@ -21,12 +21,22 @@ module Metalware
 
       def build_sub_assets
         while (asset = asset_builder.pop_asset)
-          asset.save
+          ask_edit_asset(asset.name) ? asset.edit_and_save : asset.save
         end
+      end
+
+      def ask_edit_asset(name)
+        highline.agree <<-EOF
+          Do you wish to edit asset "#{name}"?
+        EOF
       end
 
       def asset_builder
         @asset_builder ||= AssetBuilder.new
+      end
+
+      def highline
+        @highline ||= HighLine.new
       end
 
       def node
