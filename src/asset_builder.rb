@@ -36,7 +36,7 @@ module Metalware
     def edit_asset(name)
       path = Records::Asset.path(name)
       type = Records::Asset.type_from_path(path)
-      asset = Asset.new(name, path, type)
+      asset = Asset.new(self, name, path, type)
       asset.edit_and_save
     end
 
