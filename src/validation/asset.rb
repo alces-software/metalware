@@ -4,7 +4,8 @@ module Metalware
   module Validation
     class Asset
       def self.valid_file?(path)
-        Data.load(path).is_a?(Hash)
+        data = Data.load(path)
+        data.is_a?(Hash) ? data : false
       rescue StandardError
         false
       end
