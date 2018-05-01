@@ -94,6 +94,10 @@ module Metalware
         end
       end
 
+      def local?
+        name == 'local'
+      end
+
       private
 
       def white_list_for_hasher
