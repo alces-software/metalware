@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'command_helpers/layout_editor'
+require 'asset_builder'
 
 module Metalware
   module CommandHelpers
@@ -12,6 +13,10 @@ module Metalware
       def run
         copy_and_edit_record_file
         assign_asset_to_node_if_given(asset_name)
+      end
+
+      def asset_builder
+        @asset_builder ||= AssetBuilder.new
       end
 
       def unpack_node_from_options
