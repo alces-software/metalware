@@ -33,6 +33,12 @@ module Metalware
       end
     end
 
+    def edit_asset(name)
+      path = Records::Asset.path(name)
+      type = Records::Asset.type_from_path(path)
+      Asset.new(self, name, path, type).edit_and_save
+    end
+
     private
 
     def source_file_details(layout_or_type)

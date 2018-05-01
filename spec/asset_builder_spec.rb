@@ -201,4 +201,22 @@ RSpec.describe Metalware::AssetBuilder do
 
     include_examples 'save asset methods'
   end
+
+  describe '#edit_asset' do
+    let(:path) { Metalware::Records::Asset.path(test_asset) }
+    let(:expected_content) { { key: 'content' } }
+
+    AlcesUtils.mock(self, :each) do
+      FileSystem.root_setup(&:with_minimal_repo)
+      create_asset(test_asset, {}, type: type)
+    end
+
+    it 'calls the asset to edited and saved' do
+      allow(Metalware::Utils::Editor).to receive(:open).and_wrap_original do |_, path|
+        Metalware::Data.dump(path, expected_content)
+      end
+      subject.edit_asset(test_asset)
+      expect(alces.assets.find_by_name(test_asset).to_h).to include(expected_content)
+    end
+  end
 end
