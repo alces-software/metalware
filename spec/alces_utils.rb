@@ -195,6 +195,12 @@ module AlcesUtils
       alces.instance_variable_set(:@assets, nil)
     end
 
+    def create_layout(layout_name, data, type: 'rack')
+      path = Metalware::FilePath.layout(type.pluralize, layout_name)
+      FileUtils.mkdir_p(File.dirname(path))
+      Metalware::Data.dump(path, data)
+    end
+
     private
 
     attr_reader :alces, :test
