@@ -129,6 +129,43 @@ RSpec.describe Metalware::AssetBuilder do
       allow(Metalware::Data).to receive(:load).and_return([])
       expect { run_save.call }.to raise_error(Metalware::ValidationFailure)
     end
+
+    context 'with a sub asset layout' do
+      let(:parent_type) { 'rack' }
+      let(:layout_name) { 'rack1-layout' }
+      let(:layout_content) do
+        content_generator('server^server1', 'pdu^pdu1')
+      end
+      let(:asset_name) { 'rack1' }
+      let(:asset_content) do
+        alces.assets.find_by_name(asset_name).to_h.tap do |data|
+          data.delete(:metadata)
+        end
+      end
+      let(:expected_asset_content) do
+        content_generator("^#{asset_name}_server1", "^#{asset_name}_pdu1")
+      end
+
+      def content_generator(server_value, pdu_value)
+        {
+          :'no_double_^' => 'does-not^replace-double^chevron',
+          server: server_value,
+          some_key: {
+            pdus: ['^pdu-existing-asset-do-not-touch', pdu_value]
+          }
+        }
+      end
+
+      AlcesUtils.mock(self, :each) do
+        create_layout(layout_name, layout_content, type: parent_type)
+        subject.push_asset(asset_name, layout_name)
+        run_save.call
+      end
+
+      it 'transforms the sub asset notation to asset names' do
+        expect(asset_content).to eq(expected_asset_content)
+      end
+    end
   end
 
   describe '#save' do

@@ -52,13 +52,16 @@ module Metalware
     Asset = Struct.new(:name, :source_path, :type) do
       def edit_and_save
         Utils::Editor.open_copy(source_path, asset_path) do |temp_path|
-          Validation::Asset.valid_file?(temp_path)
+          validate_and_generate_sub_assets(temp_path)
         end
       end
 
       def save
-        raise_if_source_invalid(source_path)
-        Utils.copy_via_temp_file(source_path, asset_path) {}
+        Utils.copy_via_temp_file(source_path, asset_path) do |path|
+          unless validate_and_generate_sub_assets(path)
+            raise_invalid_source
+          end
+        end
       end
 
       def asset_path
@@ -67,12 +70,38 @@ module Metalware
 
       private
 
-      def raise_if_source_invalid(source_path)
-        return if Validation::Asset.valid_file?(source_path)
+      def raise_invalid_source
         raise ValidationFailure, <<-EOF.squish
           Failed to add asset: "#{name}". Please check the layout is valid:
           "#{source_path}"
         EOF
+      end
+
+      def validate_and_generate_sub_assets(path)
+        if (data = Validation::Asset.valid_file?(path))
+          new_data = convert_sub_assets(data)
+          Metalware::Data.dump(path, new_data)
+        end
+      end
+
+      def convert_sub_assets(value)
+        case value
+        when String
+          convert_sub_asset_string(value)
+        when Array
+          value.map { |v| convert_sub_assets(v) }
+        when Hash
+          value.deep_merge(value) { |_,_, v| convert_sub_assets(v) }
+        else
+          value
+        end
+      end
+
+      def convert_sub_asset_string(str)
+        return str unless str.match?(/\A[^\^]+\^[^\^]+\Z/)
+        # type = str.match(/\A.+(?=\^)/).to_s
+        append_name = str.match(/(?<=\^).+\Z/).to_s
+        "^#{name}_#{append_name}"
       end
     end
   end
