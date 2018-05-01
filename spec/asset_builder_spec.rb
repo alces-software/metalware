@@ -140,7 +140,7 @@ RSpec.describe Metalware::AssetBuilder do
   describe '#edit_and_save' do
     let(:run_save) { proc { asset.edit_and_save } }
     let(:mock_highline) do
-      double(HighLine).tap do |h|
+      instance_double(HighLine).tap do |h|
         allow(h).to receive(:agree).and_return(false)
       end
     end
