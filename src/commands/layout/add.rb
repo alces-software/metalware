@@ -6,7 +6,7 @@ require 'records/layout'
 module Metalware
   module Commands
     module Layout
-      class Add < CommandHelpers::RecordEditor
+      class Add < CommandHelpers::LayoutEditor
         private
 
         attr_reader :type_name, :layout_name
@@ -14,13 +14,9 @@ module Metalware
         def setup
           @type_name = args[0]
           @layout_name = args[1]
-        end
-
-        def run
           source # This ensures that the source type is valid
           Records::Layout.error_if_unavailable(layout_name)
           FileUtils.mkdir_p File.dirname(destination)
-          copy_and_edit_record_file
         end
 
         def destination

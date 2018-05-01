@@ -1,13 +1,18 @@
 # frozen_string_literal: true
 
-require 'validation/asset'
+require 'command_helpers/layout_editor'
 
 module Metalware
   module CommandHelpers
-    class RecordEditor < BaseCommand
+    class AssetEditor < LayoutEditor
       private
 
       attr_accessor :node
+
+      def run
+        copy_and_edit_record_file
+        assign_asset_to_node_if_given(asset_name)
+      end
 
       def unpack_node_from_options
         return unless options.node
@@ -22,25 +27,11 @@ module Metalware
         end
       end
 
-      def copy_and_edit_record_file
-        Utils::Editor.open_copy(source, destination) do |edited_path|
-          Validation::Asset.valid_file?(edited_path)
-        end
-      end
-
       def raise_error_if_node_is_missing
         return if node
         raise InvalidInput, <<-EOF
-          Can not find node: #{options.node}
+          Unable to find node: #{options.node}
         EOF
-      end
-
-      def source
-        raise NotImplementedError
-      end
-
-      def destination
-        raise NotImplementedError
       end
     end
   end
