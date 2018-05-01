@@ -76,10 +76,9 @@ module Metalware
       end
 
       def validate_and_generate_sub_assets(path)
-        if (data = Validation::Asset.valid_file?(path))
-          new_data = convert_sub_assets(data)
-          Metalware::Data.dump(path, new_data)
-        end
+        return false unless (data = Validation::Asset.valid_file?(path))
+        new_data = convert_sub_assets(data)
+        Metalware::Data.dump(path, new_data)
       end
 
       def convert_sub_assets(value)
