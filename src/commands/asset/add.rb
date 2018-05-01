@@ -5,7 +5,7 @@ require 'utils/editor'
 module Metalware
   module Commands
     module Asset
-      class Add < CommandHelpers::LayoutEditor
+      class Add < CommandHelpers::AssetEditor
         private
 
         attr_reader :type_name, :type_path, :asset_name

@@ -3,7 +3,7 @@
 module Metalware
   module Commands
     module Asset
-      class Edit < CommandHelpers::LayoutEditor
+      class Edit < CommandHelpers::AssetEditor
         private
 
         attr_reader :asset_name, :asset_path
