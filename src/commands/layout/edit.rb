@@ -15,10 +15,6 @@ module Metalware
           @layout_name = args[0]
           @layout_path = Records::Layout.path(layout_name, missing_error: true)
         end
-
-        def run
-          copy_and_edit_record_file
-        end
       end
     end
   end
