@@ -13,7 +13,7 @@ module Metalware
 
     def push_asset(name, layout_or_type)
       if (details = source_file_details(layout_or_type))
-        stack.push(Asset.new(name, details.path, details.type))
+        stack.push(Asset.new(self, name, details.path, details.type))
       else
         MetalLog.warn <<-EOF.squish
           Failed to add asset: "#{name}". Could not find layout:
@@ -49,7 +49,7 @@ module Metalware
       end
     end
 
-    Asset = Struct.new(:name, :source_path, :type) do
+    Asset = Struct.new(:builder, :name, :source_path, :type) do
       def edit_and_save
         Utils::Editor.open_copy(source_path, asset_path) do |temp_path|
           validate_and_generate_sub_assets(temp_path)
@@ -99,9 +99,11 @@ module Metalware
 
       def convert_sub_asset_string(str)
         return str unless str.match?(/\A[^\^]+\^[^\^]+\Z/)
-        # type = str.match(/\A.+(?=\^)/).to_s
+        sub_type_layout = str.match(/\A.+(?=\^)/).to_s
         append_name = str.match(/(?<=\^).+\Z/).to_s
-        "^#{name}_#{append_name}"
+        sub_asset_name = "#{name}_#{append_name}"
+        builder.push_asset(sub_asset_name, sub_type_layout)
+        '^' +  sub_asset_name
       end
     end
   end

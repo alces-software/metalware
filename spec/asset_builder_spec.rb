@@ -112,22 +112,25 @@ RSpec.describe Metalware::AssetBuilder do
     let(:asset) { subject.pop_asset }
     let(:source_content) { Metalware::Data.load(asset.source_path) }
 
-    before do
-      FileSystem.root_setup(&:with_asset_types)
-      push_test_asset
-    end
+    before { FileSystem.root_setup(&:with_asset_types) }
 
-    it 'saves the asset' do
-      run_save.call
-      content = alces.assets.find_by_name(test_asset).to_h.tap do |c|
-        c.delete(:metadata)
+    context 'with the test asset' do
+      before { push_test_asset }
+
+      it 'saves the asset' do
+        run_save.call
+        content = alces.assets.find_by_name(test_asset).to_h.tap do |c|
+          c.delete(:metadata)
+        end
+        expect(content).to eq(source_content)
       end
-      expect(content).to eq(source_content)
-    end
 
-    it 'errors if the file is invalid' do
-      allow(Metalware::Data).to receive(:load).and_return([])
-      expect { run_save.call }.to raise_error(Metalware::ValidationFailure)
+      it 'errors if the file is invalid' do
+        allow(Metalware::Data).to receive(:load).and_return([])
+        expect do
+          run_save.call
+        end.to raise_error(Metalware::ValidationFailure)
+      end
     end
 
     context 'with a sub asset layout' do
@@ -142,8 +145,12 @@ RSpec.describe Metalware::AssetBuilder do
           data.delete(:metadata)
         end
       end
+      let(:sub_asset_names) do
+        ["#{asset_name}_server1", "#{asset_name}_pdu1"]
+      end
       let(:expected_asset_content) do
-        content_generator("^#{asset_name}_server1", "^#{asset_name}_pdu1")
+        links = sub_asset_names.map { |n| '^' + n }
+        content_generator(links[0], links[1])
       end
 
       def content_generator(server_value, pdu_value)
@@ -164,6 +171,11 @@ RSpec.describe Metalware::AssetBuilder do
 
       it 'transforms the sub asset notation to asset names' do
         expect(asset_content).to eq(expected_asset_content)
+      end
+
+      it 'adds the sub assets to stack' do
+        stacked_assets = subject.stack.map(&:name)
+        expect(stacked_assets).to contain_exactly(*sub_asset_names)
       end
     end
   end
