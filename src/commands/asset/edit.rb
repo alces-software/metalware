@@ -6,16 +6,12 @@ module Metalware
       class Edit < CommandHelpers::AssetEditor
         private
 
-        attr_reader :asset_name, :asset_path
-
-        alias source asset_path
-        alias destination source
-
         def setup
           @asset_name = args[0]
-          @asset_path = Records::Asset.path(asset_name,
-                                            missing_error: true)
-          unpack_node_from_options
+        end
+
+        def edit_first_asset
+          asset_builder.edit_asset(asset_name)
         end
       end
     end

@@ -34,7 +34,7 @@ module Metalware
     end
 
     def edit_asset(name)
-      path = Records::Asset.path(name)
+      path = Records::Asset.path(name, missing_error: true)
       type = Records::Asset.type_from_path(path)
       Asset.new(self, name, path, type).edit_and_save
     end
@@ -69,7 +69,9 @@ module Metalware
       end
 
       def asset_path
-        FilePath.asset(type.pluralize, name)
+        FilePath.asset(type.pluralize, name).tap do |path|
+          FileUtils.mkdir_p(File.dirname(path))
+        end
       end
 
       private
