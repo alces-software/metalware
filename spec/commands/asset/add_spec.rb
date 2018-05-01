@@ -33,7 +33,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
     let(:parent_asset_name) { 'parent-asset' }
     let(:sub_asset_name_fragment) { 'pdu1' }
     let(:sub_asset_name) do
-      "#{parent_asset_name}_#{sub_asset_name_fragment}"
+      "#{parent_asset_name}-#{sub_asset_name_fragment}"
     end
 
     AlcesUtils.mock(self, :each) do
