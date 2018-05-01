@@ -6,19 +6,12 @@ module Metalware
       class Edit < CommandHelpers::AssetEditor
         private
 
-        attr_reader :asset_path
-
-        alias source asset_path
-        alias destination source
-
         def setup
           @asset_name = args[0]
-          @asset_path = Records::Asset.path(asset_name,
-                                            missing_error: true)
         end
 
         def edit_first_asset
-          copy_and_edit_record_file
+          asset_builder.edit_asset(asset_name)
         end
       end
     end
