@@ -164,6 +164,10 @@ RSpec.describe Metalware::Namespaces::Node do
             node.build_method
           end.to raise_error(Metalware::InvalidLocalBuild)
         end
+
+        it 'returns false when local? is called' do
+          expect(node.local?).to eq(false)
+        end
       end
 
       context "with the 'local' node" do
@@ -190,6 +194,10 @@ RSpec.describe Metalware::Namespaces::Node do
         # Instead, always force the local node to use the local build
         it 'ignores incorrect config values' do
           local_node_uses_local_build?(:pxelinux)
+        end
+
+        it 'returns true when local? is called' do
+          expect(local.local?).to eq(true)
         end
       end
     end
