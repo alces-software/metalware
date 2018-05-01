@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'command_helpers/layout_editor'
 require 'asset_builder'
 
 module Metalware
@@ -10,13 +9,17 @@ module Metalware
 
       attr_reader :asset_name
 
+      def run
+        edit_first_asset
+        build_sub_assets
+        assign_asset_to_node_if_given
+      end
+
       def edit_first_asset
         raise NotImplementedError
       end
 
-      def run
-        edit_first_asset
-        assign_asset_to_node_if_given
+      def build_sub_assets
       end
 
       def asset_builder
