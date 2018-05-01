@@ -98,7 +98,7 @@ subcommands:
     action: Commands::Configure::Local
 
   layout_add: &layout_add
-    syntax: metal layout add ASSET_TYPE LAYOUT_NAME [options]
+    syntax: metal layout add TYPE_OR_LAYOUT LAYOUT_NAME [options]
     summary: Add a new layout record
     action: Commands::Layout::Add
 
