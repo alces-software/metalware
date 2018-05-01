@@ -14,7 +14,7 @@ module Metalware
         def setup
           @type_name = args[0]
           @layout_name = args[1]
-          source # This ensure that the source type is valid
+          source # This ensures that the source type is valid
           Records::Layout.error_if_unavailable(layout_name)
           FileUtils.mkdir_p File.dirname(destination)
         end
