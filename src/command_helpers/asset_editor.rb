@@ -8,9 +8,11 @@ module Metalware
     class AssetEditor < LayoutEditor
       private
 
+      attr_reader :asset_name
+
       def run
         copy_and_edit_record_file
-        assign_asset_to_node_if_given(asset_name)
+        assign_asset_to_node_if_given
       end
 
       def asset_builder
@@ -27,7 +29,7 @@ module Metalware
          end
       end
 
-      def assign_asset_to_node_if_given(asset_name)
+      def assign_asset_to_node_if_given
         return unless node
         Cache::Asset.update do |cache|
           cache.assign_asset_to_node(asset_name, node)

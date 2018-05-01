@@ -6,7 +6,7 @@ module Metalware
       class Edit < CommandHelpers::AssetEditor
         private
 
-        attr_reader :asset_name, :asset_path
+        attr_reader :asset_path
 
         alias source asset_path
         alias destination source

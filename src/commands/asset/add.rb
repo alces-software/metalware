@@ -8,7 +8,7 @@ module Metalware
       class Add < CommandHelpers::AssetEditor
         private
 
-        attr_reader :type_name, :type_path, :asset_name
+        attr_reader :type_name, :type_path
 
         alias source type_path
 
