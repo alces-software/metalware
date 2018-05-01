@@ -69,7 +69,9 @@ module Metalware
       end
 
       def asset_path
-        FilePath.asset(type.pluralize, name)
+        FilePath.asset(type.pluralize, name).tap do |path|
+          FileUtils.mkdir_p(File.dirname(path))
+        end
       end
 
       private
