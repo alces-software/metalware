@@ -9,6 +9,11 @@ module Metalware
 
       attr_accessor :node
 
+      def run
+        copy_and_edit_record_file
+        assign_asset_to_node_if_given(asset_name)
+      end
+
       def unpack_node_from_options
         return unless options.node
         self.node = alces.nodes.find_by_name(options.node)
