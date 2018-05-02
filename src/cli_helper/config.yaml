@@ -488,7 +488,7 @@ commands:
       node: *view-answers_node
 
   view:
-    syntax: metal view [ALCES_COMMAND] [options]
+    syntax: metal view ALCES_COMMAND [options]
     summary: View domain templating config, optionally in context for given node
     description: >
       View the templating object that will be used for rendering templates. It
