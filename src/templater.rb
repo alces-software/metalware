@@ -54,31 +54,28 @@ module Metalware
     )
 
     class << self
-      # NOTE: The 'alces' input to any of these methods can be subsituted for a
-      # Node, Group, or Domain namespace. By doing so, the scope of the render
-      # will automatically be set
-      def render(alces, template, **dynamic_namespace)
+      def render(namespace, template, **dynamic_namespace)
         raw_template = File.read(template)
         begin
-          alces.render_erb_template(raw_template, dynamic_namespace)
+          namespace.render_erb_template(raw_template, dynamic_namespace)
         rescue StandardError => e
           msg = "Failed to render template: #{template}"
           raise e, "#{msg}\n#{e}", e.backtrace
         end
       end
 
-      def render_to_stdout(alces, template, **dynamic_namespace)
-        puts render(alces, template, **dynamic_namespace)
+      def render_to_stdout(namespace, template, **dynamic_namespace)
+        puts render(namespace, template, **dynamic_namespace)
       end
 
       def render_to_file(
-        alces,
+        namespace,
         template,
         save_file,
         dynamic: {},
         &validation_block
       )
-        rendered_template = render(alces, template, **dynamic)
+        rendered_template = render(namespace, template, **dynamic)
 
         rendered_template_valid?(
           rendered_template,
@@ -112,13 +109,13 @@ module Metalware
     end
 
     def render(
-      alces,
+      namespace,
       template,
       sync_location,
       dynamic: {},
       **staging_options
     )
-      rendered = self.class.render(alces, template, dynamic)
+      rendered = self.class.render(namespace, template, dynamic)
       staging.push_file(sync_location, rendered, **staging_options)
     end
 
