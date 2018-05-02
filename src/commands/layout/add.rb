@@ -9,10 +9,10 @@ module Metalware
       class Add < CommandHelpers::LayoutEditor
         private
 
-        attr_reader :type_name, :layout_name
+        attr_reader :template, :layout_name
 
         def setup
-          @type_name = args[0]
+          @template = Records::Layout.type_or_layout(args[0])
           @layout_name = args[1]
           source # This ensures that the source type is valid
           Records::Layout.error_if_unavailable(layout_name)
@@ -20,18 +20,17 @@ module Metalware
         end
 
         def destination
-          FilePath.layout(type_name.pluralize, layout_name)
+          FilePath.layout(template.type.pluralize, layout_name)
         end
 
         def source
-          FilePath.asset_type(type_name).tap do |path|
-            raise_missing_asset_type unless File.exist?(path)
-          end
+          raise_missing_asset_type_or_layout if template.nil?
+          template.path
         end
 
-        def raise_missing_asset_type
+        def raise_missing_asset_type_or_layout
           raise InvalidInput, <<-EOF.squish
-            Cannot find asset type: "#{type_name}"
+            Cannot find asset type or layout: "#{args[0]}"
           EOF
         end
       end
