@@ -98,6 +98,7 @@ module Metalware
         {
           mkdir: true,
           service: self.class.name,
+          managed: true,
         }
       end
     end
