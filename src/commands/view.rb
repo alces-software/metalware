@@ -14,6 +14,7 @@ module Metalware
       ARRAY_TYPES = [Array, Namespaces::AssetArray].freeze
 
       def run
+        error_if_no_arguments_provided
         pretty_print_json(cli_input_object.to_json)
       end
 
@@ -44,6 +45,14 @@ module Metalware
         # Should colourize the output if we have been forced to do so or we are
         # outputting to a terminal.
         options.color_output || STDOUT.isatty
+      end
+
+      def error_if_no_arguments_provided
+        return unless args.empty?
+        raise InvalidInput, <<-EOF.squish
+          No arguments provided, expected syntax:
+          metal view [ALCES_COMMAND] [options]. See --help for more info
+        EOF
       end
     end
   end
