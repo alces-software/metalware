@@ -42,17 +42,7 @@ module Metalware
     private
 
     def source_file_details(layout_or_type)
-      if Records::Asset::TYPES.include?(layout_or_type)
-        OpenStruct.new(
-          type: layout_or_type,
-          path: FilePath.asset_type(layout_or_type)
-        )
-      elsif (path = Records::Layout.path(layout_or_type))
-        OpenStruct.new(
-          type: Records::Layout.type_from_path(path),
-          path: path
-        )
-      end
+      Records::Layout.type_or_layout(layout_or_type)
     end
 
     Asset = Struct.new(:builder, :name, :source_path, :type) do
