@@ -146,7 +146,7 @@ RSpec.describe Metalware::AssetBuilder do
         end
       end
       let(:sub_asset_names) do
-        ["#{asset_name}_server1", "#{asset_name}_pdu1"]
+        ["#{asset_name}-server1", "#{asset_name}-pdu1"]
       end
       let(:expected_asset_content) do
         links = sub_asset_names.map { |n| '^' + n }

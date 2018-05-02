@@ -106,7 +106,7 @@ module Metalware
         return str unless str.match?(/\A[^\^]+\^[^\^]+\Z/)
         sub_type_layout = str.match(/\A.+(?=\^)/).to_s
         append_name = str.match(/(?<=\^).+\Z/).to_s
-        sub_asset_name = "#{name}_#{append_name}"
+        sub_asset_name = "#{name}-#{append_name}"
         builder.push_asset(sub_asset_name, sub_type_layout)
         '^' + sub_asset_name
       end
