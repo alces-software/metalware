@@ -30,7 +30,7 @@ module Metalware
 
         def raise_missing_asset_type_or_layout
           raise InvalidInput, <<-EOF.squish
-            Cannot find asset type or layout: "#{args[0]}"
+            Could not find asset type or layout: "#{args[0]}"
           EOF
         end
       end
