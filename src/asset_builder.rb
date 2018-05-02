@@ -12,7 +12,7 @@ module Metalware
     end
 
     def push_asset(name, layout_or_type)
-      if (details = source_file_details(layout_or_type))
+      if (details = Records::Layout.type_or_layout(layout_or_type))
         stack.push(Asset.new(self, name, details.path, details.type))
       else
         MetalLog.warn <<-EOF.squish
@@ -40,10 +40,6 @@ module Metalware
     end
 
     private
-
-    def source_file_details(layout_or_type)
-      Records::Layout.type_or_layout(layout_or_type)
-    end
 
     Asset = Struct.new(:builder, :name, :source_path, :type) do
       def edit_and_save
