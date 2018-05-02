@@ -10,9 +10,9 @@ module Metalware
         private
 
         attr_reader :template, :layout_name
- 
+
         def setup
-          @template = type_or_layout(args[0]) 
+          @template = type_or_layout(args[0])
           @layout_name = args[1]
           source # This ensures that the source type is valid
           Records::Layout.error_if_unavailable(layout_name)
@@ -24,7 +24,7 @@ module Metalware
         end
 
         def source
-          raise_missing_asset_type_or_layout if template.nil? 
+          raise_missing_asset_type_or_layout if template.nil?
           template.path
         end
 
