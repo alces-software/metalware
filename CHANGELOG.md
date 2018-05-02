@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- The `named` and `hosts` templates are now rendered as managed files.
+
 ## [2018.2.0] - 2018-04-19
 - Added `asset` commands for managing asset files with the following
   subcommands:
