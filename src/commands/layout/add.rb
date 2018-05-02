@@ -12,7 +12,7 @@ module Metalware
         attr_reader :template, :layout_name
 
         def setup
-          @template = type_or_layout(args[0])
+          @template = Records::Layout.type_or_layout(args[0])
           @layout_name = args[1]
           source # This ensures that the source type is valid
           Records::Layout.error_if_unavailable(layout_name)
