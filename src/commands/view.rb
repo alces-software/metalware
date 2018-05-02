@@ -18,12 +18,15 @@ module Metalware
       end
 
       def cli_input_object
-        if alces_command.is_a?(Namespaces::MetalArray)
-          alces_command
-        elsif ARRAY_TYPES.include?(alces_command.class)
-          alces_command.map(&:to_h)
+        data = alces_command
+        if data.is_a?(Namespaces::MetalArray)
+          data
+        elsif ARRAY_TYPES.include?(data.class)
+          data.map(&:to_h)
+        elsif data.respond_to?(:to_h)
+          data.to_h
         else
-          alces_command.to_h
+          data
         end
       end
 
