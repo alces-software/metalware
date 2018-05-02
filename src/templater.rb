@@ -67,41 +67,6 @@ module Metalware
       def render_to_stdout(namespace, template, **dynamic_namespace)
         puts render(namespace, template, **dynamic_namespace)
       end
-
-      def render_to_file(
-        namespace,
-        template,
-        save_file,
-        dynamic: {},
-        &validation_block
-      )
-        rendered_template = render(namespace, template, **dynamic)
-
-        rendered_template_valid?(
-          rendered_template,
-          &validation_block
-        ).tap do |valid|
-          if valid
-            write_rendered_template(rendered_template, save_file: save_file)
-          end
-        end
-      end
-
-      private
-
-      def rendered_template_valid?(rendered_template)
-        # A rendered template is automatically valid, unless we're passed a
-        # block which evaluates as falsy when given the rendered template.
-        !block_given? || yield(rendered_template)
-      end
-
-      # TODO: Remove this once render_to_file method is removed
-      def write_rendered_template(rendered_template, save_file:)
-        File.open(save_file.chomp, 'w') do |f|
-          f.puts rendered_template
-        end
-        MetalLog.info "Template Saved: #{save_file}"
-      end
     end
 
     def initialize(staging)
