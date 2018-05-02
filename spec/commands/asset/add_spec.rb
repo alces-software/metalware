@@ -20,7 +20,6 @@ RSpec.describe Metalware::Commands::Asset::Add do
     end.to output(/Could not find layout/).to_stderr
   end
 
-
   context 'with a node argument' do
     before { FileSystem.root_setup(&:with_asset_types) }
 
