@@ -34,25 +34,6 @@ require 'staging'
 
 module Metalware
   class Templater
-    MANAGED_FILE_MESSAGE = <<-EOF.strip_heredoc
-    # This file is managed by Alces Metalware; any changes made to it directly
-    # will be lost. You can change the data used to render it using the
-    # `metal configure` commands.
-    EOF
-
-    MANAGED_START_MARKER = 'METALWARE_START'
-    MANAGED_START = "########## #{MANAGED_START_MARKER} ##########"
-    MANAGED_END_MARKER = 'METALWARE_END'
-    MANAGED_END = "########## #{MANAGED_END_MARKER} ##########"
-    MANAGED_COMMENT = Utils.commentify(
-      <<-EOF.squish
-      This section of this file is managed by Alces Metalware. Any changes made
-      to this file between the #{MANAGED_START_MARKER} and
-      #{MANAGED_END_MARKER} markers may be lost; you should make any changes
-      you want to persist outside of this section or to the template directly.
-    EOF
-    )
-
     class << self
       def render(namespace, template, **dynamic_namespace)
         raw_template = File.read(template)
