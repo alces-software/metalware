@@ -8,4 +8,13 @@ RSpec.describe Metalware::Commands::Layout::Add do
   end
 
   it_behaves_like 'record add command'
+
+  it 'errors if the type does not exist' do
+    expect do
+      Metalware::Utils.run_command(described_class,
+                                   'missing-type',
+                                   'record-name',
+                                   stderr: StringIO.new)
+    end.to raise_error(Metalware::InvalidInput)
+  end
 end

@@ -28,37 +28,6 @@ RSpec.describe Metalware::CommandHelpers::AlcesCommand do
       .send(:alces_command)
   end
 
-  it 'errors if it contains brackets/ parentheses' do
-    ['{}', '[]', '()'].each do |b|
-      expect { test_command(b) }.to raise_error(Metalware::InvalidInput)
-    end
-  end
-
-  it 'errors for other puncation as delimitors' do
-    [';', ':', ',', '"', "'"].each do |p|
-      cmd = "alces#{p}domain#{p}config"
-      msg = "expected '#{p}' to raise InvalidInput error"
-      expect do
-        test_command(cmd)
-      end.to raise_error(Metalware::InvalidInput), msg
-    end
-  end
-
-  it 'does not error with period or white space delimitor' do
-    expect { test_command('alces.domain.config') }.not_to raise_error
-    expect { test_command('alces domain config') }.not_to raise_error
-    expect { test_command('alces.domain config') }.not_to raise_error
-  end
-
-  it 'can not end in a delimitor' do
-    expect do
-      test_command('alces.domain.config.')
-    end.to raise_error(Metalware::InvalidInput)
-    expect do
-      test_command('.alces.domain.config')
-    end.to raise_error(Metalware::InvalidInput)
-  end
-
   it 'can return the domain config' do
     expect(test_command('alces.domain.config')).to eq(alces.domain.config)
   end

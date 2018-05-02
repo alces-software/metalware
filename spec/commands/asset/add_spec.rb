@@ -11,6 +11,15 @@ RSpec.describe Metalware::Commands::Asset::Add do
 
   it_behaves_like 'record add command'
 
+  it 'warns if the type does not exist' do
+    SpecUtils.enable_output_to_stderr
+    expect do
+      Metalware::Utils.run_command(described_class,
+                                   'missing-type',
+                                   'record-name')
+    end.to output(/Could not find layout/).to_stderr
+  end
+
   context 'with a node argument' do
     before { FileSystem.root_setup(&:with_asset_types) }
 

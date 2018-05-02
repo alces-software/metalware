@@ -10,15 +10,6 @@ RSpec.shared_examples 'record add command' do
   let(:type) { 'rack' }
   let(:saved_record_name) { 'saved-record' }
 
-  xit 'errors if the type does not exist' do
-    expect do
-      Metalware::Utils.run_command(described_class,
-                                   'missing-type',
-                                   'record-name',
-                                   stderr: StringIO.new)
-    end.to raise_error(Metalware::InvalidInput)
-  end
-
   context 'when using the rack type' do
     before { FileSystem.root_setup(&:with_asset_types) }
 
