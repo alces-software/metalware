@@ -39,8 +39,6 @@ module Metalware
       Asset.new(self, name, path, type).edit_and_save
     end
 
-    private
-
     Asset = Struct.new(:builder, :name, :source_path, :type) do
       def edit_and_save
         Utils::Editor.open_copy(source_path, asset_path) do |temp_path|
