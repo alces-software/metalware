@@ -44,10 +44,6 @@ module Metalware
           raise e, "#{msg}\n#{e}", e.backtrace
         end
       end
-
-      def render_to_stdout(namespace, template, **dynamic_namespace)
-        puts render(namespace, template, **dynamic_namespace)
-      end
     end
 
     def initialize(staging)
