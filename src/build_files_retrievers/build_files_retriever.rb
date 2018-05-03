@@ -37,9 +37,6 @@ module Metalware
       def initialize(input, namespace)
         @input = input
         @namespace = namespace
-        klass = namespace.class
-        return if [Namespaces::Plugin, Namespaces::Node].include?(klass)
-        raise InternalError, 'The namespace is not a node or a plugin'
       end
 
       def retrieve
