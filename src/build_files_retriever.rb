@@ -115,15 +115,6 @@ module Metalware
         }
       end
 
-      def internal_templates_dir
-        base_path = if namespace.is_a?(Namespaces::Plugin)
-                      namespace.plugin.path
-                    else
-                      FilePath.repo
-                    end
-        File.join(base_path, 'files')
-      end
-
       def template_path(identifier)
         name = File.basename(identifier)
         if url?(identifier)
@@ -164,7 +155,12 @@ module Metalware
       end
 
       def internal_template_path(identifier)
-        File.join(internal_templates_dir, identifier)
+        base_path = if namespace.is_a?(Namespaces::Plugin)
+                      namespace.plugin.path
+                    else
+                      FilePath.repo
+                    end
+        File.join(base_path, 'files', identifier)
       end
     end
   end
