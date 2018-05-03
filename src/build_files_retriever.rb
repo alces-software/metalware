@@ -31,16 +31,25 @@ require 'keyword_struct'
 
 module Metalware
   class BuildFilesRetriever
-    def retrieve(namespace)
-      # `input` is passed in to RetrievalProcess (rather than intialized within
-      # it, which would still work) so that a shared cache is used for
-      # retrieving all files for this BuildFilesRetriever, to avoid duplicate
-      # retrievals of the same remote URLs across different RetrievalProcesses.
-      RetrievalProcess.new(input: input, namespace: namespace).retrieve
+    class Cache
+      def retrieve(namespace)
+        RetrievalProcess.new(input: input, namespace: namespace)
+                        .retrieve
+      end
+
+      def input
+        @input ||= Input::Cache.new
+      end
     end
 
-    def input
-      @input ||= Input::Cache.new
+    class << self
+      def new
+        cache
+      end
+
+      def cache
+        Cache.new
+      end
     end
 
     RetrievalProcess = KeywordStruct.new(:input, :namespace) do
