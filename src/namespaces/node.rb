@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'build_methods'
-require 'build_files_retriever'
 require 'namespaces/plugin'
 
 module Metalware

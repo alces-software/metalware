@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'build_files_retriever'
+require 'build_files_retrievers/build_files_retriever'
 require 'input'
 
 module Metalware
