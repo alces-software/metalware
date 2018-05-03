@@ -34,6 +34,8 @@ module Metalware
     class BuildFilesRetriever
       attr_reader :input, :namespace
 
+
+
       def initialize(input, namespace)
         @input = input
         @namespace = namespace
@@ -111,7 +113,7 @@ module Metalware
           cache_template_path(name).tap do |template|
             input.download(identifier, template)
           end
-        elsif absolute_path?(identifier)
+        elsif Pathname.new(identifier).absolute?
           # Path is an absolute path on the deployment server.
           identifier
         else
@@ -126,10 +128,6 @@ module Metalware
 
       def url?(identifier)
         identifier =~ URI::DEFAULT_PARSER.make_regexp
-      end
-
-      def absolute_path?(identifier)
-        Pathname.new(identifier).absolute?
       end
 
       def cache_template_path(template_name)
