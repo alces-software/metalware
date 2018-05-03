@@ -12,6 +12,10 @@ module Metalware
       def rendered_sub_dir
         'repo'
       end
+
+      def local_template_dir
+        FilePath.repo
+      end
     end
   end
 end

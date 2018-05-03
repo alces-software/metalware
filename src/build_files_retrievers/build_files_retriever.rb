@@ -137,12 +137,7 @@ module Metalware
       end
 
       def internal_template_path(identifier)
-        base_path = if namespace.is_a?(Namespaces::Plugin)
-                      namespace.plugin.path
-                    else
-                      FilePath.repo
-                    end
-        File.join(base_path, 'files', identifier)
+        File.join(local_template_dir, 'files', identifier)
       end
 
       private
@@ -152,6 +147,10 @@ module Metalware
       end
 
       def rendered_sub_dir
+        raise NotImplementedError
+      end
+
+      def local_template_dir
         raise NotImplementedError
       end
     end
