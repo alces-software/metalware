@@ -68,6 +68,14 @@ module Metalware
       :namespace,
       :internal_templates_dir
     ) do
+
+      def initialize(**_args)
+        super
+        klass = namespace.class
+        return if [Namespaces::Plugin, Namespaces::Node].include?(klass)
+        raise InternalError, 'The namespace is not a node or a plugin'
+      end
+
       def retrieve
         files.to_h.keys.map do |section|
           retrieve_for_section(section)
@@ -153,10 +161,8 @@ module Metalware
         node, files_dir =
           if namespace.is_a?(Namespaces::Plugin)
             [namespace.node_namespace, File.join('plugin', namespace.name)]
-          elsif namespace.is_a?(Namespaces::Node)
-            [namespace, 'repo']
           else
-            raise InternalError, "Can't find rendered_dir for: #{namespace}"
+            [namespace, 'repo']
           end
         File.join(node.name, 'files', files_dir)
       end
