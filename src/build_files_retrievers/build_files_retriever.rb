@@ -106,9 +106,9 @@ module Metalware
 
       def template_path(identifier)
         name = File.basename(identifier)
-        if url?(identifier)
-          # Download the template to the Metalware cache; will render it from
-          # there.
+        if identifier =~ URI::DEFAULT_PARSER.make_regexp
+          # Download the template to the Metalware cache
+          # will render it from there.
           cache_template_path(name).tap do |template|
             cache.download(identifier, template)
           end
@@ -123,10 +123,6 @@ module Metalware
 
       def rendered_dir
         File.join(node.name, 'files', rendered_sub_dir)
-      end
-
-      def url?(identifier)
-        identifier =~ URI::DEFAULT_PARSER.make_regexp
       end
 
       def cache_template_path(template_name)
