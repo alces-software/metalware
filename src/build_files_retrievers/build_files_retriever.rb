@@ -33,8 +33,6 @@ module Metalware
     class BuildFilesRetriever
       attr_reader :cache, :namespace
 
-
-
       def initialize(cache, namespace)
         @cache = cache
         @namespace = namespace
@@ -109,7 +107,7 @@ module Metalware
         if identifier =~ URI::DEFAULT_PARSER.make_regexp
           # Download the template to the Metalware cache
           # will render it from there.
-          cache_template_path(name).tap do |template|
+          FilePath.cached_template(name).tap do |template|
             cache.download(identifier, template)
           end
         elsif Pathname.new(identifier).absolute?
@@ -123,10 +121,6 @@ module Metalware
 
       def rendered_dir
         File.join(node.name, 'files', rendered_sub_dir)
-      end
-
-      def cache_template_path(template_name)
-        File.join(Constants::CACHE_PATH, 'templates', template_name)
       end
 
       def internal_template_path(identifier)

@@ -172,6 +172,10 @@ module Metalware
         File.join(cache, 'assets.yaml')
       end
 
+      def cached_template(name)
+        File.join(cache, 'templates', name)
+      end
+
       private
 
       def record(record_dir, types_dir, name)
