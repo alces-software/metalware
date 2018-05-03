@@ -1,12 +1,12 @@
 manufacturer: null
+model: null
+serial: null
 oob:
   ip: null
   netmask: null
   user: null
   password: null
-psus: null
-network_adapters: null
+network_adapters: []
 location:
-  rack: null
   chassis: null
   slot: null
