@@ -9,6 +9,8 @@ require 'build_files_retrievers/node'
 module Metalware
   module BuildFilesRetrievers
     class Cache
+      delegate :download, to: :input
+
       def retrieve(namespace)
         build_class = case namespace
                       when Namespaces::Node
@@ -18,7 +20,7 @@ module Metalware
                       else
                         raise InternalError, 'Can not find files'
                       end
-        build_class.new(input, namespace).retrieve
+        build_class.new(self, namespace).retrieve
       end
 
       def input

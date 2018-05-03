@@ -26,18 +26,17 @@ require 'uri'
 require 'open-uri'
 
 require 'constants'
-require 'input'
 require 'keyword_struct'
 
 module Metalware
   module BuildFilesRetrievers
     class BuildFilesRetriever
-      attr_reader :input, :namespace
+      attr_reader :cache, :namespace
 
 
 
-      def initialize(input, namespace)
-        @input = input
+      def initialize(cache, namespace)
+        @cache = cache
         @namespace = namespace
       end
 
@@ -111,7 +110,7 @@ module Metalware
           # Download the template to the Metalware cache; will render it from
           # there.
           cache_template_path(name).tap do |template|
-            input.download(identifier, template)
+            cache.download(identifier, template)
           end
         elsif Pathname.new(identifier).absolute?
           # Path is an absolute path on the deployment server.
