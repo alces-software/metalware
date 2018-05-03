@@ -42,10 +42,8 @@ module Metalware
       end
     end
 
-    class << self
-      def cache
-        Cache.new
-      end
+    def self.cache
+      Cache.new
     end
 
     attr_reader :input, :namespace
