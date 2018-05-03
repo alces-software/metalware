@@ -32,17 +32,11 @@ require 'keyword_struct'
 module Metalware
   class BuildFilesRetriever
     def retrieve_for_node(node_namespace)
-      retrieve(
-        namespace: node_namespace,
-        internal_templates_dir: files_dir_in(FilePath.repo)
-      )
+      retrieve(namespace: node_namespace)
     end
 
     def retrieve_for_plugin(plugin_namespace)
-      retrieve(
-        namespace: plugin_namespace,
-        internal_templates_dir: files_dir_in(plugin_namespace.plugin.path)
-      )
+      retrieve(namespace: plugin_namespace)
     end
 
     private
@@ -59,16 +53,7 @@ module Metalware
       @input ||= Input::Cache.new
     end
 
-    def files_dir_in(dir)
-      File.join(dir, 'files')
-    end
-
-    RetrievalProcess = KeywordStruct.new(
-      :input,
-      :namespace,
-      :internal_templates_dir
-    ) do
-
+    RetrievalProcess = KeywordStruct.new(:input, :namespace) do
       def initialize(**_args)
         super
         klass = namespace.class
@@ -138,6 +123,15 @@ module Metalware
           raw: identifier,
           name: name,
         }
+      end
+
+      def internal_templates_dir
+        base_path = if namespace.is_a?(Namespaces::Plugin)
+                      namespace.plugin.path
+                    else
+                      FilePath.repo
+                    end
+        File.join(base_path, 'files')
       end
 
       def template_path(identifier)
