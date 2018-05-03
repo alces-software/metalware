@@ -34,36 +34,18 @@ module Metalware
     def retrieve_for_node(node_namespace)
       retrieve(
         namespace: node_namespace,
-        internal_templates_dir: files_dir_in(FilePath.repo),
-        rendered_dir:  rendered_repo_files_dir(node_namespace)
+        internal_templates_dir: files_dir_in(FilePath.repo)
       )
     end
 
     def retrieve_for_plugin(plugin_namespace)
       retrieve(
         namespace: plugin_namespace,
-        internal_templates_dir: files_dir_in(plugin_namespace.plugin.path),
-        rendered_dir: rendered_plugin_files_dir(plugin_namespace)
+        internal_templates_dir: files_dir_in(plugin_namespace.plugin.path)
       )
     end
 
     private
-
-    def rendered_repo_files_dir(node)
-      rendered_files_dir(node: node, files_dir: 'repo')
-    end
-
-    def rendered_plugin_files_dir(plugin)
-      plugin_files_dir = File.join('plugin', plugin.name)
-      rendered_files_dir(
-        node: plugin.node_namespace,
-        files_dir: plugin_files_dir
-      )
-    end
-
-    def rendered_files_dir(node:, files_dir:)
-      File.join(node.name, 'files', files_dir)
-    end
 
     def retrieve(**kwargs)
       # `input` is passed in to RetrievalProcess (rather than intialized within
@@ -84,8 +66,7 @@ module Metalware
     RetrievalProcess = KeywordStruct.new(
       :input,
       :namespace,
-      :internal_templates_dir,
-      :rendered_dir
+      :internal_templates_dir
     ) do
       def retrieve
         files.to_h.keys.map do |section|
@@ -166,6 +147,18 @@ module Metalware
           # Path is internal within the given templates directory.
           internal_template_path(identifier)
         end
+      end
+
+      def rendered_dir
+        node, files_dir =
+          if namespace.is_a?(Namespaces::Plugin)
+            [namespace.node_namespace, File.join('plugin', namespace.name)]
+          elsif namespace.is_a?(Namespaces::Node)
+            [namespace, 'repo']
+          else
+            raise InternalError, "Can't find rendered_dir for: #{namespace}"
+          end
+        File.join(node.name, 'files', files_dir)
       end
 
       def url?(identifier)
