@@ -1,14 +1,24 @@
 # frozen_string_literal: true
 
-require 'build_files_retrievers/build_files_retriever'
 require 'input'
+
+require 'build_files_retrievers/build_files_retriever'
+require 'build_files_retrievers/plugin'
+require 'build_files_retrievers/node'
 
 module Metalware
   module BuildFilesRetrievers
     class Cache
       def retrieve(namespace)
-        BuildFilesRetriever.new(input, namespace)
-                           .retrieve
+        build_class = case namespace
+                      when Namespaces::Node
+                        BuildFilesRetrievers::Node
+                      when Namespaces::Plugin
+                        BuildFilesRetrievers::Plugin
+                      else
+                        raise InternalError, 'Can not find files'
+                      end
+        build_class.new(input, namespace).retrieve
       end
 
       def input
