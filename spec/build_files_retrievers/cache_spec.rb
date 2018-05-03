@@ -53,6 +53,10 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
     SpecUtils.use_mock_determine_hostip_script(self)
   end
 
+  def hash_url(url)
+    Digest::SHA1.hexdigest(url)
+  end
+
   context 'when retrieving a nodes files' do
     before do
       FileSystem.root_setup do |fs|
@@ -60,6 +64,9 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
       end
       SpecUtils.use_unit_test_config(self)
       allow(Metalware::Input).to receive(:download)
+                                   .and_wrap_original do |_, _, to_path|
+        FileUtils.touch(to_path)
+      end
     end
 
     context 'when everything works' do
@@ -72,9 +79,6 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
         other_path = '/some/other/path'
         FileUtils.mkdir_p File.dirname(other_path)
         FileUtils.touch(other_path)
-        url_path = data_path + '/cache/templates/url'
-        FileUtils.mkdir_p File.dirname(url_path)
-        FileUtils.touch(url_path)
 
         retrieved_files = subject.retrieve(test_node)
 
@@ -95,10 +99,12 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/path'
         )
 
+        url = 'http://example.com/url'
         expect(retrieved_files[:namespace01][2]).to eq(
           raw: 'http://example.com/url',
           name: 'url',
-          template_path: url_path,
+          template_path: '/var/lib/metalware/cache/templates/' +
+            hash_url(url),
           rendered_path: data_path +
             '/rendered/testnode01/files/repo/namespace01/url',
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/url'
@@ -106,9 +112,9 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
       end
 
       it 'downloads any URL identifiers to cache' do
+        url = 'http://example.com/url'
         expect(Metalware::Input).to receive(:download).with(
-          'http://example.com/url',
-          data_path + '/cache/templates/url'
+          url, data_path + '/cache/templates/' + hash_url(url)
         )
 
         subject.retrieve(test_node)

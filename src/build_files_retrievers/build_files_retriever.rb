@@ -103,13 +103,10 @@ module Metalware
       end
 
       def template_path(identifier)
-        name = File.basename(identifier)
         if identifier =~ URI::DEFAULT_PARSER.make_regexp
           # Download the template to the Metalware cache
           # will render it from there.
-          FilePath.cached_template(name).tap do |template|
-            cache.download(identifier, template)
-          end
+          cache.download(identifier)
         elsif Pathname.new(identifier).absolute?
           # Path is an absolute path on the deployment server.
           identifier
