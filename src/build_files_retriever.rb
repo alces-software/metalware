@@ -31,21 +31,6 @@ require 'keyword_struct'
 
 module Metalware
   class BuildFilesRetriever
-    class Cache
-      def retrieve(namespace)
-        BuildFilesRetriever.new(input, namespace)
-                           .retrieve
-      end
-
-      def input
-        @input ||= Input::Cache.new
-      end
-    end
-
-    def self.cache
-      Cache.new
-    end
-
     attr_reader :input, :namespace
 
     def initialize(input, namespace)

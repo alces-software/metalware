@@ -6,6 +6,7 @@ require 'group_cache'
 require 'hashie'
 require 'validation/loader'
 require 'cache/asset'
+require 'build_files_retrievers/cache'
 
 module Metalware
   module Namespaces
@@ -68,7 +69,7 @@ module Metalware
         end
 
         def build_files_retriever
-          @build_files_retriever ||= BuildFilesRetriever.cache
+          @build_files_retriever ||= BuildFilesRetrievers::Cache.new
         end
 
         def orphan_list

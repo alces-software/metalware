@@ -22,11 +22,10 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'build_files_retriever'
 require 'input'
 require 'spec_utils'
 
-RSpec.describe Metalware::BuildFilesRetriever do
+RSpec.describe Metalware::BuildFilesRetrievers::Cache do
   include AlcesUtils
 
   TEST_FILES_HASH = {
@@ -40,7 +39,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     ],
   }.freeze
 
-  subject { described_class.cache }
+  subject { described_class.new }
 
   let(:test_node_name) { 'testnode01' }
   let(:test_node) { alces.nodes.find_by_name(test_node_name) }
