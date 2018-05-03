@@ -54,7 +54,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     SpecUtils.use_mock_determine_hostip_script(self)
   end
 
-  describe '#retrieve_for_node' do
+  context 'when retrieving a nodes files' do
     before do
       FileSystem.root_setup do |fs|
         fs.with_clone_fixture('configs/unit-test.yaml')
@@ -171,7 +171,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     end
   end
 
-  describe '#retrieve_for_plugin' do
+  context 'when retrieving a plugins files' do
     let(:plugin_name) { 'some_plugin' }
     let(:plugin_path) do
       File.join(Metalware::FilePath.plugins_dir, plugin_name)
