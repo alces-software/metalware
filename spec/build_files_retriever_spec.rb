@@ -40,7 +40,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
     ],
   }.freeze
 
-  subject { described_class.new }
+  subject { described_class.cache }
 
   let(:test_node_name) { 'testnode01' }
   let(:test_node) { alces.nodes.find_by_name(test_node_name) }

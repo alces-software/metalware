@@ -43,10 +43,6 @@ module Metalware
     end
 
     class << self
-      def new
-        cache
-      end
-
       def cache
         Cache.new
       end
