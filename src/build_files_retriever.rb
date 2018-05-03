@@ -33,8 +33,8 @@ module Metalware
   class BuildFilesRetriever
     class Cache
       def retrieve(namespace)
-        RetrievalProcess.new(input: input, namespace: namespace)
-                        .retrieve
+        BuildFilesRetriever.new(input, namespace)
+                           .retrieve
       end
 
       def input
@@ -48,125 +48,126 @@ module Metalware
       end
     end
 
-    RetrievalProcess = KeywordStruct.new(:input, :namespace) do
-      def initialize(**_args)
-        super
-        klass = namespace.class
-        return if [Namespaces::Plugin, Namespaces::Node].include?(klass)
-        raise InternalError, 'The namespace is not a node or a plugin'
+    attr_reader :input, :namespace
+
+    def initialize(input, namespace)
+      @input = input
+      @namespace = namespace
+      klass = namespace.class
+      return if [Namespaces::Plugin, Namespaces::Node].include?(klass)
+      raise InternalError, 'The namespace is not a node or a plugin'
+    end
+
+    def retrieve
+      files.to_h.keys.map do |section|
+        retrieve_for_section(section)
+      end.to_h
+    end
+
+    def retrieve_for_section(section)
+      file_hashes = files[section].map do |file|
+        file_hash_for(section, file)
       end
+      [section, file_hashes]
+    end
 
-      def retrieve
-        files.to_h.keys.map do |section|
-          retrieve_for_section(section)
-        end.to_h
-      end
+    def files
+      namespace.config.files
+    end
 
-      def retrieve_for_section(section)
-        file_hashes = files[section].map do |file|
-          file_hash_for(section, file)
-        end
-        [section, file_hashes]
-      end
+    def file_hash_for(section, identifier)
+      name = File.basename(identifier)
+      template = template_path(identifier)
 
-      def files
-        namespace.config.files
-      end
-
-      def file_hash_for(section, identifier)
-        name = File.basename(identifier)
-        template = template_path(identifier)
-
-        if File.exist?(template)
-          success_file_hash(
-            identifier,
-            template_path: template,
-            rendered_path: FilePath.rendered_build_file_path(
-              rendered_dir, section, name
-            ),
-            url: DeploymentServer.build_file_url(rendered_dir, section, name)
-          )
-        else
-          error_file_hash(
-            identifier,
-            error: <<-EOF
-              Template path '#{template}' for '#{identifier}' does not exist
-            EOF
-          )
-        end
-      rescue StandardError => error
+      if File.exist?(template)
+        success_file_hash(
+          identifier,
+          template_path: template,
+          rendered_path: FilePath.rendered_build_file_path(
+            rendered_dir, section, name
+          ),
+          url: DeploymentServer.build_file_url(rendered_dir, section, name)
+        )
+      else
         error_file_hash(
           identifier,
-          error: "Retrieving '#{identifier}' gave error '#{error.message}'"
+          error: <<-EOF
+            Template path '#{template}' for '#{identifier}' does not exist
+          EOF
         )
       end
+    rescue StandardError => error
+      error_file_hash(
+        identifier,
+        error: "Retrieving '#{identifier}' gave error '#{error.message}'"
+      )
+    end
 
-      def success_file_hash(identifier, **params)
-        base_file_hash(identifier).merge(params)
-      end
+    def success_file_hash(identifier, **params)
+      base_file_hash(identifier).merge(params)
+    end
 
-      def error_file_hash(identifier, error:)
-        MetalLog.warn("Build file: #{error}")
-        base_file_hash(identifier).merge(
-          error: error
-        )
-      end
+    def error_file_hash(identifier, error:)
+      MetalLog.warn("Build file: #{error}")
+      base_file_hash(identifier).merge(
+        error: error
+      )
+    end
 
-      def base_file_hash(identifier)
-        name = File.basename(identifier)
-        {
-          raw: identifier,
-          name: name,
-        }
-      end
+    def base_file_hash(identifier)
+      name = File.basename(identifier)
+      {
+        raw: identifier,
+        name: name,
+      }
+    end
 
-      def template_path(identifier)
-        name = File.basename(identifier)
-        if url?(identifier)
-          # Download the template to the Metalware cache; will render it from
-          # there.
-          cache_template_path(name).tap do |template|
-            input.download(identifier, template)
-          end
-        elsif absolute_path?(identifier)
-          # Path is an absolute path on the deployment server.
-          identifier
-        else
-          # Path is internal within the given templates directory.
-          internal_template_path(identifier)
+    def template_path(identifier)
+      name = File.basename(identifier)
+      if url?(identifier)
+        # Download the template to the Metalware cache; will render it from
+        # there.
+        cache_template_path(name).tap do |template|
+          input.download(identifier, template)
         end
+      elsif absolute_path?(identifier)
+        # Path is an absolute path on the deployment server.
+        identifier
+      else
+        # Path is internal within the given templates directory.
+        internal_template_path(identifier)
       end
+    end
 
-      def rendered_dir
-        node, files_dir =
-          if namespace.is_a?(Namespaces::Plugin)
-            [namespace.node_namespace, File.join('plugin', namespace.name)]
-          else
-            [namespace, 'repo']
-          end
-        File.join(node.name, 'files', files_dir)
-      end
+    def rendered_dir
+      node, files_dir =
+        if namespace.is_a?(Namespaces::Plugin)
+          [namespace.node_namespace, File.join('plugin', namespace.name)]
+        else
+          [namespace, 'repo']
+        end
+      File.join(node.name, 'files', files_dir)
+    end
 
-      def url?(identifier)
-        identifier =~ URI::DEFAULT_PARSER.make_regexp
-      end
+    def url?(identifier)
+      identifier =~ URI::DEFAULT_PARSER.make_regexp
+    end
 
-      def absolute_path?(identifier)
-        Pathname.new(identifier).absolute?
-      end
+    def absolute_path?(identifier)
+      Pathname.new(identifier).absolute?
+    end
 
-      def cache_template_path(template_name)
-        File.join(Constants::CACHE_PATH, 'templates', template_name)
-      end
+    def cache_template_path(template_name)
+      File.join(Constants::CACHE_PATH, 'templates', template_name)
+    end
 
-      def internal_template_path(identifier)
-        base_path = if namespace.is_a?(Namespaces::Plugin)
-                      namespace.plugin.path
-                    else
-                      FilePath.repo
-                    end
-        File.join(base_path, 'files', identifier)
-      end
+    def internal_template_path(identifier)
+      base_path = if namespace.is_a?(Namespaces::Plugin)
+                    namespace.plugin.path
+                  else
+                    FilePath.repo
+                  end
+      File.join(base_path, 'files', identifier)
     end
   end
 end
