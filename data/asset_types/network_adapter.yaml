@@ -1,6 +1,24 @@
-#port_name: cable_colour
+manufacturer: null
+model: null
+serial: null
 ports:
-  em1: null
-  em2: null
-  em3: null
-  em4: null
+  em1:
+    network: null
+    mac: null
+    switch: null
+    port: null
+  em2:
+    network: null
+    mac: null
+    switch: null
+    port: null
+  em3:
+    network: null
+    mac: null
+    switch: null
+    port: null
+  em4:
+    network: null
+    mac: null
+    switch: null
+    port: null

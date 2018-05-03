@@ -1,6 +1,12 @@
+manufacturer: null
+model: null
+serial: null
 oob:
   ip: null
   netmask: null
   user: null
   password: null
 ports: 16
+location:
+  rack: null
+  slot: null

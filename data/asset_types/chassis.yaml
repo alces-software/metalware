@@ -1,11 +1,14 @@
 manufacturer: null
+model: null
+serial: null
 slots: 4
 oob:
   ip: null
   netmask: null
   user: null
   password: null
-psus: null
+psus: []
+servers: []
 location:
   rack: null
   slot: null

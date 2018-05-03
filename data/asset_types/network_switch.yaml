@@ -1,3 +1,6 @@
+manufacturer: null
+model: null
+serial: null
 oob:
   ip: null
   netmask: null

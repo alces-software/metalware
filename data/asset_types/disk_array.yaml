@@ -1,8 +1,12 @@
+manufacturer: null
+model: null
+serial: null
 oob:
   ip: null
   netmask: null
   user: null
   password: null
+psus: []
 location:
   rack: null
   slot: null
