@@ -121,7 +121,7 @@ module Metalware
       end
 
       def rendered_dir
-        node, files_dir =
+        _node, files_dir =
           if namespace.is_a?(Namespaces::Plugin)
             [namespace.node_namespace, File.join('plugin', namespace.name)]
           else
@@ -149,6 +149,12 @@ module Metalware
                       FilePath.repo
                     end
         File.join(base_path, 'files', identifier)
+      end
+
+      private
+
+      def node
+        raise NotImplementedError
       end
     end
   end
