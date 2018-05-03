@@ -8,6 +8,10 @@ module Metalware
       def node
         namespace
       end
+
+      def rendered_sub_dir
+        'repo'
+      end
     end
   end
 end

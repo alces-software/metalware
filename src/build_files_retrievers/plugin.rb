@@ -8,6 +8,10 @@ module Metalware
       def node
         namespace.node_namespace
       end
+
+      def rendered_sub_dir
+        File.join('plugin', namespace.name)
+      end
     end
   end
 end
