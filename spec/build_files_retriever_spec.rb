@@ -208,7 +208,7 @@ RSpec.describe Metalware::BuildFilesRetriever do
 
       plugin_namespace = Metalware::Namespaces::Plugin
                          .new(plugin, node: test_node)
-      retrieved_files = subject.retrieve_for_plugin(plugin_namespace)
+      retrieved_files = subject.retrieve(plugin_namespace)
 
       relative_rendered_path = <<-EOF.squish
         testnode01/files/plugin/#{plugin_name}/some_section/#{plugin_file_name}

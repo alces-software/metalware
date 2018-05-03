@@ -31,17 +31,12 @@ require 'keyword_struct'
 
 module Metalware
   class BuildFilesRetriever
-    def retrieve_for_plugin(plugin_namespace)
-      retrieve(namespace: plugin_namespace)
-    end
-
-    def retrieve(namespace = nil, **kwargs)
-      kwargs[:namespace] = namespace if namespace
+    def retrieve(namespace)
       # `input` is passed in to RetrievalProcess (rather than intialized within
       # it, which would still work) so that a shared cache is used for
       # retrieving all files for this BuildFilesRetriever, to avoid duplicate
       # retrievals of the same remote URLs across different RetrievalProcesses.
-      RetrievalProcess.new(input: input, **kwargs).retrieve
+      RetrievalProcess.new(input: input, namespace: namespace).retrieve
     end
 
     def input
