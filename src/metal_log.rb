@@ -56,11 +56,8 @@ module Metalware
     end
 
     def warn(msg)
-      if strict?
-        raise StrictWarningError, msg
-      elsif !quiet?
-        Output.warning "warning: #{msg}" unless quiet?
-      end
+      raise StrictWarningError, msg if strict?
+      print_warning(msg)
       super(msg)
     end
 
@@ -72,6 +69,11 @@ module Metalware
 
     def quiet?
       self.class.quiet
+    end
+
+    def print_warning(msg)
+      return if quiet?
+      Output.warning "warning: #{msg}"
     end
   end
 end
