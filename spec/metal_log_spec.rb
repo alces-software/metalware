@@ -41,6 +41,12 @@ RSpec.describe Metalware::MetalLog do
         have_received(:warning).with(test_warning)
     end
 
+    it 'only issues the warning once' do
+      run_test_command
+      run_test_command
+      expect(output).to have_received(:warning).once
+    end
+
     it 'does not give warning and raises when --strict passed' do
       expect_any_instance_of(Logger).not_to receive(:warn)
       expect do

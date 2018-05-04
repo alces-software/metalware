@@ -73,7 +73,14 @@ module Metalware
 
     def print_warning(msg)
       return if quiet?
+      message_cache[msg] ||= 0
+      message_cache[msg] += 1
+      return if message_cache[msg] > 1
       Output.warning "warning: #{msg}"
+    end
+
+    def message_cache
+      @message_cache ||= {}
     end
   end
 end
