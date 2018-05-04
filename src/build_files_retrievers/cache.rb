@@ -33,7 +33,7 @@ module Metalware
           FilePath.cached_template(sha_identifier).tap do |path|
             Input.download(url, path)
           end
-        rescue => e
+        rescue StandardError => e
           e
         end.tap { |result| cached[sha_identifier] = result }
         return_result(sha_identifier)

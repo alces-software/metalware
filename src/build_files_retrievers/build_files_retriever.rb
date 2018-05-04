@@ -105,7 +105,7 @@ module Metalware
       end
 
       def template_path(identifier)
-        if identifier =~ URI::DEFAULT_PARSER.make_regexp
+        if identifier.match?(URI::DEFAULT_PARSER.make_regexp)
           # Download the template to the Metalware cache
           # will render it from there.
           cache.download(identifier)

@@ -1,52 +1,32 @@
 # frozen_string_literal: true
 
-#==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
-#
-# This file/package is part of Alces Metalware.
-#
-# Alces Metalware is free software: you can redistribute it and/or
-# modify it under the terms of the GNU Affero General Public License
-# as published by the Free Software Foundation, either version 3 of
-# the License, or (at your option) any later version.
-#
-# Alces Metalware is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this package.  If not, see <http://www.gnu.org/licenses/>.
-#
-# For more information on the Alces Metalware, please visit:
-# https://github.com/alces-software/metalware
-#==============================================================================
-
 require 'input'
 require 'spec_utils'
 
 RSpec.describe Metalware::BuildFilesRetrievers::Cache do
   include AlcesUtils
 
-  TEST_FILES_HASH = {
-    namespace01: [
-      'some/file_in_repo',
-      '/some/other/path',
-      'http://example.com/url',
-    ],
-    namespace02: [
-      'another_file',
-    ],
-  }.freeze
-
   subject { described_class.new }
 
   let(:test_node_name) { 'testnode01' }
   let(:test_node) { alces.nodes.find_by_name(test_node_name) }
   let(:data_path) { Metalware::FilePath.metalware_data }
+  let(:test_url) { 'http://example.com/url' }
+  let(:test_files_hash) do
+    {
+      namespace01: [
+        'some/file_in_repo',
+        '/some/other/path',
+        test_url,
+      ],
+      namespace02: [
+        'another_file',
+      ],
+    }
+  end
 
   AlcesUtils.mock self, :each do
-    config(mock_node(test_node_name), files: TEST_FILES_HASH)
+    config(mock_node(test_node_name), files: test_files_hash)
   end
 
   before do
@@ -64,7 +44,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
       end
       SpecUtils.use_unit_test_config(self)
       allow(Metalware::Input).to receive(:download)
-                                   .and_wrap_original do |_, _, to_path|
+        .and_wrap_original do |_, _, to_path|
         FileUtils.touch(to_path)
       end
     end
@@ -99,12 +79,11 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/path'
         )
 
-        url = 'http://example.com/url'
         expect(retrieved_files[:namespace01][2]).to eq(
-          raw: 'http://example.com/url',
+          raw: test_url,
           name: 'url',
           template_path: '/var/lib/metalware/cache/templates/' +
-            hash_url(url),
+            hash_url(test_url),
           rendered_path: data_path +
             '/rendered/testnode01/files/repo/namespace01/url',
           url: 'http://1.2.3.4/metalware/testnode01/files/repo/namespace01/url'
@@ -112,9 +91,8 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
       end
 
       it 'downloads any URL identifiers to cache' do
-        url = 'http://example.com/url'
         expect(Metalware::Input).to receive(:download).with(
-          url, data_path + '/cache/templates/' + hash_url(url)
+          test_url, data_path + '/cache/templates/' + hash_url(test_url)
         )
 
         subject.retrieve(test_node)
@@ -158,16 +136,14 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
     end
 
     context 'when error retrieving URL file' do
-      before do
-        @http_error = SpecUtils.fake_download_error(self)
-      end
+      let!(:http_error) { SpecUtils.fake_download_error(self) }
 
       it 'adds error to file entry' do
         retrieved_files = subject.retrieve(test_node)
 
         url_file_entry = retrieved_files[:namespace01][2]
-        url = 'http://example.com/url'
-        expect(url_file_entry[:error]).to match(/#{url}.*#{@http_error}/)
+        expect(url_file_entry[:error]).to \
+          match(/#{test_url}.*#{http_error}/)
 
         # Does not make sense to have these keys if file not retrievable.
         expect(url_file_entry.key?(:template_path)).to be false
