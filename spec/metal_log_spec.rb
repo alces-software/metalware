@@ -27,6 +27,8 @@ RSpec.describe Metalware::MetalLog do
       class_spy(Metalware::Output).as_stubbed_const
     end
 
+    let(:test_warning) { 'warning: message' }
+
     after do
       # Reset global options passed to MetalLog by command.
       described_class.strict = false
@@ -36,7 +38,7 @@ RSpec.describe Metalware::MetalLog do
     it 'gives warning output by default' do
       run_test_command
       expect(output).to \
-        have_received(:warning).with('warning: message')
+        have_received(:warning).with(test_warning)
     end
 
     it 'does not give warning and raises when --strict passed' do
@@ -46,13 +48,13 @@ RSpec.describe Metalware::MetalLog do
       end.to raise_error(Metalware::StrictWarningError)
 
       expect(output).not_to \
-        have_received(:warning).with('warning: message')
+        have_received(:warning).with(test_warning)
     end
 
     it 'does not give warning output when --quiet passed' do
       run_test_command(quiet: true)
       expect(output).not_to \
-        have_received(:warning).with('warning: message')
+        have_received(:warning).with(test_warning)
     end
 
     [true, false].each do |quiet|
