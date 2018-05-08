@@ -50,6 +50,17 @@ subcommands:
     summary: Add a relationship between an asset and a node
     action: Commands::Asset::Link
 
+  asset_tool_filter: &asset_tool_filter
+    syntax: metal asset tool filter [options]
+    summary: Returns the asset names that match the filters
+    action: Commands::Asset::Tool::Filter
+
+  asset_tool: &asset_tool
+    syntax: metal asset tool [SUB_COMMAND] [options]
+    summary: Assorted tools for filtering and editing assets
+    subcommands:
+      filter: *asset_tool_filter
+
   asset_unlink: &asset_unlink
     syntax: metal asset unlink NODE_NAME [options]
     summary: Remove a relationship between an asset and a node
@@ -214,6 +225,7 @@ commands:
       delete: *asset_delete
       edit: *asset_edit
       link: *asset_link
+      tool: *asset_tool
       unlink: *asset_unlink
 
   build:
