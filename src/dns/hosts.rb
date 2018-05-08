@@ -61,6 +61,7 @@ module Metalware
       def staging_options
         {
           service: self.class.name,
+          managed: true,
         }
       end
     end
