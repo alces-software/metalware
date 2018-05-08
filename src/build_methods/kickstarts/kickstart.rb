@@ -29,7 +29,10 @@ module Metalware
           rendered_content = Templater.render(node,
                                               pxelinux_template_path,
                                               **parameters)
-          File.write(save_path, rendered_content)
+          File.open(save_path, 'w') do |f|
+            f.write(rendered_content)
+            f.fdatasync
+          end
         end
 
         def pxelinux_template_path
