@@ -33,17 +33,17 @@ subcommands:
     options:
       - *asset_node_option
 
+  asset_delete: &asset_delete
+    syntax: metal asset delete ASSET_NAME [options]
+    summary: Delete an existing asset record
+    action: Commands::Asset::Delete
+
   asset_edit: &asset_edit
     syntax: metal asset edit ASSET_NAME [options]
     summary: Edit an existing asset record
     action: Commands::Asset::Edit
     options:
       - *asset_node_option
-
-  asset_delete: &asset_delete
-    syntax: metal asset delete ASSET_NAME [options]
-    summary: Delete an existing asset record
-    action: Commands::Asset::Delete
 
   asset_link: &asset_link
     syntax: metal asset link NODE_NAME ASSET_NAME [options]
@@ -211,8 +211,8 @@ commands:
     summary: Manage the asset record files
     subcommands:
       add: *asset_add
-      edit: *asset_edit
       delete: *asset_delete
+      edit: *asset_edit
       link: *asset_link
       unlink: *asset_unlink
 
