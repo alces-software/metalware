@@ -43,6 +43,10 @@ module Metalware
         table
       end
 
+      def to_json(*_a)
+        to_h.to_json
+      end
+
       private
 
       attr_reader :table, :convert_string_block
