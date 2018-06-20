@@ -138,7 +138,10 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
   # Do not print stderr Output in rspec by default
-  config.before { $rspec_suppress_output_to_stderr = true }
+  config.before do
+    $rspec_suppress_output_to_stderr = true
+    Metalware::MetalLog.instance_variable_set(:@metal_log, nil)
+  end
 
   config.around do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file
