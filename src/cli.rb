@@ -30,14 +30,12 @@ require 'commander'
 require 'config'
 require 'colorize'
 
-require 'commander_extensions'
 require 'cli_helper/parser'
 require 'data'
 
 module Metalware
   class Cli
     include Commander::Methods
-    include CommanderExtensions::Delegates
 
     def run
       program :name, 'metal'
