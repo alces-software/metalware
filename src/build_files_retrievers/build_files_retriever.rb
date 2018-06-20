@@ -26,72 +26,25 @@ require 'uri'
 require 'open-uri'
 
 require 'constants'
-require 'input'
 require 'keyword_struct'
 
 module Metalware
-  class BuildFilesRetriever
-    def retrieve_for_node(node_namespace)
-      retrieve(
-        namespace: node_namespace,
-        internal_templates_dir: files_dir_in(FilePath.repo),
-        rendered_dir:  rendered_repo_files_dir(node_namespace)
-      )
-    end
+  module BuildFilesRetrievers
+    class BuildFilesRetriever
+      attr_reader :cache, :namespace
 
-    def retrieve_for_plugin(plugin_namespace)
-      retrieve(
-        namespace: plugin_namespace,
-        internal_templates_dir: files_dir_in(plugin_namespace.plugin.path),
-        rendered_dir: rendered_plugin_files_dir(plugin_namespace)
-      )
-    end
+      def initialize(cache, namespace)
+        @cache = cache
+        @namespace = namespace
+      end
 
-    private
-
-    def rendered_repo_files_dir(node)
-      rendered_files_dir(node: node, files_dir: 'repo')
-    end
-
-    def rendered_plugin_files_dir(plugin)
-      plugin_files_dir = File.join('plugin', plugin.name)
-      rendered_files_dir(
-        node: plugin.node_namespace,
-        files_dir: plugin_files_dir
-      )
-    end
-
-    def rendered_files_dir(node:, files_dir:)
-      File.join(node.name, 'files', files_dir)
-    end
-
-    def retrieve(**kwargs)
-      # `input` is passed in to RetrievalProcess (rather than intialized within
-      # it, which would still work) so that a shared cache is used for
-      # retrieving all files for this BuildFilesRetriever, to avoid duplicate
-      # retrievals of the same remote URLs across different RetrievalProcesses.
-      RetrievalProcess.new(input: input, **kwargs).retrieve
-    end
-
-    def input
-      @input ||= Input::Cache.new
-    end
-
-    def files_dir_in(dir)
-      File.join(dir, 'files')
-    end
-
-    RetrievalProcess = KeywordStruct.new(
-      :input,
-      :namespace,
-      :internal_templates_dir,
-      :rendered_dir
-    ) do
       def retrieve
         files.to_h.keys.map do |section|
           retrieve_for_section(section)
         end.to_h
       end
+
+      private
 
       def retrieve_for_section(section)
         file_hashes = files[section].map do |file|
@@ -152,14 +105,11 @@ module Metalware
       end
 
       def template_path(identifier)
-        name = File.basename(identifier)
-        if url?(identifier)
-          # Download the template to the Metalware cache; will render it from
-          # there.
-          cache_template_path(name).tap do |template|
-            input.download(identifier, template)
-          end
-        elsif absolute_path?(identifier)
+        if identifier.match?(URI::DEFAULT_PARSER.make_regexp)
+          # Download the template to the Metalware cache
+          # will render it from there.
+          cache.download(identifier)
+        elsif Pathname.new(identifier).absolute?
           # Path is an absolute path on the deployment server.
           identifier
         else
@@ -168,20 +118,24 @@ module Metalware
         end
       end
 
-      def url?(identifier)
-        identifier =~ URI::DEFAULT_PARSER.make_regexp
-      end
-
-      def absolute_path?(identifier)
-        Pathname.new(identifier).absolute?
-      end
-
-      def cache_template_path(template_name)
-        File.join(Constants::CACHE_PATH, 'templates', template_name)
+      def rendered_dir
+        File.join(node.name, 'files', rendered_sub_dir)
       end
 
       def internal_template_path(identifier)
-        File.join(internal_templates_dir, identifier)
+        File.join(local_template_dir, 'files', identifier)
+      end
+
+      def node
+        raise NotImplementedError
+      end
+
+      def rendered_sub_dir
+        raise NotImplementedError
+      end
+
+      def local_template_dir
+        raise NotImplementedError
       end
     end
   end

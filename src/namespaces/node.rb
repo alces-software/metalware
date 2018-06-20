@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'build_methods'
-require 'build_files_retriever'
 require 'namespaces/plugin'
 
 module Metalware
@@ -65,7 +64,7 @@ module Metalware
 
       def files
         @files ||= begin
-          data = alces.build_files_retriever.retrieve_for_node(self)
+          data = alces.build_files_retriever.retrieve(self)
           finalize_build_files(data)
         end
       end
