@@ -5,6 +5,8 @@ slots: 4
 oob:
   ip: null
   netmask: null
+  network: null
+  vlan: null
   user: null
   password: null
 psus: []
@@ -12,3 +14,4 @@ servers: []
 location:
   rack: null
   slot: null
+  height: null
