@@ -37,5 +37,17 @@ RSpec.describe Metalware::ManagedFile do
 
       it_behaves_like 'includes managed file markers', '#'
     end
+
+    context "when `comment_char: ';'` option passed" do
+      subject do
+        described_class.content(
+          managed_file,
+          rendered_content,
+          comment_char: ';'
+        )
+      end
+
+      it_behaves_like 'includes managed file markers', ';'
+    end
   end
 end
