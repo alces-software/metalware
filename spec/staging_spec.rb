@@ -126,8 +126,8 @@ RSpec.describe Metalware::Staging do
 
       it 'writes the managed file content and flags' do
         content = read_managed_content
-        expect(content.first).to eq(Metalware::ManagedFile::MANAGED_START)
-        expect(content.last).to eq(Metalware::ManagedFile::MANAGED_END)
+        expect(content.first).to include(Metalware::ManagedFile::MANAGED_START_MARKER)
+        expect(content.last).to include(Metalware::ManagedFile::MANAGED_END_MARKER)
         expect(content).to include(managed_content)
       end
 
