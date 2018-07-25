@@ -184,6 +184,14 @@ RSpec.describe Metalware::Staging do
         it_behaves_like 'writes managed file', '#'
       end
 
+      context "when `comment_char: ';'` option set for file" do
+        let(:additional_options) do
+          {comment_char: ';'}
+        end
+
+        it_behaves_like 'writes managed file', ';'
+      end
+
     end
   end
 end
