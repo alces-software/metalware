@@ -66,10 +66,6 @@ module Metalware
         end&.data
       end
 
-      def to_json
-        to_a.to_json
-      end
-
       private
 
       attr_reader :alces, :asset_loaders

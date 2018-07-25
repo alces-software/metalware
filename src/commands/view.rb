@@ -2,20 +2,32 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'command_helpers/alces_command'
 
 module Metalware
   module Commands
     class View < CommandHelpers::BaseCommand
       private
 
-      attr_reader :command
+      include CommandHelpers::AlcesCommand
 
-      def setup
-        @command = args.first
-      end
+      ARRAY_TYPES = [Array, Namespaces::AssetArray].freeze
 
       def run
-        pretty_print_json(alces.instance_eval(command).to_json)
+        pretty_print_json(cli_input_object.to_json)
+      end
+
+      def cli_input_object
+        data = alces_command
+        if data.is_a?(Namespaces::MetalArray)
+          data
+        elsif ARRAY_TYPES.include?(data.class)
+          data.map(&:to_h)
+        elsif data.respond_to?(:to_h)
+          data.to_h
+        else
+          data
+        end
       end
 
       def pretty_print_json(json)
