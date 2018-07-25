@@ -16,6 +16,11 @@ anchor_options:
     type: String
     description: >
       Assigns the asset to the node
+  color_output: &color_output
+    tags: [--color-output]
+    description: >
+      Force the output to be coloured even if not outputting to a terminal;
+      useful e.g. for piping to `less -R`.
 
 global_options:
   - tags: [--strict]
@@ -505,10 +510,7 @@ commands:
       'alces.domain.config' will only show the config.
     action: Commands::View
     options:
-      - tags: [--color-output]
-        description: >
-          Force the output to be coloured even if not outputting to a terminal;
-          useful e.g. for piping to `less -R`.
+      - *color_output
 
   eval:
     syntax: metal eval ALCES_COMMAND [options]
@@ -524,7 +526,4 @@ commands:
       whatever is most useful for this.
     action: Commands::Eval
     options:
-      - tags: [--color-output]
-        description: >
-          Force the output to be coloured even if not outputting to a terminal;
-          useful e.g. for piping to `less -R`.
+      - *color_output
