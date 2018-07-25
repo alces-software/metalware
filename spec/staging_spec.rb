@@ -115,43 +115,75 @@ RSpec.describe Metalware::Staging do
         File.read(file).gsub(/^$\n/, '').split("\n")
       end
 
-      before do
-        described_class.update do |staging|
-          staging.push_file(managed_file, managed_content, managed: true)
-          staging.delete_file_if do |file|
-            File.write file.sync, file.content
+      RSpec.shared_examples 'writes managed file' do |comment_char|
+        before do
+          described_class.update do |staging|
+            staging.push_file(
+              managed_file,
+              managed_content,
+              managed: true,
+              **additional_options
+            )
+            staging.delete_file_if do |file|
+              File.write file.sync, file.content
+            end
+          end
+        end
+
+        expected_start_marker = [
+          comment_char,
+          Metalware::ManagedFile::MANAGED_START_MARKER,
+          comment_char
+        ].join(' ')
+
+        expected_end_marker = [
+          comment_char,
+          Metalware::ManagedFile::MANAGED_END_MARKER,
+          comment_char
+        ].join(' ')
+
+        it "writes the managed file content with `#{comment_char}` as comment character" do
+          content = read_managed_content
+          expect(content.first).to include(expected_start_marker)
+          expect(content.last).to include(expected_end_marker)
+          expect(content).to include(managed_content)
+        end
+
+        it 'preserves the start and end of the file and updates content' do
+          file_start = 'FILE START'
+          file_end = 'FILE END'
+          start_content = [
+            file_start,
+            File.read(managed_file),
+            file_end,
+          ].join("\n")
+          File.write(managed_file, start_content)
+
+          new_content = 'NEW CONTENT'
+          described_class.update do |staging|
+            staging.push_file(
+              managed_file,
+              new_content,
+              managed: true,
+              **additional_options
+            )
+
+            staging.delete_file_if do |file|
+              expect(file.content.first).to eq(file_start)
+              expect(file.content.last).to eq(file_end)
+              expect(file.content).to include(new_content)
+              expect(file.content).not_to include(managed_content)
+            end
           end
         end
       end
 
-      it 'writes the managed file content and flags' do
-        content = read_managed_content
-        expect(content.first).to include(Metalware::ManagedFile::MANAGED_START_MARKER)
-        expect(content.last).to include(Metalware::ManagedFile::MANAGED_END_MARKER)
-        expect(content).to include(managed_content)
+      context 'when no additional options set for file' do
+        let(:additional_options) { {} }
+
+        it_behaves_like 'writes managed file', '#'
       end
 
-      it 'preserves the start and end of the file and updates content' do
-        file_start = 'FILE START'
-        file_end = 'FILE END'
-        start_content = [
-          file_start,
-          File.read(managed_file),
-          file_end,
-        ].join("\n")
-        File.write(managed_file, start_content)
-
-        new_content = 'NEW CONTENT'
-        described_class.update do |staging|
-          staging.push_file(managed_file, new_content, managed: true)
-          staging.delete_file_if do |file|
-            expect(file.content.first).to eq(file_start)
-            expect(file.content.last).to eq(file_end)
-            expect(file.content).to include(new_content)
-            expect(file.content).not_to include(managed_content)
-          end
-        end
-      end
     end
   end
 end
