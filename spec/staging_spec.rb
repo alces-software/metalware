@@ -133,16 +133,16 @@ RSpec.describe Metalware::Staging do
         expected_start_marker = [
           comment_char,
           Metalware::ManagedFile::MANAGED_START_MARKER,
-          comment_char
+          comment_char,
         ].join(' ')
 
         expected_end_marker = [
           comment_char,
           Metalware::ManagedFile::MANAGED_END_MARKER,
-          comment_char
+          comment_char,
         ].join(' ')
 
-        it "writes the managed file content with `#{comment_char}` as comment character" do
+        it "writes the managed file content with `#{comment_char}` as comment char" do
           content = read_managed_content
           expect(content.first).to include(expected_start_marker)
           expect(content.last).to include(expected_end_marker)
@@ -186,12 +186,11 @@ RSpec.describe Metalware::Staging do
 
       context "when `comment_char: ';'` option set for file" do
         let(:additional_options) do
-          {comment_char: ';'}
+          { comment_char: ';' }
         end
 
         it_behaves_like 'writes managed file', ';'
       end
-
     end
   end
 end

@@ -24,7 +24,7 @@ module Metalware
           @managed_file = managed_file
           @rendered_content = rendered_content
           @comment_char = comment_char
-	end
+        end
 
         def create
           pre, post = split_on_managed_section(current_file_contents)
@@ -34,7 +34,8 @@ module Metalware
 
         private
 
-        attr_reader :managed_file,
+        attr_reader \
+          :managed_file,
           :rendered_content,
           :comment_char
 
@@ -78,7 +79,6 @@ module Metalware
           Utils.commentify(MANAGED_COMMENT_TEXT, comment_char: comment_char)
         end
       end
-
     end
   end
 end
