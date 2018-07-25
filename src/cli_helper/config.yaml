@@ -509,3 +509,22 @@ commands:
         description: >
           Force the output to be coloured even if not outputting to a terminal;
           useful e.g. for piping to `less -R`.
+
+  eval:
+    syntax: metal eval ALCES_COMMAND [options]
+    summary: Evaluate argument in context of `alces` namespace
+    description: >
+      Similar to 'metal view', but evaluates argument directly in 'alces'
+      namespace without any preprocessing, and then returns result as JSON.
+
+
+      Intended to have more stable behaviour than 'metal view', and to provide
+      external programs with access to Metalware data, whereas 'metal view' is
+      intended purely for human usage and its behaviour may change as needed to
+      whatever is most useful for this.
+    action: Commands::Eval
+    options:
+      - tags: [--color-output]
+        description: >
+          Force the output to be coloured even if not outputting to a terminal;
+          useful e.g. for piping to `less -R`.
