@@ -27,7 +27,7 @@ rsync:
 		--exclude vendor/ \
 		--exclude .bundle/ \
 		--perms \
-		. dev@${IP}:${REMOTE_DIR}
+		. root@${IP}:${REMOTE_DIR}
 
 .PHONY: watch-rsync
 watch-rsync:
