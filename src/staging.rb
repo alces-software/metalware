@@ -93,7 +93,15 @@ module Metalware
 
     def file_content(data)
       raw = File.read(FilePath.staging(data.sync))
-      data.managed ? ManagedFile.content(data.sync, raw) : raw
+      data.managed ? managed_file_content(data, raw) : raw
+    end
+
+    def managed_file_content(data, rendered_content)
+      managed_file_content_args = [data.sync, rendered_content]
+      if data.comment_char
+        managed_file_content_args.push(comment_char: data.comment_char)
+      end
+      ManagedFile.content(*managed_file_content_args)
     end
   end
 end
