@@ -2,23 +2,19 @@ manufacturer: null
 model: null
 serial: null
 ports:
-  em1:
-    network: null
+  - network: null
     mac: null
     switch: null
     port: null
-  em2:
-    network: null
+  - network: null
     mac: null
     switch: null
     port: null
-  em3:
-    network: null
+  - network: null
     mac: null
     switch: null
     port: null
-  em4:
-    network: null
+  - network: null
     mac: null
     switch: null
     port: null
