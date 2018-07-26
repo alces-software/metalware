@@ -5,16 +5,12 @@ ports:
   - network: null
     mac: null
     switch: null
-    port: null
   - network: null
     mac: null
     switch: null
-    port: null
   - network: null
     mac: null
     switch: null
-    port: null
   - network: null
     mac: null
     switch: null
-    port: null
