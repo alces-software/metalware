@@ -168,6 +168,14 @@ RSpec.describe Metalware::Namespaces::Node do
         it 'returns false when local? is called' do
           expect(node.local?).to eq(false)
         end
+
+        it 'uses correct build method class when build_method specified as a string' do
+          mock_build_method('uefi-kickstart')
+
+          expect(node.build_method.class).to eq(
+            Metalware::BuildMethods::Kickstarts::UEFI
+          )
+        end
       end
 
       context "with the 'local' node" do

@@ -135,7 +135,7 @@ module Metalware
       end
 
       def build_method_class
-        case config.build_method
+        case config.build_method&.to_sym
         when :local
           msg = "node '#{name}' can not use the local build"
           raise InvalidLocalBuild, msg
