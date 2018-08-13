@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-- The `named` and `hosts` templates are now rendered as managed files.
+## [2018.3.0-rc3] - 2018-08-13
+
+- Switched `named` and `hosts` files to be rendered as Metalware-managed files
+  (https://github.com/alces-software/metalware/pull/418).
+- Fixed messages not being printed until build script finished in local build
+  (https://github.com/alces-software/metalware/pull/419).
+- Added `eval` command for programmatic access to Metalware namespace
+  (https://github.com/alces-software/metalware/pull/435).
+- Fixed non-Kickstart build methods often not being detected
+  (https://github.com/alces-software/metalware/pull/440).
 
 ## [2018.3.0-rc2] - 2018-05-03
 
