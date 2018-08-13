@@ -27,7 +27,14 @@ IFS=$'\n\t'
 # Install RVM.
 gpg2 --keyserver hkp://pgp.mit.edu --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
 curl -sSL https://get.rvm.io | bash -s stable
-# XXX Need to log out and in again here for script to work on first run.
+
+# Enable RVM, which is less strict about letting commands fail, variables be
+# unset etc. than this script.
+set +euo pipefail
+# shellcheck disable=SC1091
+source /etc/profile.d/rvm.sh
+set -euo pipefail
+
 rvm rvmrc warning ignore allGemfiles
 
 # Required for rugged gem.
@@ -45,6 +52,7 @@ yum install libvirt-devel -y
 # Install Ruby and gems.
 rvm install ruby-2.4.1
 cd .. && cd -  # Let RVM automatically use correct Ruby for dir.
-# XXX Need to log out and in again here for script to work on first run.
 gem install bundler
 bundle install
+
+echo "You need to log out and in again and then \`cd $PWD && bin/metal\` should work!"
