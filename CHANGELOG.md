@@ -6,13 +6,13 @@ All notable changes to this project will be documented in this file.
 
 - The `named` and `hosts` templates are now rendered as managed files.
 
-## [2018.2.0] - 2018-04-19
+## [2018.2.0-rc2] - 2018-04-19
 - Added `asset` commands for managing asset files with the following
   subcommands:
-- `asset add` which creates new assets from a repo template
-- `asset edit` which opens existing assets in the system editor
-- `asset link/unlink` which manage the relationships between assets and nodes
-- `asset delete` which deletes an asset and unassigns it from the nodes
+  - `asset add` which creates new assets from a repo template
+  - `asset edit` which opens existing assets in the system editor
+  - `asset link/unlink` which manage the relationships between assets and nodes
+  - `asset delete` which deletes an asset and unassigns it from the nodes
 
 ## [2018.1.0] - 2018-03-27
 
