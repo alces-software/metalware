@@ -102,7 +102,7 @@ RSpec.describe Metalware::Configurator do
   # Do not want to use readline to get input in tests as tests will then
   # hang waiting for input.
   before do
-    allow(Metalware::Configurator).to receive(:use_readline).and_return(false)
+    allow(described_class).to receive(:use_readline).and_return(false)
   end
 
   describe '#configure' do
@@ -421,7 +421,7 @@ RSpec.describe Metalware::Configurator do
 
   context 'with an orphan node' do
     let(:orphan) { 'i_am_a_orphan_node' }
-    let(:configure_orphan) { Metalware::Configurator.for_node(alces, orphan) }
+    let(:configure_orphan) { described_class.for_node(alces, orphan) }
 
     def new_group_cache
       Metalware::GroupCache.new
@@ -504,9 +504,7 @@ RSpec.describe Metalware::Configurator do
     end
 
     shared_examples 'gets the answer' do
-      it 'sets the answer correctly' do
-        expect(subject).to eq(answer)
-      end
+      it { is_expected.to eq(answer) }
 
       it 'has saved the correct answer' do
         expect(load_answer).to eq(saved_answer)
@@ -517,6 +515,7 @@ RSpec.describe Metalware::Configurator do
       subject do
         alces.groups.find_by_name(group_name).answer.to_h[identifier]
       end
+
       before { configure_group }
 
       let(:load_answer) do
@@ -527,12 +526,14 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the original default' do
         let(:answer) { original_default }
         let(:saved_answer) { original_default }
+
         include_examples 'gets the answer'
       end
 
       context 'when the answer matches the domain answer' do
         let(:answer) { domain_answer }
         let(:saved_answer) { nil }
+
         include_examples 'gets the answer'
       end
 
@@ -541,6 +542,7 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the group level default' do
         let(:answer) { group_default }
         let(:saved_answer) { group_default }
+
         include_examples 'gets the answer'
       end
 
@@ -548,16 +550,19 @@ RSpec.describe Metalware::Configurator do
         before { configure_group }
         let(:answer) { 'Some random answer' }
         let(:saved_answer) { answer }
+
         include_examples 'gets the answer'
       end
     end
 
     context 'when configuring a node' do
-      let(:node_name) { 'my_super_awesome_node' }
-      let(:group_answer) { 'I am the group level answer' }
       subject do
         alces.nodes.find_by_name(node_name).answer.to_h[identifier]
       end
+
+      let(:node_name) { 'my_super_awesome_node' }
+      let(:group_answer) { 'I am the group level answer' }
+
       let(:load_answer) do
         path = Metalware::FilePath.node_answers(node_name)
         Metalware::Data.load(path)[identifier]
@@ -569,7 +574,7 @@ RSpec.describe Metalware::Configurator do
       end
 
       before do
-        conf = Metalware::Configurator.for_node(alces, node_name)
+        conf = described_class.for_node(alces, node_name)
         configure_with_answers([answer], test_obj: conf)
       end
 
@@ -578,12 +583,14 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the node level default' do
         let(:answer) { node_default }
         let(:saved_answer) { node_default }
+
         include_examples 'gets the answer'
       end
 
       context 'when the answer matches the group level' do
         let(:answer) { group_answer }
         let(:saved_answer) { nil }
+
         include_examples 'gets the answer'
       end
     end
@@ -592,19 +599,21 @@ RSpec.describe Metalware::Configurator do
       subject do
         alces.local.answer.to_h[identifier]
       end
+
       let(:load_answer) do
         path = Metalware::FilePath.local_answers
         Metalware::Data.load(path)[identifier]
       end
 
       before do
-        conf = Metalware::Configurator.for_local(alces)
+        conf = described_class.for_local(alces)
         configure_with_answers([answer], test_obj: conf)
       end
 
       context 'when the answer matches the domain default' do
         let(:answer) { domain_answer }
         let(:saved_answer) { nil }
+
         include_examples 'gets the answer'
       end
 
@@ -613,6 +622,7 @@ RSpec.describe Metalware::Configurator do
       context 'when the answer matches the local level default' do
         let(:answer) { local_default }
         let(:saved_answer) { local_default }
+
         include_examples 'gets the answer'
       end
     end

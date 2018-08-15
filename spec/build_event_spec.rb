@@ -15,8 +15,8 @@ RSpec.describe Metalware::BuildEvent do
   include AlcesUtils
 
   let(:nodes) { ['node01', 'node02', 'node03', 'nodes4'] }
-  let(:build_event) { Metalware::BuildEvent.new(alces.nodes) }
-  let(:empty_build_event) { Metalware::BuildEvent.new([]) }
+  let(:build_event) { described_class.new(alces.nodes) }
+  let(:empty_build_event) { described_class.new([]) }
 
   AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
@@ -69,6 +69,7 @@ RSpec.describe Metalware::BuildEvent do
 
     context 'with a single node built' do
       let(:built_node) { alces.nodes[2] }
+
       before { build_node(built_node) }
 
       it 'runs the complete_hook for the node' do

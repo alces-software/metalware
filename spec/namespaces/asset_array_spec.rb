@@ -4,27 +4,47 @@ require 'alces_utils'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::Namespaces::AssetArray do
-  subject { Metalware::Namespaces::AssetArray.new(alces_copy) }
+  subject { described_class.new(alces) }
 
   # DO NOT use AlcesUtils in the section. It tests features required
   # by the namespace itself.
-  let(:alces_copy) { Metalware::Namespaces::Alces.new }
-  let(:assets) do
+  let(:alces) { Metalware::Namespaces::Alces.new }
+  let(:pdu_assets) do
     [
       {
-        name: 'asset1',
+        name: 'pdu1',
+        types_dir: 'pdus',
         data: { key: 'value1' },
       },
       {
-        name: 'asset2',
+        name: 'pdu2',
+        types_dir: 'pdus',
         data: { key: 'value2' },
       },
     ]
   end
+  let(:rack_assets) do
+    [
+      {
+        name: 'rack1',
+        types_dir: 'racks',
+        data: { key: 'value3' },
+      },
+    ]
+  end
+  let(:assets) do
+    [].tap do |arr|
+      arr.concat pdu_assets
+      arr.concat rack_assets
+    end
+  end
 
   let(:assets_data) do
     assets.map do |asset|
-      asset[:data].merge(metadata: { name: asset[:name] })
+      asset[:data].merge(metadata: {
+                           name: asset[:name],
+                           type: asset[:types_dir].singularize,
+                         })
     end
   end
 
@@ -34,7 +54,9 @@ RSpec.describe Metalware::Namespaces::AssetArray do
 
   before do
     assets.each do |asset|
-      path = Metalware::FilePath.asset(asset[:name])
+      path = Metalware::FilePath.asset(asset[:types_dir],
+                                       asset[:name])
+      FileUtils.mkdir_p(File.dirname(path))
       Metalware::Data.dump(path, asset[:data])
     end
   end
@@ -42,20 +64,57 @@ RSpec.describe Metalware::Namespaces::AssetArray do
   describe '#new' do
     context 'when there is an asset called "each"' do
       before do
-        each_path = Metalware::FilePath.asset('each')
+        each_path = Metalware::FilePath.asset('racks', 'each')
+        FileUtils.mkdir_p(File.dirname(each_path))
         Metalware::Data.dump(each_path, data: 'some-data')
       end
 
       it 'errors due to the existing method' do
         expect do
-          Metalware::Namespaces::AssetArray.new(alces_copy)
+          described_class.new(alces)
         end.to raise_error(Metalware::DataError)
       end
     end
 
     it 'does not load the files when initially called' do
       expect(Metalware::Data).not_to receive(:load)
-      Metalware::Namespaces::AssetArray.new(alces_copy)
+      described_class.new(alces)
+    end
+
+    context 'with a loaders input' do
+      subject { described_class.new(alces, loaders_input: loaders) }
+
+      let(:type) { Metalware::Records::Asset::TYPES.first }
+      let(:asset_names) { ['asset1', 'asset2'] }
+      let(:loaders) do
+        asset_names.map do |name|
+          path = Metalware::FilePath.asset(type.pluralize, name)
+          Metalware::Namespaces::AssetArray::AssetLoader.new(alces, path)
+        end
+      end
+      let!(:dir) { class_spy(Dir).as_stubbed_const }
+
+      before { subject }
+
+      it 'does not glob the file system' do
+        expect(dir).not_to have_received(:glob)
+      end
+
+      it 'has the correct number of assets' do
+        expect(subject.count).to eq(loaders.length)
+      end
+
+      it 'has defined the asset methods' do
+        asset_names.each do |name|
+          expect(subject).to respond_to(name)
+        end
+      end
+
+      it 'does not respond to the asset type methods' do
+        Metalware::Records::Asset::TYPES.map(&:pluralize).each do |type|
+          expect(subject).not_to respond_to(type)
+        end
+      end
     end
   end
 
@@ -118,6 +177,23 @@ RSpec.describe Metalware::Namespaces::AssetArray do
         expect do |b|
           subject.map(&:to_h).each(&b)
         end.to yield_successive_args(*assets_data)
+      end
+    end
+  end
+
+  describe 'asset types methods' do
+    it 'defines all the type methods as the plural' do
+      Metalware::Records::Asset::TYPES.map(&:pluralize).each do |type|
+        expect(subject).to respond_to(type)
+        expect(subject.send(type)).to be_a(subject.class)
+      end
+    end
+
+    it 'can find the assets under its type' do
+      pdu_assets.each do |asset|
+        name = asset[:name]
+        data = asset[:data]
+        expect(subject.pdus.find_by_name(name).to_h).to include(data)
       end
     end
   end

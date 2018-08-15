@@ -148,19 +148,39 @@ module Metalware
         '/var/log/metalware'
       end
 
-      def asset_template(type)
-        File.join(repo, 'assets', type + '.yaml')
+      def asset_type(type)
+        File.join(metalware_install, 'data/asset_types', type + '.yaml')
       end
 
-      def asset(name)
-        File.join(metalware_data, 'assets', name + '.yaml')
+      def asset(*a)
+        record(asset_dir, *a)
+      end
+
+      def asset_dir
+        File.join(metalware_data, 'assets')
+      end
+
+      def layout(*a)
+        record(layout_dir, *a)
+      end
+
+      def layout_dir
+        File.join(metalware_data, 'layouts')
       end
 
       def asset_cache
         File.join(cache, 'assets.yaml')
       end
 
+      def cached_template(name)
+        File.join(cache, 'templates', name)
+      end
+
       private
+
+      def record(record_dir, types_dir, name)
+        File.join(record_dir, types_dir, name + '.yaml')
+      end
 
       def template_file_name(template_type, node:)
         node.config.templates&.send(template_type) || 'default'

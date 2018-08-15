@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'build_methods'
-require 'build_files_retriever'
 require 'namespaces/plugin'
 
 module Metalware
@@ -56,7 +55,7 @@ module Metalware
       end
 
       def hexadecimal_ip
-        @hexadecimal_ip ||= SystemCommand.run "gethostip -x #{name}"
+        @hexadecimal_ip ||= SystemCommand.run("gethostip -x #{name}").chomp
       end
 
       def build_method
@@ -65,7 +64,7 @@ module Metalware
 
       def files
         @files ||= begin
-          data = alces.build_files_retriever.retrieve_for_node(self)
+          data = alces.build_files_retriever.retrieve(self)
           finalize_build_files(data)
         end
       end
@@ -92,6 +91,10 @@ module Metalware
           return unless asset_name
           alces.assets.find_by_name(asset_name)
         end
+      end
+
+      def local?
+        name == 'local'
       end
 
       private
@@ -132,7 +135,7 @@ module Metalware
       end
 
       def build_method_class
-        case config.build_method
+        case config.build_method&.to_sym
         when :local
           msg = "node '#{name}' can not use the local build"
           raise InvalidLocalBuild, msg

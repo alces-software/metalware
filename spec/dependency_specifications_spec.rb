@@ -28,11 +28,11 @@ require 'dependency_specifications'
 require 'namespaces/alces'
 
 RSpec.describe Metalware::DependencySpecifications do
-  let(:alces) { Metalware::Namespaces::Alces.new }
-
   subject do
-    Metalware::DependencySpecifications.new(alces)
+    described_class.new(alces)
   end
+
+  let(:alces) { Metalware::Namespaces::Alces.new }
 
   before do
     SpecUtils.use_mock_genders(self)

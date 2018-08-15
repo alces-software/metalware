@@ -1,0 +1,16 @@
+manufacturer: null
+model: null
+serial: null
+ports:
+  - network: null
+    mac: null
+    switch: null
+  - network: null
+    mac: null
+    switch: null
+  - network: null
+    mac: null
+    switch: null
+  - network: null
+    mac: null
+    switch: null

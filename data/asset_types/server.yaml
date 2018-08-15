@@ -1,0 +1,14 @@
+manufacturer: null
+model: null
+serial: null
+oob:
+  ip: null
+  netmask: null
+  network: null
+  vlan: null
+  user: null
+  password: null
+network_adapters: []
+location:
+  chassis: null
+  slot: null

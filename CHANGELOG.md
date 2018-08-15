@@ -2,13 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2018.2.0] - 2018-04-19
+## Unreleased
+
+## [2018.3.0] - 2018-08-15
+
+- Moved asset types to be stored in Metalware itself rather than the repo being
+  used (https://github.com/alces-software/metalware/pull/394).
+- Store assets by type (https://github.com/alces-software/metalware/pull/393).
+- Provide access to assets by type in namespace
+  (https://github.com/alces-software/metalware/pull/401).
+- Added `layout add` and `layout edit` to create and edit asset layouts
+  (https://github.com/alces-software/metalware/pull/400,
+  https://github.com/alces-software/metalware/pull/406)
+- Added method to nodes in namespace to check if node is the local node
+  (https://github.com/alces-software/metalware/pull/409).
+- Added ability to save or edit sub-assets when creating an asset
+  (https://github.com/alces-software/metalware/pull/414).
+- Added ability to create an asset from a layout as well as a type
+  (https://github.com/alces-software/metalware/pull/415).
+- Added more data to asset types
+  (https://github.com/alces-software/metalware/pull/420).
+- Switched `named` and `hosts` files to be rendered as Metalware-managed files
+  (https://github.com/alces-software/metalware/pull/418).
+- Fixed messages not being printed until build script finished in local build
+  (https://github.com/alces-software/metalware/pull/419).
+- Added `eval` command for programmatic access to Metalware namespace
+  (https://github.com/alces-software/metalware/pull/435).
+- Fixed non-Kickstart build methods often not being detected
+  (https://github.com/alces-software/metalware/pull/440).
+
+## [2018.2.0] - 2018-04-25
+
+- Fixed default values not being displayed when configuring when question
+  `type` is `integer` (https://github.com/alces-software/metalware/pull/357).
 - Added `asset` commands for managing asset files with the following
   subcommands:
-- `asset add` which creates new assets from a repo template
-- `asset edit` which opens existing assets in the system editor
-- `asset link/unlink` which manage the relationships between assets and nodes
-- `asset delete` which deletes an asset and unassigns it from the nodes
+  - `asset add` which creates a new asset from an asset type template in repo
+    (https://github.com/alces-software/metalware/pull/364).
+  - `asset edit` which opens existing assets in the system editor
+    (https://github.com/alces-software/metalware/pull/365).
+  - `asset link/unlink` which manage the relationships between assets and nodes
+    (https://github.com/alces-software/metalware/pull/373).
+  - `asset delete` which deletes an asset and unassigns it from the nodes.
+- Made assets configured using the above available within Metalware namespace
+  (https://github.com/alces-software/metalware/pull/362).
 
 ## [2018.1.0] - 2018-03-27
 

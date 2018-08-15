@@ -3,7 +3,7 @@
 
 RSpec.describe Metalware::CliHelper::Parser do
   subject do
-    Metalware::CliHelper::Parser.new(
+    described_class.new(
       Metalware::Cli.new
     )
   end

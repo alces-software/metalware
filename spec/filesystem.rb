@@ -181,8 +181,15 @@ class FileSystem
   def with_templates_fixtures(template_path, target)
     with_fixtures(
       template_path,
-      at: File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target)
+      at: File.join(
+        Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target
+      )
     )
+  end
+
+  def with_asset_types
+    asset_types_dir_path = File.dirname(Metalware::FilePath.asset_type(''))
+    FakeFS::FileSystem.clone(asset_types_dir_path, asset_types_dir_path)
   end
 
   # Create same directory hierarchy that would be created by a Metalware

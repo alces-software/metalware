@@ -18,7 +18,7 @@ RSpec.describe Metalware::Namespaces::Mixins::WhiteListHasher do
       array_method: [
         OpenStruct.new(property: 'value_within_array_object'),
       ]
-    ).extend Metalware::Namespaces::Mixins::WhiteListHasher
+    ).extend described_class
   end
 
   let(:recursive_hash_obj) do

@@ -9,6 +9,7 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
   let(:node_name) { 'test_node' }
   let(:node) { alces.nodes.find_by_name(node_name) }
   let(:content) { { node: { node_name.to_sym => asset_name } } }
+  let(:cache) { Metalware::Cache::Asset.new }
 
   AlcesUtils.mock(self, :each) do
     mock_node(node_name)
@@ -20,21 +21,21 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
                                  stderr: StringIO.new)
   end
 
-  let(:cache) { Metalware::Cache::Asset.new }
-
   context 'when using a saved asset' do
     before do
       FileSystem.root_setup(&:with_minimal_repo)
     end
 
     let(:asset_name) { 'asset_test' }
-    let(:asset_path) { Metalware::FilePath.asset(asset_name) }
     let(:asset_content) { { key: 'value' } }
-    let(:cache_content) { { node: { node_name.to_sym => asset_name } } }
+    let(:cache_path) { Metalware::FilePath.asset_cache }
+    let(:cache_content) do
+      { node: { node_name.to_sym => asset_name } }
+    end
 
-    before do
-      Metalware::Data.dump(asset_path, asset_content)
-      Metalware::Data.dump(Metalware::FilePath.asset_cache, cache_content)
+    AlcesUtils.mock(self, :each) do
+      create_asset(asset_name, asset_content)
+      Metalware::Data.dump(cache_path, cache_content)
     end
 
     it 'unlinks the asset from a node' do

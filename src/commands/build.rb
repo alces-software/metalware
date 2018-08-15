@@ -64,13 +64,6 @@ module Metalware
           # TODO: Split process up more should go in here
           build_event.process
 
-          # TODO: Consider moving GUI code into BuildEvent
-          if build_event.build_complete?
-            # For now at least, keep thread alive when in GUI so can keep
-            # accessing messages. XXX Change this, this is very wasteful.
-            in_gui? ? record_gui_build_complete : break
-          end
-
           sleep Constants::BUILD_POLL_SLEEP
         end
 
@@ -94,9 +87,16 @@ module Metalware
         end.flatten.uniq
       end
 
-      def record_gui_build_complete
-        Thread.current.thread_variable_set(COMPLETE_KEY, true)
-      end
+      # TODO: Consider moving GUI code into BuildEvent
+      # if build_event.build_complete?
+      #   # For now at least, keep thread alive when in GUI so can keep
+      #   # accessing messages. XXX Change this, this is very wasteful.
+      #   in_gui? ? record_gui_build_complete : break
+      # end
+
+      # def record_gui_build_complete
+      #   Thread.current.thread_variable_set(COMPLETE_KEY, true)
+      # end
 
       def should_gracefully_shutdown?
         in_gui? && Thread.current.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)

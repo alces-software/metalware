@@ -33,7 +33,9 @@ module Metalware
       attr_reader :overview_data
 
       def setup
-        MetalLog.warn 'overview.yaml is missing from the repo' unless File.exist? FilePath.overview
+        unless File.exist? FilePath.overview
+          MetalLog.warn 'overview.yaml is missing from the repo'
+        end
         @overview_data = Data.load FilePath.overview
       end
 

@@ -137,8 +137,13 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+  # Do not print stderr Output in rspec by default
+  config.before do
+    $rspec_suppress_output_to_stderr = true
+    Metalware::MetalLog.instance_variable_set(:@metal_log, nil)
+  end
 
-  config.around :each do |example|
+  config.around do |example|
     # Run every test using `FakeFS`, this prevents us polluting the real file
     # system
     FileSystem.test(FileSystem.root_file_system_config) do
@@ -147,7 +152,7 @@ RSpec.configure do |config|
   end
 
   # Resets the filesystem after each test
-  config.after :each do
+  config.after do
     FileSystem.root_file_system_config(reset: true)
   end
 end

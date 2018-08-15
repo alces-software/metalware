@@ -29,6 +29,10 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     end
   end
 
+  subject do
+    TestBuildMethod.new(node)
+  end
+
   let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
   let(:alces) { Metalware::Namespaces::Alces.new }
   let(:templater) do
@@ -58,10 +62,6 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
         error: 'error',
       }]
     )
-  end
-
-  subject do
-    TestBuildMethod.new(node)
   end
 
   describe '#render_staging_templates' do

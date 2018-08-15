@@ -56,7 +56,7 @@ RSpec.describe Metalware::Data do
   end
 
   describe '#load' do
-    subject { Metalware::Data.load(data_file_path) }
+    subject { described_class.load(data_file_path) }
 
     it 'loads the data file and recursively converts all keys to symbols' do
       filesystem.test do
@@ -125,7 +125,7 @@ RSpec.describe Metalware::Data do
   describe '#dump' do
     it 'dumps the data to the data file with all keys as strings' do
       filesystem.test do
-        Metalware::Data.dump(data_file_path, symbol_keyed_data)
+        described_class.dump(data_file_path, symbol_keyed_data)
 
         expect(
           YAML.load_file(data_file_path)
@@ -136,7 +136,7 @@ RSpec.describe Metalware::Data do
     it 'raises if attempt to dump non-hash data' do
       filesystem.test do
         expect do
-          Metalware::Data.dump(data_file_path, ['foo', 'bar'])
+          described_class.dump(data_file_path, ['foo', 'bar'])
         end.to raise_error(Metalware::DataError)
       end
     end

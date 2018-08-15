@@ -20,7 +20,7 @@ RSpec.describe Metalware::Templating::NilDetectionWrapper do
   let(:metal_log) { Metalware::MetalLog.metal_log }
 
   it 'the wrap command returns a binding' do
-    expect(Metalware::Templating::NilDetectionWrapper.wrap(nil)).to \
+    expect(described_class.wrap(nil)).to \
       be_a(Binding)
   end
 

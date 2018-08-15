@@ -34,125 +34,15 @@ require 'staging'
 
 module Metalware
   class Templater
-    MANAGED_FILE_MESSAGE = <<-EOF.strip_heredoc
-    # This file is managed by Alces Metalware; any changes made to it directly
-    # will be lost. You can change the data used to render it using the
-    # `metal configure` commands.
-    EOF
-
-    MANAGED_START_MARKER = 'METALWARE_START'
-    MANAGED_START = "########## #{MANAGED_START_MARKER} ##########"
-    MANAGED_END_MARKER = 'METALWARE_END'
-    MANAGED_END = "########## #{MANAGED_END_MARKER} ##########"
-    MANAGED_COMMENT = Utils.commentify(
-      <<-EOF.squish
-      This section of this file is managed by Alces Metalware. Any changes made
-      to this file between the #{MANAGED_START_MARKER} and
-      #{MANAGED_END_MARKER} markers may be lost; you should make any changes
-      you want to persist outside of this section or to the template directly.
-    EOF
-    )
-
     class << self
-      # NOTE: The 'alces' input to any of these methods can be subsituted for a
-      # Node, Group, or Domain namespace. By doing so, the scope of the render
-      # will automatically be set
-      def render(alces, template, **dynamic_namespace)
+      def render(namespace, template, **dynamic_namespace)
         raw_template = File.read(template)
         begin
-          alces.render_erb_template(raw_template, dynamic_namespace)
+          namespace.render_erb_template(raw_template, dynamic_namespace)
         rescue StandardError => e
           msg = "Failed to render template: #{template}"
           raise e, "#{msg}\n#{e}", e.backtrace
         end
-      end
-
-      def render_to_stdout(alces, template, **dynamic_namespace)
-        puts render(alces, template, **dynamic_namespace)
-      end
-
-      def render_to_file(
-        alces,
-        template,
-        save_file,
-        dynamic: {},
-        &validation_block
-      )
-        rendered_template = render(alces, template, **dynamic)
-
-        rendered_template_valid?(
-          rendered_template,
-          &validation_block
-        ).tap do |valid|
-          write_rendered_template(rendered_template, save_file: save_file) if valid
-        end
-      end
-
-      # Render template to a file where only part of the file is managed by
-      # Metalware:
-      # - if the file does not exist yet, it will be created with a new managed
-      # section;
-      # - if it exists without a managed section, the new section will be
-      # appended to the bottom of the current file;
-      # - if it exists with a managed section, this section will be replaced
-      # with the new managed section.
-      def render_managed_file(alces, template, managed_file, &validation_block)
-        rendered_template = render(alces, template)
-        rendered_template_valid?(
-          rendered_template,
-          &validation_block
-        ).tap do |valid|
-          update_managed_file(managed_file, rendered_template) if valid
-        end
-      end
-
-      private
-
-      def rendered_template_valid?(rendered_template)
-        # A rendered template is automatically valid, unless we're passed a
-        # block which evaluates as falsy when given the rendered template.
-        !block_given? || yield(rendered_template)
-      end
-
-      def update_managed_file(managed_file, rendered_template)
-        pre, post = split_on_managed_section(
-          current_file_contents(managed_file)
-        )
-        new_managed_file = [pre,
-                            managed_section(rendered_template.strip),
-                            post].join
-        write_rendered_template(new_managed_file, save_file: managed_file)
-      end
-
-      def current_file_contents(file)
-        File.exist?(file) ? File.read(file).strip : ''
-      end
-
-      def split_on_managed_section(file_contents)
-        if file_contents.include? MANAGED_START
-          pre, rest = file_contents.split(MANAGED_START)
-          _, post = rest.split(MANAGED_END)
-          [pre, post]
-        else
-          [file_contents + "\n\n", nil]
-        end
-      end
-
-      def managed_section(rendered_template)
-        [
-          MANAGED_START,
-          MANAGED_COMMENT,
-          rendered_template,
-          MANAGED_END,
-        ].join("\n") + "\n"
-      end
-
-      # TODO: Remove this once render_to_file method is removed
-      def write_rendered_template(rendered_template, save_file:)
-        File.open(save_file.chomp, 'w') do |f|
-          f.puts rendered_template
-        end
-        MetalLog.info "Template Saved: #{save_file}"
       end
     end
 
@@ -161,13 +51,13 @@ module Metalware
     end
 
     def render(
-      alces,
+      namespace,
       template,
       sync_location,
       dynamic: {},
       **staging_options
     )
-      rendered = self.class.render(alces, template, dynamic)
+      rendered = self.class.render(namespace, template, dynamic)
       staging.push_file(sync_location, rendered, **staging_options)
     end
 

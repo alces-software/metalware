@@ -5,41 +5,20 @@ require 'utils/editor'
 module Metalware
   module Commands
     module Asset
-      class Add < Metalware::CommandHelpers::BaseCommand
-        include CommandHelpers::AssetHelper
-
+      class Add < CommandHelpers::AssetEditor
         private
 
-        attr_reader :template_name, :template_path, :asset_path, :asset_name
+        attr_reader :type_name
 
         def setup
-          @template_name = args[0]
-          @template_path = FilePath.asset_template(template_name)
+          @type_name = args[0]
           @asset_name = args[1]
-          @asset_path = FilePath.asset(asset_name)
-          unpack_node_from_options
+          Records::Asset.error_if_unavailable(asset_name)
         end
 
-        def run
-          error_if_template_is_missing
-          error_if_asset_exists
-          copy_and_edit_asset_file(template_path, asset_path)
-          assign_asset_to_node_if_given(asset_name)
-        end
-
-        def error_if_template_is_missing
-          return if File.exist?(template_path)
-          raise InvalidInput, <<-EOF.squish
-            Cannot find asset template: "#{template_name}"
-          EOF
-        end
-
-        def error_if_asset_exists
-          return unless File.exist?(asset_path)
-          raise InvalidInput, <<-EOF.squish
-            The "#{asset_name}" asset already exists. Please use `metal
-            asset edit` instead
-          EOF
+        def edit_first_asset
+          asset_builder.push_asset(asset_name, type_name)
+          asset_builder.pop_asset&.edit_and_save
         end
       end
     end

@@ -73,7 +73,9 @@ module Metalware
 
           if data.empty?
             empty_count += 1
-            raise StatusDataIncomplete if empty_count > 100 && @monitor.thread.stop?
+            if empty_count > 100 && @monitor.thread.stop?
+              raise StatusDataIncomplete
+            end
           elsif data['FINISHED'] != true
             display_data data
             empty_count = 0

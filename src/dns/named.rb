@@ -90,6 +90,7 @@ module Metalware
           FilePath.template_path("named/#{direction}", node: alces.domain),
           FilePath.named_zone(zone_name),
           dynamic: dynamic_namespace,
+          comment_char: ';',
           **staging_options
         )
       end
@@ -98,6 +99,7 @@ module Metalware
         {
           mkdir: true,
           service: self.class.name,
+          managed: true,
         }
       end
     end

@@ -1,5 +1,5 @@
-
 inherit_from: .rubocop_todo.yml
+require: rubocop-rspec
 
 AllCops:
   TargetRubyVersion: 2.4
@@ -63,3 +63,40 @@ Naming/HeredocDelimiterNaming:
 Lint/HandleExceptions:
   Exclude:
     - src/status/job.rb
+
+# Quite a few specs are nested 4 deep, however the default is 3
+RSpec/NestedGroups:
+  Max: 4
+
+# The following specs have super long blocks which will not be
+# refactored
+RSpec/ExampleLength:
+  Exclude:
+    - spec/configurator_spec.rb
+    - spec/slow/**/*
+    - spec/integration/**/*
+
+# It isn't feasible to set up spies in the following specs as they
+# are coupled to the original implementation
+RSpec/MessageSpies:
+  Exclude:
+    - spec/configurator_spec.rb
+
+# Requiring that the subject is explicitly named in order to use it
+# doesn't isn't that much clearer IMO.
+RSpec/NamedSubject:
+  Enabled: false
+
+# Allow RSpec to suppress Output using a global variable. It already used a global
+# variable previously and it will not be used in the installed version of
+# Metalware. It is however useful to turn the Output off in the specs
+
+# TODO: Remove spec/commander_extensions_spec.rb from this list eventually
+# It needs to be included here as the array is overridding the todo list
+Style/GlobalVars:
+  Exclude:
+    - spec/commander_extensions_spec.rb
+    - spec/spec_helper.rb
+    - spec/spec_utils.rb
+    - src/output.rb
+

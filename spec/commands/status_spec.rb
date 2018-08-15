@@ -41,7 +41,7 @@ RSpec.describe Metalware::Status::Monitor do
     @nodes = alces.nodes.map(&:name)
     @cmds = [:ping, :power]
     @m_input = { nodes: @nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
-    @monitor = Metalware::Status::Monitor.new(@m_input)
+    @monitor = described_class.new(@m_input)
   end
 
   context 'after the monitor is initialized' do
@@ -69,7 +69,8 @@ RSpec.describe Metalware::Status::Monitor do
     end
 
     it 'start_next_job is ran' do
-      expect(@monitor.instance_variable_get(:@started_jobs)).to eq(@m_input[:thread_limit])
+      expect(@monitor.instance_variable_get(:@started_jobs))
+        .to eq(@m_input[:thread_limit])
     end
 
     it 'adds commands then nodes' do

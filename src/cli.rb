@@ -27,21 +27,22 @@ $LOAD_PATH.unshift File.dirname(__FILE__)
 require 'rubygems'
 require 'bundler/setup'
 require 'commander'
+require 'config'
 require 'colorize'
 
-require 'commander_extensions'
 require 'cli_helper/parser'
 require 'data'
 
 module Metalware
   class Cli
     include Commander::Methods
-    include CommanderExtensions::Delegates
 
     def run
       program :name, 'metal'
       program :version, '2017.2.1'
-      program :description, 'Alces tools for the management and configuration of bare metal machines'
+      program :description, <<-EOF.squish
+        Alces tools for the management and configuration of bare metal machines
+      EOF
 
       suppress_trace_class UserMetalwareError
 
