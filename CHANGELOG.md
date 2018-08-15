@@ -4,23 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-## [2018.3.0-rc3] - 2018-08-13
-
-- Switched `named` and `hosts` files to be rendered as Metalware-managed files
-  (https://github.com/alces-software/metalware/pull/418).
-- Fixed messages not being printed until build script finished in local build
-  (https://github.com/alces-software/metalware/pull/419).
-- Added `eval` command for programmatic access to Metalware namespace
-  (https://github.com/alces-software/metalware/pull/435).
-- Fixed non-Kickstart build methods often not being detected
-  (https://github.com/alces-software/metalware/pull/440).
-
-## [2018.3.0-rc2] - 2018-05-03
-
-- Added more data to asset types
-  (https://github.com/alces-software/metalware/pull/420).
-
-## [2018.3.0-rc1] - 2018-05-02
+## [2018.3.0] - 2018-08-15
 
 - Moved asset types to be stored in Metalware itself rather than the repo being
   used (https://github.com/alces-software/metalware/pull/394).
@@ -36,6 +20,16 @@ All notable changes to this project will be documented in this file.
   (https://github.com/alces-software/metalware/pull/414).
 - Added ability to create an asset from a layout as well as a type
   (https://github.com/alces-software/metalware/pull/415).
+- Added more data to asset types
+  (https://github.com/alces-software/metalware/pull/420).
+- Switched `named` and `hosts` files to be rendered as Metalware-managed files
+  (https://github.com/alces-software/metalware/pull/418).
+- Fixed messages not being printed until build script finished in local build
+  (https://github.com/alces-software/metalware/pull/419).
+- Added `eval` command for programmatic access to Metalware namespace
+  (https://github.com/alces-software/metalware/pull/435).
+- Fixed non-Kickstart build methods often not being detected
+  (https://github.com/alces-software/metalware/pull/440).
 
 ## [2018.2.0] - 2018-04-25
 
