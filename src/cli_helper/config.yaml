@@ -101,6 +101,8 @@ subcommands:
       metalware master node. This must be ran to configure metalware to match
       the system environment. This command is intended to only be ran once.
     action: Commands::Configure::Local
+    options:
+      - *configure_answers_option
 
   layout_add: &layout_add
     syntax: metal layout add TYPE_OR_LAYOUT LAYOUT_NAME [options]
