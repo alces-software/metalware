@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [2018.3.1] - 2018-08-16
+
+- Allow `--answers` option for `metal configure local` command (https://github.com/alces-software/metalware/pull/447)
+
 ## [2018.3.0] - 2018-08-15
 
 - Moved asset types to be stored in Metalware itself rather than the repo being
