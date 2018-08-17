@@ -15,6 +15,8 @@
 3. Appropriately tag this release on GitHub, in the format
    `year.release.patch[-prerelease_marker]` (e.g. `2018.1.0-rc1`).
 
-4. Announce the release at https://alces.slack.com/messages/C5FL99R89/,
+4. Create a release for the tag at https://github.com/alces-software/metalware/releases
+
+5. Announce the release at https://alces.slack.com/messages/C5FL99R89/,
    mentioning what's new in this release (the entries added to the CHANGELOG
    above), or at least where to find this if many things have been added.
