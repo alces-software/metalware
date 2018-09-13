@@ -8,10 +8,12 @@ module Metalware
     module Kickstarts
       class Kickstart < BuildMethod
         def start_hook
+          super
           render_pxelinux(firstboot: true)
         end
 
         def complete_hook
+          super
           render_pxelinux(firstboot: false)
         end
 
