@@ -18,7 +18,16 @@ module Metalware
       end
 
       def start_hook
-        # Runs at the start of the build process
+        # Renders the build hook scripts and runs them
+        regex = File.join(FilePath.build_hooks, '*')
+        Dir.glob(regex).each do |src|
+          rendered_content = Templater.render(node, src)
+          temp_file = Tempfile.new("#{node.name}-#{File.basename(src)}")
+          temp_file.write rendered_content
+          temp_file.close
+          puts SystemCommand.run("bash #{temp_file.path}")
+          temp_file.unlink
+        end
       end
 
       def complete_hook
