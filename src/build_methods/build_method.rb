@@ -20,8 +20,9 @@ module Metalware
       def start_hook
         # Renders the build hook scripts and runs them
         regex = File.join(FilePath.build_hooks, '*')
-        Dir.glob(regex).each do |file|
-          puts file
+        Dir.glob(regex).each do |src|
+          rendered_content = Templater.render(node, src)
+          puts rendered_content
         end
       end
 
