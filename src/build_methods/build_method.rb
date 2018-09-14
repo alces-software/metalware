@@ -18,7 +18,11 @@ module Metalware
       end
 
       def start_hook
-        # Runs at the start of the build process
+        # Renders the build hook scripts and runs them
+        regex = File.join(FilePath.build_hooks, '*')
+        Dir.glob(regex).each do |file|
+          puts file
+        end
       end
 
       def complete_hook
