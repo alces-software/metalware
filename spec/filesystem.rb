@@ -149,21 +149,10 @@ class FileSystem
     with_fixtures(genders_file, at: Metalware::Constants::GENDERS_PATH)
   end
 
-  def with_metal_config_fixture(genders_file)
-    with_fixtures(genders_file, at: Metalware::Constants::DEFAULT_CONFIG_PATH)
-  end
-
   def with_group_cache_fixture(group_cache_file)
     with_fixtures(
       group_cache_file,
       at: Metalware::Constants::GROUP_CACHE_PATH
-    )
-  end
-
-  def with_hunter_cache_fixture(hunter_cache_file)
-    with_fixtures(
-      hunter_cache_file,
-      at: Metalware::Constants::HUNTER_PATH
     )
   end
 

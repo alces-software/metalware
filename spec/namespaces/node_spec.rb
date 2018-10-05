@@ -51,16 +51,6 @@ RSpec.describe Metalware::Namespaces::Node do
 
     let(:node) { described_class.create(alces, node_name) }
 
-    def build_groups_hash(node_array)
-      node_array.each_with_object({}) do |name, memo|
-        memo[name.to_sym] = { name: name }
-      end
-    end
-
-    def return_node_at_runtime
-      node
-    end
-
     ##
     # Mocks the HashMergers
     #

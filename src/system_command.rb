@@ -44,15 +44,6 @@ module Metalware
         end
       end
 
-      def run_raw(command)
-        stdout, stderr, status = capture3(command)
-        {
-          stdout: stdout,
-          stderr: stderr,
-          status: status,
-        }
-      end
-
       def no_capture(command)
         MetalLog.info("SystemCommand: #{command}")
         system(command)

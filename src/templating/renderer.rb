@@ -29,13 +29,6 @@ module Metalware
   module Templating
     module Renderer
       class << self
-        # Replace all ERB in given template, generating the binding to use
-        # from the given parameters.
-        def replace_erb(template, template_parameters)
-          parameters_binding = template_parameters.wrapper_binding
-          replace_erb_with_binding(template, parameters_binding)
-        end
-
         def replace_erb_with_binding(template, parameters_binding)
           render_erb_template(template, parameters_binding)
         end

@@ -36,10 +36,6 @@ module SpecUtils
       mock_validate_genders(example_group, true, '')
     end
 
-    def mock_validate_genders_failure(example_group, nodeattr_error)
-      mock_validate_genders(example_group, false, nodeattr_error)
-    end
-
     def use_mock_genders(example_group, genders_file: 'genders/default')
       genders_path = File.join(FIXTURES_PATH, genders_file)
 

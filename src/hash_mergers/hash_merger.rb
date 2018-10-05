@@ -95,16 +95,6 @@ module Metalware
           combined_config.deep_merge!(config)
         end
       end
-
-      def replace_file_with_same_basename!(files_namespace, file_identifier)
-        files_namespace.reject! { |f| same_basename?(file_identifier, f) }
-        files_namespace << file_identifier
-        files_namespace.sort! # Sort for consistent ordering.
-      end
-
-      def same_basename?(path1, path2)
-        File.basename(path1) == File.basename(path2)
-      end
     end
   end
 end

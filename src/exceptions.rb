@@ -39,7 +39,6 @@ module Metalware
   class StrictWarningError < UserMetalwareError; end
   class InvalidInput < UserMetalwareError; end
   class InvalidConfigParameter < UserMetalwareError; end
-  class UnknownQuestionTypeError < UserMetalwareError; end
   class FileDoesNotExistError < UserMetalwareError; end
   class DataError < UserMetalwareError; end
   class UninitializedLocalNode < UserMetalwareError; end
@@ -118,6 +117,3 @@ end
 # Alias for Exception to use to indicate we want to catch everything, and to
 # also tell Rubocop to be quiet about this.
 IntentionallyCatchAnyException = Exception
-
-class AbortInTestError < StandardError
-end
