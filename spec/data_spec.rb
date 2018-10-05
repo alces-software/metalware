@@ -98,30 +98,6 @@ RSpec.describe Metalware::Data do
     end
   end
 
-  # Closely corresponds to `load` behaviour but for loading from a string
-  # rather than file.
-  describe '#load_string' do
-    it 'loads the data string and recursively converts all keys to symbols' do
-      data = string_keyed_data.to_yaml
-      expect(described_class.load_string(data)).to eq(symbol_keyed_data)
-    end
-
-    it 'returns {} if the data string is empty' do
-      expect(described_class.load_string('')).to eq({})
-    end
-
-    it 'raises if the string contains invalid YAML' do
-      expect do
-        subject.load_string(invalid_yaml)
-      end.to raise_error Psych::SyntaxError
-    end
-
-    it 'raises if loaded file does not contain hash' do
-      data = ['foo', 'bar'].to_yaml
-      expect { subject.load_string(data) }.to raise_error(Metalware::DataError)
-    end
-  end
-
   describe '#dump' do
     it 'dumps the data to the data file with all keys as strings' do
       filesystem.test do

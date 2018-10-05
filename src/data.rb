@@ -40,11 +40,6 @@ module Metalware
         raise e
       end
 
-      def load_string(data_string)
-        data = YAML.load(data_string) || {}
-        process_loaded_data(data, source: data_string)
-      end
-
       def dump(data_file, data)
         raise dump_error(data) unless valid_data?(data)
         yaml = data.deep_transform_keys(&:to_s).to_yaml

@@ -194,14 +194,6 @@ RSpec.describe Metalware::Namespaces::Alces do
       alces.render_erb_template(template)
     end
 
-    def render_node_template
-      render_template('<%= alces.node.class %>')
-    end
-
-    def render_group_template
-      render_template('<%= alces.group.class %>')
-    end
-
     describe '#domain' do
       it 'returns the domain namespace' do
         domain_class = Metalware::Namespaces::Domain.to_s

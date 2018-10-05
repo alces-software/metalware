@@ -47,10 +47,6 @@ module Metalware
 
       private
 
-      def method_builder(data)
-        Methods.new(data)
-      end
-
       class Methods < LoadSaveBase
         def initialize(data)
           @path = FilePath
