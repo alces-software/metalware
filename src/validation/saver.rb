@@ -45,8 +45,6 @@ module Metalware
         end
       end
 
-      private
-
       class Methods < LoadSaveBase
         def initialize(data)
           @path = FilePath
