@@ -68,7 +68,7 @@ RSpec.describe Metalware::Commands::Plugin::Deactivate do
       run_plugin_deactivate(example_plugin_name)
 
       matching_deactivated_plugins = Metalware::Plugins.all.select do |plugin|
-        plugin.deactivated? && plugin.name == example_plugin_name
+        !plugin.activated? && plugin.name == example_plugin_name
       end
       expect(matching_deactivated_plugins.length).to eq 1
     end
