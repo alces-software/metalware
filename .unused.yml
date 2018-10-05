@@ -30,10 +30,17 @@
       allowedTerms:
       - local?
 
+    # Things we want to explicitly not flag up as they may be useful in certain
+    # situations in development even if they're not currently used in any
+    # committed code.
     - name: Miscellaneous other terms
       allowedTerms:
       - MetalBench
       - debug!
+
+    # Things flagged up as unused which are actually used.
+    - name: False positives
+      allowedTerms:
       - body
       - credentials
       - shutdown
