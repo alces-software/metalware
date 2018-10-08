@@ -126,6 +126,20 @@ RSpec.describe Metalware::Namespaces::Node do
       end
     end
 
+    describe '#local?' do
+      context 'with a regular node' do
+        subject { described_class.create(alces, 'node01') }
+
+        it { is_expected.not_to be_local }
+      end
+
+      context "with the 'local' node" do
+        subject { described_class.create(alces, 'local') }
+
+        it { is_expected.to be_local }
+      end
+    end
+
     describe '#build_method' do
       let(:node) { described_class.create(alces, 'node01') }
 
@@ -153,10 +167,6 @@ RSpec.describe Metalware::Namespaces::Node do
           expect do
             node.build_method
           end.to raise_error(Metalware::InvalidLocalBuild)
-        end
-
-        it 'returns false when local? is called' do
-          expect(node.local?).to eq(false)
         end
 
         it 'uses correct build method class when build_method specified as a string' do
@@ -192,10 +202,6 @@ RSpec.describe Metalware::Namespaces::Node do
         # Instead, always force the local node to use the local build
         it 'ignores incorrect config values' do
           local_node_uses_local_build?(:pxelinux)
-        end
-
-        it 'returns true when local? is called' do
-          expect(local.local?).to eq(true)
         end
       end
     end
