@@ -39,10 +39,17 @@ RSpec.describe Metalware::BuildEvent do
     FileUtils.touch path
   end
 
+  def expect_build_method_hook_called_for_node(node, hook:)
+    stub_build_method = stub_build_method_for(node)
+
+    # Assert build method hook called.
+    expect(stub_build_method).to receive(hook).once
+  end
+
   describe '#run_all_complete_hooks' do
     it 'runs the complete hook for each node' do
       alces.nodes.each do |node|
-        expect(node.build_method).to receive(:complete_hook).once
+        expect_build_method_hook_called_for_node(node, hook: :complete_hook)
       end
       build_event.run_all_complete_hooks
       wait_for_hooks_to_run
@@ -52,7 +59,7 @@ RSpec.describe Metalware::BuildEvent do
   describe '#run_start_hooks' do
     it 'runs the start_hook for each node' do
       alces.nodes.each do |node|
-        expect(node.build_method).to receive(:start_hook)
+        expect_build_method_hook_called_for_node(node, hook: :start_hook)
       end
       build_event.run_start_hooks
       wait_for_hooks_to_run
@@ -73,7 +80,7 @@ RSpec.describe Metalware::BuildEvent do
       before { build_node(built_node) }
 
       it 'runs the complete_hook for the node' do
-        expect(built_node.build_method).to receive(:complete_hook)
+        expect_build_method_hook_called_for_node(built_node, hook: :complete_hook)
         process
       end
 
@@ -83,7 +90,7 @@ RSpec.describe Metalware::BuildEvent do
       end
 
       it 'only builds the node once' do
-        expect(built_node.build_method).to receive(:complete_hook).once
+        expect_build_method_hook_called_for_node(built_node, hook: :complete_hook)
         process
         build_node(built_node)
         process
@@ -100,7 +107,7 @@ RSpec.describe Metalware::BuildEvent do
 
       it 'runs all the complete hooks' do
         alces.nodes.each do |node|
-          expect(node.build_method).to receive(:complete_hook)
+          expect_build_method_hook_called_for_node(node, hook: :complete_hook)
         end
         process
       end

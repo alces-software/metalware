@@ -80,6 +80,8 @@ RSpec.describe Metalware::Commands::Build do
   # Mocks the test node
   let(:testnode) { alces.nodes.find_by_name('testnode01') }
 
+  let(:build_method) { stub_build_method_for(testnode) }
+
   AlcesUtils.mock self, :each do
     config(testnode, build_method: :kickstart)
     hexadecimal_ip(testnode)
@@ -92,12 +94,12 @@ RSpec.describe Metalware::Commands::Build do
   context 'when called without group argument' do
     context 'with a node that builds successfully' do
       it 'calls the start_hook' do
-        expect(testnode.build_method).to receive(:start_hook).once
+        expect(build_method).to receive(:start_hook).once
         run_build(testnode, delay_report_built: build_wait_time / 10)
       end
 
       it 'calls the complete_hook' do
-        expect(testnode.build_method).to receive(:complete_hook).once
+        expect(build_method).to receive(:complete_hook).once
         run_build(testnode, delay_report_built: build_wait_time / 10)
       end
     end
@@ -110,12 +112,12 @@ RSpec.describe Metalware::Commands::Build do
       end
 
       it 'calls the start hook' do
-        expect(testnode.build_method).to receive(:start_hook)
+        expect(build_method).to receive(:start_hook).once
         incomplete_build
       end
 
       it 'does not call the complete hook' do
-        expect(testnode.build_method).not_to receive(:complete_hook)
+        expect(build_method).not_to receive(:complete_hook)
         incomplete_build
       end
     end
