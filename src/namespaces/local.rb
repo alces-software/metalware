@@ -26,10 +26,6 @@ module Metalware
       def white_list_for_hasher
         super.push(:build_interface)
       end
-
-      def build_method_class
-        BuildMethods::Local
-      end
     end
   end
 end

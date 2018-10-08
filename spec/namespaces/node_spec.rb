@@ -126,77 +126,17 @@ RSpec.describe Metalware::Namespaces::Node do
       end
     end
 
-    describe '#build_method' do
-      let(:node) { described_class.create(alces, 'node01') }
-
-      def mock_build_method(method, my_node = node)
-        config = OpenStruct.new(build_method: method)
-        allow(my_node).to receive(:config).and_return(config)
-        my_node.instance_variable_set(:@build_method, nil)
-      end
-
+    describe '#local?' do
       context 'with a regular node' do
-        it 'defaults to kickstart if not specified' do
-          mock_build_method(nil)
-          exp = Metalware::BuildMethods::Kickstarts::Pxelinux
-          expect(node.build_method.class).to eq(exp)
-        end
+        subject { described_class.create(alces, 'node01') }
 
-        it 'uses the config value' do
-          mock_build_method(:basic)
-          exp = Metalware::BuildMethods::Basic
-          expect(node.build_method.class).to eq(exp)
-        end
-
-        it 'errors if tries to use local build' do
-          mock_build_method(:local)
-          expect do
-            node.build_method
-          end.to raise_error(Metalware::InvalidLocalBuild)
-        end
-
-        it 'returns false when local? is called' do
-          expect(node.local?).to eq(false)
-        end
-
-        it 'uses correct build method class when build_method specified as a string' do
-          mock_build_method('uefi-kickstart')
-
-          expect(node.build_method.class).to eq(
-            Metalware::BuildMethods::Kickstarts::UEFI
-          )
-        end
+        it { is_expected.not_to be_local }
       end
 
       context "with the 'local' node" do
-        let(:local) do
-          described_class.create(alces, 'local')
-        end
+        subject { described_class.create(alces, 'local') }
 
-        let(:local_build) { Metalware::BuildMethods::Local }
-
-        def local_node_uses_local_build?(config_build_method)
-          mock_build_method(config_build_method, local)
-          expect(local.build_method).to be_a(local_build)
-        end
-
-        it 'returns the local build method if not specified' do
-          local_node_uses_local_build?(nil)
-        end
-
-        it 'returns the local build method if specified' do
-          local_node_uses_local_build?(:local)
-        end
-
-        # Their is no point adding additional ways metalware can fail
-        # Instead, always force the local node to use the local build
-        it 'ignores incorrect config values' do
-          local_node_uses_local_build?(:pxelinux)
-        end
-
-        it 'returns true when local? is called' do
-          expect(local.local?).to eq(true)
-        end
+        it { is_expected.to be_local }
       end
     end
 

@@ -82,7 +82,9 @@ module Metalware
       end
 
       def repo_dependencies
-        nodes.map(&:build_method).reduce([]) do |memo, bm|
+        nodes.map do |node|
+          BuildMethods.build_method_for(node)
+        end.reduce([]) do |memo, bm|
           memo.push(bm.dependency_paths)
         end.flatten.uniq
       end
