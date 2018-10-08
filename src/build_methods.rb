@@ -22,7 +22,7 @@ module Metalware
         case node.config.build_method&.to_sym
         when :local
           raise InvalidLocalBuild,
-            "node '#{name}' can not use the local build method"
+                "node '#{name}' can not use the local build method"
         when :'uefi-kickstart'
           BuildMethods::Kickstarts::UEFI
         when :basic
