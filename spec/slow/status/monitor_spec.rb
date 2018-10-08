@@ -36,7 +36,7 @@ RSpec.describe Metalware::Status::Monitor do
 
   before do
     FileSystem.root_setup(&:with_genders_fixtures)
-    SpecUtils.use_mock_genders(self)
+    use_mock_genders
     @cmds = [:ping, :power]
     @m_input = { nodes: nodes, cmds: @cmds, thread_limit: 10, time_limit: 20 }
     @monitor = described_class.new(@m_input)

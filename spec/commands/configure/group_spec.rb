@@ -49,7 +49,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
   end
 
   before do
-    SpecUtils.mock_validate_genders_success(self)
+    mock_validate_genders_success
   end
 
   it 'creates correct configurator' do

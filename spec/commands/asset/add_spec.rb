@@ -12,7 +12,7 @@ RSpec.describe Metalware::Commands::Asset::Add do
   it_behaves_like 'record add command'
 
   it 'warns if the type does not exist' do
-    SpecUtils.enable_output_to_stderr
+    enable_output_to_stderr
     expect do
       Metalware::Utils.run_command(described_class,
                                    'missing-type',

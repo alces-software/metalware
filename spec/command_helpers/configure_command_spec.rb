@@ -30,8 +30,8 @@ RSpec.describe Metalware::CommandHelpers::ConfigureCommand do
 
   describe 'option handling' do
     before do
-      SpecUtils.use_mock_genders(self)
-      SpecUtils.mock_validate_genders_success(self)
+      use_mock_genders
+      mock_validate_genders_success
     end
 
     it 'passes answers through to configurator as hash' do

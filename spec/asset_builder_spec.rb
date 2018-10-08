@@ -33,7 +33,7 @@ RSpec.describe Metalware::AssetBuilder do
 
   describe '#push_asset' do
     before do
-      SpecUtils.enable_output_to_stderr
+      enable_output_to_stderr
       push_test_asset
     end
 

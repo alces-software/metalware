@@ -86,7 +86,7 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   before do
-    SpecUtils.use_mock_dependency(self)
+    use_mock_dependency
   end
 
   context 'when called without group argument' do

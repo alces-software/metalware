@@ -36,7 +36,7 @@ RSpec.describe Metalware::Commands::Each do
       fs.with_genders_fixtures
       fs.with_clone_fixture('configs/unit-test.yaml')
     end
-    SpecUtils.use_unit_test_config(self)
+    use_unit_test_config
   end
 
   let(:groups) do
