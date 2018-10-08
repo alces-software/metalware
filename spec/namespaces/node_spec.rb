@@ -75,7 +75,7 @@ RSpec.describe Metalware::Namespaces::Node do
         receive(:all_nodes).and_return(node_array)
 
       # Spoofs the hostip
-      SpecUtils.use_mock_determine_hostip_script(self)
+      use_mock_determine_hostip_script
     end
 
     it 'can access the node name' do

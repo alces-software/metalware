@@ -35,7 +35,7 @@ RSpec.describe Metalware::DependencySpecifications do
   let(:alces) { Metalware::Namespaces::Alces.new }
 
   before do
-    SpecUtils.use_mock_genders(self)
+    use_mock_genders
     allow_any_instance_of(Metalware::Namespaces::Node).to \
       receive(:group).and_return(double('group', name: 'testnodes'))
   end

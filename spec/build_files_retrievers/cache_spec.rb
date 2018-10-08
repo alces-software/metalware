@@ -30,7 +30,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
   end
 
   before do
-    SpecUtils.use_mock_determine_hostip_script(self)
+    use_mock_determine_hostip_script
   end
 
   def hash_url(url)
@@ -42,7 +42,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
       FileSystem.root_setup do |fs|
         fs.with_clone_fixture('configs/unit-test.yaml')
       end
-      SpecUtils.use_unit_test_config(self)
+      use_unit_test_config
       allow(Metalware::Input).to receive(:download)
         .and_wrap_original do |_, _, to_path|
         FileUtils.touch(to_path)
@@ -136,7 +136,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
     end
 
     context 'when error retrieving URL file' do
-      let!(:http_error) { SpecUtils.fake_download_error(self) }
+      let!(:http_error) { fake_download_error }
 
       it 'adds error to file entry' do
         retrieved_files = subject.retrieve(test_node)

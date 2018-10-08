@@ -56,6 +56,8 @@ require 'filesystem'
 
 FIXTURES_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 
+require 'spec_utils'
+
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
@@ -155,4 +157,7 @@ RSpec.configure do |config|
   config.after do
     FileSystem.root_file_system_config(reset: true)
   end
+
+  # Make our test helper functions available in all tests.
+  config.include SpecUtils
 end

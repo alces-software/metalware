@@ -12,7 +12,7 @@ RSpec.describe Metalware::Namespaces::Domain do
 
   include_examples Metalware::Namespaces::HashMergerNamespace
 
-  before { SpecUtils.use_mock_determine_hostip_script(self) }
+  before { use_mock_determine_hostip_script }
 
   it 'has a hostip' do
     expect(alces.domain.hostip).to eq('1.2.3.4')

@@ -33,8 +33,8 @@ RSpec.describe Metalware::Commands::Configure::Node do
   end
 
   before do
-    SpecUtils.use_mock_genders(self)
-    SpecUtils.mock_validate_genders_success(self)
+    use_mock_genders
+    mock_validate_genders_success
     allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)
   end
 
