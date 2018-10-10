@@ -190,10 +190,6 @@ RSpec.describe Metalware::Namespaces::Alces do
       allow(alces).to receive(:scope).and_return(scope)
     end
 
-    def render_template(template)
-      alces.render_string(template)
-    end
-
     describe '#domain' do
       it 'returns the domain namespace' do
         domain_class = Metalware::Namespaces::Domain.to_s
