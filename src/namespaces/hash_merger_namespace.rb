@@ -32,6 +32,14 @@ module Metalware
         )
       end
 
+      def render_file(template_path, **dynamic_namespace)
+        alces.render_file(
+          template_path,
+          **additional_dynamic_namespace,
+          **dynamic_namespace
+        )
+      end
+
       private
 
       attr_reader :alces

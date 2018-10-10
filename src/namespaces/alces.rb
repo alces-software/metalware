@@ -74,6 +74,14 @@ module Metalware
         end
       end
 
+      def render_file(template_path, **dynamic_namespace)
+        template = File.read(template_path)
+        render_string(template, dynamic_namespace)
+      rescue StandardError => e
+        msg = "Failed to render template: #{template_path}"
+        raise e, "#{msg}\n#{e}", e.backtrace
+      end
+
       ##
       # shared hash_merger object which contains a file cache
       #

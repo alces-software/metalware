@@ -70,6 +70,42 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
   end
 
+  describe '#render_file' do
+    def write_template(content)
+      template_file = Tempfile.new.tap do |f|
+        f.write(content)
+      end
+
+      template_file.path
+    end
+
+    it 'loads given template file and renders against namespace' do
+      template = write_template('<%= 5 + 5 %>')
+
+      result = alces.render_file(template)
+
+      expect(result).to eq(10)
+    end
+
+    it 'can be passed dynamic namespace to use when rendering' do
+      template = write_template('<%= foo %>')
+
+      result = alces.render_file(template, foo: 'bar')
+
+      expect(result).to eq('bar')
+    end
+
+    it 'includes template path in error if render fails' do
+      template = write_template('<% raise StandardError, "something went wrong" %>')
+
+      expect do
+        alces.render_file(template)
+      end.to raise_error(
+        /Failed to render template: #{template}\nsomething went wrong/
+      )
+    end
+  end
+
   describe '#local' do
     it 'errors if not initialized' do
       allow(alces).to receive(:nodes)
