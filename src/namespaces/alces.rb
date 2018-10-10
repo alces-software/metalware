@@ -67,7 +67,7 @@ module Metalware
         dynamic.node || dynamic.group || domain
       end
 
-      def render_string(template_string, dynamic_namespace = {})
+      def render_string(template_string, **dynamic_namespace)
         run_with_dynamic(dynamic_namespace) do
           Templating::Renderer
             .replace_erb_with_binding(template_string, wrapped_binding)

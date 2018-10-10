@@ -24,11 +24,11 @@ module Metalware
         @answer ||= run_hash_merger(alces.hash_mergers.answer)
       end
 
-      def render_string(template, **user_dynamic_namespace)
+      def render_string(template_string, **dynamic_namespace)
         alces.render_string(
-          template,
+          template_string,
           **additional_dynamic_namespace,
-          **user_dynamic_namespace
+          **dynamic_namespace
         )
       end
 
