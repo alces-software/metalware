@@ -30,24 +30,24 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     it 'can template a simple value' do
-      expect(render_template('<%= alces.testing.key %>')).to eq('value')
+      expect(alces.render_string('<%= alces.testing.key %>')).to eq('value')
     end
 
     it 'can do a single erb replacement' do
-      rendered = render_template('<%= alces.testing.embedded_key %>')
+      rendered = alces.render_string('<%= alces.testing.embedded_key %>')
       expect(rendered).to eq('value')
     end
 
     it 'errors if recursion depth is exceeded' do
       expect do
-        output = render_template('<%= alces.testing.infinite_value1 %>')
+        output = alces.render_string('<%= alces.testing.infinite_value1 %>')
         STDERR.puts "Template output: #{output}"
       end.to raise_error(Metalware::RecursiveConfigDepthExceededError)
     end
 
     it 'evalutes the false string as Falsey' do
       template = '<%= alces.testing.false_key ? "true" : "false" %>'
-      expect(render_template(template)).to eq(false)
+      expect(alces.render_string(template)).to eq(false)
     end
 
     context 'with a delay whilst rendering templates' do
@@ -109,7 +109,7 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     it 'templates against domain if no config is specified' do
-      expect(render_template('<%= config.key %>')).to eq('domain')
+      expect(alces.render_string('<%= config.key %>')).to eq('domain')
     end
   end
 
@@ -131,7 +131,7 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     it 'templates have nil detection' do
-      render_template('<%= domain.config.nil %>')
+      alces.render_string('<%= domain.config.nil %>')
       expect(metal_log).to \
         have_received(:warn).once.with(/.*domain.config.nil\Z/)
     end
@@ -193,26 +193,26 @@ RSpec.describe Metalware::Namespaces::Alces do
     describe '#domain' do
       it 'returns the domain namespace' do
         domain_class = Metalware::Namespaces::Domain.to_s
-        expect(render_template('<%= alces.domain.class %>')).to eq(domain_class)
+        expect(alces.render_string('<%= alces.domain.class %>')).to eq(domain_class)
       end
     end
 
     describe '#local' do
       it 'returns the local node' do
         local_class = Metalware::Namespaces::Local.to_s
-        expect(render_template('<%= alces.local.class %>')).to eq(local_class)
+        expect(alces.render_string('<%= alces.local.class %>')).to eq(local_class)
       end
     end
 
     describe '#config' do
       it 'uses the scope to obtain the config' do
-        expect(render_template('<%= alces.config.test %>')).to eq(scope_str)
+        expect(alces.render_string('<%= alces.config.test %>')).to eq(scope_str)
       end
     end
 
     describe '#answer' do
       it 'uses the scope to obtain the config' do
-        expect(render_template('<%= alces.answer.test %>')).to eq(scope_str)
+        expect(alces.render_string('<%= alces.answer.test %>')).to eq(scope_str)
       end
     end
   end
