@@ -29,13 +29,7 @@ module Metalware
   module Templating
     module Renderer
       class << self
-        def replace_erb_with_binding(template, parameters_binding)
-          render_erb_template(template, parameters_binding)
-        end
-
-        private
-
-        def render_erb_template(template, binding)
+        def replace_erb_with_binding(template, binding)
           # This mode allows templates to prevent inserting a newline for a
           # given line by ending the ERB tag on that line with `-%>`.
           trim_mode = '-'
@@ -49,6 +43,8 @@ module Metalware
             handle_error_rendering_erb(template, error)
           end
         end
+
+        private
 
         def handle_error_rendering_erb(template, error)
           Output.stderr "\nRendering template failed!\n\n"
