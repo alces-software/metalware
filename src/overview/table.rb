@@ -31,7 +31,7 @@ module Metalware
 
       def row(namespace)
         unrendered_values.map do |value|
-          namespace.render_erb_template(value)
+          namespace.render_string(value)
         end
       end
     end

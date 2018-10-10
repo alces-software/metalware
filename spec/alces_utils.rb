@@ -124,7 +124,7 @@ module AlcesUtils
   # The following method(s) will be included with AlcesUtils
   # Use AlcesUtils.start to skip the include but still setup mocking
   def render_template(template)
-    alces.render_erb_template(template)
+    alces.render_string(template)
   end
 
   # The following methods have to be initialized with a individual test

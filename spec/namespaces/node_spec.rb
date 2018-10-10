@@ -46,7 +46,7 @@ RSpec.describe Metalware::Namespaces::Node do
       Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
         key: test_value,
         erb_value1: '<%= alces.node.config.key  %>'
-      ) { |template_string| node.render_erb_template(template_string) }
+      ) { |template_string| node.render_string(template_string) }
     end
 
     let(:node) { described_class.create(alces, node_name) }

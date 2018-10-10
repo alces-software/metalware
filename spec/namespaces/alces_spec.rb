@@ -14,7 +14,7 @@ RSpec.describe Metalware::Namespaces::Alces do
     with_blank_config_and_answer(alces.domain)
   end
 
-  describe '#render_erb_template' do
+  describe '#render_string' do
     AlcesUtils.mock self, :each do
       define_method_testing do
         Metalware::HashMergers::MetalRecursiveOpenStruct.new(
@@ -24,7 +24,7 @@ RSpec.describe Metalware::Namespaces::Alces do
           infinite_value2: '<%= alces.testing.infinite_value1 %>',
           false_key: false
         ) do |template_string|
-          alces.render_erb_template(template_string)
+          alces.render_string(template_string)
         end
       end
     end
@@ -56,7 +56,7 @@ RSpec.describe Metalware::Namespaces::Alces do
 
       def render_delay_template_in_thread
         Thread.new do
-          rendered = alces.render_erb_template(template, key: 'correct')
+          rendered = alces.render_string(template, key: 'correct')
           expect(rendered).to eq('correct')
         end
       end
@@ -64,7 +64,7 @@ RSpec.describe Metalware::Namespaces::Alces do
       it 'preserve the scope when threaded' do
         t = render_delay_template_in_thread
         sleep 0.1
-        alces.render_erb_template(long_sleep, key: 'incorrect scope')
+        alces.render_string(long_sleep, key: 'incorrect scope')
         t.join
       end
     end
@@ -85,19 +85,19 @@ RSpec.describe Metalware::Namespaces::Alces do
   # conversion. Hence why some of the strings have spaces
   describe 'parses the rendered results' do
     it 'converts the true string' do
-      expect(alces.render_erb_template(' true')).to be_a(TrueClass)
+      expect(alces.render_string(' true')).to be_a(TrueClass)
     end
 
     it 'converts the false string' do
-      expect(alces.render_erb_template('false ')).to be_a(FalseClass)
+      expect(alces.render_string('false ')).to be_a(FalseClass)
     end
 
     it 'converts the nil string' do
-      expect(alces.render_erb_template('nil')).to be_a(NilClass)
+      expect(alces.render_string('nil')).to be_a(NilClass)
     end
 
     it 'converts integers' do
-      expect(alces.render_erb_template(' 1234 ')).to eq(1234)
+      expect(alces.render_string(' 1234 ')).to eq(1234)
     end
   end
 
@@ -152,7 +152,7 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     def render_scope_template(**dynamic)
-      alces.render_erb_template(scope_template, **dynamic).constantize
+      alces.render_string(scope_template, **dynamic).constantize
     end
 
     it 'defaults to the Domain namespace' do
@@ -191,7 +191,7 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
 
     def render_template(template)
-      alces.render_erb_template(template)
+      alces.render_string(template)
     end
 
     describe '#domain' do

@@ -38,7 +38,7 @@ module Metalware
       def render(namespace, template, **dynamic_namespace)
         raw_template = File.read(template)
         begin
-          namespace.render_erb_template(raw_template, dynamic_namespace)
+          namespace.render_string(raw_template, dynamic_namespace)
         rescue StandardError => e
           msg = "Failed to render template: #{template}"
           raise e, "#{msg}\n#{e}", e.backtrace

@@ -107,7 +107,7 @@ module Metalware
 
     def render_template(type)
       path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
-      node.render_erb_template(File.read(path))
+      node.render_string(File.read(path))
     end
   end
 end

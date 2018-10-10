@@ -24,8 +24,8 @@ module Metalware
         @answer ||= run_hash_merger(alces.hash_mergers.answer)
       end
 
-      def render_erb_template(template, **user_dynamic_namespace)
-        alces.render_erb_template(
+      def render_string(template, **user_dynamic_namespace)
+        alces.render_string(
           template,
           **additional_dynamic_namespace,
           **user_dynamic_namespace
@@ -50,7 +50,7 @@ module Metalware
 
       def run_hash_merger(hash_obj)
         hash_obj.merge(**hash_merger_input) do |template|
-          render_erb_template(template)
+          render_string(template)
         end
       end
 

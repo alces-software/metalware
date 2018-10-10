@@ -41,7 +41,7 @@ module Metalware
 
       def run
         nodes.each do |node|
-          rendered_cmd = node.render_erb_template(command)
+          rendered_cmd = node.render_string(command)
           opt = {
             out: $stdout.fileno ? $stdout.fileno : 1,
             err: $stderr.fileno ? $stderr.fileno : 2,

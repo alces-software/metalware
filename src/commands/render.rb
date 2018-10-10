@@ -38,7 +38,7 @@ module Metalware
         node = alces.nodes.find_by_name(name)
 
         templater = node ? node : alces
-        puts templater.render_erb_template(template)
+        puts templater.render_string(template)
       end
     end
   end

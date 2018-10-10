@@ -46,7 +46,7 @@ RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
   def build_hash(my_hash)
     Metalware::HashMergers::MetalRecursiveOpenStruct
       .new(my_hash) do |template_string|
-      alces.render_erb_template(template_string)
+      alces.render_string(template_string)
     end
   end
 
