@@ -23,7 +23,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'templater'
 require 'exceptions'
 require 'metal_log'
 require 'file_path'

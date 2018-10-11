@@ -121,12 +121,6 @@ module AlcesUtils
     end
   end
 
-  # The following method(s) will be included with AlcesUtils
-  # Use AlcesUtils.start to skip the include but still setup mocking
-  def render_template(template)
-    alces.render_erb_template(template)
-  end
-
   # The following methods have to be initialized with a individual test
   # Example, when using: 'before { AlcesUtils::Mock.new(self) }'
   class Mock

@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'staging'
-require 'keyword_struct'
 
 module Metalware
   module BuildMethods
@@ -21,7 +20,7 @@ module Metalware
         # Renders the build hook scripts and runs them
         regex = File.join(FilePath.build_hooks, '*')
         Dir.glob(regex).each do |src|
-          rendered_content = Templater.render(node, src)
+          rendered_content = node.render_file(src)
           temp_file = Tempfile.new("#{node.name}-#{File.basename(src)}")
           temp_file.write rendered_content
           temp_file.close
@@ -53,9 +52,10 @@ module Metalware
       end
 
       def render_build_files_to_staging(templater)
-        BuildFilesRenderer.new(templater: templater, namespace: node).render
+        renderer = BuildFilesRenderer.new(templater)
+        renderer.render_namespace_files(node)
         node.plugins.map do |plugin|
-          BuildFilesRenderer.new(templater: templater, namespace: plugin).render
+          renderer.render_namespace_files(plugin)
         end
       end
 
@@ -65,8 +65,8 @@ module Metalware
         templater.render(node, template_type_path, sync)
       end
 
-      BuildFilesRenderer = KeywordStruct.new(:templater, :namespace) do
-        def render
+      BuildFilesRenderer = Struct.new(:templater) do
+        def render_namespace_files(namespace)
           namespace.files.each_value do |files|
             files.select { |file| file[:error].nil? }.map do |file|
               templater.render(

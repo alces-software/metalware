@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'templater'
 require 'namespaces/alces'
 
 module Metalware
@@ -34,11 +33,10 @@ module Metalware
       def run
         template_path, name = args
 
-        template = File.read(template_path)
         node = alces.nodes.find_by_name(name)
 
         templater = node ? node : alces
-        puts templater.render_erb_template(template)
+        puts templater.render_file(template_path)
       end
     end
   end

@@ -69,7 +69,7 @@ module Metalware
         Constants::HASH_MERGER_DATA_STRUCTURE.new(
           build_file_hashes
         ) do |template|
-          render_erb_template(template)
+          render_string(template)
         end
       end
 

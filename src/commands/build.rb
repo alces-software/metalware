@@ -25,7 +25,6 @@
 require 'active_support/core_ext/string/strip'
 
 require 'command_helpers/base_command'
-require 'templater'
 require 'constants'
 require 'output'
 require 'exceptions'

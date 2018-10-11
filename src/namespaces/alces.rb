@@ -67,11 +67,19 @@ module Metalware
         dynamic.node || dynamic.group || domain
       end
 
-      def render_erb_template(template_string, dynamic_namespace = {})
+      def render_string(template_string, **dynamic_namespace)
         run_with_dynamic(dynamic_namespace) do
           Templating::Renderer
             .replace_erb_with_binding(template_string, wrapped_binding)
         end
+      end
+
+      def render_file(template_path, **dynamic_namespace)
+        template = File.read(template_path)
+        render_string(template, dynamic_namespace)
+      rescue StandardError => e
+        msg = "Failed to render template: #{template_path}"
+        raise e, "#{msg}\n#{e}", e.backtrace
       end
 
       ##
@@ -111,7 +119,7 @@ module Metalware
 
       def dynamic_hash(namespace)
         Constants::HASH_MERGER_DATA_STRUCTURE.new(namespace) do |template|
-          alces.render_erb_template(template)
+          alces.render_string(template)
         end
       end
 
