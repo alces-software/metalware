@@ -20,7 +20,7 @@ module Metalware
         # Renders the build hook scripts and runs them
         regex = File.join(FilePath.build_hooks, '*')
         Dir.glob(regex).each do |src|
-          rendered_content = Templater.render(node, src)
+          rendered_content = node.render_file(src)
           temp_file = Tempfile.new("#{node.name}-#{File.basename(src)}")
           temp_file.write rendered_content
           temp_file.close

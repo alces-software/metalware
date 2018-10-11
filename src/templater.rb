@@ -34,18 +34,6 @@ require 'staging'
 
 module Metalware
   class Templater
-    class << self
-      def render(namespace, template, **dynamic_namespace)
-        raw_template = File.read(template)
-        begin
-          namespace.render_string(raw_template, dynamic_namespace)
-        rescue StandardError => e
-          msg = "Failed to render template: #{template}"
-          raise e, "#{msg}\n#{e}", e.backtrace
-        end
-      end
-    end
-
     def initialize(staging)
       @staging = staging
     end
@@ -57,7 +45,7 @@ module Metalware
       dynamic: {},
       **staging_options
     )
-      rendered = self.class.render(namespace, template, dynamic)
+      rendered = namespace.render_file(template, **dynamic)
       staging.push_file(sync_location, rendered, **staging_options)
     end
 

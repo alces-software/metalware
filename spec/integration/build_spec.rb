@@ -177,8 +177,7 @@ RSpec.describe Metalware::Commands::Build do
           File.join(TEST_PXELINUX_DIR, 'testnode01_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(
-            alces,
+          alces.render_file(
             PXELINUX_TEMPLATE,
             nodename: 'testnode01',
             firstboot: false
@@ -191,8 +190,7 @@ RSpec.describe Metalware::Commands::Build do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(
-            alces,
+          alces.render_file(
             PXELINUX_TEMPLATE,
             nodename: 'testnode02',
             firstboot: false
@@ -205,8 +203,7 @@ RSpec.describe Metalware::Commands::Build do
           File.join(TEST_PXELINUX_DIR, 'testnode02_HEX_IP')
         )
         expect(testnode01_pxelinux).to eq(
-          Metalware::Templater.render(
-            alces,
+          alces.render_file(
             PXELINUX_TEMPLATE,
             nodename: 'testnode02',
             firstboot: true
