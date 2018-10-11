@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'templater'
 require 'namespaces/alces'
 
 module Metalware

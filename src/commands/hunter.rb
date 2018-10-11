@@ -28,7 +28,6 @@ require 'net/dhcp'
 require 'pcap'
 require 'concurrent'
 
-require 'templater'
 require 'output'
 require 'constants'
 # require 'alces/stack/log'

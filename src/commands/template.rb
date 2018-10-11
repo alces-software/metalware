@@ -24,7 +24,6 @@
 
 require 'command_helpers/base_command'
 require 'command_helpers/node_identifier'
-require 'templater'
 require 'dns'
 require 'render_methods'
 

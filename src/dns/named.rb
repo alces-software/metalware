@@ -26,7 +26,6 @@
 require 'validation/loader'
 require 'pathname'
 require 'system_command'
-require 'templater'
 require 'exceptions'
 require 'metal_log'
 
