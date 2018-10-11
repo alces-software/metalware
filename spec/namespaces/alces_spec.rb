@@ -307,7 +307,7 @@ RSpec.describe Metalware::Namespaces::Alces do
   # Keeping these in a separate `describe` for now to avoid
   # conflicts/interactions with the above, and since we may just end up
   # deleting/refactoring these away at some point.
-  context 'old Templater tests' do
+  describe 'old Templater tests' do
     include AlcesUtils
 
     let(:filesystem) do
