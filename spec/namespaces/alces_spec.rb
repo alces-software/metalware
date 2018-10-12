@@ -149,14 +149,6 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
   end
 
-  describe '#hunter' do
-    context 'when no hunter cache file present' do
-      it 'loads a empty Hashie' do
-        expect(alces.hunter.to_h).to eq(Hashie::Mash.new)
-      end
-    end
-  end
-
   describe '#data' do
     it 'provides access to data in corresponding data directory file' do
       data_file_path = Metalware::FilePath.namespace_data_file('mydata')

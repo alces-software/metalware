@@ -39,21 +39,6 @@ module Metalware
           end
         end
 
-        def hunter
-          @hunter ||= begin
-            if File.exist? Constants::HUNTER_PATH
-              Hashie::Mash.load(Constants::HUNTER_PATH)
-            else
-              warning = \
-                "#{Constants::HUNTER_PATH} does not exist; need to run " \
-                "'metal hunter' first. Falling back to empty hash for" \
-                'alces.hunter.'
-              MetalLog.warn warning
-              Hashie::Mash.new
-            end
-          end
-        end
-
         def data
           DataFileNamespace.new
         end
