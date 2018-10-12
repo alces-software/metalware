@@ -95,6 +95,13 @@ module Metalware
             if respond_to?(message)
               Hashie::Mash.load(data_file_path)
             else
+              # Normally `method_missing` should call `super` if it doesn't
+              # `respond_to?` a message. In this case this is a namespace
+              # designed to be used by users writing templates, so give them an
+              # informative error message for what they've probably missed
+              # instead. This does mean though that we could get a confusing
+              # error message if something else goes wrong in this class, so I
+              # could eventually come to regret this.
               raise UserMetalwareError,
                 "Requested data file doesn't exist: #{data_file_path}"
             end
