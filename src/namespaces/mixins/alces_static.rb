@@ -103,11 +103,11 @@ module Metalware
               # error message if something else goes wrong in this class, so I
               # could eventually come to regret this.
               raise UserMetalwareError,
-                "Requested data file doesn't exist: #{data_file_path}"
+                    "Requested data file doesn't exist: #{data_file_path}"
             end
           end
 
-          def respond_to?(message)
+          def respond_to_missing?(message, _include_all = false)
             data_file_path = namespace_data_file(message)
             File.exist?(data_file_path)
           end
