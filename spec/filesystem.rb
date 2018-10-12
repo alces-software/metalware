@@ -197,6 +197,7 @@ class FileSystem
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
       '/var/lib/metalware/assets',
+      '/var/lib/metalware/data',
       '/var/named',
       '/var/log/metalware',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),

@@ -175,6 +175,13 @@ module Metalware
         File.join(metalware_data, 'build_hooks')
       end
 
+      def namespace_data_file(name)
+        File.join(
+          Constants::NAMESPACE_DATA_PATH,
+          "#{name}.yaml"
+        )
+      end
+
       private
 
       def record(record_dir, types_dir, name)

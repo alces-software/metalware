@@ -85,6 +85,7 @@ mkdir -p /var/lib/metalware/plugins
 mkdir -p /var/lib/metalware/answers/{groups,nodes}
 mkdir -p /var/lib/metalware/assets
 mkdir -p /var/lib/metalware/build_hooks
+mkdir -p /var/lib/metalware/data
 mkdir -p /etc/named
 touch /etc/named/metalware.conf
 chmod a+rw /var/lib/metalware/events

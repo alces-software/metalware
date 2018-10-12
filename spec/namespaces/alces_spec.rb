@@ -149,11 +149,33 @@ RSpec.describe Metalware::Namespaces::Alces do
     end
   end
 
-  describe '#hunter' do
-    context 'when no hunter cache file present' do
-      it 'loads a empty Hashie' do
-        expect(alces.hunter.to_h).to eq(Hashie::Mash.new)
-      end
+  describe '#data' do
+    it 'provides access to data in corresponding data directory file' do
+      data_file_path = Metalware::FilePath.namespace_data_file('mydata')
+      Metalware::Data.dump(data_file_path, foo: { bar: 'baz' })
+
+      expect(alces.data.mydata.foo.bar).to eq('baz')
+      expect(alces.data.mydata.non_existent).to be nil
+      expect(alces.data.mydata).to be_a(Hashie::Mash)
+    end
+
+    it 'gives useful error when try to access data for non-existent file' do
+      data_file_path = Metalware::FilePath.namespace_data_file('non_existent')
+
+      expect do
+        alces.data.non_existent.foo
+      end.to raise_error(
+        Metalware::UserMetalwareError,
+        "Requested data file doesn't exist: #{data_file_path}"
+      )
+    end
+
+    it 'appropriately handles respond_to? as whether data file exists' do
+      existent_path = Metalware::FilePath.namespace_data_file('existent')
+      FileUtils.touch(existent_path)
+
+      expect(alces.data).to respond_to(:existent)
+      expect(alces.data).not_to respond_to(:non_existent)
     end
   end
 
