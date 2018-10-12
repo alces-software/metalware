@@ -54,6 +54,10 @@ module Metalware
           end
         end
 
+        def data
+          DataFileNamespace.new
+        end
+
         LOCAL_ERROR = <<-EOF.strip_heredoc
           The local node has not been configured
           Please run: `metal configure local`
@@ -96,6 +100,25 @@ module Metalware
 
         def loader
           @loader ||= Validation::Loader.new
+        end
+
+        class DataFileNamespace
+          delegate :namespace_data_file, to: FilePath
+
+          def method_missing(message, *_args)
+            data_file_path = namespace_data_file(message)
+            if respond_to?(message)
+              Hashie::Mash.load(data_file_path)
+            else
+              raise UserMetalwareError,
+                "Requested data file doesn't exist: #{data_file_path}"
+            end
+          end
+
+          def respond_to?(message)
+            data_file_path = namespace_data_file(message)
+            File.exist?(data_file_path)
+          end
         end
       end
     end
