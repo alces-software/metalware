@@ -26,8 +26,7 @@ detect_pdsh() {
 fetch_pdsh() {
     title "Fetching pdsh"
     if [ "$dep_source" == "fresh" ]; then
-        # XXX No longer works as Google Code has shut down :(.
-        fetch_source "https://pdsh.googlecode.com/files/pdsh-2.29.tar.bz2" "pdsh-source.tar.bz2"
+        fetch_source "https://github.com/chaos/pdsh/archive/pdsh-2.29.tar.gz" "pdsh-source.tar.gz"
     else
         fetch_dist pdsh
     fi
@@ -37,7 +36,7 @@ install_pdsh() {
     title "Installing pdsh"
     if [ "$dep_source" == "fresh" ]; then
         doing 'Extract'
-        tar -C "${dep_build}" -xjf "${dep_src}/pdsh-source.tar.bz2"
+        tar -C "${dep_build}" -xzf "${dep_src}/pdsh-source.tar.gz"
         say_done $?
 
         cd "${dep_build}"/pdsh-*
