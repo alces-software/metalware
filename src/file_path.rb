@@ -176,6 +176,10 @@ module Metalware
         File.join(cache, 'templates', name)
       end
 
+      def build_hooks
+        File.join(metalware_data, 'build_hooks')
+      end
+
       private
 
       def record(record_dir, types_dir, name)
