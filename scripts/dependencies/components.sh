@@ -24,10 +24,13 @@ detect_components() {
 }
 
 fetch_components() {
-    if [ "$dep_source" == "dist" ]; then
-        title "Fetching Ruby components"
-        fetch_dist 'components'
-    fi
+    # XXX Disabled as never going to be used anyway given always installing
+    # fresh gems at the moment.
+    # if [ "$dep_source" == "dist" ]; then
+    #     title "Fetching Ruby components"
+    #     fetch_dist 'components'
+    # fi
+    :
 }
 
 install_components() {
