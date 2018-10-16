@@ -41,7 +41,7 @@ source $source/scripts/lib/install.functions.sh
 # tar -C /opt/metalware -cvzf libyaml.tar.gz opt/lib
 # tar -C /opt/metalware -cvzf pdsh.tar.gz opt/pdsh
 # ```
-deps="libyaml ruby bundler genders pdsh components"
+deps="libyaml ruby bundler genders pdsh components underware"
 
 if [ -z "$2" ]; then
   echo "$0: invalid parameters"
@@ -58,6 +58,11 @@ else
   os="$1"
   dep_source="$2"
 fi
+
+# Re-export these with same names as in `scripts/bootstrap`, so can be referred
+# to by dependency install functions.
+export alces_OS="$os"
+export alces_SOURCE="$dep_source"
 
 cat <<EOF
 [33m===============================================================================
