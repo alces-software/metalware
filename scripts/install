@@ -61,7 +61,7 @@ fi
 
 cat <<EOF
 [33m===============================================================================
- STARTING INSTALLATION
+ STARTING METALWARE INSTALLATION
 ===============================================================================[0m
 EOF
 
@@ -155,7 +155,7 @@ install_certs &> "${dep_logs}/install.log"
 cat <<EOF
 [33m
 ===============================================================================
- INSTALLATION COMPLETE
+ METALWARE INSTALLATION COMPLETE
 ===============================================================================
 [0m[1m
 Global profile scripts have been installed in:
