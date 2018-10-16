@@ -112,8 +112,8 @@ module Metalware
   class SaverNoData < MetalwareError
     def initialize(msg = 'No data provided to Validation::Saver'); end
   end
-end
 
-# Alias for Exception to use to indicate we want to catch everything, and to
-# also tell Rubocop to be quiet about this.
-IntentionallyCatchAnyException = Exception
+  # Alias for Exception to use to indicate we want to catch everything, and to
+  # also tell Rubocop to be quiet about this.
+  IntentionallyCatchAnyException = Exception
+end
