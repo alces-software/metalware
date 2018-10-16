@@ -27,6 +27,20 @@ source $source/scripts/lib/ui.functions.sh
 source $source/scripts/lib/fetch.functions.sh
 source $source/scripts/lib/install.functions.sh
 
+# Note: on a `fresh` install dependencies will be retrieved and built from
+# scratch; on a `dist` install they will (mostly) be retrieved pre-built from
+# `$dist_url` above.
+#
+# Given a working `fresh` installation, the pre-built dependencies needed for a
+# `dist` installation can be packaged using commands like the following, after
+# which they should be uploaded to `$dist_url/$os/$package`:
+#
+# ```
+# tar -C /opt/metalware -cvzf genders.tar.gz opt/genders
+# tar -C /opt/metalware -cvzf ruby-2.4.1.tar.gz opt/ruby
+# tar -C /opt/metalware -cvzf libyaml.tar.gz opt/lib
+# tar -C /opt/metalware -cvzf pdsh.tar.gz opt/pdsh
+# ```
 deps="libyaml ruby bundler genders pdsh components"
 
 if [ -z "$2" ]; then
