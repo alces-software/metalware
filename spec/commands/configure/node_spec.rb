@@ -12,7 +12,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
     )
   end
 
-  let(:initial_alces) { Metalware::Namespaces::Alces.new }
+  let(:initial_alces) { Underware::Namespaces::Alces.new }
   let(:alces) do
     allow(initial_alces).to receive(:groups).and_return(
       double('groups', testnodes: test_group)
@@ -21,7 +21,7 @@ RSpec.describe Metalware::Commands::Configure::Node do
   end
 
   let(:test_group) do
-    Metalware::Namespaces::Group.new(initial_alces, 'testnodes', index: 1)
+    Underware::Namespaces::Group.new(initial_alces, 'testnodes', index: 1)
   end
 
   let(:filesystem) do
@@ -35,13 +35,13 @@ RSpec.describe Metalware::Commands::Configure::Node do
   before do
     use_mock_genders
     mock_validate_genders_success
-    allow(Metalware::Namespaces::Alces).to receive(:new).and_return(alces)
+    allow(Underware::Namespaces::Alces).to receive(:new).and_return(alces)
   end
 
   it 'creates correct configurator' do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
-        instance_of(Metalware::Namespaces::Alces),
+        instance_of(Underware::Namespaces::Alces),
         questions_section: :node,
         name: 'testnode01'
       ).and_call_original

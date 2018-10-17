@@ -25,18 +25,18 @@
 
 require 'spec_utils'
 require 'dependency_specifications'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
 RSpec.describe Metalware::DependencySpecifications do
   subject do
     described_class.new(alces)
   end
 
-  let(:alces) { Metalware::Namespaces::Alces.new }
+  let(:alces) { Underware::Namespaces::Alces.new }
 
   before do
     use_mock_genders
-    allow_any_instance_of(Metalware::Namespaces::Node).to \
+    allow_any_instance_of(Underware::Namespaces::Node).to \
       receive(:group).and_return(double('group', name: 'testnodes'))
   end
 

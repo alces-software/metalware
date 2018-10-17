@@ -4,7 +4,7 @@ require 'alces_utils'
 
 RSpec.describe Metalware::BuildMethods do
   describe '.build_method_for' do
-    let :alces { Metalware::Namespaces::Alces.new }
+    let :alces { Underware::Namespaces::Alces.new }
 
     def build_method_for(node)
       described_class.build_method_for(node)
@@ -12,7 +12,7 @@ RSpec.describe Metalware::BuildMethods do
 
     context 'when passed Local node namespace' do
       it 'gives `Local` build method for node' do
-        local = Metalware::Namespaces::Node.create(alces, 'local')
+        local = Underware::Namespaces::Node.create(alces, 'local')
 
         build_method = build_method_for(local)
 
@@ -22,7 +22,7 @@ RSpec.describe Metalware::BuildMethods do
     end
 
     context 'when passed non-Local node namespace' do
-      let :node { Metalware::Namespaces::Node.create(alces, 'somenode') }
+      let :node { Underware::Namespaces::Node.create(alces, 'somenode') }
       let :build_method { build_method_for(node) }
 
       def mock_node_config(mock_config)

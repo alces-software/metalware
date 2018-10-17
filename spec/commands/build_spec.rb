@@ -55,7 +55,7 @@ RSpec.describe Metalware::Commands::Build do
       # Allows the build to report finished after a set delay
       if delay_report_built
         sleep delay_report_built
-        if node_group.is_a?(Metalware::Namespaces::Node)
+        if node_group.is_a?(Underware::Namespaces::Node)
           [node_group]
         else
           node_group.nodes

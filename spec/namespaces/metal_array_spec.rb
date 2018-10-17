@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'constants'
 require 'underware/nodeattr_interface'
 
@@ -10,8 +10,8 @@ require 'underware/nodeattr_interface'
 # However it is the behaviour of alces.nodes that needs to
 # be ensured.
 #
-RSpec.describe Metalware::Namespaces::MetalArray do
-  let(:alces) { Metalware::Namespaces::Alces.new }
+RSpec.describe Underware::Namespaces::MetalArray do
+  let(:alces) { Underware::Namespaces::Alces.new }
 
   let(:node_names) { ['node1', 'node2', 'node3'] }
 

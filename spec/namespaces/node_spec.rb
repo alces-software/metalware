@@ -3,13 +3,13 @@
 
 require 'shared_examples/hash_merger_namespace'
 
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'constants'
 require 'hash_mergers'
 require 'recursive_open_struct'
 require 'spec_utils'
 
-RSpec.describe Metalware::Namespaces::Node do
+RSpec.describe Underware::Namespaces::Node do
   context 'with AlcesUtils' do
     include AlcesUtils
 
@@ -20,16 +20,16 @@ RSpec.describe Metalware::Namespaces::Node do
 
     subject { alces.nodes.first }
 
-    include_examples Metalware::Namespaces::HashMergerNamespace
+    include_examples Underware::Namespaces::HashMergerNamespace
   end
 
   context 'without AlcesUtils' do
     let(:alces) do
-      a = Metalware::Namespaces::Alces.new
+      a = Underware::Namespaces::Alces.new
       allow(a).to receive(:groups).and_return(
-        Metalware::Namespaces::MetalArray.new(
+        Underware::Namespaces::MetalArray.new(
           [
-            Metalware::Namespaces::Group
+            Underware::Namespaces::Group
               .new(a, 'primary_group', index: primary_group_index),
           ]
         )
@@ -170,7 +170,7 @@ RSpec.describe Metalware::Namespaces::Node do
   # Test `#plugins` without the rampant mocking above.
   describe '#plugins' do
     let(:node) { described_class.create(alces, 'node01') }
-    let(:alces) { Metalware::Namespaces::Alces.new }
+    let(:alces) { Underware::Namespaces::Alces.new }
 
     # XXX Need to handle situation of plugin being enabled for node but not
     # available globally?
@@ -235,7 +235,7 @@ RSpec.describe Metalware::Namespaces::Node do
     it 'uses plugin namespace for each enabled plugin' do
       first_plugin = node.plugins.first
 
-      expect(first_plugin).to be_a(Metalware::Namespaces::Plugin)
+      expect(first_plugin).to be_a(Underware::Namespaces::Plugin)
     end
 
     it 'provides access to plugin namespaces by plugin name' do

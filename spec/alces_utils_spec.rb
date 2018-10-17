@@ -11,7 +11,7 @@ RSpec.describe AlcesUtils do
 
   describe '#new' do
     it 'returns the mocked alces' do
-      new_alces = Metalware::Namespaces::Alces.new
+      new_alces = Underware::Namespaces::Alces.new
       expect(alces.equal?(new_alces)).to eq(true)
     end
   end
@@ -33,7 +33,7 @@ RSpec.describe AlcesUtils do
 
     it 'only has the local node by default' do
       expect(alces.nodes.length).to eq(1)
-      expect(alces.nodes[0]).to be_a(Metalware::Namespaces::Local)
+      expect(alces.nodes[0]).to be_a(Underware::Namespaces::Local)
     end
 
     context 'with a block before each test' do
@@ -218,7 +218,7 @@ RSpec.describe AlcesUtils do
       end
 
       it 'sets the Alces.new method to return the new alces object' do
-        new_alces = Metalware::Namespaces::Alces.new
+        new_alces = Underware::Namespaces::Alces.new
         expect(new_alces).to eq(alces)
       end
 

@@ -22,14 +22,6 @@
       pathStartsWith: src/configurator
       termStartsWith: ask_
 
-    # Methods may be defined in namespaces and never used elsewhere in
-    # Metalware, as we just want them to be available when the namespace is
-    # used as a binding when rendering templates.
-    - name: Namespace methods
-      pathStartsWith: src/namespaces
-      allowedTerms:
-      - local?
-
     - name: Miscellaneous other terms
       allowedTerms:
       - MetalBench

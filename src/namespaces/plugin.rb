@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'namespaces/hash_merger_namespace'
+require 'underware/namespaces/hash_merger_namespace'
 
 # A Plugin namespace contains the values configured for a particular plugin for
 # a particular node.

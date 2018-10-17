@@ -3,7 +3,7 @@
 
 require 'hash_mergers'
 require 'filesystem'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'alces_utils'
 
 module Metalware
@@ -22,7 +22,7 @@ end
 
 RSpec.describe Metalware::HashMergers::MetalRecursiveOpenStruct do
   let(:alces) do
-    namespace = Metalware::Namespaces::Alces.new
+    namespace = Underware::Namespaces::Alces.new
     allow(namespace).to receive(:testing).and_return(build_default_hash)
     namespace
   end

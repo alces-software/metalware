@@ -28,7 +28,7 @@ require 'exceptions'
 require 'dependency_specifications'
 require 'validation/loader'
 require 'file_path'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
 module Metalware
   module CommandHelpers

@@ -22,7 +22,7 @@ RSpec.describe Metalware::Commands::Configure::Domain do
   it 'creates correct configurator' do
     filesystem.test do
       expect(Metalware::Configurator).to receive(:new).with(
-        instance_of(Metalware::Namespaces::Alces),
+        instance_of(Underware::Namespaces::Alces),
         questions_section: :domain
       ).and_call_original
 

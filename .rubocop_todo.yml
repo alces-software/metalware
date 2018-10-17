@@ -139,7 +139,6 @@ RSpec/VerifiedDoubles:
     - 'spec/commands/configure/node_spec.rb'
     - 'spec/commands/each_spec.rb'
     - 'spec/dependency_specifications_spec.rb'
-    - 'spec/namespaces/mixins/white_list_hasher_spec.rb'
     - 'spec/templating/nil_detection_wrapper_spec.rb'
 
 # Offense count: 2
@@ -173,7 +172,6 @@ Style/IfUnlessModifier:
     - 'src/commands/console.rb'
     - 'src/commands/repo/update.rb'
     - 'src/commands/status.rb'
-    - 'src/namespaces/mixins/alces_static.rb'
     - 'src/templater.rb'
 
 # Offense count: 3

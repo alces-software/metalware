@@ -26,7 +26,7 @@ require 'commands/each'
 require 'spec_utils'
 require 'ostruct'
 require 'hash_mergers'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
 RSpec.describe Metalware::Commands::Each do
   include AlcesUtils
@@ -40,8 +40,8 @@ RSpec.describe Metalware::Commands::Each do
   end
 
   let(:groups) do
-    g = Metalware::Namespaces::Group.new(alces, 'nodes', index: 1)
-    Metalware::Namespaces::MetalArray.new([g])
+    g = Underware::Namespaces::Group.new(alces, 'nodes', index: 1)
+    Underware::Namespaces::MetalArray.new([g])
   end
 
   # Spoofs the nodes group

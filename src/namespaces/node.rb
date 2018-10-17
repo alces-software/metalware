@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'build_methods'
-require 'namespaces/plugin'
+require 'underware/namespaces/plugin'
 
 module Metalware
   module Namespaces

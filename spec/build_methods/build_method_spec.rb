@@ -33,8 +33,8 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     TestBuildMethod.new(node)
   end
 
-  let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
-  let(:alces) { Metalware::Namespaces::Alces.new }
+  let(:node) { Underware::Namespaces::Node.create(alces, 'node01') }
+  let(:alces) { Underware::Namespaces::Alces.new }
   let(:templater) do
     Metalware::Staging.template
   end
@@ -84,7 +84,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     it 'renders plugin build files to staging' do
       mock_plugin = OpenStruct.new
       plugin_namespace =
-        Metalware::Namespaces::Plugin.new(mock_plugin, node: node)
+        Underware::Namespaces::Plugin.new(mock_plugin, node: node)
       allow(node).to receive(:plugins).and_return([plugin_namespace])
       allow(plugin_namespace).to receive(:files).and_return(mock_files)
 

@@ -187,7 +187,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
         files: { some_section: [plugin_file_path] }
       )
 
-      plugin_namespace = Metalware::Namespaces::Plugin
+      plugin_namespace = Underware::Namespaces::Plugin
                          .new(plugin, node: test_node)
       retrieved_files = subject.retrieve(plugin_namespace)
 

@@ -2,10 +2,10 @@
 # frozen_string_literal: true
 
 require 'shared_examples/hash_merger_namespace'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'spec_utils'
 
-RSpec.describe Metalware::Namespaces::Group do
+RSpec.describe Underware::Namespaces::Group do
   include AlcesUtils
 
   context 'with mocked group' do
@@ -18,7 +18,7 @@ RSpec.describe Metalware::Namespaces::Group do
       mock_node('random_node', test_group)
     end
 
-    include_examples Metalware::Namespaces::HashMergerNamespace
+    include_examples Underware::Namespaces::HashMergerNamespace
   end
 
   context 'with a mocked genders file' do

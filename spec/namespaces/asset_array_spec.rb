@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 require 'alces_utils'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
-RSpec.describe Metalware::Namespaces::AssetArray do
+RSpec.describe Underware::Namespaces::AssetArray do
   subject { described_class.new(alces) }
 
   # DO NOT use AlcesUtils in the section. It tests features required
   # by the namespace itself.
-  let(:alces) { Metalware::Namespaces::Alces.new }
+  let(:alces) { Underware::Namespaces::Alces.new }
   let(:pdu_assets) do
     [
       {
@@ -89,7 +89,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       let(:loaders) do
         asset_names.map do |name|
           path = Metalware::FilePath.asset(type.pluralize, name)
-          Metalware::Namespaces::AssetArray::AssetLoader.new(alces, path)
+          Underware::Namespaces::AssetArray::AssetLoader.new(alces, path)
         end
       end
       let!(:dir) { class_spy(Dir).as_stubbed_const }

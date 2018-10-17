@@ -38,11 +38,11 @@ RSpec.describe Metalware::HashMergers::Answer do
 
   def answers(namespace)
     case namespace
-    when Metalware::Namespaces::Domain
+    when Underware::Namespaces::Domain
       'domain_answer'
-    when Metalware::Namespaces::Group
+    when Underware::Namespaces::Group
       'group_answer'
-    when Metalware::Namespaces::Node
+    when Underware::Namespaces::Node
       'node_answer'
     else
       raise 'unexpected error'

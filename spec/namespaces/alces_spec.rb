@@ -1,11 +1,11 @@
 
 # frozen_string_literal: true
 
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'hash_mergers'
 require 'alces_utils'
 
-RSpec.describe Metalware::Namespaces::Alces do
+RSpec.describe Underware::Namespaces::Alces do
   # TODO: The Alces class should not be tested with AlcesUtils
   # Remove AlcesUtils and mock the configs blank manually
   include AlcesUtils
@@ -109,7 +109,7 @@ RSpec.describe Metalware::Namespaces::Alces do
   describe '#local' do
     it 'errors if not initialized' do
       allow(alces).to receive(:nodes)
-        .and_return(Metalware::Namespaces::MetalArray.new([]))
+        .and_return(Underware::Namespaces::MetalArray.new([]))
 
       expect do
         alces.local
@@ -200,8 +200,8 @@ RSpec.describe Metalware::Namespaces::Alces do
   # template
   describe '#scope' do
     let(:scope_template) { '<%= alces.scope.class %>' }
-    let(:node_class) { Metalware::Namespaces::Node }
-    let(:group_class) { Metalware::Namespaces::Group }
+    let(:node_class) { Underware::Namespaces::Node }
+    let(:group_class) { Underware::Namespaces::Group }
     let(:node_double) do
       instance_double(node_class, class: node_class)
     end
@@ -250,14 +250,14 @@ RSpec.describe Metalware::Namespaces::Alces do
 
     describe '#domain' do
       it 'returns the domain namespace' do
-        domain_class = Metalware::Namespaces::Domain.to_s
+        domain_class = Underware::Namespaces::Domain.to_s
         expect(alces.render_string('<%= alces.domain.class %>')).to eq(domain_class)
       end
     end
 
     describe '#local' do
       it 'returns the local node' do
-        local_class = Metalware::Namespaces::Local.to_s
+        local_class = Underware::Namespaces::Local.to_s
         expect(alces.render_string('<%= alces.local.class %>')).to eq(local_class)
       end
     end
@@ -292,35 +292,35 @@ RSpec.describe Metalware::Namespaces::Alces do
   end
 
   context 'with a Domain scope' do
-    include_examples 'scope method tests', Metalware::Namespaces::Domain
+    include_examples 'scope method tests', Underware::Namespaces::Domain
     include_examples '#node errors'
     include_examples '#group errors'
   end
 
   context 'with a Node in scope' do
-    include_examples 'scope method tests', Metalware::Namespaces::Node
+    include_examples 'scope method tests', Underware::Namespaces::Node
     include_examples '#group errors'
 
     describe '#node' do
       it 'returns a Node' do
-        expect(alces.node.class).to eq(Metalware::Namespaces::Node.to_s)
+        expect(alces.node.class).to eq(Underware::Namespaces::Node.to_s)
       end
     end
   end
 
   context 'with a Group in scope' do
-    include_examples 'scope method tests', Metalware::Namespaces::Group
+    include_examples 'scope method tests', Underware::Namespaces::Group
     include_examples '#node errors'
 
     describe '#group' do
       it 'returns a Group' do
-        expect(alces.group.class).to eq(Metalware::Namespaces::Group.to_s)
+        expect(alces.group.class).to eq(Underware::Namespaces::Group.to_s)
       end
     end
   end
 end
 
-RSpec.describe Metalware::Namespaces::Alces do
+RSpec.describe Underware::Namespaces::Alces do
   # These tests were formerly tests of the `Metalware::Templater` class, but
   # are no longer applicable to that now rendering has been moved to the
   # namespaces. They have been moved here (and slightly tweaked to still work),

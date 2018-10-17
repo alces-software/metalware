@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'active_support/core_ext/module/delegation'
 require 'recursive_open_struct'
 require 'spec_utils'
@@ -17,14 +17,14 @@ module AlcesUtils
         # This allows it to be mocked during the spec
         # It can also be reset in the test (see below)
         before do
-          allow(Metalware::Namespaces::Alces).to \
+          allow(Underware::Namespaces::Alces).to \
             receive(:new).and_wrap_original do |m, *a|
               @spec_alces ||= m.call(*a)
             end
         end
 
         # `alces` is defined as a method so it can be reset
-        define_method(:alces) { Metalware::Namespaces::Alces.new }
+        define_method(:alces) { Underware::Namespaces::Alces.new }
         define_method(:reset_alces) do
           @spec_alces = nil
           alces
@@ -165,9 +165,9 @@ module AlcesUtils
       AlcesUtils.check_and_raise_fakefs_error
       raise_if_node_exists(name)
       add_node_to_genders_file(name, *genders)
-      Metalware::Namespaces::Node.create(alces, name).tap do |node|
+      Underware::Namespaces::Node.create(alces, name).tap do |node|
         new_nodes = alces.nodes.reduce([node], &:push)
-        metal_nodes = Metalware::Namespaces::MetalArray.new(new_nodes)
+        metal_nodes = Underware::Namespaces::MetalArray.new(new_nodes)
         allow(alces).to receive(:nodes).and_return(metal_nodes)
       end
     end

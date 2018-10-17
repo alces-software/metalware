@@ -2,15 +2,15 @@
 # frozen_string_literal: true
 
 require 'shared_examples/hash_merger_namespace'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'spec_utils'
 
-RSpec.describe Metalware::Namespaces::Domain do
+RSpec.describe Underware::Namespaces::Domain do
   include AlcesUtils
 
   subject { alces.domain }
 
-  include_examples Metalware::Namespaces::HashMergerNamespace
+  include_examples Underware::Namespaces::HashMergerNamespace
 
   before { use_mock_determine_hostip_script }
 

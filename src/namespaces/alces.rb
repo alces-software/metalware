@@ -9,9 +9,9 @@ require 'deployment_server'
 
 Metalware::Utils::DynamicRequire.relative('mixins')
 
-require 'namespaces/metal_array'
-require 'namespaces/hash_merger_namespace'
-require 'namespaces/node'
+require 'underware/namespaces/metal_array'
+require 'underware/namespaces/hash_merger_namespace'
+require 'underware/namespaces/node'
 require 'hash_mergers.rb'
 require 'ostruct'
 require 'metal_log'

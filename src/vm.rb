@@ -2,7 +2,7 @@
 
 require 'libvirt'
 require 'metal_log'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'vm/certificate'
 
 module Metalware
