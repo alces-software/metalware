@@ -15,7 +15,7 @@ module Metalware
 
       def nodes
         @nodes ||= begin
-          arr = NodeattrInterface.nodes_in_gender(name).map do |node_name|
+          arr = Underware::NodeattrInterface.nodes_in_gender(name).map do |node_name|
             alces.nodes.send(node_name)
           end
           MetalArray.new(arr)
@@ -24,7 +24,7 @@ module Metalware
 
       def hostlist_nodes
         @short_nodes_string ||= begin
-          NodeattrInterface.hostlist_nodes_in_gender(name)
+          Underware::NodeattrInterface.hostlist_nodes_in_gender(name)
         end
       end
 

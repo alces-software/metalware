@@ -67,11 +67,11 @@ RSpec.describe Metalware::Namespaces::Node do
       ##
       # Spoofs the results of NodeattrInterface
       #
-      allow(Metalware::NodeattrInterface).to \
+      allow(Underware::NodeattrInterface).to \
         receive(:genders_for_node).and_return(['primary_group'])
-      allow(Metalware::NodeattrInterface).to \
+      allow(Underware::NodeattrInterface).to \
         receive(:nodes_in_gender).and_return(node_array)
-      allow(Metalware::NodeattrInterface).to \
+      allow(Underware::NodeattrInterface).to \
         receive(:all_nodes).and_return(node_array)
 
       # Spoofs the hostip

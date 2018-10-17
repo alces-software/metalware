@@ -54,7 +54,7 @@ module AlcesUtils
         genders_exist = File.exist? genders_path
         File.write(genders_path, "local local\n") unless genders_exist
 
-        allow(Metalware::NodeattrInterface)
+        allow(Underware::NodeattrInterface)
           .to receive(:nodeattr).and_wrap_original do |method, *args|
           AlcesUtils.check_and_raise_fakefs_error
           path = AlcesUtils.nodeattr_genders_file_path(args[0])

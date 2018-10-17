@@ -23,7 +23,7 @@ module Metalware
 
       def node_names
         @node_names ||= if options.gender
-                          NodeattrInterface.nodes_in_gender(node_identifier)
+                          Underware::NodeattrInterface.nodes_in_gender(node_identifier)
                         else
                           [node_identifier]
                         end

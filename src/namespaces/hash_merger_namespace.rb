@@ -3,7 +3,7 @@
 
 require 'exceptions'
 require 'templating/renderer'
-require 'nodeattr_interface'
+require 'underware/nodeattr_interface'
 require 'hash_mergers'
 
 module Metalware

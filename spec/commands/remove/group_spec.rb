@@ -23,7 +23,7 @@
 #==============================================================================
 require 'filesystem'
 require 'commands/remove/group'
-require 'nodeattr_interface'
+require 'underware/nodeattr_interface'
 require 'ostruct'
 require 'validation/loader'
 require 'spec_utils'
@@ -60,7 +60,7 @@ RSpec.describe Metalware::Commands::Remove::Group do
   end
 
   def expected_deleted_files(group)
-    Metalware::NodeattrInterface
+    Underware::NodeattrInterface
       .nodes_in_group(group)
       .map { |node| "nodes/#{node}.yaml" }
       .unshift(["groups/#{group}.yaml"])

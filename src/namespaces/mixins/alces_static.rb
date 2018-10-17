@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/string/strip'
-require 'nodeattr_interface'
+require 'underware/nodeattr_interface'
 require 'group_cache'
 require 'hashie'
 require 'validation/loader'
@@ -22,7 +22,7 @@ module Metalware
 
         def nodes
           @nodes ||= begin
-            arr = NodeattrInterface.all_nodes.map do |node_name|
+            arr = Underware::NodeattrInterface.all_nodes.map do |node_name|
               Namespaces::Node.create(alces, node_name)
             end
             Namespaces::MetalArray.new(arr)

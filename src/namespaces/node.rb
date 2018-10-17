@@ -26,7 +26,7 @@ module Metalware
       end
 
       def genders
-        @genders ||= NodeattrInterface.genders_for_node(name)
+        @genders ||= Underware::NodeattrInterface.genders_for_node(name)
       end
 
       def index

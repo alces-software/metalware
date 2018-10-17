@@ -52,7 +52,6 @@ RSpec/ContextWording:
   Exclude:
     - 'spec/commands/status_spec.rb'
     - 'spec/fixtures/shared_context/overview.rb'
-    - 'spec/nodeattr_interface_spec.rb'
     - 'spec/validation/configure_spec.rb'
 
 # Offense count: 87
@@ -175,7 +174,6 @@ Style/IfUnlessModifier:
     - 'src/commands/repo/update.rb'
     - 'src/commands/status.rb'
     - 'src/namespaces/mixins/alces_static.rb'
-    - 'src/nodeattr_interface.rb'
     - 'src/templater.rb'
 
 # Offense count: 3

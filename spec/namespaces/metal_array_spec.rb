@@ -3,7 +3,7 @@
 
 require 'namespaces/alces'
 require 'constants'
-require 'nodeattr_interface'
+require 'underware/nodeattr_interface'
 
 ##
 # NOTE: alces.nodes is a MetalArray
@@ -16,7 +16,7 @@ RSpec.describe Metalware::Namespaces::MetalArray do
   let(:node_names) { ['node1', 'node2', 'node3'] }
 
   before do
-    allow(Metalware::NodeattrInterface).to \
+    allow(Underware::NodeattrInterface).to \
       receive(:all_nodes).and_return(node_names)
   end
 

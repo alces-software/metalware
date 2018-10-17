@@ -98,7 +98,7 @@ module SpecUtils
   private
 
   def mock_validate_genders(valid, error)
-    allow(Metalware::NodeattrInterface).to receive(
+    allow(Underware::NodeattrInterface).to receive(
       :validate_genders_file
     ).and_return([valid, error])
   end
