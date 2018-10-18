@@ -35,7 +35,6 @@ module Metalware
   class NoGenderGroupError < UserMetalwareError; end
   class NodeNotInGendersError < UserMetalwareError; end
 
-  class SystemCommandError < UserMetalwareError; end
   class StrictWarningError < UserMetalwareError; end
   class InvalidInput < UserMetalwareError; end
   class InvalidConfigParameter < UserMetalwareError; end

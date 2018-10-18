@@ -12,7 +12,7 @@ module Metalware
 
       class << self
         def open(file)
-          SystemCommand.no_capture("#{editor} #{file}")
+          Underware::SystemCommand.no_capture("#{editor} #{file}")
         end
 
         def editor

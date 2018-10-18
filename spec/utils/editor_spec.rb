@@ -44,7 +44,7 @@ RSpec.describe Metalware::Utils::Editor do
 
       it 'opens the file in the default editor' do
         cmd = "#{default_editor} #{file}"
-        expect(Metalware::SystemCommand).to receive(:no_capture).with(cmd)
+        expect(Underware::SystemCommand).to receive(:no_capture).with(cmd)
         thr = Thread.new { described_class.open(file) }
         sleep 0.1
         thr.kill

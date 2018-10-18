@@ -13,7 +13,7 @@ class NodesController < ApplicationController
     # can also be very slow so may be better way to run this than within single
     # HTTP request.
     command = "#{METAL} power #{node_name} reset"
-    flash.notice = Metalware::SystemCommand.run(command)
+    flash.notice = Underware::SystemCommand.run(command)
     redirect_to '/'
   end
 end

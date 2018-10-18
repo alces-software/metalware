@@ -46,13 +46,13 @@ RSpec.describe Metalware::Commands::Ipmi do
         ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword sel
         list
       EOF
-      expect(Metalware::SystemCommand).to receive(:run).with(cmd).ordered
+      expect(Underware::SystemCommand).to receive(:run).with(cmd).ordered
     end
 
     # Allow the system command to receive `nodeattr` commands
     before do
       with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
-      allow(Metalware::SystemCommand).to \
+      allow(Underware::SystemCommand).to \
         receive(:run).with(*with_args).and_call_original
     end
 

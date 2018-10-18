@@ -51,7 +51,7 @@ module Metalware
       end
 
       def generate_certificate_key
-        SystemCommand
+        Underware::SystemCommand
           .run("certtool --generate-privkey > #{certificate_key_path}")
       end
 
@@ -66,7 +66,7 @@ module Metalware
       end
 
       def generate_server_certificates
-        SystemCommand.run("certtool --generate-certificate \
+        Underware::SystemCommand.run("certtool --generate-certificate \
                           --load-privkey #{certificate_key_path} \
                           --load-ca-certificate #{ca_certificate_path} \
                           --load-ca-privkey #{ca_privkey_path} \

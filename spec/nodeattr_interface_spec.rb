@@ -107,7 +107,7 @@ RSpec.describe Metalware::NodeattrInterface do
       # This genders file is invalid as `node01` is given `nodes` group twice.
       File.write(genders_path, "node01 nodes,other,groups\nnode01 nodes\n")
 
-      expect { subject }.to raise_error Metalware::SystemCommandError
+      expect { subject }.to raise_error Underware::SystemCommandError
     end
 
     it 'raises if given file does not exist' do

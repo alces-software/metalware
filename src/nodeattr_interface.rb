@@ -24,7 +24,7 @@
 
 require 'constants'
 require 'exceptions'
-require 'system_command'
+require 'underware/system_command'
 
 module Metalware
   module NodeattrInterface
@@ -54,7 +54,7 @@ module Metalware
         return [] unless node
 
         nodeattr("-l #{node}").chomp.split
-      rescue SystemCommandError
+      rescue Underware::SystemCommandError
         raise NodeNotInGendersError, "Could not find node in genders: #{node}"
       end
 
@@ -77,7 +77,7 @@ module Metalware
 
       def nodeattr(command, format_error: true, mock_nodeattr: nil)
         mock_nodeattr ||= Constants::NODEATTR_COMMAND
-        SystemCommand.run(
+        Underware::SystemCommand.run(
           "#{mock_nodeattr} #{command}",
           format_error: format_error
         )

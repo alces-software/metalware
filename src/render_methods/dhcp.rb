@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'file_path'
-require 'system_command'
+require 'underware/system_command'
 
 module Metalware
   module RenderMethods
@@ -11,13 +11,13 @@ module Metalware
 
       class << self
         def restart_service
-          SystemCommand.run RESTART_DHCP
+          Underware::SystemCommand.run RESTART_DHCP
         end
 
         def validate(content)
           run_in_temp_file(content) do |file|
             cmd = "#{VALIDATE_DHCPD_CONFIG} #{file.path}"
-            SystemCommand.run cmd
+            Underware::SystemCommand.run cmd
           end
         end
 

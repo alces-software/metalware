@@ -55,7 +55,7 @@ module Metalware
       end
 
       def hexadecimal_ip
-        @hexadecimal_ip ||= SystemCommand.run("gethostip -x #{name}").chomp
+        @hexadecimal_ip ||= Underware::SystemCommand.run("gethostip -x #{name}").chomp
       end
 
       def files

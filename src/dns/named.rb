@@ -25,7 +25,7 @@
 
 require 'validation/loader'
 require 'pathname'
-require 'system_command'
+require 'underware/system_command'
 require 'exceptions'
 require 'metal_log'
 
@@ -34,7 +34,7 @@ module Metalware
     class Named
       def self.restart_service
         MetalLog.info 'Restarting named'
-        SystemCommand.run('systemctl restart named')
+        Underware::SystemCommand.run('systemctl restart named')
       end
 
       def initialize(alces, templater)

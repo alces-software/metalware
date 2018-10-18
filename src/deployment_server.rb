@@ -74,7 +74,7 @@ module Metalware
 
       def ip_on_interface(interface)
         command = "#{determine_hostip_script} #{interface}"
-        SystemCommand.run(command).chomp
+        Underware::SystemCommand.run(command).chomp
       end
 
       def determine_hostip_script
