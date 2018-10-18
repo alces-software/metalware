@@ -59,7 +59,7 @@ RSpec.describe Metalware::Utils::Editor do
 
       before do
         allow(described_class).to receive(:open)
-        Metalware::Data.dump(source, initial_content)
+        Underware::Data.dump(source, initial_content)
       end
 
       def run_open_copy(&validation)
@@ -74,7 +74,7 @@ RSpec.describe Metalware::Utils::Editor do
       it 'saves the content to the destination' do
         expect(described_class).to receive(:open)
         run_open_copy
-        expect(Metalware::Data.load(destination)).to eq(initial_content)
+        expect(Underware::Data.load(destination)).to eq(initial_content)
       end
 
       context 'with a validation block' do
@@ -90,7 +90,7 @@ RSpec.describe Metalware::Utils::Editor do
 
         it 'passes the temp file into the validation block' do
           run_open_copy do |path|
-            content = Metalware::Data.load(path)
+            content = Underware::Data.load(path)
             expect(path).not_to match(source)
             expect(path).not_to match(destination)
             expect(content).to eq(initial_content)
@@ -99,7 +99,7 @@ RSpec.describe Metalware::Utils::Editor do
 
         it 'saves the file if the validation passes' do
           run_open_copy { |_path| true }
-          content = Metalware::Data.load(destination)
+          content = Underware::Data.load(destination)
           expect(content).to eq(initial_content)
         end
 

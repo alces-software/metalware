@@ -45,7 +45,7 @@ RSpec.describe Metalware::Commands::Overview do
     end
 
     before do
-      Metalware::Data.dump Metalware::FilePath.overview, overview_hash
+      Underware::Data.dump Metalware::FilePath.overview, overview_hash
     end
 
     it 'includes the group name and additional fields' do

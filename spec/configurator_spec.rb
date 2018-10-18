@@ -520,7 +520,7 @@ RSpec.describe Metalware::Configurator do
 
       let(:load_answer) do
         path = Metalware::FilePath.group_answers(group_name)
-        Metalware::Data.load(path)[identifier]
+        Underware::Data.load(path)[identifier]
       end
 
       context 'when the answer matches the original default' do
@@ -565,7 +565,7 @@ RSpec.describe Metalware::Configurator do
 
       let(:load_answer) do
         path = Metalware::FilePath.node_answers(node_name)
-        Metalware::Data.load(path)[identifier]
+        Underware::Data.load(path)[identifier]
       end
 
       AlcesUtils.mock self, :each do
@@ -602,7 +602,7 @@ RSpec.describe Metalware::Configurator do
 
       let(:load_answer) do
         path = Metalware::FilePath.local_answers
-        Metalware::Data.load(path)[identifier]
+        Underware::Data.load(path)[identifier]
       end
 
       before do

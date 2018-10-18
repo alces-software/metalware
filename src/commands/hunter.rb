@@ -152,7 +152,7 @@ module Metalware
       end
 
       def cached_macs_to_nodes
-        Data.load(Constants::HUNTER_PATH).invert
+        Underware::Data.load(Constants::HUNTER_PATH).invert
       end
 
       def handle_new_detected_mac(hwaddr)

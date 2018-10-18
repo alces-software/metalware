@@ -55,7 +55,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
           node_parameter: 'node_value',
         },
       }.each do |plugin_config, config_data|
-        Metalware::Data.dump(plugin_config, config_data)
+        Underware::Data.dump(plugin_config, config_data)
       end
 
       expect(subject.config.domain_parameter).to eq('domain_value')
@@ -64,7 +64,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
     end
 
     it 'supports templating, with access to node namespace values' do
-      Metalware::Data.dump(plugin.domain_config,
+      Underware::Data.dump(plugin.domain_config,
                            node_name: '<%= node.name %>')
 
       expect(subject.config.node_name).to eq(node.name)
@@ -73,7 +73,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
 
   describe '#files' do
     it 'provides access to build file hashes for plugin' do
-      Metalware::Data.dump(plugin.domain_config,
+      Underware::Data.dump(plugin.domain_config,
                            files: {
                              some_files_section: [
                                '/path/to/some/file',

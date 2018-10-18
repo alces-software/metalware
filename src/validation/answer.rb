@@ -22,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'exceptions'
-require 'data'
+require 'underware/data'
 require 'dry-validation'
 
 module Metalware

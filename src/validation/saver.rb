@@ -25,7 +25,7 @@
 require 'exceptions'
 require 'file_path'
 require 'validation/answer'
-require 'data'
+require 'underware/data'
 
 module Metalware
   module Validation
@@ -58,7 +58,7 @@ module Metalware
         def answer(save_path, section)
           valid = Validation::Answer.new(data, answer_section: section)
                                     .data
-          Data.dump(save_path, valid)
+          Underware::Data.dump(save_path, valid)
         end
       end
     end

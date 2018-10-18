@@ -31,7 +31,7 @@ require 'config'
 require 'colorize'
 
 require 'cli_helper/parser'
-require 'data'
+require 'underware/data'
 
 module Metalware
   class Cli

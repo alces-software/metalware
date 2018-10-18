@@ -76,7 +76,7 @@ module Metalware
 
       def update_deactivated_plugins!(new_deactivated_plugins)
         new_cache = cache.merge(deactivated: new_deactivated_plugins)
-        Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
+        Underware::Data.dump(Constants::PLUGINS_CACHE_PATH, new_cache)
       end
 
       def exists?(plugin_name)
@@ -101,7 +101,7 @@ module Metalware
       end
 
       def cache
-        Data.load(Constants::PLUGINS_CACHE_PATH)
+        Underware::Data.load(Constants::PLUGINS_CACHE_PATH)
       end
     end
   end

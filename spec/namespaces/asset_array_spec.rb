@@ -57,7 +57,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       path = Metalware::FilePath.asset(asset[:types_dir],
                                        asset[:name])
       FileUtils.mkdir_p(File.dirname(path))
-      Metalware::Data.dump(path, asset[:data])
+      Underware::Data.dump(path, asset[:data])
     end
   end
 
@@ -66,7 +66,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
       before do
         each_path = Metalware::FilePath.asset('racks', 'each')
         FileUtils.mkdir_p(File.dirname(each_path))
-        Metalware::Data.dump(each_path, data: 'some-data')
+        Underware::Data.dump(each_path, data: 'some-data')
       end
 
       it 'errors due to the existing method' do
@@ -77,7 +77,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     end
 
     it 'does not load the files when initially called' do
-      expect(Metalware::Data).not_to receive(:load)
+      expect(Underware::Data).not_to receive(:load)
       described_class.new(alces)
     end
 
@@ -124,7 +124,7 @@ RSpec.describe Metalware::Namespaces::AssetArray do
     let(:asset_data) { assets_data[index] }
 
     def expect_to_only_load_asset_data_once
-      expect(Metalware::Data).to receive(:load).once.and_call_original
+      expect(Underware::Data).to receive(:load).once.and_call_original
     end
 
     describe '#[]' do

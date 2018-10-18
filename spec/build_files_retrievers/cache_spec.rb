@@ -182,7 +182,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
       # Create plugin config specifying file.
       plugin_config_dir = File.join(plugin_path, 'config')
       FileUtils.mkdir_p(plugin_config_dir)
-      Metalware::Data.dump(
+      Underware::Data.dump(
         plugin.domain_config,
         files: { some_section: [plugin_file_path] }
       )

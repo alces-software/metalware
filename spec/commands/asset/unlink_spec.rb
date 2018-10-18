@@ -35,7 +35,7 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
 
     AlcesUtils.mock(self, :each) do
       create_asset(asset_name, asset_content)
-      Metalware::Data.dump(cache_path, cache_content)
+      Underware::Data.dump(cache_path, cache_content)
     end
 
     it 'unlinks the asset from a node' do

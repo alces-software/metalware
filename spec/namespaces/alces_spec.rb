@@ -152,7 +152,7 @@ RSpec.describe Metalware::Namespaces::Alces do
   describe '#data' do
     it 'provides access to data in corresponding data directory file' do
       data_file_path = Metalware::FilePath.namespace_data_file('mydata')
-      Metalware::Data.dump(data_file_path, foo: { bar: 'baz' })
+      Underware::Data.dump(data_file_path, foo: { bar: 'baz' })
 
       expect(alces.data.mydata.foo.bar).to eq('baz')
       expect(alces.data.mydata.non_existent).to be nil

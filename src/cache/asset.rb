@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'file_path'
-require 'data'
+require 'underware/data'
 
 module Metalware
   module Cache
@@ -15,13 +15,13 @@ module Metalware
 
       def data
         @data ||= begin
-          raw_load = Data.load(FilePath.asset_cache)
+          raw_load = Underware::Data.load(FilePath.asset_cache)
           raw_load.empty? ? blank_cache : raw_load
         end
       end
 
       def save
-        Data.dump(FilePath.asset_cache, data)
+        Underware::Data.dump(FilePath.asset_cache, data)
       end
 
       def assign_asset_to_node(asset_name, node)

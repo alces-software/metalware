@@ -30,7 +30,7 @@ RSpec.describe Metalware::Cache::Asset do
     end
 
     it 'returns populated cache' do
-      Metalware::Data.dump(cache_path, initial_content)
+      Underware::Data.dump(cache_path, initial_content)
       expect(cache.data).to eq(initial_content)
     end
   end
@@ -98,7 +98,7 @@ RSpec.describe Metalware::Cache::Asset do
       end
 
       before do
-        Metalware::Data.dump(cache_path, initial_content)
+        Underware::Data.dump(cache_path, initial_content)
       end
 
       it 'unassigns the asset from all found instances ' do

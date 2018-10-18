@@ -58,7 +58,7 @@ RSpec.describe Metalware::AssetBuilder do
       context 'when the layout exists' do
         before do
           FileUtils.mkdir_p(File.dirname(layout_path))
-          Metalware::Data.dump(layout_path, {})
+          Underware::Data.dump(layout_path, {})
           push_layout_asset
         end
 
@@ -110,7 +110,7 @@ RSpec.describe Metalware::AssetBuilder do
 
   shared_examples 'save asset methods' do
     let(:asset) { subject.pop_asset }
-    let(:source_content) { Metalware::Data.load(asset.source_path) }
+    let(:source_content) { Underware::Data.load(asset.source_path) }
 
     before { FileSystem.root_setup(&:with_asset_types) }
 
@@ -126,7 +126,7 @@ RSpec.describe Metalware::AssetBuilder do
       end
 
       it 'errors if the file is invalid' do
-        allow(Metalware::Data).to receive(:load).and_return([])
+        allow(Underware::Data).to receive(:load).and_return([])
         expect do
           run_save.call
         end.to raise_error(Metalware::ValidationFailure)
@@ -213,7 +213,7 @@ RSpec.describe Metalware::AssetBuilder do
 
     it 'calls the asset to edited and saved' do
       allow(Metalware::Utils::Editor).to receive(:open).and_wrap_original do |_, path|
-        Metalware::Data.dump(path, expected_content)
+        Underware::Data.dump(path, expected_content)
       end
       subject.edit_asset(test_asset)
       expect(alces.assets.find_by_name(test_asset).to_h).to include(expected_content)

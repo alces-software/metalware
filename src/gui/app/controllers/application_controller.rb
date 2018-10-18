@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   def self.credentials
     @credentials ||=
       OpenStruct.new(
-        Metalware::Data.load(
+        Underware::Data.load(
           Metalware::Constants::GUI_CREDENTIALS_PATH
         )
       )

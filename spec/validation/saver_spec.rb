@@ -26,7 +26,7 @@ require 'validation/saver'
 require 'validation/answer'
 require 'filesystem'
 require 'file_path'
-require 'data'
+require 'underware/data'
 require 'alces_utils'
 
 module SaverSpec
@@ -82,7 +82,7 @@ RSpec.describe Metalware::Validation::Saver do
         receive(:new).with(data, answer_section: :domain)
                      .and_return(stubbed_answer_load)
       saver.domain_answers(data)
-      expect(Metalware::Data.load(path.domain_answers)).to eq(data)
+      expect(Underware::Data.load(path.domain_answers)).to eq(data)
     end
   end
 end

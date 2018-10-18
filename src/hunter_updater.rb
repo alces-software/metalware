@@ -35,7 +35,7 @@ module Metalware
     def add(node_name, mac_address)
       node_name = node_name.to_sym
       new_yaml = update_hunter_yaml(node_name, mac_address)
-      Data.dump(hunter_file, new_yaml)
+      Underware::Data.dump(hunter_file, new_yaml)
     end
 
     private
@@ -54,7 +54,7 @@ module Metalware
     end
 
     def load_current_yaml
-      Data.load(hunter_file)
+      Underware::Data.load(hunter_file)
     end
 
     def notify_user_about_update(current_yaml, new_node_name, new_mac_address)

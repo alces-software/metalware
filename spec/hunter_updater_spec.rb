@@ -33,7 +33,7 @@ RSpec.describe Metalware::HunterUpdater do
   let!(:output) { class_spy(Metalware::Output).as_stubbed_const }
 
   def hunter_yaml
-    Metalware::Data.load(hunter_file)
+    Underware::Data.load(hunter_file)
   end
 
   describe '#add' do
@@ -53,7 +53,7 @@ RSpec.describe Metalware::HunterUpdater do
       let(:new_mac) { 'another_mac_address' }
 
       before do
-        Metalware::Data.dump(
+        Underware::Data.dump(
           hunter_file,
           node_name.to_sym => initial_mac
         )

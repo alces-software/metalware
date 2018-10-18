@@ -54,7 +54,7 @@ module Metalware
 
       def question_tree
         @question_tree ||= default_configure_data.merge(
-          Data.load(configure_file_path)
+          Underware::Data.load(configure_file_path)
         )
       end
 

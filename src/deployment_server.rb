@@ -69,7 +69,7 @@ module Metalware
       end
 
       def server_config
-        Data.load(FilePath.server_config)
+        Underware::Data.load(FilePath.server_config)
       end
 
       def ip_on_interface(interface)

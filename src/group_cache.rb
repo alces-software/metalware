@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'validation/loader'
-require 'data'
+require 'underware/data'
 
 module Metalware
   class GroupCache
@@ -93,7 +93,7 @@ module Metalware
         primary_groups: groups_hash,
         orphans: orphans,
       }
-      Data.dump(file_path.group_cache, payload)
+      Underware::Data.dump(file_path.group_cache, payload)
       @data = nil # Reloads the cached file
       data
     end

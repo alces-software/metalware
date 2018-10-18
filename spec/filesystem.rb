@@ -45,7 +45,7 @@ class FileSystem
 
     delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
     delegate :write, to: File
-    delegate :dump, to: Metalware::Data
+    delegate :dump, to: Underware::Data
 
     def activate_plugin(plugin_name)
       Metalware::Plugins.activate!(plugin_name)

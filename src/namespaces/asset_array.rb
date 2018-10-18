@@ -38,7 +38,7 @@ module Metalware
         attr_reader :alces, :path
 
         def load_file
-          Data.load(path).merge(metadata: { name: name, type: type })
+          Underware::Data.load(path).merge(metadata: { name: name, type: type })
         end
       end
 

@@ -26,7 +26,7 @@ require 'file_path'
 require 'validation/answer'
 require 'validation/configure'
 require 'validation/load_save_base'
-require 'data'
+require 'underware/data'
 
 module Metalware
   module Validation
@@ -46,7 +46,7 @@ module Metalware
       end
 
       def group_cache
-        Data.load(path.group_cache)
+        Underware::Data.load(path.group_cache)
       end
 
       private
@@ -54,7 +54,7 @@ module Metalware
       attr_reader :path
 
       def answer(absolute_path, section)
-        yaml = Data.load(absolute_path)
+        yaml = Underware::Data.load(absolute_path)
         validator = Validation::Answer.new(yaml,
                                            answer_section: section,
                                            question_tree: question_tree)
@@ -77,7 +77,7 @@ module Metalware
       end
 
       def repo_configure_questions
-        @repo_configure_questions ||= Data.load(FilePath.configure_file)
+        @repo_configure_questions ||= Underware::Data.load(FilePath.configure_file)
       end
 
       def plugin_configure_questions

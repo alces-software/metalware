@@ -3,7 +3,7 @@
 
 require 'hash_mergers'
 require 'alces_utils'
-require 'data'
+require 'underware/data'
 require 'file_path'
 
 RSpec.describe Metalware::HashMergers::Answer do
@@ -50,7 +50,7 @@ RSpec.describe Metalware::HashMergers::Answer do
   end
 
   before do
-    Metalware::Data.dump Metalware::FilePath.configure_file, questions
+    Underware::Data.dump Metalware::FilePath.configure_file, questions
   end
 
   shared_examples 'run contexts with shared' do |spec_group|
@@ -84,15 +84,15 @@ RSpec.describe Metalware::HashMergers::Answer do
 
   context 'with answer files' do
     before do
-      Metalware::Data.dump(
+      Underware::Data.dump(
         Metalware::FilePath.domain_answers,
         identifier => answers(alces.domain)
       )
-      Metalware::Data.dump(
+      Underware::Data.dump(
         Metalware::FilePath.group_answers(group.name),
         identifier => answers(group)
       )
-      Metalware::Data.dump(
+      Underware::Data.dump(
         Metalware::FilePath.node_answers(node.name),
         identifier => answers(node)
       )

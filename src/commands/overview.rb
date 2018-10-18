@@ -36,7 +36,7 @@ module Metalware
         unless File.exist? FilePath.overview
           MetalLog.warn 'overview.yaml is missing from the repo'
         end
-        @overview_data = Data.load FilePath.overview
+        @overview_data = Underware::Data.load FilePath.overview
       end
 
       def run

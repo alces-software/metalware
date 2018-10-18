@@ -22,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'validation/answer'
-require 'data'
+require 'underware/data'
 require 'filesystem'
 require 'alces_utils'
 
@@ -63,7 +63,7 @@ RSpec.describe Metalware::Validation::Answer do
 
   def run_answer_validation(answers)
     FileSystem.test do
-      Metalware::Data.dump(Metalware::FilePath.configure_file, question_tree)
+      Underware::Data.dump(Metalware::FilePath.configure_file, question_tree)
       validator = Metalware::Validation::Answer.new(answers,
                                                     answer_section: :domain)
       [validator.validate, validator]

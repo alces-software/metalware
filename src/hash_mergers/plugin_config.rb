@@ -20,7 +20,7 @@ module Metalware
         # rather than `file_path`.
         args = [section_name].compact
         config_file = plugin.send("#{section}_config", *args)
-        Data.load(config_file)
+        Underware::Data.load(config_file)
       end
     end
   end

@@ -63,7 +63,7 @@ class HunterController < ApplicationController
         HunterJob.current_thread&.thread_variable_get(new_detected_macs_key) || []
     end
 
-    @hunter_macs_to_nodes = Metalware::Data.load(Metalware::Constants::HUNTER_PATH).invert
+    @hunter_macs_to_nodes = Underware::Data.load(Metalware::Constants::HUNTER_PATH).invert
   end
 
   def hunter_updater
