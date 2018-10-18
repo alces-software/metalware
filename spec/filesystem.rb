@@ -185,21 +185,21 @@ class FileSystem
   # install.
   def create_initial_directory_hierarchy
     [
-      '/tmp',
       '/etc',
-      '/var/log/metalware',
-      '/var/lib/metalware/staging',
-      '/var/lib/metalware/rendered/kickstart',
-      '/var/lib/metalware/rendered/system',
-      '/var/lib/metalware/events',
-      '/var/lib/metalware/cache/templates',
-      '/var/lib/metalware/repo',
+      '/tmp',
       '/var/lib/metalware/answers/groups',
       '/var/lib/metalware/answers/nodes',
       '/var/lib/metalware/assets',
+      '/var/lib/metalware/cache/templates',
       '/var/lib/metalware/data',
-      '/var/named',
+      '/var/lib/metalware/events',
+      '/var/lib/metalware/rendered/kickstart',
+      '/var/lib/metalware/rendered/system',
+      '/var/lib/metalware/repo',
+      '/var/lib/metalware/staging',
       '/var/log/metalware',
+      '/var/log/metalware',
+      '/var/named',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)
