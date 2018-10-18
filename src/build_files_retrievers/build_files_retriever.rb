@@ -26,7 +26,6 @@ require 'uri'
 require 'open-uri'
 
 require 'constants'
-require 'keyword_struct'
 
 module Metalware
   module BuildFilesRetrievers
