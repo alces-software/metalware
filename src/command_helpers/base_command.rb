@@ -95,7 +95,7 @@ module Metalware
       end
 
       def alces
-        @alces ||= Namespaces::Alces.new
+        @alces ||= Underware::Namespaces::Alces.new
       end
 
       def log_command

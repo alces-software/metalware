@@ -178,7 +178,6 @@ Style/IfUnlessModifier:
 Style/MethodMissing:
   Exclude:
     - 'spec/filesystem.rb'
-    - 'src/hash_mergers/metal_recursive_open_struct.rb'
     - 'src/metal_log.rb'
 
 # Offense count: 1

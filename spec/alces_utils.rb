@@ -167,7 +167,7 @@ module AlcesUtils
       add_node_to_genders_file(name, *genders)
       Underware::Namespaces::Node.create(alces, name).tap do |node|
         new_nodes = alces.nodes.reduce([node], &:push)
-        metal_nodes = Underware::Namespaces::MetalArray.new(new_nodes)
+        metal_nodes = Underware::Namespaces::UnderwareArray.new(new_nodes)
         allow(alces).to receive(:nodes).and_return(metal_nodes)
       end
     end

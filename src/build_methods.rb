@@ -17,7 +17,7 @@ module Metalware
       private
 
       def build_method_class_for(node)
-        return BuildMethods::Local if node.is_a?(Namespaces::Local)
+        return BuildMethods::Local if node.is_a?(Underware::Namespaces::Local)
 
         case node.config.build_method&.to_sym
         when :local

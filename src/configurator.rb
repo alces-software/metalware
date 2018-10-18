@@ -90,11 +90,11 @@ module Metalware
     def higher_level_answers
       @higher_level_answers ||= begin
         case configure_object
-        when Namespaces::Domain
+        when Underware::Namespaces::Domain
           alces.questions.root_defaults
-        when Namespaces::Group
+        when Underware::Namespaces::Group
           alces.domain.answer
-        when Namespaces::Node
+        when Underware::Namespaces::Node
           group_for_node(configure_object).answer
         end
       end.to_h # Ensure the un-rendered answer are used
@@ -154,13 +154,13 @@ module Metalware
 
     def create_new_group
       idx = group_cache.next_available_index
-      Namespaces::Group.new(alces, name, index: idx)
+      Underware::Namespaces::Group.new(alces, name, index: idx)
     end
 
     def create_orphan_node
       MetalLog.warn orphan_warning unless questions_section == :local
       group_cache.push_orphan(name)
-      Namespaces::Node.create(alces, name)
+      Underware::Namespaces::Node.create(alces, name)
     end
   end
 end

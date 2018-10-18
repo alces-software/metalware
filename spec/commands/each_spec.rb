@@ -25,7 +25,7 @@
 require 'commands/each'
 require 'spec_utils'
 require 'ostruct'
-require 'hash_mergers'
+require 'underware/hash_mergers'
 require 'underware/namespaces/alces'
 
 RSpec.describe Metalware::Commands::Each do
@@ -41,7 +41,7 @@ RSpec.describe Metalware::Commands::Each do
 
   let(:groups) do
     g = Underware::Namespaces::Group.new(alces, 'nodes', index: 1)
-    Underware::Namespaces::MetalArray.new([g])
+    Underware::Namespaces::UnderwareArray.new([g])
   end
 
   # Spoofs the nodes group
@@ -51,7 +51,7 @@ RSpec.describe Metalware::Commands::Each do
 
   # Turns off loading of answers as they are not needed
   before do
-    allow(Metalware::HashMergers::Answer).to \
+    allow(Underware::HashMergers::Answer).to \
       receive(:new).and_return(double('answer', merge: {}))
   end
 

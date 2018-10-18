@@ -75,8 +75,8 @@ module Metalware
 
         def reserved_methods
           @reserved_methods ||= begin
-            Namespaces::AssetArray.instance_methods.concat(
-              Namespaces::AssetArray.private_instance_methods
+            Underware::Namespaces::AssetArray.instance_methods.concat(
+              Underware::Namespaces::AssetArray.private_instance_methods
             ).uniq.map(&:to_s)
           end
         end
