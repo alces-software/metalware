@@ -198,7 +198,6 @@ class FileSystem
       '/var/lib/metalware/repo',
       '/var/lib/metalware/staging',
       '/var/log/metalware',
-      '/var/log/metalware',
       '/var/named',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
