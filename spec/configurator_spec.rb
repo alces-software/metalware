@@ -28,7 +28,7 @@ require 'highline'
 
 require 'configurator'
 require 'validation/loader'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Configurator do
   include AlcesUtils

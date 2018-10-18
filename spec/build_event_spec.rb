@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'build_event'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 module Metalware
   class BuildEvent

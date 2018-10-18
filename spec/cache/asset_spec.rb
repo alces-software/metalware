@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 require 'cache/asset'
 
 RSpec.describe Metalware::Cache::Asset do

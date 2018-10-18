@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.shared_examples 'record add command' do
   include AlcesUtils

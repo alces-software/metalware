@@ -4,7 +4,7 @@
 require 'templating/nil_detection_wrapper'
 require 'recursive_open_struct'
 require 'metal_log'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Templating::NilDetectionWrapper do
   AlcesUtils.start self

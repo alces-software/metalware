@@ -22,6 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'underware/constants'
 require 'underware/hash_mergers/underware_recursive_open_struct'
 
 module Metalware
@@ -35,14 +36,20 @@ module Metalware
 
     METALWARE_DATA_PATH = '/var/lib/metalware'
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
-    NAMESPACE_DATA_PATH = File.join(METALWARE_DATA_PATH, 'data')
+
+    # XXX remove?
+    # GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
+
+    # XXX Underware
+    NAMESPACE_DATA_PATH = Underware::Constants::NAMESPACE_DATA_PATH
     HUNTER_PATH = File.join(NAMESPACE_DATA_PATH, 'hunter.yaml')
-    GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
-    INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
+
     RENDERED_DIR_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
     STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
-    PLUGINS_CACHE_PATH = File.join(CACHE_PATH, 'plugins.yaml')
+
+    # XXX remove?
+    # PLUGINS_CACHE_PATH = File.join(CACHE_PATH, 'plugins.yaml')
 
     EVENTS_DIR_PATH = File.join(METALWARE_DATA_PATH, 'events')
 
@@ -55,7 +62,9 @@ module Metalware
 
     NODEATTR_COMMAND = 'nodeattr'
 
-    GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
+    # XXX Underware
+    GENDERS_PATH = Underware::Constants::GENDERS_PATH
+
     HOSTS_PATH = '/etc/hosts'
 
     UEFI_SAVE_PATH = '/var/lib/tftpboot/efi'

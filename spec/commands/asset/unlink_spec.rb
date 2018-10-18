@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'filesystem'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Asset::Unlink do
   include AlcesUtils

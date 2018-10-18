@@ -28,7 +28,7 @@ require 'commands/build'
 require 'spec_utils'
 require 'recursive_open_struct'
 require 'network'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Build do
   include AlcesUtils

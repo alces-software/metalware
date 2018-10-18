@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 require 'cache/asset'
 
 # Requires `asset_name` and `command_arguments` to be set by the

@@ -24,7 +24,7 @@
 
 require 'group_cache'
 require 'filesystem'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::GroupCache do
   include AlcesUtils

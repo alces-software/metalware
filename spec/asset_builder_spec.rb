@@ -2,7 +2,7 @@
 
 require 'spec_utils'
 require 'asset_builder'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.shared_examples 'pushes the asset' do
   it 'pushes the asset onto the stack' do

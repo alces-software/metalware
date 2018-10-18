@@ -25,7 +25,7 @@
 require 'build_methods/kickstarts/uefi'
 require 'filesystem'
 require 'file_path'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
   include AlcesUtils

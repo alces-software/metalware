@@ -2,7 +2,7 @@
 
 require 'commands'
 require 'utils'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 require 'active_support/core_ext/module/delegation'
 
 module Metalware

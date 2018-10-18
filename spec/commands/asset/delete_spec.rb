@@ -4,7 +4,7 @@ require 'cache/asset'
 require 'filesystem'
 require 'commands'
 require 'utils'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Asset::Delete do
   include AlcesUtils

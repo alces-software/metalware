@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 require 'shared_examples/record_edit_command'
 
 RSpec.describe Metalware::Commands::Layout::Edit do

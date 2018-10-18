@@ -25,7 +25,7 @@
 require 'spec_utils'
 require 'filesystem'
 require 'group_cache'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Configure::Group do
   include AlcesUtils

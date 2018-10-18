@@ -27,7 +27,7 @@ require 'file_path'
 require 'data'
 require 'filesystem'
 require 'constants'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Validation::Configure do
   include AlcesUtils

@@ -2,7 +2,7 @@
 
 require 'shared_examples/asset_command_that_assigns_a_node'
 require 'shared_examples/record_add_command'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Asset::Add do
   let(:record_path) do
