@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'yaml'
+require 'active_support/core_ext/hash/keys'
+
 require 'metal_log'
 
 module Metalware
