@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'build_methods'
+
 RSpec.describe Metalware::BuildMethods::BuildMethod do
   class TestBuildMethod < described_class
     def staging_templates
