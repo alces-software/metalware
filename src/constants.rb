@@ -48,9 +48,6 @@ module Metalware
 
     DHCPD_HOSTS_PATH = '/etc/dhcp/dhcpd.hosts'
 
-    # XXX Following needs to actually be created somewhere.
-    GUI_CREDENTIALS_PATH = File.join(CACHE_PATH, 'credentials.yaml')
-
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 
     NODEATTR_COMMAND = 'nodeattr'

@@ -32,10 +32,6 @@ module Metalware
         $stderr = old_stderr
       end
 
-      def in_gui?
-        defined? Rails
-      end
-
       def copy_via_temp_file(source, destination)
         temp_name = File.basename(destination, '.*')
         content = File.read(source)

@@ -9,10 +9,6 @@
     - name: dependency functions
       pathStartsWith: scripts/dependencies
 
-    # Ignore everything in prototype GUI.
-    - name: GUI
-      pathStartsWith: src/gui
-
     # Ignore patches for Gems; will often monkey-patch methods to be called by
     # Gem code which would otherwise be flagged up.
     - name: Gem patch methods

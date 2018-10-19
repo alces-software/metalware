@@ -3,8 +3,6 @@ require: rubocop-rspec
 
 AllCops:
   TargetRubyVersion: 2.4
-  Exclude:
-    - src/gui/**/*
 
 # Do not prefer various `%` ways of specifying things in Ruby - I
 # think these are less clear and unnecessary

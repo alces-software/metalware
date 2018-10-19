@@ -79,7 +79,6 @@ module Metalware
       end
     end
 
-    # TODO: Use the Output class to connect to the GUI
     def process_event_file(file)
       path_arr = file.split(File::SEPARATOR)
       event = path_arr[-1]

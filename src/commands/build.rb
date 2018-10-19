@@ -34,13 +34,9 @@ require 'build_event'
 module Metalware
   module Commands
     class Build < CommandHelpers::BaseCommand
-      GRACEFULLY_SHUTDOWN_KEY = :gracefully_shutdown
-      COMPLETE_KEY = :complete
-
       private
 
       delegate :template_path, to: :file_path
-      delegate :in_gui?, to: Utils
       delegate :agree, to: :high_line
 
       attr_reader :build_event
@@ -53,24 +49,17 @@ module Metalware
 
       def run
         Output.success 'Waiting for nodes to report as built...'
-        Output.cli_only '(Ctrl-C to terminate)'
+        Output.stderr '(Ctrl-C to terminate)'
 
         build_event.run_start_hooks
 
         until build_event.build_complete?
-          gracefully_shutdown if should_gracefully_shutdown?
-
           # TODO: Split process up more should go in here
           build_event.process
-
           sleep Constants::BUILD_POLL_SLEEP
         end
 
         teardown
-      rescue StandardError
-        # Ensure command is recorded as complete when in GUI.
-        record_gui_build_complete if in_gui?
-        raise
       end
 
       def dependency_hash
@@ -86,31 +75,6 @@ module Metalware
         end.reduce([]) do |memo, bm|
           memo.push(bm.dependency_paths)
         end.flatten.uniq
-      end
-
-      # TODO: Consider moving GUI code into BuildEvent
-      # if build_event.build_complete?
-      #   # For now at least, keep thread alive when in GUI so can keep
-      #   # accessing messages. XXX Change this, this is very wasteful.
-      #   in_gui? ? record_gui_build_complete : break
-      # end
-
-      # def record_gui_build_complete
-      #   Thread.current.thread_variable_set(COMPLETE_KEY, true)
-      # end
-
-      def should_gracefully_shutdown?
-        in_gui? && Thread.current.thread_variable_get(GRACEFULLY_SHUTDOWN_KEY)
-      end
-
-      def gracefully_shutdown
-        # XXX Somewhat similar to `handle_interrupt`; may not be easily
-        # generalizable however.
-        Output.info 'Exiting...'
-        build_event.run_all_complete_hooks
-        run_all_complete_hooks
-        teardown
-        record_gui_build_complete
       end
 
       def teardown
