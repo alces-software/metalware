@@ -24,7 +24,7 @@ RSpec.describe Metalware::MetalLog do
     end
 
     let!(:output) do
-      class_spy(Metalware::Output).as_stubbed_const
+      class_spy(Underware::Output).as_stubbed_const
     end
 
     let(:test_warning) { 'warning: message' }

@@ -26,7 +26,7 @@ require 'active_support/core_ext/string/strip'
 
 require 'command_helpers/base_command'
 require 'constants'
-require 'output'
+require 'underware/output'
 require 'exceptions'
 require 'command_helpers/node_identifier'
 require 'build_event'
@@ -48,8 +48,8 @@ module Metalware
       end
 
       def run
-        Output.success 'Waiting for nodes to report as built...'
-        Output.stderr '(Ctrl-C to terminate)'
+        Underware::Output.success 'Waiting for nodes to report as built...'
+        Underware::Output.stderr '(Ctrl-C to terminate)'
 
         build_event.run_start_hooks
 
@@ -80,7 +80,7 @@ module Metalware
       def teardown
         clear_up_built_node_marker_files
         build_event.kill_threads
-        Output.info 'Done.'
+        Underware::Output.info 'Done.'
       end
 
       def clear_up_built_node_marker_files
@@ -90,11 +90,11 @@ module Metalware
       end
 
       def handle_interrupt(_e)
-        Output.info 'Exiting...'
+        Underware::Output.info 'Exiting...'
         ask_if_should_run_build_complete
         teardown
       rescue Interrupt
-        Output.info 'Re-rendering templates anyway...'
+        Underware::Output.info 'Re-rendering templates anyway...'
         build_event.run_all_complete_hooks
         teardown
       end

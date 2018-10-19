@@ -27,7 +27,7 @@ require 'metal_log'
 require 'net/dhcp'
 require 'pcap'
 
-require 'output'
+require 'underware/output'
 require 'constants'
 # require 'alces/stack/log'
 require 'hunter_updater'
@@ -57,7 +57,7 @@ module Metalware
       end
 
       def listen!
-        Output.stderr \
+        Underware::Output.stderr \
           'Waiting for new nodes to appear on the network, please network ' \
           'boot them now...',
           '(Ctrl-C to terminate)'
@@ -126,7 +126,7 @@ module Metalware
         message = \
           'Detected already hunted MAC address on network ' \
           "(#{hwaddr} / #{assigned_node_name}); ignoring."
-        Output.stderr message
+        Underware::Output.stderr message
       end
 
       def cached_macs_to_nodes
@@ -146,10 +146,10 @@ module Metalware
         record_hunted_pair(name, hwaddr)
         MetalLog.info "#{name}-#{hwaddr}"
         hunter_log.info "#{name}-#{hwaddr}"
-        Output.stderr 'Logged node'
+        Underware::Output.stderr 'Logged node'
       rescue StandardError => e
         warn e # XXX Needed?
-        Output.stderr "FAIL: #{e.message}"
+        Underware::Output.stderr "FAIL: #{e.message}"
         retry if agree('Retry? [yes/no]:')
       end
 
@@ -166,7 +166,7 @@ module Metalware
       end
 
       def handle_interrupt(_e)
-        Output.stderr 'Exiting...'
+        Underware::Output.stderr 'Exiting...'
         exit
       end
     end

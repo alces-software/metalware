@@ -96,5 +96,3 @@ Style/GlobalVars:
     - spec/commander_extensions_spec.rb
     - spec/spec_helper.rb
     - spec/spec_utils.rb
-    - src/output.rb
-

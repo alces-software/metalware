@@ -60,7 +60,7 @@ RSpec.describe Metalware::Commands::Sync do
 
       before do
         # Allows the error to be printed
-        allow(Metalware::Output).to \
+        allow(Underware::Output).to \
           (receive(:stderr).and_wrap_original { |_m, *arg| warn arg })
 
         Metalware::Staging.update do |staging|

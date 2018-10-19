@@ -25,12 +25,12 @@
 require 'tempfile'
 
 require 'hunter_updater'
-require 'output'
+require 'underware/output'
 
 RSpec.describe Metalware::HunterUpdater do
   let(:hunter_file) { Tempfile.new.path }
   let(:updater) { described_class.new(hunter_file) }
-  let!(:output) { class_spy(Metalware::Output).as_stubbed_const }
+  let!(:output) { class_spy(Underware::Output).as_stubbed_const }
 
   def hunter_yaml
     Underware::Data.load(hunter_file)

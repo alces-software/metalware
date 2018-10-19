@@ -47,11 +47,11 @@ module Metalware
         private
 
         def handle_error_rendering_erb(template, error)
-          Output.stderr "\nRendering template failed!\n\n"
-          Output.stderr "Template:\n\n"
-          Output.stderr_indented_error_message template
-          Output.stderr "\nError message:\n\n"
-          Output.stderr_indented_error_message error.message
+          Underware::Output.stderr "\nRendering template failed!\n\n"
+          Underware::Output.stderr "Template:\n\n"
+          Underware::Output.stderr_indented_error_message template
+          Underware::Output.stderr "\nError message:\n\n"
+          Underware::Output.stderr_indented_error_message error.message
           abort
         end
       end

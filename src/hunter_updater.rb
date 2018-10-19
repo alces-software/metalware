@@ -24,7 +24,7 @@
 
 require 'yaml'
 
-require 'output'
+require 'underware/output'
 
 module Metalware
   class HunterUpdater
@@ -66,7 +66,7 @@ module Metalware
                 elsif mac_address_present
                   replacing_mac_address_message(current_yaml, new_mac_address)
                 end
-      Output.stderr message if message
+      Underware::Output.stderr message if message
     end
 
     def replacing_node_message(current_yaml, new_node_name)
