@@ -8,7 +8,7 @@ RSpec.describe Metalware::Commands::Console do
 
   def run_console(node_name, **options)
     AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(
+      Underware::Utils.run_command(
         Metalware::Commands::Console, node_name, **options
       )
     end

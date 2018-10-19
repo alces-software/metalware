@@ -31,7 +31,7 @@ RSpec.describe Metalware::Commands::Configure::Group do
   include AlcesUtils
 
   def run_configure_group(group)
-    Metalware::Utils.run_command(
+    Underware::Utils.run_command(
       Metalware::Commands::Configure::Group, group
     )
   end

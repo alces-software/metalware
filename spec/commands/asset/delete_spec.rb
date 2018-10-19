@@ -3,7 +3,7 @@
 require 'cache/asset'
 require 'filesystem'
 require 'commands'
-require 'utils'
+require 'underware/utils'
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Asset::Delete do
@@ -11,7 +11,7 @@ RSpec.describe Metalware::Commands::Asset::Delete do
   let(:asset) { 'saved-asset' }
 
   def run_command
-    Metalware::Utils.run_command(described_class,
+    Underware::Utils.run_command(described_class,
                                  asset,
                                  stderr: StringIO.new)
   end

@@ -10,7 +10,7 @@ RSpec.describe Metalware::Commands::Overview do
 
   def run_command
     AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(Metalware::Commands::Overview)
+      Underware::Utils.run_command(Metalware::Commands::Overview)
     end
   end
 

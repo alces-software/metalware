@@ -6,7 +6,7 @@ require 'records/layout'
 
 RSpec.describe Metalware::Records::Layout do
   include AlcesUtils
-  before { allow(Metalware::Utils::Editor).to receive(:open) }
+  before { allow(Underware::Utils::Editor).to receive(:open) }
 
   file_path_proc = proc do |types_dir, name|
     Metalware::FilePath.layout(types_dir, name)

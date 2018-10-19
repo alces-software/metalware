@@ -16,7 +16,7 @@ RSpec.describe Metalware::Commands::Asset::Unlink do
   end
 
   def run_command
-    Metalware::Utils.run_command(described_class,
+    Underware::Utils.run_command(described_class,
                                  node_name,
                                  stderr: StringIO.new)
   end

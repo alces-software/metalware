@@ -8,7 +8,7 @@ RSpec.describe Metalware::Commands::Power do
 
   def run_power(node_identifier, command, **options)
     AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(
+      Underware::Utils.run_command(
         Metalware::Commands::Power, node_identifier, command, **options
       )
     end[:stdout].read

@@ -8,7 +8,7 @@ RSpec.describe Metalware::Commands::Ipmi do
 
   def run_ipmi(node_identifier, command, **options)
     AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(
+      Underware::Utils.run_command(
         Metalware::Commands::Ipmi, node_identifier, command, **options
       )
     end

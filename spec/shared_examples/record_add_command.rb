@@ -5,7 +5,7 @@ require 'alces_utils'
 RSpec.shared_examples 'record add command' do
   include AlcesUtils
   # Stops the editor from running the bash command
-  before { allow(Metalware::Utils::Editor).to receive(:open) }
+  before { allow(Underware::Utils::Editor).to receive(:open) }
 
   let(:type) { 'rack' }
   let(:saved_record_name) { 'saved-record' }
@@ -16,14 +16,14 @@ RSpec.shared_examples 'record add command' do
     let(:type_path) { Metalware::FilePath.asset_type(type) }
 
     def run_command(record_name = saved_record_name)
-      Metalware::Utils.run_command(described_class,
+      Underware::Utils.run_command(described_class,
                                    type,
                                    record_name,
                                    stderr: StringIO.new)
     end
 
     it 'calls for the record to be opened and copied' do
-      expect(Metalware::Utils::Editor).to receive(:open_copy)
+      expect(Underware::Utils::Editor).to receive(:open_copy)
         .with(type_path, record_path)
       run_command
     end
@@ -54,14 +54,14 @@ RSpec.shared_examples 'record add command' do
     let(:layout_path) { Metalware::FilePath.layout(type.pluralize, layout) }
 
     def run_command(record_name = saved_record_name)
-      Metalware::Utils.run_command(described_class,
+      Underware::Utils.run_command(described_class,
                                    layout,
                                    record_name,
                                    stderr: StringIO.new)
     end
 
     it 'calls for the record to be opened and copied' do
-      expect(Metalware::Utils::Editor).to receive(:open_copy)
+      expect(Underware::Utils::Editor).to receive(:open_copy)
         .with(layout_path, record_path)
       run_command
     end

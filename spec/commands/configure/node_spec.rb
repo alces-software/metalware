@@ -7,7 +7,7 @@ require 'group_cache'
 
 RSpec.describe Metalware::Commands::Configure::Node do
   def run_configure_node(node)
-    Metalware::Utils.run_command(
+    Underware::Utils.run_command(
       Metalware::Commands::Configure::Node, node
     )
   end

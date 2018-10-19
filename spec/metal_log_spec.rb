@@ -17,7 +17,7 @@ RSpec.describe Metalware::MetalLog do
 
     def run_test_command(**options)
       AlcesUtils.redirect_std(:stderr) do
-        Metalware::Utils.run_command(
+        Underware::Utils.run_command(
           Metalware::Commands::TestCommand, **options
         )
       end

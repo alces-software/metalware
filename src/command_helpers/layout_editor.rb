@@ -12,7 +12,7 @@ module Metalware
       end
 
       def copy_and_edit_record_file
-        Utils::Editor.open_copy(source, destination) do |edited_path|
+        Underware::Utils::Editor.open_copy(source, destination) do |edited_path|
           Validation::Asset.valid_file?(edited_path)
         end
       end

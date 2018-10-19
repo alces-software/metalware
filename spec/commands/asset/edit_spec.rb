@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'commands'
-require 'utils'
+require 'underware/utils'
 require 'filesystem'
 require 'shared_examples/asset_command_that_assigns_a_node'
 require 'shared_examples/record_edit_command'
@@ -9,7 +9,7 @@ require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Asset::Edit do
   include AlcesUtils
-  before { allow(Metalware::Utils::Editor).to receive(:open) }
+  before { allow(Underware::Utils::Editor).to receive(:open) }
 
   let(:record_name) { 'asset' }
   let(:record_path) { Metalware::Records::Asset.path(record_name) }

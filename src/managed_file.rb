@@ -76,7 +76,7 @@ module Metalware
         end
 
         def managed_comment
-          Utils.commentify(MANAGED_COMMENT_TEXT, comment_char: comment_char)
+          Underware::Utils.commentify(MANAGED_COMMENT_TEXT, comment_char: comment_char)
         end
       end
     end

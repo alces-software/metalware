@@ -4,10 +4,10 @@
 require 'exceptions'
 require 'templating/renderer'
 require 'templating/nil_detection_wrapper'
-require 'utils/dynamic_require'
+require 'underware/utils/dynamic_require'
 require 'deployment_server'
 
-Metalware::Utils::DynamicRequire.relative('mixins')
+Underware::Utils::DynamicRequire.relative('mixins')
 
 require 'namespaces/metal_array'
 require 'namespaces/hash_merger_namespace'
@@ -16,7 +16,7 @@ require 'hash_mergers.rb'
 require 'ostruct'
 require 'metal_log'
 
-Metalware::Utils::DynamicRequire.relative('.')
+Underware::Utils::DynamicRequire.relative('.')
 
 module Metalware
   module Namespaces

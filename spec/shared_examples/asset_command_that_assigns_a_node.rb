@@ -10,13 +10,13 @@ RSpec.shared_examples 'asset command that assigns a node' do
   include AlcesUtils
 
   # Stops the editor from running the bash command
-  before { allow(Metalware::Utils::Editor).to receive(:open) }
+  before { allow(Underware::Utils::Editor).to receive(:open) }
 
   let(:asset_cache) { Metalware::Cache::Asset.new }
   let(:node_name) { 'test-node' }
 
   def run_command
-    Metalware::Utils.run_command(described_class,
+    Underware::Utils.run_command(described_class,
                                  *command_arguments,
                                  node: node_name,
                                  stderr: StringIO.new)

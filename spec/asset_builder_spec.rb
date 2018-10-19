@@ -129,7 +129,7 @@ RSpec.describe Metalware::AssetBuilder do
         allow(Underware::Data).to receive(:load).and_return([])
         expect do
           run_save.call
-        end.to raise_error(Metalware::ValidationFailure)
+        end.to raise_error(Underware::ValidationFailure)
       end
     end
 
@@ -196,7 +196,7 @@ RSpec.describe Metalware::AssetBuilder do
 
     before do
       allow(HighLine).to receive(:new).and_return(mock_highline)
-      allow(Metalware::Utils::Editor).to receive(:open)
+      allow(Underware::Utils::Editor).to receive(:open)
     end
 
     include_examples 'save asset methods'
@@ -212,7 +212,7 @@ RSpec.describe Metalware::AssetBuilder do
     end
 
     it 'calls the asset to edited and saved' do
-      allow(Metalware::Utils::Editor).to receive(:open).and_wrap_original do |_, path|
+      allow(Underware::Utils::Editor).to receive(:open).and_wrap_original do |_, path|
         Underware::Data.dump(path, expected_content)
       end
       subject.edit_asset(test_asset)

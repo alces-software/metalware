@@ -11,7 +11,7 @@ RSpec.describe Metalware::Commands::Layout::Add do
 
   it 'errors if the type does not exist' do
     expect do
-      Metalware::Utils.run_command(described_class,
+      Underware::Utils.run_command(described_class,
                                    'missing-type',
                                    'record-name',
                                    stderr: StringIO.new)

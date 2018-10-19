@@ -29,7 +29,7 @@ RSpec.describe Metalware::Commands::Plugin::Activate do
   include AlcesUtils
 
   def run_plugin_activate(plugin_name)
-    Metalware::Utils.run_command(
+    Underware::Utils.run_command(
       Metalware::Commands::Plugin::Activate, plugin_name
     )
   end

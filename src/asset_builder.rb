@@ -41,13 +41,13 @@ module Metalware
 
     Asset = Struct.new(:builder, :name, :source_path, :type) do
       def edit_and_save
-        Utils::Editor.open_copy(source_path, asset_path) do |temp_path|
+        Underware::Utils::Editor.open_copy(source_path, asset_path) do |temp_path|
           validate_and_generate_sub_assets(temp_path)
         end
       end
 
       def save
-        Utils.copy_via_temp_file(source_path, asset_path) do |path|
+        Underware::Utils.copy_via_temp_file(source_path, asset_path) do |path|
           raise_invalid_source unless validate_and_generate_sub_assets(path)
         end
       end
@@ -61,7 +61,7 @@ module Metalware
       private
 
       def raise_invalid_source
-        raise ValidationFailure, <<-EOF.squish
+        raise Underware::ValidationFailure, <<-EOF.squish
           Failed to add asset: "#{name}". Please check the layout is valid:
           "#{source_path}"
         EOF

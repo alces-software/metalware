@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'utils/editor'
+require 'underware/utils/editor'
 
 module Metalware
   module Commands

@@ -46,7 +46,7 @@ RSpec.describe Metalware::Commands::Build do
     Timeout.timeout build_wait_time do
       th = Thread.new do
         AlcesUtils.redirect_std(:stdout) do
-          Metalware::Utils.run_command(
+          Underware::Utils.run_command(
             Metalware::Commands::Build, node_group.name, **options_hash
           )
         end

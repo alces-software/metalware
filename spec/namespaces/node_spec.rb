@@ -218,7 +218,7 @@ RSpec.describe Metalware::Namespaces::Node do
         enabled_identifier => true,
         disabled_identitifer => false,
       }.to_json
-      Metalware::Utils.run_command(
+      Underware::Utils.run_command(
         Metalware::Commands::Configure::Node, node.name, answers: answers
       )
     end
