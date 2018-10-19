@@ -34,3 +34,6 @@
       allowedTerms:
       - MetalBench
       - debug!
+      - body
+      - credentials
+      - shutdown
