@@ -6,14 +6,14 @@ module Metalware
       class << self
         def validate(content)
           run_in_temp_file(content) do |file|
-            NodeattrInterface.validate_genders_file(file.path)
+            Underware::NodeattrInterface.validate_genders_file(file.path)
           end
         end
 
         private
 
         def sync_location
-          FilePath.genders
+          Underware::FilePath.genders
         end
 
         def template(namespace)

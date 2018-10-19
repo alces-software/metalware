@@ -26,7 +26,7 @@ module Metalware
       end
 
       def genders
-        @genders ||= NodeattrInterface.genders_for_node(name)
+        @genders ||= Underware::NodeattrInterface.genders_for_node(name)
       end
 
       def index
@@ -117,7 +117,7 @@ module Metalware
 
       def hash_merger_input
         { groups: genders, node: name }
-      rescue NodeNotInGendersError
+      rescue Underware::NodeNotInGendersError
         # The answer hash needs to be accessible by the Configurator. Nodes in
         # a group work fine as they appear in the genders file BUT local and
         # orphan nodes DO NOT appear in the genders file and cause the above

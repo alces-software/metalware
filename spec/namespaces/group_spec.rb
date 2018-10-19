@@ -32,7 +32,7 @@ RSpec.describe Metalware::Namespaces::Group do
         node[01-10]    group1,group2
         nodeA    group2
       EOF
-      File.write Metalware::FilePath.genders, genders
+      File.write Underware::FilePath.genders, genders
     end
 
     describe '#short_nodes_string' do

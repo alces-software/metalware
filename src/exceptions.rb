@@ -31,14 +31,9 @@ module Metalware
   class MetalwareError < StandardError; end
   class UserMetalwareError < MetalwareError; end
 
-  # NOTE: Can these be condensed?
-  class NoGenderGroupError < UserMetalwareError; end
-  class NodeNotInGendersError < UserMetalwareError; end
-
   class StrictWarningError < UserMetalwareError; end
   class InvalidInput < UserMetalwareError; end
   class InvalidConfigParameter < UserMetalwareError; end
-  class FileDoesNotExistError < UserMetalwareError; end
   class DataError < UserMetalwareError; end
   class UninitializedLocalNode < UserMetalwareError; end
   class InvalidLocalBuild < UserMetalwareError; end

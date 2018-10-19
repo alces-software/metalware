@@ -54,7 +54,7 @@ RSpec.describe Metalware::DependencySpecifications do
     it 'raises if node not in configured primary group' do
       expect do
         subject.for_node_in_configured_group('node_not_in_configured_group')
-      end.to raise_error Metalware::NodeNotInGendersError
+      end.to raise_error Underware::NodeNotInGendersError
     end
   end
 end

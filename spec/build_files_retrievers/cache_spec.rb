@@ -166,7 +166,7 @@ RSpec.describe Metalware::BuildFilesRetrievers::Cache do
     before do
       FileSystem.root_setup do |fs|
         # This must exist so can attempt to get node groups.
-        fs.touch Metalware::Constants::GENDERS_PATH
+        fs.touch Underware::Constants::GENDERS_PATH
       end
     end
 

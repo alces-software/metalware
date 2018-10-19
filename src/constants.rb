@@ -22,6 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'underware/constants'
 require 'hash_mergers/metal_recursive_open_struct'
 
 module Metalware
@@ -50,9 +51,6 @@ module Metalware
 
     MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 
-    NODEATTR_COMMAND = 'nodeattr'
-
-    GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
     HOSTS_PATH = '/etc/hosts'
 
     UEFI_SAVE_PATH = '/var/lib/tftpboot/efi'

@@ -33,10 +33,11 @@ module SpecUtils
     mock_validate_genders(true, '')
   end
 
+  # XXX Use this from Underware instead?
   def use_mock_genders(genders_file: 'genders/default')
     genders_path = File.join(FIXTURES_PATH, genders_file)
 
-    nodeattr_command = 'Metalware::Constants::NODEATTR_COMMAND'
+    nodeattr_command = 'Underware::Constants::NODEATTR_COMMAND'
     stub_const(nodeattr_command, "nodeattr -f #{genders_path}")
   end
 
@@ -98,7 +99,7 @@ module SpecUtils
   private
 
   def mock_validate_genders(valid, error)
-    allow(Metalware::NodeattrInterface).to receive(
+    allow(Underware::NodeattrInterface).to receive(
       :validate_genders_file
     ).and_return([valid, error])
   end

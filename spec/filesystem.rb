@@ -146,7 +146,7 @@ class FileSystem
   end
 
   def with_genders_fixtures(genders_file = 'genders/default')
-    with_fixtures(genders_file, at: Metalware::Constants::GENDERS_PATH)
+    with_fixtures(genders_file, at: Underware::Constants::GENDERS_PATH)
   end
 
   def with_group_cache_fixture(group_cache_file)

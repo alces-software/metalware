@@ -22,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'nodeattr_interface'
+require 'underware/nodeattr_interface'
 require 'active_support/core_ext/string/strip'
 require 'underware/data'
 require 'staging'
@@ -62,9 +62,9 @@ module Metalware
         end
 
         def list_of_answer_files
-          NodeattrInterface.nodes_in_group(primary_group)
-                           .map { |node| FilePath.node_answers(node) }
-                           .unshift(FilePath.group_answers(primary_group))
+          Underware::NodeattrInterface.nodes_in_group(primary_group)
+                                      .map { |node| FilePath.node_answers(node) }
+                                      .unshift(FilePath.group_answers(primary_group))
         end
       end
     end

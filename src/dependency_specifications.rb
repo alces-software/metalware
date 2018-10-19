@@ -27,7 +27,7 @@ module Metalware
 
     def find_node(name)
       node = alces.nodes.find_by_name(name)
-      raise NodeNotInGendersError, "Could not find node: #{name}" unless node
+      raise Underware::NodeNotInGendersError, "Could not find node: #{name}" unless node
       node
     end
   end

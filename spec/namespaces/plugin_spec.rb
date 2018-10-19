@@ -27,7 +27,7 @@ RSpec.describe Metalware::Namespaces::Plugin do
         FileUtils.mkdir_p plugin_config_dir
 
         File.write(
-          Metalware::FilePath.genders, "#{node_name} #{node_group_name}\n"
+          Underware::FilePath.genders, "#{node_name} #{node_group_name}\n"
         )
       end
     end

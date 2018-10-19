@@ -39,7 +39,7 @@ module AlcesUtils
     end
 
     def nodeattr_genders_file_path(command)
-      return Metalware::FilePath.genders unless command.include?('-f')
+      return Underware::FilePath.genders unless command.include?('-f')
       command.match(AlcesUtils::GENDERS_FILE_REGEX)[0].sub('-f ', '')
     end
 
@@ -50,16 +50,18 @@ module AlcesUtils
     # Mocks nodeattr to use faked genders file
     def spoof_nodeattr(context)
       context.instance_exec do
-        genders_path = Metalware::FilePath.genders
+        genders_path = Underware::FilePath.genders
         genders_exist = File.exist? genders_path
+        # p "genders_exist [waryknxa]:", genders_exist
         File.write(genders_path, "local local\n") unless genders_exist
 
-        allow(Metalware::NodeattrInterface)
+        allow(Underware::NodeattrInterface)
           .to receive(:nodeattr).and_wrap_original do |method, *args|
           AlcesUtils.check_and_raise_fakefs_error
           path = AlcesUtils.nodeattr_genders_file_path(args[0])
           cmd = AlcesUtils.nodeattr_cmd_trim_f(args[0])
           genders_data = File.read(path).tr('`', '"')
+          # puts "genders_data [bnbvwklw]:", genders_data
           tempfile = `mktemp /tmp/genders.XXXXX`.chomp
           begin
             `echo "#{genders_data}" > #{tempfile}`
@@ -200,7 +202,7 @@ module AlcesUtils
     attr_reader :alces, :test
 
     def raise_if_node_exists(name)
-      return unless File.exist? Metalware::FilePath.genders
+      return unless File.exist? Underware::FilePath.genders
       msg = "Node '#{name}' already exists"
       raise Metalware::InternalError, msg if alces.nodes.find_by_name(name)
     end
@@ -208,7 +210,7 @@ module AlcesUtils
     def add_node_to_genders_file(name, *genders)
       genders = [AlcesUtils.default_group] if genders.empty?
       genders_entry = "#{name} #{genders.join(',')}\n"
-      File.write(Metalware::FilePath.genders, genders_entry, mode: 'a')
+      File.write(Underware::FilePath.genders, genders_entry, mode: 'a')
     end
 
     # Allows the RSpec methods to be accessed
