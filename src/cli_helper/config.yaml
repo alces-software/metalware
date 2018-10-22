@@ -253,17 +253,6 @@ commands:
       operates over the BMC network and can be used as node is booting.
     action: Commands::Console
 
-  each:
-    syntax: metal each NODE_IDENTIFIER COMMAND [options]
-    summary: Runs a command for a node(s)
-    description: >
-      Runs the COMMAND for the node/ group specified by NODE_IDENTIFIER.
-      Commands that contain spaces must be quoted. The command is first rendered
-      by the templater and supports erb tags.
-    action: Commands::Each
-    options:
-      - *gender_option
-
   edit:
     syntax: metal edit FILE [options]
     summary: Opens a rendered file for editing
