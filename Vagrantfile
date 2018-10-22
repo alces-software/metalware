@@ -27,5 +27,6 @@ Vagrant.configure(2) do |config|
   config.vm.network "private_network", type: 'dhcp'
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.synced_folder '.', $dev_path
+  config.vm.synced_folder '../underware', '/tmp/underware'
   config.vm.provision 'shell', inline: $script
 end
