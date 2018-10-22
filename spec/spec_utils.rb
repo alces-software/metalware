@@ -25,6 +25,7 @@
 require 'alces_utils'
 require 'constants'
 require 'dependency'
+require 'build_methods'
 
 module SpecUtils
   # Mocks.
