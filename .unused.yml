@@ -37,6 +37,5 @@
     # Things flagged up as unused which are actually used.
     - name: False positives
       allowedTerms:
-      - body
       - credentials
       - shutdown
