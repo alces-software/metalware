@@ -430,12 +430,11 @@ RSpec.describe Metalware::Configurator do
     before do
       define_questions(node: [
                          {
-                           identifier: 'string_q',
-                           question: 'String?',
-                           default: 'default',
+                           identifier: 'placeholder_q',
+                           question: '?',
                          },
                        ])
-      configure_with_answers(['answer', 'sagh'], test_obj: configure_orphan)
+      configure_with_answers(['answer'], test_obj: configure_orphan)
     end
 
     it 'creates the orphan node' do
