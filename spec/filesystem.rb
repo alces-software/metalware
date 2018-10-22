@@ -219,7 +219,8 @@ class FileSystem
   end
 
   # Print every directory and file loaded in the FakeFS.
-  def debug!
+  delegate :debug!, to: FileSystem
+  def self.debug!
     begin
       # This can fail oddly if nothing matches (see
       # https://github.com/fakefs/fakefs/issues/371), hence the `rescue` with a
