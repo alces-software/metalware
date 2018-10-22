@@ -39,7 +39,6 @@ RSpec/AnyInstance:
     - 'spec/cli_helper/parser_spec.rb'
     - 'spec/command_helpers/configure_command_spec.rb'
     - 'spec/commands/console_spec.rb'
-    - 'spec/dependency_specifications_spec.rb'
     - 'spec/metal_log_spec.rb'
     - 'spec/slow/status/monitor_spec.rb'
     - 'spec/spec_utils.rb'
@@ -138,7 +137,6 @@ RSpec/VerifiedDoubles:
     - 'spec/command_helpers/alces_command_spec.rb'
     - 'spec/commands/configure/node_spec.rb'
     - 'spec/commands/each_spec.rb'
-    - 'spec/dependency_specifications_spec.rb'
     - 'spec/namespaces/mixins/white_list_hasher_spec.rb'
     - 'spec/templating/nil_detection_wrapper_spec.rb'
 

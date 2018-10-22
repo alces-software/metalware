@@ -25,7 +25,7 @@
 require 'metal_log'
 require 'dependency'
 require 'exceptions'
-require 'dependency_specifications'
+require 'underware/dependency_specifications'
 require 'validation/loader'
 require 'file_path'
 require 'namespaces/alces'
@@ -65,7 +65,7 @@ module Metalware
       end
 
       def dependency_specifications
-        DependencySpecifications.new(alces)
+        Underware::DependencySpecifications.new(alces)
       end
 
       def dependency_hash
