@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'underware/constants'
-require 'hash_mergers/metal_recursive_open_struct'
+require 'underware/hash_mergers/underware_recursive_open_struct'
 
 module Metalware
   module Constants
@@ -67,8 +67,9 @@ module Metalware
     CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
     CONFIGURE_INTERNAL_QUESTION_PREFIX = 'metalware_internal'
 
+    # XXX Remove and just use Underware constant?
     HASH_MERGER_DATA_STRUCTURE =
-      Metalware::HashMergers::MetalRecursiveOpenStruct
+      Underware::HashMergers::UnderwareRecursiveOpenStruct
 
     BUILD_POLL_SLEEP = 10
 

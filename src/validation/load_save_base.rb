@@ -50,23 +50,6 @@ module Metalware
         answer(FilePath.local_answers, :local)
       end
 
-      def section_answers(section, name = nil)
-        case section
-        when :domain
-          domain_answers
-        when :local
-          local_answers
-        when :group
-          raise InternalError, 'No group name given' if name.nil?
-          group_answers(name)
-        when :node
-          raise InternalError, 'No node name given' if name.nil?
-          node_answers(name)
-        else
-          raise InternalError, "Unrecognised question section: #{section}"
-        end
-      end
-
       private
 
       attr_reader :config

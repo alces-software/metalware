@@ -4,18 +4,6 @@ anchor_options:
     type: String
     description: >
       Switch NODE_IDENTIFIER to specify a gender, rather than a single node
-  configure_answers_option: &configure_answers_option
-    tags: [-a ANSWERS_MAPPING, --answers ANSWERS_MAPPING]
-    type: String
-    description: >
-      Given a JSON mapping of question identifiers to answer values, the
-      given answers will be saved instead of asking the configure questions
-      and saving user input.
-  asset_node_option: &asset_node_option
-    tags: [-n NODE_NAME, --node NODE_NAME]
-    type: String
-    description: >
-      Assigns the asset to the node
   color_output: &color_output
     tags: [--color-output]
     description: >
@@ -31,89 +19,6 @@ global_options:
       Suppress any warnings from being displayed
 
 subcommands:
-  asset_add: &asset_add
-    syntax: metal asset add ASSET_TYPE ASSET_NAME [options]
-    summary: Add a new asset record
-    action: Commands::Asset::Add
-    options:
-      - *asset_node_option
-
-  asset_edit: &asset_edit
-    syntax: metal asset edit ASSET_NAME [options]
-    summary: Edit an existing asset record
-    action: Commands::Asset::Edit
-    options:
-      - *asset_node_option
-
-  asset_delete: &asset_delete
-    syntax: metal asset delete ASSET_NAME [options]
-    summary: Delete an existing asset record
-    action: Commands::Asset::Delete
-
-  asset_link: &asset_link
-    syntax: metal asset link NODE_NAME ASSET_NAME [options]
-    summary: Add a relationship between an asset and a node
-    action: Commands::Asset::Link
-
-  asset_unlink: &asset_unlink
-    syntax: metal asset unlink NODE_NAME [options]
-    summary: Remove a relationship between an asset and a node
-    action: Commands::Asset::Unlink
-
-  configure_domain: &configure_domain
-    syntax: metal configure domain [options]
-    summary: Configure Metalware domain
-    description: >
-      Asks a sequence of questions defined in the current repository to
-      configure the domain for this Metalware installation. The configuration
-      answers will then be used when rendering templates.
-    action: Commands::Configure::Domain
-    options:
-      - *configure_answers_option
-
-  configure_group: &configure_group
-    syntax: metal configure group GROUP_NAME [options]
-    summary: Configure a Metalware group
-    description: >
-      Asks a sequence of questions defined in the current repository to
-      configure a group for this Metalware installation. The configuration
-      answers will then be used when rendering templates.
-    action: Commands::Configure::Group
-    options:
-      - *configure_answers_option
-
-  configure_node: &configure_node
-    syntax: metal configure node NODE_NAME [options]
-    summary: Configure a Metalware node
-    description: >
-      Asks a sequence of questions defined in the current repository to
-      configure a node for this Metalware installation. The configuration
-      answers will then be used when rendering templates.
-    action: Commands::Configure::Node
-    options:
-      - *configure_answers_option
-
-  configure_local: &configure_local
-    syntax: metal configure local [options]
-    summary: Configure the master Metalware node
-    description: >
-      Configures the node that metalware is running on. This is treated as the
-      metalware master node. This must be ran to configure metalware to match
-      the system environment. This command is intended to only be ran once.
-    action: Commands::Configure::Local
-    options:
-      - *configure_answers_option
-
-  layout_add: &layout_add
-    syntax: metal layout add TYPE_OR_LAYOUT LAYOUT_NAME [options]
-    summary: Add a new layout record
-    action: Commands::Layout::Add
-
-  layout_edit: &layout_edit
-    syntax: metal layout edit LAYOUT_NAME [options]
-    summary: Edit an existing layout record
-    action: Commands::Layout::Edit
-
   orchestrate_create: &orchestrate_create
     syntax: metal orchestrate create NODE_IDENTIFIER [options]
     summary: Creates a new virtual machine or group of machines
@@ -186,16 +91,6 @@ subcommands:
     action: Commands::Plugin::Deactivate
 
 commands:
-  asset:
-    syntax: metal asset [SUB_COMMAND] [options]
-    summary: Manage the asset record files
-    subcommands:
-      add: *asset_add
-      edit: *asset_edit
-      delete: *asset_delete
-      link: *asset_link
-      unlink: *asset_unlink
-
   build:
     syntax: metal build NODE_IDENTIFIER [options]
     summary: Renders the templates used to build the nodes
@@ -235,15 +130,6 @@ commands:
     action: Commands::Build
     options:
       - *gender_option
-
-  configure:
-    syntax: metal configure [SUB_COMMAND] [options]
-    summary: Configure different aspects of this Metalware installation
-    subcommands:
-      domain: *configure_domain
-      group: *configure_group
-      node: *configure_node
-      local: *configure_local
 
   console:
     syntax: metal console NODE_NAME [options]
@@ -318,13 +204,6 @@ commands:
         description: >
           Legacy tags used to specify the input. Their use has been
           deprecated by the COMMAND input.
-
-  layout:
-    syntax: metal layout [SUB_COMMAND] [options]
-    summary: Manage the layout record files
-    subcommands:
-      add: *layout_add
-      edit: *layout_edit
 
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]

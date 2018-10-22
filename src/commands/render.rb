@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
 module Metalware
   module Commands

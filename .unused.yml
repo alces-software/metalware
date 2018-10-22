@@ -18,14 +18,6 @@
       pathStartsWith: src/configurator
       termStartsWith: ask_
 
-    # Methods may be defined in namespaces and never used elsewhere in
-    # Metalware, as we just want them to be available when the namespace is
-    # used as a binding when rendering templates.
-    - name: Namespace methods
-      pathStartsWith: src/namespaces
-      allowedTerms:
-      - local?
-
     # Things we want to explicitly not flag up as they may be useful in certain
     # situations in development even if they're not currently used in any
     # committed code.
@@ -34,8 +26,10 @@
       - MetalBench
       - debug!
 
-    # Things flagged up as unused which are actually used.
+    # Things flagged up as unused which are actually used (or aren't actually
+    # identifiers).
     - name: False positives
       allowedTerms:
       - credentials
       - shutdown
+      - debug

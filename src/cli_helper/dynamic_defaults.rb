@@ -1,6 +1,8 @@
 
 # frozen_string_literal: true
 
+require 'deployment_server'
+
 module Metalware
   module CliHelper
     module DynamicDefaults

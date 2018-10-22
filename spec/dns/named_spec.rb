@@ -26,9 +26,9 @@
 require 'dns/named'
 require 'filesystem'
 require 'exceptions'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'staging'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::DNS::Named do
   include AlcesUtils

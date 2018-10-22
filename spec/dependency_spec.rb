@@ -30,7 +30,7 @@ require 'ostruct'
 require 'spec_helper'
 require 'fileutils'
 require 'filesystem'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Dependency do
   include AlcesUtils

@@ -37,12 +37,10 @@ Naming/AccessorMethodName:
 RSpec/AnyInstance:
   Exclude:
     - 'spec/cli_helper/parser_spec.rb'
-    - 'spec/command_helpers/configure_command_spec.rb'
     - 'spec/commands/console_spec.rb'
     - 'spec/metal_log_spec.rb'
     - 'spec/slow/status/monitor_spec.rb'
     - 'spec/spec_utils.rb'
-    - 'spec/utils/editor_spec.rb'
 
 # Offense count: 5
 # Configuration parameters: Prefixes.
@@ -51,7 +49,6 @@ RSpec/ContextWording:
   Exclude:
     - 'spec/commands/status_spec.rb'
     - 'spec/fixtures/shared_context/overview.rb'
-    - 'spec/validation/configure_spec.rb'
 
 # Offense count: 87
 # Configuration parameters: Max.
@@ -66,7 +63,6 @@ RSpec/ExpectInHook:
 # Offense count: 3
 RSpec/ExpectOutput:
   Exclude:
-    - 'spec/configurator_spec.rb'
     - 'spec/commander_extensions_spec.rb'
     - 'spec/commands/sync_spec.rb'
 
@@ -135,9 +131,7 @@ RSpec/ScatteredSetup:
 RSpec/VerifiedDoubles:
   Exclude:
     - 'spec/command_helpers/alces_command_spec.rb'
-    - 'spec/commands/configure/node_spec.rb'
     - 'spec/commands/each_spec.rb'
-    - 'spec/namespaces/mixins/white_list_hasher_spec.rb'
     - 'spec/templating/nil_detection_wrapper_spec.rb'
 
 # Offense count: 2
@@ -167,18 +161,15 @@ Style/GuardClause:
 Style/IfUnlessModifier:
   Exclude:
     - 'bin/autocomplete'
-    - 'src/command_helpers/configure_command.rb'
     - 'src/commands/console.rb'
     - 'src/commands/repo/update.rb'
     - 'src/commands/status.rb'
-    - 'src/namespaces/mixins/alces_static.rb'
     - 'src/templater.rb'
 
 # Offense count: 3
 Style/MethodMissing:
   Exclude:
     - 'spec/filesystem.rb'
-    - 'src/hash_mergers/metal_recursive_open_struct.rb'
     - 'src/metal_log.rb'
 
 # Offense count: 1

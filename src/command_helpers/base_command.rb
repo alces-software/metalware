@@ -28,7 +28,7 @@ require 'exceptions'
 require 'underware/dependency_specifications'
 require 'validation/loader'
 require 'file_path'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
 module Metalware
   module CommandHelpers
@@ -95,7 +95,7 @@ module Metalware
       end
 
       def alces
-        @alces ||= Namespaces::Alces.new
+        @alces ||= Underware::Namespaces::Alces.new
       end
 
       def log_command

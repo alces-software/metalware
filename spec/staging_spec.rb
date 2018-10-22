@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'staging'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Staging do
   include AlcesUtils

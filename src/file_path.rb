@@ -102,15 +102,6 @@ module Metalware
         event(node_namespace, 'complete')
       end
 
-      def rendered_build_file_path(rendered_dir, section, file_name)
-        File.join(
-          rendered_files,
-          rendered_dir,
-          section.to_s,
-          file_name
-        )
-      end
-
       def rendered_files
         rendered_dir
       end
@@ -143,10 +134,6 @@ module Metalware
         '/var/log/metalware'
       end
 
-      def asset_type(type)
-        File.join(metalware_install, 'data/asset_types', type + '.yaml')
-      end
-
       def asset(*a)
         record(asset_dir, *a)
       end
@@ -163,23 +150,8 @@ module Metalware
         File.join(metalware_data, 'layouts')
       end
 
-      def asset_cache
-        File.join(cache, 'assets.yaml')
-      end
-
-      def cached_template(name)
-        File.join(cache, 'templates', name)
-      end
-
       def build_hooks
         File.join(metalware_data, 'build_hooks')
-      end
-
-      def namespace_data_file(name)
-        File.join(
-          Constants::NAMESPACE_DATA_PATH,
-          "#{name}.yaml"
-        )
       end
 
       private

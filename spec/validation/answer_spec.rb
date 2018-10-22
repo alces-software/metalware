@@ -24,7 +24,7 @@
 require 'validation/answer'
 require 'underware/data'
 require 'filesystem'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Validation::Answer do
   include AlcesUtils

@@ -34,22 +34,7 @@ module Metalware
   class StrictWarningError < UserMetalwareError; end
   class InvalidInput < UserMetalwareError; end
   class InvalidConfigParameter < UserMetalwareError; end
-  class DataError < UserMetalwareError; end
-  class UninitializedLocalNode < UserMetalwareError; end
   class InvalidLocalBuild < UserMetalwareError; end
-  class MissingRecordError < UserMetalwareError; end
-
-  class RecursiveConfigDepthExceededError < UserMetalwareError
-    def initialize(msg = 'Input hash may contain infinitely recursive ERB')
-      super
-    end
-  end
-
-  class CombineHashError < UserMetalwareError
-    def initialize(msg = 'Could not combine config or answer hashes')
-      super
-    end
-  end
 
   class UnexpectedError < MetalwareError
     def initialize(msg = 'An unexpected error has occurred')
@@ -64,8 +49,6 @@ module Metalware
   end
 
   class InternalError < MetalwareError; end
-  class AnswerJSONSyntax < MetalwareError; end
-  class ScopeError < MetalwareError; end
   class ValidationFailure < UserMetalwareError; end
 
   # XXX, we need think about the future of the DependencyFailure,

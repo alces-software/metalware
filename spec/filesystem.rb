@@ -122,6 +122,10 @@ class FileSystem
   # the default repo path.
   def with_minimal_repo
     MinimalRepo.create_at('/var/lib/metalware/repo')
+    # XXX For now also create identical minimal repo for Underware - repo
+    # structure is currently shared, though independently cloned, between both
+    # projects. Reconsider how this should work.
+    MinimalRepo.create_at('/var/lib/underware/repo')
   end
 
   def with_fixtures(fixtures_dir, at:)
@@ -163,7 +167,7 @@ class FileSystem
   def with_config_fixture(config_fixture_file, target)
     with_fixtures(
       config_fixture_file,
-      at: File.join('/var/lib/metalware/repo/config', target)
+      at: File.join('/var/lib/underware/repo/config', target)
     )
   end
 

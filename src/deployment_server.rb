@@ -31,10 +31,6 @@ module Metalware
         ip_on_interface(build_interface)
       end
 
-      def system_file_url(system_file)
-        url "system/#{system_file}"
-      end
-
       def kickstart_url(node_name)
         if node_name
           path = File.join('kickstart', node_name)
@@ -44,15 +40,6 @@ module Metalware
 
       def build_complete_url(node_name)
         url "exec/kscomplete.php?name=#{node_name}" if node_name
-      end
-
-      def build_file_url(*args)
-        rendered_files_path =
-          Pathname.new(FilePath.rendered_build_file_path(*args))
-        rendered_files_root = Pathname.new(Constants::RENDERED_DIR_PATH)
-        relative_path =
-          rendered_files_path.relative_path_from(rendered_files_root)
-        url relative_path
       end
 
       def build_interface
