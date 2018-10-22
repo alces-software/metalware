@@ -2,7 +2,7 @@
 
 require 'active_support/core_ext/string/strip'
 require 'underware/nodeattr_interface'
-require 'group_cache'
+require 'underware/group_cache'
 require 'hashie'
 require 'validation/loader'
 require 'cache/asset'
@@ -80,7 +80,7 @@ module Metalware
         private
 
         def group_cache
-          @group_cache ||= GroupCache.new
+          @group_cache ||= Underware::GroupCache.new
         end
 
         def loader

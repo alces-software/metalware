@@ -34,7 +34,7 @@ module Metalware
       class Group < CommandHelpers::BaseCommand
         def setup
           @primary_group = args[0]
-          @cache = GroupCache.new
+          @cache = Underware::GroupCache.new
         end
 
         def run

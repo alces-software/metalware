@@ -424,7 +424,7 @@ RSpec.describe Metalware::Configurator do
     let(:configure_orphan) { described_class.for_node(alces, orphan) }
 
     def new_group_cache
-      Metalware::GroupCache.new
+      Underware::GroupCache.new
     end
 
     before do

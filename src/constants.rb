@@ -38,7 +38,6 @@ module Metalware
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
     NAMESPACE_DATA_PATH = File.join(METALWARE_DATA_PATH, 'data')
     HUNTER_PATH = File.join(NAMESPACE_DATA_PATH, 'hunter.yaml')
-    GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
     INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
     RENDERED_DIR_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')

@@ -24,7 +24,7 @@
 
 require 'spec_utils'
 require 'filesystem'
-require 'group_cache'
+require 'underware/group_cache'
 require 'alces_utils'
 
 RSpec.describe Metalware::Commands::Configure::Group do
@@ -37,11 +37,11 @@ RSpec.describe Metalware::Commands::Configure::Group do
   end
 
   def update_cache
-    Metalware::GroupCache.update { |c| yield c }
+    Underware::GroupCache.update { |c| yield c }
   end
 
   def new_cache
-    Metalware::GroupCache.new
+    Underware::GroupCache.new
   end
 
   let(:filesystem) do

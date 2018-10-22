@@ -24,7 +24,7 @@
 
 require 'command_helpers/configure_command'
 require 'constants'
-require 'group_cache'
+require 'underware/group_cache'
 
 module Metalware
   module Commands
@@ -48,7 +48,7 @@ module Metalware
         end
 
         def custom_configuration
-          GroupCache.update { |c| c.add group_name }
+          Underware::GroupCache.update { |c| c.add group_name }
         end
       end
     end

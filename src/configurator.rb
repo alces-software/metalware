@@ -27,7 +27,7 @@ require 'active_support/string_inquirer'
 require 'validation/loader'
 require 'validation/saver'
 require 'file_path'
-require 'group_cache'
+require 'underware/group_cache'
 require 'configurator/question'
 require 'configurator/class_methods'
 
@@ -44,7 +44,7 @@ module Metalware
     end
 
     def configure(answers = nil)
-      GroupCache.update do |cache|
+      Underware::GroupCache.update do |cache|
         @group_cache = cache
         answers ||= ask_questions
         save_answers(answers)
@@ -149,7 +149,7 @@ module Metalware
         behaviour of an orphan node that is later added to a group is undefined.
         A node can be removed from the orphan group by editing:
       EOF
-      msg + "\n" + FilePath.group_cache
+      msg + "\n" + Underware::FilePath.group_cache
     end
 
     def create_new_group

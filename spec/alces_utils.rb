@@ -223,7 +223,7 @@ module AlcesUtils
     end
 
     def group_cache
-      Metalware::GroupCache.update { |c| yield c }
+      Underware::GroupCache.update { |c| yield c }
     end
 
     def hash_object(h = {})

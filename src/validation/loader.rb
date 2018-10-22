@@ -42,7 +42,7 @@ module Metalware
       end
 
       def group_cache
-        Underware::Data.load(FilePath.group_cache)
+        Underware::Data.load(Underware::FilePath.group_cache)
       end
 
       private
