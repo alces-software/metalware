@@ -493,39 +493,3 @@ commands:
       domain: *view-answers_domain
       group: *view-answers_group
       node: *view-answers_node
-
-  view:
-    syntax: metal view ALCES_COMMAND [options]
-    summary: View domain templating config, optionally in context for given node
-    description: >
-      View the templating object that will be used for rendering templates. It
-      may optionally begin with 'alces' but this is optional.
-
-
-      The nodes, groups, domain and local namespaces can be viewed. The nodes
-      and groups have to be followed by the name of the object. The command
-      can be delimited by spaces or periods.
-
-
-      The displayed JSON can be navigated in the same way as templating. This
-      means 'alces.domain' will show all domain level parameters, where
-      'alces.domain.config' will only show the config.
-    action: Commands::View
-    options:
-      - *color_output
-
-  eval:
-    syntax: metal eval ALCES_COMMAND [options]
-    summary: Evaluate argument in context of `alces` namespace
-    description: >
-      Similar to 'metal view', but evaluates argument directly in 'alces'
-      namespace without any preprocessing, and then returns result as JSON.
-
-
-      Intended to have more stable behaviour than 'metal view', and to provide
-      external programs with access to Metalware data, whereas 'metal view' is
-      intended purely for human usage and its behaviour may change as needed to
-      whatever is most useful for this.
-    action: Commands::Eval
-    options:
-      - *color_output
