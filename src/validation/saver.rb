@@ -47,13 +47,12 @@ module Metalware
 
       class Methods < LoadSaveBase
         def initialize(data)
-          @path = FilePath
           @data = data
         end
 
         private
 
-        attr_reader :path, :data
+        attr_reader :data
 
         def answer(save_path, section)
           valid = Validation::Answer.new(data, answer_section: section)

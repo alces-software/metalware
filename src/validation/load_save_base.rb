@@ -30,28 +30,24 @@ require 'underware/data'
 module Metalware
   module Validation
     class LoadSaveBase
-      def initialize(*_a)
-        raise NotImplementedError
-      end
-
       def domain_answers
-        answer(path.domain_answers, :domain)
+        answer(FilePath.domain_answers, :domain)
       end
 
       def group_answers(name)
-        answer(path.group_answers(name), :group)
+        answer(FilePath.group_answers(name), :group)
       end
 
       def node_answers(name)
         if name == 'local'
           local_answers
         else
-          answer(path.node_answers(name), :node)
+          answer(FilePath.node_answers(name), :node)
         end
       end
 
       def local_answers
-        answer(path.local_answers, :local)
+        answer(FilePath.local_answers, :local)
       end
 
       def section_answers(section, name = nil)
@@ -73,7 +69,7 @@ module Metalware
 
       private
 
-      attr_reader :path, :config
+      attr_reader :config
 
       def answer(_absolute_path, _section)
         raise NotImplementedError
