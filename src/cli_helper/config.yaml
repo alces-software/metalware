@@ -241,15 +241,6 @@ commands:
         description: >
           Time to wait between running power command on each node.
 
-  render:
-    syntax: metal render TEMPLATE [NODE] [options]
-    summary: Render a given template
-    description: >
-      Renders the file specified by TEMPLATE and sends the output to standard
-      out. The template can be rendered for a specific node using the optional
-      NODE input.
-    action: Commands::Render
-
   repo:
     syntax: metal repo [SUB_COMMAND] [options]
     summary: Manage template and config repository
