@@ -146,7 +146,7 @@ class FileSystem
   end
 
   def with_answer_fixtures(answer_fixtures_dir)
-    with_fixtures(answer_fixtures_dir, at: '/var/lib/metalware/answers')
+    with_fixtures(answer_fixtures_dir, at: '/var/lib/underware/answers')
   end
 
   def with_genders_fixtures(genders_file = 'genders/default')

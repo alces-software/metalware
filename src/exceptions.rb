@@ -51,22 +51,6 @@ module Metalware
   class InternalError < MetalwareError; end
   class ValidationFailure < UserMetalwareError; end
 
-  # XXX, we need think about the future of the DependencyFailure,
-  # It maybe completely replaced with Validation::Loader and a file cache.
-  # If this is the case Dependency Failure/ InternalError will be replaced
-  # with Validation Failure
-
-  # Use this error as the general catch all in Dependencies
-  # The dependency can't be checked as the logic doesn't make sense
-  # NOTE: We should try and prevent these errors from appearing in production
-  class DependencyInternalError < MetalwareError
-  end
-
-  # Use this error when the dependency is checked but isn't met
-  # NOTE: This is the only dependency error we see in production
-  class DependencyFailure < UserMetalwareError
-  end
-
   class RuggedError < UserMetalwareError; end
   class RuggedCloneError < RuggedError; end
 

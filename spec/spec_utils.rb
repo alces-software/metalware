@@ -24,7 +24,7 @@
 
 require 'underware/spec/alces_utils'
 require 'constants'
-require 'dependency'
+require 'underware/dependency'
 require 'build_methods'
 
 module SpecUtils
@@ -58,7 +58,7 @@ module SpecUtils
 
   def use_mock_dependency
     allow_any_instance_of(
-      Metalware::Dependency
+      Underware::Dependency
     ).to receive(:enforce)
   end
 

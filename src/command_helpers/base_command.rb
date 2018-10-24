@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'metal_log'
-require 'dependency'
+require 'underware/dependency'
 require 'exceptions'
 require 'underware/dependency_specifications'
 require 'validation/loader'
@@ -73,7 +73,11 @@ module Metalware
       end
 
       def enforce_dependency
-        Dependency.new(command_name, dependency_hash).enforce
+        Underware::Dependency.new(
+          command_input: command_name,
+          repo_path: FilePath.repo,
+          dependency_hash: dependency_hash
+        ).enforce
       end
 
       def loader
