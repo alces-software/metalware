@@ -114,7 +114,7 @@ chmod a+rw /var/lib/metalware/events
 ln -s /etc/hosts /var/lib/metalware/rendered/system/
 
 mkdir -p "${target}"
-cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src,data} "${target}"
+cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,src,data} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
