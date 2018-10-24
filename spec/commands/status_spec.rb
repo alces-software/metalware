@@ -29,7 +29,7 @@ require 'timeout'
 require 'underware/namespaces/alces'
 
 RSpec.describe Metalware::Status::Monitor do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   before do
     FileSystem.root_setup do |fs|

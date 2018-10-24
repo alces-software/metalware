@@ -28,7 +28,7 @@ require 'status/job'
 require 'timeout'
 
 RSpec.describe Metalware::Status::Monitor do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   let(:nodes) { alces.nodes.map(&:name) }
 

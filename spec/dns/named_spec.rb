@@ -30,7 +30,7 @@ require 'staging'
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::DNS::Named do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   let(:file_path) { Metalware::FilePath }
   let(:filesystem) do

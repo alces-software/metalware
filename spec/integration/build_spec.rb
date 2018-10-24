@@ -42,7 +42,7 @@ RSpec.describe Metalware::Commands::Build do
   end
   let(:file_path) { Metalware::FilePath }
 
-  AlcesUtils.start(self)
+  Underware::AlcesUtils.start(self)
 
   TEST_KICKSTART_DIR = File
                        .join(Metalware::FilePath.rendered_files, 'kickstart')
@@ -75,7 +75,7 @@ RSpec.describe Metalware::Commands::Build do
       thr = Thread.new do
         begin
           Timeout.timeout 20 do
-            AlcesUtils.redirect_std(:stdout) do
+            Underware::AlcesUtils.redirect_std(:stdout) do
               Metalware::Commands::Build.new([name], options)
             end
           end
@@ -96,7 +96,7 @@ RSpec.describe Metalware::Commands::Build do
     FileUtils.mkdir_p(TEST_PXELINUX_DIR)
   end
 
-  AlcesUtils.mock self, :each do
+  Underware::AlcesUtils.mock self, :each do
     filesystem.test do
       alces.nodes.each { |node| hexadecimal_ip(node) }
       mock_group('nodes')

@@ -22,7 +22,7 @@ module Metalware
 end
 
 RSpec.describe Metalware::Commands::Sync do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_sync
     Underware::Utils.run_command(Metalware::Commands::Sync)

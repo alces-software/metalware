@@ -3,7 +3,7 @@
 require 'underware/spec/alces_utils'
 
 RSpec.shared_context 'overview context' do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   let(:config_value) { 'config_value' }
   let(:static) { 'static' }
@@ -17,7 +17,7 @@ RSpec.shared_context 'overview context' do
     ]
   end
 
-  AlcesUtils.mock self, :each do
+  Underware::AlcesUtils.mock self, :each do
     ['group1', 'group2', 'group3'].map do |group|
       config(mock_group(group), key: config_value)
     end

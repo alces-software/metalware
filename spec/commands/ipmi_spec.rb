@@ -4,10 +4,10 @@
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Ipmi do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_ipmi(node_identifier, command, **options)
-    AlcesUtils.redirect_std(:stdout) do
+    Underware::AlcesUtils.redirect_std(:stdout) do
       Underware::Utils.run_command(
         Metalware::Commands::Ipmi, node_identifier, command, **options
       )
@@ -33,7 +33,7 @@ RSpec.describe Metalware::Commands::Ipmi do
       }
     end
 
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       config(mock_group(group), namespace_config)
       node_names.each do |name|
         node = mock_node(name, group, gender)

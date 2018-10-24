@@ -12,16 +12,16 @@ module Metalware
 end
 
 RSpec.describe Metalware::BuildEvent do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   let(:nodes) { ['node01', 'node02', 'node03', 'nodes4'] }
   let(:build_event) { described_class.new(alces.nodes) }
   let(:empty_build_event) { described_class.new([]) }
 
-  AlcesUtils.mock self, :each do
+  Underware::AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
     alces.nodes.each { |node| hexadecimal_ip(node) }
-    AlcesUtils.kill_other_threads
+    Underware::AlcesUtils.kill_other_threads
   end
 
   def wait_for_hooks_to_run(test_obj: build_event)
@@ -68,7 +68,7 @@ RSpec.describe Metalware::BuildEvent do
 
   describe '#process' do
     def process(test_obj: build_event)
-      AlcesUtils.redirect_std(:stdout, :stderr) do
+      Underware::AlcesUtils.redirect_std(:stdout, :stderr) do
         test_obj.process
         wait_for_hooks_to_run(test_obj: test_obj)
       end

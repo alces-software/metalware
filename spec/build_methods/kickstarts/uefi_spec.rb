@@ -27,7 +27,7 @@ require 'file_path'
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   before do
     FileSystem.root_setup(&:with_minimal_repo)
@@ -36,7 +36,7 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
   let(:node_name) { 'nodeA01' }
   let(:node) { alces.nodes.find_by_name node_name }
 
-  AlcesUtils.mock self, :each do
+  Underware::AlcesUtils.mock self, :each do
     n = mock_node node_name
     allow(n).to receive(:hexadecimal_ip).and_return('00000000')
     config(n, build_method: :'uefi-kickstart')

@@ -4,10 +4,10 @@
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Power do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_power(node_identifier, command, **options)
-    AlcesUtils.redirect_std(:stdout) do
+    Underware::AlcesUtils.redirect_std(:stdout) do
       Underware::Utils.run_command(
         Metalware::Commands::Power, node_identifier, command, **options
       )
@@ -29,7 +29,7 @@ RSpec.describe Metalware::Commands::Power do
       }
     end
 
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       config(mock_group(group), namespace_config)
       node_names.each do |node|
         config(mock_node(node, group), namespace_config)

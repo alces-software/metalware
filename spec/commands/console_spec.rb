@@ -4,10 +4,10 @@
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Console do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_console(node_name, **options)
-    AlcesUtils.redirect_std(:stdout) do
+    Underware::AlcesUtils.redirect_std(:stdout) do
       Underware::Utils.run_command(
         Metalware::Commands::Console, node_name, **options
       )
@@ -28,7 +28,7 @@ RSpec.describe Metalware::Commands::Console do
       }
     end
 
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       config(mock_node(node_name), node_config)
     end
 

@@ -5,7 +5,7 @@ require 'staging'
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Staging do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def manifest
     Metalware::Staging.manifest

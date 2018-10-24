@@ -30,13 +30,13 @@ require 'network'
 require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Build do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   before do
     # Shortens the wait times for the tests
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
     # Makes sure there aren't any other threads
-    AlcesUtils.kill_other_threads
+    Underware::AlcesUtils.kill_other_threads
   end
 
   let(:build_wait_time) { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
@@ -44,7 +44,7 @@ RSpec.describe Metalware::Commands::Build do
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do
       th = Thread.new do
-        AlcesUtils.redirect_std(:stdout) do
+        Underware::AlcesUtils.redirect_std(:stdout) do
           Underware::Utils.run_command(
             Metalware::Commands::Build, node_group.name, **options_hash
           )
@@ -81,7 +81,7 @@ RSpec.describe Metalware::Commands::Build do
 
   let(:build_method) { stub_build_method_for(testnode) }
 
-  AlcesUtils.mock self, :each do
+  Underware::AlcesUtils.mock self, :each do
     config(testnode, build_method: :kickstart)
     hexadecimal_ip(testnode)
   end
@@ -123,7 +123,7 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called for group' do
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       test_group = test_group_name
       mock_group(test_group)
       ['nodeA00', 'nodeA01', 'nodeA02', 'nodeA03'].each do |node|
