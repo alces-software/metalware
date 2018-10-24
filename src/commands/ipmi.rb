@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'command_helpers/node_identifier'
+require 'underware/command_helpers/node_identifier'
 require 'underware/system_command'
 require 'vm'
 
@@ -73,7 +73,7 @@ module Metalware
 
       attr_reader :command_argument
 
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
 
       def setup
         @command_argument = Command.parse(args, options)

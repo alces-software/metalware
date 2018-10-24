@@ -28,7 +28,7 @@ require 'command_helpers/base_command'
 require 'constants'
 require 'underware/output'
 require 'exceptions'
-require 'command_helpers/node_identifier'
+require 'underware/command_helpers/node_identifier'
 require 'build_event'
 
 module Metalware
@@ -41,7 +41,7 @@ module Metalware
 
       attr_reader :build_event
 
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
 
       def setup
         @build_event = BuildEvent.new(nodes)

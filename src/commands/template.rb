@@ -23,7 +23,7 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'command_helpers/node_identifier'
+require 'underware/command_helpers/node_identifier'
 require 'dns'
 require 'render_methods'
 
@@ -32,7 +32,7 @@ module Metalware
     class Template < CommandHelpers::BaseCommand
       private
 
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
 
       attr_reader :build_methods
 
