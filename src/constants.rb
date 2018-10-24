@@ -31,9 +31,6 @@ module Metalware
       File.absolute_path(File.join(File.dirname(__FILE__), '..'))
     METAL_EXECUTABLE_PATH = File.join(METALWARE_INSTALL_PATH, 'bin/metal')
 
-    METALWARE_CONFIGS_PATH = File.join(METALWARE_INSTALL_PATH, 'etc')
-    DEFAULT_CONFIG_PATH = File.join(METALWARE_CONFIGS_PATH, 'config.yaml')
-
     METALWARE_DATA_PATH = '/var/lib/metalware'
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
     NAMESPACE_DATA_PATH = File.join(METALWARE_DATA_PATH, 'data')

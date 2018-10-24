@@ -196,9 +196,6 @@ class FileSystem
     ].each do |path|
       FileUtils.mkdir_p(path)
     end
-
-    FileUtils.mkdir_p Metalware::Constants::METALWARE_CONFIGS_PATH
-    FileUtils.touch Metalware::Constants::DEFAULT_CONFIG_PATH
   end
 
   # Print every directory and file loaded in the FakeFS.
