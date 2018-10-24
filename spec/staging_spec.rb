@@ -132,13 +132,13 @@ RSpec.describe Metalware::Staging do
 
         expected_start_marker = [
           comment_char,
-          Metalware::ManagedFile::MANAGED_START_MARKER,
+          Underware::ManagedFile::MANAGED_START_MARKER,
           comment_char,
         ].join(' ')
 
         expected_end_marker = [
           comment_char,
-          Metalware::ManagedFile::MANAGED_END_MARKER,
+          Underware::ManagedFile::MANAGED_END_MARKER,
           comment_char,
         ].join(' ')
 

@@ -6,7 +6,7 @@ require 'active_support/core_ext/string/filters'
 require 'underware/data'
 require 'file_path'
 require 'recursive-open-struct'
-require 'managed_file'
+require 'underware/managed_file'
 
 module Metalware
   class Staging
@@ -103,7 +103,7 @@ module Metalware
       if data.comment_char
         managed_file_content_args.push(comment_char: data.comment_char)
       end
-      ManagedFile.content(*managed_file_content_args)
+      Underware::ManagedFile.content(*managed_file_content_args)
     end
 
     class Templater
