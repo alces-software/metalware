@@ -22,20 +22,15 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'underware/spec/spec_utils'
 require 'constants'
 require 'underware/dependency'
 require 'build_methods'
 
 module SpecUtils
+  prepend Underware::SpecUtils
+
   # Mocks.
-
-  # XXX Use this from Underware instead?
-  def use_mock_genders(genders_file: 'genders/default')
-    genders_path = File.join(FIXTURES_PATH, genders_file)
-
-    nodeattr_command = 'Underware::Constants::NODEATTR_COMMAND'
-    stub_const(nodeattr_command, "nodeattr -f #{genders_path}")
-  end
 
   def use_mock_dependency
     allow_any_instance_of(
