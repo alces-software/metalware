@@ -22,7 +22,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'underware/spec/alces_utils'
 require 'constants'
 require 'underware/dependency'
 require 'build_methods'
