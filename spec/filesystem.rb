@@ -128,10 +128,6 @@ class FileSystem
     FakeFS::FileSystem.clone(path, at)
   end
 
-  def with_validation_error_file
-    FakeFS::FileSystem.clone(Metalware::FilePath.dry_validation_errors)
-  end
-
   def with_repo_fixtures(repo_fixtures_dir)
     # Create the minimal parts of a Metalware repo, these can then be
     # overridden by the specified fixtures.
@@ -146,13 +142,6 @@ class FileSystem
 
   def with_genders_fixtures(genders_file = 'genders/default')
     with_fixtures(genders_file, at: Underware::Constants::GENDERS_PATH)
-  end
-
-  def with_group_cache_fixture(group_cache_file)
-    with_fixtures(
-      group_cache_file,
-      at: Underware::Constants::GROUP_CACHE_PATH
-    )
   end
 
   def with_clone_fixture(fixture_file)
@@ -173,11 +162,6 @@ class FileSystem
         Metalware::Constants::METALWARE_INSTALL_PATH, 'templates', target
       )
     )
-  end
-
-  def with_asset_types
-    asset_types_dir_path = File.dirname(Metalware::FilePath.asset_type(''))
-    FakeFS::FileSystem.clone(asset_types_dir_path, asset_types_dir_path)
   end
 
   # Create same directory hierarchy that would be created by a Metalware

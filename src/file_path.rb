@@ -34,46 +34,12 @@ module Metalware
                :local_config,
                to: :config_path
 
-      def configure_file
-        File.join(repo, 'configure.yaml')
-      end
-
-      def domain_answers
-        File.join(answer_files, 'domain.yaml')
-      end
-
-      def group_answers(group)
-        file_name = "#{group}.yaml"
-        File.join(answer_files, 'groups', file_name)
-      end
-
-      def node_answers(node)
-        file_name = "#{node}.yaml"
-        File.join(answer_files, 'nodes', file_name)
-      end
-
-      def local_answers
-        node_answers('local')
-      end
-
-      def answer_files
-        File.join(metalware_data, 'answers')
-      end
-
-      def server_config
-        File.join(repo, 'server.yaml')
-      end
-
       def repo
         File.join(metalware_data, 'repo')
       end
 
       def overview
         File.join(repo, 'overview.yaml')
-      end
-
-      def plugins_dir
-        File.join(metalware_data, 'plugins')
       end
 
       # TODO: Change input from node to namespace
