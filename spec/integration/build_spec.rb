@@ -23,9 +23,7 @@
 #==============================================================================
 
 require 'constants'
-require 'spec_utils'
 require 'commands/build'
-require 'filesystem'
 
 require 'minimal_repo'
 

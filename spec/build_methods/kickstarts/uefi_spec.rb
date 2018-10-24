@@ -23,7 +23,6 @@
 #==============================================================================
 
 require 'build_methods/kickstarts/uefi'
-require 'filesystem'
 require 'file_path'
 require 'underware/spec/alces_utils'
 

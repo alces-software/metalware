@@ -24,7 +24,6 @@
 #==============================================================================
 
 require 'dns/named'
-require 'filesystem'
 require 'exceptions'
 require 'underware/namespaces/alces'
 require 'staging'

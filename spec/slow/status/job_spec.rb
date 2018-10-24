@@ -25,7 +25,6 @@
 require 'commands/status'
 require 'status/monitor'
 require 'status/job'
-require 'spec_utils'
 require 'timeout'
 
 RSpec.describe Metalware::Status::Job do
