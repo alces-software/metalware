@@ -62,24 +62,6 @@ subcommands:
         description: >
           Force update even if local changes have been made to the repo
 
-  plugin_list: &plugin_list
-    syntax: metal plugin list [options]
-    summary: List available and activated plugins
-    description: >
-      List all available Metalware plugins, along with which of these are
-      currently activated.
-    action: Commands::Plugin::List
-
-  plugin_activate: &plugin_activate
-    syntax: metal plugin activate PLUGIN_NAME [options]
-    summary: Activate given plugin for domain
-    action: Commands::Plugin::Activate
-
-  plugin_deactivate: &plugin_deactivate
-    syntax: metal plugin deactivate PLUGIN_NAME [options]
-    summary: Deactivate given plugin for domain
-    action: Commands::Plugin::Deactivate
-
 commands:
   build:
     syntax: metal build NODE_IDENTIFIER [options]
@@ -201,14 +183,6 @@ commands:
     subcommands:
       create: *orchestrate_create
       destroy: *orchestrate_destroy
-
-  plugin:
-    syntax: metal plugin [SUB_COMMAND] [options]
-    summary: View and manage activated plugins
-    subcommands:
-      list: *plugin_list
-      activate: *plugin_activate
-      deactivate: *plugin_deactivate
 
   power:
     syntax: metal power NODE_IDENTIFIER COMMAND [options]

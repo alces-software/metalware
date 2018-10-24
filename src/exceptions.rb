@@ -48,7 +48,6 @@ module Metalware
     end
   end
 
-  class InternalError < MetalwareError; end
   class ValidationFailure < UserMetalwareError; end
 
   class RuggedError < UserMetalwareError; end
@@ -68,10 +67,6 @@ module Metalware
         'delete these changes. (untracked unaffected)'
       super msg
     end
-  end
-
-  class SaverNoData < MetalwareError
-    def initialize(msg = 'No data provided to Validation::Saver'); end
   end
 
   # Alias for Exception to use to indicate we want to catch everything, and to

@@ -33,3 +33,11 @@
       - credentials
       - shutdown
       - debug
+      - activate!
+      - deactivate!
+      - exists?
+      - flatten
+      - Validation
+      - method_missing
+      - Plugin
+      - Methods

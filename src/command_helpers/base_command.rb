@@ -26,7 +26,6 @@ require 'metal_log'
 require 'underware/dependency'
 require 'exceptions'
 require 'underware/dependency_specifications'
-require 'validation/loader'
 require 'file_path'
 require 'underware/namespaces/alces'
 
@@ -78,10 +77,6 @@ module Metalware
           repo_path: FilePath.repo,
           dependency_hash: dependency_hash
         ).enforce
-      end
-
-      def loader
-        @loader ||= Validation::Loader.new
       end
 
       def file_path

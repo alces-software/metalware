@@ -25,7 +25,6 @@
 require 'fakefs/safe'
 require 'constants'
 require 'minimal_repo'
-require 'validation/configure'
 
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
 
@@ -46,10 +45,6 @@ class FileSystem
     delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
     delegate :write, to: File
     delegate :dump, to: Underware::Data
-
-    def activate_plugin(plugin_name)
-      Metalware::Plugins.activate!(plugin_name)
-    end
 
     # Create an empty file given any path, by creating every needed parent
     # directory and then the file itself.

@@ -23,7 +23,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'validation/loader'
 require 'pathname'
 require 'underware/system_command'
 require 'exceptions'
