@@ -113,6 +113,11 @@ chmod a+rw /var/lib/metalware/events
 # on the Metalware deployment server.
 ln -s /etc/hosts /var/lib/metalware/rendered/system/
 
+# Link genders file in from Underware to Metalware data dir. Genders file is
+# managed by Underware, but needs to be linked in to Metalware so it can be
+# made available on Metalware deployment server.
+ln -s /var/lib/{underware,metalware}/rendered/system/genders
+
 mkdir -p "${target}"
 cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,src,data} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
