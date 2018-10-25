@@ -50,7 +50,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
       fs.create rendered_path
     end
 
-    Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
+    Underware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       some_section: [{
         template_path: template_path,
         rendered_path: rendered_path,
@@ -59,7 +59,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
   end
 
   let(:mock_files_with_errors) do
-    Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
+    Underware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       some_section: [{
         error: 'error',
       }]

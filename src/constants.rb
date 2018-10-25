@@ -29,23 +29,18 @@ module Metalware
   module Constants
     METALWARE_INSTALL_PATH =
       File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    METAL_EXECUTABLE_PATH = File.join(METALWARE_INSTALL_PATH, 'bin/metal')
 
-    METALWARE_DATA_PATH = '/var/lib/metalware'
+    METALWARE_DATA_PATH = Underware::Constants::METALWARE_DATA_PATH
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
-    NAMESPACE_DATA_PATH = File.join(METALWARE_DATA_PATH, 'data')
-    HUNTER_PATH = File.join(NAMESPACE_DATA_PATH, 'hunter.yaml')
-    INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
     RENDERED_DIR_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
     STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
-    PLUGINS_CACHE_PATH = File.join(CACHE_PATH, 'plugins.yaml')
 
-    EVENTS_DIR_PATH = File.join(METALWARE_DATA_PATH, 'events')
+    HUNTER_PATH = File.join(Underware::Constants::NAMESPACE_DATA_PATH, 'hunter.yaml')
+
+    EVENTS_DIR_PATH = Underware::Constants::EVENTS_DIR_PATH
 
     DHCPD_HOSTS_PATH = '/etc/dhcp/dhcpd.hosts'
-
-    MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
 
     HOSTS_PATH = '/etc/hosts'
 
@@ -57,23 +52,7 @@ module Metalware
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 
-    DRY_VALIDATION_ERRORS_PATH = File.join(METALWARE_INSTALL_PATH,
-                                           'src/validation',
-                                           'errors.yaml')
-
-    CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
-    CONFIGURE_INTERNAL_QUESTION_PREFIX = 'metalware_internal'
-
-    # XXX Remove and just use Underware constant?
-    HASH_MERGER_DATA_STRUCTURE =
-      Underware::HashMergers::UnderwareRecursiveOpenStruct
-
     BUILD_POLL_SLEEP = 10
-
-    # This only exists for legacy purposes so we have a constant we can stub to
-    # skip validations; ideally we would handle wanting to test things without
-    # running validations in a better way.
-    SKIP_VALIDATION = false
 
     LOG_SEVERITY = 'INFO'
   end
