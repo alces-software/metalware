@@ -23,23 +23,12 @@
 #==============================================================================
 
 require 'constants'
-require 'file_path/config_path'
 
 module Metalware
   module FilePath
     class << self
-      delegate :domain_config,
-               :group_config,
-               :node_config,
-               :local_config,
-               to: :config_path
-
       def repo
         File.join(metalware_data, 'repo')
-      end
-
-      def overview
-        File.join(repo, 'overview.yaml')
       end
 
       # TODO: Change input from node to namespace
@@ -100,22 +89,6 @@ module Metalware
         '/var/log/metalware'
       end
 
-      def asset(*a)
-        record(asset_dir, *a)
-      end
-
-      def asset_dir
-        File.join(metalware_data, 'assets')
-      end
-
-      def layout(*a)
-        record(layout_dir, *a)
-      end
-
-      def layout_dir
-        File.join(metalware_data, 'layouts')
-      end
-
       def build_hooks
         File.join(metalware_data, 'build_hooks')
       end
@@ -128,10 +101,6 @@ module Metalware
 
       def template_file_name(template_type, node:)
         node.config.templates&.send(template_type) || 'default'
-      end
-
-      def config_path
-        @config_path ||= ConfigPath.new(base: repo)
       end
     end
   end
