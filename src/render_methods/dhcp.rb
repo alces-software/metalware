@@ -40,7 +40,7 @@ module Metalware
         end
 
         def template(namespace)
-          FilePath.repo_template_path('dhcp', node: namespace)
+          FilePath.repo_template_path('dhcp', namespace: namespace)
         end
       end
     end

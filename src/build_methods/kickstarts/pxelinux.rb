@@ -10,7 +10,7 @@ module Metalware
         private
 
         def pxelinux_template_path
-          file_path.repo_template_path(:pxelinux, node: node)
+          file_path.repo_template_path(:pxelinux, namespace: node)
         end
 
         def save_path

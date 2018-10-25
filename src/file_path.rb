@@ -31,12 +31,11 @@ module Metalware
         File.join(metalware_data, 'repo')
       end
 
-      # TODO: Change input from node to namespace
-      def repo_template_path(template_type, node:)
+      def repo_template_path(template_type, namespace:)
         File.join(
           repo,
           template_type.to_s,
-          template_file_name(template_type, node: node)
+          template_file_name(template_type, namespace: namespace)
         )
       end
 
@@ -99,8 +98,8 @@ module Metalware
         File.join(record_dir, types_dir, name + '.yaml')
       end
 
-      def template_file_name(template_type, node:)
-        node.config.templates&.send(template_type) || 'default'
+      def template_file_name(template_type, namespace:)
+        namespace.config.templates&.send(template_type) || 'default'
       end
     end
   end

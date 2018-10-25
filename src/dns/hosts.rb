@@ -50,7 +50,7 @@ module Metalware
       attr_reader :alces, :templater
 
       def template
-        FilePath.repo_template_path('hosts', node: alces.domain)
+        FilePath.repo_template_path('hosts', namespace: alces.domain)
       end
 
       def rendered_path
