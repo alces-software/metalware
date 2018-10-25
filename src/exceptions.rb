@@ -61,7 +61,7 @@ module Metalware
     end
   end
 
-  class UncommitedChanges < RuggedError
+  class UncommittedChanges < RuggedError
     def initialize(num)
       msg = "The local repo has #{num} uncommitted changes. -f will " \
         'delete these changes. (untracked unaffected)'
