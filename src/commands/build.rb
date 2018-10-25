@@ -36,7 +36,6 @@ module Metalware
     class Build < CommandHelpers::BaseCommand
       private
 
-      delegate :template_path, to: :file_path
       delegate :agree, to: :high_line
 
       attr_reader :build_event
