@@ -35,7 +35,7 @@ module Metalware
 
       def dependency_paths
         staging_templates.map do |t|
-          strip_leading_repo_path(file_path.template_path(t, node: node))
+          strip_leading_repo_path(file_path.repo_template_path(t, node: node))
         end
       end
 
@@ -60,7 +60,7 @@ module Metalware
       end
 
       def render_to_staging(templater, template_type, sync: nil)
-        template_type_path = FilePath.template_path(template_type, node: node)
+        template_type_path = FilePath.repo_template_path(template_type, node: node)
         sync ||= FilePath.template_save_path(template_type, node: node)
         templater.render(node, template_type_path, sync)
       end

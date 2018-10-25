@@ -54,7 +54,7 @@ module Metalware
       attr_reader :alces, :templater
 
       def render_repo_named_conf
-        template_path = FilePath.template_path('named', node: alces.domain)
+        template_path = FilePath.repo_template_path('named', node: alces.domain)
         templater.render(alces,
                          template_path,
                          FilePath.metalware_named,
@@ -85,7 +85,7 @@ module Metalware
         dynamic_namespace = build_dynamic_namespace(zone, net)
         templater.render(
           alces,
-          FilePath.template_path("named/#{direction}", node: alces.domain),
+          FilePath.repo_template_path("named/#{direction}", node: alces.domain),
           FilePath.named_zone(zone_name),
           dynamic: dynamic_namespace,
           comment_char: ';',
