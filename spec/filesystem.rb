@@ -169,8 +169,8 @@ class FileSystem
   def create_initial_directory_hierarchy
     [
       '/tmp',
-      '/var/lib/metalware/cache/templates',
-      '/var/lib/underware/cache/templates',
+      '/var/lib/metalware/cache',
+      '/var/lib/underware/cache',
       '/var/lib/underware/rendered/system',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
