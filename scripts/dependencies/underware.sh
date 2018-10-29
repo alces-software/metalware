@@ -32,7 +32,14 @@ fetch_underware() {
 }
 
 install_underware() {
+    local underware_version
+
     title "Installing Underware"
+
+    # Specify exact Underware version required by current Metalware to be
+    # installed.
+    underware_version="$(cat underware-version)"
+    export alces_SOURCE_BRANCH="$underware_version"
 
     # Will be installed with same arguments as provided to
     # `metalware-installer`, due to variables exported in `scripts/install`.

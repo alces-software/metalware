@@ -22,3 +22,8 @@ sudo apt-get install genders -y
 
 # Required for ruby-libvirt gem.
 sudo apt-get install libvirt-dev -y
+
+# Install specified Underware version for current Metalware at required
+# location.
+underware_version="$(cat underware-version)"
+git clone https://github.com/alces-software/underware ../underware --branch "$underware_version"
