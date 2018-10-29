@@ -42,18 +42,22 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
   end
 
   let(:template_path) { '/path/to/template' }
-  let(:rendered_path) { '/path/to/rendered' }
+  let(:relative_rendered_path) { 'path/to/rendered' }
+
+  let(:rendered_path) do
+    File.join(Metalware::Constants::RENDERED_DIR_PATH, relative_rendered_path)
+  end
 
   let(:mock_files) do
     FileSystem.root_setup do |fs|
       fs.create template_path
-      fs.create rendered_path
+      fs.create relative_rendered_path
     end
 
     Underware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       some_section: [{
         template_path: template_path,
-        rendered_path: rendered_path,
+        relative_rendered_path: relative_rendered_path,
       }]
     )
   end

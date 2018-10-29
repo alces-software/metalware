@@ -71,20 +71,33 @@ module Metalware
       # `Underware::BuildFilesRetrievers::BuildFilesRetriever#retrieve`.
       #
       # XXX How this works could probably be improved to reduce this tight
-      # coupling across the codebases - maybe this class should move in to
+      # coupling across the codebases - maybe this class should be made generic
+      # (i.e. remove reference to Metalware data directory) and moved in to
       # Underware?
       BuildFilesRenderer = Struct.new(:templater) do
         def render_namespace_files(namespace)
           namespace.files.each_value do |files|
             files.select { |file| file[:error].nil? }.map do |file|
-              templater.render(
-                namespace,
-                file[:template_path],
-                file[:rendered_path],
-                mkdir: true
-              )
+              render_file(namespace: namespace, file: file)
             end
           end
+        end
+
+        private
+
+        def render_file(namespace:, file:)
+          templater.render(
+            namespace,
+            file[:template_path],
+            rendered_path_for(file),
+            mkdir: true
+          )
+        end
+
+        def rendered_path_for(file)
+          File.join(
+            Constants::RENDERED_DIR_PATH, file[:relative_rendered_path]
+          )
         end
       end
     end
