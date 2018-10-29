@@ -39,7 +39,7 @@ module Metalware
 
     def run
       program :name, 'metal'
-      program :version, '2017.2.1'
+      program :version, '2018.4.0'
       program :description, <<-EOF.squish
         Alces tools for the management and configuration of bare metal machines
       EOF
