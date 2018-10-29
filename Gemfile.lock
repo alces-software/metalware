@@ -13,7 +13,7 @@ GIT
       highline (~> 1.7.2)
 
 GIT
-  remote: https://github.com/alces-software/ruby-pcap.git
+  remote: https://github.com/alces-software/ruby-pcap
   revision: 966ce3739d7c91c15032b3a85095c7400565841f
   specs:
     pcap (0.7.8)
