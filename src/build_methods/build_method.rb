@@ -65,6 +65,14 @@ module Metalware
         templater.render(node, template_type_path, sync)
       end
 
+      # Handles rendering the build files as retrieved by
+      # `Underware::BuildFilesRetrievers::BuildFilesRetriever`, and so is
+      # coupled to the data structure returned by
+      # `Underware::BuildFilesRetrievers::BuildFilesRetriever#retrieve`.
+      #
+      # XXX How this works could probably be improved to reduce this tight
+      # coupling across the codebases - maybe this class should move in to
+      # Underware?
       BuildFilesRenderer = Struct.new(:templater) do
         def render_namespace_files(namespace)
           namespace.files.each_value do |files|
