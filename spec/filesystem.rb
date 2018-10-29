@@ -165,33 +165,13 @@ class FileSystem
   end
 
   # Create same directory hierarchy that would be created by a Metalware
-  # install.
+  # install (without directories unneeded for any tests to pass).
   def create_initial_directory_hierarchy
     [
-      '/etc',
       '/tmp',
-      '/var/lib/metalware/answers/groups',
-      '/var/lib/metalware/answers/nodes',
-      '/var/lib/metalware/assets',
       '/var/lib/metalware/cache/templates',
-      '/var/lib/metalware/data',
-      '/var/lib/metalware/events',
-      '/var/lib/metalware/rendered/kickstart',
-      '/var/lib/metalware/rendered/system',
-      '/var/lib/metalware/repo',
-      '/var/lib/metalware/staging',
-      '/var/lib/underware/answers/groups',
-      '/var/lib/underware/answers/nodes',
-      '/var/lib/underware/assets',
       '/var/lib/underware/cache/templates',
-      '/var/lib/underware/data',
-      '/var/lib/underware/events',
-      '/var/lib/underware/rendered/kickstart',
       '/var/lib/underware/rendered/system',
-      '/var/lib/underware/repo',
-      '/var/log/metalware',
-      '/var/log/underware',
-      '/var/named',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)
