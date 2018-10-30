@@ -29,6 +29,7 @@ require 'bundler/setup'
 require 'commander'
 require 'config'
 require 'colorize'
+require 'active_support/core_ext/string/filters'
 
 require 'cli_helper/parser'
 require 'underware/data'
