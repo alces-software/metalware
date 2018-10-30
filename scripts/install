@@ -41,7 +41,7 @@ source $source/scripts/lib/install.functions.sh
 # tar -C /opt/metalware -cvzf libyaml.tar.gz opt/lib
 # tar -C /opt/metalware -cvzf pdsh.tar.gz opt/pdsh
 # ```
-deps="libyaml ruby bundler genders pdsh components underware"
+deps="underware libyaml ruby bundler genders pdsh components"
 
 if [ -z "$2" ]; then
   echo "$0: invalid parameters"
