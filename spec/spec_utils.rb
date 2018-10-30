@@ -56,4 +56,11 @@ module SpecUtils
 
     stub_build_method
   end
+
+  def kill_other_threads
+    Thread.list
+      .reject { |t| t == Thread.current }
+      .tap { |t| t.each(&:kill) }
+      .tap { |t| t.each(&:join) }
+  end
 end

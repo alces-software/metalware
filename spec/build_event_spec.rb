@@ -21,7 +21,7 @@ RSpec.describe Metalware::BuildEvent do
   Underware::AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
     alces.nodes.each { |node| hexadecimal_ip(node) }
-    Underware::AlcesUtils.kill_other_threads
+    kill_other_threads
   end
 
   def wait_for_hooks_to_run(test_obj: build_event)

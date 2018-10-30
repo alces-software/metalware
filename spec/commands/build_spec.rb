@@ -36,7 +36,7 @@ RSpec.describe Metalware::Commands::Build do
     # Shortens the wait times for the tests
     stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
     # Makes sure there aren't any other threads
-    Underware::AlcesUtils.kill_other_threads
+    kill_other_threads
   end
 
   let(:build_wait_time) { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
