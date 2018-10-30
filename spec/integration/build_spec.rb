@@ -101,7 +101,11 @@ RSpec.describe Metalware::Commands::Build do
       alces.nodes.each { |node| hexadecimal_ip(node) }
       mock_group('nodes')
     end
-    build_poll_sleep(0.1)
+    stub_build_poll_sleep(0.1)
+  end
+
+  def stub_build_poll_sleep(time)
+    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', time)
   end
 
   after do
