@@ -100,11 +100,7 @@ mkdir -p /var/lib/metalware/rendered/{basic,kickstart,system}
 mkdir -p /var/lib/metalware/cache/templates
 mkdir -p /var/lib/metalware/events
 mkdir -p /var/lib/metalware/repo
-mkdir -p /var/lib/metalware/plugins
-mkdir -p /var/lib/metalware/answers/{groups,nodes}
-mkdir -p /var/lib/metalware/assets
 mkdir -p /var/lib/metalware/build_hooks
-mkdir -p /var/lib/metalware/data
 mkdir -p /etc/named
 touch /etc/named/metalware.conf
 chmod a+rw /var/lib/metalware/events
