@@ -57,6 +57,10 @@ module SpecUtils
     stub_build_method
   end
 
+  def stub_build_poll_sleep(time)
+    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', time)
+  end
+
   def kill_other_threads
     Thread.list
       .reject { |t| t == Thread.current }

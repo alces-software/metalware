@@ -34,7 +34,7 @@ RSpec.describe Metalware::Commands::Build do
 
   before do
     # Shortens the wait times for the tests
-    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
+    stub_build_poll_sleep(0.1)
     # Makes sure there aren't any other threads
     kill_other_threads
   end
