@@ -23,9 +23,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'validation/loader'
 require 'pathname'
-require 'system_command'
+require 'underware/system_command'
 require 'exceptions'
 require 'metal_log'
 
@@ -34,7 +33,7 @@ module Metalware
     class Named
       def self.restart_service
         MetalLog.info 'Restarting named'
-        SystemCommand.run('systemctl restart named')
+        Underware::SystemCommand.run('systemctl restart named')
       end
 
       def initialize(alces, templater)
@@ -55,7 +54,7 @@ module Metalware
       attr_reader :alces, :templater
 
       def render_repo_named_conf
-        template_path = FilePath.template_path('named', node: alces.domain)
+        template_path = FilePath.repo_template_path('named', namespace: alces.domain)
         templater.render(alces,
                          template_path,
                          FilePath.metalware_named,
@@ -86,7 +85,7 @@ module Metalware
         dynamic_namespace = build_dynamic_namespace(zone, net)
         templater.render(
           alces,
-          FilePath.template_path("named/#{direction}", node: alces.domain),
+          FilePath.repo_template_path("named/#{direction}", namespace: alces.domain),
           FilePath.named_zone(zone_name),
           dynamic: dynamic_namespace,
           comment_char: ';',

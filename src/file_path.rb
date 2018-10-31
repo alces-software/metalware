@@ -23,65 +23,19 @@
 #==============================================================================
 
 require 'constants'
-require 'file_path/config_path'
 
 module Metalware
   module FilePath
     class << self
-      delegate :domain_config,
-               :group_config,
-               :node_config,
-               :local_config,
-               to: :config_path
-
-      def configure_file
-        File.join(repo, 'configure.yaml')
-      end
-
-      def domain_answers
-        File.join(answer_files, 'domain.yaml')
-      end
-
-      def group_answers(group)
-        file_name = "#{group}.yaml"
-        File.join(answer_files, 'groups', file_name)
-      end
-
-      def node_answers(node)
-        file_name = "#{node}.yaml"
-        File.join(answer_files, 'nodes', file_name)
-      end
-
-      def local_answers
-        node_answers('local')
-      end
-
-      def answer_files
-        File.join(metalware_data, 'answers')
-      end
-
-      def server_config
-        File.join(repo, 'server.yaml')
-      end
-
       def repo
         File.join(metalware_data, 'repo')
       end
 
-      def overview
-        File.join(repo, 'overview.yaml')
-      end
-
-      def plugins_dir
-        File.join(metalware_data, 'plugins')
-      end
-
-      # TODO: Change input from node to namespace
-      def template_path(template_type, node:)
+      def repo_template_path(template_type, namespace:)
         File.join(
           repo,
           template_type.to_s,
-          template_file_name(template_type, node: node)
+          template_file_name(template_type, namespace: namespace)
         )
       end
 
@@ -100,15 +54,6 @@ module Metalware
 
       def build_complete(node_namespace)
         event(node_namespace, 'complete')
-      end
-
-      def rendered_build_file_path(rendered_dir, section, file_name)
-        File.join(
-          rendered_files,
-          rendered_dir,
-          section.to_s,
-          file_name
-        )
       end
 
       def rendered_files
@@ -143,43 +88,8 @@ module Metalware
         '/var/log/metalware'
       end
 
-      def asset_type(type)
-        File.join(metalware_install, 'data/asset_types', type + '.yaml')
-      end
-
-      def asset(*a)
-        record(asset_dir, *a)
-      end
-
-      def asset_dir
-        File.join(metalware_data, 'assets')
-      end
-
-      def layout(*a)
-        record(layout_dir, *a)
-      end
-
-      def layout_dir
-        File.join(metalware_data, 'layouts')
-      end
-
-      def asset_cache
-        File.join(cache, 'assets.yaml')
-      end
-
-      def cached_template(name)
-        File.join(cache, 'templates', name)
-      end
-
       def build_hooks
         File.join(metalware_data, 'build_hooks')
-      end
-
-      def namespace_data_file(name)
-        File.join(
-          Constants::NAMESPACE_DATA_PATH,
-          "#{name}.yaml"
-        )
       end
 
       private
@@ -188,12 +98,8 @@ module Metalware
         File.join(record_dir, types_dir, name + '.yaml')
       end
 
-      def template_file_name(template_type, node:)
-        node.config.templates&.send(template_type) || 'default'
-      end
-
-      def config_path
-        @config_path ||= ConfigPath.new(base: repo)
+      def template_file_name(template_type, namespace:)
+        namespace.config.templates&.send(template_type) || 'default'
       end
     end
   end

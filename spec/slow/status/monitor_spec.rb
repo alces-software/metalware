@@ -25,12 +25,10 @@
 require 'commands/status'
 require 'status/monitor'
 require 'status/job'
-require 'spec_utils'
 require 'timeout'
-require 'filesystem'
 
 RSpec.describe Metalware::Status::Monitor do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   let(:nodes) { alces.nodes.map(&:name) }
 

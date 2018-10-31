@@ -26,9 +26,8 @@ require 'command_helpers/base_command'
 require 'metal_log'
 require 'net/dhcp'
 require 'pcap'
-require 'concurrent'
 
-require 'output'
+require 'underware/output'
 require 'constants'
 # require 'alces/stack/log'
 require 'hunter_updater'
@@ -36,8 +35,6 @@ require 'hunter_updater'
 module Metalware
   module Commands
     class Hunter < CommandHelpers::BaseCommand
-      NEW_MACS_KEY = :new_detected_macs
-
       private
 
       attr_reader \
@@ -47,25 +44,6 @@ module Metalware
         :network
 
       def setup
-        if Utils.in_gui?
-          # Hunter depends on values being set for various options when it is
-          # run; these options have defaults which will be set by Commander
-          # when running the command on the command-line, but these will not be
-          # set when running the command by creating an instance of this class
-          # directly (i.e. when running it from the GUI). Hence we need to
-          # duplicate setting these options to the defaults here.
-          # TODO Do this better, without needing to duplicate the defaults.
-          options.interface ||= CliHelper::DynamicDefaults.build_interface
-          options.prefix ||= 'node'
-          options.length ||= 2
-          options.start ||= 1
-
-          Thread.current.thread_variable_set(
-            NEW_MACS_KEY,
-            Concurrent::Array.new
-          )
-        end
-
         @hunter_log = MetalLog.new('hunter')
 
         @detection_count = options.start
@@ -79,7 +57,7 @@ module Metalware
       end
 
       def listen!
-        Output.stderr \
+        Underware::Output.stderr \
           'Waiting for new nodes to appear on the network, please network ' \
           'boot them now...',
           '(Ctrl-C to terminate)'
@@ -148,42 +126,31 @@ module Metalware
         message = \
           'Detected already hunted MAC address on network ' \
           "(#{hwaddr} / #{assigned_node_name}); ignoring."
-        Output.stderr message
+        Underware::Output.stderr message
       end
 
       def cached_macs_to_nodes
-        Data.load(Constants::HUNTER_PATH).invert
+        Underware::Data.load(Constants::HUNTER_PATH).invert
       end
 
       def handle_new_detected_mac(hwaddr)
         default_name = sequenced_name
         @detection_count += 1
 
-        if Utils.in_gui?
-          STDERR.puts "Detected: #{hwaddr}" # XXX Remove this?
-          new_detected_macs = Thread.current.thread_variable_get(NEW_MACS_KEY)
-          new_detected_macs << hwaddr
-        else
-          name_node_question = \
-            "Detected a machine on the network (#{hwaddr}). Please enter " \
-            'the hostname:'
-          name = ask(name_node_question) do |answer|
-            answer.default = default_name
-          end
-          record_hunted_pair(name, hwaddr)
-          MetalLog.info "#{name}-#{hwaddr}"
-          hunter_log.info "#{name}-#{hwaddr}"
-          Output.stderr 'Logged node'
+        name_node_question = \
+          "Detected a machine on the network (#{hwaddr}). Please enter " \
+          'the hostname:'
+        name = ask(name_node_question) do |answer|
+          answer.default = default_name
         end
+        record_hunted_pair(name, hwaddr)
+        MetalLog.info "#{name}-#{hwaddr}"
+        hunter_log.info "#{name}-#{hwaddr}"
+        Underware::Output.stderr 'Logged node'
       rescue StandardError => e
         warn e # XXX Needed?
-        if Utils.in_gui?
-          # XXX Handle this better?
-          p "Hunter error: #{e}"
-        else
-          Output.stderr "FAIL: #{e.message}"
-          retry if agree('Retry? [yes/no]:')
-        end
+        Underware::Output.stderr "FAIL: #{e.message}"
+        retry if agree('Retry? [yes/no]:')
       end
 
       def record_hunted_pair(node_name, mac_address)
@@ -199,7 +166,7 @@ module Metalware
       end
 
       def handle_interrupt(_e)
-        Output.stderr 'Exiting...'
+        Underware::Output.stderr 'Exiting...'
         exit
       end
     end

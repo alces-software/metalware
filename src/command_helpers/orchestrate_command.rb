@@ -23,12 +23,12 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'command_helpers/node_identifier'
+require 'underware/command_helpers/node_identifier'
 
 module Metalware
   module CommandHelpers
     class OrchestrateCommand < BaseCommand
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
     end
   end
 end

@@ -1,7 +1,7 @@
 
 # frozen_string_literal: true
 
-require 'system_command'
+require 'underware/system_command'
 require 'fileutils'
 
 module Metalware
@@ -12,7 +12,7 @@ module Metalware
         rendered_local_template =
           file_path.template_save_path(:local, node: node)
         FileUtils.chmod 'u+x', rendered_local_template
-        puts SystemCommand.run(rendered_local_template)
+        puts Underware::SystemCommand.run(rendered_local_template)
       end
 
       private

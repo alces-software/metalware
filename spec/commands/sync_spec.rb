@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 require 'commands'
-require 'utils'
-require 'alces_utils'
+require 'underware/utils'
+require 'underware/spec/alces_utils'
 require 'active_support/core_ext/module/delegation'
 
 module Metalware
@@ -22,10 +22,10 @@ module Metalware
 end
 
 RSpec.describe Metalware::Commands::Sync do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_sync
-    Metalware::Utils.run_command(Metalware::Commands::Sync)
+    Underware::Utils.run_command(Metalware::Commands::Sync)
   end
 
   delegate :manifest, to: Metalware::Staging
@@ -60,7 +60,7 @@ RSpec.describe Metalware::Commands::Sync do
 
       before do
         # Allows the error to be printed
-        allow(Metalware::Output).to \
+        allow(Underware::Output).to \
           (receive(:stderr).and_wrap_original { |_m, *arg| warn arg })
 
         Metalware::Staging.update do |staging|

@@ -25,7 +25,6 @@
 require 'fakefs/safe'
 require 'constants'
 require 'minimal_repo'
-require 'validation/configure'
 
 # XXX Reduce the hardcoded paths once sorted out Config/Constants situation.
 
@@ -45,11 +44,7 @@ class FileSystem
 
     delegate :mkdir_p, :touch, :rm_rf, to: FileUtils
     delegate :write, to: File
-    delegate :dump, to: Metalware::Data
-
-    def activate_plugin(plugin_name)
-      Metalware::Plugins.activate!(plugin_name)
-    end
+    delegate :dump, to: Underware::Data
 
     # Create an empty file given any path, by creating every needed parent
     # directory and then the file itself.
@@ -122,15 +117,15 @@ class FileSystem
   # the default repo path.
   def with_minimal_repo
     MinimalRepo.create_at('/var/lib/metalware/repo')
+    # XXX For now also create identical minimal repo for Underware - repo
+    # structure is currently shared, though independently cloned, between both
+    # projects. Reconsider how this should work.
+    MinimalRepo.create_at('/var/lib/underware/repo')
   end
 
   def with_fixtures(fixtures_dir, at:)
     path = fixtures_path(fixtures_dir)
     FakeFS::FileSystem.clone(path, at)
-  end
-
-  def with_validation_error_file
-    FakeFS::FileSystem.clone(Metalware::FilePath.dry_validation_errors)
   end
 
   def with_repo_fixtures(repo_fixtures_dir)
@@ -142,18 +137,11 @@ class FileSystem
   end
 
   def with_answer_fixtures(answer_fixtures_dir)
-    with_fixtures(answer_fixtures_dir, at: '/var/lib/metalware/answers')
+    with_fixtures(answer_fixtures_dir, at: '/var/lib/underware/answers')
   end
 
   def with_genders_fixtures(genders_file = 'genders/default')
-    with_fixtures(genders_file, at: Metalware::Constants::GENDERS_PATH)
-  end
-
-  def with_group_cache_fixture(group_cache_file)
-    with_fixtures(
-      group_cache_file,
-      at: Metalware::Constants::GROUP_CACHE_PATH
-    )
+    with_fixtures(genders_file, at: Underware::Constants::GENDERS_PATH)
   end
 
   def with_clone_fixture(fixture_file)
@@ -163,7 +151,7 @@ class FileSystem
   def with_config_fixture(config_fixture_file, target)
     with_fixtures(
       config_fixture_file,
-      at: File.join('/var/lib/metalware/repo/config', target)
+      at: File.join('/var/lib/underware/repo/config', target)
     )
   end
 
@@ -176,41 +164,23 @@ class FileSystem
     )
   end
 
-  def with_asset_types
-    asset_types_dir_path = File.dirname(Metalware::FilePath.asset_type(''))
-    FakeFS::FileSystem.clone(asset_types_dir_path, asset_types_dir_path)
-  end
-
   # Create same directory hierarchy that would be created by a Metalware
-  # install.
+  # install (without directories unneeded for any tests to pass).
   def create_initial_directory_hierarchy
     [
       '/tmp',
-      '/etc',
-      '/var/log/metalware',
-      '/var/lib/metalware/staging',
-      '/var/lib/metalware/rendered/kickstart',
-      '/var/lib/metalware/rendered/system',
-      '/var/lib/metalware/events',
-      '/var/lib/metalware/cache/templates',
-      '/var/lib/metalware/repo',
-      '/var/lib/metalware/answers/groups',
-      '/var/lib/metalware/answers/nodes',
-      '/var/lib/metalware/assets',
-      '/var/lib/metalware/data',
-      '/var/named',
-      '/var/log/metalware',
+      '/var/lib/metalware/cache',
+      '/var/lib/underware/cache',
+      '/var/lib/underware/rendered/system',
       File.join(Metalware::Constants::METALWARE_INSTALL_PATH, 'templates'),
     ].each do |path|
       FileUtils.mkdir_p(path)
     end
-
-    FileUtils.mkdir_p Metalware::Constants::METALWARE_CONFIGS_PATH
-    FileUtils.touch Metalware::Constants::DEFAULT_CONFIG_PATH
   end
 
   # Print every directory and file loaded in the FakeFS.
-  def debug!
+  delegate :debug!, to: FileSystem
+  def self.debug!
     begin
       # This can fail oddly if nothing matches (see
       # https://github.com/fakefs/fakefs/issues/371), hence the `rescue` with a

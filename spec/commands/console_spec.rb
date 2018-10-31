@@ -1,14 +1,14 @@
 
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Console do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_console(node_name, **options)
-    AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(
+    Underware::AlcesUtils.redirect_std(:stdout) do
+      Underware::Utils.run_command(
         Metalware::Commands::Console, node_name, **options
       )
     end
@@ -28,13 +28,13 @@ RSpec.describe Metalware::Commands::Console do
       }
     end
 
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       config(mock_node(node_name), node_config)
     end
 
     describe 'when run for node' do
       it 'runs console info then activate commands for node' do
-        expect(Metalware::SystemCommand).to receive(:run).with(
+        expect(Underware::SystemCommand).to receive(:run).with(
           <<-EOF.squish
             ipmitool -H node01.bmc -I lanplus -U bmcuser -P bmcpassword -e
             '&' sol info

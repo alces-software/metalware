@@ -25,13 +25,11 @@
 require 'commands/status'
 require 'status/monitor'
 require 'status/job'
-require 'spec_utils'
 require 'timeout'
-require 'namespaces/alces'
-require 'filesystem'
+require 'underware/namespaces/alces'
 
 RSpec.describe Metalware::Status::Monitor do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   before do
     FileSystem.root_setup do |fs|

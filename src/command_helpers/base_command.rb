@@ -23,12 +23,11 @@
 #==============================================================================
 
 require 'metal_log'
-require 'dependency'
+require 'underware/dependency'
 require 'exceptions'
-require 'dependency_specifications'
-require 'validation/loader'
+require 'underware/dependency_specifications'
 require 'file_path'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 
 module Metalware
   module CommandHelpers
@@ -65,7 +64,7 @@ module Metalware
       end
 
       def dependency_specifications
-        DependencySpecifications.new(alces)
+        Underware::DependencySpecifications.new(alces)
       end
 
       def dependency_hash
@@ -73,11 +72,11 @@ module Metalware
       end
 
       def enforce_dependency
-        Dependency.new(command_name, dependency_hash).enforce
-      end
-
-      def loader
-        @loader ||= Validation::Loader.new
+        Underware::Dependency.new(
+          command_input: command_name,
+          repo_path: FilePath.repo,
+          dependency_hash: dependency_hash
+        ).enforce
       end
 
       def file_path
@@ -95,7 +94,7 @@ module Metalware
       end
 
       def alces
-        @alces ||= Namespaces::Alces.new
+        @alces ||= Underware::Namespaces::Alces.new
       end
 
       def log_command

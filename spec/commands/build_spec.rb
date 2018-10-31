@@ -25,19 +25,18 @@
 require 'timeout'
 
 require 'commands/build'
-require 'spec_utils'
 require 'recursive_open_struct'
 require 'network'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Build do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   before do
     # Shortens the wait times for the tests
-    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', 0.1)
+    stub_build_poll_sleep(0.1)
     # Makes sure there aren't any other threads
-    AlcesUtils.kill_other_threads
+    kill_other_threads
   end
 
   let(:build_wait_time) { Metalware::Constants::BUILD_POLL_SLEEP * 5 }
@@ -45,8 +44,8 @@ RSpec.describe Metalware::Commands::Build do
   def run_build(node_group, delay_report_built: nil, **options_hash)
     Timeout.timeout build_wait_time do
       th = Thread.new do
-        AlcesUtils.redirect_std(:stdout) do
-          Metalware::Utils.run_command(
+        Underware::AlcesUtils.redirect_std(:stdout) do
+          Underware::Utils.run_command(
             Metalware::Commands::Build, node_group.name, **options_hash
           )
         end
@@ -55,7 +54,7 @@ RSpec.describe Metalware::Commands::Build do
       # Allows the build to report finished after a set delay
       if delay_report_built
         sleep delay_report_built
-        if node_group.is_a?(Metalware::Namespaces::Node)
+        if node_group.is_a?(Underware::Namespaces::Node)
           [node_group]
         else
           node_group.nodes
@@ -82,7 +81,7 @@ RSpec.describe Metalware::Commands::Build do
 
   let(:build_method) { stub_build_method_for(testnode) }
 
-  AlcesUtils.mock self, :each do
+  Underware::AlcesUtils.mock self, :each do
     config(testnode, build_method: :kickstart)
     hexadecimal_ip(testnode)
   end
@@ -124,7 +123,7 @@ RSpec.describe Metalware::Commands::Build do
   end
 
   context 'when called for group' do
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       test_group = test_group_name
       mock_group(test_group)
       ['nodeA00', 'nodeA01', 'nodeA02', 'nodeA03'].each do |node|

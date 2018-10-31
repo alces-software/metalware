@@ -39,7 +39,7 @@ install_components() {
     doing 'Configure'
     "${alces_RUBYHOME}/bin/bundle" install \
         --path=vendor \
-        --without=test \
+        --without=development test \
         &> "${dep_logs}/components-install.log"
     say_done $?
 

@@ -22,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'system_command'
+require 'underware/system_command'
 require 'metal_log'
 require 'file_path'
 

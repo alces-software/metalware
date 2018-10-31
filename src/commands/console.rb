@@ -3,7 +3,7 @@
 #==============================================================================
 # Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
 #
-# This file/package is part of Alces Metalware.
+# This file/package is part of Alces Underware.
 #
 # Alces Metalware is free software: you can redistribute it and/or
 # modify it under the terms of the GNU Affero General Public License
@@ -46,7 +46,7 @@ module Metalware
       end
 
       def valid_connection?
-        SystemCommand.run(console_command('info'))
+        Underware::SystemCommand.run(console_command('info'))
       end
 
       def console_command(type)

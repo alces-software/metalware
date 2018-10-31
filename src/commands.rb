@@ -22,8 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'utils/dynamic_require'
+require 'underware/utils/dynamic_require'
 require 'command_helpers/base_command'
 
-Metalware::Utils::DynamicRequire.relative('command_helpers')
-Metalware::Utils::DynamicRequire.relative('commands')
+Underware::Utils::DynamicRequire.relative('command_helpers')
+Underware::Utils::DynamicRequire.relative('commands')

@@ -1,6 +1,0 @@
-
-<% @new_detected_macs.each_with_index do |mac, index| %>
-  <% unless @known_macs.include? mac %>
-    <%= render 'detected_node_row', mac: mac, index: index %>
-  <% end %>
-<% end %>

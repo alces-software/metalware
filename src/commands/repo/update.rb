@@ -57,7 +57,7 @@ module Metalware
             end
           else
             raise LocalAheadOfRemote, ahead_behind[0] if ahead_behind[0] > 0
-            raise UncommitedChanges, uncommited if uncommited > 0
+            raise UncommittedChanges, uncommited if uncommited > 0
           end
 
           if uncommited + ahead_behind[0] + ahead_behind[1] == 0

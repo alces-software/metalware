@@ -24,7 +24,7 @@
 require 'logger'
 require 'exceptions'
 require 'fileutils'
-require 'output'
+require 'underware/output'
 
 module Metalware
   class MetalLog < Logger
@@ -76,7 +76,7 @@ module Metalware
       message_cache[msg] ||= 0
       message_cache[msg] += 1
       return if message_cache[msg] > 1
-      Output.warning "warning: #{msg}"
+      Underware::Output.warning "warning: #{msg}"
     end
 
     def message_cache

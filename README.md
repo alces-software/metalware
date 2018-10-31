@@ -67,7 +67,7 @@ Once installed and your shell configuration is sourced, you can access the Metal
 
 ```
 [root@localhost ~]# metal
-NAME:
+  NAME:
 
     metal
 
@@ -76,45 +76,37 @@ NAME:
     Alces tools for the management and configuration of bare metal machines
 
   COMMANDS:
-        
-    build   Renders the templates used to build the nodes               
-    console Volatile. Display a node's console in the terminal          
-    dhcp    Renders and reboots dhcp from the hunter cache              
-    each    Runs a command for a node(s)                
-    help    Display global or [command] help documentation              
-    hosts   Adds a node(s) to the hosts file            
-    hunter  Detects and caches DHCP discover messages           
-    ipmi    Volatile. Perform ipmi commands on single or multiple machines      
-    power   Volatile. Run power commands on a node.             
-    render  Render a given template             
-    repo    Manage template and config repository               
-    status  Display the current network status of the nodes     
+
+    build       Renders the templates used to build the nodes
+    console     Display a node's console in the terminal
+    edit        Opens a rendered file for editing
+    help        Display global or [command] help documentation
+    hunter      Detects and caches DHCP discover messages
+    ipmi        Perform ipmi commands on single or multiple machines
+    orchestrate Orchestrate virtual machines
+    power       Run power commands on a node.
+    repo        Manage template and config repository
+    status      Display the current network status of the nodes
+    sync        Moves staged files into place and service management
+    template    Template the files for a node or group to staging
 
   GLOBAL OPTIONS:
-        
-    -c FILE, --config FILE 
-        Specify config file to use instead of default
-(/opt/metalware/etc/config.yaml)
-        
-    --strict 
+
+    --strict
         Convert warnings to errors
-        
-    --quiet 
+
+    --quiet
         Suppress any warnings from being displayed
-        
-    -h, --help 
+
+    -h, --help
         Display help documentation
-        
-    --version 
+
+    --version
         Display version information
-        
-    --trace 
+
+    --trace
         Display backtrace when an error occurs
 ```
-
-## Documentation
-
-- [Templating system](docs/templating-system.md)
 
 ## Contributing
 

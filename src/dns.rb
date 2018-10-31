@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-require 'utils/dynamic_require'
+require 'underware/utils/dynamic_require'
 
-Metalware::Utils::DynamicRequire.relative('dns')
+Underware::Utils::DynamicRequire.relative('dns')

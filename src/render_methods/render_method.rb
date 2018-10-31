@@ -8,6 +8,7 @@ module Metalware
       class << self
         def render_to_staging(namespace, templater)
           file = template(namespace)
+          # p "file [lqjycjiq]:", file
           templater.render(namespace, file, sync_location, **staging_opts)
         end
 

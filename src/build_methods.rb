@@ -1,11 +1,11 @@
 
 # frozen_string_literal: true
 
-require 'utils/dynamic_require'
+require 'underware/utils/dynamic_require'
 require 'build_methods/build_method'
 require 'build_methods/kickstarts/kickstart'
 
-Metalware::Utils::DynamicRequire.relative('build_methods')
+Underware::Utils::DynamicRequire.relative('build_methods')
 
 module Metalware
   module BuildMethods
@@ -17,7 +17,7 @@ module Metalware
       private
 
       def build_method_class_for(node)
-        return BuildMethods::Local if node.is_a?(Namespaces::Local)
+        return BuildMethods::Local if node.is_a?(Underware::Namespaces::Local)
 
         case node.config.build_method&.to_sym
         when :local

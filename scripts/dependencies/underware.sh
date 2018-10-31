@@ -1,7 +1,5 @@
-# frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2018 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -22,35 +20,28 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-module Metalware
-  module FilePath
-    class ConfigPath
-      attr_reader :base
+detect_underware() {
+    [ -d "/opt/underware" ]
+}
 
-      def initialize(base:)
-        @base = base
-      end
+fetch_underware() {
+    # No-op function required as `scripts/install` will call this, but we just
+    # want to fetch and install Underware with a single command in the usual
+    # way (below).
+    :
+}
 
-      def domain_config
-        path 'domain'
-      end
+install_underware() {
+    local underware_version
 
-      def local_config
-        path 'local'
-      end
+    title "Installing Underware"
 
-      def path(name)
-        file_name = "#{name}.yaml"
-        File.join(base, 'config', file_name)
-      end
+    # Specify exact Underware version required by current Metalware to be
+    # installed.
+    underware_version="$(cat underware-version)"
+    export alces_SOURCE_BRANCH="$underware_version"
 
-      # These are the names we currently expect to use to access the different
-      # config paths elsewhere. Since they all go the same place maybe we don't
-      # need different methods. Or maybe we should change configs to use same
-      # file structure as answers, which is more structured and helps prevent
-      # conflicts.
-      alias group_config path
-      alias node_config path
-    end
-  end
-end
+    # Will be installed with same arguments as provided to
+    # `metalware-installer`, due to variables exported in `scripts/install`.
+    curl -sL http://git.io/underware-installer | /bin/bash
+}

@@ -10,7 +10,7 @@ module Metalware
         private
 
         def pxelinux_template_path
-          file_path.template_path(:'uefi-kickstart', node: node)
+          file_path.repo_template_path(:'uefi-kickstart', namespace: node)
         end
 
         def save_path
