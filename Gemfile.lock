@@ -21,7 +21,7 @@ GIT
 PATH
   remote: ../underware
   specs:
-    underware (0.2.0)
+    underware (0.3.0)
       activesupport (~> 5.1.6)
       colorize
       commander
@@ -155,7 +155,7 @@ DEPENDENCIES
   rugged
   simplecov
   terminal-table
-  underware (= 0.2.0)!
+  underware (= 0.3.0)!
 
 RUBY VERSION
    ruby 2.4.1p111
