@@ -6,11 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ## [2018.4.0] - 2018-10-15
 
-- Add build hooks for rendering and executing scripts at runtime (https://github.com/alces-software/metalware/pull/448)
+- Added build hooks for rendering and executing scripts at runtime
+  (https://github.com/alces-software/metalware/pull/448).
 
 ## [2018.3.1] - 2018-08-16
 
-- Allow `--answers` option for `metal configure local` command (https://github.com/alces-software/metalware/pull/447)
+- Allowed `--answers` option for `metal configure local` command
+  (https://github.com/alces-software/metalware/pull/447).
 
 ## [2018.3.0] - 2018-08-15
 
