@@ -24,7 +24,7 @@
 
 require 'yaml'
 
-require 'output'
+require 'underware/output'
 
 module Metalware
   class HunterUpdater
@@ -35,7 +35,7 @@ module Metalware
     def add(node_name, mac_address)
       node_name = node_name.to_sym
       new_yaml = update_hunter_yaml(node_name, mac_address)
-      Data.dump(hunter_file, new_yaml)
+      Underware::Data.dump(hunter_file, new_yaml)
     end
 
     private
@@ -54,7 +54,7 @@ module Metalware
     end
 
     def load_current_yaml
-      Data.load(hunter_file)
+      Underware::Data.load(hunter_file)
     end
 
     def notify_user_about_update(current_yaml, new_node_name, new_mac_address)
@@ -66,7 +66,7 @@ module Metalware
                 elsif mac_address_present
                   replacing_mac_address_message(current_yaml, new_mac_address)
                 end
-      Output.stderr message if message
+      Underware::Output.stderr message if message
     end
 
     def replacing_node_message(current_yaml, new_node_name)

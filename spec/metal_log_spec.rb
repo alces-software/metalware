@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'command_helpers/base_command'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::MetalLog do
   describe '#warn' do
@@ -16,15 +16,15 @@ RSpec.describe Metalware::MetalLog do
     end
 
     def run_test_command(**options)
-      AlcesUtils.redirect_std(:stderr) do
-        Metalware::Utils.run_command(
+      Underware::AlcesUtils.redirect_std(:stderr) do
+        Underware::Utils.run_command(
           Metalware::Commands::TestCommand, **options
         )
       end
     end
 
     let!(:output) do
-      class_spy(Metalware::Output).as_stubbed_const
+      class_spy(Underware::Output).as_stubbed_const
     end
 
     let(:test_warning) { 'warning: message' }

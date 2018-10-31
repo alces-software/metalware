@@ -1,14 +1,14 @@
 
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Power do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_power(node_identifier, command, **options)
-    AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(
+    Underware::AlcesUtils.redirect_std(:stdout) do
+      Underware::Utils.run_command(
         Metalware::Commands::Power, node_identifier, command, **options
       )
     end[:stdout].read
@@ -29,7 +29,7 @@ RSpec.describe Metalware::Commands::Power do
       }
     end
 
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       config(mock_group(group), namespace_config)
       node_names.each do |node|
         config(mock_node(node, group), namespace_config)
@@ -39,13 +39,13 @@ RSpec.describe Metalware::Commands::Power do
     # Allow the system command to receive `nodeattr` commands
     before do
       with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
-      allow(Metalware::SystemCommand).to \
+      allow(Underware::SystemCommand).to \
         receive(:run).with(*with_args).and_call_original
     end
 
     describe 'when run for node' do
       it 'runs appropriate ipmi command for given command and node' do
-        expect(Metalware::SystemCommand).to receive(:run).once.with(
+        expect(Underware::SystemCommand).to receive(:run).once.with(
           <<-EOF.squish
             ipmitool -H node01.bmc -I lanplus -U bmcuser -P
             bmcpassword chassis power on
@@ -59,7 +59,7 @@ RSpec.describe Metalware::Commands::Power do
     describe 'when run for group' do
       it 'runs appropriate ipmi command followed by sleep for each node' do
         node_names.each do |name|
-          expect(Metalware::SystemCommand).to receive(:run).with(
+          expect(Underware::SystemCommand).to receive(:run).with(
             <<-EOF.squish
               ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P
               bmcpassword chassis power on
@@ -76,13 +76,13 @@ RSpec.describe Metalware::Commands::Power do
 
       it 'does not error when individual ipmi commands error' do
         allow(
-          Metalware::SystemCommand
+          Underware::SystemCommand
         ).to receive(:run)
           .with(/ipmitool -H node01/)
           .once
-          .and_raise(Metalware::SystemCommandError, 'error123')
+          .and_raise(Underware::SystemCommandError, 'error123')
         allow(
-          Metalware::SystemCommand
+          Underware::SystemCommand
         ).to receive(:run)
           .twice
           .with(/ipmitool -H node0[23]/)

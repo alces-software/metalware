@@ -1,7 +1,5 @@
-# frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2017 Stephen F. Norledge and Alces Software Ltd.
+# Copyright (C) 2018 Stephen F. Norledge and Alces Software Ltd.
 #
 # This file/package is part of Alces Metalware.
 #
@@ -22,8 +20,28 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'underware/utils/dynamic_require'
-require 'command_helpers/base_command'
+detect_underware() {
+    [ -d "/opt/underware" ]
+}
 
-Underware::Utils::DynamicRequire.relative('command_helpers')
-Underware::Utils::DynamicRequire.relative('commands')
+fetch_underware() {
+    # No-op function required as `scripts/install` will call this, but we just
+    # want to fetch and install Underware with a single command in the usual
+    # way (below).
+    :
+}
+
+install_underware() {
+    local underware_version
+
+    title "Installing Underware"
+
+    # Specify exact Underware version required by current Metalware to be
+    # installed.
+    underware_version="$(cat underware-version)"
+    export alces_SOURCE_BRANCH="$underware_version"
+
+    # Will be installed with same arguments as provided to
+    # `metalware-installer`, due to variables exported in `scripts/install`.
+    curl -sL http://git.io/underware-installer | /bin/bash
+}

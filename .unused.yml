@@ -1,0 +1,43 @@
+
+# Config file for false positives to ignore (or other things don't care about)
+# when running https://github.com/joshuaclayton/unused.
+
+- name: Ruby
+  autoLowLikelihood:
+
+    # Ignore all dependency functions.
+    - name: dependency functions
+      pathStartsWith: scripts/dependencies
+
+    # Ignore patches for Gems; will often monkey-patch methods to be called by
+    # Gem code which would otherwise be flagged up.
+    - name: Gem patch methods
+      pathStartsWith: src/patches
+
+    - name: Configurator::Question asker methods
+      pathStartsWith: src/configurator
+      termStartsWith: ask_
+
+    # Things we want to explicitly not flag up as they may be useful in certain
+    # situations in development even if they're not currently used in any
+    # committed code.
+    - name: Miscellaneous other terms
+      allowedTerms:
+      - MetalBench
+      - debug!
+
+    # Things flagged up as unused which are actually used (or aren't actually
+    # identifiers).
+    - name: False positives
+      allowedTerms:
+      - credentials
+      - shutdown
+      - debug
+      - activate!
+      - deactivate!
+      - exists?
+      - flatten
+      - Validation
+      - method_missing
+      - Plugin
+      - Methods

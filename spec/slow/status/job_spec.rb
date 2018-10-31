@@ -25,7 +25,6 @@
 require 'commands/status'
 require 'status/monitor'
 require 'status/job'
-require 'spec_utils'
 require 'timeout'
 
 RSpec.describe Metalware::Status::Job do
@@ -41,7 +40,7 @@ RSpec.describe Metalware::Status::Job do
     described_class.send(:define_method, :bash_sleep, lambda {
       run_bash('sleep 100')
     })
-    SpecUtils.use_mock_genders(self)
+    use_mock_genders
   end
 
   after do

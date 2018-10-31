@@ -27,7 +27,21 @@ source $source/scripts/lib/ui.functions.sh
 source $source/scripts/lib/fetch.functions.sh
 source $source/scripts/lib/install.functions.sh
 
-deps="libyaml ruby bundler genders pdsh components"
+# Note: on a `fresh` install dependencies will be retrieved and built from
+# scratch; on a `dist` install they will (mostly) be retrieved pre-built from
+# `$dist_url` above.
+#
+# Given a working `fresh` installation, the pre-built dependencies needed for a
+# `dist` installation can be packaged using commands like the following, after
+# which they should be uploaded to `$dist_url/$os/$package`:
+#
+# ```
+# tar -C /opt/metalware -cvzf genders.tar.gz opt/genders
+# tar -C /opt/metalware -cvzf ruby-2.4.1.tar.gz opt/ruby
+# tar -C /opt/metalware -cvzf libyaml.tar.gz opt/lib
+# tar -C /opt/metalware -cvzf pdsh.tar.gz opt/pdsh
+# ```
+deps="underware libyaml ruby bundler genders pdsh components"
 
 if [ -z "$2" ]; then
   echo "$0: invalid parameters"
@@ -45,9 +59,14 @@ else
   dep_source="$2"
 fi
 
+# Re-export these with same names as in `scripts/bootstrap`, so can be referred
+# to by dependency install functions.
+export alces_OS="$os"
+export alces_SOURCE="$dep_source"
+
 cat <<EOF
 [33m===============================================================================
- STARTING INSTALLATION
+ STARTING METALWARE INSTALLATION
 ===============================================================================[0m
 EOF
 
@@ -81,9 +100,6 @@ mkdir -p /var/lib/metalware/rendered/{basic,kickstart,system}
 mkdir -p /var/lib/metalware/cache/templates
 mkdir -p /var/lib/metalware/events
 mkdir -p /var/lib/metalware/repo
-mkdir -p /var/lib/metalware/plugins
-mkdir -p /var/lib/metalware/answers/{groups,nodes}
-mkdir -p /var/lib/metalware/assets
 mkdir -p /var/lib/metalware/build_hooks
 mkdir -p /etc/named
 touch /etc/named/metalware.conf
@@ -93,8 +109,13 @@ chmod a+rw /var/lib/metalware/events
 # on the Metalware deployment server.
 ln -s /etc/hosts /var/lib/metalware/rendered/system/
 
+# Link genders file in from Underware to Metalware data dir. Genders file is
+# managed by Underware, but needs to be linked in to Metalware so it can be
+# made available on Metalware deployment server.
+ln -s /var/lib/{underware,metalware}/rendered/system/genders
+
 mkdir -p "${target}"
-cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,libexec,src,data} "${target}"
+cp -R "${source}/"{underware-version,Gemfile,Gemfile.lock,bin,etc,src} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
@@ -140,7 +161,7 @@ install_certs &> "${dep_logs}/install.log"
 cat <<EOF
 [33m
 ===============================================================================
- INSTALLATION COMPLETE
+ METALWARE INSTALLATION COMPLETE
 ===============================================================================
 [0m[1m
 Global profile scripts have been installed in:

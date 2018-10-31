@@ -23,8 +23,7 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'command_helpers/node_identifier'
-require 'templater'
+require 'underware/command_helpers/node_identifier'
 require 'dns'
 require 'render_methods'
 
@@ -33,12 +32,14 @@ module Metalware
     class Template < CommandHelpers::BaseCommand
       private
 
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
 
       attr_reader :build_methods
 
       def setup
-        @build_methods = nodes.map(&:build_method)
+        @build_methods = nodes.map do |node|
+          BuildMethods.build_method_for(node)
+        end
       end
 
       def run

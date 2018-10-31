@@ -2,10 +2,10 @@
 # frozen_string_literal: true
 
 require 'staging'
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Staging do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def manifest
     Metalware::Staging.manifest
@@ -132,13 +132,13 @@ RSpec.describe Metalware::Staging do
 
         expected_start_marker = [
           comment_char,
-          Metalware::ManagedFile::MANAGED_START_MARKER,
+          Underware::ManagedFile::MANAGED_START_MARKER,
           comment_char,
         ].join(' ')
 
         expected_end_marker = [
           comment_char,
-          Metalware::ManagedFile::MANAGED_END_MARKER,
+          Underware::ManagedFile::MANAGED_END_MARKER,
           comment_char,
         ].join(' ')
 

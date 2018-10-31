@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'build_methods'
+
 RSpec.describe Metalware::BuildMethods::BuildMethod do
   class TestBuildMethod < described_class
     def staging_templates
@@ -33,31 +35,35 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     TestBuildMethod.new(node)
   end
 
-  let(:node) { Metalware::Namespaces::Node.create(alces, 'node01') }
-  let(:alces) { Metalware::Namespaces::Alces.new }
+  let(:node) { Underware::Namespaces::Node.create(alces, 'node01') }
+  let(:alces) { Underware::Namespaces::Alces.new }
   let(:templater) do
     Metalware::Staging.template
   end
 
   let(:template_path) { '/path/to/template' }
-  let(:rendered_path) { '/path/to/rendered' }
+  let(:relative_rendered_path) { 'path/to/rendered' }
+
+  let(:rendered_path) do
+    File.join(Metalware::Constants::RENDERED_DIR_PATH, relative_rendered_path)
+  end
 
   let(:mock_files) do
     FileSystem.root_setup do |fs|
       fs.create template_path
-      fs.create rendered_path
+      fs.create relative_rendered_path
     end
 
-    Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
+    Underware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       some_section: [{
         template_path: template_path,
-        rendered_path: rendered_path,
+        relative_rendered_path: relative_rendered_path,
       }]
     )
   end
 
   let(:mock_files_with_errors) do
-    Metalware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
+    Underware::Constants::HASH_MERGER_DATA_STRUCTURE.new(
       some_section: [{
         error: 'error',
       }]
@@ -84,7 +90,7 @@ RSpec.describe Metalware::BuildMethods::BuildMethod do
     it 'renders plugin build files to staging' do
       mock_plugin = OpenStruct.new
       plugin_namespace =
-        Metalware::Namespaces::Plugin.new(mock_plugin, node: node)
+        Underware::Namespaces::Plugin.new(mock_plugin, node: node)
       allow(node).to receive(:plugins).and_return([plugin_namespace])
       allow(plugin_namespace).to receive(:files).and_return(mock_files)
 

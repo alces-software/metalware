@@ -23,8 +23,8 @@
 #==============================================================================
 
 require 'command_helpers/base_command'
-require 'command_helpers/node_identifier'
-require 'system_command'
+require 'underware/command_helpers/node_identifier'
+require 'underware/system_command'
 require 'vm'
 
 module Metalware
@@ -73,7 +73,7 @@ module Metalware
 
       attr_reader :command_argument
 
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
 
       def setup
         @command_argument = Command.parse(args, options)
@@ -101,8 +101,8 @@ module Metalware
 
       def ipmi_command_output(node)
         command = ipmi_command(node, arguments: ipmi_command_arguments)
-        SystemCommand.run(command)
-      rescue SystemCommandError => e
+        Underware::SystemCommand.run(command)
+      rescue Underware::SystemCommandError => e
         e.message
       end
 

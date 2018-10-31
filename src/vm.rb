@@ -2,7 +2,7 @@
 
 require 'libvirt'
 require 'metal_log'
-require 'namespaces/alces'
+require 'underware/namespaces/alces'
 require 'vm/certificate'
 
 module Metalware
@@ -107,7 +107,7 @@ module Metalware
 
     def render_template(type)
       path = "/var/lib/metalware/repo/libvirt/#{type}.xml"
-      node.render_erb_template(File.read(path))
+      node.render_file(path)
     end
   end
 end

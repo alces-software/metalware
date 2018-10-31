@@ -4,18 +4,6 @@ anchor_options:
     type: String
     description: >
       Switch NODE_IDENTIFIER to specify a gender, rather than a single node
-  configure_answers_option: &configure_answers_option
-    tags: [-a ANSWERS_MAPPING, --answers ANSWERS_MAPPING]
-    type: String
-    description: >
-      Given a JSON mapping of question identifiers to answer values, the
-      given answers will be saved instead of asking the configure questions
-      and saving user input.
-  asset_node_option: &asset_node_option
-    tags: [-n NODE_NAME, --node NODE_NAME]
-    type: String
-    description: >
-      Assigns the asset to the node
   color_output: &color_output
     tags: [--color-output]
     description: >
@@ -31,89 +19,6 @@ global_options:
       Suppress any warnings from being displayed
 
 subcommands:
-  asset_add: &asset_add
-    syntax: metal asset add ASSET_TYPE ASSET_NAME [options]
-    summary: Add a new asset record
-    action: Commands::Asset::Add
-    options:
-      - *asset_node_option
-
-  asset_edit: &asset_edit
-    syntax: metal asset edit ASSET_NAME [options]
-    summary: Edit an existing asset record
-    action: Commands::Asset::Edit
-    options:
-      - *asset_node_option
-
-  asset_delete: &asset_delete
-    syntax: metal asset delete ASSET_NAME [options]
-    summary: Delete an existing asset record
-    action: Commands::Asset::Delete
-
-  asset_link: &asset_link
-    syntax: metal asset link NODE_NAME ASSET_NAME [options]
-    summary: Add a relationship between an asset and a node
-    action: Commands::Asset::Link
-
-  asset_unlink: &asset_unlink
-    syntax: metal asset unlink NODE_NAME [options]
-    summary: Remove a relationship between an asset and a node
-    action: Commands::Asset::Unlink
-
-  configure_domain: &configure_domain
-    syntax: metal configure domain [options]
-    summary: Configure Metalware domain
-    description: >
-      Asks a sequence of questions defined in the current repository to
-      configure the domain for this Metalware installation. The configuration
-      answers will then be used when rendering templates.
-    action: Commands::Configure::Domain
-    options:
-      - *configure_answers_option
-
-  configure_group: &configure_group
-    syntax: metal configure group GROUP_NAME [options]
-    summary: Configure a Metalware group
-    description: >
-      Asks a sequence of questions defined in the current repository to
-      configure a group for this Metalware installation. The configuration
-      answers will then be used when rendering templates.
-    action: Commands::Configure::Group
-    options:
-      - *configure_answers_option
-
-  configure_node: &configure_node
-    syntax: metal configure node NODE_NAME [options]
-    summary: Configure a Metalware node
-    description: >
-      Asks a sequence of questions defined in the current repository to
-      configure a node for this Metalware installation. The configuration
-      answers will then be used when rendering templates.
-    action: Commands::Configure::Node
-    options:
-      - *configure_answers_option
-
-  configure_local: &configure_local
-    syntax: metal configure local [options]
-    summary: Configure the master Metalware node
-    description: >
-      Configures the node that metalware is running on. This is treated as the
-      metalware master node. This must be ran to configure metalware to match
-      the system environment. This command is intended to only be ran once.
-    action: Commands::Configure::Local
-    options:
-      - *configure_answers_option
-
-  layout_add: &layout_add
-    syntax: metal layout add TYPE_OR_LAYOUT LAYOUT_NAME [options]
-    summary: Add a new layout record
-    action: Commands::Layout::Add
-
-  layout_edit: &layout_edit
-    syntax: metal layout edit LAYOUT_NAME [options]
-    summary: Edit an existing layout record
-    action: Commands::Layout::Edit
-
   orchestrate_create: &orchestrate_create
     syntax: metal orchestrate create NODE_IDENTIFIER [options]
     summary: Creates a new virtual machine or group of machines
@@ -127,16 +32,6 @@ subcommands:
     action: Commands::Orchestrate::Destroy
     options:
       - *gender_option
-
-  remove_group: &remove_group
-    syntax: metal remove group GROUP_NAME [options]
-    summary: Removes a previously configured group
-    description: >
-      Removes the configuration answer file for the group and updates the
-      primary group cache. Will also delete all nodes within the primary group
-      to prevent them becoming orphans. This is done by deleting the answer
-      files associated with the nodes.
-    action: Commands::Remove::Group
 
   repo_use: &repo_use
     syntax: metal repo use REPO_URL [options]
@@ -167,62 +62,7 @@ subcommands:
         description: >
           Force update even if local changes have been made to the repo
 
-  plugin_list: &plugin_list
-    syntax: metal plugin list [options]
-    summary: List available and activated plugins
-    description: >
-      List all available Metalware plugins, along with which of these are
-      currently activated.
-    action: Commands::Plugin::List
-
-  plugin_activate: &plugin_activate
-    syntax: metal plugin activate PLUGIN_NAME [options]
-    summary: Activate given plugin for domain
-    action: Commands::Plugin::Activate
-
-  plugin_deactivate: &plugin_deactivate
-    syntax: metal plugin deactivate PLUGIN_NAME [options]
-    summary: Deactivate given plugin for domain
-    action: Commands::Plugin::Deactivate
-
-  view-answers_domain: &view-answers_domain
-    syntax: metal view-answers domain [options]
-    summary: View configured answers for the overall domain
-    description: >
-      View configuration questions along with configured answers for the
-      overall Metalware domain
-    action:
-      Commands::ViewAnswers::Domain
-
-  view-answers_group: &view-answers_group
-    syntax: metal view-answers group GROUP_NAME [options]
-    summary: View configured answers for a group
-    description: >
-      View configuration questions along with configured answers for given
-      group and the overall Metalware domain
-    action:
-      Commands::ViewAnswers::Group
-
-  view-answers_node: &view-answers_node
-    syntax: metal view-answers node NODE [options]
-    summary: View configured answers for a node
-    description: >
-      View configuration questions along with configured answers for given
-      node, its primary group, and the overall Metalware domain
-    action:
-      Commands::ViewAnswers::Node
-
 commands:
-  asset:
-    syntax: metal asset [SUB_COMMAND] [options]
-    summary: Manage the asset record files
-    subcommands:
-      add: *asset_add
-      edit: *asset_edit
-      delete: *asset_delete
-      link: *asset_link
-      unlink: *asset_unlink
-
   build:
     syntax: metal build NODE_IDENTIFIER [options]
     summary: Renders the templates used to build the nodes
@@ -263,15 +103,6 @@ commands:
     options:
       - *gender_option
 
-  configure:
-    syntax: metal configure [SUB_COMMAND] [options]
-    summary: Configure different aspects of this Metalware installation
-    subcommands:
-      domain: *configure_domain
-      group: *configure_group
-      node: *configure_node
-      local: *configure_local
-
   console:
     syntax: metal console NODE_NAME [options]
     summary: Display a node's console in the terminal
@@ -279,17 +110,6 @@ commands:
       Displays the console of a node in the terminal. The console command
       operates over the BMC network and can be used as node is booting.
     action: Commands::Console
-
-  each:
-    syntax: metal each NODE_IDENTIFIER COMMAND [options]
-    summary: Runs a command for a node(s)
-    description: >
-      Runs the COMMAND for the node/ group specified by NODE_IDENTIFIER.
-      Commands that contain spaces must be quoted. The command is first rendered
-      by the templater and supports erb tags.
-    action: Commands::Each
-    options:
-      - *gender_option
 
   edit:
     syntax: metal edit FILE [options]
@@ -357,32 +177,12 @@ commands:
           Legacy tags used to specify the input. Their use has been
           deprecated by the COMMAND input.
 
-  layout:
-    syntax: metal layout [SUB_COMMAND] [options]
-    summary: Manage the layout record files
-    subcommands:
-      add: *layout_add
-      edit: *layout_edit
-
   orchestrate:
     syntax: metal orchestrate [SUB_COMMAND] [options]
     summary: Orchestrate virtual machines
     subcommands:
       create: *orchestrate_create
       destroy: *orchestrate_destroy
-
-  overview:
-    syntax: metal overview [options]
-    summary: Gives an overview of the configured groups
-    action: Commands::Overview
-
-  plugin:
-    syntax: metal plugin [SUB_COMMAND] [options]
-    summary: View and manage activated plugins
-    subcommands:
-      list: *plugin_list
-      activate: *plugin_activate
-      deactivate: *plugin_deactivate
 
   power:
     syntax: metal power NODE_IDENTIFIER COMMAND [options]
@@ -414,22 +214,6 @@ commands:
         default: 0.5
         description: >
           Time to wait between running power command on each node.
-
-  remove:
-    syntax: metal remove [SUB_COMMAND] [options]
-    summary: Remove metalware controlled files/ objects
-    # Description can be added for subcommand
-    subcommands:
-      group: *remove_group
-
-  render:
-    syntax: metal render TEMPLATE [NODE] [options]
-    summary: Render a given template
-    description: >
-      Renders the file specified by TEMPLATE and sends the output to standard
-      out. The template can be rendered for a specific node using the optional
-      NODE input.
-    action: Commands::Render
 
   repo:
     syntax: metal repo [SUB_COMMAND] [options]
@@ -467,65 +251,21 @@ commands:
       Moves rendered files generated by `template`. These files are moved from
       staging to there sync location occurding to the staging manifest. The
       rendered section are also updated by sync. Once a file has been synced,
-      it is removed from staging directory and the stagging manifest is
+      it is removed from staging directory and the staging manifest is
       updated.
     action: Commands::Sync
 
   template:
     syntax: metal template NODE_IDENTIFIER [options]
-    summary: Template the files for a node or group to stagging
+    summary: Template the files for a node or group to staging
     description: >
       The template command renders the files for a node or group. This includes
       the templates for the particular build method used as well as the build
       files as defined in the configs.
 
 
-      All the templates are rendered to the stagging directory. This is so they
+      All the templates are rendered to the staging directory. This is so they
       can be reviewed before the are moved into place using the sync command.
     action: Commands::Template
     options:
       - *gender_option
-
-  view-answers:
-    syntax: metal view-answers [SUB_COMMAND] [options]
-    summary: View configured answers
-    subcommands:
-      domain: *view-answers_domain
-      group: *view-answers_group
-      node: *view-answers_node
-
-  view:
-    syntax: metal view ALCES_COMMAND [options]
-    summary: View domain templating config, optionally in context for given node
-    description: >
-      View the templating object that will be used for rendering templates. It
-      may optionally begin with 'alces' but this is optional.
-
-
-      The nodes, groups, domain and local namespaces can be viewed. The nodes
-      and groups have to be followed by the name of the object. The command
-      can be delimited by spaces or periods.
-
-
-      The displayed JSON can be navigated in the same way as templating. This
-      means 'alces.domain' will show all domain level parameters, where
-      'alces.domain.config' will only show the config.
-    action: Commands::View
-    options:
-      - *color_output
-
-  eval:
-    syntax: metal eval ALCES_COMMAND [options]
-    summary: Evaluate argument in context of `alces` namespace
-    description: >
-      Similar to 'metal view', but evaluates argument directly in 'alces'
-      namespace without any preprocessing, and then returns result as JSON.
-
-
-      Intended to have more stable behaviour than 'metal view', and to provide
-      external programs with access to Metalware data, whereas 'metal view' is
-      intended purely for human usage and its behaviour may change as needed to
-      whatever is most useful for this.
-    action: Commands::Eval
-    options:
-      - *color_output

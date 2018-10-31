@@ -22,87 +22,49 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'alces_utils'
+require 'underware/spec/spec_utils'
 require 'constants'
-require 'dependency'
+require 'underware/dependency'
+require 'build_methods'
 
 module SpecUtils
-  # Use `instance_exec` in many functions in this module to execute blocks the
-  # context of the passed RSpec example group.
-  class << self
-    # Mocks.
+  prepend Underware::SpecUtils
 
-    def mock_validate_genders_success(example_group)
-      mock_validate_genders(example_group, true, '')
-    end
+  # Mocks.
 
-    def mock_validate_genders_failure(example_group, nodeattr_error)
-      mock_validate_genders(example_group, false, nodeattr_error)
-    end
+  def use_mock_dependency
+    allow_any_instance_of(
+      Underware::Dependency
+    ).to receive(:enforce)
+  end
 
-    def use_mock_genders(example_group, genders_file: 'genders/default')
-      genders_path = File.join(FIXTURES_PATH, genders_file)
+  # Other shared utils.
 
-      example_group.instance_exec do
-        nodeattr_command = 'Metalware::Constants::NODEATTR_COMMAND'
-        stub_const(nodeattr_command, "nodeattr -f #{genders_path}")
-      end
-    end
+  def stub_build_method_for(node)
+    stub_build_method = instance_double(
+      Metalware::BuildMethods::BuildMethod
+    ).as_null_object
 
-    def use_unit_test_config(example_group)
-      example_group.instance_exec do
-        stub_const(
-          'Metalware::Constants::DEFAULT_CONFIG_PATH',
-          SpecUtils.fixtures_config('unit-test.yaml')
-        )
-      end
-    end
+    # Expect build method to be created, and stub the created object.
+    expect(
+      Metalware::BuildMethods
+    ).to receive(
+      :build_method_for
+    ).at_least(:once).with(
+      node
+    ).and_return(stub_build_method)
 
-    def use_mock_determine_hostip_script(example_group)
-      example_group.instance_exec do
-        stub_const(
-          'Metalware::Constants::METALWARE_INSTALL_PATH',
-          FIXTURES_PATH
-        )
-      end
-    end
+    stub_build_method
+  end
 
-    def use_mock_dependency(example_group)
-      example_group.instance_exec do
-        allow_any_instance_of(
-          Metalware::Dependency
-        ).to receive(:enforce)
-      end
-    end
+  def stub_build_poll_sleep(time)
+    stub_const('Metalware::Constants::BUILD_POLL_SLEEP', time)
+  end
 
-    def fake_download_error(example_group)
-      http_error = "418 I'm a teapot"
-      example_group.instance_exec do
-        allow(Metalware::Input).to receive(:download).and_raise(
-          OpenURI::HTTPError.new(http_error, nil)
-        )
-      end
-      http_error
-    end
-
-    # Other shared utils.
-
-    def fixtures_config(config_file)
-      File.join(FIXTURES_PATH, 'configs', config_file)
-    end
-
-    def enable_output_to_stderr
-      $rspec_suppress_output_to_stderr = false
-    end
-
-    private
-
-    def mock_validate_genders(example_group, valid, error)
-      example_group.instance_exec do
-        allow(Metalware::NodeattrInterface).to receive(
-          :validate_genders_file
-        ).and_return([valid, error])
-      end
-    end
+  def kill_other_threads
+    Thread.list
+          .reject { |t| t == Thread.current }
+          .tap { |t| t.each(&:kill) }
+          .tap { |t| t.each(&:join) }
   end
 end

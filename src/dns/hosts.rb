@@ -23,7 +23,6 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'templater'
 require 'exceptions'
 require 'metal_log'
 require 'file_path'
@@ -51,7 +50,7 @@ module Metalware
       attr_reader :alces, :templater
 
       def template
-        FilePath.template_path('hosts', node: alces.domain)
+        FilePath.repo_template_path('hosts', namespace: alces.domain)
       end
 
       def rendered_path

@@ -22,7 +22,7 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 require 'command_helpers/base_command'
-require 'command_helpers/node_identifier'
+require 'underware/command_helpers/node_identifier'
 require 'status/monitor'
 require 'status/job'
 require 'fileutils'
@@ -33,7 +33,7 @@ module Metalware
     class Status < CommandHelpers::BaseCommand
       private
 
-      prepend CommandHelpers::NodeIdentifier
+      prepend Underware::CommandHelpers::NodeIdentifier
 
       def setup
         @opt = options

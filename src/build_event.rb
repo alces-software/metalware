@@ -62,7 +62,8 @@ module Metalware
     def run_hook(node, hook_name)
       build_threads.push(Thread.new do
         begin
-          node.build_method.send("#{hook_name}_hook")
+          build_method = BuildMethods.build_method_for(node)
+          build_method.send("#{hook_name}_hook")
         rescue StandardError => e
           warn e.message
           warn e.backtrace
@@ -78,7 +79,6 @@ module Metalware
       end
     end
 
-    # TODO: Use the Output class to connect to the GUI
     def process_event_file(file)
       path_arr = file.split(File::SEPARATOR)
       event = path_arr[-1]

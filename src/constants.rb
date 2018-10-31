@@ -22,39 +22,26 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
-require 'hash_mergers/metal_recursive_open_struct'
+require 'underware/constants'
+require 'underware/hash_mergers/underware_recursive_open_struct'
 
 module Metalware
   module Constants
     METALWARE_INSTALL_PATH =
       File.absolute_path(File.join(File.dirname(__FILE__), '..'))
-    METAL_EXECUTABLE_PATH = File.join(METALWARE_INSTALL_PATH, 'bin/metal')
 
-    METALWARE_CONFIGS_PATH = File.join(METALWARE_INSTALL_PATH, 'etc')
-    DEFAULT_CONFIG_PATH = File.join(METALWARE_CONFIGS_PATH, 'config.yaml')
-
-    METALWARE_DATA_PATH = '/var/lib/metalware'
+    METALWARE_DATA_PATH = Underware::Constants::METALWARE_DATA_PATH
     CACHE_PATH = File.join(METALWARE_DATA_PATH, 'cache')
-    HUNTER_PATH = File.join(CACHE_PATH, 'hunter.yaml')
-    GROUP_CACHE_PATH = File.join(CACHE_PATH, 'groups.yaml')
-    INVALID_RENDERED_GENDERS_PATH = File.join(CACHE_PATH, 'invalid.genders')
     RENDERED_DIR_PATH = File.join(METALWARE_DATA_PATH, 'rendered')
     STAGING_DIR_PATH = File.join(METALWARE_DATA_PATH, 'staging')
     STAGING_MANIFEST_PATH = File.join(CACHE_PATH, 'staging-manifest.yaml')
-    PLUGINS_CACHE_PATH = File.join(CACHE_PATH, 'plugins.yaml')
 
-    EVENTS_DIR_PATH = File.join(METALWARE_DATA_PATH, 'events')
+    HUNTER_PATH = File.join(Underware::Constants::NAMESPACE_DATA_PATH, 'hunter.yaml')
+
+    EVENTS_DIR_PATH = Underware::Constants::EVENTS_DIR_PATH
 
     DHCPD_HOSTS_PATH = '/etc/dhcp/dhcpd.hosts'
 
-    # XXX Following needs to actually be created somewhere.
-    GUI_CREDENTIALS_PATH = File.join(CACHE_PATH, 'credentials.yaml')
-
-    MAXIMUM_RECURSIVE_CONFIG_DEPTH = 10
-
-    NODEATTR_COMMAND = 'nodeattr'
-
-    GENDERS_PATH = File.join(METALWARE_DATA_PATH, 'rendered/system/genders')
     HOSTS_PATH = '/etc/hosts'
 
     UEFI_SAVE_PATH = '/var/lib/tftpboot/efi'
@@ -65,22 +52,7 @@ module Metalware
     METALWARE_NAMED_PATH = '/etc/named/metalware.conf'
     VAR_NAMED_PATH = '/var/named'
 
-    DRY_VALIDATION_ERRORS_PATH = File.join(METALWARE_INSTALL_PATH,
-                                           'src/validation',
-                                           'errors.yaml')
-
-    CONFIGURE_SECTIONS = [:domain, :group, :node, :local].freeze
-    CONFIGURE_INTERNAL_QUESTION_PREFIX = 'metalware_internal'
-
-    HASH_MERGER_DATA_STRUCTURE =
-      Metalware::HashMergers::MetalRecursiveOpenStruct
-
     BUILD_POLL_SLEEP = 10
-
-    # This only exists for legacy purposes so we have a constant we can stub to
-    # skip validations; ideally we would handle wanting to test things without
-    # running validations in a better way.
-    SKIP_VALIDATION = false
 
     LOG_SEVERITY = 'INFO'
   end

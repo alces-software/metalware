@@ -29,9 +29,10 @@ require 'bundler/setup'
 require 'commander'
 require 'config'
 require 'colorize'
+require 'active_support/core_ext/string/filters'
 
 require 'cli_helper/parser'
-require 'data'
+require 'underware/data'
 
 module Metalware
   class Cli
@@ -39,7 +40,7 @@ module Metalware
 
     def run
       program :name, 'metal'
-      program :version, '2017.2.1'
+      program :version, '2018.5.0-rc1'
       program :description, <<-EOF.squish
         Alces tools for the management and configuration of bare metal machines
       EOF

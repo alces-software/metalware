@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
-require 'data'
+require 'active_support/core_ext/string/strip'
+require 'active_support/core_ext/string/filters'
+
+require 'underware/data'
 require 'file_path'
 require 'recursive-open-struct'
-require 'templater'
-require 'managed_file'
+require 'underware/managed_file'
 
 module Metalware
   class Staging
@@ -33,12 +35,12 @@ module Metalware
     private_class_method :new
 
     def save
-      Data.dump(FilePath.staging_manifest, manifest.to_h)
+      Underware::Data.dump(FilePath.staging_manifest, manifest.to_h)
     end
 
     def manifest
       @manifest ||= begin
-        Data.load(FilePath.staging_manifest).tap do |x|
+        Underware::Data.load(FilePath.staging_manifest).tap do |x|
           x.merge! blank_manifest if x.empty?
           # Converts the file paths to strings
           x[:files] = x[:files].map { |key, data| [key.to_s, data] }.to_h
@@ -101,7 +103,28 @@ module Metalware
       if data.comment_char
         managed_file_content_args.push(comment_char: data.comment_char)
       end
-      ManagedFile.content(*managed_file_content_args)
+      Underware::ManagedFile.content(*managed_file_content_args)
+    end
+
+    class Templater
+      def initialize(staging)
+        @staging = staging
+      end
+
+      def render(
+        namespace,
+        template,
+        sync_location,
+        dynamic: {},
+        **staging_options
+      )
+        rendered = namespace.render_file(template, **dynamic)
+        staging.push_file(sync_location, rendered, **staging_options)
+      end
+
+      private
+
+      attr_reader :staging
     end
   end
 end

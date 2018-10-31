@@ -1,14 +1,14 @@
 
 # frozen_string_literal: true
 
-require 'alces_utils'
+require 'underware/spec/alces_utils'
 
 RSpec.describe Metalware::Commands::Ipmi do
-  include AlcesUtils
+  include Underware::AlcesUtils
 
   def run_ipmi(node_identifier, command, **options)
-    AlcesUtils.redirect_std(:stdout) do
-      Metalware::Utils.run_command(
+    Underware::AlcesUtils.redirect_std(:stdout) do
+      Underware::Utils.run_command(
         Metalware::Commands::Ipmi, node_identifier, command, **options
       )
     end
@@ -33,7 +33,7 @@ RSpec.describe Metalware::Commands::Ipmi do
       }
     end
 
-    AlcesUtils.mock self, :each do
+    Underware::AlcesUtils.mock self, :each do
       config(mock_group(group), namespace_config)
       node_names.each do |name|
         node = mock_node(name, group, gender)
@@ -46,13 +46,13 @@ RSpec.describe Metalware::Commands::Ipmi do
         ipmitool -H #{name}.bmc -I lanplus -U bmcuser -P bmcpassword sel
         list
       EOF
-      expect(Metalware::SystemCommand).to receive(:run).with(cmd).ordered
+      expect(Underware::SystemCommand).to receive(:run).with(cmd).ordered
     end
 
     # Allow the system command to receive `nodeattr` commands
     before do
       with_args = [/\Anodeattr.*/, an_instance_of(Hash)]
-      allow(Metalware::SystemCommand).to \
+      allow(Underware::SystemCommand).to \
         receive(:run).with(*with_args).and_call_original
     end
 

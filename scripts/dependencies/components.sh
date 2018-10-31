@@ -24,10 +24,13 @@ detect_components() {
 }
 
 fetch_components() {
-    if [ "$dep_source" == "dist" ]; then
-        title "Fetching Ruby components"
-        fetch_dist 'components'
-    fi
+    # XXX Disabled as never going to be used anyway given always installing
+    # fresh gems at the moment.
+    # if [ "$dep_source" == "dist" ]; then
+    #     title "Fetching Ruby components"
+    #     fetch_dist 'components'
+    # fi
+    :
 }
 
 install_components() {
@@ -36,7 +39,7 @@ install_components() {
     doing 'Configure'
     "${alces_RUBYHOME}/bin/bundle" install \
         --path=vendor \
-        --without=test \
+        --without=development test \
         &> "${dep_logs}/components-install.log"
     say_done $?
 
