@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [2018.5.0-rc1] - 2018-10-31
+
+- Pulled out various parts of Metalware's public interface which are not
+  specific to building bare metal clusters (i.e. various commands), as well as
+  various internals also needed by these, to Underware
+  (https://github.com/alces-software/underware), and performed various
+  refactoring and tweaking within Metalware to make use of things which have
+  been moved to Underware
+  (https://github.com/alces-software/metalware/pull/456).
+
 ## [2018.4.0] - 2018-10-15
 
 - Added build hooks for rendering and executing scripts at runtime
