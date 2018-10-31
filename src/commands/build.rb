@@ -30,6 +30,7 @@ require 'underware/output'
 require 'exceptions'
 require 'underware/command_helpers/node_identifier'
 require 'build_event'
+require 'build_methods'
 
 module Metalware
   module Commands
