@@ -115,7 +115,7 @@ ln -s /etc/hosts /var/lib/metalware/rendered/system/
 ln -s /var/lib/{underware,metalware}/rendered/system/genders
 
 mkdir -p "${target}"
-cp -R "${source}/"{Gemfile,Gemfile.lock,bin,etc,src} "${target}"
+cp -R "${source}/"{underware-version,Gemfile,Gemfile.lock,bin,etc,src} "${target}"
 cp ${source}/etc/logrotate.d/* /etc/logrotate.d/
 say_done $?
 
