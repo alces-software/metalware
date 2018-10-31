@@ -8,7 +8,7 @@ source 'https://rubygems.org'
 # https://github.com/fakefs/fakefs#fakefs-----typeerror-superclass-mismatch-for-class-file.
 require 'pp'
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
 # We want Underware to be installed at a sibling directory to Metalware (so it
 # can be used as an entirely independent tool in its own right), but also want
@@ -19,6 +19,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 underware_version = File.read('underware-version').chomp
 gem 'underware', underware_version, path: '../underware'
 
+gem 'activesupport'
 gem 'colorize'
 gem 'commander', github: 'alces-software/commander'
 gem 'dry-validation'
@@ -31,7 +32,6 @@ gem 'recursive-open-struct'
 gem 'ruby-libvirt'
 gem 'rugged'
 gem 'terminal-table'
-gem 'activesupport'
 
 # Forked of a fork containing a logger fix. The main gem can be used
 # again once StructuredWarnings is removed

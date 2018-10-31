@@ -63,8 +63,8 @@ module SpecUtils
 
   def kill_other_threads
     Thread.list
-      .reject { |t| t == Thread.current }
-      .tap { |t| t.each(&:kill) }
-      .tap { |t| t.each(&:join) }
+          .reject { |t| t == Thread.current }
+          .tap { |t| t.each(&:kill) }
+          .tap { |t| t.each(&:join) }
   end
 end
