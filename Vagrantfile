@@ -9,6 +9,9 @@
 
 $dev_path='/tmp/metalware'
 $script = <<SCRIPT
+# Login as root and change to project dir.
+echo 'sudo su -' > /home/vagrant/.bashrc
+echo 'cd #{$dev_path}' >> /root/.bashrc
 
 export alces_OS=el7
 curl -sL http://git.io/metalware-installer | /bin/bash
