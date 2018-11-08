@@ -151,8 +151,8 @@ RSpec.configure do |config|
     ENV['PATH'] = "#{mock_libexec_path}:#{ENV['PATH']}"
   end
 
-  # Do not print stderr Output in rspec by default
   config.before do
+    # Do not print stderr Output in rspec by default
     $rspec_suppress_output_to_stderr = true
     Metalware::MetalLog.instance_variable_set(:@metal_log, nil)
   end
