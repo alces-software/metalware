@@ -32,6 +32,4 @@ if [[ -z $2 ]]; then
   exit 1
 fi
 
-touch /tmp/foo
-
 echo "$2_HEX_IP"
