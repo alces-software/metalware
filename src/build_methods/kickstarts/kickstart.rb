@@ -38,6 +38,10 @@ module Metalware
           end
         end
 
+        def node_hexadecimal_ip
+          Underware::SystemCommand.run("gethostip -x #{node.name}").chomp
+        end
+
         def pxelinux_template_path
           raise NotImplementedError
         end

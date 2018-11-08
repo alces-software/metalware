@@ -139,6 +139,18 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+
+  config.before :suite do
+    # Mock executables under this path so they take precedence over system
+    # binaries (doing this is a little bit more magic than I'd like, but is the
+    # most straightforward/robust way I can see, given our current
+    # architecture, to do a Metalware-wide replacement of certain binaries
+    # which won't give the correct answer when running tests locally, while
+    # still having all our Ruby code run).
+    mock_libexec_path = 'spec/fixtures/libexec/'
+    ENV['PATH'] = "#{mock_libexec_path}:#{ENV['PATH']}"
+  end
+
   # Do not print stderr Output in rspec by default
   config.before do
     $rspec_suppress_output_to_stderr = true
