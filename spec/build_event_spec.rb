@@ -20,7 +20,6 @@ RSpec.describe Metalware::BuildEvent do
 
   Underware::AlcesUtils.mock self, :each do
     nodes.each { |node| mock_node(node) }
-    alces.nodes.each { |node| hexadecimal_ip(node) }
     kill_other_threads
   end
 

@@ -98,7 +98,6 @@ RSpec.describe Metalware::Commands::Build do
 
   Underware::AlcesUtils.mock self, :each do
     filesystem.test do
-      alces.nodes.each { |node| hexadecimal_ip(node) }
       mock_group('nodes')
     end
     stub_build_poll_sleep(0.1)
