@@ -40,6 +40,7 @@ gem 'rubytree', github: 'alces-software/RubyTree'
 group :test do
   gem 'fakefs'
   gem 'rspec'
+  gem 'rspec-retry'
   gem 'simplecov'
 end
 

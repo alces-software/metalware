@@ -106,6 +106,8 @@ GEM
     rspec-mocks (3.8.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
+    rspec-retry (0.6.1)
+      rspec-core (> 3.3)
     rspec-support (3.8.0)
     rubocop (0.52.1)
       parallel (~> 1.10)
@@ -148,6 +150,7 @@ DEPENDENCIES
   pry
   recursive-open-struct
   rspec
+  rspec-retry
   rubocop (~> 0.52.1)
   rubocop-rspec
   ruby-libvirt

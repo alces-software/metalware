@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'rspec/retry'
+
 # Setup simplecov.
 require 'simplecov'
 SimpleCov.profiles.define 'metalware' do
@@ -140,6 +142,12 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
+  # `rspec-retry` settings.
+  config.verbose_retry = true
+  config.display_try_failure_messages = true
+  # Ensure FakeFS is in a fresh, consistent, state before retrying the test.
+  config.retry_callback = proc { FileSystem.reinitialize }
+
   config.before :suite do
     # Mock executables under this path so they take precedence over system
     # binaries (doing this is a little bit more magic than I'd like, but is the
@@ -163,6 +171,11 @@ RSpec.configure do |config|
     FileSystem.test(FileSystem.root_file_system_config) do
       example.run
     end
+  end
+
+  config.around :each, :flaky do |example|
+    # Retry tests tagged `flaky` a few times to avoid spurious suite failures.
+    example.run_with_retry retry: 3
   end
 
   # Resets the filesystem after each test

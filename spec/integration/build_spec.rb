@@ -30,7 +30,7 @@ require 'minimal_repo'
 # TODO: Could test rendering in these tests as well, though already doing in
 # unit tests.
 
-RSpec.describe Metalware::Commands::Build do
+RSpec.describe Metalware::Commands::Build, flaky: true do
   TEST_DIR = 'tmp/integration-test'
 
   let(:filesystem) do
@@ -218,11 +218,6 @@ RSpec.describe Metalware::Commands::Build do
           expect_interrupt_does_not_kill(thread)
           expect_interrupt_kills(thread)
           expect_clears_up_built_node_marker_files
-
-          # Magic sleep to fix intermittent failure where following files would
-          # sometimes not have been re-rendered before we check for their
-          # existence.
-          sleep 0.5
 
           expect_permanent_pxelinux_rendered_for_testnode01
           expect_permanent_pxelinux_rendered_for_testnode02
