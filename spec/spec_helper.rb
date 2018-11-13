@@ -22,6 +22,8 @@
 # https://github.com/alces-software/metalware
 #==============================================================================
 
+require 'rspec/retry'
+
 # Setup simplecov.
 require 'simplecov'
 SimpleCov.profiles.define 'metalware' do
@@ -139,8 +141,26 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
-  # Do not print stderr Output in rspec by default
+
+  # `rspec-retry` settings.
+  config.verbose_retry = true
+  config.display_try_failure_messages = true
+  # Ensure FakeFS is in a fresh, consistent, state before retrying the test.
+  config.retry_callback = proc { FileSystem.reinitialize }
+
+  config.before :suite do
+    # Mock executables under this path so they take precedence over system
+    # binaries (doing this is a little bit more magic than I'd like, but is the
+    # most straightforward/robust way I can see, given our current
+    # architecture, to do a Metalware-wide replacement of certain binaries
+    # which won't give the correct answer when running tests locally, while
+    # still having all our Ruby code run).
+    mock_libexec_path = 'spec/fixtures/libexec/'
+    ENV['PATH'] = "#{mock_libexec_path}:#{ENV['PATH']}"
+  end
+
   config.before do
+    # Do not print stderr Output in rspec by default
     $rspec_suppress_output_to_stderr = true
     Metalware::MetalLog.instance_variable_set(:@metal_log, nil)
   end
@@ -151,6 +171,11 @@ RSpec.configure do |config|
     FileSystem.test(FileSystem.root_file_system_config) do
       example.run
     end
+  end
+
+  config.around :each, :flaky do |example|
+    # Retry tests tagged `flaky` a few times to avoid spurious suite failures.
+    example.run_with_retry retry: 3
   end
 
   # Resets the filesystem after each test

@@ -14,7 +14,7 @@ module Metalware
         end
 
         def save_path
-          File.join(file_path.uefi_save, "grub.cfg-#{node.hexadecimal_ip}")
+          File.join(file_path.uefi_save, "grub.cfg-#{node_hexadecimal_ip}")
         end
       end
     end

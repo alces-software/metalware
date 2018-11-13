@@ -38,12 +38,11 @@ RSpec.describe Metalware::BuildMethods::Kickstarts::UEFI do
 
   Underware::AlcesUtils.mock self, :each do
     n = mock_node node_name
-    allow(n).to receive(:hexadecimal_ip).and_return('00000000')
     config(n, build_method: :'uefi-kickstart')
   end
 
   it 'renders the pxelinux template with correct save_path' do
-    save_path = File.join(Metalware::FilePath.uefi_save, 'grub.cfg-00000000')
+    save_path = File.join(Metalware::FilePath.uefi_save, "grub.cfg-#{node_name}_HEX_IP")
     FileUtils.mkdir(File.dirname(save_path))
     build_method = Metalware::BuildMethods.build_method_for(node)
     build_method.start_hook

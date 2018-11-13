@@ -99,17 +99,23 @@ class FileSystem
   end
 
   def self.test(configurator = FileSystem.root_file_system_config)
+    fs = reinitialize(configurator)
+    yield fs
+    FakeFS.deactivate!
+  end
+
+  # Set FakeFS up in a fresh, consistent state, with initial directory
+  # hierarchy and any additional configuration to be performed by the passed
+  # `configurator`.
+  def self.reinitialize(configurator = FileSystem.root_file_system_config)
     # Ensure the FakeFS is in a fresh state. XXX needed?
     FakeFS.deactivate!
     FakeFS.clear!
 
-    FakeFS do
-      filesystem = new
-      filesystem.create_initial_directory_hierarchy
-
-      configurator.configure_filesystem(filesystem)
-
-      yield filesystem
+    FakeFS.activate!
+    new.tap do |fs|
+      fs.create_initial_directory_hierarchy
+      configurator.configure_filesystem(fs)
     end
   end
 

@@ -24,14 +24,14 @@ set -euo pipefail
 IFS=$'\n\t'
 
 if [[ $1 != '-x' ]]; then
+  # shellcheck disable=SC2016
   echo 'Mock `gethostip` only supports `-x` option'
   exit 1
 fi
 if [[ -z $2 ]]; then
+  # shellcheck disable=SC2016
   echo 'Mock `gethostip` requires node name'
   exit 1
 fi
-
-touch /tmp/foo
 
 echo "$2_HEX_IP"
