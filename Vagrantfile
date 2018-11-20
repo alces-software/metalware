@@ -22,6 +22,7 @@ echo "pathmunge /opt/metalware/opt/ruby/bin" > /etc/profile.d/metalware-ruby.sh
 cd #{$dev_path}
 bundle install
 
+yum install -y vim tree
 SCRIPT
 
 
